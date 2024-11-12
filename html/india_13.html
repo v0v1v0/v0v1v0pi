@@ -1,0 +1,127 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>logLik.displacement</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Likelihood Displacement</h2>
+
+<h3>Description</h3>
+
+<p>Compute the likelihood displacement influence measure based on leave-one-out cases deletion 
+for linear models, lad and ridge regression.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  logLik.displacement(model, ...)
+  ## S3 method for class 'lm'
+logLik.displacement(model, pars = "full", ...)
+  ## S3 method for class 'ols'
+logLik.displacement(model, pars = "full", ...)
+  ## S3 method for class 'lad'
+logLik.displacement(model, method = "quasi", pars = "full", ...)
+  ## S3 method for class 'ridge'
+logLik.displacement(model, pars = "full", ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p> an <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> object, returned by <code>lm</code>, <code>ols</code>, <code>lad</code> 
+or <code>ridge</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pars</code></td>
+<td>
+<p> should be considered the whole vector of parameters (<code>pars = "full"</code>), 
+or only the vector of coefficients (<code>pars = "coef"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p> only required for <code>'lad'</code> objects, options available are <code>"quasi"</code> 
+and <code>"BR"</code> to obtain the likelihood displacement based on Sun and Wei (2004) and Elian 
+et al. (2000) approaches, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> further arguments passed to or from other methods.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A vector whose <em>i</em>th element contains the distance between the likelihood functions,
+</p>
+<p style="text-align: center;"><code class="reqn">LD_i(\bold{\beta},\sigma^2) = 2\{l(\hat{\bold{\beta}},\hat{\sigma}^2) - 
+  l(\hat{\bold{\beta}}_{(i)},\hat{\sigma}^2_{(i)})\},</code>
+</p>
+
+<p>for <code>pars = "full"</code>, where <code class="reqn">\hat{\bold{\beta}}_{(i)}</code> and <code class="reqn">\hat{\sigma}^2_{(i)}</code> 
+denote the estimates of <code class="reqn">\bold{\beta}</code> and <code class="reqn">\sigma^2</code> when the <em>i</em>th observation is 
+removed from the dataset. If we are interested only in <code class="reqn">\bold{\beta}</code> (i.e. <code>pars = "coef"</code>)
+the likelihood displacement becomes
+</p>
+<p style="text-align: center;"><code class="reqn">LD_i(\bold{\beta}|\sigma^2) = 2\{l(\hat{\bold{\beta}},\hat{\sigma}^2) - 
+  \max_{\sigma^2} l(\hat{\bold{\beta}}_{(i)},\hat{\sigma}^2)\}.</code>
+</p>
+
+
+
+<h3>References</h3>
+
+<p>Cook, R.D., Weisberg, S. (1982).
+<em>Residuals and Influence in Regression</em>.
+Chapman and Hall, London.
+</p>
+<p>Cook, R.D., Pena, D., Weisberg, S. (1988).
+The likelihood displacement: A unifying principle for influence measures.
+<em>Communications in Statistics - Theory and Methods</em> <b>17</b>, 623-640.
+<a href="https://doi.org/10.1080/03610928808829645">doi:10.1080/03610928808829645</a>.
+</p>
+<p>Elian, S.N., Andre, C.D.S., Narula, S.C. (2000).
+Influence measure for the L1 regression.
+<em>Communications in Statistics - Theory and Methods</em> <b>29</b>, 837-849.
+<a href="https://doi.org/10.1080/03610920008832518">doi:10.1080/03610920008832518</a>.
+</p>
+<p>Sun, R.B., Wei, B.C. (2004).
+On influence assessment for LAD regression.
+<em>Statistics &amp; Probability Letters</em> <b>67</b>, 97-110.
+<a href="https://doi.org/10.1016/j.spl.2003.08.018">doi:10.1016/j.spl.2003.08.018</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Likelihood displacement for linear regression
+fm &lt;- ols(stack.loss ~ ., data = stackloss)
+LD &lt;- logLik.displacement(fm)
+plot(LD, ylab = "Likelihood displacement", ylim = c(0,9))
+text(21, LD[21], label = as.character(21), pos = 3)
+
+# Likelihood displacement for LAD regression
+fm &lt;- lad(stack.loss ~ ., data = stackloss)
+LD &lt;- logLik.displacement(fm)
+plot(LD, ylab = "Likelihood displacement", ylim = c(0,1.5))
+text(17, LD[17], label = as.character(17), pos = 3)
+
+# Likelihood displacement for ridge regression
+data(portland)
+fm &lt;- ridge(y ~ ., data = portland)
+LD &lt;- logLik.displacement(fm)
+plot(LD, ylab = "Likelihood displacement", ylim = c(0,4))
+text(8, LD[8], label = as.character(8), pos = 3)
+</code></pre>
+
+
+</div>

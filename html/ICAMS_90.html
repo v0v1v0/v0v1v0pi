@@ -1,0 +1,140 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>PlotTransBiasGeneExp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot transcription strand bias with respect to gene expression values</h2>
+
+<h3>Description</h3>
+
+<p>Plot transcription strand bias with respect to gene expression values
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">PlotTransBiasGeneExp(
+  annotated.SBS.vcf,
+  expression.data,
+  Ensembl.gene.ID.col,
+  expression.value.col,
+  num.of.bins,
+  plot.type,
+  damaged.base = NULL,
+  ymax = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>annotated.SBS.vcf</code></td>
+<td>
+<p>An SBS VCF annotated by
+<code>AnnotateSBSVCF</code>. It <strong>must</strong> have transcript range
+information added.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>expression.data</code></td>
+<td>
+<p>A <code>data.table</code> which contains the
+expression values of genes. <br> See <code>GeneExpressionData</code> for more
+details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Ensembl.gene.ID.col</code></td>
+<td>
+<p>Name of column which has the Ensembl gene ID
+information in <code>expression.data</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>expression.value.col</code></td>
+<td>
+<p>Name of column which has the gene expression
+values in <code>expression.data</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.of.bins</code></td>
+<td>
+<p>The number of bins that will be plotted on the graph.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.type</code></td>
+<td>
+<p>A character string indicating one mutation type to be
+plotted. It should be one of "C&gt;A", "C&gt;G", "C&gt;T", "T&gt;A", "T&gt;C", "T&gt;G".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>damaged.base</code></td>
+<td>
+<p>One of <code>NULL</code>, <code>"purine"</code> or
+<code>"pyrimidine"</code>. This function allocates approximately
+equal numbers of mutations from <code>damaged.base</code> into
+each of <code>num.of.bins</code> bin by expression level. E.g.
+if <code>damaged.base</code> is <code>"purine"</code>, then mutations from
+A and G will be allocated in approximately equal numbers to
+each expression-level bin. The rationale for the name <code>damaged.base</code>
+is that the direction of strand bias is a result of whether the damage
+occurs on a purine or pyrimidine.
+If <code>NULL</code>, the function attempts to infer the <code>damaged.base</code>
+based on mutation counts.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ymax</code></td>
+<td>
+<p>Limit for the y axis. If not specified, it defaults to NULL and
+the y axis limit equals 1.5 times of the maximum mutation counts in a
+specific mutation type.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list whose first element is a logic value indicating whether the
+plot is successful. The second element is a named numeric vector containing
+the p-values printed on the plot.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The p-values are calculated by logistic regression using function
+<code>glm</code>. The dependent variable is labeled "1" and "0" if
+the mutation from <code>annotated.SBS.vcf</code> falls onto the untranscribed and
+transcribed strand respectively. The independent variable is the binary
+logarithm of the gene expression value from <code>expression.data</code> plus one,
+i.e. <code class="reqn">log_2 (x + 1)</code> where <code class="reqn">x</code> stands for gene
+expression value.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">file &lt;- c(system.file("extdata/Strelka-SBS-vcf/",
+                      "Strelka.SBS.GRCh37.s1.vcf",
+                      package = "ICAMS"))
+list.of.vcfs &lt;- ReadAndSplitStrelkaSBSVCFs(file)
+SBS.vcf &lt;- list.of.vcfs$SBS.vcfs[[1]]             
+if (requireNamespace("BSgenome.Hsapiens.1000genomes.hs37d5", quietly = TRUE)) {
+  annotated.SBS.vcf &lt;- AnnotateSBSVCF(SBS.vcf, ref.genome = "hg19",
+                                      trans.ranges = trans.ranges.GRCh37)
+  PlotTransBiasGeneExp(annotated.SBS.vcf = annotated.SBS.vcf, 
+                       expression.data = gene.expression.data.HepG2, 
+                       Ensembl.gene.ID.col = "Ensembl.gene.ID", 
+                       expression.value.col = "TPM", 
+                       num.of.bins = 4, plot.type = "C&gt;A")
+}
+</code></pre>
+
+
+</div>

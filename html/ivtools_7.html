@@ -1,0 +1,414 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ivglm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Instrumental variable estimation of the causal exposure effect in 
+generalized linear models 
+</h2>
+
+<h3>Description</h3>
+
+<p><code>ivglm</code> performs instrumental variable estimation of the causal exposure effect in 
+generalized linear models with individual-level data. Below, <code class="reqn">Z</code>, <code class="reqn">X</code>, and 
+<code class="reqn">Y</code> are the instrument, the exposure, and the outcome, respectively. 
+<code class="reqn">L</code> is a vector of covariates that we wish to control for in the analysis; 
+these would typically be confounders for the instrument and the outcome.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ivglm(estmethod, X, Y, fitZ.L=NULL, fitX.LZ=NULL, fitX.L=NULL, fitY.LX=NULL, 
+  fitY.LZX=NULL, data, formula=~1, ctrl=FALSE, clusterid=NULL, link, vcov.fit=TRUE, 
+  ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>estmethod</code></td>
+<td>
+
+<p>a string specifying the desired estimation method; either <code>"ts"</code> for two-stage
+estimation, or <code>"g"</code> for G-estimation. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+
+<p>a string specifying the name of the exposure <code class="reqn">X</code> in <code>data</code>. This is not needed 
+if <code>fitX.LZ</code> is specified. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+
+<p>a string specifying the name of the outcome <code class="reqn">Y</code> in <code>data</code>. This 
+is not needed if <code>fitY.LX</code> or <code>fitY.LZX</code> is specified. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitZ.L</code></td>
+<td>
+
+<p>an object of class <code>"glm"</code>, as returned by the <code>glm</code> function 
+in the <span class="pkg">stats</span> package. This is a fitted GLM for <code class="reqn">E(Z|L)</code>. If there are no covariates,
+then <code>fitZ.L</code> may be specified as a model with an intercept only. This argument
+is not used when <code>estmethod="ts"</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitX.LZ</code></td>
+<td>
+
+<p>an object of class <code>"glm"</code>, as returned by the <code>glm</code> function 
+in the <span class="pkg">stats</span> package. This is a fitted GLM for <code class="reqn">E(X|L,Z)</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitX.L</code></td>
+<td>
+
+<p>an object of class <code>"glm"</code>, as returned by the <code>glm</code> function 
+in the <span class="pkg">stats</span> package. This is a fitted GLM for <code class="reqn">E(X|L)</code>. If there are no covariates,
+then <code>fitX.L</code> may be specified as a model with an intercept only. This argument
+is not used when <code>estmethod="ts"</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitY.LX</code></td>
+<td>
+
+<p>an object of class <code>"glm"</code>, as returned by the <code>glm</code> function 
+in the <span class="pkg">stats</span> package. This is a fitted GLM for <code class="reqn">E(Y|L,X)</code>. 
+This argument is not used when <code>estmethod="g"</code>.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitY.LZX</code></td>
+<td>
+
+<p>an object of class <code>"glm"</code>, as returned by the <code>glm</code> function 
+in the <span class="pkg">stats</span> package. This is a fitted GLM for <code class="reqn">E(Y|L,Z,X)</code>. 
+This argument is not used when <code>estmethod="ts"</code>. It is also not used 
+when <code>estmethod="g"</code> and <code>link="identity"</code> or <code>link="log"</code>.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>a data frame containing the variables in the model. The covariates, instrument,
+exposure and outcome can have arbitrary names, e.g. they don't need to 
+be called <code>L</code>, <code>Z</code>, <code>X</code> and <code>Y</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+
+<p>an object of class <code>"formula"</code>, with no left-hand side. This specifies
+the causal interaction terms <code class="reqn">m(L)</code>; see ‘Details’. Defaults to <code>~1</code>, i.e. 
+main effect only. This argument is not used when <code>estmethod="ts"</code>.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ctrl</code></td>
+<td>
+
+<p>logical. Should the control function <code class="reqn">R=X-\hat{X}</code> be used when re-fitting 
+<code>fitY.LX</code>? This argument is not used when <code>estmethod="g"</code>.   
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clusterid</code></td>
+<td>
+
+<p>an optional string containing the name of a cluster identification variable when 
+data are clustered. Specifying <code>clusterid</code> corrects the standard errors
+but does not affect the estimates. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>link</code></td>
+<td>
+
+<p>a string specifying the link function for the causal generalized linear model;
+see ‘Details’. Either <code>"identity"</code>, <code>"log"</code>, or <code>"logit"</code>. 
+This argument is not used when <code>estmethod="ts"</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vcov.fit</code></td>
+<td>
+
+<p>logical. Should the variance-covariance matrix be computed?  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>optional arguments passed on to the <code>nleqslv</code> function, which is used to 
+solve the estimating equations when <code>estmethod="g"</code>. See the help pages 
+for <code>nleqslv</code>. This argument is not used when <code>estmethod="ts"</code>. 
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+ 
+<p><code>ivglm</code> estimates the parameter <code class="reqn">\psi</code> in the causal generalized linear model
+</p>
+<p style="text-align: center;"><code class="reqn">\eta\{E(Y|L,Z,X)\}-\eta\{E(Y_0|L,Z,X)\}=m^T(L)X\psi.</code>
+</p>
+
+<p>Here, <code class="reqn">E(Y_0|L,Z,X)</code> is counterfactual mean of the outcome, 
+had the exposure been set to 0. The link function
+<code class="reqn">\eta</code> is either the identity, log or logit link, as specified by 
+the <code>link</code> argument. The vector function <code class="reqn">m(L)</code> contains interaction terms
+between <code class="reqn">L</code> and <code class="reqn">X</code>. If <code>estmethod="ts"</code>, then these are specified 
+implicitly through the model <code>fitY.LX</code>. If <code>estmethod="g"</code>, then these     
+are specified explicitly through the <code>formula</code> argument.
+</p>
+<p>If <code>estmethod="ts"</code>, then two-stage estimation of <code class="reqn">\psi</code> is performed.
+In this case, the model <code>fitX.LZ</code> is used to construct predictions
+<code class="reqn">\hat{X}=\hat{E}(X|L,Z)</code>. These predictions are subsequently used to re-fit 
+the model <code>fitY.LX</code>, with <code class="reqn">X</code> replaced with <code class="reqn">\hat{X}</code>. The obtained 
+coefficient(s) for <code class="reqn">\hat{X}</code> in the re-fitted model is the two-stage estimator of <code class="reqn">\psi</code>. 
+</p>
+<p>If <code>estmethod="g"</code>, then G-estimation of <code class="reqn">\psi</code> is performed. In this case,
+the estimator is obtained as the solution to the estimating equation
+</p>
+<p style="text-align: center;"><code class="reqn">H(\psi)=\sum_{i=1}^n\hat{d}(L_i,Z_i)h_i(\psi)=0.</code>
+</p>
+
+<p>The function <code class="reqn">h_i(\psi)</code> is defined as
+</p>
+<p style="text-align: center;"><code class="reqn">h_i(\psi)=Y_i-m^T(L_i)\psi X_i</code>
+</p>
+
+<p>when <code>link="identity"</code>,
+</p>
+<p style="text-align: center;"><code class="reqn">h_i(\psi)=Y_i\textrm{exp}\{-m^T(L_i)\psi X_i\}</code>
+</p>
+
+<p>when <code>link="log"</code>, and
+</p>
+<p style="text-align: center;"><code class="reqn">h_i(\psi)=\textrm{expit}[\textrm{logit}\{\hat{E}(Y|L_i,Z_i,X_i)\}-m^T(L_i)\psi X_i]</code>
+</p>
+
+<p>when <code>link="logit"</code>. In the latter, <code class="reqn">\hat{E}(Y|L_i,Z_i,X_i)</code> is
+an estimate of <code class="reqn">E(Y|L_i,Z_i,X_i)</code> obtained from the model <code>fitY.LZX</code>.
+The estimated function <code class="reqn">\hat{d}(L,Z)</code> is chosen so that the true function
+has conditional mean 0, given <code class="reqn">L</code>; <code class="reqn">E\{d(L,Z)|L\}=0</code>. 
+The specific form of <code class="reqn">\hat{d}(L,Z)</code> is determined by the user-specified models. 
+If <code>fitX.LZ</code> and <code>fitX.L</code> are specified, then <code class="reqn">\hat{d}(L,Z)=m(L)\{\hat{E}(X|L,Z)-\hat{E}(X|L)\}</code>, 
+where <code class="reqn">\hat{E}(X|L,Z)</code> and <code class="reqn">\hat{E}(X|L)</code> are obtained from <code>fitX.LZ</code>
+and <code>fitX.L</code>, respectively. If these are not specified, then <code class="reqn">\hat{d}(L,Z)=m(L)\{Z-\hat{E}(Z|L)\}</code>, 
+where <code class="reqn">\hat{E}(Z|L)</code> is obtained from <code>fitZ.L</code>, which then must be specified. 
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>ivglm</code> returns an object of class <code>"ivglm"</code>, which inherits from 
+class <code>"ivmod"</code>. An object of class <code>"ivglm"</code> is a list containing 
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+
+<p>the matched call. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>input</code></td>
+<td>
+
+<p><code>input</code> is a list containing all input arguments     
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>est</code></td>
+<td>
+
+<p>a vector containing the estimate of <code class="reqn">\psi</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vcov</code></td>
+<td>
+
+<p>the variance-covariance matrix for the estimate of <code class="reqn">\psi</code>, 
+obtained with the sandwich formula. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>estfunall</code></td>
+<td>
+
+<p>a matrix of all subject-specific contributions to the estimating functions used in the estimation process.
+One row for each subject, one column for each parameter. If <code>estmethod="ts"</code>,
+then the first columns correspond to the parameters estimated by <code>fitX.LZ</code>, and
+the last columns correspond to the parameters estimated by the re-fitted model 
+<code>fitY.LX</code>. If <code>estmethod="g"</code>, then the first columns correspond to <code class="reqn">\psi</code>, 
+and the remaining columns correspond to the parameters estimated by <code>fitZ.L</code>,
+<code>fitX.LZ</code>, <code>fitX.L</code> and <code>fitY.LZX</code>, whichever were used in the
+estimation process.    
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d.estfun</code></td>
+<td>
+
+<p>the jacobian matrix of <code>colMeans(estfunall)</code>.    
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>converged</code></td>
+<td>
+
+<p>logical. Was a solution found to the estimating equations?   
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitY.LX</code></td>
+<td>
+
+<p>the re-fitted model <code>fitY.LX</code> used in the estimation process when <code>estmethod="ts"</code>.
+This element is NULL when <code>estmethod="g"</code>. 
+</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p><code>ivglm</code> allows for weights. However, these are defined implicitly 
+through the input models. Thus, when models are used as input to <code>ivglm</code>, 
+these models have to be fitted with the same weights. When <code>estmethod="g"</code>
+the weights are taken from <code>fitX.LZ</code>, if specified by the user. If <code>fitX.LZ</code> is not
+specified then the weights are taken from <code>fitZ.L</code>. Hence, if weights are used,
+then either <code>fitX.LZ</code> or <code>fitZ.L</code> must be specified.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Arvid Sjolander. 
+</p>
+
+
+<h3>References</h3>
+
+<p>Bowden J., Vansteelandt S. (2011). Mendelian randomization analysis of
+case-control data using structural mean models. <em>Statistics in Medicine</em>
+<b>30</b>(6), 678-694.
+</p>
+<p>Sjolander A., Martinussen T. (2019). Instrumental variable estimation with the R package ivtools.
+<em>Epidemiologic Methods</em> <b>8</b>(1), 1-20.
+</p>
+<p>Vansteelandt S., Bowden J., Babanezhad M., Goetghebeur E. (2011). 
+On instrumental variables estimation of causal odds ratios.
+<em>Statistical Science</em> <b>26</b>(3), 403-422.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+set.seed(9)
+
+##Note: the parameter values in the examples below are chosen to make 
+##Y0 independent of Z, which is necessary for Z to be a valid instrument.
+
+n &lt;- 1000
+psi0 &lt;- 0.5
+psi1 &lt;- 0.2
+
+##---Example 1: linear model and interaction between X and L---
+
+L &lt;- rnorm(n)
+Z &lt;- rnorm(n, mean=L)
+X &lt;- rnorm(n, mean=Z)
+m0 &lt;- X-Z+L 
+Y &lt;- rnorm(n, mean=psi0*X+psi1*X*L+m0)
+data &lt;- data.frame(L, Z, X, Y)
+
+#two-stage estimation
+fitX.LZ &lt;- glm(formula=X~Z, data=data)
+fitY.LX &lt;- glm(formula=Y~X+L+X*L, data=data)
+fitIV &lt;- ivglm(estmethod="ts", fitX.LZ=fitX.LZ, fitY.LX=fitY.LX, data=data, 
+  ctrl=TRUE) 
+summary(fitIV)
+
+#G-estimation with model for Z
+fitZ.L &lt;- glm(formula=Z~L, data=data)
+fitIV &lt;- ivglm(estmethod="g", X="X", Y="Y", fitZ.L=fitZ.L, data=data, 
+  formula=~L, link="identity")
+summary(fitIV)
+
+#G-estimation with model for X
+fitX.LZ &lt;- glm(formula=X~L+Z, data=data)
+fitX.L &lt;- glm(formula=X~L, data=data)
+fitIV &lt;- ivglm(estmethod="g", Y="Y", fitX.LZ=fitX.LZ, fitX.L=fitX.L, data=data, 
+  formula=~L, link="identity")
+summary(fitIV)
+
+##---Example 2: logistic model and no covariates--- 
+
+Z &lt;- rbinom(n, 1, 0.5)
+X &lt;- rbinom(n, 1, 0.7*Z+0.2*(1-Z)) 
+m0 &lt;- plogis(1+0.8*X-0.39*Z)
+Y &lt;- rbinom(n, 1, plogis(psi0*X+log(m0/(1-m0)))) 
+data &lt;- data.frame(Z, X, Y)
+
+#two-stage estimation
+fitX.LZ &lt;- glm(formula=X~Z, family="binomial", data=data)
+fitY.LX &lt;- glm(formula=Y~X, family="binomial", data=data)
+fitIV &lt;- ivglm(estmethod="ts", fitX.LZ=fitX.LZ, fitY.LX=fitY.LX, data=data, 
+  ctrl=TRUE) 
+summary(fitIV)
+
+#G-estimation with model for Z
+fitZ.L &lt;- glm(formula=Z~1, data=data)
+fitY.LZX &lt;- glm(formula=Y~X+Z+X*Z, family="binomial", data=data)
+fitIV &lt;- ivglm(estmethod="g", X="X", fitZ.L=fitZ.L, fitY.LZX=fitY.LZX, 
+  data=data, link="logit")
+summary(fitIV)
+
+
+</code></pre>
+
+
+</div>

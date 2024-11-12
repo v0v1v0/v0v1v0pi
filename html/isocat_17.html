@@ -1,0 +1,76 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>makeQuantileSurfaces</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Convert probability surface to probability-quantile surface</h2>
+
+<h3>Description</h3>
+
+<p>Converts normalized probability surface (e.g. one layer output of
+isotopeAssignmentModel function) to quantile surfaces.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">makeQuantileSurfaces(probabilitySurface, rename = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>probabilitySurface</code></td>
+<td>
+<p>Normalized probability surface RasterLayer</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rename</code></td>
+<td>
+<p>Character value to append to raster name (e.g. "_quantile"). Defaults to FALSE.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns RasterLayer rescaled to quantile values.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>quantileAtSamplingLocation</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Generate example probability surfaces.
+myiso &lt;- rasterFromXYZ(isoscape)
+myiso_sd &lt;- rasterFromXYZ(isoscape_sd)
+df &lt;- data.frame(
+         ID = c(-100, -80, -50),
+         isotopeValue = c(-100, -80, -50),
+         SD_indv = rep(5, 3)
+         )
+assignmentModels &lt;- isotopeAssignmentModel(
+         ID = df$ID,
+         isotopeValue = df$isotopeValue,
+         SD_indv = df$SD_indv,
+         precip_raster = myiso,
+         precip_SD_raster = myiso_sd,
+         nClusters = FALSE
+         )
+
+# Convert to quantile surfaces.
+quantile_surface &lt;-  raster::stack( lapply( unstack(assignmentModels), makeQuantileSurfaces) )
+plot(quantile_surface)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,85 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>spectrumMetric2Xml</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Convert a SpectrumMetric into XML for the BSS</h2>
+
+<h3>Description</h3>
+
+<p>The <code>spectrumMetric2Xml</code> function converts a <code>SpectrumMetric</code> into an
+XML structure appropriate for submitting to the MUSTANG Backend Storage System (BSS).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">spectrumMetric2Xml(metricList)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>metricList</code></td>
+<td>
+<p>a list of <code>SpectrumMetric</code> objects</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p>A character string with BSS formatted XML is returned.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  ## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+# NOTE:  The following trace has 1.728 million points.
+# NOTE:  Downloading and calculating PSD may take a while.
+starttime &lt;- as.POSIXct("2010-02-27",tz="GMT")
+endtime &lt;- as.POSIXct("2010-02-28",tz="GMT")
+  
+# Get the waveform
+st &lt;- getDataselect(iris,"IU","ANMO","00","BHZ",starttime,endtime)
+
+# Make sure we're working with a single snclq
+unique_ids &lt;- uniqueIds(st)
+if (length(unique_ids) &gt; 1) {
+  stop(paste("PSDMetric: Stream has",unique_ids,"unique identifiers"))
+}
+snclq &lt;- unique_ids[1]
+
+# Calculate and plot the Power Spectral Density
+psdList &lt;- psdList(st)
+  
+# Create a Spectrum metric list
+spectrumMetricList &lt;- list()
+index &lt;- 1
+for (psd in psdList) {
+  spectrumMetricList[[index]] &lt;- new("SpectrumMetric", snclq=snclq,  
+                                      starttime=psd$starttime, endtime=psd$endtime, 
+                                      metricName="psd", freqs=psd$freq,
+                                      amps=psd$spec, phases=psd$freq*0)
+  index &lt;- index + 1
+}
+
+# Show the XML version of the metric
+bssXml &lt;- spectrumMetric2Xml(spectrumMetricList)
+cat(bssXml)
+  
+## End(Not run)
+</code></pre>
+
+
+</div>

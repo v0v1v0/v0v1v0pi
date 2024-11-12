@@ -1,0 +1,122 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>purge</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Identify and remove erroneous reference sequences.</h2>
+
+<h3>Description</h3>
+
+<p>This function evaluates a DNA reference database (a "DNAbin" object)
+and removes any sequences whose taxonomic metadata appear to be inconsistent
+with those of their most closely related sequences.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">purge(x, db, level = "order", confidence = 0.8, cores = 1, quiet = FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a DNAbin list object whose names include taxonomic identification numbers
+(see <code>searchGB</code> for details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>db</code></td>
+<td>
+<p>a valid taxonomy database containing the taxonomic identification numbers
+included in the "names" attribute of the primary input object (a data.frame object;
+see <code>taxonomy</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+<p>character string giving the taxonomic level at which
+heterogeneity within a cluster will flag a sequence as potentially erroneous.
+This should be a recognized rank within the taxonomy database.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>confidence</code></td>
+<td>
+<p>numeric, the minimum confidence value for a sequence to be purged.
+For example, if <code>confidence = 0.8</code> (the default value) a sequence will only be
+purged if its taxonomy differs from at least four other independent sequences
+in its cluster.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>integer giving the number of processors for multithreading. Defaults to 1.
+This argument may alternatively be a 'cluster' object,
+in which case it is the user's responsibility to close the socket
+connection at the conclusion of the operation,
+for example by running <code>parallel::stopCluster(cores)</code>.
+The string 'autodetect' is also accepted, in which case the maximum
+number of cores to use is one less than the total number of cores available.
+Note that in this case there
+may be a tradeoff in terms of speed depending on the number and size
+of sequences to be processed, due to the extra time required to initialize
+the cluster.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>logical indicating whether progress should be printed to the console.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments to pass to <code>otu</code> (not including
+<code>nstart</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function first clusters the sequence dataset into operational
+taxonomic units (OTUs) based on a given genetic similarity threshold
+using the <code>otu</code> function from the <code>kmer</code>
+package.
+Each cluster is then checked for taxonomic homogeneity at a given rank,
+and any sequences that appear out of place are removed.
+The criteria for sequence removal are that at least two other independent
+studies should contradict the taxonomic metadata attributed to the sequence.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a "DNAbin" object.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Shaun Wilkinson
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  data(whales)
+  data(whale_taxonomy)
+  whales &lt;- purge(whales, db = whale_taxonomy, level = "species",
+                  threshold = 0.97, method = "farthest")
+</code></pre>
+
+
+</div>

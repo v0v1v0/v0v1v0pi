@@ -1,0 +1,142 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>comp_norm_test</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Selection of Nonnormal Invariant Components Using Marginal Normality Tests</h2>
+
+<h3>Description</h3>
+
+<p>Identifies invariant coordinates that are non normal using univariate normality tests.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">comp_norm_test(
+  object,
+  test = "agostino.test",
+  type = "smallprop",
+  level = 0.05,
+  adjust = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>object of class <code>"ICS"</code> where both <code>S1</code> and <code>S2</code> are specified as functions.
+The sample size and the dimension of interest are also obtained from the object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test</code></td>
+<td>
+<p>name of the normality test to be used. Possibilites are <code>"jarque.test"</code>,
+<code>"anscombe.test"</code>, <code>"bonett.test"</code>, <code>"agostino.test"</code>, <code>"shapiro.test"</code>.
+Default is <code>"agostino.test"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>currently the only option is <code>"smallprop"</code>. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+<p>the initial level used to make a decision based on the test p-values. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adjust</code></td>
+<td>
+<p>logical. If <code>TRUE</code>, the quantiles levels are adjusted. Default is <code>TRUE</code>. See details.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Currently the only available <code>type</code> is <code>"smallprop"</code> which detects which of the components follow a univariately normal distribution. It starts from the first component and stops when a component is detected as gaussian. Five tests for univariate normality are available. See normal_crit() function for more general cases.
+</p>
+<p>If <code>adjust = FALSE</code> all tests are performed at the same <code>level</code>. This leads however often to too many components. Therefore some multiple testing adjustments might be useful. The current default adjusts the level for the jth component as <code>level</code>/j.
+</p>
+<p>Note that the function is seldomly called directly by the user but internally by <code>ICS_outlier()</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list containing:
+</p>
+
+<ul>
+<li> <p><code>index</code>:  integer vector indicating the indices of the selected components.
+</p>
+</li>
+<li> <p><code>test</code>: string with the name of the normality test used.
+</p>
+</li>
+<li> <p><code>criterion</code>: vector of the p-values from the marginal normality tests for each component.
+</p>
+</li>
+<li> <p><code>levels</code>: vector of the levels used for the decision for each component.
+</p>
+</li>
+<li> <p><code>adjust</code>: logical. <code>TRUE</code> if adjusted.
+</p>
+</li>
+<li> <p><code>type</code>: <code>type</code> used
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Aurore Archimbaud and Klaus Nordhausen
+</p>
+
+
+<h3>References</h3>
+
+<p>Archimbaud, A., Nordhausen, K. and Ruiz-Gazen, A. (2018), ICS for multivariate outlier detection with application to quality control. Computational Statistics &amp; Data Analysis, 128:184-199. ISSN 0167-9473.  <a href="https://doi.org/10.1016/j.csda.2018.06.011">doi:10.1016/j.csda.2018.06.011</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>ICS(), <code>comp_simu_test()</code>, jarque.test(),
+anscombe.test(), bonett.test(), bonett.test(),
+shapiro.test()
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+Z &lt;- rmvnorm(1000, rep(0, 6))
+# Add 20 outliers on the first component
+Z[1:20, 1] &lt;- Z[1:20, 1] + 10
+pairs(Z)
+icsZ &lt;- ICS(Z)
+# The shift located outliers can be displayed in one dimension
+comp_norm_test(icsZ)
+# Only one invariant component is non normal and selected.
+comp_norm_test(icsZ, test = "bonett.test")
+
+# Example with no outlier
+Z0 &lt;- rmvnorm(1000, rep(0, 6))
+pairs(Z0)
+icsZ0 &lt;-ICS(Z0)
+# Should select no component
+comp_norm_test(icsZ0, level = 0.01)$index
+
+</code></pre>
+
+
+</div>

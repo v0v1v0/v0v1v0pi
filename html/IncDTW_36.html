@@ -1,0 +1,189 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>lowerbound</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+lowerbound
+</h2>
+
+<h3>Description</h3>
+
+<p>Calculate the lowerbound for the DTW distance measure in linear time.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">lowerbound(C, ws, scale = c("z", "01", "none"),
+           dist_method = c("norm1", "norm2", "norm2_square"), 
+           Q = NULL, tube = NULL)
+                     
+lowerbound_tube(Q, ws, scale = c("z", "01", "none"))
+                     
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Q</code></td>
+<td>
+
+<p>vector or matrix, the query time series
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C</code></td>
+<td>
+
+<p>vector or matrix, the query time series
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist_method</code></td>
+<td>
+
+<p>distance method, one of ("norm1", "norm2", "norm2_square")
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+
+<p>either "none", so no scaling is performed, or one of ("z", "01") to scale both Q and C. Also see <code>dtw</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ws</code></td>
+<td>
+
+<p>see <code>dtw</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tube</code></td>
+<td>
+<p>tube for lower bounding. "tube" can be the output from lowerbound_tube(). If tube = NULL, then Q must not be NULL, so that tube can be defined. If the tube is passed as argument to lowerbound(), then it is necessary that the scale parameter in the lowerbound() call is identical to the scaling method applied on Q before calculating the tube.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Lower Bounding: The following methods are implemented:
+</p>
+
+<ul>
+<li> <p><code>LB_Keogh</code> for univariate time series (Keogh et al. 2005)
+</p>
+</li>
+<li> <p><code>LB_MV</code> for multivariate time series with the <code>dist_method = "norm2_square"</code>, (Rath et al. 2002)
+</p>
+</li>
+<li>
+<p> Adjusted for different distance methods "norm1" and "norm2", inspired by (Rath et al. 2002).
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>lowerbound distance measure that is proven to be smaller than the DTW distance measure
+</p>
+
+
+<h3>References</h3>
+
+
+<ul>
+<li>
+<p> Keogh, Eamonn, and Chotirat Ann Ratanamahatana. "Exact indexing of dynamic time warping." Knowledge and information systems 7.3 (2005): 358-386.
+</p>
+</li>
+<li>
+<p> Rath, Toni M., and R. Manmatha. "Lower-bounding of dynamic time warping distances for multivariate time series." University of Massachusetts Amherst Technical Report MM 40 (2002).
+</p>
+</li>
+<li>
+<p> Sakurai, Yasushi, Christos Faloutsos, and Masashi Yamamuro. "Stream monitoring under the time warping distance." Data Engineering, 2007. ICDE 2007. IEEE 23rd International Conference on. IEEE, 2007.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Not run: 
+
+#--- Univariate time series Q and C
+ws &lt;- sample(2:40, size = 1)
+dist_method &lt;- "norm1"
+N &lt;- 50
+N &lt;- 50
+Q &lt;- cumsum(rnorm(N))
+C &lt;- cumsum(rnorm(N))
+Q.z &lt;- IncDTW::scale(Q, "z")
+C.z &lt;- IncDTW::scale(C, "z")
+
+lb.z &lt;- lowerbound(C = C.z, ws = ws, scale ="none", dist_method = dist_method, Q = Q.z)
+lb &lt;- lowerbound(C = C, ws = ws, scale ="z", dist_method = dist_method, Q = Q)
+d1 &lt;- dtw2vec(Q = Q.z, C = C.z, step_pattern = "symmetric1", 
+  dist_method = dist_method, ws = ws)$distance
+d2 &lt;- dtw2vec(Q = Q.z, C = C.z, step_pattern = "symmetric2", 
+  dist_method = dist_method, ws = ws)$distance
+
+c(lb, lb.z, d1, d2)
+
+
+#--- with pre-calculated tube
+ws &lt;- sample(2:40, size = 1)
+dist_method &lt;- "norm1"
+N &lt;- 50
+N &lt;- 50
+Q &lt;- cumsum(rnorm(N))
+C &lt;- cumsum(rnorm(N))
+Q.z &lt;- IncDTW::scale(Q, "z")
+C.z &lt;- IncDTW::scale(C, "z")
+
+tube &lt;- lowerbound_tube(Q, ws, scale = "z")
+
+lb.z &lt;- lowerbound(C = C.z, ws = ws, scale ="none", dist_method = dist_method, tube = tube)
+lb &lt;- lowerbound(C = C, ws = ws, scale ="z", dist_method = dist_method, tube = tube)
+d1 &lt;- dtw2vec(Q = Q.z, C = C.z, step_pattern = "symmetric1", 
+  dist_method = dist_method, ws = ws)$distance
+d2 &lt;- dtw2vec(Q = Q.z, C = C.z, step_pattern = "symmetric2", 
+  dist_method = dist_method, ws = ws)$distance
+
+c(lb, lb.z, d1, d2)
+
+
+
+#--- Multivariate time series Q and C
+ws &lt;- sample(2:40, size = 1)
+dist_method &lt;- sample(c("norm1", "norm2", "norm2_square"), size = 1)
+N &lt;- 50
+Q &lt;- matrix(cumsum(rnorm(N * 3)), ncol = 3)
+C &lt;- matrix(cumsum(rnorm(N * 3)), ncol = 3)
+Q.z &lt;- IncDTW::scale(Q, "z")
+C.z &lt;- IncDTW::scale(C, "z")
+
+lb.z &lt;- lowerbound(C = C.z, ws = ws, scale ="none", dist_method = dist_method, Q = Q.z)
+lb &lt;- lowerbound(C = C, ws = ws, scale ="z", dist_method = dist_method, Q = Q)
+d1 &lt;- dtw2vec(Q = Q.z, C = C.z, step_pattern = "symmetric1", 
+  dist_method = dist_method, ws = ws)$distance
+d2 &lt;- dtw2vec(Q = Q.z, C = C.z, step_pattern = "symmetric2", 
+  dist_method = dist_method, ws = ws)$distance
+
+c(lb, lb.z, d1, d2)
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

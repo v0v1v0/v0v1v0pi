@@ -1,0 +1,92 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ics_distances</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Squared ICS Distances for Invariant Coordinates</h2>
+
+<h3>Description</h3>
+
+<p>Squared ICS Distances for Invariant Coordinates
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ics_distances(object, index = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>object of class <code>"ICS"</code> where both <code>S1</code> and <code>S2</code> are specified as functions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>index</code></td>
+<td>
+<p>vector of integers indicating the indices of the components to select.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For outlier detection, the squared ICS distances can be used as a measure of outlierness. Denote as <code class="reqn">Z</code> the invariant coordinates centered with the location estimate specified in <code>S1</code> (for details see ICS()). Let <code class="reqn">Z_k</code> be the <code class="reqn">k</code> components of <code class="reqn">Z</code> selected by <code>index</code>, then the ICS distance of the observation <code class="reqn">i</code>  is defined as:     </p>
+<p style="text-align: center;"><code class="reqn">ICSD^2(x_i,k) = || Z_k||^2.</code>
+</p>
+
+<p>Note that if all components are selected, the ICS distances are equivalent to the Mahalanobis distances computed with respect of the first scatter and associated location specified in <code>S1</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A numeric vector containing the squared ICS distances.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Aurore Archimbaud and Klaus Nordhausen
+</p>
+
+
+<h3>References</h3>
+
+<p>Archimbaud, A., Nordhausen, K. and Ruiz-Gazen, A. (2018), ICS for multivariate outlier detection with application to quality control. Computational Statistics &amp; Data Analysis, 128:184-199. ISSN 0167-9473.  <a href="https://doi.org/10.1016/j.csda.2018.06.011">doi:10.1016/j.csda.2018.06.011</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>ICS(), <code>mahalanobis()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">Z &lt;- rmvnorm(1000, rep(0, 6))
+Z[1:20, 1] &lt;- Z[1:20, 1] + 5
+A &lt;- matrix(rnorm(36), ncol = 6)
+X &lt;- tcrossprod(Z, A)
+
+pairs(X)
+icsX &lt;- ICS(X, center = TRUE)
+
+icsX.dist.all &lt;- ics_distances(icsX, index = 1:6)
+maha &lt;- mahalanobis(X, center = colMeans(X), cov = cov(X))
+# in this case the distances should be the same
+plot(icsX.dist.all, maha)
+all.equal(icsX.dist.all, maha)
+
+icsX.dist.first &lt;- ics_distances(icsX, index = 1)
+plot(icsX.dist.first)
+</code></pre>
+
+
+</div>

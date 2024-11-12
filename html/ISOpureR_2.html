@@ -1,0 +1,138 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ISOpure.model_optimize.cg_code.rminimize</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Minimize a differentiable multivariate function</h2>
+
+<h3>Description</h3>
+
+<p>This function is a conjugate-gradient search with interpolation/extrapolation by Carl 
+Edward Rasmussen.  A description of the Matlab code can be found at 
+http://learning.eng.cam.ac.uk/carl/code/minimize/ (accessed Jan. 21, 2014). This is a 
+implementation in R.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ISOpure.model_optimize.cg_code.rminimize(X, f, df, run_length, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>The starting point is given by X which must be either a scalar or a column vector or
+matrix, not a row matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>f</code></td>
+<td>
+<p>The name of the function to be minimized, returning a scalar</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>The name of the function which returns the vector of partial derivatives of f wrt X,
+where again the partial derivatives must be in scalar or column vector/matrix form</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>run_length</code></td>
+<td>
+<p>Gives the length of the run: if it is positive, it gives the maximum number 
+of line searches, if negative its absolute gives the maximum allowed number of function 
+evaluations. Note, for ISOpureR, used only positive run_length.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Parameters to be passed on to the function f.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function returns when either its length is up, or if no further progress can be made (ie,
+we are at a (local) minimum, or so close that due to numerical problems, we cannot get any 
+closer). NOTE: If the function terminates within a few iterations, it could be an indication 
+that the function values and derivatives are not consistent (ie, there may be a bug in the 
+implementation of your "f" function).
+</p>
+<p>The Polack-Ribiere flavour of conjugate gradients is used to compute search directions, and a 
+line search using quadratic and cubic polynomial approximations and the Wolfe-Powell stopping 
+criteria is used together with the slope ratio method for guessing initial step sizes. 
+Additionally a bunch of checks are made to make sure that exploration is taking place and that
+extrapolation will not be unboundedly large.</p>
+
+
+<h3>Value</h3>
+
+<p>A list with three components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>The found solution X</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fX</code></td>
+<td>
+<p>A vector of function values fX indicating the progress made</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>i</code></td>
+<td>
+<p>The number of iterations</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Catalina Anghel, Francis Nguyen, Carl Edward Rasmussen</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example from Carl E. Rasmussen's webpage
+
+rosenbrock &lt;- function(x){
+	D &lt;- length(x);
+ 	y &lt;- sum(100*(x[2:D] - x[1:(D-1)]^2)^2 + (1-x[1:(D-1)])^2);
+ 	return(y);
+ 	};
+drosenbrock &lt;- function(x){
+	D &lt;- length(x);
+	df &lt;- numeric(D);
+	df[1:D-1] &lt;- -400*x[1:(D-1)]*(x[2:D]-x[1:(D-1)]^2) - 2*(1-x[1:(D-1)]);
+  	df[2:D] &lt;- df[2:D] + 200*(x[2:D]-x[1:(D-1)]^2);
+  	return(df);
+	};
+
+ISOpure.model_optimize.cg_code.rminimize(c(0,0), rosenbrock, drosenbrock, 25)
+#
+# [[1]]
+# [1] 1 1
+#
+# [[2]]
+#  [1] 1.000000e+00 7.716094e-01 5.822402e-01 4.049274e-01 3.246633e-01
+#  [6] 2.896041e-01 7.623420e-02 6.786212e-02 3.378424e-02 1.089908e-03
+# [11] 1.087952e-03 8.974308e-05 1.218382e-07 6.756019e-09 3.870791e-15
+# [16] 1.035408e-21 6.248025e-27 5.719242e-30 4.930381e-32
+#
+# [[3]]
+# [1] 20
+</code></pre>
+
+
+</div>

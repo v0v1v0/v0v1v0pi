@@ -1,0 +1,205 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>imaging-volume</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Read and write volume data</h2>
+
+<h3>Description</h3>
+
+<p>Read and write volume data ('MRI', 'CT', etc.) in 'NIfTI' or 'MGH' formats.
+Please use <code>read_volume</code> and <code>write_volume</code> for high-level
+function. These functions
+will call other low-level functions internally.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">read_volume(file, header_only = FALSE, format = c("auto", "nifti", "mgh"), ...)
+
+write_volume(x, con, format = c("auto", "nifti", "mgh"), ...)
+
+io_read_mgz(file, header_only = FALSE)
+
+io_write_mgz(x, con, ...)
+
+## S3 method for class 'ieegio_volume'
+io_write_mgz(x, con, ...)
+
+## S3 method for class 'ieegio_mgh'
+io_write_mgz(x, con, ...)
+
+## S3 method for class 'nifti'
+io_write_mgz(x, con, ...)
+
+## S3 method for class 'niftiImage'
+io_write_mgz(x, con, ...)
+
+## S3 method for class 'ants.core.ants_image.ANTsImage'
+io_write_mgz(x, con, ...)
+
+## S3 method for class 'array'
+io_write_mgz(x, con, vox2ras = NULL, ...)
+
+io_read_nii(
+  file,
+  method = c("oro", "rnifti", "ants"),
+  header_only = FALSE,
+  ...
+)
+
+io_write_nii(x, con, ...)
+
+## S3 method for class 'array'
+io_write_nii(x, con, vox2ras = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>file path to read volume data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>header_only</code></td>
+<td>
+<p>whether to read header data only;
+default is <code>FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>format</code></td>
+<td>
+<p>format of the file to be written; choices are <code>'auto'</code>,
+<code>'nifti'</code> or <code>'mgh'</code>; default is to <code>'auto'</code>
+detect the format based on file names, which will save as a 'MGH' file
+when file extension is <code>'mgz'</code> or <code>'mgh'</code>, otherwise 'NIfTI'
+format. We recommend explicitly setting this argument</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>passed to other methods</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>volume data (such as 'NIfTI' image, array, or 'MGH')
+to be saved</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>con</code></td>
+<td>
+<p>file path to store image</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vox2ras</code></td>
+<td>
+<p>a <code>4x4</code> transform matrix from voxel indexing (column,
+row, slice) to scanner (often 'T1-weighted' image) 'RAS'
+(right-anterior-superior) coordinate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>method to read the file; choices are <code>'oro'</code> (using
+<code>readNIfTI</code>), <code>'rnifti'</code> (using
+<code>readNifti</code>), and <code>'ants'</code> (using
+<code>as_ANTsImage</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Format</h3>
+
+<p>format of the file; default is auto-detection, other choices are
+<code>'nifti'</code> and <code>'mgh'</code>;
+</p>
+
+
+<h3>Value</h3>
+
+<p>imaging readers return <code>ieegio_volume</code> objects.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+library(ieegio)
+
+nifti_file &lt;- "brain.demosubject.nii.gz"
+
+# Use `ieegio_sample_data(nifti_file)`
+#   to download sample data
+
+
+if( ieegio_sample_data(nifti_file, test = TRUE) ) {
+
+# ---- NIfTI examples ---------------------------------------------
+
+file &lt;- ieegio_sample_data(nifti_file)
+
+# basic read
+vol &lt;- read_volume(file)
+
+# voxel to scanner RAS
+vol$transforms$vox2ras
+
+# to freesurfer surface
+vol$transforms$vox2ras_tkr
+
+# to FSL
+vol$transforms$vox2fsl
+
+image(vol$data[,,128], asp = 1, axes = FALSE)
+
+# ---- using other methods --------------------------------------
+# default
+vol &lt;- read_volume(file, method = "oro", format = "nifti")
+vol$header
+
+# lazy-load nifti
+vol2 &lt;- read_volume(file, method = "rnifti", format = "nifti")
+vol2$header
+
+# Using ANTsPyx
+vol3 &lt;- read_volume(file, method = "ants", format = "nifti")
+vol3$header
+
+# ---- write --------------------------------------------------------
+
+# write as NIfTI
+f &lt;- tempfile(fileext = ".nii.gz")
+
+write_volume(vol, f, format = "nifti")
+
+# alternative method
+write_volume(vol$header, f, format = "nifti")
+
+# write to mgz/mgh
+f2 &lt;- tempfile(fileext = ".mgz")
+
+write_volume(vol, f, format = "mgh")
+
+# clean up
+unlink(f)
+unlink(f2)
+
+}
+
+</code></pre>
+
+
+</div>

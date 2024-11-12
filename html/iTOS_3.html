@@ -1,0 +1,95 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>addinteger</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Add an Integer Penalty to an Existing Distance Matrix
+</h2>
+
+<h3>Description</h3>
+
+<p>Takes an integer valued covariate, and adds a penalty proportional
+to the difference in the integer values, with proportionality constant
+penalty.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">addinteger(costmatrix, z, iscore, penalty = 1000)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>costmatrix</code></td>
+<td>
+
+<p>An existing cost matrix with sum(z) rows and sum(1-z) columns.  The function checks the compatability of costmatrix, z and p; so, it may stop with an error if these are not of appropriate dimensions.  In particular, costmatrix may come from startcost().
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+
+<p>A vector with z[i]=1 if individual i is treated or z[i]=0 if individual i is control.  The rows of costmatrix refer to treated individuals and the columns refer to controls.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iscore</code></td>
+<td>
+
+<p>An vector of integers with length equal to length(z).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>penalty</code></td>
+<td>
+
+<p>One positive number used to penalize mismatches for iscore.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If a treated and control individual differ on iscore in absolute value by dif, then the distance between them is increased by adding dif*penalty.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A penalized distance matrix.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Paul R. Rosenbaum
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(binge)
+# Select two treated and four controls from binge
+d&lt;-binge[is.element(binge$SEQN,c(109315,109365,109266,109273,109290,109332)),]
+attach(d)
+z&lt;-1*(AlcGroup=="B")
+names(z)&lt;-d$SEQN
+rbind(z,education)
+dist&lt;-startcost(z)
+addinteger(dist,z,education,penalty=3)
+detach(d)
+rm(d,dist,z)
+</code></pre>
+
+
+</div>

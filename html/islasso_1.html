@@ -1,0 +1,105 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>islasso-package</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+The Induced Smoothed lasso: A practical framework for hypothesis testing in high dimensional regression
+</h2>
+
+<h3>Description</h3>
+
+<p>This package implements an induced smoothed approach for hypothesis testing in lasso regression.
+</p>
+
+
+<h3>Details</h3>
+
+
+<table>
+<tr>
+<td style="text-align: left;">
+Package: </td>
+<td style="text-align: left;"> islasso</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+Type: </td>
+<td style="text-align: left;"> Package</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+Version: </td>
+<td style="text-align: left;"> 1.5.w</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+Date: </td>
+<td style="text-align: left;"> 2024-01-22</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+License: </td>
+<td style="text-align: left;"> GPL-2</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+</td>
+</tr>
+</table>
+<p><code>islasso</code> is used to fit generalized linear models with a L1-penalty on (some) regression coefficients. Along with point estimates, the main advantage is to return the full covariance matrix of estimate. The resulting standard errors can be used to make inference in the lasso framework. The main function is <code>islasso</code> and the correspoinding fitter function <code>islasso.fit</code>, and many auxiliary functions are implemented to summarize and visualize results: <code>summary.islasso</code>,  <code>predict.islasso</code>,  <code>logLik.islasso</code>, <code>deviance.islasso</code>,  <code>residuals.islasso</code>.
+</p>
+<p><code>islasso.path</code> is used to fit Fit a generalized linear model via the Induced Smoothed Lasso. The regularization path is computed for the lasso or elasticnet penalty at a grid of values for the regularization parameter lambda. Along with coefficients profile, the main advantage is to return also the standard errors profile. The resulting standard errors can be used to make inference in the lasso framework. The main function is <code>islasso.path</code> and the correspoinding fitter function <code>islasso.path.fit</code>, and many auxiliary functions are implemented to summarize and visualize results: <code>summary.islasso.path</code>,  <code>predict.islasso.path</code>,  <code>logLik.islasso.path</code>, <code>deviance.islasso.path</code>,  <code>residuals.islasso.path</code>, <code>coef.islasso.path</code>, <code>fitted.islasso.path</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Gianluca Sottile based on some preliminary functions by Vito Muggeo.
+</p>
+<p>Maintainer: Gianluca Sottile &lt;gianluca.sottile@unipa.it&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Cilluffo, G, Sottile, G, S, La Grutta, S and Muggeo, VMR (2019). <em>The Induced Smoothed lasso: A practical framework for hypothesis testing in high dimensional regression</em>.
+Statistical Methods in Medical Research, DOI: 10.1177/0962280219842890.
+</p>
+<p>Sottile, G, Cilluffo, G, Muggeo, VMR (2019). <em>The R package islasso: estimation and
+hypothesis testing in lasso regression</em>. Technical Report on ResearchGate.
+doi:10.13140/RG.2.2.16360.11521.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+set.seed(1)
+n &lt;- 100
+p &lt;- 30
+p1 &lt;- 10  #number of nonzero coefficients
+coef.veri &lt;- sort(round(c(seq(.5, 3, l=p1/2), seq(-1, -2, l=p1/2)), 2))
+sigma &lt;- 1
+
+coef &lt;- c(coef.veri, rep(0, p-p1))
+
+X &lt;- matrix(rnorm(n*p), n, p)
+mu &lt;- drop(X%*%coef)
+y &lt;- mu + rnorm(n, 0,sigma)
+
+o &lt;- islasso.path(y ~ ., data = data.frame(y = y, X), 
+                  family = gaussian())
+temp &lt;- GoF.islasso.path(o) 
+
+lambda &lt;- temp$lambda.min["BIC"]
+o &lt;- islasso(y ~ ., data = data.frame(y = y, X), 
+             family = gaussian(), lambda = lambda)
+o
+summary(o, pval = .05)
+
+</code></pre>
+
+
+</div>

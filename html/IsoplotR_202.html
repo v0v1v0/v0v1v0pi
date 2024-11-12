@@ -1,0 +1,121 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>york</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Linear regression of X,Y-variables with correlated errors</h2>
+
+<h3>Description</h3>
+
+<p>Implements the unified regression algorithm of York et al. (2004)
+which, although based on least squares, yields results that are
+consistent with maximum likelihood estimates of Titterington and
+Halliday (1979).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">york(x)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a 4 or 5-column matrix with the X-values, the analytical
+uncertainties of the X-values, the Y-values, the analytical
+uncertainties of the Y-values, and (optionally) the correlation
+coefficients of the X- and Y-values.</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>Given n pairs of (approximately) collinear measurements <code class="reqn">X_i</code>
+and <code class="reqn">Y_i</code> (for <code class="reqn">1 \leq i \leq n</code>), their uncertainties
+<code class="reqn">s[X_i]</code> and <code class="reqn">s[Y_i]</code>, and their covariances
+cov[<code class="reqn">X_i,Y_i</code>], the <code>york</code> function finds the best fitting
+straight line using the least-squares algorithm of York et
+al. (2004). This algorithm is modified from an earlier method
+developed by York (1968) to be consistent with the maximum
+likelihood approach of Titterington and Halliday (1979). It
+computes the MSWD as a measure of under/overdispersion.
+Overdispersed datasets (MSWD&gt;1) can be dealt with in the same three
+ways that are described in the documentation of the
+<code>isochron</code> function.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A seven-element list of vectors containing:
+</p>
+
+<dl>
+<dt>a</dt>
+<dd>
+<p>the intercept of the straight line fit and its
+standard error</p>
+</dd>
+<dt>b</dt>
+<dd>
+<p>the slope of the fit and its standard error</p>
+</dd>
+<dt>cov.ab</dt>
+<dd>
+<p>the covariance of the slope and intercept</p>
+</dd>
+<dt>mswd</dt>
+<dd>
+<p>the mean square of the residuals (a.k.a
+‘reduced Chi-square’) statistic</p>
+</dd>
+<dt>df</dt>
+<dd>
+<p>degrees of freedom of the linear fit <code class="reqn">(n-2)</code></p>
+</dd>
+<dt>p.value</dt>
+<dd>
+<p>p-value of a Chi-square value with <code>df</code>
+degrees of freedom</p>
+</dd>
+</dl>
+<h3>References</h3>
+
+<p>Titterington, D.M. and Halliday, A.N., 1979. On the fitting of
+parallel isochrons and the method of maximum likelihood. Chemical
+Geology, 26(3), pp.183-195.
+</p>
+<p>York, Derek, et al., 2004. Unified equations for the slope,
+intercept, and standard errors of the best straight line.  American
+Journal of Physics 72.3, pp.367-375.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>data2york</code>, <code>titterington</code>,
+<code>isochron</code>, <code>ludwig</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">X &lt;- c(1.550,12.395,20.445,20.435,20.610,24.900,
+       28.530,50.540,51.595,86.51,106.40,157.35)
+Y &lt;- c(.7268,.7849,.8200,.8156,.8160,.8322,
+       .8642,.9584,.9617,1.135,1.230,1.490)
+n &lt;- length(X)
+sX &lt;- X*0.01
+sY &lt;- Y*0.005
+rXY &lt;- rep(0.8,n)
+dat &lt;- cbind(X,sX,Y,sY,rXY)
+fit &lt;- york(dat)
+scatterplot(dat,fit=fit)
+</code></pre>
+
+
+</div>

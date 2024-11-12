@@ -1,0 +1,144 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>kappa_coef</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate Cohen's Kappa Coefficient</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates weighted or unweighted Kappa
+coefficient for two sets of ratings. Kappa coefficient quantifies the
+agreement between two sets of ratings (like two raters) beyond what is
+expected by chance. It can be used as a measure of inter-rater reliability.
+</p>
+<p>If the ratings are ordinal (for example Likert scale), weighted kappa
+coefficient can be used. Weighted Kappa penalizes the larger discrepancies
+between raters. More emphasis is put to large differences between rating
+and small emphasis will be put on smaller differences. The available
+weighting options are <code>"linear"</code> and <code>"quadratic"</code>. By default
+the function calculates <code>"unweighted"</code> Kappa coefficient.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">kappa_coef(x, weights = "unweighted")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A matrix/data.frame with two columns where each column contains
+a set of ratings. When <code>weights = "linear"</code> or
+<code>weights = "quadratic"</code>, each row should be an ordered factor or
+numbers. The rows with missing values (i.e. <code>NA</code>) will be removed
+from the analysis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>Either a string representing the weighting method. Or, a
+square matrix of weights that will be applied to the cross table
+(assuming the ratings are ordered factors or numeric).
+There are three possible weighting methods (aside from the custom
+weights method):
+</p>
+
+<dl>
+<dt><code>'unweighted'</code></dt>
+<dd>
+<p>This is the original Kappa coefficient where no weighting applied.
+This is the default method. This method is appropriate for both
+nominal (i.e. unordered) data or ordinal (i.e. ordered) data.
+</p>
+</dd>
+<dt><code>'linear'</code></dt>
+<dd>
+<p>Linear weights applied.</p>
+</dd>
+<dt><code>'quadratic'</code></dt>
+<dd>
+<p>Quadratic weights applied. </p>
+</dd>
+</dl>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A Kappa coefficient which is a number between -1 and 1. 1 means
+perfect agreement between ratings. 0 means agreement between rating is no
+better than agreement one would get merely by chance. Negative values means
+the agreement is even worse than one would get by chance.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Emre Gonulates
+</p>
+
+
+<h3>References</h3>
+
+<p>Cohen, Jacob (1960). "A coefficient of agreement for nominal scales".
+Educational and Psychological Measurement. 20 (1): 37–46.
+</p>
+<p>Sim, J., &amp; Wright, C. C. (2005). The kappa statistic in reliability studies:
+use, interpretation, and sample size requirements. Physical therapy, 85(3),
+257-268.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#########  Example 1  #########
+# Hypothetical data from Sim and Wright (2005), Table 1
+# "Diagnostic Assessments of Relevance of Lateral Shift by 2 Clinicians"
+dtf &lt;- data.frame(c1 = c(rep("Relevant", 22), rep("Relevant", 2),
+                         rep("Not Relevant", 4), rep("Not Relevant", 11)),
+                  c2 = c(rep("Relevant", 22), rep("Not Relevant", 2),
+                         rep("Relevant", 4), rep("Not Relevant", 11)))
+kappa_coef(dtf)
+
+#########  Example 2  #########
+# Hypothetical data from Sim and Wright (2005), p.260, Table 2
+pain_raw &lt;- data.frame(t1 = c(rep("No Pain", 15 + 3 + 1 + 1),
+                              rep("Mild Pain", 4 + 18 + 3 + 2),
+                              rep("Moderate Pain", 4 + 5 + 16 + 4),
+                              rep("Severe Pain", 1 + 2 + 4 + 17)),
+                       t2 = c(rep("No Pain", 15), rep("Mild Pain", 3),
+                              rep("Moderate Pain", 1), rep("Severe Pain", 1),
+                              rep("No Pain", 4), rep("Mild Pain", 18),
+                              rep("Moderate Pain", 3), rep("Severe Pain", 2),
+                              rep("No Pain", 4), rep("Mild Pain", 5),
+                              rep("Moderate Pain", 16), rep("Severe Pain", 4),
+                              rep("No Pain", 1), rep("Mild Pain", 2),
+                              rep("Moderate Pain", 4), rep("Severe Pain", 17))
+  )
+# Since data is ordinal, convert columns to ordinal factors:
+ordered_levels &lt;- c("No Pain", "Mild Pain", "Moderate Pain", "Severe Pain")
+pain_ordered &lt;- data.frame(
+  t1 = factor(pain_raw$t1, levels = ordered_levels, ordered = TRUE),
+  t2 = factor(pain_raw$t2, levels = ordered_levels, ordered = TRUE))
+table(pain_ordered)
+
+# Unweighted Kappa Coefficient
+kappa_coef(pain_ordered)
+# Kappa Coefficient with linear weights
+kappa_coef(pain_ordered, weights = "linear")
+# Kappa Coefficient with quadratic weights
+kappa_coef(pain_ordered, weights = "quadratic")
+
+</code></pre>
+
+
+</div>

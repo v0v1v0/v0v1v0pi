@@ -1,0 +1,170 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>or.relimp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Function to calculate relative importance for order-restricted 
+linear models </h2>
+
+<h3>Description</h3>
+
+<p>The function calculates relative importance by averaging over the variables 
+R-squared contributions from all orderings of variables for linear models with 
+inequality restrictions on the parameters. 
+NOTE: only useful if each restriction refers to exactly one variable,
+or if it is adequate to reduce multi-variable restrictions by omitting 
+the affected variables but leaving the restriction otherwise intact.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">or.relimp(model, ui, ci = NULL, ...)
+## S3 method for class 'lm'
+or.relimp(model, ui, ci = NULL, index = 2:length(coef(model)), meq = 0, 
+     tol = sqrt(.Machine$double.eps), ...)
+     
+## Default S3 method:
+or.relimp(model, ui, ci = NULL, index = 2:ncol(model), meq = 0, 
+     tol = sqrt(.Machine$double.eps), ...)
+     
+all.R2(covmat, ui, ci = NULL, index = 2:ncol(covmat), meq = 0, 
+     tol = sqrt(.Machine$double.eps), ...)
+     ## user does not need to call this function
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p> a linear model object of class <code>lm</code> with data included; 
+for function <code>or.relimp</code>, 
+all explanatory variables must be numeric (i.e. no factors), 
+and higher-order terms (e.g. interactions) are not permitted. 
+</p>
+<p>OR
+</p>
+<p>the covariance matrix of the response (first position) and all regressors</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>covmat</code></td>
+<td>
+<p> the covariance matrix of the response (first position) and all regressors</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ui</code></td>
+<td>
+<p> cf. explanation in <code>link{orlm}</code>;
+cf. also details below </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci</code></td>
+<td>
+<p> cf. explanation in <code>link{orlm}</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>index</code></td>
+<td>
+<p> cf. explanation in <code>link{orlm}</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meq</code></td>
+<td>
+<p> cf. explanation in <code>link{orlm}</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p> cf. explanation in <code>link{orlm}</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> Further options </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Function <code>or.relimp</code> uses function <code>all.R2</code> for 
+calculating the R-squared values of all subsets that are subsequently 
+handed to function <code>Shapley.value</code> (from package <code>kappalab</code>), 
+which takes care of the averaging over ordering. 
+</p>
+<p>WARNING: In models with subsets of the regressors, the 
+columns of the matrix <code>ui</code> referring to regressors outside the 
+current subset are simply deleted for the sub model. 
+This is only reasonable if either the individual 
+constraints refer to individual parameters only (e.g. all 
+parameters restricted to be non-negative) or if the constraints 
+are still reasonable in the sub model with some variables deleted, 
+e.g. perhaps (depending on the application) sum 
+of all parameters less or equal to 1.
+</p>
+<p>WARNING: If the number of regressors (<code>p</code>) is large, the functions 
+quickly becomes unmanageable (a vector of size <code>2^p</code> is returned 
+or handled in the process.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>all.R2</code> returns a vector (<code>2^p</code> elements) with all R-squared values 
+(<code>p</code> is the number of regressors, vector is ordered from empty to full model 
+in natural order (cf. <code>ic.infer:::nchoosek</code> for the order within one model 
+size).
+</p>
+<p><code>or.relimp</code> returns a vector (<code>p</code> elements) with average R-squared 
+contributions from all models with respective subset of restrictions 
+<code>ui %*% beta &gt;= ci</code> enforced. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Ulrike Groemping, BHT Berlin </p>
+
+
+<h3>See Also</h3>
+
+<p> See also <code>orlm</code> for order-restricted linear models and 
+<code>calc.relimp</code> from <code>R</code>-package <code>relaimpo</code> for a much more 
+comfortable and much faster routine for unrestricted linear models</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">covswiss &lt;- cov(swiss)
+## all R2-values for restricted linear model with restrictions that
+## Catholic and Infant.Mortality have non-negative coefficients
+R2s &lt;- all.R2(covswiss, ui=rbind(c(0,0,0,1,0),c(0,0,0,0,1)))
+R2s
+
+require(kappalab) ## directly using package kappalab
+Shapley.value(set.func(R2s))  
+
+### with convenience wrapper from this package
+or.relimp(covswiss, ui=rbind(c(0,0,0,1,0),c(0,0,0,0,1)))
+
+### also works on linear models
+limo &lt;- lm(swiss)
+#or.relimp(limo, ui=rbind(c(0,0,0,1,0),c(0,0,0,0,1)))
+
+## same model using index vector
+or.relimp(limo, ui=rbind(c(1,0),c(0,1)), index=5:6)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,112 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Zsimilarity</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Summarise MCMC samples of clustering labels with a similarity matrix and find the 'average' clustering</h2>
+
+<h3>Description</h3>
+
+<p>This function takes a Monte Carlo sample of cluster labels, computes an average similarity matrix and returns the clustering with minimum mean squared error to this average. The <code>mcclust</code> package <strong>must</strong> be loaded.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Zsimilarity(zs)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>zs</code></td>
+<td>
+<p>A matrix containing samples of clustering labels where the columns correspond to the number of observations (N) and the rows correspond to the number of iterations (M).</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>This function takes a Monte Carlo sample of cluster labels, converts them to adjacency matrices, and computes a similarity matrix as an average of the adjacency matrices. The dimension of the similarity matrix is invariant to label switching and the number of clusters in each sample, desirable features when summarising partitions of Bayesian nonparametric models such as IMIFA. As a summary of the posterior clustering, the clustering with minimum mean squared error to this 'average' clustering is reported.
+</p>
+<p>A heatmap of <code>z.sim</code> may provide a useful visualisation, if appropriately ordered. The user is also invited to perform hierarchical clustering using <code>hclust</code> after first converting this similarity matrix to a distance matrix - "complete" linkage is recommended. Alternatively, <code>hc</code> could be used.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list containing three elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>z.avg</code></td>
+<td>
+<p>The 'average' clustering, with minimum squared distance to <code>z.sim</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z.sim</code></td>
+<td>
+<p>The N x N similarity matrix, in a sparse format (see <code>simple_triplet_matrix</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MSE.z</code></td>
+<td>
+<p>A vector of length M recording the MSEs between each clustering and the 'average' clustering.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>The <code>mcclust</code> package <strong>must</strong> be loaded.
+</p>
+<p>This is liable to take quite some time to run, especially if the number of observations &amp;/or number of iterations is large. Depending on how distinct the clusters are, <code>z.sim</code> may be stored better in a non-sparse format. This function can optionally be called inside <code>get_IMIFA_results</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Keefe Murphy - &lt;<a href="mailto:keefe.murphy@mu.ie">keefe.murphy@mu.ie</a>&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Carmona, C., Nieto-barajas, L. and Canale, A. (2018) Model based approach for household clustering with mixed scale variables. <em>Advances in Data Analysis and Classification</em>, 13(2): 559-583.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>get_IMIFA_results</code>, <code>simple_triplet_matrix</code>, <code>hclust</code>, <code>hc</code>, <code>comp.psm</code>, <code>cltoSim</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Run a IMIFA model and extract the sampled cluster labels
+# data(olive)
+# sim    &lt;- mcmc_IMIFA(olive, method="IMIFA", n.iters=5000)
+# zs     &lt;- sim[[1]][[1]]$z.store
+
+# Get the similarity matrix and visualise it
+# zsimil &lt;- Zsimilarity(zs)
+# z.sim  &lt;- as.matrix(zsimil$z.sim)
+# z.col  &lt;- mat2cols(z.sim, cols=heat.colors(30, rev=TRUE))
+# z.col[z.sim == 0] &lt;- NA
+# plot_cols(z.col, na.col=par()$bg); box(lwd=2)
+
+# Extract the clustering with minimum squared distance to this
+# 'average' and evaluate its performance against the true labels
+# table(zsimil$z.avg, olive$area)
+
+# Perform hierarchical clustering on the distance matrix
+# Hcl    &lt;- hclust(as.dist(1 - z.sim), method="complete")
+# plot(Hcl)
+# table(cutree(Hcl, k=3), olive$area)
+</code></pre>
+
+
+</div>

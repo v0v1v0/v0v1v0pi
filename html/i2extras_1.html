@@ -1,0 +1,115 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>add_rolling_average</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Add a rolling average</h2>
+
+<h3>Description</h3>
+
+<p><code>add_rolling_average()</code> adds a rolling average to an <code style="white-space: pre;">⁠&lt;incidence2&gt;⁠</code> object.
+If multiple groupings or count variables are present then the average will be
+calculated for each.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">add_rolling_average(
+  x,
+  n = 3L,
+  complete_dates = TRUE,
+  align = c("right", "center"),
+  colname = "rolling_average",
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[incidence2]⁠</code> object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[integer]⁠</code>
+</p>
+<p>How many date groupings to consider in each window?
+</p>
+<p><code>double</code> vectors will be converted via <code>as.integer(n)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>complete_dates</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[bool]⁠</code>
+</p>
+<p>Should <code>incidence2::complete_dates()</code> be called on the data prior to adding
+the rolling average.
+</p>
+<p>Defaults to TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>align</code></td>
+<td>
+<p> character, define if rolling window covers preceding rows
+(<code>"right"</code>), following rows (<code>"left"</code>) or centered
+(<code>"center"</code>). Defaults to <code>"right"</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colname</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[character]⁠</code>
+</p>
+<p>The name of the column to contain the rolling average.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments passed to <code>incidence2::complete_dates()</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The input object with an additional column for the rolling average.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+if (requireNamespace("outbreaks", quietly = TRUE)) {
+
+
+  data(ebola_sim_clean, package = "outbreaks")
+  dat &lt;- ebola_sim_clean$linelist
+  dat &lt;- subset(dat, date_of_onset &lt;= as.Date("2014-10-05"))
+
+  inci &lt;- incidence2::incidence(
+      dat,
+      date_index = "date_of_onset",
+      groups = "gender",
+      interval = "isoweek"
+  )
+
+  add_rolling_average(inci, n = 3L)
+  inci2 &lt;- incidence2::regroup(inci)
+  add_rolling_average(inci2, n = 7L)
+
+}
+
+</code></pre>
+
+
+</div>

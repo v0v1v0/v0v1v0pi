@@ -1,0 +1,160 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>kendallNA</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Kendall's coefficient of concordance W – generalized for randomly incomplete datasets</h2>
+
+<h3>Description</h3>
+
+<p>This function computes Kendall's coefficient of concordance W that is an index of 
+interrater reliability for ordinal ratings. This function also works on incomplete datasets without 
+any imputation of missing values or (row- or cloumn-wise) omissions of data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">kendallNA(X)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>n*m matrix or dataframe; n objects (rows), k  raters (columns)</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>This function is able to calculate W, also on randomly incomplete (i.e. unbalanced) 
+data sets. Therefor it uses the mean Spearman's <code class="reqn">\rho</code> of all pairwise comparisons, see Kendall
+(1962):
+</p>
+<p style="text-align: center;"><code class="reqn">W = [1 + mean \rho_S * (k-1)] / k</code>
+</p>
+
+<p>where k is the mean number of (pairwise) ratings per object and <code class="reqn">mean \rho_S</code> is calculated 
+weighted, according to Taylor (1987), since the pairwise <code class="reqn">\rho_S</code> are possibly based on a 
+different number of ratings, what must be reflected in weights.<br>
+Thus, an imputation of missing values or (row- or cloumn-wise) omissions of data are obsolete. In 
+case of complete datasets, it yields the same results as usual implementations of Kendall's W, 
+except for tied ranks. In case of tied ranks, the (pairwise) correction of <code class="reqn">\rho_S</code> is used, 
+which (already with complete datasets) results in slightly different values than the tie correction 
+explicitly specified for W.<br>
+More details are given in Brueckl (2011).
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>amrho</code></td>
+<td>
+<p>mean Spearman's <code class="reqn">\rho</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>amk</code></td>
+<td>
+<p>mean number of (pairwise) ratings per object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>W</code></td>
+<td>
+<p>Kendall's coefficient of concordance among raters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>chisqu</code></td>
+<td>
+<p>value of the  <code class="reqn">\chi</code>-squared test statistic</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>degrees of freedom</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>one-tailed type I error probability (statistical significance)</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Markus Brueckl
+</p>
+
+
+<h3>References</h3>
+
+<p>Brueckl, M. (2011). Statistische Verfahren zur Ermittlung der Urteileruebereinstimmung. 
+in: Altersbedingte Veraenderungen der Stimme und Sprechweise von Frauen, Berlin: Logos, 88–103.
+</p>
+<p>Kendall, M.G. (1962). Rank correlation methods (3rd ed.). London: Griffin.
+</p>
+<p>Taylor, J.M.G. (1987). Kendall's and Spearman's correlation coefficients in the 
+presence of a blocking variable. Biometrics, 43, 409–416.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>iccNA, kendall</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example 1:
+data(ConsistNA)
+# ConsistNA exhibits missing values and a perfect concordance
+# between raters:
+ConsistNA
+# Common W-algorithms fail, since each row as well as each 
+# column of ConsistNA exhibits unfilled cells and these missing 
+# data are omitted column-wise or row-wise (please install and 
+# load the irr package):
+#kendall(ConsistNA)
+# But the generalization of Kendall's W implemeted in irrNA 
+# is able to assess the perfect concordance, assuming that 
+# the data were at least ordinally scaled and not tied, e.g. 
+# that each rater really ranked the objects that he rated 
+# without giving equal ranks to two or more objects.
+kendallNA(ConsistNA)
+#
+# Example 2:
+data(IndepNA)
+# IndepNA exhibits missing values and zero variance between 
+# the raters (just as well as between the objects):
+IndepNA
+# Common W-algorithms fail:
+#kendall(IndepNA)
+# kendallNA includes all (rater-pairwise) available data in 
+# its calculation (e.g. only Objects 1--4 when Rater1 and 
+# Rater2 are correlated):
+kendallNA(IndepNA)
+#
+# Example 3:
+data(IndepW)
+# IndepW exhibits missing values and a mean Spearman's rho,
+# that equals zero:
+IndepW
+# Again, common W-algorithms fail,
+#kendall(IndepW)
+# while kendallNA includes all (rater-pairwise) available 
+# data:
+kendallNA(IndepW)
+</code></pre>
+
+
+</div>

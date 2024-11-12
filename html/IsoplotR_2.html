@@ -1,0 +1,587 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>age</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate isotopic ages</h2>
+
+<h3>Description</h3>
+
+<p>Calculates U-Pb, Pb-Pb, Th-Pb, Ar-Ar, K-Ca, Re-Os, Sm-Nd, Rb-Sr, Lu-Hf,
+U-Th-He, Th-U and fission track ages and propagates their
+analytical uncertainties. Includes options for single grain,
+isochron and concordia_ages.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">age(x, ...)
+
+## Default S3 method:
+age(
+  x,
+  method = "U238-Pb206",
+  oerr = 1,
+  sigdig = NA,
+  exterr = FALSE,
+  J = c(NA, NA),
+  zeta = c(NA, NA),
+  rhoD = c(NA, NA),
+  d = diseq(),
+  ...
+)
+
+## S3 method for class 'UPb'
+age(
+  x,
+  type = 1,
+  exterr = FALSE,
+  i = NULL,
+  oerr = 1,
+  sigdig = NA,
+  common.Pb = 0,
+  discordance = discfilter(),
+  ...
+)
+
+## S3 method for class 'PbPb'
+age(
+  x,
+  isochron = TRUE,
+  common.Pb = 2,
+  exterr = FALSE,
+  i = NULL,
+  oerr = 1,
+  sigdig = NA,
+  projerr = FALSE,
+  ...
+)
+
+## S3 method for class 'ArAr'
+age(
+  x,
+  isochron = FALSE,
+  i2i = TRUE,
+  exterr = FALSE,
+  i = NULL,
+  oerr = 1,
+  sigdig = NA,
+  projerr = FALSE,
+  ...
+)
+
+## S3 method for class 'KCa'
+age(
+  x,
+  isochron = FALSE,
+  i2i = TRUE,
+  exterr = FALSE,
+  i = NULL,
+  oerr = 1,
+  sigdig = NA,
+  projerr = FALSE,
+  ...
+)
+
+## S3 method for class 'UThHe'
+age(x, isochron = FALSE, central = FALSE, i = NULL, oerr = 1, sigdig = NA, ...)
+
+## S3 method for class 'fissiontracks'
+age(x, central = FALSE, i = NULL, oerr = 1, sigdig = NA, exterr = FALSE, ...)
+
+## S3 method for class 'ThU'
+age(
+  x,
+  isochron = FALSE,
+  Th0i = 0,
+  exterr = FALSE,
+  i = NULL,
+  oerr = 1,
+  sigdig = NA,
+  ...
+)
+
+## S3 method for class 'ThPb'
+age(
+  x,
+  isochron = TRUE,
+  i2i = TRUE,
+  exterr = FALSE,
+  i = NULL,
+  oerr = 1,
+  sigdig = NA,
+  projerr = FALSE,
+  ...
+)
+
+## S3 method for class 'ReOs'
+age(
+  x,
+  isochron = TRUE,
+  i2i = TRUE,
+  exterr = FALSE,
+  i = NULL,
+  oerr = 1,
+  sigdig = NA,
+  projerr = FALSE,
+  ...
+)
+
+## S3 method for class 'SmNd'
+age(
+  x,
+  isochron = TRUE,
+  i2i = TRUE,
+  exterr = FALSE,
+  i = NULL,
+  oerr = 1,
+  sigdig = NA,
+  projerr = FALSE,
+  ...
+)
+
+## S3 method for class 'RbSr'
+age(
+  x,
+  isochron = TRUE,
+  i2i = TRUE,
+  exterr = FALSE,
+  i = NULL,
+  oerr = 1,
+  sigdig = NA,
+  projerr = FALSE,
+  ...
+)
+
+## S3 method for class 'LuHf'
+age(
+  x,
+  isochron = TRUE,
+  i2i = TRUE,
+  exterr = FALSE,
+  i = NULL,
+  oerr = 1,
+  sigdig = NA,
+  projerr = FALSE,
+  ...
+)
+
+## S3 method for class 'PD'
+age(
+  x,
+  nuclide,
+  isochron = TRUE,
+  i2i = TRUE,
+  exterr = FALSE,
+  i = NULL,
+  oerr = 1,
+  sigdig = NA,
+  projerr = FALSE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>can be:
+</p>
+
+<ul>
+<li>
+<p> a scalar containing an isotopic ratio,
+</p>
+</li>
+<li>
+<p> a two element vector containing an isotopic ratio and its standard
+error, or the spontaneous and induced track densities <code>Ns</code> and
+<code>Ni</code>,
+</p>
+</li>
+<li>
+<p> a two element vector containing <code>Ar40Ar39</code>,
+<code>s[Ar40Ar39]</code>,
+</p>
+</li>
+<li>
+<p> a two element vector containing <code>K40Ca40</code> and
+<code>s[K40Ca40]</code>,
+</p>
+</li>
+<li>
+<p> a six element vector containing <code>U</code>, <code>s[U]</code>, <code>Th</code>,
+<code>s[Th]</code>, <code>He</code> and <code>s[He]</code>,
+</p>
+</li>
+<li>
+<p> an eight element vector containing <code>U</code>, <code>s[U]</code>,
+<code>Th</code>, <code>s[Th]</code>, <code>He</code>, <code>s[He]</code>, <code>Sm</code> and
+<code>s[Sm]</code>
+</p>
+</li>
+<li>
+<p> a two element vector containing <code>Sr87Rb87</code> and
+<code>s[Sr87Rb87]</code>
+</p>
+</li>
+<li>
+<p> a two element vector containing <code>Os187Re187</code> and
+<code>s[Os187Re187]</code>
+</p>
+</li>
+<li>
+<p> a two element vector containing <code>Nd143Sm147</code> and
+<code>s[Nd144Sm147]</code>
+</p>
+</li>
+<li>
+<p> a two element vector containing <code>Hf176Lu176</code> and
+<code>s[Hf176Lu176]</code>
+</p>
+</li>
+<li>
+<p> a five element vector containing <code>Th230U238</code>, <code>s[Th230/U238]</code>,
+<code>U234U238</code>, <code>s[U234U238]</code> and <code>cov[Th230U238,U234U238]</code>
+</p>
+</li>
+</ul>
+<p>OR
+</p>
+ <ul><li>
+<p> an object of class <code>UPb</code>, <code>PbPb</code>,
+<code>ThPb</code>, <code>ArAr</code>, <code>KCa</code>, <code>ThU</code>, <code>RbSr</code>,
+<code>SmNd</code>, <code>ReOs</code>, <code>LuHf</code>, <code>UThHe</code> or
+<code>fissiontracks</code>.  </p>
+</li></ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>one of either <code>'U238-Pb206'</code>,
+<code>'U235-Pb207'</code>, <code>'Pb207-Pb206'</code>,
+<code>'Th232-Pb208'</code>, <code>'Ar-Ar'</code>, <code>'K-Ca'</code>,
+<code>'Th-U'</code>, <code>'Re-Os'</code>, <code>'Sm-Nd'</code>, <code>'Rb-Sr'</code>,
+<code>'Lu-Hf'</code>, <code>'U-Th-He'</code> or <code>'fissiontracks'</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>oerr</code></td>
+<td>
+<p>indicates whether the analytical uncertainties of the
+output are reported as:
+</p>
+<p><code>1</code>: 1<code class="reqn">\sigma</code> absolute uncertainties.
+</p>
+<p><code>2</code>: 2<code class="reqn">\sigma</code> absolute uncertainties.
+</p>
+<p><code>3</code>: absolute (1-<code class="reqn">\alpha</code>)% confidence intervals, where
+<code class="reqn">\alpha</code> equales the value that is stored in
+<code>settings('alpha')</code>.
+</p>
+<p><code>4</code>: 1<code class="reqn">\sigma</code> relative uncertainties (<code class="reqn">\%</code>).
+</p>
+<p><code>5</code>: 2<code class="reqn">\sigma</code> relative uncertainties (<code class="reqn">\%</code>).
+</p>
+<p><code>6</code>: relative (1-<code class="reqn">\alpha</code>)% confidence intervals, where
+<code class="reqn">\alpha</code> equales the value that is stored in
+<code>settings('alpha')</code>.
+</p>
+<p>(only used when <code>isochron</code> and <code>central</code> are <code>FALSE</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigdig</code></td>
+<td>
+<p>number of significant digits for the uncertainty
+estimate (only used if <code>type=1</code>, <code>isochron=FALSE</code> and
+<code>central=FALSE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exterr</code></td>
+<td>
+<p>propagate the external (decay constant and
+calibration factor) uncertainties?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>J</code></td>
+<td>
+<p>two-element vector with the J-factor and its standard
+error.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zeta</code></td>
+<td>
+<p>two-element vector with the zeta-factor and its standard
+error.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rhoD</code></td>
+<td>
+<p>two-element vector with the track density of the
+dosimeter glass and its standard error.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p>an object of class <code>diseq</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>scalar flag indicating whether
+</p>
+<p><code>1</code>: each U-Pb analysis should be considered separately,
+</p>
+<p><code>2</code>: all the measurements should be combined to calculate a
+concordia_age,
+</p>
+<p><code>3</code>: a discordia_line should be fitted through all the U-Pb
+analyses using the maximum likelihood algorithm of Ludwig
+(1998), which assumes that the scatter of the data is solely
+due to the analytical uncertainties.
+</p>
+<p><code>4</code>: a discordia_line should be fitted ignoring the analytical
+uncertainties.
+</p>
+<p><code>5</code>: a discordia_line should be fitted using a modified
+maximum likelihood algorithm that accounts for overdispersion by
+adding a geological (co)variance term.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>i</code></td>
+<td>
+<p>index of a particular aliquot</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>common.Pb</code></td>
+<td>
+<p>common lead correction:
+</p>
+<p><code>0</code>: none
+</p>
+<p><code>1</code>: use the Pb-composition stored in
+</p>
+<p><code>settings('iratio','Pb207Pb206')</code> (if <code>x</code> has class
+<code>UPb</code> and <code>x$format&lt;4</code>);
+</p>
+<p><code>settings('iratio','Pb206Pb204')</code> and
+<code>settings('iratio','Pb207Pb204')</code> (if <code>x</code> has class
+<code>PbPb</code> or <code>x</code> has class <code>UPb</code> and
+<code>3&lt;x$format&lt;7</code>); or
+</p>
+<p><code>settings('iratio','Pb206Pb208')</code> and
+<code>settings('iratio','Pb207Pb208')</code> (if <code>x</code> has class
+<code>UPb</code> and <code>x$format=7</code> or <code>8</code>).
+</p>
+<p><code>2</code>: use the isochron intercept as the initial Pb-composition
+</p>
+<p><code>3</code>: use the Stacey-Kramer two-stage model to infer the initial
+Pb-composition</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>discordance</code></td>
+<td>
+<p>discordance calculator. This is an object of
+class <code>discfilter</code>, or a two element list
+containing:
+</p>
+<p><code>option</code>: one of
+</p>
+<p><code>1</code> or <code>'t'</code> (absolute age filter);
+</p>
+<p><code>2</code> or <code>'r'</code> (relative age filter);
+</p>
+<p><code>3</code> or <code>'sk'</code> (Stacey-Kramers common Pb filter);
+</p>
+<p><code>4</code> or <code>'a'</code> (perpendicular Aitchison distance);
+</p>
+<p><code>5</code> or <code>'c'</code> (concordia distance);
+</p>
+<p><code>6</code> or <code>'p'</code> (p-value of concordance); or
+</p>
+<p><code>NA</code> (omit the discordance from the output)
+</p>
+<p><code>before</code>: logical flag indicating whether the discordance
+should be calculated before (<code>TRUE</code>) or after (<code>FALSE</code>)
+the common-Pb correction.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>isochron</code></td>
+<td>
+<p>logical flag indicating whether each analysis
+should be considered separately (<code>isochron=FALSE</code>) or an
+isochron age should be calculated from all analyses together
+(<code>isochron=TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>projerr</code></td>
+<td>
+<p>logical. If <code>TRUE</code>, propagates the uncertainty
+of the non-radiogenic isotope correction (the 'projection
+error') into the age uncertainty. Note that the resulting
+single grain age uncertainties may be strongly correlated with
+each other, but these error correlations are not reported in
+the output.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>i2i</code></td>
+<td>
+<p>‘isochron to intercept’: calculates the initial (aka
+‘inherited’, ‘excess’, or ‘common’)
+<code class="reqn">^{40}</code>Ar/<code class="reqn">^{36}</code>Ar, <code class="reqn">^{40}</code>Ca/<code class="reqn">^{44}</code>Ca,
+<code class="reqn">^{87}</code>Sr/<code class="reqn">^{86}</code>Sr, <code class="reqn">^{143}</code>Nd/<code class="reqn">^{144}</code>Nd,
+<code class="reqn">^{187}</code>Os/<code class="reqn">^{188}</code>Os, <code class="reqn">^{176}</code>Hf/<code class="reqn">^{177}</code>Hf or
+<code class="reqn">^{204}</code>Pb/<code class="reqn">^{208}</code>Pb ratio from an isochron
+fit. Setting <code>i2i</code> to <code>FALSE</code> uses the default values
+stored in <code>settings('iratio',...)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>central</code></td>
+<td>
+<p>logical flag indicating whether each analysis should
+be considered separately (<code>central=FALSE</code>) or a central
+age should be calculated from all analyses together
+(<code>central=TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Th0i</code></td>
+<td>
+<p>initial <code class="reqn">^{230}</code>Th correction.
+</p>
+<p><code>0</code>: no correction
+</p>
+<p><code>1</code>: project the data along an isochron fit
+</p>
+<p><code>2</code>: if <code>x$format</code> is <code>1</code> or <code>2</code>, correct the
+data using the measured present day <code class="reqn">^{230}</code>Th/<code class="reqn">^{238}</code>U,
+<code class="reqn">^{232}</code>Th/<code class="reqn">^{238}</code>U and <code class="reqn">^{234}</code>U/<code class="reqn">^{238}</code>U
+activity ratios in the detritus. If <code>x$format</code> is <code>3</code> or
+<code>4</code>, correct the data using the measured
+<code class="reqn">^{238}</code>U/<code class="reqn">^{232}</code>Th activity ratio of the whole rock, as
+stored in <code>x</code> by the <code>read.data()</code> function.
+</p>
+<p><code>3</code>: correct the data using an assumed initial
+<code class="reqn">^{230}</code>Th/<code class="reqn">^{232}</code>Th-ratio for the detritus (only relevant
+if <code>x$format</code> is <code>1</code> or <code>2</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nuclide</code></td>
+<td>
+<p>a text string corresponding to a valid entry for
+<code>settings('lambda',...)</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+
+<ol>
+<li>
+<p> if <code>x</code> is a scalar or a vector, returns the age using
+the geochronometer given by <code>method</code> and its standard error.
+</p>
+</li>
+<li>
+<p> if <code>x</code> has class <code>UPb</code> and <code>type=1</code>, returns a
+table with the following columns: <code>t.75</code>, <code>err[t.75]</code>,
+<code>t.68</code>, <code>err[t.68]</code>, <code>t.76</code>, <code>err[t.76]</code>,
+(<code>t.82</code>, <code>err[t.82]</code>,) <code>t.conc</code>, <code>err[t.conc]</code>,
+(<code>disc</code>) or <code>err[p.conc]</code>,) containing the
+<code class="reqn">^{207}</code>Pb/<code class="reqn">^{235}</code>U-age and standard error, the
+<code class="reqn">^{206}</code>Pb/<code class="reqn">^{238}</code>U-age and standard error, the
+<code class="reqn">^{207}</code>Pb/<code class="reqn">^{206}</code>Pb-age and standard error, (the
+<code class="reqn">^{208}</code>Pb/<code class="reqn">^{232}</code>Th-age and standard error,) the single
+grain concordia_age and standard error, (and the % discordance or
+p-value for concordance,) respectively.
+</p>
+</li>
+<li>
+<p> if <code>x</code> has class <code>UPb</code> and <code>type=2, 3, 4</code> or
+<code>5</code>, returns the output of the <code>concordia</code>
+function.
+</p>
+</li>
+<li>
+<p> if <code>x</code> has class <code>PbPb</code>, <code>ThPb</code>, <code>ArAr</code>,
+<code>KCa</code>, <code>RbSr</code>, <code>SmNd</code>, <code>ReOs</code>, <code>LuHf</code>,
+<code>ThU</code> or <code>UThHe</code> and <code>isochron=FALSE</code>, returns a
+table of Pb-Pb, Th-Pb, Ar-Ar, K-Ca, Rb-Sr, Sm-Nd, Re-Os, Lu-Hf,
+Th-U or U-Th-He ages and their standard errors.
+</p>
+</li>
+<li>
+<p> if <code>x</code> has class <code>ThU</code> and <code>isochron=FALSE</code>,
+returns a 5-column table with the Th-U ages, their standard errors,
+the initial <code class="reqn">^{234}</code>U/<code class="reqn">^{238}</code>U-ratios, their standard errors,
+and the correlation coefficient between the ages and the initial
+ratios.
+</p>
+</li>
+<li>
+<p> if <code>x</code> has class <code>PbPb</code>, <code>ThPb</code>, <code>ArAr</code>,
+<code>KCa</code>, <code>RbSr</code>, <code>SmNd</code>, <code>ReOs</code>, <code>LuHf</code>,
+<code>UThHe</code> or <code>ThU</code> and <code>isochron=TRUE</code>, returns the
+output of the <code>isochron</code> function.
+</p>
+</li>
+<li>
+<p> if <code>x</code> has class <code>fissiontracks</code> and
+<code>central=FALSE</code>, returns a table of fission track ages and
+standard errors.
+</p>
+</li>
+<li>
+<p> if <code>x</code> has class <code>fissiontracks</code> or <code>UThHe</code>
+and <code>central=TRUE</code>, returns the output of the
+<code>central</code> function.
+</p>
+</li>
+</ol>
+<h3>See Also</h3>
+
+<p><code>concordia</code>, <code>isochron</code>,
+<code>central</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">attach(examples)
+tUPb &lt;- age(UPb,type=1)
+tconc &lt;- age(UPb,type=2)
+tdisc &lt;- age(UPb,type=3)
+tArAr &lt;- age(ArAr)
+tiso &lt;- age(ArAr,isochron=TRUE,i2i=TRUE)
+tcentral &lt;- age(FT1,central=TRUE)
+</code></pre>
+
+
+</div>

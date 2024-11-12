@@ -1,0 +1,134 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>psi_hyper</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Find sensible inverse gamma hyperparameters for variance/uniqueness parameters</h2>
+
+<h3>Description</h3>
+
+<p>Takes an inverse-Gamma shape hyperparameter, and an inverse covariance matrix (or estimate thereof), and finds data-driven scale hyperparameters in such a way that Heywood problems are avoided for factor analysis or probabilistic principal components analysis (and mixtures thereof).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">psi_hyper(shape,
+          dat,
+          type = c("unconstrained", "isotropic"),
+          beta0 = 3,
+          ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>shape</code></td>
+<td>
+<p>A positive shape hyperparameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dat</code></td>
+<td>
+<p>The data matrix for which the inverse covariance matrix is to be estimated. If data are to be centered &amp;/or scaled within <code>mcmc_IMIFA</code>, then <code>dat</code> must also be standardised in the same way.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>A switch indicating whether a single scale (<code>isotropic</code>) or variable-specific scales (<code>unconstrained</code>) are to be derived. Both options are allowed under models in <code>mcmc_IMIFA</code> with "constrained" or "unconstrained" uniquenesses, but only a single scale can be specified for models with "isotropic" or "single" uniquenesses.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta0</code></td>
+<td>
+<p>See Note below. Must be a strictly positive numeric scalar. Defaults to <code>3</code>, but is only invoked when explicitly supplied or when the number of observations <code>N</code> is not greater than the number of variables <code>P</code> (or when inverting the sample covariance matrix somehow otherwise fails). In some cases, <code>beta0</code> should not be so small as to render the estimate of the inverse unstable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Catches unused arguments. Advanced users can also supply the sample covariance matrix of <code>dat</code>, if available, through <code>...</code> via the argument <code>covar</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Constraining uniquenesses to be isotropic provides the link between factor analysis and the probabilistic PCA model. When used in conjunction with <code>mcmc_IMIFA</code> with "isotropic" or "single" uniquenesses, <code>type</code> must be <code>isotropic</code>, but for "unconstrained" or "constrained" uniquenesses, it's possible to specify either a single scale (<code>type="isotropic"</code>) or variable-specific scales (<code>type="unconstrained"</code>).
+</p>
+<p>Used internally by <code>mcmc_IMIFA</code> when its argument <code>psi_beta</code> is not supplied.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Either a single scale hyperparameter or <code>ncol(dat)</code> variable-specific scale hyperparameters.
+</p>
+
+
+<h3>Note</h3>
+
+<p>When <code>N &gt; P</code>, where <code>N</code> is the number of observations and <code>P</code> is the number of variables, the inverse of the sample covariance matrix is used by default.
+</p>
+<p>When <code>N &lt;= P</code>, the inverse either does not exist or the estimate thereof is highly unstable. Thus, an estimate of the form <code class="reqn">\left(\beta_0 + \frac{N}{2}\right)\left(\beta_0\mathcal{I}_p + 0.5\sum_{i=1}^N x_i x_i^\top\right)^{-1}</code> is used instead.
+</p>
+<p>For unstandardised data, the estimate is instead constructed using a standardised version of the data, and the resulting inverse <em>correlation</em> matrix estimate is scaled appropriately by the diagonal entries of the sample covariance matrix of the original data.
+</p>
+<p>This estimate can also be used in <code>N &gt; P</code> cases by explicitly supplying <code>beta0</code>. It will also be used if inverting the sample covariance matrix fails in <code>N &gt; P</code> cases.
+</p>
+<p>The optional argument <code>beta0</code> can be supplied to <code>mcmc_IMIFA</code> via the control function <code>mixfaControl</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Keefe Murphy - &lt;<a href="mailto:keefe.murphy@mu.ie">keefe.murphy@mu.ie</a>&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Murphy, K., Viroli, C., and Gormley, I. C. (2020) Infinite mixtures of infinite factor analysers, <em>Bayesian Analysis</em>, 15(3): 937-963. &lt;<a href="https://doi.org/10.1214/19-BA1179">doi:10.1214/19-BA1179</a>&gt;.
+</p>
+<p>Fruwirth-Schnatter, S. and Lopes, H. F. (2010). Parsimonious Bayesian factor analysis when the number of factors is unknown, <em>Technical Report</em>. The University of Chicago Booth School of Business.
+</p>
+<p>Fruwirth-Schnatter, S. and Lopes, H. F. (2018). Sparse Bayesian factor analysis when the number of factors is unknown, <em>to appear</em>. &lt;<a href="https://arxiv.org/abs/1804.04231">arXiv:1804.04231</a>&gt;.
+</p>
+<p>Tipping, M. E. and Bishop, C. M. (1999). Probabilistic principal component analysis, <em>Journal of the Royal Statistical Society: Series B (Statistical Methodology)</em>, 61(3): 611-622.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>mcmc_IMIFA</code>, <code>mixfaControl</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(olive)
+olive2  &lt;- olive[,-(1:2)]
+shape   &lt;- 2.5
+(scale1 &lt;- psi_hyper(shape=shape, dat=olive2))
+
+# Try again with scaled data
+olive_S &lt;- scale(olive2, center=TRUE, scale=TRUE)
+
+# Use the inverse of the sample covariance matrix
+(scale2 &lt;- psi_hyper(shape=shape, dat=olive_S))
+
+# Use the estimated inverse covariance matrix
+(scale3 &lt;- psi_hyper(shape=shape, dat=olive_S, beta0=3))
+
+# In the normalised example, the mean uniquenesses (given by scale/(shape - 1)),
+# can be interpreted as the prior proportion of the variance that is idiosyncratic
+(prop1   &lt;- scale1/(shape - 1))
+(prop2   &lt;- scale2/(shape - 1))
+</code></pre>
+
+
+</div>

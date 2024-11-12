@@ -1,0 +1,133 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>as_rcpp_simplextree</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Coerce objects to class 'Rcpp_SimplexTree'</h2>
+
+<h3>Description</h3>
+
+<p>Coerce objects to 'Rcpp_SimplexTree' objects, as implemented in
+the simplextree package.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">as_rcpp_simplextree(x, ...)
+
+## Default S3 method:
+as_rcpp_simplextree(x, ...)
+
+## S3 method for class 'Rcpp_SimplexTree'
+as_rcpp_simplextree(x, ...)
+
+## S3 method for class 'gudhi.simplex_tree.SimplexTree'
+as_rcpp_simplextree(x, ...)
+
+## S3 method for class 'igraph'
+as_rcpp_simplextree(x, index = NULL, ...)
+
+## S3 method for class 'network'
+as_rcpp_simplextree(x, index = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An R object to be coerced. See Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments passed to methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>index</code></td>
+<td>
+<p>Integer-valued vertex attribute to be used as 0-simplex indices.
+Ignored if <code>NULL</code> (the default).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>as_rcpp_simplextree()</code> is a generic function with specific methods for
+different simplicial complex S3 classes. It returns an object of class
+'Rcpp_SimplexTree', which is an Rcpp Module that exposes an instance of a C++ instance of a simplex
+tree.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An instance of a simplex tree, exposed as an Rcpp Module with class
+'Rcpp_SimplexTree'.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">if (requireNamespace("TDA", quietly = TRUE)) {
+  # convert a TDA filtration object
+  t &lt;- 2 * pi * c(0, 1, 3, 6) / 7
+  rf &lt;- TDA::ripsFiltration(
+    cbind(x = cos(t), y = sin(t)),
+    maxdimension = 2L, maxscale = 1.7
+  )
+  print(rf$cmplx)
+  st_rf &lt;- as_rcpp_simplextree(rf)
+  print(st_rf)
+  st_rf2 &lt;- as_rcpp_simplextree(rf$cmplx)
+  print(st_rf2)
+}
+
+## Not run: 
+
+if (requireNamespace("reticulate", quietly = TRUE)) {
+  # convert a Python GUDHI simplex tree
+  gd &lt;- reticulate::import("gudhi")
+  gd_st &lt;- gd$SimplexTree()
+  for (s in list(3:5, 5:6, 8)) gd_st$insert(as.list(s))
+  st_gd &lt;- as_rcpp_simplextree(gd_st)
+  st_gd$as_list()
+}
+
+## End(Not run)
+
+if (requireNamespace("igraph", quietly = TRUE)) {
+  # convert an igraph object
+  ig &lt;- igraph::graph(c(1,2, 2,3, 1,3, 3,4))
+  print(ig)
+  st_ig &lt;- as_rcpp_simplextree(ig)
+  print(st_ig)
+  
+  # specify 0-simplex indices
+  set.seed(0L)
+  ig &lt;- igraph::set_vertex_attr(ig, "id", value = sample(igraph::vcount(ig)) + 1L)
+  igraph::V(ig)$id
+  igraph::as_edgelist(ig)
+  st_ig &lt;- as_rcpp_simplextree(ig, index = "id")
+  st_ig$vertices
+  st_ig$edges
+}
+
+if (requireNamespace("network", quietly = TRUE)) {
+  # convert a network object
+  el &lt;- data.frame(tails = c(1, 2, 1, 3), heads = c(2, 3, 3, 4))
+  nw &lt;- network::network.edgelist(el, network::network.initialize(4))
+  print(nw)
+  st_nw &lt;- as_rcpp_simplextree(nw)
+  print(st_nw)
+}
+</code></pre>
+
+
+</div>

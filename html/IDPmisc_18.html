@@ -1,0 +1,126 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ipanel.smooth</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Panelplot for itermplot </h2>
+
+<h3>Description</h3>
+
+<p>An example of a useful panel function for huge datasets</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ipanel.smooth(x, y = NULL, pixs = 1, zmax = NULL,
+              ztransf = function(x) {x},
+              colramp = IDPcolorRamp, col = "black", lwd = 2,
+              span = 2/3, iter = 3, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x,y</code></td>
+<td>
+<p> Numeric vectors of the same length. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pixs</code></td>
+<td>
+<p> Size of pixel in x- and y-direction in [mm] on the
+plotting device. When x and y are numeric, pixels are square.  When x
+and y are factors, pixels are no longer square.  The pixels are
+enlarged in x-direction. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zmax</code></td>
+<td>
+<p> Maximum number of counts per Pixel in the plot. When
+NULL, the density in the scatter plot is encoded from 0 pixel to
+maximum number of counts observed.  zmax must be equal or larger than
+maximum number of counts found. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ztransf</code></td>
+<td>
+<p> Function to transform the number of counts per pixel,
+which will be mapped by the function in <code>colramp</code> to well
+defined colors.  The user has to make sure that the transformed
+density lies in the range [0,zmax], where zmax is any positive
+number (&gt;=2).  For examples see <code>ipairs</code> and
+<code>ilagplot</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colramp</code></td>
+<td>
+<p> Color ramp to encode the number of counts within
+a pixel by color. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col,lwd</code></td>
+<td>
+<p> Color and line width of the “smoothed curve”. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>span</code></td>
+<td>
+<p> the smoother span. This gives the proportion of points in
+the plot which influence the smooth at each value. Larger values
+give more smoothness. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter</code></td>
+<td>
+<p> The number of robustifying iterations which should be
+performed. Using smaller values of iter will make lowess run
+faster. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> Other graphical parameters as arguments to the
+<code>lines function. </code></p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p> Rene Locher </p>
+
+
+<h3>See Also</h3>
+
+ <p><code>lowess</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">r.lm &lt;- lm(Sepal.Length~Sepal.Width+Petal.Length+Petal.Width+Species,
+           data = iris)
+par(mfrow = c(2,2), pty = "s")
+itermplot(r.lm, se = TRUE, partial.res = TRUE, smooth = ipanel.smooth,
+          lwd.smth = 3, pixs = 2, ask = FALSE)
+
+if (require(SwissAir)) {
+  par(mfrow = c(1,1))
+  dat &lt;- log(AirQual[,c("ad.O3", "ad.WS")])
+  pairs(dat,
+        panel = ipanel.smooth)
+} else print("Package SwissAir is not available")
+
+</code></pre>
+
+
+</div>

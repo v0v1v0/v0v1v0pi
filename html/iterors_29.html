@@ -1,0 +1,113 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ireadBin</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create an iterator to read binary data from a connection</h2>
+
+<h3>Description</h3>
+
+<p>Create an iterator to read binary data from a connection.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ireadBin(
+  con,
+  what = "raw",
+  n = 1L,
+  size = NA_integer_,
+  signed = TRUE,
+  endian = .Platform$endian,
+  ipos = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>con</code></td>
+<td>
+<p>A connection object or a character string naming a file or a raw
+vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>what</code></td>
+<td>
+<p>Either an object whose mode will give the mode of the vector to
+be read, or a character vector of length one describing the mode: one of
+“numeric”, “double”, “integer”, “int”,
+“logical”, “complex”, “character”, “raw”.
+Unlike <code>readBin</code>, the default value is “raw”.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>integer.  The (maximal) number of records to be read each time the
+iterator is called.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size</code></td>
+<td>
+<p>integer.  The number of bytes per element in the byte stream.
+The default, ‘NA_integer_’, uses the natural size.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>signed</code></td>
+<td>
+<p>logical.  Only used for integers of sizes 1 and 2, when it
+determines if the quantity on file should be regarded as a signed or
+unsigned integer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>endian</code></td>
+<td>
+<p>The endian-ness ('“big”' or '“little”') of the
+target system for the file.  Using '“swap”' will force swapping
+endian-ness.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ipos</code></td>
+<td>
+<p>iterable.  If not <code>NULL</code>, values from this iterable will be
+used to do a seek on the file before calling readBin.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Originally from the <code>itertools</code> package.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An iteror reading binary chunks from the connection.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+zz &lt;- file("testbin", "wb")
+writeBin(1:100, zz)
+close(zz)
+
+it &lt;- ihasNext(ireadBin("testbin", integer(), 10))
+repeat print(nextOr(it, break))
+unlink("testbin")
+
+</code></pre>
+
+
+</div>

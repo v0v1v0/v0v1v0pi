@@ -1,0 +1,395 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>multiple</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Locally Multiple Objective Optimal Designs for the 4-Parameter Hill Model</h2>
+
+<h3>Description</h3>
+
+<p>The 4-parameter Hill model is of the form
+</p>
+<p style="text-align: center;"><code class="reqn">f(D) = c + \frac{(d-c)(\frac{D}{a})^b}{1+(\frac{D}{a})^b} + \epsilon,</code>
+</p>
+
+<p>where <code class="reqn">\epsilon \sim N(0, \sigma^2)</code>,
+<code class="reqn">D</code> is the dose level and the predictor,
+<code class="reqn">a</code> is the ED50,
+<code class="reqn">d</code> is the upper limit of response,
+<code class="reqn">c</code> is the lower limit of response and
+<code class="reqn">b</code> denotes the Hill constant that
+control the flexibility in the slope of the response curve.<br>
+Sometimes, the Hill model is re-parameterized and written as
+</p>
+<p style="text-align: center;"><code class="reqn">f(x) = \frac{\theta_1}{1 + exp(\theta_2 x + \theta_3)} + \theta_4,</code>
+</p>
+
+<p>where <code class="reqn">\theta_1 = d - c</code>, <code class="reqn">\theta_2 = - b</code>,
+<code class="reqn">\theta_3 = b\log(a)</code>, <code class="reqn">\theta_4 = c</code>, <code class="reqn">\theta_1 &gt; 0</code>,
+<code class="reqn">\theta_2 \neq 0</code>, and <code class="reqn">-\infty &lt; ED50 &lt; \infty</code>,
+where <code class="reqn">x = log(D) \in [-M, M]</code>
+for some sufficiently large value of <code class="reqn">M</code>.
+The new form is sometimes called  4-parameter logistic model.<br>
+The function <code>multiple</code> finds locally multiple-objective optimal designs for estimating the model parameters, the ED50, and the MED, simultaneously.
+For more details, see Hyun and  Wong (2015).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">multiple(
+  minDose,
+  maxDose,
+  iter,
+  k,
+  inipars,
+  Hill_par = TRUE,
+  delta,
+  lambda,
+  fimfunc = NULL,
+  ICA.control = list(),
+  sens.control = list(),
+  initial = NULL,
+  tol = sqrt(.Machine$double.xmin),
+  x = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>minDose</code></td>
+<td>
+<p>Minimum dose <code class="reqn">D</code>. For the 4-parameter logistic model, i.e. when <code>Hill_par = FALSE</code>, it is the minimum of <code class="reqn">log(D)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxDose</code></td>
+<td>
+<p>Maximum dose <code class="reqn">D</code>. For the 4-parameter logistic model, i.e. when <code>Hill_par = FALSE</code>, it is the maximum of <code class="reqn">log(D)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter</code></td>
+<td>
+<p>Maximum number of iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>Number of design points. Must be at least equal to the number of model parameters to avoid singularity of the FIM.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inipars</code></td>
+<td>
+<p>A vector of initial estimates for the vector of parameters  <code class="reqn">(a, b, c, d)</code>.
+For the 4-parameter logistic model, i.e. when <code>Hill_par = FALSE</code>,
+it is  a vector of initial estimates for <code class="reqn">(\theta_1, \theta_2,\theta_3, \theta_4)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Hill_par</code></td>
+<td>
+<p>Hill model parameterization? Defaults to <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta</code></td>
+<td>
+<p>Predetermined meaningful value of the minimum effective dose MED.
+When <code class="reqn">\delta &lt; 0 </code>, then <code class="reqn">\theta_2 &gt; 0</code> or when <code class="reqn">\delta &gt; 0</code>, then <code class="reqn">\theta_2 &lt; 0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>A vector of relative importance of each of the three criteria,
+i.e. <code class="reqn">\lambda = (\lambda_1, \lambda_2, \lambda_3)</code>.
+Here <code class="reqn">0 &lt; \lambda_i &lt; 1</code> and  s <code class="reqn">\sum \lambda_i = 1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fimfunc</code></td>
+<td>
+<p>A function. Returns the FIM as a <code>matrix</code>. Required when <code>formula</code> is missing. See 'Details' of <code>minimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ICA.control</code></td>
+<td>
+<p>ICA control parameters. For details, see <code>ICA.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sens.control</code></td>
+<td>
+<p>Control Parameters for Calculating the ELB. For details, see <code>sens.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial</code></td>
+<td>
+<p>A matrix of the  initial design points and weights that will be inserted into the initial solutions (countries) of the algorithm.
+Every row is a design, i.e.  a concatenation of <code>x</code> and <code>w</code>. Will be coerced to a <code>matrix</code> if necessary.  See 'Details' of <code>minimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>Tolerance for finding the general inverse of the Fisher information matrix. Defaults to <code>.Machine$double.xmin</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A vector of candidate design (support) points.
+When is not set to <code>NULL</code> (default),
+the algorithm only finds the optimal weights for the candidate points in  <code>x</code>.
+Should be set when the user has a finite number of candidate design points  and the purpose
+is to find the optimal weight for each of them (when zero, they will be excluded from the design).
+For design points with more than one dimension, see 'Details' of <code>sensminimax</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>When <code class="reqn">\lambda_1 &gt; 0</code>, then the number of support points <code>k</code>
+must at least be four to avoid singularity of the Fisher information matrix.
+</p>
+<p>One can adjust the tuning parameters in <code>ICA.control</code> to set a stopping rule
+based on the general equivalence theorem. See 'Examples' below.
+</p>
+
+
+<h3>Value</h3>
+
+<p>an object of class <code>minimax</code> that is a list including three sub-lists:
+</p>
+
+<dl>
+<dt><code>arg</code></dt>
+<dd>
+<p>A list of design and algorithm parameters.</p>
+</dd>
+<dt><code>evol</code></dt>
+<dd>
+<p>A list of length equal to the number of iterations that stores
+the information about the best design (design with least criterion value)
+of each iteration. <code>evol[[iter]]</code> contains:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+      <code>iter</code>                   </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Iteration number.</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>x</code>                      </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Design points. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>w</code>                      </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Design weights. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>min_cost</code>               </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Value of the criterion for the best imperialist (design).  </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>mean_cost</code>              </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Mean of the criterion values of all the imperialists. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>sens</code>                   </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> An object of class <code>'sensminimax'</code>. See below. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>param</code>                  </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Vector of parameters.</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+    </td>
+</tr>
+</table>
+</dd>
+<dt><code>empires</code></dt>
+<dd>
+<p>A list of all the  empires of the last iteration.</p>
+</dd>
+<dt><code>alg</code></dt>
+<dd>
+<p>A list with following information:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+      <code>nfeval</code>           </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Number of function evaluations.  It does not count the function evaluations from checking the general equivalence theorem.</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>nlocal</code>           </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Number of successful local searches. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>nrevol</code>           </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Number of successful revolutions. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>nimprove</code>         </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Number of successful movements toward the imperialists in the assimilation step. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>convergence</code>      </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Stopped by <code>'maxiter'</code> or <code>'equivalence'</code>?</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+    </td>
+</tr>
+</table>
+</dd>
+<dt><code>method</code></dt>
+<dd>
+<p>A type of optimal designs used.</p>
+</dd>
+<dt><code>design</code></dt>
+<dd>
+<p>Design points and weights at the final iteration.</p>
+</dd>
+<dt><code>out</code></dt>
+<dd>
+<p>A data frame of design points, weights, value of the criterion for the best imperialist (min_cost), and Mean of the criterion values of all the imperialistsat each iteration (mean_cost).</p>
+</dd>
+</dl>
+<p>The list <code>sens</code> contains information about the design verification by the general equivalence theorem. See <code>sensminimax</code> for more details.
+It is given  every <code>ICA.control$checkfreq</code> iterations
+and also the last iteration if   <code>ICA.control$checkfreq &gt;= 0</code>. Otherwise, <code>NULL</code>.
+</p>
+<p><code>param</code> is a vector of parameters that is the global minimum of
+the minimax criterion or the global maximum of the standardized maximin criterion over the parameter space, given  the current <code>x</code>, <code>w</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>This function is NOT appropriate for  finding  c-optimal designs for estimating 'MED' or 'ED50' (single objective optimal designs)
+and  the results may not be stable.
+The reason is that for the c-optimal criterion
+the generalized inverse of the Fisher information matrix
+is not stable and depends
+on the tolerance value (<code>tol</code>).
+</p>
+
+
+<h3>References</h3>
+
+<p>Hyun, S. W., and Wong, W. K. (2015). Multiple-Objective Optimal Designs for Studying the Dose Response Function and Interesting Dose Levels. The international journal of biostatistics, 11(2), 253-271.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>sensmultiple</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># All the examples are available in Hyun and Wong (2015)
+
+#################################
+#  4-parameter logistic model
+# Example 1, Table 3
+#################################
+lam &lt;- c(0.05, 0.05, .90)
+# Initial estimates are derived from Table 1
+# See how the stopping rules are set via 'stop_rul', checkfreq' and 'stoptol'
+Theta1 &lt;- c(1.563, 1.790, 8.442, 0.137)
+res1 &lt;- multiple(minDose = log(.001), maxDose = log(1000),
+                 inipars = Theta1, k = 4, lambda = lam, delta = -1,
+                 Hill_par = FALSE,
+                 iter = 1,
+                 ICA.control = list(rseed = 1366, ncount = 100,
+                                    stop_rule = "equivalence",
+                                    checkfreq = 100, stoptol = .95))
+## Not run: 
+res1 &lt;- update(res1, 1000)
+# stops at iteration 101
+
+## End(Not run)
+
+#################################
+#  4-parameter Hill model
+#################################
+## initial estimates for the parameters of Hill model:
+a &lt;- 0.008949  # ED50
+b &lt;- -1.79 # Hill constant
+c &lt;- 0.137 # lower limit
+d &lt;- 1.7 # upper limit
+# D belongs to c(.001, 1000) ## dose in mg
+## the vector of Hill parameters are now c(a, b, c, d)
+## Not run: 
+res2 &lt;- multiple(minDose = .001, maxDose = 1000,
+                 inipars =  c(a, b, c, d),
+                 Hill_par = TRUE, k = 4, lambda = lam,
+                 delta = -1, iter = 1000,
+                 ICA.control = list(rseed = 1366, ncount = 100,
+                                    stop_rule = "equivalence",
+                                    checkfreq = 100, stoptol = .95))
+# stops at iteration 100
+
+## End(Not run)
+
+
+
+# use x argument to provide fix number of  dose levels.
+# In this case, the optimization is only over weights
+## Not run: 
+res3 &lt;- multiple(minDose = log(.001), maxDose = log(1000),
+                 inipars = Theta1, k = 4, lambda = lam, delta = -1,
+                 iter = 300,
+                 Hill_par = FALSE,
+                 x = c(-6.90, -4.66, -3.93, 3.61),
+                 ICA.control = list(rseed = 1366))
+res3$evol[[300]]$w
+# if the user provide the desugn points via x, there is no guarantee
+#   that the resulted design is optimal. It only provides the optimal weights given
+#   the x points of the design.
+plot(res3)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

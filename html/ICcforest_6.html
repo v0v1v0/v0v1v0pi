@@ -1,0 +1,136 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>tuneICRF</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Tune mtry to the optimal value with respect to out-of-bag error for an ICcforest model</h2>
+
+<h3>Description</h3>
+
+<p>Starting with the default value of mtry, search for the optimal value 
+(with respect to Out-of-Bag error estimate) of mtry for ICcforest.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">tuneICRF(
+  formula,
+  data,
+  mtryStart = NULL,
+  stepFactor = 1.5,
+  ntreeTry = 100L,
+  control = partykit::ctree_control(teststat = "quad", testtype = "Univ", mincriterion =
+    0, saveinfo = FALSE, minsplit = nrow(data) * 0.15, minbucket = nrow(data) * 0.06),
+  suppress = TRUE,
+  trace = TRUE,
+  plot = FALSE,
+  doBest = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>a formula object, with the response being a <code>Surv</code> 
+object, with form 
+</p>
+<p><code>Surv(time1, time2, type="interval2")</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a data frame containing the variables named in <code>Formula</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mtryStart</code></td>
+<td>
+<p>starting value of <code>mtry</code>; default is <code>sqrt(nvar)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stepFactor</code></td>
+<td>
+<p>at each iteration, <code>mtry</code> is inflated (or deflated) by this value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ntreeTry</code></td>
+<td>
+<p>number of trees used at the tuning step.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>a list with control parameters, see <code>cforest</code>. 
+The default values correspond to those of the default values used by <code>ICcforest</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>suppress</code></td>
+<td>
+<p>a logical specifying whether the messages from <code>getFitEsts</code> 
+are suppressed. If <code>FALSE</code>, the messages are printed. <code>suppress = TRUE</code> is set by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trace</code></td>
+<td>
+<p>whether to print the progress of the search. <code>trace = TRUE</code> is set by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>whether to plot the out-of-bag error as a function of <code>mtry</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>doBest</code></td>
+<td>
+<p>whether to run an ICcforest using the optimal mtry found.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>If <code>doBest=FALSE</code> (default), this returns the optimal mtry value of those searched.
+</p>
+<p>If <code>doBest=TRUE</code>, this returns the ICcforest object produced with the optimal mtry.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>sbrier_IC</code> for evaluation of model fit for interval-censored data 
+when searching for the optimal value of <code>mtry</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">### Example with dataset tandmob2
+library(icenReg)
+data(miceData)
+
+## For ICcforest to run, Inf should be set to be a large number, for example, 9999999.
+miceData$u[miceData$u == Inf] &lt;- 9999999.
+
+## Create a new variable to be selected from
+miceData$new = rep(1:4)
+
+## Tune mtry 
+mtryTune &lt;- tuneICRF(Surv(l, u, type = "interval2") ~ grp + new, data = miceData)
+
+</code></pre>
+
+
+</div>

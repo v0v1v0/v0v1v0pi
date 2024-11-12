@@ -1,0 +1,189 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>DepNHPPqueue</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generating   dependent point processes by a tandem queueing network</h2>
+
+<h3>Description</h3>
+
+<p>It  generates <code class="reqn">d</code> dependent  (homogeneous or nonhomogeneous)  Poisson processes  
+using  <code class="reqn">d-1</code>  queues in tandem.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">DepNHPPqueue(lambda, d,   T=NULL,  nEv=NULL,  nserv="infty", Clambda=TRUE,
+	            ddist='exp',argd=1,dplot=TRUE, fixed.seed=NULL, ...)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>Numeric value or vector. Intensity  of  the first Poisson process. If  its length is 1,
+homogeneous processes are generated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p>Integer. Number of dependent processes to be generated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>T</code></td>
+<td>
+<p>Optional. Positive integer. Length of the period where the point are  going to be generated. 
+Only used in homogeneous processes (if lambda is a constant).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nEv</code></td>
+<td>
+<p>Optional. Positive integer. Number of points to be generated in the processs. Only used in homogeneous processes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Clambda</code></td>
+<td>
+<p>Optional logical  flag. Only used in nonhomogeneous processes. If it is TRUE, the intensity vectors of the generated point 
+processes is calculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nserv</code></td>
+<td>
+<p>Optional.  Number of servers in the queue system; only two  values are possible: 1 or "infty" if the  number of servers is infinity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ddist</code></td>
+<td>
+<p>Character string.  Identification of the probability distribution of the  serving time. It must be one 
+of the  names of the probability distributions available in the stats package, 
+see <code>Distributions</code>; for example "gamma", "geom", etc.</p>
+</td>
+</tr>
+</table>
+<p>. 
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>argd</code></td>
+<td>
+<p>Optional. A  value, vector or a matrix (with d-1 rows) containing the arguments to be used in the probability distribution  in <code>ddist</code>; see Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dplot</code></td>
+<td>
+<p>Optional. A logical flag. If it is TRUE,  the  marginal processes  are plotted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed.seed</code></td>
+<td>
+<p>Optional. An integer or NULL. Value used to set the seed 
+in random generation processes; if it is NULL, a random seed is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments to  be passed to the function <code>plot</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The generation algorithm is described in Cebrian et al. (2020).
+The generation of dependent homogeneous Poisson processes   can be  based on  a  M\ M\ 1 or a M\ M \ <code class="reqn">\infty</code>  
+queue, and the intensity of each output process is equal to the intensity of the input process, see Burke(1956).
+The generation of dependent nonhomogeneous Poisson processes  is based on  a  M(t)\ G \ <code class="reqn">\infty</code>  queue 
+and the intensity of each output process is equal to the convolution  <code class="reqn">\lambda_{out}(t)=\lambda_{inp}(t)*f(t)</code>,  
+where  <code class="reqn">\lambda_{inp}(t)</code> is the input intensity and <code class="reqn">f(t)</code>  the density function of the
+service time, see Keilson and Servi (1994).
+</p>
+<p>In the homogeneous processes, the argument <code class="reqn">\lambda</code> can be  an integer or
+a vector with equal values. In the first case,  the argument <code>nEv</code> or <code>T</code> must be specified;  in the second,
+the length of the vector determines the length of period where the points are 
+generated (as in the nonhomogeneous case).
+</p>
+<p>The  serving times in all the queues must have a probability distribution in the same family (<code>ddist</code>) 
+but the parameters of that distribution can be different in each queue. If the parameters are  the same in all the queues, 
+argument <code>argd</code>  is a numeric value (if there is only one parameter) or a  vector; if the parameters are different in each
+queue,  <code>argd</code>  must be a matrix with (d-1) rows, even if there is only one parameter it must be  a (d-1) <code class="reqn">\times</code> 1 matrix.
+</p>
+<p>The occurrence times  in each  output process are sorted, so that the output time in row i does not always 
+correspond to the input time in the same row.  The number of points in the output process may be lower than  in the input (if some outputs 
+have not been observed).
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with elements
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>posNH</code></td>
+<td>
+<p>A list of  <code class="reqn">d</code> vectors,  containing the occurrence points in each point process. The name of the 
+elements in the list are N1, N2,..., Nd.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambdaM</code></td>
+<td>
+<p>A <code class="reqn">d</code>-column matrix containing the  intensity vectors of  the <code class="reqn">d</code> dependent processes,  in nonhomogeneous processes and
+if <code>Clambda=TRUE</code>. Otherwise, the input argument <code>lambda</code>.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Burke, P. J. (1956). The Output of a Queuing System. <em>Operations Research</em>. 4(6), 699-704.
+</p>
+<p>Cebrian, A.C., Abaurrea, J.  and Asin, J. (2020).   Testing  independence between two  point processes in time.
+<em>Journal of Simulation and Computational Statistics</em>
+</p>
+<p>Keilson, J. Servi, L.D. (1994). Networks of nonhomogeneous
+M G <code class="reqn">\infty</code>. <em>J. Appl. Probab.</em>, 31, 157-68.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>IndNHPP</code>, <code>DepNHNeyScot</code>, 
+<code>DepNHPPMarked</code>, <code>DepNHCPSP</code>  </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#Generation of 3 dependent HPPs, with  one server  and exponential service time equal to 10
+aux&lt;-DepNHPPqueue(lambda=0.05, d=3,  nEv=25,fixed.seed=123,nserv=1, argd=0.1)
+aux$posNH
+
+#Generation of 4 dependent NHPPs, with infinity servers and different mean service times
+#at each queue
+lambda&lt;-runif(200,0,0.1)
+aux&lt;-DepNHPPqueue(lambda=lambda, d=4, fixed.seed=123, argd=cbind(c(0.1, 0.3, 0.1)))
+aux$posNH
+
+
+#Generation of 3 dependent NHPPs, with infinity servers and  Gamma service times 
+#with different parameters at each queue
+lambda&lt;-runif(200,0,0.1)
+aux&lt;-DepNHPPqueue(lambda=lambda, d=3, ddist='gamma',fixed.seed=123, 
+                  argd=cbind(c(0.1, 0.3), c(1,2)))
+aux$posNH
+
+</code></pre>
+
+
+</div>

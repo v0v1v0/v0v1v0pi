@@ -1,0 +1,223 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bb.mle</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Maximum likelihood estimate for beta binomial distributions</h2>
+
+<h3>Description</h3>
+
+<p>calculate maximum likelihood estimate and the corresponding log likelihood value for beta binomial,
+beta negative binomial, negative binomial and Poisson distributions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">bb.mle(x, n, alpha1, alpha2, lowerbound = 0.01, upperbound = 10000)
+
+bnb.mle(x, r, alpha1, alpha2, lowerbound = 0.01, upperbound = 10000)
+
+nb.mle(x, r, p, lowerbound = 0.01, upperbound = 10000)
+
+poisson.mle(x)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A vector of count data. Should be non-negative integers.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>An initial value of the number of trials. Must be a positive number, but not required to be an integer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha1</code></td>
+<td>
+<p>An initial value for the first shape parameter of beta distribution. Should be a positive number.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha2</code></td>
+<td>
+<p>An initial value for the second shape parameter of beta distribution. Should be a positive number.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lowerbound</code></td>
+<td>
+<p>A lower searching bound used in the optimization of likelihood function. Should be a small positive number.
+The default is 1e-2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upperbound</code></td>
+<td>
+<p>An upper searching bound used in the optimization of likelihood function. Should be a large positive number.
+The default is 1e4.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>An initial value of the number of success before which m failures are observed, where m is the element of x.
+Must be a positive number, but not required to be an integer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>An initial value of the probability of success, should be a positive value within (0,1).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>bb.mle</code>, <code>bnb.mle</code>, <code>nb.mle</code> and <code>poisson.mle</code> calculate the maximum likelihood estimate of beta binomial,
+beta negative binomial, negative binomial and Poisson distributions, respectively.
+</p>
+<p>Please NOTE that the arguments in the four functions are NOT CHECKED AT ALL! The user must be aware of their inputs to avoid
+getting suspicious results.
+</p>
+<p>Suppose that <code class="reqn">X</code> is a random count variable that only takes non-negative values. If <code class="reqn">p</code> has a prior distribution
+<code class="reqn">beta(alpha1,alpha2)</code> and <code class="reqn">X</code> follows a binomial distribution <code class="reqn">b(n,p)</code>, then <code class="reqn">X</code> follows the beta binomial
+distribution with
+</p>
+<p><code class="reqn">P(X=k)=C(n,k)Beta(k+alpha1,n-k+alpha2)/Beta(alpha1,alpha2)</code>,
+</p>
+<p>where <code class="reqn">C(,)</code> is the combination function, <code class="reqn">Beta(,)</code> is the beta function and <code class="reqn">beta(,)</code> stands for the beta distribution.
+</p>
+<p>If <code class="reqn">X</code> stands for the number of failures observed before the <code class="reqn">r</code>th success, the probability of <code class="reqn">X</code> taking the
+value <code class="reqn">k</code> under the negative binomial distribution equals
+</p>
+<p><code class="reqn">P(X=k)=C(k+r-1,k)p^r(1-p)^k</code>,
+</p>
+<p>As in beta binomial distribution, assume the prior distribution of <code class="reqn">p</code> is <code class="reqn">beta(alpha1,alpha2)</code>. <code class="reqn">X</code> follows
+a beta negative binomial distribution if <code class="reqn">X</code> follows a negative binomial distribution with parameters <code class="reqn">r</code> and <code class="reqn">p</code>.
+The probability density function of a beta negative binomial distribution is defined as:
+</p>
+<p><code class="reqn">P(X=k)=\Gamma(r+k)Beta(r+alpha1,k+alpha2)/Beta(alpha1,alpha2)/\Gamma(r)/k!</code>,
+</p>
+<p>where <code class="reqn">\Gamma</code> represents the Gamma function.
+</p>
+<p>With the only parameter <code class="reqn">lambda</code>, the probability density function of a Poisson distribution is
+</p>
+<p><code class="reqn">P(X=k)=lambda^k exp(-lambda)/k!</code>
+</p>
+<p>The maximum likelihood estimate of all four distributions can be derived by minimizing the corresponding negative log likelihood
+function. It is easy to deduce the sample estimate of <code class="reqn">lambda</code> which is equal to the sample mean. However, it is not so
+straightforward to solve the optimization problems of the other three distributions. Thus, we adopt the optimization
+algorithm "L-BFGS-B" by calling R basic
+function <code>optim</code>. Lower and upper bounds on the unknown parameters are required for the algorithm "L-BFGS-B", which are
+determined by the arguments <code>lowerbound</code> and <code>upperbound</code>. But note that for the estimate of <code class="reqn">p</code>, the upper bound
+for searching is essentially <code>1-lowerbound</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A row vector containing the maximum likelihood estimate of unknown parameters and the corresponding value of log likelihood.
+</p>
+<p>With <code class="reqn">bb.mle</code>, the following values are returned:
+</p>
+
+<ul>
+<li>
+<p>n: the maximum likelihood estimate of n.
+</p>
+</li>
+<li>
+<p>alpha1: the maximum likelihood estimate of alpha1.
+</p>
+</li>
+<li>
+<p>alpha2: the maximum likelihood estimate of alpha2.
+</p>
+</li>
+<li>
+<p>loglik: the value of log likelihood with maximum likelihood estimates plugged-in.
+</p>
+</li>
+</ul>
+<p>With <code class="reqn">bnb.mle</code>, the following values are returned:
+</p>
+
+<ul>
+<li>
+<p>r: the maximum likelihood estimate of r.
+</p>
+</li>
+<li>
+<p>alpha1: the maximum likelihood estimate of alpha1.
+</p>
+</li>
+<li>
+<p>alpha2: the maximum likelihood estimate of alpha2.
+</p>
+</li>
+<li>
+<p>loglik: the value of log likelihood with maximum likelihood estimates plugged-in.
+</p>
+</li>
+</ul>
+<p>With <code class="reqn">nb.mle</code>, the following values are returned:
+</p>
+
+<ul>
+<li>
+<p>r: the maximum likelihood estimate of r.
+</p>
+</li>
+<li>
+<p>p: the maximum likelihood estimate of p.
+</p>
+</li>
+<li>
+<p>loglik: the value of log likelihood with maximum likelihood estimates plugged-in.
+</p>
+</li>
+</ul>
+<p>With <code class="reqn">poisson.mle</code>, the following values are returned:
+</p>
+
+<ul>
+<li>
+<p>lambda: the maximum likelihood estimate of lambda.
+</p>
+</li>
+<li>
+<p>loglik: the value of log likelihood with maximum likelihood estimate plugged-in.
+</p>
+</li>
+</ul>
+<h3>Reference</h3>
+
+
+<ul><li>
+<p>H. Aldirawi, J. Yang, A. A. Metwally (2019). Identifying Appropriate Probabilistic Models for Sparse Discrete Omics Data,
+accepted for publication in 2019 IEEE EMBS International Conference on Biomedical &amp; Health Informatics (BHI).
+</p>
+</li></ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">x=extraDistr::rbbinom(2000,12,2,4)
+bb.mle(x,3,1,1)
+x=extraDistr::rbnbinom(2000,8,3,5)
+bnb.mle(x, 3.3, 1, 1)
+x=stats::rnbinom(2000,size=5,prob=0.3)
+nb.mle(x, 7, 0.5)
+x=stats::rpois(2000,7)
+poisson.mle(x)
+</code></pre>
+
+
+</div>

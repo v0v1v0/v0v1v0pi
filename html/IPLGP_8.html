@@ -1,0 +1,321 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>simu.GDO</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate Progeny with GD-O Strategy</h2>
+
+<h3>Description</h3>
+
+<p>Identify parental lines based on GD-O strategy and simulate their offsprings.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">simu.GDO(
+  fittedA.t,
+  fittedD.t = NULL,
+  fittedmu.t = NULL,
+  geno.t,
+  marker,
+  geno.c = NULL,
+  npl = NULL,
+  better.c = FALSE,
+  weight = NULL,
+  direction = NULL,
+  outcross = FALSE,
+  nprog = 50,
+  nsele = NULL,
+  ngen = 10,
+  nrep = 30,
+  cri = 10000,
+  console = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fittedA.t</code></td>
+<td>
+<p>matrix. An n*t matrix denotes the fitted values of each traits
+of the training population. The missing value must have been already imputed.
+If outcross is set to be TRUE, this argument must be the additive effect part
+of fitted values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fittedD.t</code></td>
+<td>
+<p>matrix. An n*t matrix denotes the dominance effect part of
+fitted values when outcross is set to be TRUE. The missing value must have been
+already imputed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fittedmu.t</code></td>
+<td>
+<p>numeric or vector. A p*1 vector denote the average value of
+fitted values when outcross is set to be TRUE. The length must be the same as
+the number of traits.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>geno.t</code></td>
+<td>
+<p>matrix. An n*p matrix denotes the marker score matrix of the
+training population. The markers must be coded as 1, 0, or -1 for alleles
+AA, Aa, or aa. The missing value must have been already imputed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>marker</code></td>
+<td>
+<p>matrix. A p*2 matrix whose first column indicates the chromosome
+number to which a marker belongs; and second column indicates the position of
+the marker in centi-Morgan (cM).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>geno.c</code></td>
+<td>
+<p>matrix. An nc*p matrix denotes the marker score matrix of the
+candidate population with nc individuals and p markers. It should be pure lines
+and markers must be coded as 1, or -1 for alleles AA, or aa. The missing value
+must have been already imputed. If geno.c is set to be NULL, the candidate
+population is exactly the training population.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>npl</code></td>
+<td>
+<p>integer. An integer indicates the number of individuals who will
+be chosen as the parental lines. If npl = NULL, it will be 4 times the number
+of traits.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>better.c</code></td>
+<td>
+<p>logical. A logical variable, if better.c is set to be TRUE,
+the candidate individuals with GEBVs better than average for all the target
+traits will comprise the candidate set. Otherwise, all the candidate
+individuals will comprise the candidate set.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weight</code></td>
+<td>
+<p>vector. A vector with length t indicates the weights of target
+traits in selection index. If weight is set to be NULL, the equal weight will
+be assigned to all the target traits. The weights should be a positive number.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>direction</code></td>
+<td>
+<p>vector. A vector with length t indicates the selecting
+directions for target traits. The elements of direction are Inf, or -Inf
+representing the rule that the larger the better; or the smaller the better.
+Or if the element is a number, it will select the individuals with the trait
+value close to the number. If direction is set to be NULL, the selecting
+direction will be the larger the better for all trait.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outcross</code></td>
+<td>
+<p>logical. A logical variable, if outcross is set to be TRUE,
+the crop is regarded as an outcross crop. The kinship matrix of dominance
+effects are also considered in the model, and crossing and selection will be
+performed in F1 generation. The detail can be seen in the references.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nprog</code></td>
+<td>
+<p>integer. An integer indicates the number of progenies which
+will be produced for each of the best individuals at every generation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsele</code></td>
+<td>
+<p>integer. An integer indicates the number of the best individuals
+which will be selected at each generation. If nsele is set to be NULL, the
+number will be the same as the number of F1 individuals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ngen</code></td>
+<td>
+<p>integer. An integer indicates the number of generations in the
+simulation process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nrep</code></td>
+<td>
+<p>integer. An integer indicates the number of repetitions in the
+simulation process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cri</code></td>
+<td>
+<p>integer. An integer indicates the stopping criterion, note that
+cri &lt; 1e+06. The genetic algorithm will stop if the number of iterations
+reaches cri.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>console</code></td>
+<td>
+<p>logical. A logical variable, if console is set to be TRUE,
+the simulation process will be shown in the R console.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>The GD-O strategy.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weight</code></td>
+<td>
+<p>The weights of target traits in selection index.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>direction</code></td>
+<td>
+<p>The selecting directions of target traits in selection index.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu</code></td>
+<td>
+<p>The mean vector of target traits.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sd</code></td>
+<td>
+<p>The standard deviation vector of target traits.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>GEBV.value</code></td>
+<td>
+<p>The GEBVs of target traits in each generation and each
+repetition.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parental.lines</code></td>
+<td>
+<p>The IDs and D-score of parental lines selected in
+each repetition.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>suggested.subset</code></td>
+<td>
+<p>The most frequently selected parental lines by this
+strategy.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>The function output.best and output.gain can be used to summarize the result.
+</p>
+<p>The fitted value data in the input data can be obtained by the function
+GBLUP.fit and mmer, that can be seen in the Examples shown below.
+</p>
+
+
+<h3>References</h3>
+
+<p>Chung PY, Liao CT. 2020. Identification of superior parental lines for
+biparental crossing via genomic prediction. PLoS ONE 15(12):e0243159.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>mmer</code>
+<code>GBLUP.fit</code>
+<code>GA.Dscore</code>
+<code>simu.gamete</code>
+<code>simu.GDO</code>
+<code>simu.GEBVGD</code>
+<code>output.best</code>
+<code>output.gain</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># generate simulated data
+set.seed(6000)
+geno.test &lt;- matrix(sample(c(1, -1), 200, replace = TRUE), 10, 20)
+t1 &lt;- 5*geno.test[,3]+3*geno.test[,7]-geno.test[,11]+rnorm(10,30,10)
+t2 &lt;- 3*geno.test[,3]+geno.test[,12]-2*geno.test[,18]+rnorm(10,10,5)
+t3 &lt;- NULL
+t4 &lt;- NULL
+t5 &lt;- NULL
+marker.test &lt;- cbind(rep(1:2, each=10), rep(seq(0, 90, 10), 2))
+fit &lt;- GBLUP.fit(t1, t2, t3, t4, t5, geno = geno.test)
+fitvalue &lt;- fit$fitted.value
+
+geno.candidate &lt;- matrix(sample(c(1,-1), 300, replace = TRUE), 15, 20)
+
+# run and output
+result &lt;- simu.GDO(fitvalue, geno.t = geno.test, marker = marker.test,
+geno.c = geno.candidate, nprog = 5, nsele = 10, ngen = 5, nrep = 5, cri = 250)
+result$suggested.subset
+
+
+
+# other method: use mmer to obtain the fitted value
+## Not run: 
+set.seed(6000)
+geno.test &lt;- matrix(sample(c(1, -1), 200, replace = TRUE), 10, 20)
+t1 &lt;- 5*geno.test[,3]+3*geno.test[,7]-geno.test[,11]+rnorm(10,30,10)
+t2 &lt;- 3*geno.test[,3]+geno.test[,12]-2*geno.test[,18]+rnorm(10,10,5)
+phe &lt;- cbind(t1, t2)
+nt &lt;- ncol(phe)
+marker.test &lt;- cbind(rep(1:2, each=10), rep(seq(0, 90, 10), 2))
+rownames(geno.test) &lt;- 1:nrow(geno.test)
+id &lt;- rownames(geno.test)
+K0 &lt;- geno.test%*%t(geno.test)/ncol(geno.test)
+
+dat &lt;- data.frame(id, phe)
+fit0 &lt;- sommer::mmer(cbind(t1, t2)~1,
+      random = ~sommer::vsr(id, Gu = K0, Gtc = sommer::unsm(nt)),
+      rcov = ~sommer::vsr(units, Gtc = sommer::unsm(nt)),
+      data = dat,
+      tolParInv = 0.1)
+
+u0 &lt;- fit0$U$`u:id`
+fit &lt;- matrix(unlist(u0), ncol = nt)
+colnames(fit) &lt;- names(u0)
+
+fit &lt;- fit+matrix(fit0$fitted[1,], nrow(fit), nt, byrow = TRUE)
+fitvalue &lt;- fit[order(as.numeric(names((u0[[1]])))),]
+
+## End(Not run)
+</code></pre>
+
+
+</div>

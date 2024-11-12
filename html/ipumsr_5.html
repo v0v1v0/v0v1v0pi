@@ -1,0 +1,268 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>add_to_extract.nhgis_extract</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Add values to an existing IPUMS NHGIS extract definition</h2>
+
+<h3>Description</h3>
+
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental"><img src="../help/figures/lifecycle-experimental.svg" alt="[Experimental]"></a>
+</p>
+<p>Add new values to an IPUMS NHGIS extract definition.
+All fields are optional, and if omitted, will be unchanged.
+Supplying a value for fields that take a single value, such as
+<code>description</code> and <code>data_format</code>, will replace the existing value with
+the supplied value.
+</p>
+<p>This function is marked as experimental because it is typically not the best
+option for maintaining reproducible extract definitions and may be retired
+in the future. For reproducibility, users should strive to build extract
+definitions with <code>define_extract_nhgis()</code>.
+</p>
+<p>If you have a complicated extract definition to revise, but do not have
+the original extract definition code that created it, we suggest that you
+save the revised extract as a JSON file with <code>save_extract_as_json()</code>. This
+will create a stable version of the extract definition that
+can be used in the future as needed.
+</p>
+<p>To remove existing values from an IPUMS NHGIS extract definition, use
+<code>remove_from_extract()</code>.
+</p>
+<p>Learn more about the IPUMS API in <code>vignette("ipums-api")</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'nhgis_extract'
+add_to_extract(
+  extract,
+  description = NULL,
+  datasets = NULL,
+  time_series_tables = NULL,
+  geographic_extents = NULL,
+  shapefiles = NULL,
+  breakdown_and_data_type_layout = NULL,
+  tst_layout = NULL,
+  data_format = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>extract</code></td>
+<td>
+<p>An <code>ipums_extract</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>description</code></td>
+<td>
+<p>Description of the extract.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>datasets</code></td>
+<td>
+<p>List of <code>ds_spec</code> objects created by <code>ds_spec()</code>
+containing the specifications
+for the <a href="https://www.nhgis.org/overview-nhgis-datasets">datasets</a>
+to include in the extract request. See examples.
+</p>
+<p>If a dataset already exists in the extract, its new specifications
+will be added to those that already exist for that dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time_series_tables</code></td>
+<td>
+<p>List of <code>tst_spec</code> objects created by <code>tst_spec()</code>
+containing the specifications for the
+<a href="https://www.nhgis.org/time-series-tables">time series tables</a>
+to include in the extract request.
+</p>
+<p>If a time series table already exists in the extract, its new
+specifications will be added to those that already exist for that time
+series table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>geographic_extents</code></td>
+<td>
+<p>Vector of geographic extents to use for
+all of the <code>datasets</code> in the extract definition (for instance, to obtain
+data within a particular state). Use <code>"*"</code> to select all available extents.
+</p>
+<p>Required when any of the <code>datasets</code> included in the extract definition
+include <code>geog_levels</code> that require extent selection. See
+<code>get_metadata_nhgis()</code> to determine if a geographic level requires extent
+selection. At the time of writing, NHGIS supports extent selection only
+for blocks and block groups.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shapefiles</code></td>
+<td>
+<p>Names of any <a href="https://www.nhgis.org/gis-files">shapefiles</a>
+to include in the extract request.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>breakdown_and_data_type_layout</code></td>
+<td>
+<p>The desired layout
+of any <code>datasets</code> that have multiple data types or breakdown values.
+</p>
+
+<ul>
+<li> <p><code>"single_file"</code> (default) keeps all data types and breakdown values in
+one file
+</p>
+</li>
+<li> <p><code>"separate_files"</code> splits each data type or breakdown value into its
+own file
+</p>
+</li>
+</ul>
+<p>Required if any <code>datasets</code> included in the extract definition consist of
+multiple data types (for instance, estimates and margins of error) or have
+multiple breakdown values specified. See <code>get_metadata_nhgis()</code> to
+determine whether a requested dataset has multiple data types.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tst_layout</code></td>
+<td>
+<p>The desired layout of all <code>time_series_tables</code> included in
+the extract definition.
+</p>
+
+<ul>
+<li> <p><code>"time_by_column_layout"</code> (wide format, default): rows correspond to
+geographic units, columns correspond to different times in the time
+series
+</p>
+</li>
+<li> <p><code>"time_by_row_layout"</code> (long format): rows correspond to a single
+geographic unit at a single point in time
+</p>
+</li>
+<li> <p><code>"time_by_file_layout"</code>: data for different times are provided in
+separate files
+</p>
+</li>
+</ul>
+<p>Required when an extract definition includes any <code>time_series_tables</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_format</code></td>
+<td>
+<p>The desired format of the extract data file.
+</p>
+
+<ul>
+<li> <p><code>"csv_no_header"</code> (default) includes only a minimal header in the first
+row
+</p>
+</li>
+<li> <p><code>"csv_header"</code> includes a second, more descriptive header row.
+</p>
+</li>
+<li> <p><code>"fixed_width"</code> provides data in a fixed width format
+</p>
+</li>
+</ul>
+<p>Note that by default, <code>read_nhgis()</code> removes the additional header row in
+<code>"csv_header"</code> files.
+</p>
+<p>Required when an extract definition includes any <code>datasets</code> or
+<code>time_series_tables</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Ignored</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For extract fields that take a single value, <code>add_to_extract()</code> will
+replace the existing value with the new value provided for that field.
+It is not necessary to first remove this value using
+<code>remove_from_extract()</code>.
+</p>
+<p>If the supplied extract definition comes from
+a previously submitted extract request, this function will reset the
+definition to an unsubmitted state.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A modified <code>nhgis_extract</code> object
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>remove_from_extract()</code> to remove
+values from an extract definition.
+</p>
+<p><code>define_extract_nhgis()</code> to create a new extract definition.
+</p>
+<p><code>submit_extract()</code> to submit an extract request.
+</p>
+<p><code>download_extract()</code> to download extract data files.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">extract &lt;- define_extract_nhgis(
+  datasets = ds_spec("1990_STF1", c("NP1", "NP2"), "county")
+)
+
+# Add a new dataset or time series table to the extract
+add_to_extract(
+  extract,
+  datasets = ds_spec("1990_STF2a", "NPA1", "county")
+)
+
+add_to_extract(
+  extract,
+  time_series_tables = tst_spec("A00", "state")
+)
+
+# If a dataset/time series table name already exists in the definition
+# its specification will be modified by adding the new specifications to
+# the existing ones
+add_to_extract(
+  extract,
+  datasets = ds_spec("1990_STF1", "NP4", "nation")
+)
+
+# You can add new datasets and modify existing ones simultaneously by
+# providing a list of `ds_spec` objects
+add_to_extract(
+  extract,
+  datasets = list(
+    ds_spec("1990_STF1", "NP4", "nation"),
+    ds_spec("1990_STF2a", "NPA1", "county")
+  )
+)
+
+# Values that can only take a single value are replaced
+add_to_extract(extract, data_format = "fixed_width")$data_format
+</code></pre>
+
+
+</div>

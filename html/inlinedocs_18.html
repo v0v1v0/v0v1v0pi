@@ -1,0 +1,136 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>extract.xxx.chunks</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Extract documentation from a function</h2>
+
+<h3>Description</h3>
+
+<p>Given source code of a function, return a list describing inline
+documentation in that source code.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">extract.xxx.chunks(src, 
+    name.fun = "(unnamed function)", 
+    ...)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>src</code></td>
+<td>
+<p>The source lines of the function to examine, as a character
+vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name.fun</code></td>
+<td>
+<p>The name of the function/chunk to use in warning messages.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>ignored.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For simple functions/arguments, the argument may also be
+documented by appending <code>##&lt;&lt;</code> comments on the same line as the
+argument name. Mixing this mechanism with <code>###</code> comment lines for
+the same argument is likely to lead to confusion, as the <code>###</code>
+lines are processed first.
+</p>
+<p>Additionally, consecutive sections of <code>##</code> comment
+lines beginning with <code>##</code><em>xxx</em><code>&lt;&lt;</code> (where
+<em>xxx</em> is one of the fields: <code>alias</code>, <code>details</code>,
+<code>keyword</code>, <code>references</code>, <code>author</code>, <code>note</code>,
+<code>seealso</code>, <code>value</code>, <code>title</code> or <code>description</code>)
+are accumulated and inserted in the relevant part of the .Rd
+file.
+</p>
+<p>For <code>value</code>, <code>title</code>, <code>description</code> and function
+arguments, these <em>append</em> to any text from "prefix"
+(<code>^### </code>) comment lines, irrespective of the order in the
+source.
+</p>
+<p>When documenting S4 classes, documentation from <code>details</code>
+sections will appear under a section <code>Objects from the Class</code>. That
+section typically includes information about construction methods
+as well as other description of class objects (but note that the
+class Slots are documented in a separate section).
+</p>
+<p>Each separate extra section appears as a new
+paragraph except that: </p>
+<ul>
+<li>
+<p> empty sections (no
+matter how many lines) are ignored;</p>
+</li>
+<li> <p><code>alias</code> and
+<code>keyword</code> sections have special rules;</p>
+</li>
+<li>
+<p><code>description</code> should be brief, so all such sections
+are concatenated as one paragraph;</p>
+</li>
+<li> <p><code>title</code> should
+be one line, so any extra <code>title</code> sections are
+concatenated as a single line with spaces separating the
+sections.</p>
+</li>
+</ul>
+<p>As a special case, the construct <code>##describe&lt;&lt;</code> causes
+similar processing to the main function arguments to be
+applied in order to construct a describe block within the
+documentation, for example to describe the members of a
+list. All subsequent "same line" <code>##&lt;&lt;</code> comments go into that
+block until terminated by a subsequent <code>##</code><em>xxx</em><code>&lt;&lt;</code> line.
+</p>
+<p>Such regions may be nested, but not in such a way
+that the first element in a <code>describe</code> is another
+<code>describe</code>.  Thus there must be at least one
+<code>##&lt;&lt;</code> comment between each pair of
+<code>##describe&lt;&lt;</code> comments.
+</p>
+<p>When nested <code>describe</code> blocks are used, a comment-only
+line with <code>##end&lt;&lt;</code> terminates the current level only; any
+other valid <code>##</code><em>xxx</em><code>&lt;&lt;</code> line terminates
+all open describe blocks.</p>
+
+
+<h3>Value</h3>
+
+<p>Named list of character strings extracted from comments. For each
+name N we will look for N{...} in the Rd file and replace it
+with the string in this list (implemented in <code>modify.Rd.file</code>).</p>
+
+
+<h3>Note</h3>
+
+<p><code>alias</code> extras are automatically split at new lines.
+</p>
+<p><code>keyword</code> extras are automatically split at white space,
+as all the valid keywords are single words.
+</p>
+<p>The "value" section of a .Rd file is implicitly a describe
+block and <code>##</code><code>value</code><code>&lt;&lt;</code> acts accordingly. Therefore
+it automatically enables the describe block itemization (##&lt;&lt; after
+list entries).</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Toby Dylan Hocking &lt;toby.hocking@r-project.org&gt; [aut, cre], Keith Ponting [aut], Thomas Wutzler [aut], Philippe Grosjean [aut], Markus Müller [aut], R Core Team [ctb, cph]</p>
+
+
+</div>

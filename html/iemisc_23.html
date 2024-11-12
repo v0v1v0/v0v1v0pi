@@ -1,0 +1,167 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>colebrook</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Accurately calculate the Colebrook-White equation to obtain the Darcy-Weisbach friction factor</h2>
+
+<h3>Description</h3>
+
+<p>This function "provides the fast, accurate, and robust computation of the
+Colebrook-White equation" to determine the "Darcy-Weisbach friction factor
+F". This method is "more efficient than the solution of the Colebrook
+equation via the Lambert W-function, or the simple approximations." The
+solution is accurate to "around machine precision for all R &gt; 3 and for all
+0 &lt;= K, i.e. in an interval exceeding all values of physical interest."
+Reference: Clamond
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">colebrook(Re, K = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Re</code></td>
+<td>
+<p>numeric vector that contains the Reynolds number [dimensionless],
+which should be &gt;= 2300. Reference: Clamond</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>numeric vector that contains the "equivalent sand roughness height
+sand roughness height (material specific roughness) divided by the
+hydraulic diameters", if known. If not known, the default value is 0.
+Reference: Clamond</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Colebrook-White equation is expressed as
+</p>
+<p style="text-align: center;"><code class="reqn">\frac{1}{\sqrt{F}} = -2 * log10{\frac{K}{3.7} + \frac{2.51}{R * \sqrt{F}}}</code>
+</p>
+
+
+<dl>
+<dt><em>F</em></dt>
+<dd>
+<p>Darcy-Weisbach friction factor</p>
+</dd>
+<dt><em>K</em></dt>
+<dd>
+<p>Equivalent sand roughness height (material specific
+roughness) divided by the hydraulic diameters</p>
+</dd>
+<dt><em>R</em></dt>
+<dd>
+<p>the Reynolds' number (dimensionless)</p>
+</dd>
+</dl>
+<h3>Value</h3>
+
+<p>F Return a numeric vector containing the Darcy-Weisbach friction
+factor. Reference: Clamond
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Didier Clamond (colebrook MATLAB function), Irucka Embry (colebrook R function)
+</p>
+
+
+<h3>References</h3>
+
+
+<ol>
+<li>
+<p> Steven C. Chapra, <em>Applied Numerical Methods with MATLAB for Engineers and Scientists</em>, Second Edition, Boston, Massachusetts: McGraw-Hill, 2008, pages 157-161.
+</p>
+</li>
+<li>
+<p> Didier Clamond, "Efficient resolution of the Colebrook equation", <em>Ind. Eng. Chem. Res.</em>, 2009, 48 (7), pages 3665-3671 <a href="https://arxiv.org/abs/0810.5564">https://arxiv.org/abs/0810.5564</a> and <a href="https://math.univ-cotedazur.fr/~didierc/DidPublis/ICR_2009.pdf">https://math.univ-cotedazur.fr/~didierc/DidPublis/ICR_2009.pdf</a>
+</p>
+</li>
+</ol>
+<h3>See Also</h3>
+
+<p><code>Re1</code>, <code>Re2</code>, <code>Re3</code>, <code>Re4</code> for the Reynolds number and
+<code>f1</code>, <code>f2</code>, <code>f3</code>, <code>f4</code>, <code>f5</code>, <code>f6</code>, <code>f7</code>, 
+and <code>f8</code> for the Darcy friction factor
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+install.load::load_package("iemisc", "units")
+
+# Example 1 (Reference: Clamond)
+F &lt;- colebrook(c(3e3, 7e5, 1e100), 0.01)
+
+F
+
+
+# Example 2
+# 'Determine f for air flow through a smooth, thin tube. The parameters are
+# rho = 1.23 kg/m^3, mu = 1.79 x 10^-5 N * s/m^2, D = 0.005 m, V = 40 m/s
+# and epsilon = 0.0015 mm.' Reference: Chapra 158
+
+# Determine R (the Reynolds number) first using the following parameters:
+
+rho &lt;- 1.23 # kg/m^3
+V &lt;- 40 # m/s
+D &lt;- 0.005 # m
+mu &lt;- 1.79 * 10^-5 # N * s/m^2
+
+eps &lt;- 0.0015 # mm
+eps &lt;- set_units(eps, "mm")
+units(eps) &lt;- make_units(m)
+
+Re &lt;- rho * V * D / mu
+
+
+K &lt;- drop_units(eps) / D
+
+
+# with K
+fr1 &lt;- colebrook(Re, K); fr1
+
+# without K
+fr2 &lt;- colebrook(Re); fr2
+
+
+# The solution on Chapra 159 and 160 is 'f = 0.02896781017144' which was
+# computed using the Newton-Raphson method, Swamee-Jain approximation
+# equation, and MATLAB's fzero function.
+
+# Thus,
+fm &lt;- 0.02896781017144
+
+# Compute the relative error between fr[1 and 2] (this function) and fm (Chapra).
+
+relerror(fr1, fm)
+
+
+relerror(fr2, fm)
+
+# compare the relative error with and without K
+
+
+
+
+
+</code></pre>
+
+
+</div>

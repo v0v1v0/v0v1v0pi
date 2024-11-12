@@ -1,0 +1,202 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>intervalaverage</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>time-weighted average of values measured over intervals</h2>
+
+<h3>Description</h3>
+
+<p><code>intervalaverage</code> takes values recorded over
+non-overlapping intervals and averages them to defined intervals, possibly within
+groups (individuals/monitors/locations/etc).  This function could be used to take averages over long
+intervals
+of values measured over short intervals and/or to take short "averages" of values measured over
+longer intervals (ie, downsample without smoothing). Measurement intervals and averaging intervals need
+not align. In the event that an averaging interval contains more than one measurement interval,
+a weighted average is calculated (ie each measurement is weighted on the duration of its interval's
+overlap with the averaging period interval).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">intervalaverage(
+  x,
+  y,
+  interval_vars,
+  value_vars,
+  group_vars = NULL,
+  required_percentage = 100,
+  skip_overlap_check = FALSE,
+  verbose = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a data.table containing values measured over intervals. see
+<code>interval_vars</code> parameter
+for how to specify interval columns and <code>value_vars</code> for how to
+specify value columns.
+intervals in <code>x</code> must must be completely non-overlapping within
+groups defined by group_vars. if <code>group_vars</code> is specified (non-<code>NULL</code>), <code>x</code> must
+also contain columns specified in <code>group_vars</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>a data.table object containing intervals over which averages of <code>x</code> values should be computed.
+averaging intervals in <code>y</code>, unlike measurement intervals in <code>x</code>, may be overlapping within groups.
+if <code>group_vars</code> is specified (non-<code>NULL</code>),  <code>y</code> must contains those <code>group_vars</code> column names
+(and this would allow different averaging periods for each group)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interval_vars</code></td>
+<td>
+<p>a length-2 character vector of column names in both <code>x</code> and <code>y</code>.
+These column names specify columns in x and y that define
+closed (inclusive) starting and ending intervals. The column name
+specifying the lower-bound column must be specified first.
+these columns in x and y must all be of the same class and either be integer or IDate.
+The interval_vars character vector cannot be named. This is reserved for future use allowing
+different interval_vars column names in x and y.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value_vars</code></td>
+<td>
+<p>a character vector of column names in <code>x</code>. This specifies
+the columns to be averaged.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group_vars</code></td>
+<td>
+<p>A character vector of column names in both x and y.
+The interaction of
+these variables define groups in which averages of <code>x</code> values will be taken.
+specifying subjects/monitors/locations within which to take averages.
+By default this is <code>NULL</code>, in which case averages are taken over the entire <code>x</code>
+dataset for each <code>y</code> period.
+The group_vars character vector cannot be named. This is reserved for future use allowing
+different interval_vars column names in x and y.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>required_percentage</code></td>
+<td>
+<p>This percentage of the duration of each (possibly group-specific)
+<code>y</code> interval must be observed
+and nonmissing for a specific <code>value_var</code> in <code>x</code> in order for the return table to
+contain a nonmissing average of the <code>value_var</code> for that <code>y</code> interval.  If the percentage
+of the nonmissing <code>value_var</code> observations is less than <code>required_percentage</code> an NA will be be returned
+for that average.
+The default is 100, meaning that if <em>any</em> portion of a <code>y</code> interval is either not recorded or
+missing in <code>x</code>, then the corresponding return row will contain a an NA for the average of that
+<code>value_var</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>skip_overlap_check</code></td>
+<td>
+<p>by default, FALSE. setting this to TRUE will skip
+internal checks to make sure x intervals are non-overlapping within
+groups defined by group_vars.
+intervals in x must be non-overlapping,
+but you may want to skip this check if you've  already checked this because
+it is computationally intensive for large datasets.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>include printed timing information? by default, FALSE</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>All intervals are treated as closed (ie inclusive of the start and end values in interval_vars)
+</p>
+<p>x and y are not copied but rather passed by reference to function internals
+but the order of these data.tables is restored on function completion or error,
+</p>
+<p>When required_percentage is less than 100, xminstart and xmaxend may be useful to
+determine whether an average meets specified coverage requirements in terms of not
+just percent of missingness but whether values are represented through the range of the y interval
+</p>
+
+
+<h3>Value</h3>
+
+<p>returns a data.table object.
+Rows of the return data.table correspond to intervals from y. i.e, the number
+of rows of the return will be the number of rows of y.
+Columns of the returned data.table are as follows: <br></p>
+
+<ul>
+<li>
+<p> grouping variables as specified in <code>group_vars</code> <br></p>
+</li>
+<li>
+<p> interval columns corresponding to intervals in y. These columns are named the
+same they were in x and y and as specified in <code>interval_vars</code>
+</p>
+</li>
+<li>
+<p> value variable columns from x, averaged to periods in y.
+named the same as they were in x <br></p>
+</li>
+<li> <p><code>yduration</code>: the length of the interval (ie as a count) specified in y <br></p>
+</li>
+<li> <p><code>xduration</code>: the total length of the intervals (ie as a count)
+from x that fall into this interval from y. this will be equal to
+yduration if x is comprehensive for (ie, fully covers)  this interval from y. <br></p>
+</li>
+<li> <p><code>nobs_&lt;value_vars&gt;</code>: for each <code>value_var</code> specified, this is the count of
+non-missing values from x that fall into this interval from y. this will be
+equal to xduration if the value_var contains no NA values over the y
+interval. If there are NAs in value variables, then <code>nobs_&lt;value_vars&gt;</code>
+will be different from <code>xduration</code> and won't necessarily be all the same
+for each value_var.
+</p>
+</li>
+<li> <p><code>xminstart</code>: For each returned interval (ie the intervals from Y) the minimum of the
+start intervals represented in x.  If the start of the earliest x interval is less than the start
+of the y interval, the minimum of the y interval is returned. Note, this is the minimum start
+time in x matching with the y interval whether or not any value_vars were missing or not for that start time.
+If you need non-missing minimum start times, you could remove NA intervals from
+x prior to calling intervalaverage (this would need to be done separately for each value_var).
+</p>
+</li>
+<li> <p><code>xmaxend</code>:  similar to xminstart but the maximum of the end intervals represented in x.
+Again, this does not pay attention to whether the interval in x had non-missing value_vars.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">x &lt;- data.table(start=seq(1L,by=7L,length=6),
+               end=seq(7L,by=7L,length=6),
+               pm25=c(10,12,8,14,22,18))
+
+y &lt;- data.table(start=seq(3L,by=7L,length=6),
+               end=seq(9L,by=7L,length=6))
+
+z &lt;- intervalaverage(x,y,interval_vars=c("start","end"),
+                    value_vars=c("pm25"))
+
+#also see vignette for more extensive examples
+</code></pre>
+
+
+</div>

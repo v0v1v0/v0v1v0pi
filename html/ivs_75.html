@@ -1,0 +1,178 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iv-sets</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Set operations</h2>
+
+<h3>Description</h3>
+
+<p>This family of functions treats ivs as sets. They always compute
+the minimal iv of each input and return a minimal iv.
+</p>
+
+<ul>
+<li> <p><code>iv_set_complement()</code> takes the complement of the intervals in an iv. By
+default, the minimum and maximum of the inputs define the bounds to take
+the complement over, but this can be adjusted with <code>lower</code> and <code>upper</code>.
+Missing intervals are always dropped in the complement.
+</p>
+</li>
+<li> <p><code>iv_set_union()</code> answers the question, "Which intervals are in <code>x</code> or <code>y</code>?"
+It is equivalent to combining the two vectors together and then calling
+<code>iv_groups()</code>.
+</p>
+</li>
+<li> <p><code>iv_set_intersect()</code> answers the question, "Which intervals are in <code>x</code> and
+<code>y</code>?"
+</p>
+</li>
+<li> <p><code>iv_set_difference()</code> answers the question, "Which intervals are in <code>x</code> but
+not <code>y</code>?" Note that this is an asymmetrical difference.
+</p>
+</li>
+<li> <p><code>iv_set_symmetric_difference()</code> answers the question, "Which intervals are
+in <code>x</code> or <code>y</code> but not both?"
+</p>
+</li>
+</ul>
+<h3>Usage</h3>
+
+<pre><code class="language-R">iv_set_complement(x, ..., lower = NULL, upper = NULL)
+
+iv_set_union(x, y)
+
+iv_set_intersect(x, y)
+
+iv_set_difference(x, y)
+
+iv_set_symmetric_difference(x, y)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[iv]⁠</code>
+</p>
+<p>An interval vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>These dots are for future extensions and must be empty.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower, upper</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[vector(1) / NULL]⁠</code>
+</p>
+<p>Bounds for the universe over which to compute the complement. These should
+have the same type as the element type of the interval vector. It is
+often useful to expand the universe to, say, <code>-Inf</code> to <code>Inf</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[iv]⁠</code>
+</p>
+<p>An interval vector.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+
+<ul>
+<li>
+<p> For <code>iv_set_complement()</code>, a vector of the same type as <code>x</code> containing the
+complement.
+</p>
+</li>
+<li>
+<p> For all other set operations, a vector of the same type as the common type
+of <code>x</code> and <code>y</code> containing the result.
+</p>
+</li>
+</ul>
+<h3>Graphical Representation</h3>
+
+<p>Graphically, generating the complement looks like:
+</p>
+<p><img src="../help/figures/complement.png" alt="complement.png"></p>
+<p>If you were to set <code>upper = 20</code> with these intervals, then you'd get one more
+interval in the complement.
+</p>
+<p><img src="../help/figures/complement-upper.png" alt="complement-upper.png"></p>
+<p>Generating the intersection between two ivs looks like:
+</p>
+<p><img src="../help/figures/intersect.png" alt="intersect.png"></p>
+
+
+<h3>See Also</h3>
+
+<p>The <em>pairwise</em> versions of these functions, such as
+<code>iv_pairwise_set_union()</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x &lt;- iv_pairs(
+  c(10, 12),
+  c(0, 5),
+  c(NA, NA),
+  c(3, 6),
+  c(-5, -2),
+  c(NA, NA)
+)
+x
+
+y &lt;- iv_pairs(
+  c(2, 7),
+  c(NA, NA),
+  c(-3, -1),
+  c(14, 15)
+)
+y
+
+# Complement contains any values from `[-5, 12)` that aren't represented
+# in these intervals. Missing intervals are dropped.
+iv_set_complement(x)
+
+# Expand out the "universe" of possible values
+iv_set_complement(x, lower = -Inf)
+iv_set_complement(x, lower = -Inf, upper = Inf)
+
+# Which intervals are in x or y?
+iv_set_union(x, y)
+
+# Which intervals are in x and y?
+iv_set_intersect(x, y)
+
+# Which intervals are in x but not y?
+iv_set_difference(x, y)
+
+# Which intervals are in y but not x?
+iv_set_difference(y, x)
+
+# Missing intervals in x are kept if there aren't missing intervals in y
+iv_set_difference(x, iv(1, 2))
+
+# Which intervals are in x or y but not both?
+iv_set_symmetric_difference(x, y)
+
+# Missing intervals will be kept if they only appear on one side
+iv_set_symmetric_difference(x, iv(1, 2))
+iv_set_symmetric_difference(iv(1, 2), x)
+</code></pre>
+
+
+</div>

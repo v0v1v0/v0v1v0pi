@@ -1,0 +1,102 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getGrowthPeriod</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculating Growing Degree Days and Lengths of Growth Stages for Various Crops Using Onset Data from ICARDA's Database</h2>
+
+<h3>Description</h3>
+
+<p>Calculates growing degree days (GDD) as well as cumulative GDD, and returns a list of various data frames based on specified arguments.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getGrowthPeriod(sitecode, crop, base, max, gdd = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>sitecode</code></td>
+<td>
+<p>expression. Vector with names of sites from which to extract onset data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>crop</code></td>
+<td>
+<p>character. Type of crop in ICARDA database. See section 'Details' for crops which have calculations available.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>base</code></td>
+<td>
+<p>integer. Minimum temperature constraint for the crop.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max</code></td>
+<td>
+<p>integer. Maximum temperature constraint for the crop.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gdd</code></td>
+<td>
+<p>boolean. If <code>TRUE</code>, returns a data frame containing calculated GDD and accumulated GDD together with climatic variables used for the calculations. Default: FALSE.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Growing degree days for various crops are calculated using average daily minimum and maximum temperature values obtained from onset data. The temperature constraints specified in <code>base</code> and <code>max</code> are first applied before the calculations are done. These constraints ensure very low or high temperatures which prevent growth of a particular crop are not included.
+Crops for which GDD calculations are available include: 'Durum wheat', 'Bread wheat', 'Barley', 'Chickpea', 'Lentil'. Each of these can be supplied as options for the argument <code>crop</code>.
+Cumulative GDD values determine the length of different growing stages. Growing stages vary depending on the type of crop. Durum wheat, bread wheat and barley have five growth stages, i.e. beginning of heading, beginning and completion of flowering, and beginning and completion of grain filling. Chickpea and lentil have four growth stages, i.e. beginning of flowering, completion of 50
+The length of the full growth cycle of the crop for each site is also given in the output data frame.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list object with different data frames depending on specified option in <code>gdd</code>.
+If <code>gdd = TRUE</code>, the object is a list containing three data frames: the first one with lengths of different growing stages, the second one with original onset data with phenological variables, and the third one with calculated GDD and accumulated GDD for the sites specified in <code>sitecode</code>.
+If <code>gdd = FALSE</code>, the object is a list containing two data frames: the first one with lengths of different growing stages, and the second one with original onset data with phenological variables for the sites specified in <code>sitecode</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Khadija Aouzal, Zakaria Kehel, Bancy Ngatia
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">if(interactive()){
+ # Calculate GDD for durum wheat
+ data(durumDaily)
+ growth &lt;- getGrowthPeriod(sitecode = durumDaily$site_code,
+                           crop = 'Durum wheat', base = 0,
+                           max = 35, gdd = TRUE)
+
+ # Get data frame with lengths of growth stages from list
+ # object returned
+ growth.lengths &lt;- growth[[1]]
+
+ # Get data frame with phenotypic variables from list
+ # object returned
+ growth.pheno &lt;- growth[[2]]
+
+ # Get data frame with GDD, cumulative GDD and climatic
+ # variables from list object returned (when gdd = TRUE)
+ growth.gdd &lt;- growth[[3]]
+ }
+</code></pre>
+
+
+</div>

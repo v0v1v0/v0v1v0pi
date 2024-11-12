@@ -1,0 +1,158 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iter.mcmc</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>mcmc inference of causal models with all possible causal factors: G, G*G, G*E and E</h2>
+
+<h3>Description</h3>
+
+<p>provides proportions of each causal factor of G, G*G, G*E and E based on relative concordance data
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R"> iter.mcmc(ppt,aj=2,n.iter,n.chains,thinning=5,init.cut,darray,x,n,model,mcmcrg=0.01)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ppt</code></td>
+<td>
+<p>population lifetime incidence</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>aj</code></td>
+<td>
+<p>a constant for the stage of data collection</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.iter</code></td>
+<td>
+<p>number of mcmc iterations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.chains</code></td>
+<td>
+<p>number of mcmc chain</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thinning</code></td>
+<td>
+<p>mcmc thinning parameter (default=5)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init.cut</code></td>
+<td>
+<p>mcmc data cut</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>darray</code></td>
+<td>
+<p>indicating the array positions of available data among 9 relative pairs: 1:mzt,2:parent-offspring,3:dzt,4:sibling,5:2-direct(grandparent-grandchild),6:3rd(uncle-niece),7:3-direct(great-grandparent-great-grandchild),8:4th (causin),9:4d(great-great-grandparent-great-great-grandchild)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>number of disease concordance of relative pairs</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>total number of relative pairs</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>an array, size of 4 (1: E component; 2: G component; 3: G*E component; 4: G*G component), indicating the existance of the causal component: 0: excluded; 1: included. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mcmcrg</code></td>
+<td>
+<p> parameter of the data collection stage (default=0.01)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a list of rejectionRate, result summary, Gelman-Rubin diagnostics (point est. &amp; upper C.I.) for output variables:
+e[1]: proportion of environmental factor (E)
+g[2]: proportion of genetic factor (G)
+ge[3]: proportion of gene-environment interaction (G*E)
+gg[4]: proportion of gene interactions (G*G)
+gn[5]: number of recessive genes in G
+ppe[6]: population proportion of interacting environment in G*E
+ppg[7]: population proportion of interacting genetic factor in G*E
+fd[8]: frequency of dominant genes in G
+fdge[9]: frequency of dominant genes in G*E
+gnge[10]: number of recessive genes in G*E
+ppd[11]: population proportion of dominant genes in G*G
+ppr[12]: population proportion of recessive genes in G*G
+kd[13]: number of dominant genes in G*G
+kr[14]: number of recessive genes in G*G
+</p>
+
+
+<h3>References</h3>
+
+<p>L. Park, J. Kim, A novel approach for identifying causal models of complex disease from family data, Genetics, 2015 Apr; 199, 1007-1016.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">### PLI=0.01.
+ppt&lt;-0.01
+
+### a simple causal model with G and E components
+
+pg&lt;-0.007  # the proportion of G component in total populations
+pgg&lt;-0  # the proportion of G*G component in total populations
+pge&lt;-0  # the proportion of G*E component in total populations
+e&lt;-1-(1-ppt)/(1-pg)   # the proportion of E component in total populations
+
+fd&lt;-0.001  # one dominant gene
+tt&lt;-3      # the number of recessive genes
+
+temp&lt;-sqrt(1-((1-pg)/(1-fd)^2)^(1/tt))
+fr&lt;-c(array(0,length(fd)),array(temp,tt))
+fd&lt;-c(fd,array(0,tt))
+
+rp&lt;-drgegggne(fd,fr,c(0,0),c(0,0),c(0,0),c(0,0),0,e)
+
+sdata&lt;-rp[,3]/(rp[,2]+rp[,3])
+#sdata&lt;-round(sdata*500)
+
+darray&lt;-c(1:2,4:6)  
+  ## available data= MZT, P-O, sibs, grandparent-grandchild, avuncular pair
+n&lt;-array(1000,length(darray))
+x&lt;-array()
+for(i in 1:length(darray)){
+x[i]&lt;-rbinom(1,n[i],sdata[darray[i]])
+}
+model&lt;-c(1,1,0,0)
+
+## remove # from the following lines to test examples.
+#iter.mcmc(ppt,2,15,2,1,1,darray,x,n,model) # provide a running test
+#iter.mcmc(ppt,2,2000,2,10,500,darray,x,n,model) # provide a proper result
+
+</code></pre>
+
+
+</div>

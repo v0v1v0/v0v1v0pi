@@ -1,0 +1,197 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>multipatt</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Multi-level pattern analysis</h2>
+
+<h3>Description</h3>
+
+<p>This function studies the association between species patterns and combinations of groups of sites.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">multipatt(
+  x,
+  cluster,
+  func = "IndVal.g",
+  duleg = FALSE,
+  restcomb = NULL,
+  min.order = 1,
+  max.order = NULL,
+  control = how(),
+  permutations = NULL,
+  print.perm = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Community data table</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster</code></td>
+<td>
+<p>A vector representing a partition of sites</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>func</code></td>
+<td>
+<p>Species-site group association function. Four values are accepted <code>"IndVal"</code>, <code>"IndVal.g"</code>, <code>"r"</code> and <code>"r.g"</code> (lowercase values are also accepted).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>duleg</code></td>
+<td>
+<p>If TRUE, site group combinations are not considered, only the original site groups, like in Dufrêne &amp; Legendre (1997). Internally, <code>duleg = TRUE</code> equals <code>max.order = 1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>restcomb</code></td>
+<td>
+<p>A vector of integer values used to restrict the combinations of site groups to those with ecological sense according to the analyst. The default <code>NULL</code> indicates that all combinations are used. If <code>duleg=TRUE</code> this argument is ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.order</code></td>
+<td>
+<p>An integer indicating the minimum order of site group combinations (by default <code>max.order=1</code> for singletons). Cannot be larger than <code>max.order</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.order</code></td>
+<td>
+<p>An integer indicating the maximum order of site group combinations to be considered: <code>max.order=1</code> for singletons, <code>max.order=2</code> for pairs, <code>max.order=3</code> for triplets... As <code>restcomb</code>, this parameter provide a way to restrict the site group combinations that make ecological sense. By default all possible site group combinations are considered. If <code>max.order=1</code> then the function will behave as if <code>duleg=TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>A list of control values describing properties of the permutation design, as returned by a call to <code>how</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>permutations</code></td>
+<td>
+<p>A custom matrix of permutations, to be used if <code>control = NULL</code>, with permutations in rows and site indices in columns</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print.perm</code></td>
+<td>
+<p>If TRUE, prints permutation numbers after each set of 100 permutations.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function creates combinations of the input clusters and compares each combination with the species in the input matrix x. For each species it chooses the combination with a highest association value. Best matching patterns are tested for statistical significance of the associations. Four association indices are possible (some less than for <code>strassoc</code>): "IndVal", "IndVal.g", "r" and "r.g". Indicator value indices will return the pattern that better matches the species observed pattern, whereas correlation indices will return the pattern that creates a highest inside/outside difference. Details are given in De Cáceres et al. (2010). The user can restrict the combinations in three ways: (1) by using <code>duleg=TRUE</code>, which leads to consider single site-groups only; (2) by setting the minimum and maximum order of combinations using <code>min.order</code> and <code>max.order</code>; or (3) by using <code>restcomb</code> to restrict combinations at will. In order to carry out the third way, values in <code>restcomb</code> must be the indices of combinations that appear in the column <code>index</code> of object <code>sign</code> (see below). 
+</p>
+<p>Complex permutation designs are allowed through the function <code>how</code> from package "permute". If those are not enough, the user can set <code>control = NULL</code> and specify a custom matrix of permutations to test with parameter <code>permutations</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>multipatt</code> with:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>func</code></td>
+<td>
+<p>The name of the function used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comb</code></td>
+<td>
+<p>A matrix describing all the combinations studied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>str</code></td>
+<td>
+<p>A matrix the association strength for all combinations studied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>If <code>func = "IndVal"</code> (or <code>func = "IndVal.g"</code>) a matrix whose values are the "A" (or "A.g") component of indicator values. Otherwise this element is left as <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>If <code>func = "IndVal"</code> (or <code>func = "IndVal.g"</code>) a matrix whose values are the "B" component of indicator values. Otherwise this element is left as <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sign</code></td>
+<td>
+<p>Data table with results of the best matching pattern, the association value and the degree of statistical significance of the association (i.e. p-values from permutation test). Note that p-values are not corrected for multiple testing.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>This function gives the same results as function <code>indval</code> in package "labdsv" when used setting <code>func="IndVal.g"</code> and <code>duleg=TRUE</code>, excepting the fact that the square root IndVal values is returned instead of the original IndVal.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Miquel De Cáceres Ainsa, EMF-CREAF
+</p>
+<p>Florian Jansen, Institute of Botany and Landscape Ecology, Ernst-Moritz-Arndt-University
+</p>
+
+
+<h3>References</h3>
+
+<p>De Cáceres, M. and Legendre, P. 2009. Associations between species and groups of sites: indices and statistical inference. Ecology 90(12): 3566-3574.
+</p>
+<p>De Cáceres, M., Legendre, P., Moretti, M. 2010. Improving indicator species analysis by combining groups of sites. Oikos 119(10): 1674-1684.
+</p>
+<p>Dufrêne, M. and P. Legendre. 1997. Species assemblages and indicator species: The need for a flexible asymetrical approach. Ecological Monographs 67:345-366.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>summary.multipatt</code>, <code>strassoc</code>, <code>signassoc</code>, <code>how</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(stats)
+
+data(wetland) ## Loads species data
+
+wetkm &lt;- kmeans(wetland, centers=3) ## Creates three clusters using kmeans
+
+## Runs the combination analysis using IndVal.g as statistic
+wetpt &lt;- multipatt(wetland, wetkm$cluster, control = how(nperm=999)) 
+
+## Lists those species with significant association to one combination
+summary(wetpt) 
+
+## Lists those species with significant association to one combination, 
+## including indval components.
+summary(wetpt, indvalcomp=TRUE) 
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,113 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>imagesToKerasInput</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Convert magick images in tibble to array for keras</h2>
+
+<h3>Description</h3>
+
+<p>This function converts a tibble of images into input for TensorFlow models in keras. Specifically, images are converted to 4D arrays (image, height, width, channels). It can process color images and masks (for model training).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">imagesToKerasInput(
+  images,
+  subset = NULL,
+  type = NULL,
+  grayscale = NULL,
+  n_class = 1,
+  max = 1
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>images</code></td>
+<td>
+<p>list. Output of <code>loadImages</code> or <code>dataAugmentation</code>. List with two items ($info: data frame with information about images, $img: tibble containing magick images)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+<p>integer. Indices of images to process. Can be useful for only processing subsets of images (e.g. training images, not test/validation images).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>character. Can be "image" or "mask" and will set color channels of array accordingly (optional).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grayscale</code></td>
+<td>
+<p>logical. Defines color channels of images: 1 if codeTRUE, 3 if <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_class</code></td>
+<td>
+<p>For mask images, how many classes do they contain? (note that binary classifications like the canopy model have one class only)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max</code></td>
+<td>
+<p>integer. Maximum value of output color values range. Can be 1 or 255.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function will try to infer the colorspace from images, but if the colorspaces are inconsistent one has to define 'colorspace'.
+<code>type = "image"</code> can have either colorspace "sRGB" or "Gray", masks are always "Gray". color images have three color channels in the arrays, grayscale images have one color channel.
+<code>n_class</code> is only relevant for masks. It determines the dimensions of the output. The default 1 is the (binary case). Higher values are for multi-class cases. If n_class is 2 or larger, keras::to_categorical() will be applied, and the <code>u_net</code> model will use softmax instead of sigmoid activation in the final layer.
+</p>
+<p>By default, color value range will be 0-1. Alternatively, set <code>max</code> to 255 to create color value range 0-255 (e.g. to create input for Habitat-Net models).
+</p>
+
+
+<h3>Value</h3>
+
+<p>An array with the following dimensions: image, height, width, channels
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example 1: Canopy
+
+# images
+wd_images_can &lt;- system.file("images/canopy/resized",
+                             package = "imageseg")
+images_can &lt;- loadImages(imageDir = wd_images_can)
+x &lt;- imagesToKerasInput(images_can)
+str(x)   # a 4D array with an attribute data frame
+
+# masks
+
+wd_mask_can &lt;- system.file("images/canopy/masks",
+                             package = "imageseg")
+masks_can &lt;- loadImages(imageDir = wd_mask_can)
+y &lt;- imagesToKerasInput(masks_can, type = "mask", grayscale = TRUE)
+str(y)   # a 4D array with an attribute data frame
+
+# Example 2: Understory
+wd_images_us &lt;- system.file("images/understory/resized",
+                             package = "imageseg")
+images_us &lt;- loadImages(imageDir = wd_images_us)
+x &lt;- imagesToKerasInput(images_us)
+str(x)   # a 4D array, with an attribute data frame
+
+</code></pre>
+
+
+</div>

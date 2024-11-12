@@ -1,0 +1,526 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>rdif</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>IRT residual-based differential item functioning (RDIF) detection framework</h2>
+
+<h3>Description</h3>
+
+<p>This function computes three RDIF statistics (Lim &amp; Choe, In press; Lim, Choe, &amp; Han, 2022),
+which are <code class="reqn">RDIF_{R}</code>, <code class="reqn">RDIF_{S}</code>, and <code class="reqn">RDIF_{RS}</code>, for each item. <code class="reqn">RDIF_{R}</code> primarily
+captures the typical contrast in raw residual pattern between two groups caused by uniform DIF whereas
+<code class="reqn">RDIF_{S}</code> primarily captures the typical contrast in squared residual pattern between two groups caused
+by nonuniform DIF. <code class="reqn">RDIF_{RS}</code> can reasonably capture both types of DIF.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">rdif(x, ...)
+
+## Default S3 method:
+rdif(
+  x,
+  data,
+  score = NULL,
+  group,
+  focal.name,
+  D = 1,
+  alpha = 0.05,
+  missing = NA,
+  purify = FALSE,
+  purify.by = c("rdifrs", "rdifr", "rdifs"),
+  max.iter = 10,
+  min.resp = NULL,
+  method = "ML",
+  range = c(-5, 5),
+  norm.prior = c(0, 1),
+  nquad = 41,
+  weights = NULL,
+  ncore = 1,
+  verbose = TRUE,
+  ...
+)
+
+## S3 method for class 'est_irt'
+rdif(
+  x,
+  score = NULL,
+  group,
+  focal.name,
+  alpha = 0.05,
+  missing = NA,
+  purify = FALSE,
+  purify.by = c("rdifrs", "rdifr", "rdifs"),
+  max.iter = 10,
+  min.resp = NULL,
+  method = "ML",
+  range = c(-5, 5),
+  norm.prior = c(0, 1),
+  nquad = 41,
+  weights = NULL,
+  ncore = 1,
+  verbose = TRUE,
+  ...
+)
+
+## S3 method for class 'est_item'
+rdif(
+  x,
+  group,
+  focal.name,
+  alpha = 0.05,
+  missing = NA,
+  purify = FALSE,
+  purify.by = c("rdifrs", "rdifr", "rdifs"),
+  max.iter = 10,
+  min.resp = NULL,
+  method = "ML",
+  range = c(-5, 5),
+  norm.prior = c(0, 1),
+  nquad = 41,
+  weights = NULL,
+  ncore = 1,
+  verbose = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A data frame containing the item metadata (e.g., item parameters, number of categories, models ...), an object of class <code>est_item</code>
+obtained from the function <code>est_item</code>, or an object of class <code>est_irt</code> obtained from the function <code>est_irt</code>.
+The item metadata can be easily created using the function <code>shape_df</code>. See <code>est_irt</code>, <code>irtfit</code>,
+<code>info</code> or <code>simdat</code> for more details about the item metadata.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments that will be forwarded to the <code>est_score</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A matrix containing examinees' response data for the items in the argument <code>x</code>. A row and column indicate
+the examinees and items, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>score</code></td>
+<td>
+<p>A vector of examinees' ability estimates. If the abilities are not provided, <code>rdif</code> estimates the abilities before
+computing the RDIF statistics. See <code>est_score</code> for more details about scoring methods. Default is NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group</code></td>
+<td>
+<p>A numeric or character vector indicating group membership of examinees. The length of the vector should be the same
+with the number of rows in the response data matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>focal.name</code></td>
+<td>
+<p>A single numeric or character scalar representing the level associated with the focal group. For instance,
+given <code>group = c(0, 1, 0, 1, 1)</code> and '1' indicating the focal group, set <code>focal.name = 1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>A scaling factor in IRT models to make the logistic function as close as possible to the normal ogive function (if set to 1.7).
+Default is 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>A numeric value to specify significance <code class="reqn">\alpha</code>-level of the hypothesis test using the RDIF statistics.
+Default is .05.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>missing</code></td>
+<td>
+<p>A value indicating missing values in the response data set. Default is NA.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>purify</code></td>
+<td>
+<p>A logical value indicating whether a purification process will be implemented or not. Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>purify.by</code></td>
+<td>
+<p>A character string specifying a RDIF statistic with which the purification is implemented. Available statistics
+are "rdifrs" for <code class="reqn">RDIF_{RS}</code>, "rdifr" for <code class="reqn">RDIF_{R}</code>, and "rdifs" for <code class="reqn">RDIF_{S}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.iter</code></td>
+<td>
+<p>A positive integer value specifying the maximum number of iterations for
+the purification process. Default is 10.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.resp</code></td>
+<td>
+<p>A positive integer value specifying the minimum number of item responses for an examinee
+required to compute the ability estimate. Default is NULL. See details below for more information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>A character string indicating a scoring method. Available methods are "ML" for the maximum likelihood estimation,
+"WL" for the weighted likelihood estimation, "MAP" for the maximum a posteriori estimation, and "EAP" for the expected
+a posteriori estimation. Default method is "ML".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>range</code></td>
+<td>
+<p>A numeric vector of two components to restrict the range of ability scale for the ML, WL, EAP, and MAP scoring methods.
+Default is c(-5, 5).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>norm.prior</code></td>
+<td>
+<p>A numeric vector of two components specifying a mean and standard deviation of the normal prior distribution.
+These two parameters are used to obtain the gaussian quadrature points and the corresponding weights from the normal distribution. Default is
+c(0,1). Ignored if <code>method</code> is "ML" or "WL".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nquad</code></td>
+<td>
+<p>An integer value specifying the number of gaussian quadrature points from the normal prior distribution. Default is 41.
+Ignored if <code>method</code> is "ML", "WL", or "MAP".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>A two-column matrix or data frame containing the quadrature points (in the first column) and the corresponding weights
+(in the second column) of the latent variable prior distribution. The weights and quadrature points can be easily obtained
+using the function <code>gen.weight</code>. If NULL and <code>method</code> is "EAP", default values are used (see the arguments
+of <code>norm.prior</code> and <code>nquad</code>). Ignored if <code>method</code> is "ML", "WL" or "MAP".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncore</code></td>
+<td>
+<p>The number of logical CPU cores to use. Default is 1. See <code>est_score</code> for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>A logical value. If TRUE, the progress messages of purification procedure are suppressed. Default is TRUE.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The RDIF framework (Lim et al., 2022) consists of three IRT residual-based statistics: <code class="reqn">RDIF_{R}</code>, <code class="reqn">RDIF_{S}</code>,
+and <code class="reqn">RDIF_{RS}</code>. Under the null hypothesis that a test contains no DIF items, <code class="reqn">RDIF_{R}</code> and <code class="reqn">RDIF_{S}</code> follow
+normal distributions asymptotically. <code class="reqn">RDIF_{RS}</code> is a based on a bivariate normal distribution of <code class="reqn">RDIF_{R}</code> and
+<code class="reqn">RDIF_{S}</code> statistics. Under the null hypothesis of no DIF items, it follows a <code class="reqn">\chi^{2}</code> distribution asymptotically
+with 2 degrees of freedom. See Lim et al. (2022) for more details about RDIF framework.
+</p>
+<p>The <code>rdif</code> function computes all three RDIF statistics of <code class="reqn">RDIF_{R}</code>, <code class="reqn">RDIF_{S}</code>, and <code class="reqn">RDIF_{RS}</code>. The current
+version of <code>rdif</code> function supports both dichotomous and polytomous item response data. To compute the three statistics, the <code>rdif</code> function
+requires (1) item parameter estimates obtained from aggregate data regardless of group membership, (2) examinees' ability estimates
+(e.g., ML), and (3) examinees' item response data. Note that the ability estimates need to be computed using the aggregate data-based
+item parameter estimates. The item parameter estimates should be provided in the <code>x</code> argument, the ability estimates should
+be provided in the <code>score</code> argument, and the response data should be provided in the <code>data</code> argument. When the abilities
+are not given in the <code>score</code> argument (i.e., <code>score = NULL</code>), the <code>rdif</code> function estimates examinees' abilities
+automatically using the scoring method specified in the <code>method</code> argument (e.g., <code>method = "ML"</code>).
+</p>
+<p>The <code>group</code> argument accepts a vector of either two distinct numeric or character variables. Between two distinct variable, one is to
+represent the reference group and another one is to represent the focal group. The length of the vector should be the same with the number
+of rows in the response data and each value in the vector should indicate each examinee of the response data. Once the <code>gruop</code> is
+specified, a single numeric or character value needs to be provided in the <code>focal.name</code> argument to define which group variable in
+the <code>group</code> argument represents the focal group.
+</p>
+<p>As other DIF detection approaches, an iterative purification process can be implemented for the RDIF framework.
+When <code>purify = TRUE</code>, the purification process is implemented based on one of RDIF statistics specified in the <code>purify.by</code>
+argument (e.g, <code>purify.by="rdifrs"</code>). At each iterative purification, examinees' latent abilities are computed using purified items and
+scoring method specified in the <code>method</code> argument. The iterative purification process stops when no further DIF items are found or
+the process reaches a predetermined limit of iteration, which can be specified in the <code>max.iter</code> argument. See Lim et al. (2022)
+for more details about the purification procedure.
+</p>
+<p>Scoring with a limited number of items can result in large standard errors, which may impact the effectiveness of DIF detection within
+the RDIF framework. The <code>min.resp</code> argument can be employed to avoid using scores with significant standard errors when calculating
+the RDIF statistics, particularly during the purification process. For instance, if <code>min.resp</code> is not NULL (e.g., <code>min.resp=5</code>),
+item responses from examinees whose total item responses fall below the specified minimum number are treated as missing values (i.e., NA).
+Consequently, their ability estimates become missing values and are not utilized in computing the RDIF statistics. If <code>min.resp=NULL</code>,
+an examinee's score will be computed as long as there is at least one item response for the examinee.
+</p>
+
+
+<h3>Value</h3>
+
+<p>This function returns a list of four internal objects. The four objects are:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>no_purify</code></td>
+<td>
+<p>A list of several sub-objects containing the results of DIF analysis without a purification procedure. The sub-objects are:
+</p>
+
+<dl>
+<dt>dif_stat</dt>
+<dd>
+<p>A data frame containing the results of three RDIF statistics across all evaluated items. From the first column, each column
+indicates item's ID, <code class="reqn">RDIF_{R}</code> statistic, standardized <code class="reqn">RDIF_{R}</code>, <code class="reqn">RDIF_{S}</code> statistic, standardized <code class="reqn">RDIF_{S}</code>,
+<code class="reqn">RDIF_{RS}</code> statistic, p-value of the <code class="reqn">RDIF_{R}</code>, p-value of the <code class="reqn">RDIF_{S}</code>, p-value of the <code class="reqn">RDIF_{RS}</code>, sample size of
+the reference group, sample size of the focal group, and total sample size, respectively. Note that <code class="reqn">RDIF_{RS}</code> does not have its standardized
+value because it is a <code class="reqn">\chi^{2}</code> statistic.</p>
+</dd>
+<dt>moments</dt>
+<dd>
+<p>A data frame containing the moments of three RDIF statistics. From the first column, each column indicates item's ID,
+mean of <code class="reqn">RDIF_{R}</code>, standard deviation of <code class="reqn">RDIF_{R}</code>, mean of <code class="reqn">RDIF_{S}</code>, standard deviation of <code class="reqn">RDIF_{S}</code>, and
+covariance of <code class="reqn">RDIF_{R}</code> and <code class="reqn">RDIF_{S}</code>, respectively.</p>
+</dd>
+<dt>dif_item</dt>
+<dd>
+<p>A list of three numeric vectors showing potential DIF items flagged by each of the RDIF statistics. Each of the numeric vector
+means the items flagged by <code class="reqn">RDIF_{R}</code>, <code class="reqn">RDIF_{S}</code>, and <code class="reqn">RDIF_{RS}</code>, respectively.</p>
+</dd>
+<dt>score</dt>
+<dd>
+<p>A vector of ability estimates used to compute the RDIF statistics.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>purify</code></td>
+<td>
+<p>A logical value indicating whether the purification process was used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>with_purify</code></td>
+<td>
+<p>A list of several sub-objects containing the results of DIF analysis with a purification procedure. The sub-objects are:
+</p>
+
+<dl>
+<dt>purify.by</dt>
+<dd>
+<p>A character string indicating which RDIF statistic is used for the purification. "rdifr", "rdifs", and "rdifrs" refers to
+<code class="reqn">RDIF_{R}</code>, <code class="reqn">RDIF_{S}</code>, and <code class="reqn">RDIF_{RS}</code>, respectively.</p>
+</dd>
+<dt>dif_stat</dt>
+<dd>
+<p>A data frame containing the results of three RDIF statistics across all evaluated items. From the first column, each column
+indicates item's ID, <code class="reqn">RDIF_{R}</code> statistic, standardized <code class="reqn">RDIF_{R}</code>, <code class="reqn">RDIF_{S}</code> statistic, standardized <code class="reqn">RDIF_{S}</code>,
+<code class="reqn">RDIF_{RS}</code> statistic, p-value of the <code class="reqn">RDIF_{R}</code>, p-value of the <code class="reqn">RDIF_{S}</code>, p-value of the <code class="reqn">RDIF_{RS}</code>, sample size of
+the reference group, sample size of the focal group, total sample size, and <em>n</em>th iteration where the RDIF statistics were computed,
+respectively.</p>
+</dd>
+<dt>moments</dt>
+<dd>
+<p>A data frame containing the moments of three RDIF statistics. From the first column, each column indicates item's ID,
+mean of <code class="reqn">RDIF_{R}</code>, standard deviation of <code class="reqn">RDIF_{R}</code>, mean of <code class="reqn">RDIF_{S}</code>, standard deviation of <code class="reqn">RDIF_{S}</code>, covariance
+of <code class="reqn">RDIF_{R}</code> and <code class="reqn">RDIF_{S}</code>, and <em>n</em>th iteration where the RDIF statistics were computed, respectively.</p>
+</dd>
+<dt>dif_item</dt>
+<dd>
+<p>A list of three numeric vectors showing potential DIF items flagged by each of the RDIF statistics. Each of the numeric vector
+means the items flagged by <code class="reqn">RDIF_{R}</code>, <code class="reqn">RDIF_{S}</code>, and <code class="reqn">RDIF_{RS}</code>, respectively.</p>
+</dd>
+<dt>n.iter</dt>
+<dd>
+<p>A total number of iterations implemented for the purification.</p>
+</dd>
+<dt>score</dt>
+<dd>
+<p>A vector of final purified ability estimates used to compute the RDIF statistics.</p>
+</dd>
+<dt>complete</dt>
+<dd>
+<p>A logical value indicating whether the purification process was completed. If FALSE, it means that the purification process
+reached the maximum iteration number but it was not complete.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>A significance <code class="reqn">\alpha</code>-level used to compute the p-values of RDIF statistics.</p>
+</td>
+</tr>
+</table>
+<h3>Methods (by class)</h3>
+
+
+<ul>
+<li> <p><code>rdif(default)</code>: Default method to computes three RDIF statistics using a data frame <code>x</code> containing the item metadata.
+</p>
+</li>
+<li> <p><code>rdif(est_irt)</code>: An object created by the function <code>est_irt</code>.
+</p>
+</li>
+<li> <p><code>rdif(est_item)</code>: An object created by the function <code>est_item</code>.
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Hwanggyu Lim <a href="mailto:hglim83@gmail.com">hglim83@gmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Lim, H., &amp; Choe, E. M. (2023). Detecting differential item functioning in CAT using IRT residual DIF approach.
+<em>Journal of Educational Measurement</em>. <a href="https://doi.org/10.1111/jedm.12366">doi:10.1111/jedm.12366</a>.
+</p>
+<p>Lim, H., Choe, E. M., &amp; Han, K. T. (2022). A residual-based differential item functioning detection framework in
+item response theory. <em>Journal of Educational Measurement, 59</em>(1), 80-104. <a href="https://doi.org/10.1111/jedm.12313">doi:10.1111/jedm.12313</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>est_item</code>, <code>info</code>, <code>simdat</code>, <code>shape_df</code>,
+<code>gen.weight</code>, <code>est_score</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# call library
+library("dplyr")
+
+## Uniform DIF detection
+###############################################
+# (1) manipulate true uniform DIF data
+###############################################
+# import the "-prm.txt" output file from flexMIRT
+flex_sam &lt;- system.file("extdata", "flexmirt_sample-prm.txt", package = "irtQ")
+
+# select 36 of 3PLM items which are non-DIF items
+par_nstd &lt;-
+  bring.flexmirt(file = flex_sam, "par")$Group1$full_df %&gt;%
+  dplyr::filter(.data$model == "3PLM") %&gt;%
+  dplyr::filter(dplyr::row_number() %in% 1:36) %&gt;%
+  dplyr::select(1:6)
+par_nstd$id &lt;- paste0("nondif", 1:36)
+
+# generate four new items to inject uniform DIF
+difpar_ref &lt;-
+  shape_df(
+    par.drm = list(a = c(0.8, 1.5, 0.8, 1.5), b = c(0.0, 0.0, -0.5, -0.5), g = 0.15),
+    item.id = paste0("dif", 1:4), cats = 2, model = "3PLM"
+  )
+
+# manipulate uniform DIF on the four new items by adding constants to b-parameters
+# for the focal group
+difpar_foc &lt;-
+  difpar_ref %&gt;%
+  dplyr::mutate_at(.vars = "par.2", .funs = function(x) x + rep(0.7, 4))
+
+# combine the 4 DIF and 36 non-DIF items for both reference and focal groups
+# thus, the first four items have uniform DIF
+par_ref &lt;- rbind(difpar_ref, par_nstd)
+par_foc &lt;- rbind(difpar_foc, par_nstd)
+
+# generate the true thetas
+set.seed(123)
+theta_ref &lt;- rnorm(500, 0.0, 1.0)
+theta_foc &lt;- rnorm(500, 0.0, 1.0)
+
+# generate the response data
+resp_ref &lt;- simdat(par_ref, theta = theta_ref, D = 1)
+resp_foc &lt;- simdat(par_foc, theta = theta_foc, D = 1)
+data &lt;- rbind(resp_ref, resp_foc)
+
+###############################################
+# (2) estimate the item and ability parameters
+#     using the aggregate data
+###############################################
+# estimate the item parameters
+est_mod &lt;- est_irt(data = data, D = 1, model = "3PLM")
+est_par &lt;- est_mod$par.est
+
+# estimate the ability parameters using ML
+score &lt;- est_score(x = est_par, data = data, method = "ML")$est.theta
+
+###############################################
+# (3) conduct DIF analysis
+###############################################
+# create a vector of group membership indicators
+# where '1' indicates the focal group
+group &lt;- c(rep(0, 500), rep(1, 500))
+
+# (a)-1 compute RDIF statistics by providing scores,
+#       and without a purification
+dif_nopuri_1 &lt;- rdif(
+  x = est_par, data = data, score = score,
+  group = group, focal.name = 1, D = 1, alpha = 0.05
+)
+print(dif_nopuri_1)
+
+# (a)-2 compute RDIF statistics by not providing scores
+#       and without a purification
+dif_nopuri_2 &lt;- rdif(
+  x = est_par, data = data, score = NULL,
+  group = group, focal.name = 1, D = 1, alpha = 0.05,
+  method = "ML"
+)
+print(dif_nopuri_2)
+
+# (b)-1 compute RDIF statistics with a purification
+#       based on RDIF(R)
+dif_puri_r &lt;- rdif(
+  x = est_par, data = data, score = score,
+  group = group, focal.name = 1, D = 1, alpha = 0.05,
+  purify = TRUE, purify.by = "rdifr"
+)
+print(dif_puri_r)
+
+# (b)-2 compute RDIF statistics with a purification
+#       based on RDIF(S)
+dif_puri_s &lt;- rdif(
+  x = est_par, data = data, score = score,
+  group = group, focal.name = 1, D = 1, alpha = 0.05,
+  purify = TRUE, purify.by = "rdifs"
+)
+print(dif_puri_s)
+
+# (b)-3 compute RDIF statistics with a purification
+#       based on RDIF(RS)
+dif_puri_rs &lt;- rdif(
+  x = est_par, data = data, score = score,
+  group = group, focal.name = 1, D = 1, alpha = 0.05,
+  purify = TRUE, purify.by = "rdifrs"
+)
+print(dif_puri_rs)
+
+
+</code></pre>
+
+
+</div>

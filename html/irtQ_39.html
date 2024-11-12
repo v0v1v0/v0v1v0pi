@@ -1,0 +1,148 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>lwrc</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Lord-Wingersky Recursion Formula</h2>
+
+<h3>Description</h3>
+
+<p>This function computes the conditional distributions of number-correct (or observed) scores
+given probabilities of category responses to items or given a set of theta values using Lord and
+Wingersky recursion formula (1984).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">lwrc(x = NULL, theta, prob = NULL, cats, D = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A data frame containing the item metadata (e.g., item parameters, number of categories, models ...).
+See <code>irtfit</code>, <code>info</code> or <code>simdat</code> for more details about the item metadata.
+This data frame can be easily obtained using the function <code>shape_df</code>. If <code>prob = NULL</code>, this data frame is
+used in the recursion formula. See below for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta</code></td>
+<td>
+<p>A vector of theta values where the conditional distribution of observed scores are computed.
+The theta values are only required when a data frame is specified in the argument <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob</code></td>
+<td>
+<p>A matrix containing the probability of answering each category of an item. Each row indicates an item and
+each column represents each category of the item. When the number of categories differs between items, the empty cells
+should be filled with zeros or NA values. If <code>x = NULL</code>, this probability matrix is used in the recursion Formula.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cats</code></td>
+<td>
+<p>A numeric vector specifying the number of categories for each item. For example, a dichotomous
+item has two categories. This information is only required when a probability matrix is specified in the argument
+<code>prob</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>A scaling factor in IRT models to make the logistic function as close as possible to the normal ogive function
+(if set to 1.7). Default is 1.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The Lord and Wingersky recursive algorithm is an efficient way of calculating the compound probabilities
+of any number-correct scores on a test based on IRT models. This algorithm is particularly useful when computing
+the IRT model-based observed score distribution for a test.
+</p>
+<p>To compute the conditional distributions of observed scores, either the item metadata set specified in <code>x</code> or
+the probability matrix specified in <code>prob</code> can be used.
+</p>
+
+
+<h3>Value</h3>
+
+<p>When the <code>prob</code> argument is provided, this function returns a vector of the probabilities of obtaining every
+observed score on a test. When the <code>x</code> argument is specified, the function returns a matrix of conditional probabilities
+across all possible observed scores and theta values.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Hwanggyu Lim <a href="mailto:hglim83@gmail.com">hglim83@gmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Kolen, M. J. &amp; Brennan, R. L. (2004) <em>Test Equating, Scaling, and Linking</em> (2nd ed.). New York:
+Springer.
+</p>
+<p>Lord, F. &amp; Wingersky, M. (1984). Comparison of IRT true score and equipercentile observed score equatings.
+<em>Applied Psychological Measurement, 8</em>(4), 453-461.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## example 1: when a matrix of probabilities is used as a data set
+## this is an example from Kolen and Brennan (2004, p. 183)
+# create a matrix of probabilities of getting correct and incorrect answers for three items
+probs &lt;- matrix(c(.74, .73, .82, .26, .27, .18), nrow = 3, ncol = 2, byrow = FALSE)
+
+# create a vector of score categories for the three items
+cats &lt;- c(2, 2, 2)
+
+# compute the conditional distributions of observed scores
+lwrc(prob = probs, cats = cats)
+
+## example 2: when a matrix of probabilities is used as a data set
+## with a mixed-format test
+# category probabilities for a dichotomous item
+p1 &lt;- c(0.2, 0.8, 0, 0, 0)
+# category probabilities for a dichotomous item
+p2 &lt;- c(0.4, 0.6, NA, NA, NA)
+# category probabilities for a polytomous item with five categories
+p3 &lt;- c(0.1, 0.2, 0.2, 0.4, 0.1)
+# category probabilities for a polytomous item with three categories
+p4 &lt;- c(0.5, 0.3, 0.2, NA, NA)
+
+# rbind the probability vectors
+p &lt;- rbind(p1, p2, p3, p4)
+
+# create a vector of score categories for the four items
+cats &lt;- c(2, 2, 5, 3)
+
+# compute the conditional distributions of observed scores
+lwrc(prob = p, cats = cats)
+
+## example 3: when a data frame for the item metadata of
+## a mixed-format test is used.
+# import the "-prm.txt" output file from flexMIRT
+flex_prm &lt;- system.file("extdata", "flexmirt_sample-prm.txt", package = "irtQ")
+
+# read item parameters and transform them to item metadata
+x &lt;- bring.flexmirt(file = flex_prm, "par")$Group1$full_df
+
+# compute the conditional distributions of observed scores
+lwrc(x = x, theta = seq(-4, 4, 0.2), D = 1)
+
+</code></pre>
+
+
+</div>

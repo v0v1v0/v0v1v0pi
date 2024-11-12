@@ -1,0 +1,776 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bayes</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Bayesian D-Optimal Designs</h2>
+
+<h3>Description</h3>
+
+<p>Finds (pseudo) Bayesian D-optimal designs for linear and nonlinear models.
+It should be used when the user assumes a (truncated) prior distribution for the unknown model parameters.
+If you have a discrete prior, please use the function <code>robust</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">bayes(
+  formula,
+  predvars,
+  parvars,
+  family = gaussian(),
+  prior,
+  lx,
+  ux,
+  iter,
+  k,
+  fimfunc = NULL,
+  ICA.control = list(),
+  sens.control = list(),
+  crt.bayes.control = list(),
+  sens.bayes.control = list(),
+  initial = NULL,
+  npar = NULL,
+  plot_3d = c("lattice", "rgl"),
+  x = NULL,
+  crtfunc = NULL,
+  sensfunc = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>A linear or nonlinear model <code>formula</code>.
+A symbolic description of the model consists of predictors and the unknown model parameters.
+Will be coerced to a <code>formula</code> if necessary.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predvars</code></td>
+<td>
+<p>A vector of characters. Denotes the predictors in the <code>formula</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parvars</code></td>
+<td>
+<p>A vector of characters. Denotes the unknown parameters in the <code>formula</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>A description of the response distribution and the link function to be used in the model.
+This can be a family function, a call to a family function or a character string naming the family.
+Every family function has a link argument allowing to specify the link function to be applied on the response variable.
+If not specified, default links are used. For details see <code>family</code>.
+By default, a linear gaussian model <code>gaussian()</code> is applied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior</code></td>
+<td>
+<p>An object of class <code>cprior</code>. User can also use one of the functions
+<code>uniform</code>, <code>normal</code>,
+<code>skewnormal</code> or <code>student</code>  to create the  prior. See 'Details' of <code>bayes</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lx</code></td>
+<td>
+<p>Vector of lower bounds for the predictors. Should be in the same order as <code>predvars</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ux</code></td>
+<td>
+<p>Vector of upper bounds for the predictors. Should be in the same order as <code>predvars</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter</code></td>
+<td>
+<p>Maximum number of iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>Number of design points. Must be at least equal to the number of model parameters to avoid singularity of the FIM.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fimfunc</code></td>
+<td>
+<p>A function. Returns the FIM as a <code>matrix</code>. Required when <code>formula</code> is missing. See 'Details' of <code>minimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ICA.control</code></td>
+<td>
+<p>ICA control parameters. For details, see <code>ICA.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sens.control</code></td>
+<td>
+<p>Control Parameters for Calculating the ELB. For details, see <code>sens.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>crt.bayes.control</code></td>
+<td>
+<p>A list. Control parameters to approximate the integral in  the Bayesian criterion at a given design over the parameter space.
+For details, see <code>crt.bayes.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sens.bayes.control</code></td>
+<td>
+<p>A list. Control parameters to verify the general equivalence theorem. For details, see <code>sens.bayes.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial</code></td>
+<td>
+<p>A matrix of the  initial design points and weights that will be inserted into the initial solutions (countries) of the algorithm.
+Every row is a design, i.e.  a concatenation of <code>x</code> and <code>w</code>. Will be coerced to a <code>matrix</code> if necessary.  See 'Details' of <code>minimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>npar</code></td>
+<td>
+<p>Number of model parameters.  Used when <code>fimfunc</code> is given instead of <code>formula</code> to specify the number of model parameters.
+If not specified correctly, the sensitivity (derivative) plot may be shifted below the y-axis.
+When <code>NULL</code> (default), it will be set to <code>length(parvars)</code> or
+<code>prior$npar</code> when <code>missing(formula)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_3d</code></td>
+<td>
+<p>Which package should be used to plot the sensitivity (derivative) function for two-dimensional design space. Defaults to <code>"lattice"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A vector of candidate design (support) points.
+When is not set to <code>NULL</code> (default),
+the algorithm only finds the optimal weights for the candidate points in  <code>x</code>.
+Should be set when the user has a finite number of candidate design points  and the purpose
+is to find the optimal weight for each of them (when zero, they will be excluded from the design).
+For design points with more than one dimension, see 'Details' of <code>sensminimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>crtfunc</code></td>
+<td>
+<p>(Optional) a function that specifies an arbitrary criterion. It must have especial arguments and output. See 'Details' of <code>bayes</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sensfunc</code></td>
+<td>
+<p>(Optional) a function that specifies the sensitivity function for <code>crtfunc</code>. See 'Details' of <code>bayes</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Let <code class="reqn">\Xi</code> be the space of all  approximate designs with
+<code class="reqn">k</code> design points (support points) at <code class="reqn">x_1, x_2, ...,  x_k</code> from  design space <code class="reqn">\chi</code> with
+corresponding weights  <code class="reqn">w_1, . . . ,w_k</code>.
+Let <code class="reqn">M(\xi, \theta)</code> be the Fisher information
+matrix (FIM) of a <code class="reqn">k-</code>point design <code class="reqn">\xi</code>
+and  <code class="reqn">\pi(\theta)</code> is a user-given  prior distribution for the vector of unknown parameters <code class="reqn">\theta</code>.
+A  Bayesian D-optimal design <code class="reqn">\xi^*</code> minimizes over <code class="reqn">\Xi</code>
+</p>
+<p style="text-align: center;"><code class="reqn">\int_{\theta \in \Theta} -\log|M(\xi, \theta)| \pi(\theta) d\theta.</code>
+</p>
+
+<p>An object of class <code>cprior</code>  is a  list with the following components:
+</p>
+
+<ul>
+<li>
+<p><code>fn</code>: Prior distribution as an R <code>function</code> with argument <code>param</code> that is the vector of the unknown parameters. See below.
+</p>
+</li>
+<li>
+<p><code>npar</code>: Number of unknown parameters and is equal to the length of <code>param</code>.
+</p>
+</li>
+<li>
+<p><code>lower</code>: Argument <code>lower</code>. It has the same length as <code>param</code>.
+</p>
+</li>
+<li>
+<p><code>upper</code>: Argument <code>upper</code>. It has the same length as <code>param</code>.
+</p>
+</li>
+</ul>
+<p>A <code>cprior</code> object  will be passed to the argument <code>prior</code> of the function <code>bayes</code>.
+The argument <code>param</code> in <code>fn</code> has the same order as the argument <code>parvars</code> when the model is specified by a <code>formula</code>.
+Otherwise, it is the same as the argument <code>param</code> in the function <code>fimfunc</code>.<br>
+The user can use the implemented  priors that are <code>uniform</code>, <code>normal</code>,
+<code>skewnormal</code> and <code>student</code> to create a <code>cprior</code> object.
+</p>
+<p>To verify the equivalence theorem of the output design,
+use <code>plot</code> function or change the value of the <code>checkfreq</code> in the argument <code>ICA.control</code>.
+</p>
+<p>To increase the speed of the algorithm, change the value of the tuning parameters <code>tol</code> and <code>maxEval</code> via
+the argument  <code>crt.bayes.control</code> when <code>crt.bayes.control$method = "cubature"</code>.
+Similarly, this applies  when <code>crt.bayes.control$method = "quadrature"</code>.
+In general, if the CPU time matters, the user should find an appropriate speed-accuracy trade-off  for her/his own problem.
+See 'Examples' for more details.
+</p>
+<p>If some of the parameters are known and fixed, they should be set
+to their values via the argument <code>paravars</code> when the model is given by <code>formula</code>. In this case,
+the user must provide the number of parameters via the argument <code>npar</code> for verifying the general equivalence theorem.
+See 'Examples', Section 'Weibull',  'Richards' and 'Exponential' model.
+</p>
+<p><code>crtfunc</code> is a function that is used
+to specify a new criterion.
+Its arguments are:
+</p>
+
+<ul>
+<li>
+<p> design points <code>x</code> (as a <code>vector</code>).
+</p>
+</li>
+<li>
+<p> design weights <code>w</code> (as a <code>vector</code>).
+</p>
+</li>
+<li>
+<p> model parameters as follows.
+</p>
+
+<ul>
+<li>
+<p> If <code>formula</code> is specified:
+they should be the same parameter specified by <code>parvars</code>.
+Note that <code>crtfunc</code> must be vectorized with respect to the parameters.
+The parameters enter the body of <code>crtfunc</code> as a <code>vector</code> with dynamic length.
+</p>
+</li>
+<li>
+<p> If FIM is specified via the argument <code>fimfunc</code>:
+<code>param</code> that is a matrix where its row is a
+vector of parameters values.
+</p>
+</li>
+</ul>
+</li>
+<li> <p><code>fimfunc</code> is a <code>function</code> that takes the other arguments of <code>crtfunc</code>
+and returns the computed Fisher information matrices for each parameter vector.
+The output is a list of matrices.
+</p>
+</li>
+</ul>
+<p>The <code>crtfunc</code> function must return a vector of  criterion values associated with the vector of parameter values.
+The <code>sensfunc</code> is the optional sensitivity function for the criterion
+<code>crtfunc</code>. It has one more argument than  <code>crtfunc</code>,
+which is  <code>xi_x</code>. It denotes the design point of the degenerate design
+and  must be a vector with the same length as the number of  predictors.
+For more details, see 'Examples'.
+</p>
+
+
+<h3>Value</h3>
+
+<p>an object of class <code>minimax</code> that is a list including three sub-lists:
+</p>
+
+<dl>
+<dt><code>arg</code></dt>
+<dd>
+<p>A list of design and algorithm parameters.</p>
+</dd>
+<dt><code>evol</code></dt>
+<dd>
+<p>A list of length equal to the number of iterations that stores the information about the best design (design with the minimum criterion value) of each iteration as follows:
+<code>evol[[iter]]</code> contains:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+      <code>iter</code>                   </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Iteration number.</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>x</code>                      </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Design points. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>w</code>                      </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Design weights. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>min_cost</code>               </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Value of the criterion for the best imperialist (design).  </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>mean_cost</code>              </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Mean of the criterion values of all the imperialists. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>sens</code>                   </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> An object of class <code>'sensminimax'</code>. See below.</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+    </td>
+</tr>
+</table>
+</dd>
+<dt><code>empires</code></dt>
+<dd>
+<p>A list of all the empires of the last iteration.</p>
+</dd>
+<dt><code>alg</code></dt>
+<dd>
+<p>A list with following information:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+      <code>nfeval</code>           </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Number of function evaluations. It does not count the function evaluations from checking the general equivalence theorem. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>nlocal</code>           </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Number of successful local searches. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>nrevol</code>           </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Number of successful revolutions. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>nimprove</code>         </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Number of successful movements toward the imperialists in the assimilation step. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>convergence</code>      </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Stopped by <code>'maxiter'</code> or <code>'equivalence'</code>?</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+    </td>
+</tr>
+</table>
+</dd>
+<dt><code>method</code></dt>
+<dd>
+<p>A type of optimal designs used.</p>
+</dd>
+<dt><code>design</code></dt>
+<dd>
+<p>Design points and weights at the final iteration.</p>
+</dd>
+<dt><code>out</code></dt>
+<dd>
+<p>A data frame of design points, weights, value of the criterion for the best imperialist (min_cost), and Mean of the criterion values of all the imperialistsat each iteration (mean_cost).</p>
+</dd>
+</dl>
+<p>The list <code>sens</code>  contains information about the design verification by the general equivalence theorem.
+See <code>sensbayes</code> for more Details.
+It is only given every <code>ICA.control$checkfreq</code> iterations
+and also the last iteration if   <code>ICA.control$checkfreq &gt;= 0</code>. Otherwise, <code>NULL</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Atashpaz-Gargari, E, &amp; Lucas, C (2007). Imperialist competitive algorithm: an algorithm for optimization inspired by imperialistic competition. In 2007 IEEE congress on evolutionary computation (pp. 4661-4667). IEEE.<br>
+Masoudi E, Holling H, Duarte BP, Wong Wk (2019). Metaheuristic Adaptive Cubature Based Algorithm to Find Bayesian Optimal Designs for Nonlinear Models. Journal of Computational and Graphical Statistics. &lt;doi:10.1080/10618600.2019.1601097&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>sensbayes</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#############################################
+# Two parameter logistic model: uniform prior
+#############################################
+# set the unfirom prior
+uni &lt;- uniform(lower =  c(-3, .1), upper = c(3, 2))
+# set the logistic model with formula
+res1 &lt;- bayes(formula = ~1/(1 + exp(-b *(x - a))),
+              predvars = "x", parvars = c("a", "b"),
+              family = binomial(), lx = -3, ux = 3,
+              k =  5, iter = 1, prior = uni,
+              ICA.control = list(rseed = 1366))
+
+## Not run: 
+  res1 &lt;- update(res1, 500)
+  plot(res1)
+
+## End(Not run)
+# You can also use your  Fisher information matrix (FIM) if you think it is faster!
+## Not run: 
+  bayes(fimfunc = FIM_logistic, lx = -3, ux = 3, k =  5, iter = 500,
+        prior = uni, ICA.control = list(rseed = 1366))
+
+## End(Not run)
+
+# with fixed x
+## Not run: 
+  res1.1 &lt;- bayes(formula = ~1/(1 + exp(-b *(x - a))),
+                  predvars = "x", parvars = c("a", "b"),
+                  family = binomial(), lx = -3, ux = 3,
+                  k =  5, iter = 100, prior = uni,
+                  x = c( -3, -1.5, 0,  1.5, 3),
+                  ICA.control = list(rseed = 1366))
+  plot(res1.1)
+  # not optimal
+
+## End(Not run)
+
+# with quadrature formula
+## Not run: 
+  res1.2 &lt;- bayes(formula = ~1/(1 + exp(-b *(x - a))),
+                  predvars = "x", parvars = c("a", "b"),
+                  family = binomial(), lx = -3, ux = 3,
+                  k =  5, iter = 1, prior = uni,
+                  crt.bayes.control = list(method = "quadrature"),
+                  ICA.control = list(rseed = 1366))
+  res1.2 &lt;- update(res1.2, 500)
+  plot(res1.2) # not optimal
+  # compare it with res1 that was found by automatic integration
+  plot(res1)
+
+  # we increase the number of quadrature nodes
+  res1.3 &lt;- bayes(formula = ~1/(1 + exp(-b *(x - a))),
+                  predvars = "x", parvars = c("a", "b"),
+                  family = binomial(), lx = -3, ux = 3,
+                  k =  5, iter = 1, prior = uni,
+                  crt.bayes.control = list(method = "quadrature",
+                                           quadrature = list(level = 9)),
+                  ICA.control = list(rseed = 1366))
+  res1.3 &lt;- update(res1.3, 500)
+  plot(res1.3)
+  # by automatic integration (method = "cubature"),
+  #  we did not need to worry about the number of nodes.
+
+## End(Not run)
+###############################################
+# Two parameter logistic model: normal prior #1
+###############################################
+# defining the normal prior #1
+norm1 &lt;- normal(mu =  c(0, 1),
+                sigma = matrix(c(1, -0.17, -0.17, .5), nrow = 2),
+                lower =  c(-3, .1), upper = c(3, 2))
+## Not run: 
+  # initializing
+  res2 &lt;- bayes(formula = ~1/(1 + exp(-b *(x - a))), predvars = "x", parvars = c("a", "b"),
+                family = binomial(), lx = -3, ux = 3, k =  4, iter = 1, prior = norm1,
+                ICA.control = list(rseed = 1366))
+  res2 &lt;- update(res2, 500)
+  plot(res2)
+
+## End(Not run)
+
+###############################################
+# Two parameter logistic model: normal prior #2
+###############################################
+# defining the normal prior #1
+norm2 &lt;- normal(mu =  c(0, 1),
+                sigma = matrix(c(1, 0, 0, .5), nrow = 2),
+                lower =  c(-3, .1), upper = c(3, 2))
+## Not run: 
+  # initializing
+  res3 &lt;- bayes(formula = ~1/(1 + exp(-b *(x - a))), predvars = "x", parvars = c("a", "b"),
+                family = binomial(), lx = -3, ux = 3, k =  4, iter = 1, prior = norm2,
+                ICA.control = list(rseed = 1366))
+
+  res3 &lt;- update(res3, 700)
+  plot(res3,
+       sens.bayes.control = list(cubature = list(maxEval = 3000, tol = 1e-4)),
+       sens.control = list(optslist = list(maxeval = 3000)))
+
+## End(Not run)
+
+
+######################################################
+# Two parameter logistic model: skewed normal prior #1
+######################################################
+skew1 &lt;- skewnormal(xi = c(0, 1),
+                    Omega = matrix(c(1, -0.17, -0.17, .5), nrow = 2),
+                    alpha = c(1, 0), lower =  c(-3, .1), upper = c(3, 2))
+## Not run: 
+  res4 &lt;- bayes(formula = ~1/(1 + exp(-b *(x - a))), predvars = "x", parvars = c("a", "b"),
+                family = binomial(), lx = -3, ux = 3, k =  4, iter = 700, prior = skew1,
+                ICA.control = list(rseed = 1366, ncount = 60))
+  plot(res4,
+       sens.bayes.control = list(cubature = list(maxEval = 3000, tol = 1e-4)),
+       sens.control = list(optslist = list(maxeval = 3000)))
+
+## End(Not run)
+
+
+######################################################
+# Two parameter logistic model: skewed normal prior #2
+######################################################
+skew2 &lt;- skewnormal(xi = c(0, 1),
+                    Omega = matrix(c(1, -0.17, -0.17, .5), nrow = 2),
+                    alpha = c(-1, 0), lower =  c(-3, .1), upper = c(3, 2))
+## Not run: 
+  res5 &lt;- bayes(formula = ~1/(1 + exp(-b *(x - a))), predvars = "x", parvars = c("a", "b"),
+                family = binomial(), lx = -3, ux = 3, k =  4, iter = 700, prior = skew2,
+                ICA.control = list(rseed = 1366, ncount = 60))
+  plot(res5,
+       sens.bayes.control = list(cubature = list(maxEval = 3000, tol = 1e-4)),
+       sens.control = list(optslist = list(maxeval = 3000)))
+
+## End(Not run)
+
+###############################################
+# Two parameter logistic model: t student prior
+###############################################
+# set the prior
+stud &lt;- student(mean =  c(0, 1), S   = matrix(c(1, -0.17, -0.17, .5), nrow = 2),
+                df = 3, lower =  c(-3, .1), upper = c(3, 2))
+## Not run: 
+  res6 &lt;- bayes(formula = ~1/(1 + exp(-b *(x - a))), predvars = "x", parvars = c("a", "b"),
+                family = binomial(), lx = -3, ux = 3, k =  5, iter = 500, prior = stud,
+                ICA.control = list(ncount = 50, rseed = 1366))
+  plot(res6)
+
+## End(Not run)
+# not bad, but to find a very accurate designs we increase
+# the ncount to 200 and repeat the optimization
+## Not run: 
+  res6 &lt;- bayes(formula = ~1/(1 + exp(-b *(x - a))),
+                predvars = "x", parvars = c("a", "b"),
+                family = binomial(), lx = -3, ux = 3, k =  5, iter = 1000, prior = stud,
+                ICA.control = list(ncount = 200,  rseed = 1366))
+  plot(res6)
+
+## End(Not run)
+
+
+##############################################
+# 4-parameter sigmoid Emax model: unform prior
+##############################################
+lb &lt;- c(4, 11, 100, 5)
+ub &lt;- c(8, 15, 130, 9)
+## Not run: 
+  res7 &lt;- bayes(formula = ~ theta1 + (theta2 - theta1)*(x^theta4)/(x^theta4 + theta3^theta4),
+                predvars = c("x"), parvars = c("theta1", "theta2", "theta3", "theta4"),
+                lx = .001, ux = 500, k = 5, iter = 200, prior = uniform(lb, ub),
+                ICA.control = list(rseed = 1366, ncount = 60))
+  plot(res7,
+       sens.bayes.control = list(cubature = list(maxEval = 500, tol = 1e-3)),
+       sens.control = list(optslist = list(maxeval = 500)))
+
+## End(Not run)
+
+#######################################################################
+# 2-parameter Cox Proportional-Hazards Model for type one cenosred data
+#######################################################################
+# The Fisher information matrix is available here with name FIM_2par_exp_censor1
+# However, we should reparameterize the function to match the standard of the argument 'fimfunc'
+myfim &lt;- function(x, w, param)
+  FIM_2par_exp_censor1(x = x, w = w, param = param, tcensor = 30)
+## Not run: 
+  res8 &lt;- bayes(fimfunc = myfim, lx = 0, ux = 1, k = 4,
+                iter = 1, prior = uniform(c(-11, -11), c(11, 11)),
+                ICA.control = list(rseed = 1366))
+
+  res8 &lt;- update(res8, 200)
+  plot(res8,
+       sens.bayes.control = list(cubature = list(maxEval = 500, tol = 1e-3)),
+       sens.control = list(optslist = list(maxeval = 500)))
+
+## End(Not run)
+
+
+#######################################################################
+# 2-parameter Cox Proportional-Hazards Model for random cenosred data
+#######################################################################
+# The Fisher information matrix is available here with name FIM_2par_exp_censor2
+# However, we should reparameterize the function to match the standard of the argument 'fimfunc'
+myfim &lt;- function(x, w, param)
+  FIM_2par_exp_censor2(x = x, w = w, param = param, tcensor = 30)
+## Not run: 
+  res9 &lt;- bayes(fimfunc = myfim, lx = 0, ux = 1, k = 2,
+                iter = 200, prior = uniform(c(-11, -11), c(11, 11)),
+                ICA.control = list(rseed = 1366))
+  plot(res9,
+       sens.bayes.control = list(cubature = list(maxEval = 100, tol = 1e-3)),
+       sens.control = list(optslist = list(maxeval = 100)))
+
+## End(Not run)
+
+#################################
+# Weibull model: Uniform prior
+################################
+# see Dette, H., &amp; Pepelyshev, A. (2008).
+# Efficient experimental designs for sigmoidal growth models.
+# Journal of statistical planning and inference, 138(1), 2-17.
+
+## See how we fixed a some parameters in Bayesian designs
+## Not run: 
+  res10 &lt;- bayes(formula = ~a - b * exp(-lambda * t ^h),
+                 predvars = c("t"),
+                 parvars = c("a=1", "b=1", "lambda", "h=1"),
+                 lx = .00001, ux = 20,
+                 prior = uniform(.5, 2.5), k = 5, iter = 400,
+                 ICA.control = list(rseed = 1366))
+  plot(res10)
+
+## End(Not run)
+
+#################################
+# Weibull model: Normal prior
+################################
+norm3 &lt;- normal(mu = 1, sigma = .1, lower = .5, upper = 2.5)
+res11 &lt;- bayes(formula = ~a - b * exp(-lambda * t ^h),
+               predvars = c("t"),
+               parvars = c("a=1", "b=1", "lambda", "h=1"),
+               lx = .00001, ux = 20, prior = norm3, k = 4, iter = 1,
+               ICA.control = list(rseed = 1366))
+
+## Not run: 
+  res11 &lt;- update(res11, 400)
+  plot(res11)
+
+## End(Not run)
+
+#################################
+# Richards model: Normal prior
+#################################
+norm4 &lt;- normal(mu = c(1, 1), sigma = matrix(c(.2, 0.1, 0.1, .4), 2, 2),
+                lower = c(.4, .4), upper = c(1.6, 1.6))
+## Not run: 
+  res12 &lt;- bayes(formula = ~a/(1 + b * exp(-lambda*t))^h,
+                 predvars = c("t"),
+                 parvars = c("a=1", "b", "lambda", "h=1"),
+                 lx = .00001, ux = 10,
+                 prior = norm4,
+                 k = 5, iter = 400,
+                 ICA.control = list(rseed = 1366))
+  plot(res12,
+       sens.bayes.control = list(cubature = list(maxEval = 1000, tol = 1e-3)),
+       sens.control = list(optslist = list(maxeval = 1000)))
+  ## or we can use the quadrature formula to plot the derivative function
+  plot(res12,
+       sens.bayes.control = list(method = "quadrature"),
+       sens.control = list(optslist = list(maxeval = 1000)))
+
+
+## End(Not run)
+
+#################################
+# Exponential model: Uniform prior
+#################################
+## Not run: 
+res13 &lt;- bayes(formula = ~a + exp(-b*x), predvars = "x",
+               parvars = c("a = 1", "b"),
+               lx = 0.0001, ux = 1,
+               prior = uniform(lower = 1, upper = 20),
+               iter = 300, k = 3,
+               ICA.control= list(rseed = 100))
+  plot(res13)
+
+## End(Not run)
+
+#################################
+# Power logistic model
+#################################
+# See, Duarte, B. P., &amp; Wong, W. K. (2014).
+# A Semidefinite Programming based approach for finding
+# Bayesian optimal designs for nonlinear models
+uni1 &lt;- uniform(lower = c(-.3, 6, .5), upper = c(.3, 8, 1))
+## Not run: 
+  res14 &lt;- bayes(formula = ~1/(1 + exp(-b *(x - a)))^s, predvars = "x",
+                 parvars = c("a", "b", "s"),
+                 lx = -1, ux = 1, prior = uni1, k = 5, iter = 1)
+  res14 &lt;- update(res14, 300)
+  plot(res14)
+
+## End(Not run)
+
+############################################################################
+# A two-variable generalized linear model with a gamma distributed response
+############################################################################
+lb &lt;- c(.5, 0, 0, 0, 0, 0)
+ub &lt;- c(2, 1, 1, 1, 1, 1)
+myformula1 &lt;- ~beta0+beta1*x1+beta2*x2+beta3*x1^2+beta4*x2^2+beta5*x1*x2
+## Not run: 
+  res15 &lt;- bayes(formula = myformula1,
+                 predvars = c("x1", "x2"), parvars = paste("beta", 0:5, sep = ""),
+                 family = Gamma(),
+                 lx = rep(0, 2), ux = rep(1, 2),
+                 prior = uniform(lower = lb, upper = ub),
+                 k = 7,iter = 1, ICA.control = list(rseed = 1366))
+  res14 &lt;- update(res14, 500)
+  plot(res14,
+       sens.bayes.control = list(cubature = list(maxEval = 5000, tol = 1e-4)),
+       sens.control = list(optslist = list(maxeval = 3000)))
+
+## End(Not run)
+
+#################################
+# Three parameter logistic model
+#################################
+## Not run: 
+sigma1 &lt;- matrix(-0.1, nrow = 3, ncol = 3)
+diag(sigma1) &lt;- c(.5, .4, .1)
+norm5 &lt;- normal(mu =  c(0, 1, .2), sigma = sigma1,
+                lower =  c(-3, .1, 0), upper = c(3, 2, .7))
+  res16 &lt;- bayes(formula = ~ c + (1-c)/(1 + exp(-b *(x - a))), predvars = "x",
+                 parvars = c("a", "b", "c"),
+                 family = binomial(), lx = -3, ux = 3,
+                 k =  4, iter = 500, prior = norm5,
+                 ICA.control = list(rseed = 1366, ncount = 50),
+                 crt.bayes.control = list(cubature = list(maxEval = 2500, tol = 1e-4)))
+  plot(res16,
+       sens.bayes.control = list(cubature = list(maxEval = 3000, tol = 1e-4)),
+       sens.control = list(optslist = list(maxeval = 3000)))
+  # took 925 second on my system
+
+## End(Not run)
+
+
+</code></pre>
+
+
+</div>

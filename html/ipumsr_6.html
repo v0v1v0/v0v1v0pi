@@ -1,0 +1,272 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>add_to_extract_micro</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Add values to an existing extract definition for an IPUMS microdata
+collection</h2>
+
+<h3>Description</h3>
+
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental"><img src="../help/figures/lifecycle-experimental.svg" alt="[Experimental]"></a>
+</p>
+<p>Add new values or replace existing values in an IPUMS microdata extract
+definition. All fields are optional, and if omitted, will be unchanged.
+Supplying a value
+for fields that take a single value, such as <code>description</code> and <code>data_format</code>,
+will replace the existing value with the supplied value.
+</p>
+<p>This function is marked as experimental because it is typically not the best
+option for maintaining reproducible extract definitions and may be retired
+in the future. For reproducibility, users should strive to build extract
+definitions with <code>define_extract_micro()</code>.
+</p>
+<p>If you have a complicated extract definition to revise, but do not have
+the original extract definition code that created it, we suggest that you
+save the revised extract as a JSON file with <code>save_extract_as_json()</code>. This
+will create a stable version of the extract definition that
+can be used in the future as needed.
+</p>
+<p>To remove existing values from an IPUMS microdata extract definition, use
+<code>remove_from_extract()</code>.
+</p>
+<p>Learn more about the IPUMS API in <code>vignette("ipums-api")</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'micro_extract'
+add_to_extract(
+  extract,
+  description = NULL,
+  samples = NULL,
+  variables = NULL,
+  time_use_variables = NULL,
+  sample_members = NULL,
+  data_format = NULL,
+  data_structure = NULL,
+  rectangular_on = NULL,
+  case_select_who = NULL,
+  data_quality_flags = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>extract</code></td>
+<td>
+<p>An <code>ipums_extract</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>description</code></td>
+<td>
+<p>Description of the extract.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>samples</code></td>
+<td>
+<p>Vector of samples to include in the extract
+request. Use <code>get_sample_info()</code> to identify
+sample IDs for a given collection.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variables</code></td>
+<td>
+<p>Character vector of variable names or a list of
+<code>var_spec</code> objects created by <code>var_spec()</code>
+containing specifications for all variables to include in the extract.
+</p>
+<p>If a variable already exists in the extract, its specifications
+will be added to those that already exist for that variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time_use_variables</code></td>
+<td>
+<p>Vector of names of IPUMS-defined time use variables
+or a list of specifications for user-defined time use variables
+to include in the extract request. Use <code>tu_var_spec()</code> to create a
+<code>tu_var_spec</code> object containing a time use variable specification.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sample_members</code></td>
+<td>
+<p>Indication of whether to include additional sample
+members in the extract request. If provided, must be one of
+<code>"include_non_respondents"</code>, <code>"include_household_members"</code>, or both.
+</p>
+<p>Sample member selection is only available for the IPUMS ATUS collection
+(<code>"atus"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_format</code></td>
+<td>
+<p>Format for the output extract data file. Either
+<code>"fixed_width"</code> or <code>"csv"</code>.
+</p>
+<p>Note that while <code>"stata"</code>, <code>"spss"</code>, or <code>"sas9"</code> are also accepted, these
+file formats are not supported by ipumsr data-reading functions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_structure</code></td>
+<td>
+<p>Data structure for the output extract data.
+</p>
+
+<ul>
+<li> <p><code>"rectangular"</code> provides data in which every row has the same record type
+(determined by <code>"rectangular_on"</code>), with variables from other record types
+written onto associated records of the chosen type (e.g. household
+variables written onto person records).
+</p>
+</li>
+<li> <p><code>"hierarchical"</code> provides data that include rows of differing record
+types, with records ordered according to their hierarchical structure (e.g.
+each person record is followed by the activity records for that person).
+</p>
+</li>
+<li> <p><code>"household_only"</code> provides household records only. This data structure
+is only available for the IPUMS USA collection (<code>"usa"</code>).
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rectangular_on</code></td>
+<td>
+<p>If <code>data_structure</code> is <code>"rectangular"</code>,
+records on which to rectangularize. One of <code>"P"</code> (person), <code>"A"</code>
+(activity), <code>"I"</code> (injury) or <code>"R"</code> (round).
+</p>
+<p>Defaults to <code>"P"</code> if <code>data_structure</code> is <code>"rectangular"</code> and <code>NULL</code>
+otherwise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>case_select_who</code></td>
+<td>
+<p>Indication of how to interpret any case selections
+included for variables in the extract definition.
+</p>
+
+<ul>
+<li> <p><code>"individuals"</code> includes records for all individuals who match the
+specified case selections.
+</p>
+</li>
+<li> <p><code>"households"</code> includes records for all members of each household that
+contains an individual who matches the specified case selections.
+</p>
+</li>
+</ul>
+<p>Defaults to <code>"individuals"</code>. Use <code>var_spec()</code> to add case selections for
+specific variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_quality_flags</code></td>
+<td>
+<p>Set to <code>TRUE</code> to include data quality
+flags for all applicable variables in the extract definition. This will
+override the <code>data_quality_flags</code> specification for individual variables
+in the definition.
+</p>
+<p>Use <code>var_spec()</code> to add data quality flags for specific variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Ignored</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If the supplied extract definition comes from
+a previously submitted extract request, this function will reset the
+definition to an unsubmitted state.
+</p>
+<p>To modify variable-specific parameters for variables that already exist
+in the extract, create a new variable specification with <code>var_spec()</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A modified <code>micro_extract</code> object
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>remove_from_extract()</code> to remove
+values from an extract definition.
+</p>
+<p><code>submit_extract()</code> to submit an extract request.
+</p>
+<p><code>download_extract()</code> to download extract data files.
+</p>
+<p><code>define_extract_micro()</code> to create a new extract
+definition from scratch
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">extract &lt;- define_extract_micro(
+  collection = "usa",
+  description = "2013 ACS Data",
+  samples = "us2013a",
+  variables = c("SEX", "AGE", "YEAR")
+)
+
+# Add a single sample
+add_to_extract(extract, samples = "us2014a")
+
+# Add samples and variables
+extract2 &lt;- add_to_extract(
+  extract,
+  samples = "us2014a",
+  variables = c("MARST", "BIRTHYR")
+)
+
+# Modify specifications for variables in the extract by using `var_spec()`
+# with the existing variable name:
+add_to_extract(
+  extract,
+  samples = "us2014a",
+  variables = var_spec("SEX", case_selections = "2")
+)
+
+# You can make multiple modifications or additions by providing a list
+# of `var_spec()` objects:
+add_to_extract(
+  extract,
+  samples = "us2014a",
+  variables = list(
+    var_spec("RACE", attached_characteristics = "mother"),
+    var_spec("SEX", case_selections = "2"),
+    var_spec("RELATE")
+  )
+)
+
+# Values that only take a single value are replaced
+add_to_extract(extract, description = "New description")$description
+</code></pre>
+
+
+</div>

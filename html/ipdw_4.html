@@ -1,0 +1,124 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ipdwInterp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Inverse Distance Weighting with custom distances</h2>
+
+<h3>Description</h3>
+
+<p>This function takes a rasterstack of pathdistances and generates surfaces by weighting parameter values by these distances
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ipdwInterp(
+  sf_ob,
+  rstack,
+  paramlist,
+  overlapped = FALSE,
+  yearmon = "default",
+  removefile = TRUE,
+  dist_power = 1,
+  trim_rstack = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>sf_ob</code></td>
+<td>
+<p>sf object with point geometries</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rstack</code></td>
+<td>
+<p>RasterStack of path distances</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>paramlist</code></td>
+<td>
+<p>character. String representing parameter names</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overlapped</code></td>
+<td>
+<p>logical. Default is FALSE, specify TRUE if some points lie on top of barriers</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yearmon</code></td>
+<td>
+<p>character. String specifying the name of the sf object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>removefile</code></td>
+<td>
+<p>logical. Remove files after processing?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist_power</code></td>
+<td>
+<p>numeric. Distance decay power (p)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trim_rstack</code></td>
+<td>
+<p>logical. Trim the raster stack by the convex hull of sf_ob</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Under the hood, this function evaluates:
+</p>
+<p style="text-align: center;"><code class="reqn">V = \frac{\sum\limits_{i=1}^n v_i \frac{1}{d_i^p}}{\sum\limits_{i=1}^n \frac{1}{d_i^p}}</code>
+</p>
+
+<p>where <code>d</code> is the distance between prediction and measurement points,
+<code>v_i</code> is the measured parameter value, and <code>p</code> is a power parameter.
+</p>
+
+
+<h3>Value</h3>
+
+<p>RasterLayer
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(sf)
+sf_ob &lt;- data.frame(rnorm(2))
+xy    &lt;- data.frame(x = c(4, 2), y = c(8, 4))
+sf_ob &lt;- st_as_sf(cbind(sf_ob, xy), coords = c("x", "y"))
+
+m &lt;- matrix(NA, 10, 10)
+costras &lt;- raster(m, xmn = 0, xmx = ncol(m), ymn = 0, ymx = nrow(m))
+
+# introduce spatial gradient
+costras[] &lt;- runif(ncell(costras), min = 1, max = 10)
+for (i in 1:nrow(costras)) {
+  costras[i, ] &lt;- costras[i, ] + i
+  costras[, i] &lt;- costras[, i] + i
+}
+
+rstack &lt;- pathdistGen(sf_ob, costras, 100, progressbar = FALSE)
+final.raster &lt;- ipdwInterp(sf_ob, rstack, paramlist = c("rnorm.2."), overlapped = TRUE)
+plot(final.raster)
+plot(sf_ob, add = TRUE)
+</code></pre>
+
+
+</div>

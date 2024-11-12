@@ -1,0 +1,150 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_parameters</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get model parameters</h2>
+
+<h3>Description</h3>
+
+<p>Returns the coefficients (or posterior samples for Bayesian
+models) from a model. See the documentation for your object's class:
+</p>
+
+<ul>
+<li> <p>Bayesian models (<strong>rstanarm</strong>, <strong>brms</strong>, <strong>MCMCglmm</strong>, ...)
+</p>
+</li>
+<li> <p>Estimated marginal means (<strong>emmeans</strong>)
+</p>
+</li>
+<li> <p>Generalized additive models (<strong>mgcv</strong>, <strong>VGAM</strong>, ...)
+</p>
+</li>
+<li> <p>Marginal effects models (<strong>mfx</strong>)
+</p>
+</li>
+<li> <p>Mixed models (<strong>lme4</strong>, <strong>glmmTMB</strong>, <strong>GLMMadaptive</strong>, ...)
+</p>
+</li>
+<li> <p>Zero-inflated and hurdle models (<strong>pscl</strong>, ...)
+</p>
+</li>
+<li> <p>Models with special components (<strong>betareg</strong>, <strong>MuMIn</strong>, ...)
+</p>
+</li>
+<li> <p>Hypothesis tests (<code>htest</code>)
+</p>
+</li>
+</ul>
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_parameters(x, ...)
+
+## Default S3 method:
+get_parameters(x, verbose = TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A fitted model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Currently not used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Toggle messages and warnings.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>In most cases when models either return different "effects" (fixed,
+random) or "components" (conditional, zero-inflated, ...), the arguments
+<code>effects</code> and <code>component</code> can be used.
+</p>
+<p><code>get_parameters()</code> is comparable to <code>coef()</code>, however, the coefficients
+are returned as data frame (with columns for names and point estimates of
+coefficients). For Bayesian models, the posterior samples of parameters are
+returned.
+</p>
+
+
+<h3>Value</h3>
+
+
+<ul>
+<li>
+<p> for non-Bayesian models, a data frame with two columns: the parameter names
+and the related point estimates.
+</p>
+</li>
+<li>
+<p> for Anova (<code>aov()</code>) with error term, a list of parameters for the
+conditional and the random effects parameters
+</p>
+</li>
+</ul>
+<h3>Model components</h3>
+
+<p>Possible values for the <code>component</code> argument depend on the model class.
+Following are valid options:
+</p>
+
+<ul>
+<li> <p><code>"all"</code>: returns all model components, applies to all models, but will only
+have an effect for models with more than just the conditional model component.
+</p>
+</li>
+<li> <p><code>"conditional"</code>: only returns the conditional component, i.e. "fixed effects"
+terms from the model. Will only have an effect for models with more than
+just the conditional model component.
+</p>
+</li>
+<li> <p><code>"smooth_terms"</code>: returns smooth terms, only applies to GAMs (or similar
+models that may contain smooth terms).
+</p>
+</li>
+<li> <p><code>"zero_inflated"</code> (or <code>"zi"</code>): returns the zero-inflation component.
+</p>
+</li>
+<li> <p><code>"dispersion"</code>: returns the dispersion model component. This is common
+for models with zero-inflation or that can model the dispersion parameter.
+</p>
+</li>
+<li> <p><code>"instruments"</code>: for instrumental-variable or some fixed effects regression,
+returns the instruments.
+</p>
+</li>
+<li> <p><code>"location"</code>: returns location parameters such as <code>conditional</code>,
+<code>zero_inflated</code>, <code>smooth_terms</code>, or <code>instruments</code> (everything that are
+fixed or random effects - depending on the <code>effects</code> argument - but no
+auxiliary parameters).
+</p>
+</li>
+<li> <p><code>"distributional"</code> (or <code>"auxiliary"</code>): components like <code>sigma</code>, <code>dispersion</code>,
+<code>beta</code> or <code>precision</code> (and other auxiliary parameters) are returned.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(mtcars)
+m &lt;- lm(mpg ~ wt + cyl + vs, data = mtcars)
+get_parameters(m)
+</code></pre>
+
+
+</div>

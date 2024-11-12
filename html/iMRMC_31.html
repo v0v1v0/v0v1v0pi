@@ -1,0 +1,268 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sim.NormalIG.Hierarchical</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate an MRMC data set comparing two modalities by a hierarchical model</h2>
+
+<h3>Description</h3>
+
+<p>This procedure simulates an MRMC data set for an MRMC agreement study comparing two 
+modalities. It is a hierarchical model that consists of two interaction terms: reader-case
+interaction and modality-reader-case-replicate interaction. Both interaction
+terms are conditionally normally distributed, with the case(-related) factor contributing 
+to the conditional mean and the reader(-related) factor contributing to the conditional 
+variance. The case effect is normally distributed, while the reader effect is
+an inverse-gamma.
+</p>
+<p>The Hierarchical Inverse-Gamma model is described in this paper:
+</p>
+
+<ul><li>
+<p> S. Wen and B. D. Gallas,
+“Three-Way Mixed Effect ANOVA to Estimate MRMC Limits of Agreement,”
+<em>Statistics in Biopharmaceutical Research</em>, <strong>14</strong>, pp. 532–541, 2022,
+<a href="https://doi.org/10.1080/19466315.2022.2063169">doi:10.1080/19466315.2022.2063169</a>
+</p>
+</li></ul>
+<h3>Usage</h3>
+
+<pre><code class="language-R">sim.NormalIG.Hierarchical(
+  config,
+  R = NULL,
+  AR = NULL,
+  BR = NULL,
+  is.within = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>config</code></td>
+<td>
+<p>[list] of simulation parameters:
+</p>
+
+<ul>
+<li>
+<p> Experiment labels and size
+</p>
+
+<ul>
+<li> <p><code>modalityID</code>: [vector] label modality A and B.
+</p>
+</li>
+<li> <p><code>nR</code>: [num] number of readers
+</p>
+</li>
+<li> <p><code>nC</code>: [num] number of cases
+</p>
+</li>
+<li> <p><code>C_dist</code>: [chr] distribution of the case. Default <code>C_dist="normal"</code>
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p> Mean and fixed effects:
+</p>
+
+<ul>
+<li> <p><code>mu</code>: [num] grand mean
+</p>
+</li>
+<li> <p><code>tau_A</code>: [num] modality A
+</p>
+</li>
+<li> <p><code>tau_B</code>: [num] modality B
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p> Reader-case interaction term
+</p>
+
+<ul>
+<li> <p><code>sigma_C</code>: [num] std of case factor (if <code>C_dist="normal"</code>)
+</p>
+</li>
+<li> <p><code>a_C</code>:     [num] alpha for distribution of case (if <code>C_dist="beta"</code>)
+</p>
+</li>
+<li> <p><code>b_C</code>:     [num] beta for distribution of case (if <code>C_dist="beta"</code>)
+</p>
+</li>
+<li> <p><code>alpha_R</code>: [num] shape parameter for reader
+</p>
+</li>
+<li> <p><code>beta_R</code>:  [num] scale parameter for reader
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p> Modality-reader-case-replicate interaction term for modality A
+</p>
+
+<ul>
+<li> <p><code>sigma_C.A</code>: [num] std of case factor (if <code>C_dist="normal"</code>)
+</p>
+</li>
+<li> <p><code>a_C.A</code>:     [num] alpha for distribution of case (if <code>C_dist="beta"</code>)
+</p>
+</li>
+<li> <p><code>b_C.A</code>:     [num] beta for distribution of case (if <code>C_dist="beta"</code>)
+</p>
+</li>
+<li> <p><code>alpha_R.A</code>: [num] shape parameter for reader
+</p>
+</li>
+<li> <p><code>beta_R.A</code>:  [num] scale parameter for reader
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p> Modality-reader-case-replicate interaction term for modality B
+</p>
+
+<ul>
+<li> <p><code>sigma_C.B</code>: [num] std of case factor (if <code>C_dist="normal"</code>)
+</p>
+</li>
+<li> <p><code>a_C.B</code>:     [num] alpha for distribution of case (if <code>C_dist="beta"</code>)
+</p>
+</li>
+<li> <p><code>b_C.B</code>:     [num] beta for distribution of case (if <code>C_dist="beta"</code>)
+</p>
+</li>
+<li> <p><code>alpha_R.B</code>: [num] shape parameter for reader
+</p>
+</li>
+<li> <p><code>beta_R.B</code>:  [num] scale parameter for reader
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p> Scales for the case related terms and interaction terms
+</p>
+
+<ul>
+<li> <p><code>C_scale</code>:      [num] weight for the case factor
+</p>
+</li>
+<li> <p><code>RC_scale</code>:     [num] weight for the reader-case interaction term
+</p>
+</li>
+<li> <p><code>tauC_scale</code>:   [num] weight for the modality-case term
+</p>
+</li>
+<li> <p><code>tauRCE_scale</code>: [num] weight for the modality-reader-case-replicate interaction term
+</p>
+</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+<p>[vector] of size <code>nR</code> of reader factors pre-generated from
+a gamma(<code>alpha_R</code>, <code>beta_R</code>) distribution 
+to allow the reader factor to be fixed across multiple simulations.
+Default <code>= NULL</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>AR</code></td>
+<td>
+<p>[vector] of size <code>nR</code> of modality-reader interaction terms
+pre-generated from a gamma(<code>alpha_R.A</code>, <code>beta_R.A</code>) distribution 
+to allow the modality-reader interaction terms to be
+fixed across multiple simulations the modality-reader interaction.
+Default <code>= NULL</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>BR</code></td>
+<td>
+<p>[vector] of size <code>nR</code> of modality-reader interaction terms
+pre-generated from a gamma(<code>alpha_R.B</code>, <code>beta_R.B</code>) distribution 
+to allow the modality-reader interaction terms to be
+fixed across multiple simulations the modality-reader interaction.
+Default <code>= NULL</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>is.within</code></td>
+<td>
+<p>[bol] whether the data are within-modality (A==B).
+In this case the modality-reader and modality-case interaction terms 
+will be the same.
+Default <code>= FALSE</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The model has the following structure:
+X.ijkl = mu + m.i + RC.jk + mRCE.ijkl
+</p>
+
+<ul>
+<li>
+<p> mu = grand mean
+</p>
+</li>
+<li>
+<p> m.i = modalities (levels: A and B)
+</p>
+</li>
+<li>
+<p> RC.jk given R.j,C.k ~ N(C.k, R.j) reader-case interaction term
+</p>
+</li>
+<li>
+<p> mRCE.ijkl given mR.ij,mC.ik ~ N(mC.ik, mR.ij) modality-reader-case-replicate term
+</p>
+</li>
+<li>
+<p> C.k and mC.ik are Normal/beta distributed
+</p>
+</li>
+<li>
+<p> R.j and mR.ij are Inverse-Gamma distributed
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>df   [data.frame] with nR x nC x 2 rows including
+</p>
+
+<ul>
+<li>
+<p> readerID: [Factor] w/ nR levels "reader1", "reader2", ...
+</p>
+</li>
+<li>
+<p> caseID: [Factor] w/ nC levels "case1", "case2", ...
+</p>
+</li>
+<li>
+<p> modalityID: [Factor] w/ 2 levels "testA" and "testB"
+</p>
+</li>
+<li>
+<p> score: [num] reader score
+</p>
+</li>
+</ul>
+</div>

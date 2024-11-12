@@ -1,0 +1,110 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fit3d</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+
+Fit a Plane to Image (Matrix) with SVD
+</h2>
+
+<h3>Description</h3>
+
+
+<p>Find plane that best fits trend in image (matrix)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fit3d(mat)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>mat</code></td>
+<td>
+
+
+<p>image (matrix) of values to fit plane to
+</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+
+<p>This function returns the best fit plane with the DC offset included.  In other words average of the matrix values is added to the best fit plane within the function.
+</p>
+
+
+<h3>Value</h3>
+
+
+
+
+
+
+<p>matrix with same dimensions as <code>mat</code> whose values represent the best fit plane.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Alex J.C. Witsil
+</p>
+
+
+<h3>See Also</h3>
+
+
+<p><code>svd</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## break the RGB image into 3 matrices
+img.r &lt;- erebus[,,1]
+img.g &lt;- erebus[,,2]
+img.b &lt;- erebus[,,3]
+
+## find the planar trend in the red channel
+trend.r &lt;- fit3d(img.r)
+trend.g &lt;- fit3d(img.g)
+trend.b &lt;- fit3d(img.b)
+
+## subtract the red channel trend from the original red channel image
+img.r.detrend &lt;- img.r-trend.r
+img.g.detrend &lt;- img.g-trend.g
+img.b.detrend &lt;- img.b-trend.b
+
+## combine the RGB detrended matrices into an array
+img.detrend = array(dim=dim(erebus))
+img.detrend[,,1] &lt;- img.r.detrend
+img.detrend[,,2] &lt;- img.g.detrend
+img.detrend[,,3] &lt;- img.b.detrend
+
+################
+### PLOTTING ###
+################
+
+close.screen(all.screens=TRUE)
+split.screen(c(1,3))
+screen(1)
+image2(erebus,asp=1,main='Original Image',ylab='image rows',xlab='image cols')
+screen(2)
+image2(trend.r,asp=1,main='Fitted Trend',ylab='image rows',xlab='image cols')
+screen(3)
+image2(img.detrend,asp=1,main='Detrended Image',ylab='image rows',xlab='image cols')
+
+## close screens
+close.screen(all.screens=TRUE)
+
+</code></pre>
+
+
+</div>

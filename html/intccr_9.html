@@ -1,0 +1,209 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ciregic</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Competing Risks Regression with Interval-Censored Data</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>ciregic</code> performs semiparametric regression on cumulative incidence function with interval-censored competing risks data. It fits the proportional subdistribution hazards model (Fine-Gray model), the proportional odds model, and other models that belong to the class of semiparametric generalized odds rate transformation models. The standard errors for the estimated regression coefficients are estimated by a choice of options: 1) the bootstrapping method or 2) the least-squares method.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ciregic(formula, data, alpha, k = 1, do.par, nboot, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>a formula object relating the survival object <code>Surv2(v, u, event)</code> to a set of covariates</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a data frame that includes the variables named in the formula argument</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p><code class="reqn">\alpha = (\alpha1, \alpha2)</code> contains parameters that define the link functions from class of generalized odds-rate transformation models. The components <code class="reqn">\alpha1</code> and <code class="reqn">\alpha2</code> should both be <code class="reqn">\ge 0</code>. If <code class="reqn">\alpha1 = 0</code>, the user assumes the proportional subdistribution hazards model or the Fine-Gray model for the cause of failure 1. If <code class="reqn">\alpha2 = 1</code>, the user assumes the proportional odds model for the cause of failure 2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>a parameter that controls the number of knots in the B-spline with <code class="reqn">0.5 \le </code><code>k</code><code class="reqn"> \le 1</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>do.par</code></td>
+<td>
+<p>an option to use parallel computing for bootstrap. If <code>do.par = TRUE</code>, parallel computing will be used during the bootstrap estimation of the variance-covariance matrix for the regression parameter estimates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nboot</code></td>
+<td>
+<p>a number of bootstrap samples for estimating variances and covariances of the estimated regression coefficients. If <code>nboot = 0</code>, the function <code>ciregic</code> provides the variance estimator of the regression parameter estimates using the least-squares method and does not perform the bootstrap method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The formula for the model has the form of <code>response ~ predictors</code>. The response in the formula is a <code>Surv2(v, u, event)</code> object where <code>v</code> is the last observation time prior to the failure, <code>u</code> is the first observation time after the failure, and <code>event</code> is the event or censoring indicator. <code>event</code> should include 0, 1 or 2, denoting right-censoring, failure from cause 1 and failure from cause 2, respectively. If <code>event=0</code> (i.e. right-censored observation) then <code>u</code> is not included in any calculation as it corresponds to <code class="reqn">\infty</code>. The user can provide any value in <code>u</code> for the right-censored cases, even <code>NA</code>. The function <code>ciregic</code> fits models that belong to the class of generalized odds rate transformation models which includes the proportional subdistribution hazards or the Fine-Gray model and the proportional odds model. The parameter <code class="reqn">\alpha=(\alpha1, \alpha2)</code> defines the link function/model to be fitted for cause of failure 1 and 2, respectively. A value of <code>0</code> corresponds to the Fine-Gray model and a value of <code>1</code> corresponds to the proportional odds model. For example, if <code class="reqn">\alpha=(0,1)</code> then the function <code>ciregic</code> fits the Fine-Gray model for cause 1 and the proportional odds model for cause 2.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The function <code>ciregic</code> provides an object of class <code>ciregic</code> with components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>varnames</code></td>
+<td>
+<p>a vector containing variable names</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coefficients</code></td>
+<td>
+<p>a vector of the regression coefficient estimates</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma</code></td>
+<td>
+<p>a vector of the estimated coefficients for the B-splines</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vcov</code></td>
+<td>
+<p>a variance-covariance matrix of the estimated regression coefficients</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>a vector of the link function parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loglikelihood</code></td>
+<td>
+<p>a loglikelihood of the fitted model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>convergence</code></td>
+<td>
+<p>an indicator of convegence</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tms</code></td>
+<td>
+<p>a vector of the minimum and maximum observation times</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Bv</code></td>
+<td>
+<p>a list containing the B-splines basis functions evaluated at <code>v</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numboot</code></td>
+<td>
+<p>a number of converged bootstrap</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>notconverged</code></td>
+<td>
+<p>a list of number of bootstrap samples that did not converge</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>a matched call</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Giorgos Bakoyannis, <a href="mailto:gbakogia@iu.edu">gbakogia@iu.edu</a>
+</p>
+<p>Jun Park, <a href="mailto:jun.park@alumni.iu.edu">jun.park@alumni.iu.edu</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Bakoyannis, G., Yu, M., and Yiannoutsos C. T. (2017). Semiparametric regression on cumulative incidence function with interval-censored competing risks data. <em>Statistics in Medicine</em>, <strong>36</strong>:3683-3707.
+</p>
+<p>Fine, J. P. and Gray, R. J. (1999). A proportional hazards model for the subdistribution of a competing risk. <em>Journal of the American Statistical Association</em>, <strong>94</strong>:496-509.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>summary.ciregic</code> for the summarized results and <code>predict.ciregic</code> for value of the predicted cumulative incidence functions. <code>coef</code> and <code>vcov</code> are the generic functions. <code>dataprep</code> for reshaping data from a long format to a suitable format to be used in the function <code>ciregic</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+## Set seed in order to have reproducibility of the bootstrap standard error estimate
+set.seed(1234)
+
+## Reshaping data from a long format to a suitable format
+newdata &lt;- dataprep(data = longdata, ID = id, time = t,
+                    event = c, Z = c(z1, z2))
+## Estimation of regression parameters only. No bootstrap variance estimation.
+## with 'newdata'
+fit &lt;- ciregic(formula = Surv2(v = v, u = u, event = c) ~ z1 + z2, data = newdata,
+               alpha = c(1, 1), nboot = 0, do.par = FALSE)
+fit
+
+## Bootstrap variance estimation based on 50 replications
+fit &lt;- ciregic(formula = Surv2(v = v, u = u, event = c) ~ z1 + z2, data = newdata,
+               alpha = c(1, 1), nboot = 50, do.par = FALSE)
+
+## End(Not run)
+## Note that the user can use parallel computing to decrease
+## the computation time of the bootstrap variance-covariance
+## estimation (e.g. nboot = 50)
+
+## Summarize semiparametric regression model
+summary(fit)
+
+## Predict and draw plot the cumulative incidence function evaluated at z1 = 1 and z2 = 0.5
+t &lt;- seq(from = 0, to = 2.8, by = 2.8 / 99)
+pred &lt;- predict(object = fit, covp = c(1, 0.5), times = t)
+pred
+plot(pred$t, pred$cif1, type = "l", ylim = c(0, 1))
+points(pred$t, pred$cif2, type = "l", col = 2)
+</code></pre>
+
+
+</div>

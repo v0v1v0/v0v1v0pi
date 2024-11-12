@@ -1,0 +1,79 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>deltaIC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Summarise DIC and WAIC from <code>lgcp</code> objects.</h2>
+
+<h3>Description</h3>
+
+<p>Calculates DIC and/or WAIC differences and produces an ordered summary.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">deltaIC(..., criterion = "DIC")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Comma-separated objects inheriting from class <code>inla</code> and obtained
+from a run of <code>INLA::inla()</code>, <code>bru()</code> or <code>lgcp()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>criterion</code></td>
+<td>
+<p>character vector. If it includes 'DIC', computes DIC differences;
+If it contains 'WAIC', computes WAIC differences. Default: 'DIC'</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A data frame with each row containing the Model name, DIC and Delta.DIC,
+and/or WAIC and Delta.WAIC.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+if (bru_safe_inla(multicore = FALSE)) {
+  # Generate some data
+  input.df &lt;- data.frame(idx = 1:10, x = cos(1:10))
+  input.df &lt;- within(
+    input.df,
+    y &lt;- rpois(10, 5 + 2 * cos(1:10) + rnorm(10, mean = 0, sd = 0.1))
+  )
+
+  # Fit two models
+  fit1 &lt;- bru(
+    y ~ x,
+    family = "poisson",
+    data = input.df,
+    options = list(control.compute = list(dic = TRUE))
+  )
+  fit2 &lt;- bru(
+    y ~ x + rand(idx, model = "iid"),
+    family = "poisson",
+    data = input.df,
+    options = list(control.compute = list(dic = TRUE))
+  )
+
+  # Compare DIC
+
+  deltaIC(fit1, fit2)
+}
+
+</code></pre>
+
+
+</div>

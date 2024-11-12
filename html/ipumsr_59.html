@@ -1,0 +1,118 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ipums_var_info</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get contextual information about variables in an IPUMS data source</h2>
+
+<h3>Description</h3>
+
+<p>Summarize the variable metadata for the variables found in an ipums_ddi
+object or data frame. Provides descriptions of variable
+content (<code>var_label</code> and <code>var_desc</code>) as well as labels of particular
+values for each variable (<code>val_labels</code>).
+</p>
+<p><code>ipums_var_info()</code> produces a <code>tibble</code> summary
+of multiple variables at once.
+</p>
+<p><code>ipums_var_label()</code>, <code>ipums_var_desc()</code>, and <code>ipums_val_labels()</code> provide
+specific metadata for a single variable.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ipums_var_info(object, vars = NULL)
+
+ipums_var_label(object, var = NULL)
+
+ipums_var_desc(object, var = NULL)
+
+ipums_val_labels(object, var = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>An ipums_ddi object, a data frame containing variable
+metadata (as produced by most ipumsr data-reading functions), or
+a <code>haven::labelled()</code> vector from a
+single column in such a data frame.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vars, var</code></td>
+<td>
+<p>A tidyselect selection identifying
+the variable(s) to include in the output. Only <code>ipums_var_info()</code> allows
+for the selection of multiple variables.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For <code>ipums_var_info()</code>, if the provided <code>object</code> is a
+<code>haven::labelled()</code>
+vector (i.e. a single column from a data frame), the summary output will
+include the variable label, variable description, and value labels, if
+applicable.
+</p>
+<p>If it is a data frame, the same information will be
+provided for all variables present in the data or to those indicated in
+<code>vars</code>.
+</p>
+<p>If it is an ipums_ddi object, the summary will also
+include information used when reading the data from disk, including
+start/end positions for columns in the fixed-width file, implied decimals,
+and variable types.
+</p>
+<p>Providing an <code>ipums_ddi</code> object is the most robust way to access
+variable metadata, as many data processing operations will remove these
+attributes from data frame-like objects.
+</p>
+
+
+<h3>Value</h3>
+
+<p>For <code>ipums_var_info()</code>, a <code>tibble</code> containing
+variable information.
+</p>
+<p>Otherwise, a length-1 character vector with the requested variable
+information.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>read_ipums_ddi()</code> or <code>read_nhgis_codebook()</code> to read IPUMS metadata files.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">ddi &lt;- read_ipums_ddi(ipums_example("cps_00157.xml"))
+
+# Info for all variables in a data source
+ipums_var_info(ddi)
+
+# Metadata for individual variables
+ipums_var_desc(ddi, MONTH)
+
+ipums_var_label(ddi, MONTH)
+
+ipums_val_labels(ddi, MONTH)
+
+# NHGIS also supports variable-level metadata, though many fields
+# are not relevant and remain blank:
+cb &lt;- read_nhgis_codebook(ipums_example("nhgis0972_csv.zip"))
+
+ipums_var_info(cb)
+</code></pre>
+
+
+</div>

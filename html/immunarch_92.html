@@ -1,0 +1,119 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>repSample</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Downsampling and resampling of immune repertoires</h2>
+
+<h3>Description</h3>
+
+<p>Sample (downsample) repertoires using different approches.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">repSample(
+  .data,
+  .method = c("downsample", "resample", "sample"),
+  .n = NA,
+  .prob = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>.data</code></td>
+<td>
+<p>The data to be processed. Can be data.frame,
+data.table, or a list of these objects.
+</p>
+<p>Every object must have columns in the immunarch compatible format.
+immunarch_data_format
+</p>
+<p>Competent users may provide advanced data representations:
+DBI database connections, Apache Spark DataFrame from copy_to or a list
+of these objects. They are supported with the same limitations as basic objects.
+</p>
+<p>Note: each connection must represent a separate repertoire.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.method</code></td>
+<td>
+<p>Character. Name of a sampling method. See "Details" for more details. Default value is "downsample"
+that downsamples the repertoires to the number of clones (i.e., reads / UMIs) that the smallest repertoire has, if user
+doesn't set any value to the ".n" argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.n</code></td>
+<td>
+<p>Integer. Number of clones / clonotypes / reads / UMIs to choose, depending on the method. Set NA to sample
+repertoires to the size of the smallest repertoire in the ".data".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.prob</code></td>
+<td>
+<p>Logical. If TRUE then samples the clonotypes with probability weights equal to their number of clones. Used only if
+".method" is "sample".</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If <code>.method</code> is "downsample" then <code>repSample</code> chooses <code>.n</code> clones (not clonotypes!) from the input repertoires without any probabilistic simulation,
+but exactly computing each choosed clones. Such approach is is more consistent and biologically pleasant than
+an output from the function if <code>.method</code> is "resample".
+</p>
+<p>If <code>.method</code> is "resample" then <code>repSample</code> uses multinomial distribution to compute the number of occurences for each cloneset.
+then it removes zero-number clonotypes and return the resulting data frame. Probabilities for <code>rmultinom</code> for each cloneset
+is a percentage of this cloneset in the "Proportion" column. It's a some sort of simulation of how clonotypes are chosen from the organisms.
+</p>
+<p>if <code>.method</code> is "sample" then <code>repSample</code> chooses <code>.n</code> clonotypes (not clones!) randomly. Depending on the
+<code>.prob</code> argument, the function chooses clonotypes either according to their size (if <code>.prob</code> is TRUE, by default),
+or each clonotype has an equal chance to be choosed (if <code>.prob</code> is FALSE). Note that sampling is done without replacing.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Subsampled immune repertoire or a list of subsampled immune repertoires.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>rmultinom, clonal_proportion
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(immdata)
+# Downsampling to 1000 clones (not clonotypes!)
+tmp &lt;- repSample(immdata$data[[1]], .n = 1000)
+sum(tmp$Clones)
+
+# Downsampling to 1000 clonotypes
+tmp &lt;- repSample(immdata$data[[1]], "sample", .n = 1000)
+nrow(tmp)
+
+# Downsampling to the smallest repertoire by clones (not clonotypes!)
+tmp &lt;- repSample(immdata$data[c(1, 2)])
+sum(tmp[[1]]$Clones)
+sum(tmp[[2]]$Clones)
+
+# Downsampling to the smallest repertoire by clonotypes
+tmp &lt;- repSample(immdata$data[c(1, 2)], "sample")
+nrow(tmp[[1]]$Clones)
+nrow(tmp[[2]]$Clones)
+</code></pre>
+
+
+</div>

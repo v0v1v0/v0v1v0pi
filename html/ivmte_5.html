@@ -1,0 +1,219 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bound</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Obtaining TE bounds</h2>
+
+<h3>Description</h3>
+
+<p>This function estimates the bounds on the target treatment
+effect. The LP model must be passed as an environment variable,
+under the entry <code>$model</code>. See <code>lpSetup</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">bound(
+  env,
+  sset,
+  solver,
+  solver.options,
+  noisy = FALSE,
+  smallreturnlist = FALSE,
+  rescale = FALSE,
+  debug = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>env</code></td>
+<td>
+<p>environment containing the matrices defining the LP
+problem.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sset</code></td>
+<td>
+<p>a list containing the point estimates and gamma
+components associated with each element in the S-set. This
+object is only used to determine the names of terms. If it is
+no submitted, then no names are provided to the solution
+vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>solver</code></td>
+<td>
+<p>string, name of the package used to solve the LP
+problem.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>solver.options</code></td>
+<td>
+<p>list, each item of the list should correspond
+to an option specific to the LP solver selected.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>noisy</code></td>
+<td>
+<p>boolean, set to <code>TRUE</code> if optimization results
+should be displayed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smallreturnlist</code></td>
+<td>
+<p>boolean, set to <code>TRUE</code> if the LP model
+should not be returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rescale</code></td>
+<td>
+<p>boolean, set to <code>TRUE</code> if the MTR components
+should be rescaled to improve stability in the LP/QP/QCP
+optimization.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>debug</code></td>
+<td>
+<p>boolean, indicates whether or not the function should
+provide output when obtaining bounds. The option is only
+applied when <code>solver = 'gurobi'</code> or <code>solver =
+'rmosek'</code>. The output provided is the same as what the Gurobi
+API would send to the console.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a list containing the bounds on the treatment effect; the
+coefficients on each term in the MTR associated with the upper
+and lower bounds, for both counterfactuals; the optimization
+status to the maximization and minimization problems; the LP
+problem that the optimizer solved.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">dtm &lt;- ivmte:::gendistMosquito()
+
+## Declare empty list to be updated (in the event multiple IV like
+## specifications are provided
+sSet &lt;- list()
+
+## Declare MTR formulas
+formula0 = ~ 1 + u
+formula1 = ~ 1 + u
+
+## Construct object that separates out non-spline components of MTR
+## formulas from the spline components. The MTR functions are
+## obtained from this object by the function 'genSSet'.
+splinesList = list(removeSplines(formula0), removeSplines(formula1))
+
+## Construct MTR polynomials
+polynomials0 &lt;- polyparse(formula = formula0,
+                          data = dtm,
+                          uname = u,
+                          as.function = FALSE)
+polynomials1 &lt;- polyparse(formula = formula1,
+                          data = dtm,
+                          uname = u,
+                           as.function = FALSE)
+
+## Generate propensity score model
+propensityObj &lt;- propensity(formula = d ~ z,
+                            data = dtm,
+                            link = "linear")
+
+## Generate IV estimates
+ivEstimates &lt;- ivEstimate(formula = ey ~ d | z,
+                          data = dtm,
+                          components = l(intercept, d),
+                          treat = d,
+                          list = FALSE)
+
+## Generate target gamma moments
+targetGamma &lt;- genTarget(treat = "d",
+                         m0 = ~ 1 + u,
+                         m1 = ~ 1 + u,
+                         target = "atu",
+                         data = dtm,
+                         splinesobj = splinesList,
+                         pmodobj = propensityObj,
+                         pm0 = polynomials0,
+                         pm1 = polynomials1)
+
+## Construct S-set. which contains the coefficients and weights
+## corresponding to various IV-like estimands
+sSet &lt;- genSSet(data = dtm,
+                sset = sSet,
+                sest = ivEstimates,
+                splinesobj = splinesList,
+                pmodobj = propensityObj$phat,
+                pm0 = polynomials0,
+                pm1 = polynomials1,
+                ncomponents = 2,
+                scount = 1,
+                yvar = "ey",
+                dvar = "d",
+                means = TRUE)
+## Only the entry $sset is required
+sSet &lt;- sSet$sset
+
+## Define additional upper- and lower-bound constraints for the LP
+## problem
+A &lt;- matrix(0, nrow = 22, ncol = 4)
+A &lt;- cbind(A, rbind(cbind(1, seq(0, 1, 0.1)),
+                    matrix(0, nrow = 11, ncol = 2)))
+A &lt;- cbind(A, rbind(matrix(0, nrow = 11, ncol = 2),
+                    cbind(1, seq(0, 1, 0.1))))
+sense &lt;- c(rep("&gt;", 11), rep("&lt;", 11))
+rhs &lt;- c(rep(0.2, 11), rep(0.8, 11))
+
+## Construct LP object to be interpreted and solved by
+## lpSolveAPI. Note that an environment has to be created for the LP
+## object. The matrices defining the shape restrictions must be stored
+## as a list under the entry \code{$mbobj} in the environment.
+modelEnv &lt;- new.env()
+modelEnv$mbobj &lt;- list(mbA = A,
+                    mbs = sense,
+                    mbrhs = rhs)
+## Convert the matrices defining the shape constraints into a format
+## that is suitable for the LP solver.
+lpSetup(env = modelEnv,
+        sset = sSet,
+        solver = "lpsolveapi")
+## Setup LP model so that it is solving for the bounds.
+lpSetupBound(env = modelEnv,
+             g0 = targetGamma$gstar0,
+             g1 = targetGamma$gstar1,
+             sset = sSet,
+             criterion.tol = 0,
+             criterion.min = 0,
+             solver = "lpsolveapi")
+## Declare any LP solver options as a list.
+lpOptions &lt;- optionsLpSolveAPI(list(epslevel = "tight"))
+## Obtain the bounds.
+bounds &lt;- bound(env = modelEnv,
+                sset = sSet,
+                solver = "lpsolveapi",
+                solver.options = lpOptions)
+cat("The bounds are [",  bounds$min, ",", bounds$max, "].\n")
+
+</code></pre>
+
+
+</div>

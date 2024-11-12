@@ -1,0 +1,171 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pred_intervals</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Produce Error Bounds for Predictions</h2>
+
+<h3>Description</h3>
+
+<p>A function to produce a confidence region for a linear predictor. In upcoming versions will (hopefully) be greatly simplified.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pred_intervals(
+  predictions,
+  pred_model,
+  gen_model,
+  training_matrix,
+  gene_lengths,
+  biomarker_values,
+  alpha = 0.1,
+  range_factor = 1.1,
+  s = NULL,
+  max_panel_length = NULL,
+  biomarker = "TMB",
+  marker_mut_types = c("NS", "I"),
+  model = "Refitted T"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>predictions</code></td>
+<td>
+<p>(list)
+A predictions object, as produced by get_predictions().</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pred_model</code></td>
+<td>
+<p>(list)
+A predictive model, as produced by pred_first_fit(), pred_refit_panel() or
+pred_refit_range().</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gen_model</code></td>
+<td>
+<p>(list)
+A generative model, as produce by fit_gen_model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>training_matrix</code></td>
+<td>
+<p>(sparse matrix)
+A training matrix, as produced by get_tables()$matrix or get_table_from_maf()$matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gene_lengths</code></td>
+<td>
+<p>(data frame)
+A data frame with columns 'Hugo_Symbol' and 'max_cds'. See example_maf_data$gene_lengths, or
+ensembl_gene_lengths for examples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>biomarker_values</code></td>
+<td>
+<p>(data frame)
+A data frame containing the true values of the biomarker in question.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>(numeric)
+Confidence level for error bounds.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>range_factor</code></td>
+<td>
+<p>(numeric)
+Value specifying how far beyond the range of max(biomarker) to plot confidence region.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s</code></td>
+<td>
+<p>(numeric)
+If input predictions are for a range of panels, s chooses which panel
+(column in a pred_fit object) to produce predictions for.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_panel_length</code></td>
+<td>
+<p>(numeric)
+Select panel by maximum length.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>biomarker</code></td>
+<td>
+<p>(character)
+Which biomarker is being predicted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>marker_mut_types</code></td>
+<td>
+<p>(character)
+If biomarker is not one of "TMB" or "TIB", then this is required to specify which mutation type
+groups constitute the biomarker.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>(character)
+The model (must be based on a linear estimator) for which prediction intervals are being generated.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with two entries:
+</p>
+
+<ul>
+<li>
+<p> prediction_intervals:
+</p>
+</li>
+<li>
+<p> confidence_region:
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">example_intervals &lt;- pred_intervals(predictions = get_predictions(example_refit_range,
+               new_data = example_tables$val),
+               pred_model = example_refit_range, biomarker_values = example_tmb_tables$val,
+               gen_model = example_gen_model, training_matrix = example_tables$train$matrix,
+               max_panel_length = 15000, gene_lengths = example_maf_data$gene_lengths)
+
+example_confidence_plot &lt;- ggplot2::ggplot() +
+  ggplot2::geom_point(data = example_intervals$prediction_intervals,
+             ggplot2::aes(x = true_value, y = estimated_value)) +
+        ggplot2::geom_ribbon(data = example_intervals$confidence_region,
+          ggplot2::aes(x = x, ymin = y_lower, ymax = y_upper),
+                    fill = "red", alpha = 0.2) +
+        ggplot2::geom_line(data = example_intervals$confidence_region,
+          ggplot2::aes(x = x, y = y), linetype = 2) +
+        ggplot2::scale_x_log10() + ggplot2::scale_y_log10()
+
+plot(example_confidence_plot)
+</code></pre>
+
+
+</div>

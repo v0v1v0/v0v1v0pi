@@ -1,0 +1,100 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_mutation_dictionary</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Group and Filter Mutation Types</h2>
+
+<h3>Description</h3>
+
+<p>A function to create a mutation dictionary to group and filter mutation types: this can be useful for computational practicality. It is often not practical to model
+each distinct mutation type together, so for practicality one may group multiple classes together (e.g. all indel mutations, all nonsynonymous mutations).
+Additionally, some mutation types may be excluded from modelling (for example, one may wish not to use synonymous mutations in the model fitting process).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_mutation_dictionary(
+  for_biomarker = "TIB",
+  include_synonymous = TRUE,
+  maf = NULL,
+  dictionary = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>for_biomarker</code></td>
+<td>
+<p>(string)
+Specify some standard groupings of mutation types, corresponding the the coarsest groupings
+of nonsynonymous mutations required to evaluate the biomarkers TMB and TIB. If "TMB", groups all nonsynonymous
+mutations together, if "TIB" groups indel mutations together and all other mutations together.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include_synonymous</code></td>
+<td>
+<p>(logical)
+Determine whether synonymous mutations should be included in the dictionary.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maf</code></td>
+<td>
+<p>(dataframe)
+An annotated mutation table containing the column 'Variant_Classification', only used to check if the dictionary specified does not contain all the variant types
+in your dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dictionary</code></td>
+<td>
+<p>(character)
+Directly specify the dictionary, in the form of a vector of grouping values. The names of the vector should correspond to the set
+of variant classifications of interest in the mutation annotated file (MAF).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A vector of characters, with values corresponding to the grouping labels for mutation types, and with names corresponding to the mutation types as they
+will be referred to in a mutation annotated file (MAF). See examples.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># To understand the dictionary format, note that the following code
+dictionary &lt;- get_mutation_dictionary(for_biomarker = "TMB")
+# is equivalent to
+dictionary &lt;- c(rep("NS",9), rep("S", 8))
+names(dictionary) &lt;- c('Missense_Mutation', 'Nonsense_Mutation',
+'Splice_Site', 'Translation_Start_Site',
+'Nonstop_Mutation', 'In_Frame_Ins',
+'In_Frame_Del', 'Frame_Shift_Del',
+'Frame_Shift_Ins', 'Silent',
+'Splice_Region', '3\'Flank', '5\'Flank',
+'Intron', 'RNA', '3\'UTR', '5\'UTR')
+# where the grouping levels are chosen to be "NS" and "S" for
+# nonsynonymous and synonymous mutations respectively.
+# the code
+dictionary &lt;- get_mutation_dictionary(for_biomarker = "TIB", include_synonymous = FALSE)
+# is equivalent to
+dictionary &lt;- dictionary &lt;- c(rep("NS",7), rep("I", 2))
+names(dictionary) &lt;- c('Missense_Mutation', 'Nonsense_Mutation',
+                       'Splice_Site', 'Translation_Start_Site',
+                      'Nonstop_Mutation', 'In_Frame_Ins',
+                      'In_Frame_Del', 'Frame_Shift_Del',
+                      'Frame_Shift_Ins')
+# where now "I" is used as a label to refer to indel mutations,
+# and synonymous mutations are filtered out.
+</code></pre>
+
+
+</div>

@@ -1,0 +1,114 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mmapply</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Apply a Function to Multiple Arrays with Implicit Expansion</h2>
+
+<h3>Description</h3>
+
+<p>Similar function to <code>mapply</code> with support for implicit expansion.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mmapply(
+  FUN,
+  ...,
+  MoreArgs = list(),
+  SIMPLIFY = TRUE,
+  USE.NAMES = TRUE,
+  ALLOW.RECYCLING = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>FUN</code></td>
+<td>
+<p>Function to apply to each combination of arguments. Found via <code>match.fun</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Objects that are coerced to arrays, expanded using implicit expansion, and then vectorized over.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MoreArgs</code></td>
+<td>
+<p>Pass arguments in a list instead of <code>...</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SIMPLIFY</code></td>
+<td>
+<p>If <code>TRUE</code>, the resulting list array is simplified to an atomic array if possible.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>USE.NAMES</code></td>
+<td>
+<p>If <code>TRUE</code>, the dimensions are named using the names of input arguments of matching size.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ALLOW.RECYCLING</code></td>
+<td>
+<p>Whether to allow recycling of elements in each dimension.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Most arguments are handled in a similar fashion to <code>mapply</code> with some key differences:
+</p>
+
+<ul>
+<li>
+<p> Entries of <code>MoreArgs</code> are treated the same as the ones in <code>...</code>, i.e.
+<code>mmapply(...)</code> is the same as <code>mmapply(MoreArgs = list(...))</code>.
+Additional arguments to FUN can be passed here or in <code>...</code>, either as they are
+(if they are atomic), or as a <code>list()</code> of length one.
+</p>
+</li>
+<li> <p><code>SIMPLIFY</code> only simplifies a list array to an atomic array, nothing else.
+</p>
+</li>
+<li> <p><code>USE.NAMES</code> uses names from all arguments, but never uses an argument itself as names.
+</p>
+</li>
+</ul>
+<p>If <code>ALLOW.RECYCLING</code> is set to <code>TRUE</code>, all arrays of any size are compatible.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An array containing the result of <code>FUN</code> for each combination of entries from <code>...</code> after implicit expansion.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>expandArray</code>, <code>expandedDim</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">summaries &lt;- list(Max = max, Min = min, avg = mean)
+data &lt;- list(a = 1:5, b = 2:3, c = 20:12)
+formatStrings &lt;- array(c('%.1f', '%.3f'), c(1,1,2))
+mmapply(function(f, d, s) sprintf(s, f(d)), summaries, t(data), formatStrings)
+
+</code></pre>
+
+
+</div>

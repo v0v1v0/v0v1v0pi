@@ -1,0 +1,161 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ivdesc</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Profiling compliers and non-compliers for instrumental variable analysis</h2>
+
+<h3>Description</h3>
+
+<p>Estimates the mean and variance of a covariate for the complier, never-taker and always-taker subpopulation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ivdesc(
+  X,
+  D,
+  Z,
+  variance = FALSE,
+  boot = TRUE,
+  bootn = 1000,
+  balance = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>vector with numeric covariate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>vector with binary treatment</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Z</code></td>
+<td>
+<p>vector with binary instrument</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variance</code></td>
+<td>
+<p>Calculate the variance of the covariate for each subgroup?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot</code></td>
+<td>
+<p>Replace all standard errors with bootstrap standard errors?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bootn</code></td>
+<td>
+<p>number of bootstraps (ignored if <code>boot=FALSE</code> )</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>balance</code></td>
+<td>
+<p>Run balance test?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments to be passed to <code>ivdesc_all</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function estimates the mean and the associated standard error of <code>X</code> for the complier, never-taker and always-taker subpopulation within a sample where some, but not all, units are encouraged by instrument <code>Z</code> to take the treatment <code>D</code>. 
+Observations with missing values in either <code>X</code>, <code>D</code>, or <code>Z</code> are droppped (listwise deletion). 
+</p>
+<p>One-sided noncompliance is supported. The mean for the always-/never-taker subpopulation will only be computed if there are at least two observed units in these subpopulations.
+</p>
+<p>If <code>boot=FALSE</code>, standard errors based on asymptotic theory are estimated.
+</p>
+<p>The balance test is a t-test allowing for unequal variances.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a object <code>ivdesc</code> with estimates for each subgroup (<code>co</code>: complier, <code>nt</code>: never-taker, <code>at</code> : always-taker) and the full sample: 
+</p>
+
+<ul>
+<li> <p><code>mu</code> and <code>mu_se</code> : Mean of <code>X</code> and standard error
+</p>
+</li>
+<li> <p><code>pi</code> and <code>pi_se</code>: Proportion of each subgroup in the sample and standard error 
+</p>
+</li>
+<li> <p><code>var</code>: Variance of <code>X</code> (if <code>variance=TRUE</code>)
+</p>
+</li>
+</ul>
+<p>Can be coerced to a proper <code>data.frame</code> using <code>as.data.frame</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>M. Marbach and D. Hangartner. 2020. Profiling Compliers and Non-compliers for Instrumental Variable Analysis. <em>Political Analysis</em>, 28(3), 435-444.
+</p>
+<p>D. Hangartner, M. Marbach, L. Henckel, M. H. Maathuis, R. R. Kelz, and L. Keele. 2021. Profiling Compliers in Instrumental Variables Designs. Available at arXiv: <a href="https://arxiv.org/abs/2103.06328">https://arxiv.org/abs/2103.06328</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ivreg</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"> 
+
+ # Example 1: Albertson/Lawrence (2009)
+ # see Marbach/Hangartner (2019) for details/discussion
+
+ library(icsw)
+ data(FoxDebate)
+
+ with(FoxDebate, ivdesc(X=readnews,D=watchpro,Z=conditn) )  
+
+ 
+
+ 
+
+ # Example 2: JTPA Data
+
+ library(haven)
+ jtpa &lt;- read_dta("http://fmwww.bc.edu/repec/bocode/j/jtpa.dta") 
+
+ with(jtpa, ivdesc(age, training, assignmt, bootn=500))
+ with(jtpa, ivdesc(hispanic, training, assignmt, boot=FALSE))
+
+ 
+ 
+ 
+
+
+</code></pre>
+
+
+</div>

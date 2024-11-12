@@ -1,0 +1,157 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>image_surf</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Find SURF points in an image</h2>
+
+<h3>Description</h3>
+
+<p>SURF (speeded up robust features) points are blobs in a digital image
+<a href="https://en.wikipedia.org/wiki/Speeded_up_robust_features">https://en.wikipedia.org/wiki/Speeded_up_robust_features</a>. The function identifies
+these points in the image and also provides a numeric descriptor of each point.
+</p>
+<p>This SURF descriptor is used on computer vision applications like object matching (by comparing the SURF
+descriptor of several images using e.g. kNN - from the rflann package) or object recognition.
+The SURF feature descriptor is based on the sum of the Haar wavelet response around the point of interest.
+More information on the calculation, see the reference paper.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">image_surf(x, max_points = 1000, detection_threshold = 30)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a 3-dimensional array of integer pixel values where the first dimension is RGB, 2nd the width of the image and the 3rd the height of the image. See the example.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_points</code></td>
+<td>
+<p>maximum number of surf points to find</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>detection_threshold</code></td>
+<td>
+<p>detection threshold (the higher, the lower the number of SURF points found)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a list with SURF points found and the SURF descriptor. It contains:
+</p>
+
+<ul>
+<li>
+<p>points: The number of SURF points
+</p>
+</li>
+<li>
+<p>x: The x location of each SURF point
+</p>
+</li>
+<li>
+<p>y: The y location of each SURF point
+</p>
+</li>
+<li>
+<p>angle: The angle of each SURF point
+</p>
+</li>
+<li>
+<p>pyramid_scale: The pyramid scale of each SURF point
+</p>
+</li>
+<li>
+<p>score: The score of each SURF point
+</p>
+</li>
+<li>
+<p>laplacian: The laplacian at each SURF point
+</p>
+</li>
+<li>
+<p>surf: The SURF descriptor which is a matrix with 64 columns describing the point
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+<p>SURF: Speeded Up Robust Features By Herbert Bay, Tinne Tuytelaars, and Luc Van Gool
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(magick)
+f &lt;- system.file("extdata", "cruise_boat.png", package = "image.dlib")
+x &lt;- image_read(f)
+x
+surf_blobs &lt;- image_data(x, channels = "rgb")
+surf_blobs &lt;- as.integer(surf_blobs, transpose = FALSE)
+surf_blobs &lt;- image_surf(surf_blobs, max_points = 10000, detection_threshold = 50)
+str(surf_blobs)
+
+library(magick)
+plt &lt;- image_draw(x)
+points(surf_blobs$x, surf_blobs$y, col = "red", pch = 20)
+dev.off()
+plt
+## Not run: 
+## Plot the points
+"as.cimg.magick-image" &lt;- function(x){
+  out &lt;- lapply(x, FUN=function(frame){
+    frame &lt;- as.integer(frame[[1]])[, , 1:3] # dropping the alpha channel
+    dim(frame) &lt;- append(dim(frame), 1, after = 2)
+    frame
+  })
+  out$along &lt;- 3
+  out &lt;- do.call(abind::abind, out)
+  out &lt;- imager::as.cimg(out)
+  out &lt;- imager::permute_axes(out, "yxzc")
+  out
+}
+library(imager)
+library(magick)
+library(abind)
+img &lt;- image_read(path = f)
+plot(as.cimg(img), main = "SURF points")
+points(surf_blobs$x, surf_blobs$y, col = "red", pch = 20)
+
+## End(Not run)
+
+library(magick)
+img1   &lt;- image_scale(logo, "x300")
+img2   &lt;- image_flip(img1)
+height &lt;- image_info(img1)$height
+sp1 &lt;- image_surf(image_data(img1, channels = "rgb"), max_points = 50)
+sp2 &lt;- image_surf(image_data(img2, channels = "rgb"), max_points = 50)
+
+## Match surf points and plot matches
+library(FNN)
+k &lt;- get.knnx(sp1$surf, sp2$surf, k = 1)
+combined &lt;- image_append(c(img1, img2), stack = TRUE)
+plt &lt;- image_draw(combined)
+points(sp1$x, sp1$y, col = "red")
+points(sp2$x, sp2$y + height, col = "blue")
+for(i_from in head(order(k$nn.dist), 50)){
+  i_to   &lt;- k$nn.index[i_from]
+  lines(x = c(sp1$x[i_to], sp2$x[i_from]), y = c(sp1$y[i_to], sp2$y[i_from] + height), col = "red")
+}
+dev.off()
+plt
+</code></pre>
+
+
+</div>

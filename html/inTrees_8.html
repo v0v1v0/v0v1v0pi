@@ -1,0 +1,78 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>GBM2List</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Transform gbm object to a list of trees
+</h2>
+
+<h3>Description</h3>
+
+<p>Transform gbm object to a list of trees that can be used for rule condition extraction
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">GBM2List(gbm1,X)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>gbm1</code></td>
+<td>
+
+
+<p>gbm object
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+
+<p>predictor variable matrix
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a list of trees in an inTrees-required format
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>RF2List</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">    library(gbm)
+    data(iris)
+    X &lt;- iris[,1:(ncol(iris)-1)]
+    target &lt;- iris[,"Species"] 
+    gbmFit &lt;- gbm(Species~ ., data=iris, n.tree = 400,
+                    interaction.depth = 10,distribution="multinomial")
+    treeList &lt;- GBM2List(gbmFit,X)
+    ruleExec = extractRules(treeList,X)
+    ruleExec &lt;- unique(ruleExec)
+    #ruleExec &lt;- ruleExec[1:min(2000,length(ruleExec)),,drop=FALSE]
+    ruleMetric &lt;- getRuleMetric(ruleExec,X,target)
+    ruleMetric &lt;- pruneRule(ruleMetric,X,target)
+    ruleMetric &lt;- unique(ruleMetric)
+    learner &lt;- buildLearner(ruleMetric,X,target)
+    pred &lt;- applyLearner(learner,X)
+    readableLearner &lt;- presentRules(learner,colnames(X)) # more readable format
+    err &lt;- 1-sum(pred==target)/length(pred);
+</code></pre>
+
+
+</div>

@@ -1,0 +1,258 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ConvertedModel</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Converted torch-based model</h2>
+
+<h3>Description</h3>
+
+<p>This class stores all layers converted to <code>torch</code> in a module which can be
+used like the original model (but <code>torch</code>-based). In addition, it provides
+other functions that are useful for interpreting individual predictions or
+explaining the entire model. This model is part of the class <code>Converter</code>
+and is the core for all the necessary calculations in the methods provided
+in this package.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ConvertedModel(modules_list, graph, input_nodes, output_nodes, dtype = "float")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>modules_list</code></td>
+<td>
+<p>(<code>list</code>)<br>
+A list of all accepted layers created by the <code>Converter</code>
+class during initialization.<br></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>(<code>list</code>)<br>
+The <code>graph</code> argument gives a way to pass an input through
+the model, which is especially relevant for non-sequential architectures.
+It can be seen as a list of steps in which order the layers from
+<code>modules_list</code> must be applied. The list contains the following elements:
+</p>
+
+<ul>
+<li> <p><code style="white-space: pre;">⁠$current_nodes⁠</code><br>
+This list describes the current position and the number
+of the respective intermediate values when passing through the model.
+For example, <code>list(1,3,3)</code> means that in this step one output from the
+first layer and two from the third layer (the numbers correspond to the
+list indices from the <code>modules_list</code> argument) are available for
+the calculation of the current layer with index <code>used_node</code>.
+</p>
+</li>
+<li> <p><code style="white-space: pre;">⁠$used_node⁠</code><br>
+The index of the layer from the <code>modules_list</code> argument
+which will be applied in this step.
+</p>
+</li>
+<li> <p><code style="white-space: pre;">⁠$used_idx⁠</code><br>
+The indices of the outputs from <code>current_nodes</code>, which are
+used as inputs of the current layer (<code>used_node</code>).
+</p>
+</li>
+<li> <p><code style="white-space: pre;">⁠$times⁠</code><br>
+The frequency of the output value, i.e., is the output used
+more than once as an input for subsequent layers?<br></p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>input_nodes</code></td>
+<td>
+<p>(<code>numeric</code>)<br>
+A vector of layer indices describing the input layers,
+i.e., they are used as the starting point for the calculations.<br></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output_nodes</code></td>
+<td>
+<p>(<code>numeric</code>)<br>
+A vector of layer indices describing the indices
+of the output layers.<br></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dtype</code></td>
+<td>
+<p>(<code>character(1)</code>)<br>
+The data type for all the calculations and defined tensors. Use
+either <code>'float'</code> for <code>torch::torch_float</code> or <code>'double'</code> for
+<code>torch::torch_double</code>.<br></p>
+</td>
+</tr>
+</table>
+<h3>Method <code>forward()</code>
+</h3>
+
+<p>The forward method of the whole model, i.e., it calculates the output
+<code class="reqn">y=f(x)</code> of a given input <code class="reqn">x</code>. In doing so, all intermediate
+values are stored in the individual torch modules from <code>modules_list</code>.
+</p>
+
+
+<h4>Usage</h4>
+
+<div class="sourceCode"><pre>self(x,
+     channels_first = TRUE,
+     save_input = FALSE,
+     save_preactivation = FALSE,
+     save_output = FAlSE,
+     save_last_layer = FALSE)
+</pre></div>
+
+
+
+<h4>Arguments</h4>
+
+
+<dl>
+<dt><code>x</code></dt>
+<dd>
+<p>The input torch tensor for this model.</p>
+</dd>
+<dt><code>channels_first</code></dt>
+<dd>
+<p>If the input tensor <code>x</code> is given in the format
+'channels first', use <code>TRUE</code>. Otherwise, if the channels are last,
+use <code>FALSE</code> and the input will be transformed into the format 'channels
+first'. Default: <code>TRUE</code>.</p>
+</dd>
+<dt><code>save_input</code></dt>
+<dd>
+<p>Logical value whether the inputs from each layer
+are to be saved or not. Default: <code>FALSE</code>.</p>
+</dd>
+<dt><code>save_preactivation</code></dt>
+<dd>
+<p>Logical value whether the preactivations
+from each layer are to be saved or not. Default: <code>FALSE</code>.</p>
+</dd>
+<dt><code>save_output</code></dt>
+<dd>
+<p>Logical value whether the outputs from each layer
+are to be saved or not. Default: <code>FALSE</code>.</p>
+</dd>
+<dt><code>save_last_layer</code></dt>
+<dd>
+<p>Logical value whether the inputs,
+preactivations and outputs from the last layer are to be saved or not.
+Default: <code>FALSE</code>.</p>
+</dd>
+</dl>
+<h4>Return</h4>
+
+<p>Returns a list of the output values of the model with respect to the
+given inputs.
+</p>
+
+
+
+<h3>Method <code>update_ref()</code>
+</h3>
+
+<p>This method updates the intermediate values in each module from the
+list <code>modules_list</code> for the reference input <code>x_ref</code> and returns the
+output from it in the same way as in the <code>forward</code> method.
+</p>
+
+
+<h4>Usage</h4>
+
+<div class="sourceCode"><pre>self$update_ref(x_ref,
+                channels_first = TRUE,
+                save_input = FALSE,
+                save_preactivation = FALSE,
+                save_output = FAlSE,
+                save_last_layer = FALSE)
+</pre></div>
+
+
+
+<h4>Arguments</h4>
+
+
+<dl>
+<dt><code>x_ref</code></dt>
+<dd>
+<p>Reference input of the model.</p>
+</dd>
+<dt><code>channels_first</code></dt>
+<dd>
+<p>If the tensor <code>x_ref</code> is given in the format
+'channels first' use <code>TRUE</code>. Otherwise, if the channels are last,
+use <code>FALSE</code> and the input will be transformed into the format 'channels
+first'. Default: <code>TRUE</code>.</p>
+</dd>
+<dt><code>save_input</code></dt>
+<dd>
+<p>Logical value whether the inputs from each layer
+are to be saved or not. Default: <code>FALSE</code>.</p>
+</dd>
+<dt><code>save_preactivation</code></dt>
+<dd>
+<p>Logical value whether the preactivations
+from each layer are to be saved or not. Default: <code>FALSE</code>.</p>
+</dd>
+<dt><code>save_output</code></dt>
+<dd>
+<p>Logical value whether the outputs from each layer
+are to be saved or not. Default: <code>FALSE</code>.</p>
+</dd>
+<dt><code>save_last_layer</code></dt>
+<dd>
+<p>Logical value whether the inputs,
+preactivations and outputs from the last layer are to be saved or not.
+Default: <code>FALSE</code>.</p>
+</dd>
+</dl>
+<h4>Return</h4>
+
+<p>Returns a list of the output values of the model with respect to the
+given reference input.
+</p>
+
+
+
+<h3>Method <code>set_dtype()</code>
+</h3>
+
+<p>This method changes the data type for all the layers in <code>modules_list</code>.
+Use either <code>'float'</code> for torch::torch_float or <code>'double'</code> for
+torch::torch_double.
+</p>
+
+
+<h4>Usage</h4>
+
+<p><code>self$set_dtype(dtype)</code>
+</p>
+
+
+
+<h4>Arguments</h4>
+
+
+<dl>
+<dt><code>dtype</code></dt>
+<dd>
+<p>The data type for all the calculations and defined
+tensors.</p>
+</dd>
+</dl>
+</div>

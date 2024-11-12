@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>costrasterGen</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generate a cost Raster</h2>
+
+<h3>Description</h3>
+
+<p>Generate a cost raster from an object of class sf with point or polygon geometries
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">costrasterGen(xymat, pols, extent = "polys", projstr, resolution = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xymat</code></td>
+<td>
+<p>Matrix of coordinates or an sf object with point geometries</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pols</code></td>
+<td>
+<p>sf object with polygon geometries</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>extent</code></td>
+<td>
+<p>Define extent based on extent of xymat/sf (points) or pols (polys). Default is polys.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>projstr</code></td>
+<td>
+<p>proj4 string defining the output projection. A warning will be thrown if projstr does not match the projection of the extent target. Pass NULL for non-geographic grids.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resolution</code></td>
+<td>
+<p>Numeric defaults to 1. See <code>raster</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Ensure that the projection of the xymat coordinates and pols match. If they do not match use the <code>st_transform</code> command.
+</p>
+
+
+<h3>Value</h3>
+
+<p>RasterLayer
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>rasterize</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+library(sf)
+Sr1 &lt;- st_polygon(list(cbind(c(0, 0, 1, 1, 0), c(0, 12, 12, 0, 0))))
+Sr4 &lt;- st_polygon(list(cbind(c(9, 9, 10, 10, 9), c(0, 12, 12, 0, 0))))
+Sr2 &lt;- st_polygon(list(cbind(c(1, 1, 9, 9, 1), c(11, 12, 12, 11, 11))))
+Sr3 &lt;- st_polygon(list(cbind(c(1, 1, 9, 9, 1), c(0, 1, 1, 0, 0))))
+Sr5 &lt;- st_polygon(list(cbind(c(4, 4, 5, 5, 4), c(4, 8, 8, 4, 4))))
+pols &lt;- st_as_sf(st_sfc(Sr1, Sr2, Sr3, Sr4, Sr5,
+  crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
+
+# using a matrix object
+xymat &lt;- matrix(3, 3, nrow = 1, ncol = 2)
+costras &lt;- costrasterGen(xymat, pols, projstr = NULL)
+
+# plotting
+plot(costras)
+points(xymat)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

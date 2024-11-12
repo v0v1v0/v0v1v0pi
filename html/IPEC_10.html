@@ -1,0 +1,373 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fitIPEC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Nonlinear Fitting Function
+</h2>
+
+<h3>Description</h3>
+
+<p>Estimates the parameters of a given parametric model 
+using the <code>optim</code> function in package <span class="pkg">stats</span>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fitIPEC( expr, x, y, ini.val, weights = NULL, control = list(), 
+         fig.opt = TRUE, xlim = NULL, ylim = NULL, xlab = NULL, ylab = NULL )
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>expr</code></td>
+<td>
+<p>A given parametric model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A vector or matrix of observations of independent variable(s)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>A vector of observations of response variable</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ini.val</code></td>
+<td>
+<p>A vector or list of initial values of model parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>An optional vector of weights to be used in the fitting process. 
+<code>weights</code> should be NULL or a numeric vector. If non-NULL, weighted least squares is used with weights <code>weights</code>; 
+otherwise ordinary least squares is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>A list of control parameters for using 
+the <code>optim</code> function in package <span class="pkg">stats</span></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fig.opt</code></td>
+<td>
+<p>An option to determine whether to draw the fitted curve</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlim</code></td>
+<td>
+<p>The shown range of the <em>x</em>-axis</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylim</code></td>
+<td>
+<p>The shown range of the <em>y</em>-axis</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>The label of the <em>x</em>-axis</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>The label of the <em>y</em>-axis</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The Nelder-Mead algorithm is the default in the <code>optim</code> function in package <span class="pkg">stats</span>. 
+The user can accurately estimate the model parameters by setting smaller relative convergence 
+tolerance and larger maximum number of iterations in the input argument of <code>control</code>, 
+</p>
+<p>e.g. <code>control=list(trace=FALSE, reltol=1e-20, maxit=50000)</code>, 
+</p>
+<p>at the expense of the running speed.
+</p>
+<p><code>ini.val</code> can be a vector or a list that has saved initial values for model parameters, 
+</p>
+<p>e.g. <code>y = beta0 + beta1 * x + beta2 * x^2</code>, 
+</p>
+<p><code>ini.val = list(beta0=seq(5, 15, len=2), beta1=seq(0.1, 1, len=9), 
+beta2=seq(0.01, 0.05, len=5))</code>, which is similar to the usage of the 
+input argument of <code>start</code> of <code>nls</code> in package <span class="pkg">stats</span>. 
+</p>
+<p>In the <code>weights</code> argument option, the default is <code>weights = NULL</code>. 
+In that case, ordinary least squares is used. 
+The residual sum of squares (RSS) between the observed and predicted <code class="reqn">y</code> values 
+is minimized to estimate a model's parameters, i.e., 
+</p>
+<p style="text-align: center;"><code class="reqn">\mbox{RSS} = \sum_{i=1}^{n}\left(y_i-\hat{y}_i\right)^{2}</code>
+</p>
+
+<p>where <code class="reqn">y_i</code> and <code class="reqn">\hat{y}_i</code> represent the observed and predicted <code class="reqn">y</code> values, respectively; 
+and <code class="reqn">n</code> represents the sample size. If <code>weights</code> is a numeric vector, 
+the weighted residual sum of squares is minimized, i.e.,   
+</p>
+<p style="text-align: center;"><code class="reqn">\mbox{RSS} = \sum_{i=1}^{n}w_i\left(y_i-\hat{y}_i\right)^{2}</code>
+</p>
+ 
+<p>where <code class="reqn">w_i</code> is the <code class="reqn">i</code> elements of <code>weights</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>expr</code></td>
+<td>
+<p>The formula used</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>par</code></td>
+<td>
+<p>The vector of estimates of parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RSS</code></td>
+<td>
+<p>The residual sum of squares or the weighted residual sum of squares</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R.sq</code></td>
+<td>
+<p>The coefficient of determination or the weighted coefficient of determination</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>The number of data points, namely the sample size</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>This function can be applicable to a nonlinear parametric model with 
+a single independent variable or with multiple independent variables. 
+</p>
+<p><code>R.sq</code> is only used to help users intuitively judge whether the fitted curve seriously 
+deviates from the actual observations. However, it should NOT be used to decide which of 
+several competing models is the most appropriate (Pages 44<code class="reqn">-</code>45 in Ratkowsky 1990). 
+<code>RSS</code> and curvatures are among the suitable candidates to answer such a question.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Peijian Shi <a href="mailto:pjshi@njfu.edu.cn">pjshi@njfu.edu.cn</a>, Peter M. Ridland <a href="mailto:p.ridland@unimelb.edu.au">p.ridland@unimelb.edu.au</a>, 
+David A. Ratkowsky <a href="mailto:d.ratkowsky@utas.edu.au">d.ratkowsky@utas.edu.au</a>, Yang Li <a href="mailto:yangli@fau.edu">yangli@fau.edu</a>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Nelder, J.A. and Mead, R. (1965) A simplex method for function minimization. 
+<em>Comput. J.</em> 7, 308<code class="reqn">-</code>313. <a href="https://doi.org/10.1093/comjnl/7.4.308">doi:10.1093/comjnl/7.4.308</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>bootIPEC</code>, <code>optim</code> in package <span class="pkg">stats</span>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#### Example 1 ###################################################################################
+graphics.off()
+# The velocity of the reaction (counts/min^2) under different substrate concentrations 
+#   in parts per million (ppm) (Page 269 of Bates and Watts 1988)
+
+x1 &lt;- c(0.02, 0.02, 0.06, 0.06, 0.11, 0.11, 0.22, 0.22, 0.56, 0.56, 1.10, 1.10)
+y1 &lt;- c(76, 47, 97, 107, 123, 139, 159, 152, 191, 201, 207, 200)
+
+# Define the Michaelis-Menten model
+MM &lt;- function(theta, x){
+    theta[1]*x / ( theta[2] + x )    
+}
+
+res0 &lt;- fitIPEC(MM, x=x1, y=y1, ini.val=c(200, 0.05), 
+                xlim=c(0, 1.5), ylim=c(0, 250), fig.opt=TRUE)
+par1 &lt;- res0$par
+par1
+res0
+
+# The input names of parameters will not affect the fitted results.
+# We can use other names to replace theta1 and theta2.   
+iv.list1 &lt;- list( theta1=seq(100, 300, by=50), theta2=seq(10, 100, by=10) )  
+result0  &lt;- fitIPEC( MM, x=x1, y=y1, ini.val=iv.list1, xlim=c(0, 1.5), ylim=c(0, 250), 
+                     fig.opt=FALSE, control=list(trace=FALSE, reltol=1e-20, maxit=50000) )
+param1   &lt;- result0$par
+param1
+##################################################################################################
+
+
+#### Example 2 ###################################################################################
+graphics.off()
+# Development data of female pupae of cotton bollworm (Wu et al. 2009)
+# References:
+#   Ratkowsky, D.A. and Reddy, G.V.P. (2017) Empirical model with excellent statistical 
+#       properties for describing temperature-dependent developmental rates of insects  
+#       and mites. Ann. Entomol. Soc. Am. 110, 302-309.
+#   Wu, K., Gong, P. and Ruan, Y. (2009) Estimating developmental rates of 
+#       Helicoverpa armigera (Lepidoptera: Noctuidae) pupae at constant and
+#       alternating temperature by nonlinear models. Acta Entomol. Sin. 52, 640-650.
+
+# 'x2' is the vector of temperature (in degrees Celsius)
+# 'D2' is the vector of developmental duration (in d)
+# 'y2' is the vector of the square root of developmental rate (in 1/d)
+
+x2 &lt;- seq(15, 37, by=1)
+D2 &lt;- c(41.24,37.16,32.47,26.22,22.71,19.01,16.79,15.63,14.27,12.48,
+       11.3,10.56,9.69,9.14,8.24,8.02,7.43,7.27,7.35,7.49,7.63,7.9,10.03)
+y2 &lt;- 1/D2
+y2 &lt;- sqrt( y2 )
+
+ini.val1 &lt;- c(0.14, 30, 10, 40)
+
+# Define the square root function of the Lobry-Rosso-Flandrois (LRF) model
+sqrt.LRF &lt;- function(P, x){
+  ropt &lt;- P[1]
+  Topt &lt;- P[2]
+  Tmin &lt;- P[3]
+  Tmax &lt;- P[4]
+  fun0 &lt;- function(z){
+    z[z &lt; Tmin] &lt;- Tmin
+    z[z &gt; Tmax] &lt;- Tmax
+    return(z)
+  }
+  x &lt;- fun0(x)
+  if (Tmin &gt;= Tmax | ropt &lt;= 0 | Topt &lt;= Tmin | Topt &gt;= Tmax) 
+    temp &lt;- Inf
+  if (Tmax &gt; Tmin &amp; ropt &gt; 0 &amp; Topt &gt; Tmin &amp; Topt &lt; Tmax){
+    temp &lt;- sqrt( ropt*(x-Tmax)*(x-Tmin)^2/((Topt-Tmin)*((Topt-Tmin
+      )*(x-Topt)-(Topt-Tmax)*(Topt+Tmin-2*x))) )  
+  }
+  return( temp )
+}
+
+myfun &lt;- sqrt.LRF
+xlab1 &lt;- expression( paste("Temperature (", degree, "C)", sep="" ) )
+ylab1 &lt;- expression( paste("Developmental rate"^{1/2}, 
+                     " (", d^{"-1"}, ")", sep="") )
+resu0 &lt;- fitIPEC( myfun, x=x2, y=y2, ini.val=ini.val1, xlim=NULL, 
+                  ylim=NULL, xlab=xlab1, ylab=ylab1, fig.opt=TRUE, 
+	          control=list(trace=FALSE, reltol=1e-20, maxit=50000) )
+par2  &lt;- resu0$par
+par2
+resu0
+##################################################################################################
+
+
+#### Example 3 ###################################################################################
+graphics.off()
+# Height growth data of four species of bamboo (Gramineae: Bambusoideae)
+# Reference(s):
+# Shi, P., Fan, M., Ratkowsky, D.A., Huang, J., Wu, H., Chen, L.,   
+#     Fang, S. and Zhang, C. (2017) Comparison of two ontogenetic  
+#     growth equations for animals and plants. Ecol. Model. 349, 1-10.
+
+data(shoots)
+# Choose a species
+# 1: Phyllostachys iridescens; 2: Phyllostachys mannii; 
+# 3: Pleioblastus maculatus; 4: Sinobambusa tootsik
+# 'x3' is the vector of the investigation times from a specific starting time of growth
+# 'y3' is the vector of the aboveground height values of bamboo shoots at 'x3' 
+ind &lt;- 4
+x3  &lt;- shoots$x[shoots$Code == ind]
+y3  &lt;- shoots$y[shoots$Code == ind] 
+
+# Define the beta sigmoid model (bsm)
+bsm &lt;- function(P, x){
+  P  &lt;- cbind(P)
+  if(length(P) !=4 ) {stop(" The number of parameters should be 4!")}
+  ropt &lt;- P[1]
+  topt &lt;- P[2]
+  tmin &lt;- P[3]
+  tmax &lt;- P[4]
+  tailor.fun &lt;- function(x){
+    x[x &lt; tmin] &lt;- tmin
+    x[x &gt; tmax] &lt;- tmax
+    return(x)
+  }
+  x &lt;- tailor.fun(x)   
+  ropt*(x-tmin)*(x-2*tmax+topt)/(topt+tmin-2*tmax)*(
+        (x-tmin)/(topt-tmin))^((topt-tmin)/(tmax-topt))   
+}
+
+ini.val2 &lt;- c(40, 30, 5, 50)
+xlab2    &lt;- "Time (d)"
+ylab2    &lt;- "Height (cm)"
+
+re0  &lt;- fitIPEC( bsm, x=x3, y=y3, ini.val=ini.val2, 
+                 xlim=NULL, ylim=NULL, xlab=xlab2, ylab=ylab2, 
+                 fig.opt=TRUE, control=list(trace=FALSE, reltol=1e-20, maxit=50000) )
+par3 &lt;- re0$par
+par3
+##################################################################################################
+
+
+#### Example 4 ###################################################################################
+# Data on biochemical oxygen demand (BOD; Marske 1967)
+# References:
+# Pages 56, 255 and 271 in Bates and Watts (1988)
+# Carr, N.L. (1960) Kinetics of catalytic isomerization of n-pentane. Ind. Eng. Chem.
+#     52, 391-396.   
+
+data(isom)
+Y &lt;- isom[,1]
+X &lt;- isom[,2:4]
+
+# There are three independent variables saved in matrix 'X' and one response variable (Y)
+# The first column of 'X' is the vector of partial pressure of hydrogen
+# The second column of 'X' is the vector of partial pressure of n-pentane
+# The third column of 'X' is the vector of partial pressure of isopentane
+# Y is the vector of experimental reaction rate (in 1/hr)
+
+isom.fun &lt;- function(theta, x){
+  x1     &lt;- x[,1]
+  x2     &lt;- x[,2]
+  x3     &lt;- x[,3]
+  theta1 &lt;- theta[1]
+  theta2 &lt;- theta[2]
+  theta3 &lt;- theta[3]
+  theta4 &lt;- theta[4]
+  theta1*theta3*(x2-x3/1.632) / ( 1 + theta2*x1 + theta3*x2 + theta4*x3 )
+}
+
+ini.val8 &lt;- c(35, 0.1, 0.05, 0.2)
+cons1    &lt;- fitIPEC( isom.fun, x=X, y=Y, ini.val=ini.val8, control=list(
+                     trace=FALSE, reltol=1e-20, maxit=50000) )
+par8     &lt;- cons1$par 
+##################################################################################################
+</code></pre>
+
+
+</div>

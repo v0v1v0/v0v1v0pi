@@ -1,0 +1,190 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>simMHB</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Simulates detection and count data with spatial and temporal replication
+</h2>
+
+<h3>Description</h3>
+
+<p>Function simulates MHB (Monitoring häufige Brutvögel) lookalike data. MHB is the Swiss breeding bird survey that is the source of many classic data sets (e.g. Kéry &amp; Royle, 2016, 2021). This survey was launched in 1999 and for a total of 267 1km2 quadrats laid out in an approximate grid over Switzerland. 2 or 3 surveys are conducted in each breeding season (mid-April to early July) on a quadrat-specific, constant route averaging 4-6 km and all birds detected are mapped, thus yielding replicated counts of unmarked individuals.
+</p>
+<p>The data are simulated under the assumptions of a binomial N-mixture model where for <code>lambda</code> we can specify a log-linear trend over the years and we can account for site-level random effects in both the intercept and the slopes of the log-linear model.
+</p>
+<p>For detection probability we have currently a constant average or a logit-linear trend over the years, with no further heterogeneity.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">simMHB(nsites = 267, nsurveys = 3, nyears = 25,
+    mean.lam = 1, mean.beta = 0.03, sd.lam = c(0.5, 0.05),
+    mean.p = 0.6, beta.p = 0.1,
+    show.plot = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nsites</code></td>
+<td>
+
+<p>number of sites included in the survey.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsurveys</code></td>
+<td>
+
+<p>number of replicate surveys at each site in each year.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nyears</code></td>
+<td>
+
+<p>number of years.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean.lam</code></td>
+<td>
+
+<p>intercept of expected abundance.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean.beta</code></td>
+<td>
+
+<p>average slope of log(lambda) on year.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sd.lam</code></td>
+<td>
+
+<p>a length 2 vector, the SDs of the Normal distribution from which random site effects for the intercept and the slope in the log-linear model for lambda are drawn randomly.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean.p</code></td>
+<td>
+
+<p>value of constant detection probability per survey (or intercept of the logit-linear model for p).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta.p</code></td>
+<td>
+
+<p>slope of the logit(p) in year.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>show.plot</code></td>
+<td>
+
+<p>if TRUE, the output will be displayed graphically.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with the arguments used and the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>alpha </code></td>
+<td>
+<p>vector with intercept used for the log-linear model for lambda for each site.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta </code></td>
+<td>
+<p>vector with slope used for the log-linear model for lambda for each site.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lam </code></td>
+<td>
+<p>sites x years matrix with the expected number of animals at each site.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N </code></td>
+<td>
+<p>sites x years matrix  with the realized number of animals at each site.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>totalN </code></td>
+<td>
+<p>vector with the total number of animals in each year.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p </code></td>
+<td>
+<p>vector with the probability of detection in each year.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C </code></td>
+<td>
+<p>sites x surveys x years array with the counts of animals detected.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Marc Kéry
+</p>
+
+
+<h3>References</h3>
+
+<p>Kéry, M., Royle, A. (2016) <em>Applied Hierarchical Modeling in Ecology</em> Vol 1, Academic Press.
+</p>
+<p>Kéry, M., Royle, A. (2021) <em>Applied Hierarchical Modeling in Ecology</em> Vol 2, Academic Press.
+</p>
+<p>Schaub, M., Kéry, M. (2022) <em>Integrated Population Models</em>, Academic Press, section 4.3.3.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Explicit default values for all function arguments
+str(dat &lt;- simMHB(nsites=267, nsurveys=3, nyears=25, mean.lam=1,
+    mean.beta=0.03, sd.lam=c(0.5, 0.05), mean.p=0.6, beta.p=0.1,
+    show.plot=TRUE))
+str(dat &lt;- simMHB())                # Same, implicit
+str(dat &lt;- simMHB(nsites=1000))     # More sites
+str(dat &lt;- simMHB(nsurveys=10))     # More surveys
+str(dat &lt;- simMHB(nyears=50))       # More years
+str(dat &lt;- simMHB(mean.lam=5))      # Higher mean abundance
+str(dat &lt;- simMHB(mean.beta=-0.03)) # Population declines
+str(dat &lt;- simMHB(sd.lam=c(0, 0)))  # No site variability in lambda
+str(dat &lt;- simMHB(mean.p=1))        # Perfect detection
+str(dat &lt;- simMHB(mean.p=0.6, beta.p=0)) # Constant p = 0.6
+str(dat &lt;- simMHB(mean.p=0.6, beta.p=-0.2)) # Declining p
+str(dat &lt;- simMHB(show.plot=FALSE)) # No plots (when used in simulations)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,134 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>idaNaiveBayes</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Naive Bayes Classifier</h2>
+
+<h3>Description</h3>
+
+<p>This function generates a Naive Bayes classification model based on the contents of an IDA data frame (<code>ida.data.frame</code>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">idaNaiveBayes(form,data,id="id",modelname=NULL)
+
+## S3 method for class 'idaNaiveBayes'
+predict(object,newdata,id, withProbabilities=FALSE,...)
+## S3 method for class 'idaNaiveBayes'
+print(x,...)  
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>form</code></td>
+<td>
+<p>A <code>formula</code> object that describes the model to fit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>An <code>ida.data.frame</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>The name of the column that contains unique IDs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modelname</code></td>
+<td>
+<p>Name for the model. Will be created automatically unless specified otherwise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>An object of the class <code>idaNaiveBayes</code> to used for prediction, i.e. for applying it to new data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p>An IDA data frame that contains the data to which to apply the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>withProbabilities</code></td>
+<td>
+<p>A boolean value indicating if the probabilities for each class value are included in the result of the predict function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of the class <code>idaNaiveBayes</code> to be printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional parameters to pass to the print and predict method.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>idaNaiveBayes</code> builds a Naive Bayes classification model, thus a model that assumes independence
+of input variables with respect to the target variable.
+</p>
+<p>Continuous input variables are discretized using
+equal width discretization. Missing values are ignored on a record and attribute level when calculating the
+conditional probabilities. 
+</p>
+<p>Models are stored persistently in the database under the name <code>modelname</code>. Model names cannot have more than 64 characters and
+cannot contain white spaces. They need to be quoted like table names, otherwise they will be treated upper case by default. Only one
+model with a given name is allowed in the database at a time. If a model with <code>modelname</code> already exists, you need to drop it with <code>idaDropModel</code>
+first before you can create another one with the same name. The model name can be used to retrieve the model later (<code>idaRetrieveModel</code>).
+</p>
+
+
+<h3>Value</h3>
+
+<p>The function <code>idaNaiveBayes</code> returns an object of class <code>"idaNaiveBayes"</code> and <code>"naiveBayes"</code> compatible
+with Naive Bayes objects produced by the e1071 package.
+</p>
+<p>The <code>predict.idaNaiveBayes</code> method applies the model to the data in a table and returns an IDA data frame that contains
+a list of tuples, each of which comprises one row ID and one prediction.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+#Create ida data frame
+idf &lt;- ida.data.frame("IRIS")
+
+#Create a naive bayes model
+nb &lt;- idaNaiveBayes(Species~SepalLength,idf,"ID")
+
+#Print the model
+print(nb)
+
+#Apply the model to data
+idf2 &lt;- predict(nb,idf,"ID")
+
+#Inspect the results
+head(idf2)
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

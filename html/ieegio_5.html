@@ -1,0 +1,87 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>io_h5_valid</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Check whether a 'HDF5' file can be opened for read/write</h2>
+
+<h3>Description</h3>
+
+<p>Check whether a 'HDF5' file can be opened for read/write
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">io_h5_valid(file, mode = c("r", "w"), close_all = FALSE)
+
+io_h5_names(file)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>path to file</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mode</code></td>
+<td>
+<p><code>'r'</code> for read access and <code>'w'</code> for write access</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>close_all</code></td>
+<td>
+<p>whether to close all connections or just close current
+connection; default is false. Set this to <code>TRUE</code> if you want to
+close all other connections to the file</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>io_h5_valid</code> returns a logical value indicating whether the
+file can be opened. <code>io_h5_names</code> returns a character vector of
+dataset names.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+x &lt;- array(1:27, c(3,3,3))
+f &lt;- tempfile()
+
+# No data written to the file, hence invalid
+io_h5_valid(f, 'r')
+
+io_write_h5(x, f, 'dset')
+io_h5_valid(f, 'w')
+
+# Open the file and hold a connection
+ptr &lt;- hdf5r::H5File$new(filename = f, mode = 'w')
+
+# Can read, but cannot write
+io_h5_valid(f, 'r')  # TRUE
+io_h5_valid(f, 'w')  # FALSE
+
+# However, this can be reset via `close_all=TRUE`
+io_h5_valid(f, 'r', close_all = TRUE)
+io_h5_valid(f, 'w')  # TRUE
+
+# Now the connection is no longer valid
+ptr
+
+# clean up
+unlink(f)
+
+</code></pre>
+
+
+</div>

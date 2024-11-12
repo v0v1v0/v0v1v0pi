@@ -1,0 +1,141 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getIFD</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>RIF/CIF Image Field Directories Extraction</h2>
+
+<h3>Description</h3>
+
+<p>Extracts IFDs (Image File Directory) in RIF or CIF files.<br>
+IFDs contain information about images or masks of objects stored within XIF files.<br>
+The first IFD is special in that it does not contain image of mask information but general information about the file.<br>
+Users are highly encouraged to read TIFF specifications to have a better understanding about what IFDs are.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getIFD(
+  fileName,
+  offsets = "first",
+  trunc_bytes = 12,
+  force_trunc = FALSE,
+  verbose = FALSE,
+  verbosity = 1,
+  display_progress = FALSE,
+  bypass = FALSE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fileName</code></td>
+<td>
+<p>path to file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offsets</code></td>
+<td>
+<p>either "all", "first" or an object of class 'IFC_offset'. Default is "first".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trunc_bytes</code></td>
+<td>
+<p>a positive integer maximal number of individual scalar to extract BYTE/ASCII/SBYTE/UNDEFINED for TAGS (1, 2, 6 or 7). Default is 12.<br>
+However, if less is found, less is returned in map. 
+Note that, if 0 is provided, it will be automatically set to 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>force_trunc</code></td>
+<td>
+<p>whether to force truncation for all TAGS types. Default is FALSE.<br>
+If TRUE, 'trunc_bytes' will be used for TAGS (3, 4, 5, 8, 9, 10, 11 and 12) to extract desired number of individual scalar corresponding to each types.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>whether to display information (use for debugging purpose). Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbosity</code></td>
+<td>
+<p>quantity of information displayed when verbose is TRUE; 1: normal, 2: rich. Default is 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>display_progress</code></td>
+<td>
+<p>whether to display a progress bar. Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bypass</code></td>
+<td>
+<p>whether to bypass checks on 'trunc_bytes', 'force_trunc', 'verbose', 'verbosity' and 'display_progress'. Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments to be passed.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Function will return IFDs (image, mask or first) from the file using provided offsets argument.<br>
+IFDs contain several tags that can be viewed as descriptive meta-information of raw data stored within RIF or CIF file. For more details see TIFF specifications.<br>
+If 'offsets' == "first" only first IFD will be returned.<br>
+If 'offsets' == "all" all images and masks IFDs will be returned but not "first" one.
+Be aware that errors may occur if offsets are not extracted with <code>getOffsets</code> or <code>subsetOffsets</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of named lists, each containing:<br>
+-tags, a named list whose names are tags found, where each tag is a list of tag, typ, siz, val, byt, len, off, map information.<br>
+-infos, a named list containing essential information about IFDs,
+IMAGE_LENGTH, IMAGE_WIDTH, OBJECT_ID, COMPRESSION,
+TYPE, STRIP_OFFSETS, STRIP_BYTE_COUNTS,
+BG_MEAN, BG_STD<br>
+-curr_IFD_offset, the position of current IFD offset<br>
+-next_IFD_offset, the position of next IFD offset
+</p>
+
+
+<h3>Source</h3>
+
+<p>TIFF 6.0 specifications archived from web <a href="https://web.archive.org/web/20211209104854/https://www.adobe.io/open/standards/TIFF.html">https://web.archive.org/web/20211209104854/https://www.adobe.io/open/standards/TIFF.html</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">if(requireNamespace("IFCdata", quietly = TRUE)) {
+  ## use a cif file
+  file_cif &lt;- system.file("extdata", "example.cif", package = "IFCdata")
+  ## read 1st IFD
+  IFD_first &lt;- getIFD(fileName = file_cif, offsets = "first")
+  ## show information contained in 1st IFD
+  print(sapply(IFD_first[[1]]$tags, FUN=function(x) x)) 
+} else {
+  message(sprintf('Please run `install.packages("IFCdata", repos = "%s", type = "source")` %s',
+                  'https://gitdemont.github.io/IFCdata/',
+                  'to install extra files required to run this example.'))
+}
+</code></pre>
+
+
+</div>

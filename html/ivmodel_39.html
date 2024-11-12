@@ -1,0 +1,180 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>KClass</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>k-Class Estimator</h2>
+
+<h3>Description</h3>
+
+<p><code>KClass</code> computes the k-Class estimate for the <code>ivmodel</code> object.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">KClass(ivmodel,
+       beta0 = 0, alpha = 0.05, k = c(0, 1),
+       manyweakSE = FALSE, heteroSE = FALSE,clusterID = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ivmodel</code></td>
+<td>
+<p><code>ivmodel</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta0</code></td>
+<td>
+<p>Null value <code class="reqn">\beta_0</code> for testing null hypothesis <code class="reqn">H_0: \beta = \beta_0</code> in <code>ivmodel</code>. Default is 0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>The significance level for hypothesis testing. Default is 0.05.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>A vector of <code class="reqn">k</code> values for the k-Class estimator. Default
+is 0 (OLS) and 1 (TSLS).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>manyweakSE</code></td>
+<td>
+<p>Should many weak instrument (and
+heteroscedastic-robust) asymptotics in Hansen, Hausman and Newey
+(2008) be used to compute standard errors? (Not supported for k=0)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>heteroSE</code></td>
+<td>
+<p>Should heteroscedastic-robust standard errors be used? Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clusterID</code></td>
+<td>
+<p>If cluster-robust standard errors are desired, provide a vector of length that's identical to the sample size. For example, if n = 6 and clusterID = c(1,1,1,2,2,2), there would be two clusters where the first cluster is formed by the first three observations and the second cluster is formed by the last three observations. clusterID can be numeric, character, or factor.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>KClass</code> computes the k-Class estimate for the instrumental variables model in <code>ivmodel</code>, specifically for the parameter <code class="reqn">\beta</code>. It generates a point estimate, a standard error associated with the point estimate, a test statistic and a p value under the null hypothesis <code class="reqn">H_0: \beta = \beta_0</code> in <code>ivmodel</code> along with a <code class="reqn">1-\alpha</code> confidence interval.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>KClass</code> returns a list containing the following components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>A row matrix of k values supplied to <code>KClass</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>point.est</code></td>
+<td>
+<p>A row matrix of point estimates of <code class="reqn">\beta</code>, with each row corresponding to the k values supplied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>std.err</code></td>
+<td>
+<p>A row matrix of standard errors of the estimates, with each row corresponding to the k values supplied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test.stat</code></td>
+<td>
+<p>A row matrix of test statistics for testing the null hypothesis <code class="reqn">H_0: \beta = \beta_0</code> in <code>ivmodel</code>, with each row corresponding to the k values supplied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.value</code></td>
+<td>
+<p>A row matrix of p value of the test under the null hypothesis <code class="reqn">H_0: \beta = \beta_0</code> in <code>ivmodel</code>, with each row corresponding to the k values supplied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci</code></td>
+<td>
+<p>A matrix of two columns specifying the confidence interval, with each row corresponding to the k values supplied.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Yang Jiang, Hyunseung Kang, and Dylan Small</p>
+
+
+<h3>See Also</h3>
+
+<p>See also <code>ivmodel</code> for details on the instrumental variables model.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(card.data)
+Y=card.data[,"lwage"]
+D=card.data[,"educ"]
+Z=card.data[,c("nearc4","nearc2")]
+Xname=c("exper", "expersq", "black", "south", "smsa", "reg661",
+        "reg662", "reg663", "reg664", "reg665", "reg666", "reg667",
+		"reg668", "smsa66")
+X=card.data[,Xname]
+card.model2IV = ivmodel(Y=Y,D=D,Z=Z,X=X)
+KClass(card.model2IV,
+          k=c(0,1,0.5))
+
+## Not run: 
+## The following code tests the mank weak IV standard error for LIML and Fuller.
+example &lt;- function(q = 10, rho1 = 0.5, n1 = 10000,
+sigma.uv = 0.5, beta = 1, gamma = rep(1/sqrt(q), q)) {
+
+    Sigma1 &lt;- outer(1:q, 1:q, function(i, j) rho1^abs(i - j))
+
+    library(MASS)
+    Z1 &lt;- mvrnorm(n1, rep(1, q), Sigma1)
+    Z1 &lt;- matrix(2 * as.numeric(Z1 &gt; 0) - 1, nrow = n1)
+    UV1 &lt;- mvrnorm(n1, rep(0, 2), matrix(c(1, sigma.uv, sigma.uv, 1), 2))
+    X1 &lt;- Z1 
+    Y1 &lt;- X1 
+
+    list(Z1 = Z1, X1 = X1, Y1 = Y1)
+
+}
+
+one.sim &lt;- function(manyweakSE) {
+    data &lt;- example(q = 100, n1 = 200)
+    fit &lt;- ivmodel(data$Y1, data$X1, data$Z1, manyweakSE = manyweakSE)
+    1 &gt; coef(fit)[, 2] - 1.96 * coef(fit)[, 3] &amp; 1 &lt; coef(fit)[, 2] + 1.96 * coef(fit)[, 3]
+}
+
+res &lt;- replicate(200, one.sim(TRUE))
+apply(res, 1, mean)
+
+res &lt;- replicate(200, one.sim(FALSE))
+apply(res, 1, mean)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

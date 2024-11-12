@@ -1,0 +1,204 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot.Itempool</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot Item Characteristic Curves or Test Characteristic Curve of an
+<code>Itempool</code> object</h2>
+
+<h3>Description</h3>
+
+<p><code>plot.Itempool</code> plots the item characteristic curves (item response
+curves) or test characteristic curve of an <code>Itempool-class</code>
+object.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'Itempool'
+plot(
+  x,
+  theta_range = c(-4, 4),
+  type = "icc",
+  tcc_prop_corr = FALSE,
+  focus_item = NULL,
+  title = "",
+  suppress_plot = FALSE,
+  legend_title = NULL,
+  base_r_graph = FALSE,
+  y_lim = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An <code>Itempool-class</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta_range</code></td>
+<td>
+<p>Either a numeric vector of length two setting the
+boundaries of x-axis, e.g. <code>c(-4, 4)</code>, or, a numeric vector that is
+includes the theta values  that will be plotted, e.g.
+<code>seq(-3, 3, by = 0.1)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>The type of the graph. The default value is <code>"icc"</code>.
+Available options are:
+</p>
+
+<dl>
+<dt><strong><code>"icc"</code></strong></dt>
+<dd>
+<p>Plot item characteristic curve of each item</p>
+</dd>
+<dt><strong><code>"tcc"</code></strong></dt>
+<dd>
+<p>Plot test characteristic curve</p>
+</dd>
+<dt><strong><code>"hist"</code></strong></dt>
+<dd>
+<p>Plot histograms of item parameters</p>
+</dd>
+<dt><strong><code>"pars"</code></strong></dt>
+<dd>
+<p>Plot dot plot of item parameters</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tcc_prop_corr</code></td>
+<td>
+<p>If <code>TRUE</code>, test characteristic curve will be
+show the proportion correct of the test (i.e. the range of y-axis
+will be 0-1 instead of 0 to the number of items).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>focus_item</code></td>
+<td>
+<p>A character string of the 'item_id' of the item to be
+focused. If <code>type = "pars"</code>, this item will be shown with a
+red dot to distinguish it from others.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>title</code></td>
+<td>
+<p>Title of the plot. Set <code>title = NULL</code> to suppress the plot
+title. The default is <code>""</code>.
+If <code>type = "tcc"</code> and <code>title = ""</code>, title will be 'Test
+Characteristic Curve'. If <code>type = "icc"</code> and <code>title = ""</code>, title
+will be 'Item Characteristic Curve'. If <code>type = "hist"</code> or
+<code>type = "pars"</code> and <code>title = ""</code>, title will be
+'Parameter Values'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>suppress_plot</code></td>
+<td>
+<p>If <code>FALSE</code> the function will print the plot. If
+<code>TRUE</code>, function will return the plot object. Default value is
+<code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>legend_title</code></td>
+<td>
+<p>The title of the plot's legend.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>base_r_graph</code></td>
+<td>
+<p>If <code>TRUE</code> function will plot graphs using base R
+graphics. If <code>FALSE</code> the function will check whether 'ggplot2' package
+is installed. If it is installed, it will use 'ggplot2' package for the
+plot. The default value is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y_lim</code></td>
+<td>
+<p>A numeric vector of length two representing the lower and
+upper bound of y-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments that will be passed to <code>geom_line</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Depending on the value of <code>suppress_plot</code> function either prints
+the item characteristic curve or returns the plot object.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Emre Gonulates
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">ip &lt;- generate_ip(n = sample(10:15,1))
+plot(ip)
+
+# Additional arguments will passed to geom_line
+plot(ip, size = .25, alpha = 0.3)
+
+# Set the boundaries of the graph
+plot(ip, theta_range = c(-2, 2))
+# alternatively provide theta values
+plot(ip, theta_range = seq(-6, 6, by = 0.25))
+
+
+# Test Characteristic Curve
+plot(ip, type = "tcc")
+
+# Proportion correct for test characteristic curve
+plot(ip, type = "tcc", tcc_prop_corr = TRUE)
+
+# Plot histogram of item parameters
+plot(ip, type = "hist")
+
+
+## Not run: 
+# Item parameter summary
+ip &lt;- generate_ip(n = 200)
+plot(ip, type = "pars")
+plot(ip, type = "pars", dotsize = .75)
+plot(ip, type = "pars", focus_item = "Item_22")
+# Use base R graphics
+plot(ip, type = "pars", base_r_graph = TRUE)
+
+# # Remove the legend altogether
+# plot(ip, suppress_plot = TRUE) + ggplot2::theme(legend.position="none")
+# # Change the labels:
+# plot(ip, suppress_plot = TRUE) +
+#   ylab("Probability") + xlab("Ability Score")
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

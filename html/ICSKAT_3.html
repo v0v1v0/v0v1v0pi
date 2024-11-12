@@ -1,0 +1,101 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>chiSqMatchFast</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>chiSqMatchFast.R</h2>
+
+<h3>Description</h3>
+
+<p>Match the moments of a mixture of scaled chi-square random variables to a single non-central chi-square,
+assumes the quadratic form case where the mean of the multivariate normal V=RV is 0.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">chiSqMatchFast(lambdaVec, alwaysCentral = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>lambdaVec</code></td>
+<td>
+<p>Numeric vector holding the eigenvalues of the A term, where we are interested in x^TAX
+and x is multivariate normal.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alwaysCentral</code></td>
+<td>
+<p>Boolean determining whether to always set the noncentrality parameter to 0, as in SKAT package.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with the elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>sigmaQrho</code></td>
+<td>
+<p>Standard deviation of the mixture distribution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>muQrho</code></td>
+<td>
+<p>Mean of the mixture distribution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta</code></td>
+<td>
+<p>Noncentrality parameter of the matched distribution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>l</code></td>
+<td>
+<p>Degrees of freedom of the matched distribution</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(2)
+gMat &lt;- matrix(data=rbinom(n=2000, size=2, prob=0.3), nrow=100)
+xMat &lt;- matrix(data=rnorm(200), nrow=100)
+bhFunInv &lt;- function(x) {x}
+obsTimes &lt;- 1:5
+etaVec &lt;- rep(0, 100)
+outcomeDat &lt;- gen_IC_data(bhFunInv = bhFunInv, obsTimes = obsTimes, windowHalf = 0.1,
+probMiss = 0.1, etaVec = etaVec)
+lt &lt;- outcomeDat$leftTimes
+rt &lt;- outcomeDat$rightTimes
+tpos_ind &lt;- as.numeric(lt &gt; 0)
+obs_ind &lt;- as.numeric(rt != Inf)
+dmats &lt;- make_IC_dmat(xMat, lt, rt, obs_ind, tpos_ind)
+nullFit &lt;- ICSKAT_fit_null(init_beta = rep(0, 5), left_dmat = dmats$left_dmat,
+right_dmat=dmats$right_dmat, obs_ind = obs_ind, tpos_ind = tpos_ind, lt = lt, rt = rt)
+icskatOut &lt;- ICskat(left_dmat = dmats$left_dmat, right_dmat=dmats$right_dmat,
+lt = lt, rt = rt, obs_ind = obs_ind, tpos_ind = tpos_ind, gMat = gMat,
+null_beta = nullFit$beta_fit, Itt = nullFit$Itt)
+Rrho &lt;- matrix(data=0.5, nrow=20, ncol=20)
+diag(Rrho) &lt;- 1
+toDecomp &lt;- Rrho %*% icskatOut$sig_mat
+tempEvals &lt;- eigen(toDecomp, symmetric = TRUE, only.values = TRUE)$values
+idx1 &lt;- which(tempEvals &gt;= 0)
+idx2 &lt;- which(tempEvals &gt; mean(tempEvals[idx1])/100000)
+tempEvals &lt;- tempEvals[idx2]
+chiSqMatchFast(lambdaVec = tempEvals)
+
+</code></pre>
+
+
+</div>

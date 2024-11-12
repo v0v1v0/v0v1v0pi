@@ -1,0 +1,153 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>idrbag</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compute IDR predictions with (su)bagging</h2>
+
+<h3>Description</h3>
+
+<p>Computes IDR predictions with bootstrap aggregating (bagging)
+or subsample aggregation (subagging).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">idrbag(y, X, groups = setNames(rep(1, ncol(X)), colnames(X)), orders =
+  c("comp" = 1), stoch = "sd", pars = osqpSettings(verbose = FALSE, eps_abs =
+  1e-5, eps_rel = 1e-5, max_iter = 10000L), progress = TRUE, newdata, 
+  digits = 3, interpolation = "linear", b, p, replace = FALSE, grid = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>numeric vector (the response variable).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>data frame of numeric or ordered factor variables (the regression
+covariates).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groups</code></td>
+<td>
+<p>named vector of length <code>ncol(X)</code> denoting groups of
+variables that are to be ordered with the same order (see 'Details'). Only
+relevant if <code>X</code> contains more than one variable. The same names as in
+<code>X</code> should be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>orders</code></td>
+<td>
+<p>named vector giving for each group in <code>groups</code> the order
+that will be applied to this group. Only relevant if <code>X</code> contains more
+than one variable. The names of <code>orders</code> give the order, the entries
+give the group labels. Available options: <code>"comp"</code> for componentwise
+order, <code>"sd"</code> for stochastic dominance, <code>"icx"</code> for increasing
+convex order (see 'Details). Default is <code>"comp"</code> for all variables.
+The <code>"sd"</code> and <code>"icx"</code> orders can only be used with numeric
+variables, but not with ordered factors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stoch</code></td>
+<td>
+<p>stochastic order constraint used for estimation. Default is
+<code>"sd"</code> for first order stochastic dominance. Use <code>"hazard"</code> for
+hazard rate order (experimental).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pars</code></td>
+<td>
+<p>parameters for quadratic programming optimization (only relevant
+if <code>X</code> has more than one column), set using
+<code>osqpSettings</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>progress</code></td>
+<td>
+<p>display progressbar (<code>TRUE</code>, <code>FALSE</code> or <code>1</code>,
+<code>0</code>)?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p><code>data.frame</code> containing variables with which to
+predict. Ordered factor variables are converted to numeric for computation,
+so ensure that the factor levels are identical in <code>newdata</code> and in
+<code>X</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>number of decimal places for the predictive CDF.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interpolation</code></td>
+<td>
+<p>interpolation method for univariate data. Default is 
+<code>"linear"</code>. Any other argument will select midpoint interpolation (see 
+'Details' in <code>predict.idrfit</code>). Has no effect for multivariate
+IDR.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>number of (su)bagging samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>size of (su)bagging samples relative to training data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>replace</code></td>
+<td>
+<p>draw samples with (<code>TRUE</code>, <code>1</code>) or without
+(<code>FALSE</code>, <code>0</code>) replacement?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grid</code></td>
+<td>
+<p>grid on which the predictive CDFs are evaluated. Default are
+the unique values of <code>y</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function draws <code>b</code> times a random subsample of size
+<code>ceiling(nrow(X)*p)</code>) from the training data, fits IDR to each
+subsample, computes predictions for the new data supplied in <code>newdata</code>,
+and averages the predictions derived from the <code>b</code> subsamples. There are
+no default values for <code>b</code> and <code>p</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of predictions, see <code>predict.idrfit</code>.
+</p>
+
+
+</div>

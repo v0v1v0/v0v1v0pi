@@ -1,0 +1,187 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot.dice</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Create a plot of a <code>dice</code> object.
+</h2>
+
+<h3>Description</h3>
+
+<p>Plotting of <code>dice</code> objects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'dice'
+plot(x, plot_margin = 0.05, frac_to_plot = 1, 
+      plot_sd = TRUE, plot_orig_pts_deriv = TRUE, pts_preds_size = 1.5, 
+      colorvec, color_by = NULL, x_quantile = TRUE, plot_dpdp = TRUE, 
+      rug_quantile = seq(from = 0, to = 1, by = 0.1), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>Object of class <code>dice</code> to plot.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_margin</code></td>
+<td>
+
+<p>Extra margin to pass to <code>ylim</code> as a fraction of the range of <code>x$d_ice_curves</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>frac_to_plot</code></td>
+<td>
+
+<p>If <code>frac_to_plot</code> is less than 1, randomly plot <code>frac_to_plot</code> fraction of the
+curves in <code>x$d_ice_curves</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_sd</code></td>
+<td>
+
+<p>If <code>TRUE</code>, plot the cross-observation sd of partial derivatives below the derivative plots.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_orig_pts_deriv</code></td>
+<td>
+
+<p>If <code>TRUE</code>, marks each curve at the location of the derivative estimate at the
+location of <code>predictor</code> actually occurring in the data. If <code>FALSE</code>
+no mark is drawn.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pts_preds_size</code></td>
+<td>
+
+<p>Size of points to make if <code>plot_orig_pts_deriv</code> is <code>TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colorvec</code></td>
+<td>
+
+<p>Optional vector of colors to use for each curve.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>color_by</code></td>
+<td>
+
+<p>Optional variable name (or column number) in <code>Xice</code> to color curves by. If the <code>color_by</code>
+variable has 10 or fewer unique values, a discrete set of colors is used for each value and a legend is 
+printed and returned. If there are more values, curves are colored from light to dark corresponding 
+to low to high values of the variable specified by <code>color_by</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x_quantile</code></td>
+<td>
+
+<p>If <code>TRUE</code>, the plot is drawn with the x-axis taken to be <code>quantile(gridpts)</code>. If <code>FALSE</code>,
+the predictor's original scale is used.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_dpdp</code></td>
+<td>
+
+<p>If <code>TRUE</code>, the estimated derivative of the PDP is plotted and highlighted in yellow.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rug_quantile</code></td>
+<td>
+
+<p>If not null, tick marks are drawn on the x-axis corresponding to the vector of quantiles specified by this parameter.
+Forced to <code>NULL</code> when <code>x_quantile</code> is set to <code>TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Additional plotting arguments.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with the following elements.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>plot_points_indices</code></td>
+<td>
+<p>Row numbers of <code>Xice</code> of those observations presented in the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>legend_text</code></td>
+<td>
+<p>If the <code>color_by</code> argument was used, 
+a legend describing the map between the <code>color_by</code> predictor
+and curve colors.</p>
+</td>
+</tr>
+</table>
+<h3>See Also</h3>
+
+<p>dice
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+require(ICEbox)
+require(randomForest)
+require(MASS) #has Boston Housing data, Pima
+
+data(Boston) #Boston Housing data
+X = Boston
+y = X$medv
+X$medv = NULL
+
+## build a RF:
+bhd_rf_mod = randomForest(X, y)
+
+## Create an 'ice' object for the predictor "age":
+bhd.ice = ice(object = bhd_rf_mod, X = X, y = y, predictor = "age", frac_to_build = .1) 
+
+# estimate derivatives, then plot.
+bhd.dice = dice(bhd.ice)
+plot(bhd.dice)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

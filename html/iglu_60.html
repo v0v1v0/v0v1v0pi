@@ -1,0 +1,107 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>process_data</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Data Pre-Processor</h2>
+
+<h3>Description</h3>
+
+<p>A helper function to assist in pre-processing the user-supplied
+input data for use with other functions.
+Typically, this function will process the data and return another DataFrame.
+This function ensures that the returned data will be compatible with every
+function within the <code>iglu</code> package. All <code>NA</code>s will be removed. See Vignette for further details.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">process_data(data, id, timestamp, glu, time_parser = as.POSIXct)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>User-supplied dataset containing continuous glucose monitor data. Must
+contain data for time and glucose readings at a minimum. Accepted formats are dataframe and tibble.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>Optional column name (character string) corresponding to subject id column.
+If no value is passed, an id of 1 will be assigned to the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timestamp</code></td>
+<td>
+<p>Required column name (character string) corresponding to time values in data. The dates can be
+in any format parsable by as.POSIXct, or any format accepted by the parser passed to time_parser. See time_parser param for an explanation
+on how to handle arbitrary formats.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>glu</code></td>
+<td>
+<p>Required column name (character string) corresponding to glucose values, mg/dL</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time_parser</code></td>
+<td>
+<p>Optional function used to convert datetime strings to time objects. Defaults to as.POSIXct.
+If your times are in a format not parsable by as.POSIXct, you can parse a custom format by passing
+function(time_string) {strptime(time_string, format = &lt;format string&gt;)} as the time_parser parameter.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A dataframe with the columns "id", "time", and "gl" will be returned. All <code>NA</code>s will be removed.
+</p>
+<p>If "mmol/l" in the glucose column name, the glucose values will be multipled by 18 to convert to mg/dL.
+</p>
+<p>Based on John Schwenck's <code>data_process</code> for his bp package "https://github.com/johnschwenck/bp".
+</p>
+
+
+<h3>Value</h3>
+
+<p>A processed DataFrame object that cooperates with every other
+function within the <code>iglu</code> package - all column names and formats comply.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>David Buchanan, John Schwenck
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("example_data_1_subject")
+
+# Process example data
+processed &lt;- process_data(example_data_1_subject, id = "id", timestamp = "time", glu = "gl")
+
+processed
+
+data("example_data_5_subject")
+
+# Process example data
+processed_5subj &lt;- process_data(example_data_5_subject, id = "id", timestamp = "time", glu = "gl")
+
+processed_5subj
+
+</code></pre>
+
+
+</div>

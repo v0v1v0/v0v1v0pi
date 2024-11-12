@@ -1,0 +1,173 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cvr2.ipflasso</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Cross-validated integrative lasso with cross-validated penalty factors</h2>
+
+<h3>Description</h3>
+
+<p>Runs cvr.glmnet giving different penalty factors to predictors from different blocks and chooses the penalty factors by cross-validation from the list <code>pflist</code> of candidates.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cvr2.ipflasso(X, Y, family, type.measure, standardize=TRUE, 
+              alpha=1, blocks, pflist, nfolds, ncv, 
+              nzeromax = +Inf, plot=FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>a (nxp) matrix of predictors with observations in rows and predictors in columns</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>n-vector giving the value of the response (either continuous, numeric-binary 0/1, or <code>Surv</code> object)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>should be "gaussian" for continuous <code>Y</code>, "binomial" for binary <code>Y</code>, "cox" for <code>Y</code> of type <code>Surv</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type.measure</code></td>
+<td>
+<p>The accuracy/error measure computed in cross-validation. If not specified, type.measure is "class" (classification error) if <code>family="binomial"</code>, "mse" (mean squared error) if <code>family="gaussian"</code> and partial likelihood if <code>family="cox"</code>. If <code>family="binomial"</code>, one may specify <code>type.measure="auc"</code> (area under the ROC curve).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>standardize</code></td>
+<td>
+<p>whether the predictors should be standardized or not. Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>the elastic net mixing parameter: <code>alpha</code>=1 yields the L1 penalty (lasso), <code>alpha</code>=0 yields the L2 penalty. Default is <code>alpha</code>=1 (lasso).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>blocks</code></td>
+<td>
+<p>a list of length M the format <code>list(block1=...,block2=...,</code> where the dots should be replaced by the indices of the predictors included in this block. The blocks should form a partition of 1:p.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pflist</code></td>
+<td>
+<p>a list of candidate penalty factors (see the argument <code>pf</code> of the function <code>cvr.ipflasso</code>) of the format weightslist=list(c(1,1),c(1,2),c(2,1),...).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nfolds</code></td>
+<td>
+<p>the number of folds of CV procedure.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncv</code></td>
+<td>
+<p>the number of repetitions of CV. Not to be confused with <code>nfolds</code>. For example, if one repeats 50 times 5-fold-CV (i.e. considers 50 random partitions into 5 folds in turn and averages the results), <code>nfolds</code> equals 5 and <code>ncv</code> equals 50.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nzeromax</code></td>
+<td>
+<p>the maximal number of predictors allowed in the final model. Default is +Inf, i.e. the best model is selected based on CV without restriction.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>If <code>plot=TRUE</code>, the function outputs plots of CV errors and number of included predictors for each block.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with the following arguments:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>coeff</code></td>
+<td>
+<p>the matrix of coefficients obtained with the best combination of penalty factors, with covariates corresponding to rows and lambda values corresponding to columns. The first row contains the intercept of the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ind.bestlambda</code></td>
+<td>
+<p>the index of the best lambda as selected by CV for the best combination of penalty factors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bestlambda</code></td>
+<td>
+<p>the best lambda as selected by CV for the best combination of penalty factors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ind.bestpf</code></td>
+<td>
+<p>the index of the best penalty factor selected by CV from the list of candidates <code>pflist</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cvm</code></td>
+<td>
+<p>the CV error for each candidate lambda value, averaged over the ncv runs of <code>cv.glmnet</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+<p>a list of length <code>length(pflist)</code> containing the outputs of the function <code>cvr.ipflasso</code> for all candidate penalty factors from <code>pflist</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>See arguments.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Anne-Laure Boulesteix (<a href="https://www.en.ibe.med.uni-muenchen.de/mitarbeiter/professoren/boulesteix/index.html">https://www.en.ibe.med.uni-muenchen.de/mitarbeiter/professoren/boulesteix/index.html</a>)   
+</p>
+
+
+<h3>References</h3>
+
+<p>Boulesteix AL, De Bin R, Jiang X, Fuchs M, 2017. IPF-lasso: integrative L1-penalized regression with penalty factors for prediction based on multi-omics data. Comput Math Methods Med 2017:7691937.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># load ipflasso library
+library(ipflasso)
+
+# generate dummy data
+X&lt;-matrix(rnorm(50*200),50,200)
+Y&lt;-rbinom(50,1,0.5)
+
+cvr2.ipflasso(X=X,Y=Y,family="binomial",type.measure="class",standardize=FALSE,
+              blocks=list(block1=1:50,block2=51:200),
+              pflist=list(c(1,1),c(1,2),c(2,1)),nfolds=5,ncv=10)
+</code></pre>
+
+
+</div>

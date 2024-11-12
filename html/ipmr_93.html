@@ -1,0 +1,224 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>domains</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Accessor functions for (proto_)ipm objects</h2>
+
+<h3>Description</h3>
+
+<p>Functions that access slots of a <code>*_ipm</code> (including
+<code>proto_ipm</code>). <code>default</code> methods correspond to <code>*_ipm</code> objects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">domains(object)
+
+## S3 method for class 'proto_ipm'
+domains(object)
+
+## Default S3 method:
+domains(object)
+
+vital_rate_exprs(object)
+
+## S3 method for class 'proto_ipm'
+vital_rate_exprs(object)
+
+## Default S3 method:
+vital_rate_exprs(object)
+
+vital_rate_funs(ipm)
+
+## S3 method for class 'ipmr_ipm'
+vital_rate_funs(ipm)
+
+vital_rate_exprs(object, kernel, vital_rate) &lt;- value
+
+## S3 replacement method for class 'proto_ipm'
+vital_rate_exprs(object, kernel, vital_rate) &lt;- value
+
+new_fun_form(form)
+
+kernel_formulae(object)
+
+## S3 method for class 'proto_ipm'
+kernel_formulae(object)
+
+## Default S3 method:
+kernel_formulae(object)
+
+kernel_formulae(object, kernel) &lt;- value
+
+## S3 replacement method for class 'proto_ipm'
+kernel_formulae(object, kernel) &lt;- value
+
+parameters(object)
+
+## S3 method for class 'proto_ipm'
+parameters(object)
+
+## Default S3 method:
+parameters(object)
+
+parameters(object, ...) &lt;- value
+
+## S3 replacement method for class 'proto_ipm'
+parameters(object, ...) &lt;- value
+
+int_mesh(ipm, full_mesh = TRUE)
+
+## S3 method for class 'ipmr_ipm'
+int_mesh(ipm, full_mesh = TRUE)
+
+pop_state(object)
+
+## S3 method for class 'proto_ipm'
+pop_state(object)
+
+## Default S3 method:
+pop_state(object)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>A <code>proto_ipm</code> or object created by <code>make_ipm()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ipm</code></td>
+<td>
+<p>An object created by <code>make_ipm()</code>. This argument only applies to
+<code>int_mesh()</code> and <code>vital_rate_funs()</code> (because these quantities don't
+exist until <code>make_ipm()</code> is called).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kernel</code></td>
+<td>
+<p>The name of the kernel to insert the new vital rate expression
+into.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vital_rate</code></td>
+<td>
+<p>The name of the vital rate to replace. If the vital rate
+doesn't already exist in the <code>object</code>, a new one with this name will be
+created.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>For <code>parameters&lt;-</code>, a named list of new parameters. The new list does not need
+to contain all of the parameters, just the ones to update/append. For
+<code>vital_rate_exprs&lt;-</code> and <code>kernel_formulae&lt;-</code>, a new functional form.
+The new functional form must be wrapped in a call to <code>new_fun_form</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>form</code></td>
+<td>
+<p>An expression representing the new vital rate or kernel formula
+to insert.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments used in <code>RPadrino</code> methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>full_mesh</code></td>
+<td>
+<p>Return the full integration mesh? Default is <code>TRUE</code>.
+<code>FALSE</code> returns only unique values for each state variable.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>*.default</code> method corresponds to output from <code>make_ipm()</code>,
+and the <code>*.proto_ipm</code> methods correspond to outputs from <code>define_*</code>.
+</p>
+<p>When using <code>kernel_formulae&lt;-</code> and <code>vital_rates_exprs&lt;-</code>, the right
+hand side of the expression must be wrapped in <code>new_fun_form</code>. See
+examples.
+</p>
+<p>Note that when using <code>vital_rate_funs</code>, unless the vital rate expression
+explicitly contains an expression for integration, these functions
+<strong>are not yet integrated!</strong> This is useful for things like sensitivity
+and elasticity analysis, but care must be taken to not use these values
+incorrectly.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Depending on the class of <code>object</code>, a list
+with types numeric or character.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(gen_di_det_ex)
+
+proto &lt;- gen_di_det_ex$proto_ipm
+
+# Create a new, iterated IPM
+new_ipm &lt;- make_ipm(proto, iterate = TRUE,
+                    iterations = 100, return_all_envs = TRUE)
+
+vital_rate_exprs(new_ipm)
+kernel_formulae(new_ipm)
+vital_rate_funs(new_ipm)
+
+domains(new_ipm)
+parameters(new_ipm)
+
+# Usage is the same for proto_ipm's as *_ipm's
+
+vital_rate_exprs(proto)
+kernel_formulae(proto)
+
+domains(proto)
+parameters(proto)
+
+int_mesh(new_ipm)
+
+# Setting new parameters, vital rate expressions, and kernel formulae
+# only works on proto_ipm's.
+
+# This replaces the "g_int" parameter and leaves the rest untouched
+
+parameters(proto) &lt;- list(g_int = 1.5)
+
+# This creates a new g_z parameter and leaves the rest of parameters untouched
+parameters(proto) &lt;- list(g_z = 2.2)
+
+# setting a new vital rate or kernel expression requires wrapping the
+# right-hand side in a call to new_fun_form(). new_fun_form uses expressions
+# with the same format as ... in define_kernel()
+
+vital_rate_exprs(proto,
+                 kernel = "P",
+                 vital_rate = "g_mu") &lt;- new_fun_form(g_int + g_z + g_slope * ht_1)
+
+kernel_formulae(proto, kernel = "stay_discrete") &lt;- new_fun_form(g_z * d_ht)
+
+</code></pre>
+
+
+</div>

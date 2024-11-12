@@ -1,0 +1,205 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>gridPanel</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create a css grid based HTML tag</h2>
+
+<h3>Description</h3>
+
+<p>Creates a HTML tag and automatically generates css style rules based on css
+grid, depending on the given arguments. Functionality acts as a way to
+generate css grid based HTML containers directly from R without the need
+to write any additional css rules directly.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">gridPanel(
+  ...,
+  template = NULL,
+  areas = NULL,
+  rows = NULL,
+  columns = NULL,
+  gap = NULL,
+  align_items = "stretch",
+  justify_items = "stretch",
+  auto_fill = TRUE,
+  breakpoint_system = getBreakpointSystem(),
+  id = generateID()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Tag attributes (named arguments) and child elements (unnamed
+arguments or with names used in areas).
+</p>
+<p>Named arguments are treated as additional html attribute
+values to the parent tag, unless that name is used in the areas attribute
+as a grid area name.
+</p>
+<p>Child elements may include any combination of other tags objects, HTML
+strings, and htmlDependencys.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>template</code></td>
+<td>
+<p>The name of a registered template to use as a base for the
+grid, or a template object from gridTemplate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>areas</code></td>
+<td>
+<p>A list of vectors with area names, or a vector or strings
+representing each row of the grid. Each element should contain
+the names, per row, of each area of the grid.
+</p>
+<p>Expected values follow the
+convention for the <code>grid-template-areas</code> css attribute.
+</p>
+<p>for example <code>c("area-1 area-1", "area-2 area-3")</code> and
+<code style="white-space: pre;">⁠list(c("area-1", "area-1"), c(area-2", "area-3"))⁠</code> are both valid
+representations of a 2x2 grid with 3 named areas.
+</p>
+<p>Supports breakpoints.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rows</code></td>
+<td>
+<p>A string of css valid sizes separated by a space. or a vector of
+sizes. For example both <code>"1fr 2fr"</code> or <code>c("1fr", "2fr")</code> are valid
+representations of the same 2 rows grid sizes.
+</p>
+<p>Follows the convention for the <code>grid-template-rows</code> css attribute.
+</p>
+<p>If not provided the existing space will be split equally accordingly to the
+areas defined in areas.
+</p>
+<p>Supports breakpoints.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>columns</code></td>
+<td>
+<p>A string of css valid sizes separated by a space. or a vector
+of sizes. For example both <code>"1fr 2fr"</code> or <code>c("1fr", "2fr") </code>are valid
+representations of the same 2 columns grid sizes.
+</p>
+<p>Follows the convention for the <code>grid-template-columns</code> css attribute.
+</p>
+<p>If not provided the existing space will be split equally accordingly to the
+areas defined in areas.
+</p>
+<p>Supports breakpoints.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gap</code></td>
+<td>
+<p>The space between elements in the panel. Controls both the
+space between rows and columns.
+</p>
+<p>Accepts a css valid value, or 2 values separated by a space (if using
+different values for row and column spacing).
+</p>
+<p>Supports breakpoints.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>align_items</code></td>
+<td>
+<p>The cell behavior according to the <code>align-items</code> css
+property. Aligns grid items along the block (column) axis.
+</p>
+<p>Accepts a valid css <code>align-items</code> value
+(<code>start</code> | <code>end</code> | <code>center</code> | <code>stretch</code>).
+</p>
+<p>Supports breakpoints.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>justify_items</code></td>
+<td>
+<p>The cell behavior according to the <code>justify-items</code> css
+property. Aligns grid items along the inline (row) axis.
+</p>
+<p>Accepts a valid css <code>justify-items</code> value
+(<code>start</code> | <code>end</code> | <code>center</code> | <code>stretch</code>).
+</p>
+<p>Supports breakpoints.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>auto_fill</code></td>
+<td>
+<p>Should the panel stretch to fit its parent size (TRUE), or
+should its size be based on its children element sizes (FALSE).
+</p>
+<p>Supports breakpoints.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>breakpoint_system</code></td>
+<td>
+<p>Breakpoint system to use.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>The parent element id.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Behaves similar to a normal HTML tag, but provides helping
+arguments that simplify the way grid css can be created from shiny.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An HTML tagList.
+</p>
+
+
+<h3>Note</h3>
+
+<p>When creating responsive layouts based on css media rules, some
+arguments allow a named list can be passed instead of a single value.
+</p>
+<p>The names in that list can be any of the breakpoints available in
+the <code>breakpoint_system</code> argument.
+</p>
+<p>It is recommended to define the breakpoint system for the application
+globally before UI definitions, but the <code>breakpoint_system</code> in panel
+functions allows for more flexibility when reusing components
+from other projects.
+</p>
+<p>See <a href="https://css-tricks.com/snippets/css/complete-guide-grid/">https://css-tricks.com/snippets/css/complete-guide-grid/</a>
+for additional details on using css grids.
+</p>
+<p>For a full list of valid HTML attributes check visit
+<a href="https://www.w3schools.com/tags/ref_attributes.asp">https://www.w3schools.com/tags/ref_attributes.asp</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>gridPage
+</p>
+
+
+</div>

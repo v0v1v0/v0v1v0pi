@@ -1,0 +1,104 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>chmap</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generates a heat map based on an iClusterVB object</h2>
+
+<h3>Description</h3>
+
+<p>Generates a heat map based on an iClusterVB object
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">chmap(fit, rho = 0.5, cols = NULL, title = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fit</code></td>
+<td>
+<p>A fitted iClusterVB object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+<p>The minimum probability of inclusion for features shown on the
+heatmap. Default is 0.5. 0 would show all features. Only useful for
+VS_method = 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cols</code></td>
+<td>
+<p>A vector of colors to use for the clusters. The default is a
+random selection of colors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>title</code></td>
+<td>
+<p>A character vector or a single value. Title of the heat map. The
+default is "View 1 - Distribution 1", ..., "View R - Distribution R".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments to be passed down to
+<code>pheatmap</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a heat map for each data view.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Setting up the data
+dat1 &lt;- list(
+  gauss_1 = sim_data$continuous1_data[c(1:20, 61:80, 121:140, 181:200), 1:75],
+  gauss_2 = sim_data$continuous2_data[c(1:20, 61:80, 121:140, 181:200), 1:75],
+  poisson_1 = sim_data$count_data[c(1:20, 61:80, 121:140, 181:200), 1:75],
+  multinomial_1 = sim_data$binary_data[c(1:20, 61:80, 121:140, 181:200), 1:75]
+)
+
+# Recoding `0`s to `2`s
+dat1$multinomial_1[dat1$multinomial_1 == 0] &lt;- 2
+
+dist &lt;- c(
+  "gaussian", "gaussian",
+  "poisson", "multinomial"
+)
+
+fit_iClusterVB &lt;- iClusterVB(
+  mydata = dat1,
+  dist = dist,
+  K = 4,
+  initial_method = "VarSelLCM",
+  VS_method = 1,
+  max_iter = 25
+)
+
+
+# We can set the colors, turn off scaling and set titles
+
+chmap(fit_iClusterVB,
+  cols = c("red", "blue", "green", "purple"),
+  title = c("Gene Expression", "DNA Methylation", "Copy Number", "Mutation Status"),
+  scale = "none"
+)
+</code></pre>
+
+
+</div>

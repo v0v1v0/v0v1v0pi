@@ -1,0 +1,145 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>peaks</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Finding Peaks in Raw Data </h2>
+
+<h3>Description</h3>
+
+<p>Returns position, signal height and approximate width at half
+maximum peak height. </p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">peaks(x, y = NULL, minPH, minPW, thr, stepF = 0.49)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x, y</code></td>
+<td>
+<p> Position and height of signal. Any reasonable way of
+defining the coordinates is acceptable. See function
+<code>link{getXY}</code> for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minPH</code></td>
+<td>
+<p> Mimimum height of peak to be reported. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minPW</code></td>
+<td>
+<p> Minimum width of peak at half maximum to be reported. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thr</code></td>
+<td>
+<p> Threshold below which the signal is not processed. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stepF</code></td>
+<td>
+ <p><code>StepF</code> defines indirectly the accuracy of the
+selection criteria <code>minPH</code> and <code>minPW</code> and of the value of
+the calculated width: The smaller the more accurate and the slower
+the function. It must be &lt;0.5</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function is especially useful for signals in which both very broad
+and very narrow peaks are of interest. The peaks may lie very close to
+each other or might even be superpositioned on top of each
+other, e.g. peaks on broader shoulders. The algorithm is also very
+useful when the resolution of the signal is poor and the noise is
+small.
+</p>
+<p>The function is looking for peaks without any preceding baseline
+substraction or smoothing, which could distort the spectrum.
+</p>
+<p>The selection criteria <code>minPH</code> and <code>minPW</code> and the values
+for the calculated peak widths are only approximate.</p>
+
+
+<h3>Value</h3>
+
+<p>dataframe consisting of
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>x </code></td>
+<td>
+<p>Position of peak</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y </code></td>
+<td>
+<p>Signal height</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w </code></td>
+<td>
+<p>Approximate width at half maximum of peak</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>In the function, the main selection criterium for the peaks is the
+height of the peaks, the second optional criterium is the width of the
+peaks.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Rene Locher </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">n &lt;- 200
+freq &lt;- 1:n
+theory &lt;- sin(freq/n*4*pi)*cos(freq/n*3*pi)
+spec &lt;- theory + 0.1*rnorm(n)
+
+plot(spec,type="b")
+lines(theory,lwd=2)
+
+pts &lt;- peaks(spec, minPH=0.7)
+points(pts,col="red",cex=1.2, pch=20)
+
+## peaks after smoothing the spectrum
+spec.sm &lt;- loess.smooth(freq, spec, span=0.2,
+                        degree = 2, evaluation = 100)
+lines(spec.sm$x, spec.sm$y, col="steelblue", lwd=2)
+pts &lt;- peaks(spec.sm, minPH=0.4)
+points(pts,col="green",cex=1.2,pch=20)
+
+## Analyses of Mass Spectrum between 12000 and 100'000
+## without smoothing, without baseline substraction
+data(MS)
+MS1 &lt;- log10(MS[MS$mz&gt;12000&amp;MS$mz&lt;1e5,])
+
+P &lt;- peaks(MS1, minPH=0.02, minPW=0.001)
+plot(MS1, type="l", xlab="log10(mz)", ylab="log10(I)")
+points(P,col="blue",cex=1.6)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,114 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getGaps</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Gap analysis</h2>
+
+<h3>Description</h3>
+
+<p>The <code>getGaps</code> method calculates data dropouts that occur within the requested time
+range associated with a <code>Stream</code>.
+</p>
+<p>A <code>Stream</code> object returned by <code>getDataselect</code> contains a list of individual
+<code>Trace</code> objects, each of which is guaranteed to contain a continuous array of 
+data in each <code>Trace@data</code> slot. Each <code>TraceHeader</code> also contains a <code>starttime</code> and
+an <code>endtime</code> defining a period of uninterrupted data collection.
+</p>
+<p>Data dropouts are determined by examining the <code>requestedStartime</code> and <code>requestedEndtime</code>
+slots associated with the <code>Stream</code> and the <code>starttime</code> and <code>endtime</code> slots
+found in the each <code>TraceHeader</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getGaps(x, min_gap)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+ <p><code>Stream</code> object </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_gap</code></td>
+<td>
+<p> minimum gap (sec) below which gaps will be ignored (default=1/sampling_rate) </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This method first checks the SNCL id of each <code>Trace</code> to make sure they are identical
+and generates an error if they are not. Mismatches in the <code>sampling_rate</code> will also generate
+an error.
+</p>
+<p>The data gaps (in seconds) within a <code>Stream</code> are
+determined and the associated <code>sampling_rate</code> is used to calculate the number of
+missing values in each gap. The length of the <code>gaps</code> and <code>nsamples</code> vectors
+in the returned list will be one more than the number of <code>Traces</code>
+(inital gap + gaps between traces + final gap).
+</p>
+<p>Gaps smaller than <code>min_gap</code> are set to <code>0</code>. Values of <code>min_gap</code> smaller
+than <code>1/sampling_rate</code> will be ignored and the default value will be used instead.
+</p>
+<p>Overlaps will appear as gaps with negative values.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list is returned with the following elements:
+</p>
+
+<ul>
+<li>
+<p><code>gaps</code> numeric vector of data gaps within a <code>Stream</code>
+</p>
+</li>
+<li>
+<p><code>nsamples</code> number of missing samples associated with each gap
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+starttime &lt;- as.POSIXct("2012-01-24", tz="GMT")
+endtime &lt;- as.POSIXct("2012-01-25", tz="GMT")
+
+# Get the waveform
+st &lt;- getDataselect(iris,"AK","PIN","","BHZ",starttime,endtime)
+
+# Save the gap analysis in a variable
+gapInfo &lt;- getGaps(st)
+
+# See what information is availble
+names(gapInfo)
+
+# Look at a histogram of data dropouts
+hist(gapInfo$nsamples, breaks=50, 
+     main="Data Gaps in AK.PIN..BHZ Jan 24, 2012",
+     xlab="number of missing samples per gap")
+
+## End(Not run)
+</code></pre>
+
+
+</div>

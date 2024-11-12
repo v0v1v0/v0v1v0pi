@@ -1,0 +1,197 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>idaDivCluster</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Hierarchical (divisive) clustering</h2>
+
+<h3>Description</h3>
+
+<p>This function generates a hierarchical (divisive) clustering model 
+based on the contents of an IDA data frame (<code>ida.data.frame</code>) by applying recursively the K-means algorithm.	
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">idaDivCluster(
+    data,
+    id,
+    distance="euclidean",
+    maxiter=5, 
+    minsplit=5,
+    maxdepth=3,
+    randseed=12345,
+    outtable=NULL,
+    modelname=NULL
+)
+
+## S3 method for class 'idaDivCluster'
+print(x,...)  
+## S3 method for class 'idaDivCluster'
+predict(object, newdata, id,...)  
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>An IDA data frame that contains the input data for the function. The input IDA data frame 
+must include a column that contains a unique ID for each row.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>The name of the column that contains a unique ID for each row of the input data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distance</code></td>
+<td>
+<p>The distance function that is to be used. This can be set to <code>"euclidean"</code>, which 
+causes the squared Euclidean distance to be used, or <code>"norm_euclidean"</code>, which causes normalized euclidean distance to be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+<p>The maximum number of iterations to perform in the base K-means Clustering algorithm</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minsplit</code></td>
+<td>
+<p>The minimum number of instances per cluster that can be split.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxdepth</code></td>
+<td>
+<p>The maximum number of cluster levels (including leaves).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>randseed</code></td>
+<td>
+<p>The seed for the random number generator.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outtable</code></td>
+<td>
+<p>The name of the output table that is to contain the results of the operation. When NULL 
+is specified, a table name is generated automatically.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modelname</code></td>
+<td>
+<p>The name under which the model is stored in the database.
+This is the name that is specified when using functions such as <code>idaRetrieveModel</code> or <code>idaDropModel</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>An object of the class <code>idaDivCluster</code> to used for prediction, i.e. for applying it to new data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of the class <code>idaDivCluster</code> to be printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p>An IDA data frame that contains the data to which to apply the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional parameters to pass to the print or predict method.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The idaDivCluster clustering function builds a hierarchical clustering model by applying the K-means algorithm 
+recursively in a top-down fashion. The hierarchy of clusters is represented in a binary tree structure (each
+parent node has exactly 2 child nodes). The leafs of the cluster tree are identified by negative numbers.
+</p>
+<p>Models are stored persistently in the database under the name <code>modelname</code>. Model names cannot have more than 64 characters and
+cannot contain white spaces. They need to be quoted like table names, otherwise they will be treated upper case by default. Only one
+model with a given name is allowed in the database at a time. If a model with <code>modelname</code> already exists, you need to drop it with <code>idaDropModel</code>
+first before you can create another one with the same name. The model name can be used to retrieve the model later (<code>idaRetrieveModel</code>).
+</p>
+<p>The output of the print function for a idaDivCluster object is:
+</p>
+
+<ul>
+<li>
+<p> A vector containing a list of centers
+</p>
+</li>
+<li>
+<p> A vector containing a list of cluster sizes
+</p>
+</li>
+<li>
+<p> A vector containing a list of the number of elements in each cluster
+</p>
+</li>
+<li>
+<p> A data frame or the name of the table containing the calculated cluster assignments
+</p>
+</li>
+<li>
+<p> The within-cluster sum of squares (which indicates cluster density)
+</p>
+</li>
+<li>
+<p> The names of the slots that are available in the idaDivCluster object.
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>The idaDivCluster function returns an object of class <code>idaDivCluster</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>idaRetrieveModel</code>, <code>idaDropModel</code>, <code>idaListModels</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+
+#Create ida data frame
+idf &lt;- ida.data.frame("IRIS")
+
+#Create a DivCluster model stored in the database as DivClusterMODEL
+dcm &lt;- idaDivCluster(idf, id="ID",modelname="DivClusterMODEL") 
+	
+#Print the model
+print(dcm)
+
+#Predict the model
+pred &lt;- predict(dcm,idf,id="ID")
+
+#Inspect the predictions
+head(pred)
+	
+
+## End(Not run)</code></pre>
+
+
+</div>

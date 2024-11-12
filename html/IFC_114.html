@@ -1,0 +1,182 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ExtractFromXIF</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>RIF/CIF File Reader</h2>
+
+<h3>Description</h3>
+
+<p>Extracts data from RIF or CIF Files.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ExtractFromXIF(
+  fileName,
+  extract_features = TRUE,
+  extract_images = FALSE,
+  extract_offsets = FALSE,
+  extract_stats = TRUE,
+  pnt_in_poly_algorithm = 1,
+  pnt_in_poly_epsilon = 1e-12,
+  force_default = TRUE,
+  verbose = FALSE,
+  verbosity = 1,
+  display_progress = TRUE,
+  fast = TRUE,
+  recursive = FALSE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fileName</code></td>
+<td>
+<p>path to file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>extract_features</code></td>
+<td>
+<p>whether to extract features from file. Default is TRUE.<br>
+If TRUE, <code>ExtractFromXIF</code> will try to export features. It it fails a message will be sent.<br>
+Otherwise, graphs, pops and regions will be also extracted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>extract_images</code></td>
+<td>
+<p>whether to extract images information from file. Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>extract_offsets</code></td>
+<td>
+<p>whether to extract IFDs offsets from corresponding. Default is FALSE.<br>
+See <code>getOffsets</code> for further details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>extract_stats</code></td>
+<td>
+<p>whether to extract population statistics. Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pnt_in_poly_algorithm</code></td>
+<td>
+<p>algorithm used to determine if object belongs to a polygon region or not. Default is 1.<br>
+Note that for the moment only 1(Trigonometry) is available.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pnt_in_poly_epsilon</code></td>
+<td>
+<p>epsilon to determine if object belongs to a polygon region or not. It only applies when algorithm is 1. Default is 1e-12.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>force_default</code></td>
+<td>
+<p>when display information can't be retrieved whether to use default values. Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>whether to display information (use for debugging purpose). Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbosity</code></td>
+<td>
+<p>quantity of information displayed when verbose is TRUE; 1: normal, 2: rich. Default is 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>display_progress</code></td>
+<td>
+<p>whether to display a progress bar. Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fast</code></td>
+<td>
+<p>whether to fast extract 'objects' or not. Default is TRUE.<br>
+Meaning that offsets will be extracted expecting that 'objects' are stored in ascending order.
+if extract_images is FALSE, a message will be thrown since extraction method does not ensure correct mapping between objects and offsets.<br>
+if extract_images is TRUE, a warning will be sent if an object is found at an unexpected order.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>recursive</code></td>
+<td>
+<p>whether to recursively apply <code>ExtractFromXIF</code> on files defining input fileName when it is a merged. Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments to be passed.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If extract_stats is TRUE, extract_features will be automatically forced to TRUE.<br>
+If extract_images is TRUE, extract_offsets will be automatically forced to TRUE.<br>
+If extract_offsets is TRUE, offsets of images and masks IFDs will be extracted.<br>
+If extract_images is TRUE, information about images will be extracted.<br>
+If the input fileName is a merged of several files and recursive is set to TRUE, then ExtractFromXIF will be applied recursively on these files.<br>
+/!\ Note that features extraction is mandatory to correctly extract graphs, pops, regions and statistics values.<br></p>
+
+
+<h3>Value</h3>
+
+<p>A named list of class 'IFC_data', whose members are:<br>
+-description, a list of descriptive information,<br>
+-fileName, path of fileName input,<br>
+-fileName_image, same as fileName,<br>
+-features, a data.frame of features,<br>
+-features_def, a describing how features are defined,<br>
+-graphs, a list of graphical elements found,<br>
+-pops, a list describing populations found,<br>
+-regions, a list describing how regions are defined,<br>
+-images, a data.frame describing information about images,<br>
+-offsets, an integer vector of images and masks IFDs offsets,<br>
+-stats, a data.frame describing populations count and percentage to parent and total population,<br>
+-checksum, current file checksum.<br>
+If fileName is a merged of several files returned object will be of class 'IFC_data' and 'Merged'.
+If recursive is set to "TRUE", ExtractFromXIF will be applied recursively on files defining the merged.
+and the returned object will be a list of the above-mentionned list for each of these files.
+</p>
+
+
+<h3>Source</h3>
+
+<p>For pnt_in_poly_algorithm, Trigonometry, is an adaptation of Jeremy VanDerWal's code <a href="https://github.com/jjvanderwal/SDMTools">https://github.com/jjvanderwal/SDMTools</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">if(requireNamespace("IFCdata", quietly = TRUE)) {
+  ## use a cif file, but you can also read rif
+  file_cif &lt;- system.file("extdata", "example.cif", package = "IFCdata")
+  cif &lt;- ExtractFromXIF(fileName = file_cif)
+} else {
+  message(sprintf('Please run `install.packages("IFCdata", repos = "%s", type = "source")` %s',
+                  'https://gitdemont.github.io/IFCdata/',
+                  'to install extra files required to run this example.'))
+}
+</code></pre>
+
+
+</div>

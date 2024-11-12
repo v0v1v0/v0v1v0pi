@@ -1,0 +1,100 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>loglik</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>The non-calibrated objective function ("log-likelihood")</h2>
+
+<h3>Description</h3>
+
+<p>This function computes the objective function, its gradient and its Hessian matrix for the non-calibrated likelihood estimator in Tan (2006), JASA.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">loglik(lam, tr, h)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>lam</code></td>
+<td>
+<p>A vector of parameters ("lambda").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tr</code></td>
+<td>
+<p>A vector of non-missing or treatment indicators.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>A constraint matrix.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>The value of the objective function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gradient</code></td>
+<td>
+<p>The gradient of the objective function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hessian</code></td>
+<td>
+<p>The Hessian matrix of objective function.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Tan, Z. (2006) "A distributional approach for causal inference using propensity scores," <em>Journal of the American Statistical Association</em>, 101, 1619-1637.
+</p>
+<p>Tan, Z. (2010) "Bounded, efficient and doubly robust estimation with inverse weighting,"
+<em>Biometrika</em>, 97, 661-682.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(KS.data)
+attach(KS.data)
+z=cbind(z1,z2,z3,z4)
+x=cbind(x1,x2,x3,x4)
+
+#logistic propensity score model, correct
+ppi.glm &lt;- glm(tr~z, family=binomial(link=logit))
+p &lt;- ppi.glm$fitted
+
+#outcome regression model, misspecified
+y.fam &lt;- gaussian(link=identity)
+
+eta1.glm &lt;- glm(y ~ x, subset=tr==1, 
+               family=y.fam, control=glm.control(maxit=1000))
+eta1.hat &lt;- predict.glm(eta1.glm, 
+               newdata=data.frame(x=x), type="response")
+
+#
+g1 &lt;- cbind(1,eta1.hat)
+h &lt;- cbind(p, (1-p)*g1)
+
+loglik(lam=rep(0,dim(h)[2]-1), tr=tr, h=h)
+</code></pre>
+
+
+</div>

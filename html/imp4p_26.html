@@ -1,0 +1,104 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>prob.mcar</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Estimation of a vector of probabilities that missing values are MCAR.
+</h2>
+
+<h3>Description</h3>
+
+<p>This function returns a vector of probabilities that each missing value is MCAR from specified confidence intervals.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">prob.mcar(b.u,absc,pi.na,pi.mcar,F.tot,F.obs)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>b.u</code></td>
+<td>
+<p>A numeric vector of upper bounds for missing values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>absc</code></td>
+<td>
+<p>The interval on which is estimated the MCAR data mechanism.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pi.na</code></td>
+<td>
+<p>The estimated proportion of missing values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pi.mcar</code></td>
+<td>
+<p>The estimated proportion of MCAR values among missing values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>F.tot</code></td>
+<td>
+<p>An estimation of the cumulative distribution function of the complete values on the interval <code>absc</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>F.obs</code></td>
+<td>
+<p>An estimation of the cumulative distribution function of the missing values on the interval <code>absc</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A numeric vector of estimated probabilities to be MCAR for missing values assuming upper bounds for them (<code>b.u</code>). The input arguments <code>absc</code>, <code>pi.mcar</code>, <code>pi.na</code>, <code>F.tot</code> and <code>F.obs</code> can be estimated thanks to the function <code>estim.mix</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Quentin Giai Gianetto &lt;quentin2g@yahoo.fr&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>estim.mix</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#Simulating data
+#Simulating data
+res.sim=sim.data(nb.pept=2000,nb.miss=600);
+
+#Imputation of missing values with the slsa algorithm
+dat.slsa=impute.slsa(tab=res.sim$dat.obs,conditions=res.sim$condition,repbio=res.sim$repbio);
+
+#Estimation of the mixture model
+res=estim.mix(tab=res.sim$dat.obs, tab.imp=dat.slsa, conditions=res.sim$condition);
+
+#Computing probabilities to be MCAR
+born=estim.bound(tab=res.sim$dat.obs,conditions=res.sim$condition);
+
+#Computing probabilities to be MCAR in the first column of result$tab.mod
+proba=prob.mcar(b.u=born$tab.upper[,1],absc=res$abs.mod,pi.na=res$pi.na[1],
+pi.mcar=res$pi.mcar[1], F.tot=res$F.tot[,1], F.obs=res$F.obs[,1]);
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,104 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>read_brainvis</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Read 'BrainVision' data</h2>
+
+<h3>Description</h3>
+
+<p>Read 'BrainVision' data
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">read_brainvis(
+  file,
+  extract_path = getOption("ieegio.extract_path", NULL),
+  header_only = FALSE,
+  cache_ok = TRUE,
+  verbose = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>file path to the data file</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>extract_path</code></td>
+<td>
+<p>location to where the extracted information is to be
+stored</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>header_only</code></td>
+<td>
+<p>whether to only load header data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cache_ok</code></td>
+<td>
+<p>whether existing cache should be reused; default is
+<code>TRUE</code>. This input can speed up reading large data files; set to
+<code>FALSE</code> to delete cache before importing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>whether to print processing messages; default is <code>TRUE</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A cached object that is readily to be loaded to memory; see
+<code>SignalDataCache</code> for class definition.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+if( ieegio_sample_data("brainvis.dat", test = TRUE) ) {
+  # ensure the header and marker files are downloaded as well
+  ieegio_sample_data("brainvis.vhdr")
+  ieegio_sample_data("brainvis.dat")
+  file &lt;- ieegio_sample_data("brainvis.vmrk")
+
+  x &lt;- read_brainvis(file)
+  print(x)
+
+  x$get_header()
+
+  x$get_channel_table()
+
+  x$get_annotations()
+
+  channel &lt;- x$get_channel(10)
+
+  plot(
+    channel$time,
+    channel$value,
+    type = "l",
+    main = channel$info$Label,
+    xlab = "Time",
+    ylab = channel$info$Unit
+  )
+}
+
+</code></pre>
+
+
+</div>

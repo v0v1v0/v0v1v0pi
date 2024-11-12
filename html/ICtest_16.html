@@ -1,0 +1,155 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NGPP</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Non-Gaussian Projection Pursuit 
+</h2>
+
+<h3>Description</h3>
+
+<p>Estimates <code class="reqn">k</code> non-Gaussian signal components using projection pursuit. The projection index can be chosen among convex combinations of squares of one or several standard projection indices used in ICA.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">NGPP(X, k, nl = c("skew", "pow3"), alpha = 0.8, method = "symm", eps = 1e-6,
+     verbose = FALSE, maxiter = 100)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>Numeric matrix with n rows corresponding to the observations and p columns corresponding to the variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>Number of components to estimate, <code class="reqn">1 \leq k \leq p</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nl</code></td>
+<td>
+<p>Vector of non-linearities, a convex combination of the corresponding squared objective functions of which is then used as the projection index. The choices include <code>"skew"</code> (skewness), <code>"pow3"</code> (excess kurtosis), <code>"tanh"</code> (<code class="reqn">log(cosh)</code>) and <code>"gauss"</code> (Gaussian function).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>Vector of positive weights between 0 and 1 given to the non-linearities. The length of <code>alpha</code> should be either one less than the number of non-linearities in which case the missing weight is chosen so that <code>alpha</code> sums to one, or equal to the number of non-linearities in which case the weights are used as such. No boundary checks for the weights are done.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>If <code>"symm"</code> the <code>k</code> signals are estimated simultaneously (symmetric projection pursuit) and if <code>"defl"</code> they are estimated one-by-one (deflation-based projection pursuit).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>Convergence tolerance.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>If <code>TRUE</code> the numbers of iterations will be printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+<p>Maximum number of iterations.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>It is assumed that the data is a random sample from the model <code class="reqn">x = m + A s</code> where the latent vector <code class="reqn">s = (s_1^T, s_2^T)^T</code> consists of <code class="reqn">k</code>-dimensional non-Gaussian subvector (the signal) and <code class="reqn">p - k</code>-dimensional Gaussian subvector (the noise) and the components of <code class="reqn">s</code> are mutually independent. Without loss of generality we further assume that the components of <code class="reqn">s</code> have zero means and unit variances.
+</p>
+<p>The objective is to estimate an inverse for the mixing matrix <code class="reqn">A</code> and in non-Gaussian projection pursuit this is done by first standardizaing the observations and then finding mutually orthogonal directions maximizing a convex combination of the chosen squared objective functions.
+</p>
+<p>After estimation the found signals are ordered in decreasing order with respect to their objective function values.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with class 'bss' containing the following components: 
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>W</code></td>
+<td>
+<p>Estimated unmixing matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>S</code></td>
+<td>
+<p>Matrix of size <code class="reqn">n \times k</code> containing the estimated signals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>Vector of the objective function values of the signals</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MU</code></td>
+<td>
+<p>Location vector of the data which was substracted before estimating the signal components.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Joni Virta
+</p>
+
+
+<h3>References</h3>
+
+<p><cite>Virta, J., Nordhausen, K. and Oja, H., (2016), Projection Pursuit for non-Gaussian Independent Components, &lt;https://arxiv.org/abs/1612.05445&gt;.</cite> 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>NGPPsim, NGPPest, fICA</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Simulated data with 2 signals
+
+n &lt;- 500
+S &lt;- cbind(rexp(n), runif(n),  rnorm(n))
+A &lt;- matrix(rnorm(9), ncol = 3)
+X &lt;- S %*% t(A)
+
+res &lt;- NGPP(X, 2)
+res$W %*% A
+
+
+# Iris data
+
+X &lt;- as.matrix(iris[, 1:4])
+
+res &lt;- NGPP(X, 2, nl = c("pow3", "tanh"), alpha = 0.5)
+plot(res, col = iris[, 5])
+</code></pre>
+
+
+</div>

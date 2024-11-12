@@ -1,0 +1,238 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>lpSetup</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Constructing LP problem</h2>
+
+<h3>Description</h3>
+
+<p>If the user passes IV-like moments to the function, then the
+function constructs the components of the LP problem. If no IV-like
+moments are passed, then the function constructs the linear
+constraints of the QCQP problem. Note that the LP/QCQP model will
+be saved inside an environment variable, which is to be passed
+through the argument <code>env</code>. This is done for efficient use of
+memory. The environment <code>env</code> is supposed to already contain a
+list under the entry <code>$mbobj</code> containing the matrices defining
+the shape constraints. This list of shape constraints <code>$mbobj</code>
+should contain three entries corresponding to a system of linear
+equations of the form <code>Ax &lt;=&gt; b</code>: <code>mbA</code>, the matrix
+defining the constraints, <code>A</code>; <code>mbs</code>, a vector indicating
+whether a row in <code>mbA</code> is an equality or inequality constraint
+(for Gurobi and MOSEK, use '&lt;=', '&gt;=', '='; for CPLEX,
+use 'L', 'G', and 'E'); <code>mbrhs</code>, a vector of the right hand
+side values defining the constraint of the form i.e. the vector
+<code>b</code>. Depending on the linear programming solver used, this
+function will return different output specific to the solver.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">lpSetup(
+  env,
+  sset,
+  orig.sset = NULL,
+  equal.coef0 = NULL,
+  equal.coef1 = NULL,
+  shape = TRUE,
+  direct = FALSE,
+  rescale = TRUE,
+  solver
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>env</code></td>
+<td>
+<p>environment containing the matrices defining the LP/QCQP
+problem.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sset</code></td>
+<td>
+<p>List of IV-like estimates and the corresponding gamma
+terms.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>orig.sset</code></td>
+<td>
+<p>list, only used for bootstraps. The list contains
+the gamma moments for each element in the S-set, as well as the
+IV-like coefficients.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>equal.coef0</code></td>
+<td>
+<p>character, name of terms in <code>m0</code> that
+should have common coefficients with the corresponding terms in
+<code>m1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>equal.coef1</code></td>
+<td>
+<p>character, name of terms in <code>m1</code> that
+should have common coefficients with the corresponding terms in
+<code>m0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shape</code></td>
+<td>
+<p>boolean, default set to TRUE. Switch to determine
+whether or not to include shape restrictions in the LP/QCQP
+problem.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>direct</code></td>
+<td>
+<p>boolean, set to <code>TRUE</code> if the direct MTR
+regression is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rescale</code></td>
+<td>
+<p>boolean, set to <code>TRUE</code> if the MTR components
+should be rescaled to improve stability in the LP/QCQP
+optimization.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>solver</code></td>
+<td>
+<p>string, name of the package used to solve the LP/QCQP
+problem.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list of matrices and vectors necessary to define an
+LP/QCQP problem.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">dtm &lt;- ivmte:::gendistMosquito()
+
+## Declare empty list to be updated (in the event multiple IV like
+## specifications are provided
+sSet &lt;- list()
+
+## Declare MTR formulas
+formula0 = ~ 1 + u
+formula1 = ~ 1 + u
+
+## Construct object that separates out non-spline components of MTR
+## formulas from the spline components. The MTR functions are
+## obtained from this object by the function 'genSSet'.
+splinesList = list(removeSplines(formula0), removeSplines(formula1))
+
+## Construct MTR polynomials
+polynomials0 &lt;- polyparse(formula = formula0,
+                          data = dtm,
+                          uname = u,
+                          as.function = FALSE)
+polynomials1 &lt;- polyparse(formula = formula1,
+                          data = dtm,
+                          uname = u,
+                           as.function = FALSE)
+
+## Generate propensity score model
+propensityObj &lt;- propensity(formula = d ~ z,
+                            data = dtm,
+                            link = "linear")
+
+## Generate IV estimates
+ivEstimates &lt;- ivEstimate(formula = ey ~ d | z,
+                          data = dtm,
+                          components = l(intercept, d),
+                          treat = d,
+                          list = FALSE)
+
+## Generate target gamma moments
+targetGamma &lt;- genTarget(treat = "d",
+                         m0 = ~ 1 + u,
+                         m1 = ~ 1 + u,
+                         target = "atu",
+                         data = dtm,
+                         splinesobj = splinesList,
+                         pmodobj = propensityObj,
+                         pm0 = polynomials0,
+                         pm1 = polynomials1)
+
+## Construct S-set. which contains the coefficients and weights
+## corresponding to various IV-like estimands
+sSet &lt;- genSSet(data = dtm,
+                sset = sSet,
+                sest = ivEstimates,
+                splinesobj = splinesList,
+                pmodobj = propensityObj$phat,
+                pm0 = polynomials0,
+                pm1 = polynomials1,
+                ncomponents = 2,
+                scount = 1,
+                yvar = "ey",
+                dvar = "d",
+                means = TRUE)
+## Only the entry $sset is required
+sSet &lt;- sSet$sset
+
+## Define additional upper- and lower-bound constraints for the LP
+## problem.  The code below imposes a lower bound of 0.2 and upper
+## bound of 0.8 on the MTRs.
+A &lt;- matrix(0, nrow = 22, ncol = 4)
+A &lt;- cbind(A, rbind(cbind(1, seq(0, 1, 0.1)),
+                    matrix(0, nrow = 11, ncol = 2)))
+A &lt;- cbind(A, rbind(matrix(0, nrow = 11, ncol = 2),
+                    cbind(1, seq(0, 1, 0.1))))
+sense &lt;- c(rep("&gt;", 11), rep("&lt;", 11))
+rhs &lt;- c(rep(0.2, 11), rep(0.8, 11))
+
+## Construct LP object to be interpreted and solved by
+## lpSolveAPI. Note that an environment has to be created for the LP
+## object. The matrices defining the shape restrictions must be stored
+## as a list under the entry \code{$mbobj} in the environment.
+modelEnv &lt;- new.env()
+modelEnv$mbobj &lt;- list(mbA = A,
+                    mbs = sense,
+                    mbrhs = rhs)
+## Convert the matrices defining the shape constraints into a format
+## that is suitable for the LP solver.
+lpSetup(env = modelEnv,
+        sset = sSet,
+        solver = "lpsolveapi")
+## Setup LP model so that it is solving for the bounds.
+lpSetupBound(env = modelEnv,
+             g0 = targetGamma$gstar0,
+             g1 = targetGamma$gstar1,
+             sset = sSet,
+             criterion.tol = 0,
+             criterion.min = 0,
+             solver = "lpsolveapi")
+## Declare any LP solver options as a list.
+lpOptions &lt;- optionsLpSolveAPI(list(epslevel = "tight"))
+## Obtain the bounds.
+bounds &lt;- bound(env = modelEnv,
+                sset = sSet,
+                solver = "lpsolveapi",
+                solver.options = lpOptions)
+cat("The bounds are [",  bounds$min, ",", bounds$max, "].\n")
+
+</code></pre>
+
+
+</div>

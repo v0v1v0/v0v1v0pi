@@ -1,0 +1,119 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>side</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Higher-order Local Information Dimension Estimator.</h2>
+
+<h3>Description</h3>
+
+<p><code>side</code> is a Higher-order Information Dimension Estimator, which estimates
+local information dimension of given dataset based on the polynomial regression
+with Poisson error structure.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">side(
+  x,
+  maxDim = 5,
+  DM = FALSE,
+  local = FALSE,
+  method = "disc",
+  comb = "average"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>data matrix or distance matrix given by as.matrix(dist(x)).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxDim</code></td>
+<td>
+<p>maximum of the candidate dimensions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DM</code></td>
+<td>
+<p>whether <code>'x'</code> is distance matrix or not. logical.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>local</code></td>
+<td>
+<p>logical. If <code>TRUE</code>, a vector of local dimensions at each sample point is returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>algorithm to estimate intrinsic dimension. 'disc' for discrite dimension estimation. 'cont' for continuous dimension estimation with MLE by Newton-method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comb</code></td>
+<td>
+<p>'average', 'median' or 'vote' for combining local estimates when global estimate is required.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A variant of fractal dimension called the local information dimension is considered.
+The local information dimension is estimated by using the probability mass function.
+The function <code>side</code> considers higher-order expansion of the probability mass around
+the inspection point, and it estimates the local information dimension by fitting 
+a generalized linear model with Poisson error structure and an identity link function.
+There are two methods for dimension estimation: the first method tries different 
+dimensions and adopt the one with maximum likelihood, while the second method directly
+maximises the likelihood with respect to the intrinsic dimension. The former returns 
+an integer-valued dimension estimate, and the latter returns a real-valued estimate.
+The result of the former method is used as an initial value for the latter method
+in numerical optimization. Slow but more accurate than <code>mada</code> in some cases.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Estimated local or global intrinsic dimension.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Hideitsu Hino <a href="mailto:hideitsu.hino@gmail.com">hideitsu.hino@gmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>H. Hino, J. Fujiki, S. Akaho, and N. Murata, 'Local Intrinsic Dimension Estimation by Generalized Linear Modeling', Neural Computation, 2017
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## local intrinsic dimension estimate
+tmp &lt;- gendata(DataName='ldbl', n=300)
+x &lt;- tmp$x
+set.seed(999)
+idx &lt;- c(sample(which(tmp$tDim==1)[1:10],3), sample(which(tmp$tDim==2)[1:30],3))
+estmada &lt;- mada(x=x[1:100,], local=TRUE)
+estmada[idx]  ## estimated local intrinsic dimensions by mada
+tmp$tDim[idx] ## true local intrinsic dimensions
+estside &lt;- side(x=x[1:100,], local=TRUE)
+estside[idx] ## estimated local intrinsic dimensions by side
+</code></pre>
+
+
+</div>

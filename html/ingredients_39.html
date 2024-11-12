@@ -1,0 +1,85 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot.ceteris_paribus_oscillations</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot Ceteris Paribus Oscillations</h2>
+
+<h3>Description</h3>
+
+<p>This function plots local variable importance plots
+calculated as oscillations in the Ceteris Paribus Profiles.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'ceteris_paribus_oscillations'
+plot(x, ..., bar_width = 10)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a ceteris paribus oscillation explainer produced with function <code>calculate_oscillations()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other explainers that shall be plotted together</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bar_width</code></td>
+<td>
+<p>width of bars. By default <code>10</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a <code>ggplot2</code> object
+</p>
+
+
+<h3>References</h3>
+
+<p>Explanatory Model Analysis. Explore, Explain, and Examine Predictive Models. <a href="https://ema.drwhy.ai/">https://ema.drwhy.ai/</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library("DALEX")
+library("ranger")
+
+apartments_rf_model &lt;- ranger(m2.price ~., data = apartments)
+
+explainer_rf &lt;- explain(apartments_rf_model,
+                        data = apartments_test[,-1],
+                        y = apartments_test[,1],
+                        label = "ranger forest",
+                        verbose = FALSE)
+
+apartment &lt;- apartments_test[1:2,]
+
+cp_rf &lt;- ceteris_paribus(explainer_rf, apartment)
+plot(cp_rf, color = "_ids_")
+
+vips &lt;- calculate_oscillations(cp_rf)
+vips
+
+plot(vips)
+
+
+</code></pre>
+
+
+</div>

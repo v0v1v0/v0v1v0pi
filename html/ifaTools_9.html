@@ -1,0 +1,107 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>uniquenessPrior</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Uniqueness prior to assist in item factor analysis</h2>
+
+<h3>Description</h3>
+
+<p>To prevent Heywood cases, Bock, Gibbons, &amp; Muraki (1988)
+suggested a beta prior on the uniqueness (Equations 43-46).
+The analytic gradient and Hessian are
+included for quick optimization using Newton-Raphson.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">uniquenessPrior(model, numFactors, strength = 0.1, name = "uniquenessPrior")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>an mxModel</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numFactors</code></td>
+<td>
+<p>the number of factors.
+All items are assumed to have the same number of factors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>strength</code></td>
+<td>
+<p>the strength of the prior</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name</code></td>
+<td>
+<p>the name of the mxModel that is returned</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>To reproduce these derivatives in maxima for the case
+of 2 slopes (<code>c</code> and <code>d</code>), use the following code:
+</p>
+<p><code>f(c,d) := -p*log(1-(c^2 / (c^2+d^2+1) + (d^2 / (c^2+d^2+1))));</code>
+</p>
+<p><code>diff(f(c,d), d),radcan;</code>
+</p>
+<p><code>diff(diff(f(c,d), d),d),radcan;</code>
+</p>
+<p>The general pattern is given in Bock, Gibbons, &amp; Muraki.
+</p>
+
+
+<h3>Value</h3>
+
+<p>an mxModel that evaluates to the prior density in deviance units
+</p>
+
+
+<h3>References</h3>
+
+<p>Bock, R. D., Gibbons, R., &amp; Muraki, E. (1988). Full-information item factor analysis.
+<em>Applied Psychological Measurement, 12</em>(3), 261-280.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">numItems &lt;- 6
+spec &lt;- list()
+spec[1:numItems] &lt;- list(rpf.drm(factors=2))
+names(spec) &lt;- paste0("i", 1:numItems)
+item &lt;- mxMatrix(name="item", free=TRUE,
+                 values=mxSimplify2Array(lapply(spec, rpf.rparam)))
+item$labels[1:2,] &lt;- paste0('p',1:(numItems * 2))
+data &lt;- rpf.sample(100, spec, item$values)  # use a larger sample size
+m1 &lt;- mxModel(model="m1", item,
+              mxData(observed=data, type="raw"),
+              mxExpectationBA81(spec),
+              mxFitFunctionML())
+up &lt;- uniquenessPrior(m1, 2)
+container &lt;- mxModel("container", m1, up,
+                     mxFitFunctionMultigroup(c("m1", "uniquenessPrior")),
+                     mxComputeSequence(list(
+                       mxComputeOnce('fitfunction', c('fit','gradient')),
+                       mxComputeReportDeriv())))
+container &lt;- mxRun(container)
+container$output$fit
+container$output$gradient
+</code></pre>
+
+
+</div>

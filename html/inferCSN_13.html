@@ -1,0 +1,272 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fit_sparse_regression</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit a sparse regression model</h2>
+
+<h3>Description</h3>
+
+<p>Computes the regularization path for the specified loss function and penalty function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fit_sparse_regression(
+  x,
+  y,
+  penalty = "L0",
+  algorithm = "CD",
+  regulators_num = ncol(x),
+  cross_validation = FALSE,
+  n_folds = 10,
+  seed = 1,
+  loss = "SquaredError",
+  nLambda = 100,
+  nGamma = 5,
+  gammaMax = 10,
+  gammaMin = 1e-04,
+  partialSort = TRUE,
+  maxIters = 200,
+  rtol = 1e-06,
+  atol = 1e-09,
+  activeSet = TRUE,
+  activeSetNum = 3,
+  maxSwaps = 100,
+  scaleDownFactor = 0.8,
+  screenSize = 1000,
+  autoLambda = NULL,
+  lambdaGrid = list(),
+  excludeFirstK = 0,
+  intercept = TRUE,
+  lows = -Inf,
+  highs = Inf,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>The matrix of regulators.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>The vector of target.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>penalty</code></td>
+<td>
+<p>The type of regularization, default is <em><code>L0</code></em>.
+This can take either one of the following choices: <em><code>L0</code></em>, <em><code>L0L1</code></em>, and <em><code>L0L2</code></em>.
+For high-dimensional and sparse data, <em><code>L0L2</code></em> is more effective.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algorithm</code></td>
+<td>
+<p>The type of algorithm used to minimize the objective function, default is <em><code>CD</code></em>.
+Currently <em><code>CD</code></em> and <em><code>CDPSI</code></em> are supported.
+The <em><code>CDPSI</code></em> algorithm may yield better results, but it also increases running time.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>regulators_num</code></td>
+<td>
+<p>The number of non-zore coefficients, this value will affect the final performance.
+The maximum support size at which to terminate the regularization path.
+Recommend setting this to a small fraction of min(n,p) (e.g. 0.05 * min(n,p)) as L0 regularization typically selects a small portion of non-zeros.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cross_validation</code></td>
+<td>
+<p>Logical value, default is <em><code>FALSE</code></em>, whether to use cross-validation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_folds</code></td>
+<td>
+<p>The number of folds for cross-validation, default is <em><code>10</code></em>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>The random seed for cross-validation, default is <em><code>1</code></em>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loss</code></td>
+<td>
+<p>The loss function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nLambda</code></td>
+<td>
+<p>The number of Lambda values to select.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nGamma</code></td>
+<td>
+<p>The number of Gamma values to select.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gammaMax</code></td>
+<td>
+<p>The maximum value of Gamma when using the <code>L0L2</code> penalty.
+For the <code>L0L1</code> penalty this is automatically selected.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gammaMin</code></td>
+<td>
+<p>The minimum value of Gamma when using the <code>L0L2</code> penalty.
+For the <code>L0L1</code> penalty, the minimum value of gamma in the grid is set to gammaMin * gammaMax.
+Note that this should be a strictly positive quantity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>partialSort</code></td>
+<td>
+<p>If <code>TRUE</code>, partial sorting will be used for sorting the coordinates to do greedy cycling.
+Otherwise, full sorting is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxIters</code></td>
+<td>
+<p>The maximum number of iterations (full cycles) for <code>CD</code> per grid point.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rtol</code></td>
+<td>
+<p>The relative tolerance which decides when to terminate optimization,
+based on the relative change in the objective between iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>atol</code></td>
+<td>
+<p>The absolute tolerance which decides when to terminate optimization,
+based on the absolute L2 norm of the residuals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>activeSet</code></td>
+<td>
+<p>If <code>TRUE</code>, performs active set updates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>activeSetNum</code></td>
+<td>
+<p>The number of consecutive times a support should appear before declaring support stabilization.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxSwaps</code></td>
+<td>
+<p>The maximum number of swaps used by <code>CDPSI</code> for each grid point.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scaleDownFactor</code></td>
+<td>
+<p>This parameter decides how close the selected Lambda values are.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>screenSize</code></td>
+<td>
+<p>The number of coordinates to cycle over when performing initial correlation screening.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>autoLambda</code></td>
+<td>
+<p>Ignored parameter. Kept for backwards compatibility.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambdaGrid</code></td>
+<td>
+<p>A grid of Lambda values to use in computing the regularization path.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>excludeFirstK</code></td>
+<td>
+<p>This parameter takes non-negative integers.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intercept</code></td>
+<td>
+<p>If <code>FALSE</code>, no intercept term is included in the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lows</code></td>
+<td>
+<p>Lower bounds for coefficients.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>highs</code></td>
+<td>
+<p>Upper bounds for coefficients.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Parameters for other methods.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An S3 object describing the regularization path
+</p>
+
+
+<h3>References</h3>
+
+<p>Hazimeh, Hussein et al.
+“L0Learn: A Scalable Package for Sparse Learning using L0 Regularization.”
+J. Mach. Learn. Res. 24 (2022): 205:1-205:8.
+</p>
+<p>Hazimeh, Hussein and Rahul Mazumder.
+“Fast Best Subset Selection: Coordinate Descent and Local Combinatorial Optimization Algorithms.”
+Oper. Res. 68 (2018): 1517-1537.
+</p>
+<p>https://github.com/hazimehh/L0Learn/blob/master/R/fit.R
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("example_matrix")
+fit &lt;- fit_sparse_regression(
+  example_matrix[, -1],
+  example_matrix[, 1]
+)
+head(coef(fit))
+</code></pre>
+
+
+</div>

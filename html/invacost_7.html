@@ -1,0 +1,132 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot.invacost.costsummary</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot raw cumulated cost of invasive species over different periods of time</h2>
+
+<h3>Description</h3>
+
+<p>This function provides different plotting methods for the raw average annual 
+cost of invasive species over different periods of time
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'invacost.costsummary'
+plot(
+  x,
+  plot.breaks = 10^(-15:15),
+  plot.type = "points",
+  average.annual.values = TRUE,
+  cost.transf = "log10",
+  graphical.parameters = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>The output object from <code>summarizeCosts</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.breaks</code></td>
+<td>
+<p>a vector of numeric values indicating the plot breaks 
+for the Y axis (cost values)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.type</code></td>
+<td>
+<p><code>"points"</code> or <code>"bars"</code>. Defines the type of plot
+you want to make; bars are not advised in log scale because the base value (0)
+is infinite in log-scale.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>average.annual.values</code></td>
+<td>
+<p>if <code>TRUE</code>, the plot will represent average
+annual values rather than cumulative values over the entire period</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cost.transf</code></td>
+<td>
+<p>Type of transformation you want to apply on cost values.
+Specify <code>NULL</code> to avoid any transformation. Only useful
+for graphical representation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>graphical.parameters</code></td>
+<td>
+<p>set this to <code>"manual"</code> if you want to 
+customise <code>ggplot2</code> parameters. 
+By default, the following layers are configured: <code>ylab</code>, <code>xlab</code>, 
+<code>scale_x_continuous</code>,
+<code>theme_bw</code> and, if <code>cost.transf = "log10"</code>, <code>scale_y_log10</code> and 
+<code>annotation_logticks</code>. If you specify <code>grahical.parameters = "manual"</code>,
+all defaults will be ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments, none implemented for now</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p><a href="https://github.com/Farewe/invacost">https://github.com/Farewe/invacost</a>
+</p>
+<p>Leroy Boris, Kramer Andrew M, Vaissière Anne-Charlotte, Kourantidou Melina,
+Courchamp Franck &amp; Diagne Christophe (2022). Analysing economic costs 
+of invasive alien species with the invacost R package. Methods in Ecology
+and Evolution. <a href="https://doi.org/10.1111/2041-210X.13929">doi:10.1111/2041-210X.13929</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(invacost)
+
+### Cleaning steps
+# Eliminating data with no information on starting and ending years
+invacost &lt;- invacost[-which(is.na(invacost$Probable_starting_year_adjusted)), ]
+invacost &lt;- invacost[-which(is.na(invacost$Probable_ending_year_adjusted)), ]
+# Keeping only observed and reliable costs
+invacost &lt;- invacost[invacost$Implementation == "Observed", ]
+invacost &lt;- invacost[which(invacost$Method_reliability == "High"), ]
+# Eliminating data with no usable cost value
+invacost &lt;- invacost[-which(is.na(invacost$Cost_estimate_per_year_2017_USD_exchange_rate)), ]
+
+### Expansion
+
+db.over.time &lt;- expandYearlyCosts(invacost,
+                                  startcolumn = "Probable_starting_year_adjusted",
+                                  endcolumn = "Probable_ending_year_adjusted")
+                                  
+### Analysis
+res &lt;- summarizeCosts(db.over.time,
+                      minimum.year = 1970,
+                      maximum.year = 2020)
+
+### Visualisation
+plot(res)
+plot(res, plot.type = "bars")
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,89 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>qpred</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Quantile function of IDR or raw forecasts</h2>
+
+<h3>Description</h3>
+
+<p>Evaluate the the quantile function of IDR predictions or of unprocessed
+forecasts in a <code>data.frame</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">qpred(predictions, quantiles)
+
+## S3 method for class 'idr'
+qpred(predictions, quantiles)
+
+## S3 method for class 'data.frame'
+qpred(predictions, quantiles)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>predictions</code></td>
+<td>
+<p>either an object of class <code>idr</code> (output of
+<code>predict.idrfit</code>), or a <code>data.frame</code> of numeric variables. In
+the latter case, quantiles are computed using the empirical distribution of
+the variables in <code>predictions</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quantiles</code></td>
+<td>
+<p>numeric vector of desired quantiles.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The quantiles are defined as lower quantiles, that is,
+</p>
+<p style="text-align: center;"><code class="reqn">
+  q(u) = inf(x: cdf(x) &gt;= u).
+</code>
+</p>
+
+
+
+<h3>Value</h3>
+
+<p>A matrix of forecasts for the desired quantiles, one column per quantile.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>predict.idrfit</code>, <code>cdf</code>, <code>qscore</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("rain")
+
+## Postprocess HRES forecast using data of 3 years
+
+X &lt;- rain[1:(3 * 365), "HRES", drop = FALSE]
+y &lt;- rain[1:(3 * 365), "obs"]
+
+fit &lt;- idr(y = y, X = X)
+
+## Compute 95%-quantile forecast given that the HRES forecast is
+## 2.5 mm, 5 mm or 10 mm
+
+predictions &lt;- predict(fit, data = data.frame(HRES = c(2.5, 5, 10)))
+qpred(predictions, quantiles = 0.95)
+</code></pre>
+
+
+</div>

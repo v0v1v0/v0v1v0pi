@@ -1,0 +1,219 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>SeqMOD</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Sequential modified federov algorithm for MNL model.</h2>
+
+<h3>Description</h3>
+
+<p>Selects the choice set that minimizes the DB-error when added to an initial
+design, given (updated) parameter values.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">SeqMOD(
+  des = NULL,
+  cand.set,
+  n.alts,
+  par.draws,
+  prior.covar,
+  alt.cte = NULL,
+  no.choice = NULL,
+  weights = NULL,
+  parallel = TRUE,
+  reduce = TRUE,
+  allow.rep = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>des</code></td>
+<td>
+<p>A design matrix in which each row is a profile. If alternative
+specific constants are present, those should be included as the first
+column(s) of the design. Can be generated with <code>Modfed</code> or <code>CEA</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cand.set</code></td>
+<td>
+<p>A numeric matrix in which each row is a possible profile. The
+<code>Profiles</code> function can be used to generate this matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.alts</code></td>
+<td>
+<p>Numeric value indicating the number of alternatives per choice
+set.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>par.draws</code></td>
+<td>
+<p>A matrix or a list, depending on <code>alt.cte</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior.covar</code></td>
+<td>
+<p>Covariance matrix of the prior distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alt.cte</code></td>
+<td>
+<p>A binary vector indicating for each alternative whether an
+alternative specific constant is desired. The default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>no.choice</code></td>
+<td>
+<p>An integer indicating the no choice alternative. The default
+is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>A vector containing the weights of the draws. Default is
+<code>NULL</code>, See also <code>ImpsampMNL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>Logical value indicating whether computations should be done
+over multiple cores.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reduce</code></td>
+<td>
+<p>Logical value indicating whether the candidate set should be
+reduced or not.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allow.rep</code></td>
+<td>
+<p>Logical value indicating whether repeated choice sets are
+allowed in the design.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This algorithm is ideally used in an adaptive context. The algorithm will
+select the next DB-efficient choice set given parameter values and possible
+previously generated choice sets. In an adaptive context these parameter
+values are updated after each observed response.
+</p>
+<p>Previously generated choice sets, which together form an initial design, can
+be provided in <code>des</code>. When no design is provided, the algorithm will
+select te most efficient choice set based on the fisher information of the
+prior covariance matrix <code>prior.covar</code>.
+</p>
+<p>If <code>alt.cte = NULL</code>, <code>par.draws</code> should be a matrix in which each
+row is a sample from the multivariate parameter distribution. In case that
+<code>alt.cte</code> is not <code>NULL</code>, a list containing two matrices should be
+provided to <code>par.draws</code>. The first matrix containing the parameter draws
+for the alternative specific parameters. The second matrix containing the
+draws for the rest of the parameters.
+</p>
+<p>The list of potential choice sets are created using
+<code>combn</code>. If <code>reduce</code> is <code>TRUE</code>,
+<code>allow.rep = FALSE</code> and vice versa. Furthermore, the list of
+potential choice sets will be screaned in order to select only those choice
+sets with a unique information matrix. If no alternative specific constants are used,
+<code>reduce</code> should always be <code>TRUE</code>. When alternative specific
+constants are used <code>reduce</code> can be <code>TRUE</code> so that the algorithm
+will be faster, but the combinations of constants and profiles will not be
+evaluated exhaustively.
+</p>
+<p>The <code>weights</code> argument can be used when the <code>par.draws</code> have
+weights. This is for example the case when parameter values are updated using
+<code>ImpsampMNL</code>.
+</p>
+<p>When <code>parallel</code> is <code>TRUE</code>, <code>detectCores</code> will
+be used to decide upon the number of available cores. That number minus 1
+cores will be used to search for the optimal choice set. For small problems
+(6 parameters), <code>parallel = TRUE</code> can be slower. For larger problems the
+computation time will decrease significantly.
+</p>
+<p><em>Note:</em> this function is more stable than <code>SeqCEA</code>, but
+it takes more time to get the output. This happens because this function
+makes an exhaustive search to get the choice set, whereas
+<code>SeqCEA</code> makes a random search.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>set</code></td>
+<td>
+<p>A matrix representing a DB efficient choice set.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>error</code></td>
+<td>
+<p>A numeric value indicating the DB-error of the whole
+design.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Traets F, Sanchez G, Vandebroek M (2020).
+“Generating Optimal Designs for Discrete Choice Experiments in R: The idefix Package.”
+<em>Journal of Statistical Software</em>, <b>96</b>(3).
+</p>
+<p>Yu J, Goos P, Vandebroek M (2011).
+“Individually adapted sequential Bayesian conjoint-choice designs in the presence of consumer heterogeneity.”
+<a href="https://www.sciencedirect.com/science/article/pii/S0167811611000668">https://www.sciencedirect.com/science/article/pii/S0167811611000668</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># DB efficient choice set, given a design and parameter draws. 
+# Candidate profiles 
+cs &lt;- Profiles(lvls = c(3, 3, 3), coding = c("D", "D", "D"))
+m &lt;- c(0.3, 0.2, -0.3, -0.2, 1.1, 2.4) # mean (total = 6 parameters).
+pc &lt;- diag(length(m)) # covariance matrix
+set.seed(123)
+sample &lt;- MASS::mvrnorm(n = 10, mu = m, Sigma = pc)
+# Initial design.
+des &lt;- example_design 
+# Efficient choice set to add. 
+SeqMOD(des = des, cand.set = cs, n.alts = 2, par.draws = sample, 
+           prior.covar = pc, parallel = FALSE)
+
+# DB efficient choice set, given parameter draws. 
+# with alternative specific constants 
+des &lt;- example_design2 
+cs &lt;- Profiles(lvls = c(3, 3, 3), coding = c("D", "D", "D"))
+ac &lt;- c(1, 1, 0) # Alternative specific constants. 
+m &lt;- c(0.3, 0.2, -0.3, -0.2, 1.1, 2.4, 1.8, 1.2) # mean 
+pc &lt;- diag(length(m)) # covariance matrix
+pos &lt;- MASS::mvrnorm(n = 10, mu = m, Sigma = pc)
+sample &lt;- list(pos[ , 1:2], pos[ , 3:8])
+# Efficient choice set. 
+SeqMOD(des = des, cand.set = cs, n.alts = 3, par.draws = sample, alt.cte = ac, 
+           prior.covar = pc, parallel = FALSE)
+</code></pre>
+
+
+</div>

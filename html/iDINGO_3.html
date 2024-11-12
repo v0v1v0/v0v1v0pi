@@ -1,0 +1,178 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dingo</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Fit DINGO model
+</h2>
+
+<h3>Description</h3>
+
+<p>This function fit DINGO model and calculates edge-wise differential scores for all pairwise edges among p variables.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dingo(dat,x,rhoarray=NULL,diff.score=T,B=100,verbose=T,cores=1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dat</code></td>
+<td>
+
+<p>nxp data with colnames as genename
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a length n vector representing a binary covariate
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rhoarray</code></td>
+<td>
+<p>a vector representing candidate tuning parameters of glasso for fitting global network model. If it is one value, then we use the value as the tuning parameter. It is set by NULL as default and we select 100 candidate values.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diff.score</code></td>
+<td>
+<p>a logical value. If TRUE, edge-wise differential scores are calculated from bootstrap standard error. Otherwise, we fit Steps 1 and 2 of DINGO model to get group specific GGMs (partial correlations)  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>the number of bootstrap samples to calculate differential scores.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>if TRUE, lists the procedure
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>the number of cores to run in parallel for bootstrapping, set to 1 as a default. If more cores are specified than the recommended maximum (the number of cores detected minus 1), this value will be replaced by the recommended value.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>genepair</code></td>
+<td>
+<p>a p(p-1)/2 x 2 matrix indicating all pairs of genes
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>levels.x</code></td>
+<td>
+<p>a length 2 vector indicating levels of the binary covariate x, the first element is for group 1 and the second element is for group 2
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R1</code></td>
+<td>
+<p>a length p(p-1)/2 vector indicating partial correlations for group 1 and the order is corresponding to the order of genepair
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R2</code></td>
+<td>
+<p>a length p(p-1)/2 vector indicating partial correlations for group 2 and the order is corresponding to the order of genepair
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.diff</code></td>
+<td>
+<p>a p(p-1)/2 x boot.B matrix indicating bootstrapped difference, Fisher's Z transformed R1 - R2. The rows are corresponding to the order of gene pair and the columns are corresponding to the bootstrap samples
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diff.score</code></td>
+<td>
+<p>a p(p-1)/2 vector of differential score corresponding to genepair
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.val</code></td>
+<td>
+<p>a p(p-1)/2 vector of corrected p-values corresponding to genepair
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+<p>selected tuning parameter of glasso fit
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>P</code></td>
+<td>
+<p>p by p matrix of Global component of the DINGO model
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q</code></td>
+<td>
+<p>p by 2 matrix of the coefficient parameter of the local group specific component L(x) of the DINGO model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Psi</code></td>
+<td>
+<p> p by p diagonal matrix of the noise covariance parameter of the local group specific component L(x) of the DINGO model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>step.times</code></td>
+<td>
+<p> a length 3 vector containing the elapsed time for Step 1, Step 2, and Bootstrap Scoring, respectively.
+</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Min Jin HA mjha@mdanderson.org, Caleb CLASS caclass@mdanderson.org
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(gbm)
+# Run DINGO (the first column, 'x', contains the group data).
+# This may take 5-10 minutes.
+## Not run: fit &lt;- dingo(gbm[,-1], gbm$x, diff.score = TRUE, B = 100, cores = 2)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,241 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Manningtrap_critical</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Trapezoidal cross-section for the Gauckler-Manning-Strickler equation (critical parameters)</h2>
+
+<h3>Description</h3>
+
+<p>This function solves for one missing variable in the Gauckler-Manning-
+Strickler equation for a trapezoidal cross-section and uniform flow. The
+<code>uniroot</code> function is used to obtain the missing parameters.
+This function provides both normal and critical parameters values.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Manningtrap_critical(
+  Q = NULL,
+  n = NULL,
+  m = NULL,
+  m1 = NULL,
+  m2 = NULL,
+  Sf = NULL,
+  y = NULL,
+  b = NULL,
+  Temp = NULL,
+  units = c("SI", "Eng"),
+  type = c("symmetrical", "non-symmetrical"),
+  critical = c("approximate", "accurate"),
+  output = c("list", "data.table")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Q</code></td>
+<td>
+<p>numeric vector that contains the discharge value (m^3/s or ft^3/s),
+if known.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>numeric vector that contains the Manning's roughness coefficient n,
+if known.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>numeric vector that contains the symmetric "cross-sectional side slope
+of m:V (horizontal:vertical)", if known.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m1</code></td>
+<td>
+<p>numeric vector that contains the non-symmetric "cross-sectional side
+slope of m1:V (horizontal:vertical)", if known.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m2</code></td>
+<td>
+<p>numeric vector that contains the non-symmetric "cross-sectional side
+slope of m2:V (horizontal:vertical)", if known.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Sf</code></td>
+<td>
+<p>numeric vector that contains the bed slope (m/m or ft/ft),
+if known.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>numeric vector that contains the flow depth (m or ft), if known.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>numeric vector that contains the bottom width, if known.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Temp</code></td>
+<td>
+<p>numeric vector that contains the temperature (degrees C or degrees
+Fahrenheit), if known.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>units</code></td>
+<td>
+<p>character vector that contains the system of units [options are
+<code>SI</code> for International System of Units or <code>Eng</code> for English units
+(United States Customary System in the United States and Imperial Units in
+the United Kingdom)]</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>character vector that contains the type of trapezoid (symmetrical
+or non-symmetrical). The symmetrical trapezoid uses <code>m</code> while the non-
+symmetrical trapezoid uses <code>m1</code> and <code>m2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>critical</code></td>
+<td>
+<p>character vector that contains the type of critical parameters
+calculations (<code>approximate</code> or <code>accurate</code>). The accurate calculation
+provides parameters where the Froude number is 1. The approximate calculation
+calculates the values without having the Froude number return 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output</code></td>
+<td>
+<p>character vector that contains the output type, either it will be
+a <code>list</code> or <code>data.table</code>. The list is
+the easiest to obtain a singular value.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Critical State Discussion from Chow pages 13, 63
+"When F (Froude number) is equal to unity, ... the flow is said to be in a 
+<em>critical</em> state. If F is less than unity, ... the flow is <em>subcritical</em>. If
+F is greater than unity, ... the flow is <em>supercritical</em>."
+</p>
+<p>"... the critical state of flow through a channel section is characterized
+by several important conditions. Recapitulating, they are (1) the specific
+energy is a minimum for a given discharge; (2) the discharge is a maximum
+for a given specific energy; (3) the specific force is a minimum for a given
+discharge; (4) the velocity head is equal to half the hydraulic depth in a
+channel of small slope; (5) the Froude number is equal to unity; and (6) the
+velocity of flow in a channel of small slope with uniform velocity
+distribution is equal to the celerity of small gravity waves in shallow
+water caused by local disturbances."
+</p>
+<p>"Discussions on critical state of flow have referred mainly to a particular
+section of a channel, known as the <em>critical section</em>. If the critical state
+of exists throughout the entire length of the channel or over a reach of the
+channel, the flow in the channel is a <em>critical flow</em>."
+</p>
+
+
+<h3>Value</h3>
+
+<p>the missing parameters (Q, n, b, m, m1, m2, Sf, or y) &amp; V (velocity),
+Flow depth (y), Bottom width (b), symmetric side slope (m), Slope (Sf),
+A (area), P (wetted perimeters), R (hydraulic radius), B (top width), D
+(hydraulic depth), w (Wetted Length), w1 (Wetted Length for a
+non-symmetric trapezoid), w2 (Wetted Length for a non-symmetric trapezoid),
+Z (Section Factor), E (Specific Energy), K (conveyance), Vel_Head (Velocity
+Head), Re (Reynolds number), Fr (Froude number), taud (maximum shear
+stress), tau0 (average shear stress), yc (critical depth), Ac (critical
+area), Pc (critical wetted perimeters), Bc (critical top width), Rc (critical
+hydraulic radius), Dc (critical hydraulic depth), Vc (critical velocity), Qc
+(critical discharge), Sfc (critical slope), Frc (critical Froude number), Zc
+(critical Section Factor), Ec (critical Specific Energy) as a <code>list</code>.
+Alternatively, the Flow depth (y), Flow area (A), Wetted Perimeters (P),
+Top Width (B), Bottom width (b), Hydraulic Radius (R), Hydraulic Depth (D),
+Flow Mean Velocity (V), Flow Discharge (Q), Manning's roughness coefficient
+(n), Slope (Sf), Temperature, Absolute Temperature, Saturated Liquid
+Density, Absolute or Dynamic Viscosity, Kinematic Viscosity, Froude number
+(Fr), Reynolds number (Re), symmetric side slope (m), non-symmetric side
+slope (m1), non-symmetric side slope (m2), Wetted Length (w), Wetted Length
+for a non-symmetric trapezoid (w1), Wetted Length for a non-symmetric
+trapezoid (w2), Section Factor (Z), conveyance (K), Specific Energy (E),
+Velocity Head (Vel_Head), Maximum Shear Stress (taud), Average Shear Stress
+(tau0) along with the associated units can be returned in a <code>data.table</code>.
+Both the normal and the critical values (where present) are returned in the
+table.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Irucka Embry
+</p>
+
+
+<h3>References</h3>
+
+<p>Ven Te Chow, Ph.D., <em>Open-Channel Hydraulics</em>, McGraw-Hill Classic Textbook Reissue, New York City, New York: McGraw-Hill Book Company, 1988, pages 13, 63.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Example 1
+
+library(iemisc)
+# Exercise 4.1 from Sturm (page 153)
+
+uuc &lt;- Manningtrap_critical(Q = 3000, b = 40, m = 3, Sf = 0.002, n = 0.025,
+units = "Eng", type = "symmetrical", critical = "accurate", output = "list")
+# Q = 3000 cfs, b = 40 ft, m = 3, Sf = 0.002 ft/ft, n = 0.025,
+# units = English units
+# This will solve for y since it is missing and y will be in ft
+
+uuc$y # only returns y
+
+uuc # returns all results
+
+
+
+# Example 2
+
+# Please refer to the iemisc: Manning... Examples using iemiscdata
+# [https://www.ecoccs.com/R_Examples/Manning_iemiscdata_Examples.pdf] and iemisc:
+# Open Channel Flow Examples involving Geometric Shapes with the
+# Gauckler-Manning-Strickler Equation
+# [https://www.ecoccs.com/R_Examples/Open-Channel-Flow_Examples_Geometric_Shapes.pdf]
+# for the cross-section examples using iemiscdata
+
+
+
+
+
+
+
+</code></pre>
+
+
+</div>

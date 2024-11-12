@@ -1,0 +1,120 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mk_event_individual</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Creating an event with intensity of class individual</h2>
+
+<h3>Description</h3>
+
+<p>Creates an event with intensity of class individual (without interactions). When the event occurs, something happens to an individual <code>I</code> in the population.
+The created event must be used with <code>mk_model</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mk_event_individual(type, name, intensity_code, kernel_code = "")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Must be one of <code>'birth'</code>, <code>'death'</code>, <code>'entry'</code>, <code>'exit'</code>, <code>'swap'</code> or <code>'custom'</code>. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name</code></td>
+<td>
+<p><em>(Optional)</em> If not specified, the name given to the event is its type.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intensity_code</code></td>
+<td>
+<p>String containing some C++ code describing the intensity function. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kernel_code</code></td>
+<td>
+<p>String containing some C++ code describing the event action. Optional for <code>'birth'</code>, <code>'death'</code> and <code>'exit'</code> events. See details.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>type</code> argument is one of the following
+</p>
+
+<dl>
+<dt><code>'birth'</code></dt>
+<dd>
+<p>By default, a new individual <code>newI</code> is created, with the same characteristics of the parent <code>I</code> and birth date equal to the current time. Optional code can be precised in <code>kernel_code</code>.</p>
+</dd>
+<dt><code>'death'</code></dt>
+<dd>
+<p>By default, the individual <code>I</code> dies. Optional code can be precised in <code>kernel_code</code>.</p>
+</dd>
+<dt><code>'entry'</code></dt>
+<dd>
+<p>A new individual <code>newI</code> is added to the population, and its characteristics have to be defined by the user in the entry <code>kernel_code</code>.</p>
+</dd>
+<dt><code>'exit'</code></dt>
+<dd>
+<p>An individual <code>I</code> exits from the population. Optional code can be precised in <code>kernel_code</code>.</p>
+</dd>
+<dt><code>'swap'</code></dt>
+<dd>
+<p>The user can change the characteristics of the selected individual <code>I</code>. This requires <code>kernel_code</code>.</p>
+</dd>
+<dt><code>'custom'</code></dt>
+<dd>
+<p>None of the above types, the user defines <code>kernel_code</code> that can act on the selected individual <code>I</code> and on the population <code>pop</code>.</p>
+</dd>
+</dl>
+<p>The <code>intensity_code</code> argument is a string containing some C++ code describing the event intensity for individual <code>I</code> at time <code>t</code>. The intensity value <strong>must be stored</strong> in the variable <code>result</code>.
+Some of available variables in the C++ code are: <code>t</code> (the current time), <code>I</code> (the current individual selected for the event), the name of the model parameters (some variables, or functions, see <code>mk_model</code>).
+See <code>vignette('IBMPopSim_Cpp')</code> for more details.
+</p>
+<p>The <code>kernel_code</code> argument is a string containing some C++ code which describing the action of the event. Some of available variables in the C++ code are: <code>t</code> (the current time), <code>pop</code> (the current population), <code>I</code> (the current individual selected for the event), <code>newI</code> (the new individual if <code>'birth'</code> or <code>'entry'</code> event), the name of the model parameters (some variables, or functions, see <code>mk_model</code>).
+See <code>vignette('IBMPopSim')</code> for more details.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An S3 object of class <code>event</code> of type individual.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>mk_model</code>, <code>mk_event_poisson</code>, <code>mk_event_inhomogeneous_poisson</code>, and <code>mk_event_interaction</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">params &lt;- list("p_male"= 0.51,
+              "birth_rate" = stepfun(c(15,40), c(0,0.05,0)),
+              "death_rate" = gompertz(0.008, 0.02))
+
+death_event &lt;- mk_event_individual(type = "death",
+                name = "my_death_event",
+                intensity_code = "result = death_rate(age(I,t));")
+
+birth_event &lt;- mk_event_individual(type = "birth",
+                intensity_code = "if (I.male) result = 0;
+                                  else result = birth_rate(age(I,t));",
+                kernel_code = "newI.male = CUnif(0, 1) &lt; p_male;")
+
+</code></pre>
+
+
+</div>

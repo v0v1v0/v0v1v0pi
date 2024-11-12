@@ -1,0 +1,438 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>SmoothGrad</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>SmoothGrad and SmoothGrad<code class="reqn">\times</code>Input</h2>
+
+<h3>Description</h3>
+
+<p><em>SmoothGrad</em> was introduced by D. Smilkov et al. (2017) and is an extension
+to the classical <em>Vanilla Gradient</em> method. It takes the mean of the
+gradients for <code>n</code> perturbations of each data point, i.e., with
+<code class="reqn">\epsilon \sim N(0,\sigma)</code>
+</p>
+<p style="text-align: center;"><code class="reqn">1/n \sum_n d f(x+ \epsilon)_j / d x_j.</code>
+</p>
+
+<p>Analogous to the <em>Gradient<code class="reqn">\times</code>Input</em> method, you can also use the argument
+<code>times_input</code> to multiply the gradients by the inputs before taking the
+average (<em>SmoothGrad<code class="reqn">\times</code>Input</em>).
+</p>
+<p>The R6 class can also be initialized using the <code>run_smoothgrad</code> function
+as a helper function so that no prior knowledge of R6 classes is required.
+</p>
+
+
+<h3>Super classes</h3>
+
+<p><code>innsight::InterpretingMethod</code> -&gt; <code>innsight::GradientBased</code> -&gt; <code>SmoothGrad</code>
+</p>
+
+
+<h3>Public fields</h3>
+
+<div class="r6-fields">
+
+<dl>
+<dt><code>n</code></dt>
+<dd>
+<p>(<code>integer(1)</code>)<br>
+Number of perturbations of the input data (default: <code class="reqn">50</code>).<br></p>
+</dd>
+<dt><code>noise_level</code></dt>
+<dd>
+<p>(<code>numeric(1)</code>)<br>
+The standard deviation of the Gaussian
+perturbation, i.e., <code class="reqn">\sigma = (max(x) - min(x)) *</code> <code>noise_level</code>.<br></p>
+</dd>
+</dl>
+</div>
+
+
+<h3>Methods</h3>
+
+
+
+<h4>Public methods</h4>
+
+
+<ul>
+<li> <p><a href="#method-SmoothGrad-new"><code>SmoothGrad$new()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-SmoothGrad-clone"><code>SmoothGrad$clone()</code></a>
+</p>
+</li>
+</ul>
+<details open><summary>Inherited methods</summary><ul>
+<li><span class="pkg-link" data-pkg="innsight" data-topic="InterpretingMethod" data-id="get_result"><a href="../../innsight/html/InterpretingMethod.html#method-InterpretingMethod-get_result"><code>innsight::InterpretingMethod$get_result()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="innsight" data-topic="InterpretingMethod" data-id="plot"><a href="../../innsight/html/InterpretingMethod.html#method-InterpretingMethod-plot"><code>innsight::InterpretingMethod$plot()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="innsight" data-topic="InterpretingMethod" data-id="plot_global"><a href="../../innsight/html/InterpretingMethod.html#method-InterpretingMethod-plot_global"><code>innsight::InterpretingMethod$plot_global()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="innsight" data-topic="InterpretingMethod" data-id="print"><a href="../../innsight/html/InterpretingMethod.html#method-InterpretingMethod-print"><code>innsight::InterpretingMethod$print()</code></a></span></li>
+</ul></details><hr>
+<a id="method-SmoothGrad-new"></a>
+
+
+
+<h4>Method <code>new()</code>
+</h4>
+
+<p>Create a new instance of the <code>SmoothGrad</code> R6 class. When initialized,
+the method <em>SmoothGrad</em> or <em>SmoothGrad<code class="reqn">\times</code>Input</em> is applied to
+the given data and the results are stored in the field <code>result</code>.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>SmoothGrad$new(
+  converter,
+  data,
+  channels_first = TRUE,
+  output_idx = NULL,
+  output_label = NULL,
+  ignore_last_act = TRUE,
+  times_input = FALSE,
+  n = 50,
+  noise_level = 0.1,
+  verbose = interactive(),
+  dtype = "float"
+)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>converter</code></dt>
+<dd>
+<p>(<code>Converter</code>)<br>
+An instance of the <code>Converter</code> class that includes the
+torch-converted model and some other model-specific attributes. See
+<code>Converter</code> for details.<br></p>
+</dd>
+<dt><code>data</code></dt>
+<dd>
+<p>(<code>array</code>, <code>data.frame</code>, <code>torch_tensor</code> or <code>list</code>)<br>
+The data to which the method is to be applied. These must
+have the same format as the input data of the passed model to the
+converter object. This means either
+</p>
+
+<ul>
+<li>
+<p> an <code>array</code>, <code>data.frame</code>, <code>torch_tensor</code> or array-like format of
+size <em>(batch_size, dim_in)</em>, if e.g., the model has only one input layer, or
+</p>
+</li>
+<li>
+<p> a <code>list</code> with the corresponding input data (according to the
+upper point) for each of the input layers.<br></p>
+</li>
+</ul>
+</dd>
+<dt><code>channels_first</code></dt>
+<dd>
+<p>(<code>logical(1)</code>)<br>
+The channel position of the given data (argument
+<code>data</code>). If <code>TRUE</code>, the channel axis is placed at the second position
+between the batch size and the rest of the input axes, e.g.,
+<code>c(10,3,32,32)</code> for a batch of ten images with three channels and a
+height and width of 32 pixels. Otherwise (<code>FALSE</code>), the channel axis
+is at the last position, i.e., <code>c(10,32,32,3)</code>. If the data
+has no channel axis, use the default value <code>TRUE</code>.<br></p>
+</dd>
+<dt><code>output_idx</code></dt>
+<dd>
+<p>(<code>integer</code>, <code>list</code> or <code>NULL</code>)<br>
+These indices specify the output nodes for which
+the method is to be applied. In order to allow models with multiple
+output layers, there are the following possibilities to select
+the indices of the output nodes in the individual output layers:
+</p>
+
+<ul>
+<li>
+<p> An <code>integer</code> vector of indices: If the model has only one output
+layer, the values correspond to the indices of the output nodes, e.g.,
+<code>c(1,3,4)</code> for the first, third and fourth output node. If there are
+multiple output layers, the indices of the output nodes from the first
+output layer are considered.
+</p>
+</li>
+<li>
+<p> A <code>list</code> of <code>integer</code> vectors of indices: If the method is to be
+applied to output nodes from different layers, a list can be passed
+that specifies the desired indices of the output nodes for each
+output layer. Unwanted output layers have the entry <code>NULL</code> instead of
+a vector of indices, e.g., <code>list(NULL, c(1,3))</code> for the first and
+third output node in the second output layer.
+</p>
+</li>
+<li> <p><code>NULL</code> (default): The method is applied to all output nodes in
+the first output layer but is limited to the first ten as the
+calculations become more computationally expensive for more output
+nodes.<br></p>
+</li>
+</ul>
+</dd>
+<dt><code>output_label</code></dt>
+<dd>
+<p>(<code>character</code>, <code>factor</code>, <code>list</code> or <code>NULL</code>)<br>
+These values specify the output nodes for which
+the method is to be applied. Only values that were previously passed with
+the argument <code>output_names</code> in the <code>converter</code> can be used. In order to
+allow models with multiple
+output layers, there are the following possibilities to select
+the names of the output nodes in the individual output layers:
+</p>
+
+<ul>
+<li>
+<p> A <code>character</code> vector or <code>factor</code> of labels: If the model has only one output
+layer, the values correspond to the labels of the output nodes named in the
+passed <code>Converter</code> object, e.g.,
+<code>c("a", "c", "d")</code> for the first, third and fourth output node if the
+output names are <code>c("a", "b", "c", "d")</code>. If there are
+multiple output layers, the names of the output nodes from the first
+output layer are considered.
+</p>
+</li>
+<li>
+<p> A <code>list</code> of <code>charactor</code>/<code>factor</code> vectors of labels: If the method is to be
+applied to output nodes from different layers, a list can be passed
+that specifies the desired labels of the output nodes for each
+output layer. Unwanted output layers have the entry <code>NULL</code> instead of
+a vector of labels, e.g., <code>list(NULL, c("a", "c"))</code> for the first and
+third output node in the second output layer.
+</p>
+</li>
+<li> <p><code>NULL</code> (default): The method is applied to all output nodes in
+the first output layer but is limited to the first ten as the
+calculations become more computationally expensive for more output
+nodes.<br></p>
+</li>
+</ul>
+</dd>
+<dt><code>ignore_last_act</code></dt>
+<dd>
+<p>(<code>logical(1)</code>)<br>
+Set this logical value to include the last
+activation functions for each output layer, or not (default: <code>TRUE</code>).
+In practice, the last activation (especially for softmax activation) is
+often omitted.<br></p>
+</dd>
+<dt><code>times_input</code></dt>
+<dd>
+<p>(<code style="white-space: pre;">⁠logical(1⁠</code>)<br>
+Multiplies the gradients with the input features.
+This method is called <em>SmoothGrad<code class="reqn">\times</code>Input</em>.<br></p>
+</dd>
+<dt><code>n</code></dt>
+<dd>
+<p>(<code>integer(1)</code>)<br>
+Number of perturbations of the input data (default: <code class="reqn">50</code>).<br></p>
+</dd>
+<dt><code>noise_level</code></dt>
+<dd>
+<p>(<code>numeric(1)</code>)<br>
+Determines the standard deviation of the Gaussian
+perturbation, i.e., <code class="reqn">\sigma = (max(x) - min(x)) *</code> <code>noise_level</code>.<br></p>
+</dd>
+<dt><code>verbose</code></dt>
+<dd>
+<p>(<code>logical(1)</code>)<br>
+This logical argument determines whether a progress bar is
+displayed for the calculation of the method or not. The default value is
+the output of the primitive R function <code>interactive()</code>.<br></p>
+</dd>
+<dt><code>dtype</code></dt>
+<dd>
+<p>(<code>character(1)</code>)<br>
+The data type for the calculations. Use
+either <code>'float'</code> for torch_float or <code>'double'</code> for
+torch_double.<br></p>
+</dd>
+</dl>
+</div>
+
+
+<hr>
+<a id="method-SmoothGrad-clone"></a>
+
+
+
+<h4>Method <code>clone()</code>
+</h4>
+
+<p>The objects of this class are cloneable with this method.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>SmoothGrad$clone(deep = FALSE)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>deep</code></dt>
+<dd>
+<p>Whether to make a deep clone.</p>
+</dd>
+</dl>
+</div>
+
+
+
+
+<h3>References</h3>
+
+<p>D. Smilkov et al. (2017) <em>SmoothGrad: removing noise by adding noise.</em>
+CoRR, abs/1706.03825
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other methods: 
+<code>ConnectionWeights</code>,
+<code>DeepLift</code>,
+<code>DeepSHAP</code>,
+<code>ExpectedGradient</code>,
+<code>Gradient</code>,
+<code>IntegratedGradient</code>,
+<code>LIME</code>,
+<code>LRP</code>,
+<code>SHAP</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# ------------------------- Example 1: Torch -------------------------------
+library(torch)
+
+# Create nn_sequential model and data
+model &lt;- nn_sequential(
+  nn_linear(5, 10),
+  nn_relu(),
+  nn_linear(10, 2),
+  nn_sigmoid()
+)
+data &lt;- torch_randn(25, 5)
+
+# Create Converter
+converter &lt;- convert(model, input_dim = c(5))
+
+# Calculate the smoothed Gradients
+smoothgrad &lt;- SmoothGrad$new(converter, data)
+
+# You can also use the helper function `run_smoothgrad` for initializing
+# an R6 SmoothGrad object
+smoothgrad &lt;- run_smoothgrad(converter, data)
+
+# Print the result as a data.frame for first 5 rows
+head(get_result(smoothgrad, "data.frame"), 5)
+
+# Plot the result for both classes
+plot(smoothgrad, output_idx = 1:2)
+
+# Plot the boxplot of all datapoints
+boxplot(smoothgrad, output_idx = 1:2)
+
+# ------------------------- Example 2: Neuralnet ---------------------------
+if (require("neuralnet")) {
+  library(neuralnet)
+  data(iris)
+
+  # Train a neural network
+  nn &lt;- neuralnet(Species ~ ., iris,
+    linear.output = FALSE,
+    hidden = c(10, 5),
+    act.fct = "logistic",
+    rep = 1
+  )
+
+  # Convert the trained model
+  converter &lt;- convert(nn)
+
+  # Calculate the smoothed gradients
+  smoothgrad &lt;- run_smoothgrad(converter, iris[, -5], times_input = FALSE)
+
+  # Plot the result for the first and 60th data point and all classes
+  plot(smoothgrad, data_idx = c(1, 60), output_idx = 1:3)
+
+  # Calculate SmoothGrad x Input and do not ignore the last activation
+  smoothgrad &lt;- run_smoothgrad(converter, iris[, -5], ignore_last_act = FALSE)
+
+  # Plot the result again
+  plot(smoothgrad, data_idx = c(1, 60), output_idx = 1:3)
+}
+
+
+# ------------------------- Example 3: Keras -------------------------------
+if (require("keras") &amp; keras::is_keras_available()) {
+  library(keras)
+
+  # Make sure keras is installed properly
+  is_keras_available()
+
+  data &lt;- array(rnorm(64 * 60 * 3), dim = c(64, 60, 3))
+
+  model &lt;- keras_model_sequential()
+  model %&gt;%
+    layer_conv_1d(
+      input_shape = c(60, 3), kernel_size = 8, filters = 8,
+      activation = "softplus", padding = "valid") %&gt;%
+    layer_conv_1d(
+      kernel_size = 8, filters = 4, activation = "tanh",
+      padding = "same") %&gt;%
+    layer_conv_1d(
+      kernel_size = 4, filters = 2, activation = "relu",
+      padding = "valid") %&gt;%
+    layer_flatten() %&gt;%
+    layer_dense(units = 64, activation = "relu") %&gt;%
+    layer_dense(units = 16, activation = "relu") %&gt;%
+    layer_dense(units = 3, activation = "softmax")
+
+  # Convert the model
+  converter &lt;- convert(model)
+
+  # Apply the SmoothGrad method
+  smoothgrad &lt;- run_smoothgrad(converter, data, channels_first = FALSE)
+
+  # Plot the result for the first datapoint and all classes
+  plot(smoothgrad, output_idx = 1:3)
+
+  # Plot the result as boxplots for first two classes
+  boxplot(smoothgrad, output_idx = 1:2)
+}
+
+
+#------------------------- Plotly plots ------------------------------------
+if (require("plotly")) {
+  # You can also create an interactive plot with plotly.
+  # This is a suggested package, so make sure that it is installed
+  library(plotly)
+
+  # Result as boxplots
+  boxplot(smoothgrad, as_plotly = TRUE)
+
+  # Result of the second data point
+  plot(smoothgrad, data_idx = 2, as_plotly = TRUE)
+}
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,110 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>LK</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Likelihood factorization of Lin and Ke (2011) - LK Factorization</h2>
+
+<h3>Description</h3>
+
+<p>The function calculates the likelihood factorization of Lin and Ke (2011) and computes paramaters for estimation of PIN value.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">LK(data, fixed = c(FALSE, FALSE, FALSE, FALSE, FALSE))</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Data frame with 2 variables</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed</code></td>
+<td>
+<p>Initial values for parameters in the following order: alpha, delta, mu, epsilon_b, epsilon_s</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>In order to use LK's return in optimization functions, please <strong>omit</strong> second argument. With this way, LK will return a function instead of a value. Moreover, argument for data must be a data frame with 2 columns that contain numbers. Not any other type.</p>
+
+
+<h3>Value</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>LK_out</code></td>
+<td>
+<p>Returns an optim() object including parameter estimates for the likelihood factorization of Lin and Ke (2011)</p>
+</td>
+</tr></table>
+<h3>Warning </h3>
+
+<p>This function does not handle NA values. Therefore the datasets should not contain any missing value</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Duygu Celik and Murat Tinic</p>
+
+
+<h3>References</h3>
+
+<p>Lin, H.W.W. and Ke, W.C. A computing bias in estimating the probability of informed trading. Journal of Financial Markets, 14(4), pp.625-640, 2011.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  # Sample Data
+  #   Buy Sell 
+  #1  350  382  
+  #2  250  500  
+  #3  500  463  
+  #4  552  550  
+  #5  163  200  
+  #6  345  323  
+  #7  847  456  
+  #8  923  342  
+  #9  123  578  
+  #10 349  455 
+  
+  Buy&lt;-c(350,250,500,552,163,345,847,923,123,349)
+  Sell&lt;-c(382,500,463,550,200,323,456,342,578,455)
+  data=cbind(Buy,Sell)
+  
+  # Initial parameter values
+  # par0 = (alpha, delta, mu, epsilon_b, epsilon_s)
+  par0 = c(0.5,0.5,300,400,500)
+  
+  # Call LK function
+  LK_out = LK(data)
+  model = optim(par0, LK_out, gr = NULL, method = c("Nelder-Mead"), hessian = FALSE)
+  
+  ## Parameter Estimates
+  model$par[1] # Estimate for alpha
+  # [1] 0.480277
+  model$par[2] # Estimate for delta
+  # [1] 0.830850
+  model$par[3] # Estimate for mu
+  # [1] 315.259805
+  model$par[4] # Estimate for eb
+  # [1] 296.862318
+  model$par[5] # Estimate for es
+  # [1] 434.3046
+  
+  ## Estimate for PIN 
+  (model$par[1]*model$par[3])/((model$par[1]*model$par[3])+model$par[4]+model$par[5])
+  # [1] 0.178391
+  ####
+</code></pre>
+
+
+</div>

@@ -1,0 +1,134 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>GRApprox</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Gelman-Rubin mode approximation
+</h2>
+
+<h3>Description</h3>
+
+<p>Performs the multiple mode approximation of Gelman-Rubin (applies a
+Laplace approximation to each mode). The weights are determined
+corresponding to the height of each mode.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">GRApprox(post, start, grad, method = c("nlminb", "nlm", "Nelder-Mead", "BFGS"),
+         control = list(), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>post</code></td>
+<td>
+
+<p>log-posterior density.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start</code></td>
+<td>
+
+<p>vector of starting values if dimension=1
+otherwise matrix of starting values with the starting values in the rows
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grad</code></td>
+<td>
+
+<p>gradient of log-posterior
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>Which optimizer to use
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+
+<p>Control list for the chosen optimizer
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Additional arguments for log-posterior density specified in <code>post</code>
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Produces an object of class mixDist. That a list mit entries<br><code>weights</code> Vector of weights for individual components<br><code>means</code> Matrix of component medians of components<br><code>sigmas</code> List containing scaling matrices<br><code>eigenHess</code> List containing eigen decompositions of scaling matrices<br><code>dets</code> Vector of determinants of scaling matrix<br><code>sigmainv</code> List containing inverse scaling matrices<br></p>
+
+
+<h3>Author(s)</h3>
+
+<p>Bjoern Bornkamp
+</p>
+
+
+<h3>References</h3>
+
+<p>Gelman, A., Carlin, J. B., Stern, H. S. &amp; Rubin, D. B. (2003) Bayesian Data
+Analysis, 2nd edition, Chapman and Hall. (Chapter 12)
+</p>
+<p>Bornkamp, B. (2011). Approximating Probability Densities by Iterated
+Laplace Approximations, <em>Journal of Computational and Graphical
+Statistics</em>, <b>20</b>(3), 656–669.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>iterLap</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+  ## log-density for banana example
+  banana &lt;- function(pars, b, sigma12){
+    dim &lt;- 10
+    y &lt;- c(pars[1], pars[2]+b*(pars[1]^2-sigma12), pars[3:dim])
+    cc &lt;- c(1/sqrt(sigma12), rep(1, dim-1))
+    return(-0.5*sum((y*cc)^2))
+  }
+
+  start &lt;- rbind(rep(0,10),rep(-1.5,10),rep(1.5,10))
+  ## multiple mode Laplace approximation
+  aa &lt;- GRApprox(banana, start, b = 0.03, sigma12 = 100)
+  ## print mixDist object
+  aa
+  ## summary method
+  summary(aa)
+  ## importance sampling using the obtained mixDist object 
+  ## using a mixture of t distributions with 10 degrees of freedom
+  dd &lt;- IS(aa, nSim=1000, df = 10, post=banana, b = 0.03,
+           sigma12 = 100)
+  ## effective sample size
+  dd$ESS
+</code></pre>
+
+
+</div>

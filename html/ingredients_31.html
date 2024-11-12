@@ -1,0 +1,178 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>partial_dependence</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Partial Dependence Profiles</h2>
+
+<h3>Description</h3>
+
+<p>Partial Dependence Profiles are averages from Ceteris Paribus Profiles.
+Function <code>partial_dependence</code> calls <code>ceteris_paribus</code> and then <code>aggregate_profiles</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">partial_dependence(x, ...)
+
+## S3 method for class 'explainer'
+partial_dependence(
+  x,
+  variables = NULL,
+  N = 500,
+  variable_splits = NULL,
+  grid_points = 101,
+  ...,
+  variable_type = "numerical"
+)
+
+## Default S3 method:
+partial_dependence(
+  x,
+  data,
+  predict_function = predict,
+  label = class(x)[1],
+  variables = NULL,
+  grid_points = 101,
+  variable_splits = NULL,
+  N = 500,
+  ...,
+  variable_type = "numerical"
+)
+
+## S3 method for class 'ceteris_paribus_explainer'
+partial_dependence(x, ..., variables = NULL)
+
+partial_dependency(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an explainer created with function <code>DALEX::explain()</code>, an object of the class <code>ceteris_paribus_explainer</code> or
+or a model to be explained.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variables</code></td>
+<td>
+<p>names of variables for which profiles shall be calculated.
+Will be passed to <code>calculate_variable_split</code>.
+If <code>NULL</code> then all variables from the validation data will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>number of observations used for calculation of partial dependence profiles. By default <code>500</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variable_splits</code></td>
+<td>
+<p>named list of splits for variables, in most cases created with <code>calculate_variable_split</code>.
+If <code>NULL</code> then it will be calculated based on validation data avaliable in the <code>explainer</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grid_points</code></td>
+<td>
+<p>number of points for profile. Will be passed to <code>calculate_variable_split</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variable_type</code></td>
+<td>
+<p>a character. If <code>"numerical"</code> then only numerical variables will be calculated.
+If <code>"categorical"</code> then only categorical variables will be calculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>validation dataset, will be extracted from <code>x</code> if it's an explainer
+NOTE: It is best when target variable is not present in the <code>data</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predict_function</code></td>
+<td>
+<p>predict function, will be extracted from <code>x</code> if it's an explainer</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label</code></td>
+<td>
+<p>name of the model. By default it's extracted from the <code>class</code> attribute of the model</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Find more details in the <a href="https://ema.drwhy.ai/partialDependenceProfiles.html">Partial Dependence Profiles Chapter</a>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>an object of the class <code>aggregated_profiles_explainer</code>
+</p>
+
+
+<h3>References</h3>
+
+<p>Explanatory Model Analysis. Explore, Explain, and Examine Predictive Models. <a href="https://ema.drwhy.ai/">https://ema.drwhy.ai/</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library("DALEX")
+
+model_titanic_glm &lt;- glm(survived ~ gender + age + fare,
+                         data = titanic_imputed, family = "binomial")
+
+explain_titanic_glm &lt;- explain(model_titanic_glm,
+                               data = titanic_imputed[,-8],
+                               y = titanic_imputed[,8],
+                               verbose = FALSE)
+
+pdp_glm &lt;- partial_dependence(explain_titanic_glm,
+                              N = 25, variables = c("age", "fare"))
+head(pdp_glm)
+plot(pdp_glm)
+
+
+library("ranger")
+
+model_titanic_rf &lt;- ranger(survived ~., data = titanic_imputed, probability = TRUE)
+
+explain_titanic_rf &lt;- explain(model_titanic_rf,
+                              data = titanic_imputed[,-8],
+                              y = titanic_imputed[,8],
+                              label = "ranger forest",
+                              verbose = FALSE)
+
+pdp_rf &lt;- partial_dependence(explain_titanic_rf, variable_type = "numerical")
+plot(pdp_rf)
+
+pdp_rf &lt;- partial_dependence(explain_titanic_rf, variable_type = "categorical")
+plotD3(pdp_rf, label_margin = 80, scale_plot = TRUE)
+
+
+</code></pre>
+
+
+</div>

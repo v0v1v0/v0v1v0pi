@@ -1,0 +1,126 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pruneindicators</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Determines the best subset of indicators</h2>
+
+<h3>Description</h3>
+
+<p>This function allows reducing drastically the number of species combinations to be retained for a given target site group.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pruneindicators(
+  x,
+  At = 0,
+  Bt = 0,
+  sqrtIVt = 0,
+  alpha = 1,
+  max.indicators = 4,
+  verbose = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class '<code>indicators</code>'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>At</code></td>
+<td>
+<p>Threshold for positive predictive value. Combinations with lower values are not kept.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Bt</code></td>
+<td>
+<p>Threshold for sensitivity. Combinations with lower values are not kept.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sqrtIVt</code></td>
+<td>
+<p>Threshold for (square root of) indicator value. Combinations with lower values are not kept.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>Threshold for statistical significance of indicator value. Combinations with higher p-values are not kept.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.indicators</code></td>
+<td>
+<p>Maximum number of species combinations to be kept. If <code>NULL</code>, the function returns all the non-nested valid indicators without further selection.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>If TRUE, prints the results of each step.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>First, the function selects those indicators (species or species combinations) with valid positive predictive value, sensitivity and indicator value, according to the input thresholds. If the object '<code>speciescomb</code>' contains confidence intervals, then the lower bounds are used to select the valid indicators. Second, the function discards those valid indicators whose occurrence pattern is nested within other valid indicators. Third, the function evaluates the <code>coverage</code> of the remaining set of indicators and explores subsets of increasing number of indicators, until the same coverage is attained and the set of indicators is returned. If the maximum allowed members is attained (<code>max.indicators</code>) then the set of indicators with maximum coverage is returned.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class '<code>indicators</code>' with only the species combinations selected.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Miquel De Cáceres Ainsa, EMF-CREAF
+</p>
+
+
+<h3>References</h3>
+
+<p>De Cáceres, M., Legendre, P., Wiser, S.K. and Brotons, L. 2012. Using species combinations in indicator analyses. Methods in Ecology and Evolution 3(6): 973-982.
+</p>
+<p>De Cáceres, M. and Legendre, P. 2009. Associations between species and groups of sites: indices and statistical inference. Ecology 90(12): 3566-3574.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>indicators</code>, <code>coverage</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(stats)
+
+data(wetland) ## Loads species data
+
+## Creates three clusters using kmeans
+wetkm &lt;- kmeans(wetland, centers=3) 
+
+## Run indicator analysis with species combinations for the first group
+sc &lt;- indicators(X=wetland, cluster=wetkm$cluster, group=1, verbose=TRUE, At=0.5, Bt=0.2)
+
+## Finds the 'best' subset of indicators
+sc2 &lt;- pruneindicators(sc, At=0.5, Bt=0.2, verbose=TRUE)
+print(sc2)
+
+</code></pre>
+
+
+</div>

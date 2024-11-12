@@ -1,0 +1,314 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot_diff2</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot difference surface based on model predictions.</h2>
+
+<h3>Description</h3>
+
+<p>Plot difference surface based on model predictions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">plot_diff2(
+  model,
+  view,
+  comp,
+  cond = NULL,
+  color = "terrain",
+  nCol = 100,
+  col = NULL,
+  add.color.legend = TRUE,
+  se = 1.96,
+  sim.ci = FALSE,
+  show.diff = FALSE,
+  col.diff = 1,
+  alpha.diff = 0.5,
+  n.grid = 30,
+  nlevels = 10,
+  zlim = NULL,
+  xlim = NULL,
+  ylim = NULL,
+  main = NULL,
+  xlab = NULL,
+  ylab = NULL,
+  rm.ranef = TRUE,
+  transform.view = NULL,
+  hide.label = FALSE,
+  dec = NULL,
+  f = 1.96,
+  print.summary = getOption("itsadug_print"),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A GAMM model, resulting from the functions
+<code>gam</code> or <code>bam</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>view</code></td>
+<td>
+<p>Name of continuous predictors that should be plotted on the x-
+and y-axes. Vector of two values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comp</code></td>
+<td>
+<p>Named list with the grouping predictor (categorical variable)
+and the 2 levels to calculate the difference for.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cond</code></td>
+<td>
+<p>Named list of the values to use for the other predictor terms 
+(not in view).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>color</code></td>
+<td>
+<p>The color scheme to use for plots. One of 'topo', 'heat', 
+'cm', 'terrain', 'gray' or 'bw'. Alternatively a vector with some colors 
+can be provided for a custom color palette.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nCol</code></td>
+<td>
+<p>Range of colors of background of contour plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p>Line color.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add.color.legend</code></td>
+<td>
+<p>Logical: whether or not to add a color legend. 
+Default is TRUE. If FALSE (omitted), one could use the function
+<code>gradientLegend</code> to add a legend manually at any position.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se</code></td>
+<td>
+<p>If less than or equal to zero then only the predicted surface is 
+plotted, but if greater than zero, then the predicted values plus 
+confidence intervals are plotted. 
+The value of <code>se</code> will be multiplied with 
+the standard error (i.e., 1.96 results in 95%CI and 2.58). 
+Default is set to 1.96 (95%CI).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sim.ci</code></td>
+<td>
+<p>Logical: Using simultaneous confidence intervals or not 
+(default set to FALSE). The implementation of simultaneous CIs follows 
+Gavin Simpson's blog of December 15, 2016: 
+<a href="https://fromthebottomoftheheap.net/2016/12/15/simultaneous-interval-revisited/">https://fromthebottomoftheheap.net/2016/12/15/simultaneous-interval-revisited/</a>. 
+This interval is calculated from simulations based. 
+Please specify a seed (e.g., <code>set.seed(123)</code>) for reproducable results. 
+Note: in contrast with Gavin Simpson's code, here the Bayesian posterior 
+covariance matrix of the parameters is uncertainty corrected 
+(<code>unconditional=TRUE</code>) to reflect the uncertainty on the estimation of 
+smoothness parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>show.diff</code></td>
+<td>
+<p>Logical: whether or not to indicate the regions that 
+are significantly different from zero. Note that these regions are just 
+an indication and dependent on the value of <code>n.grid</code>. 
+Defaults to FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.diff</code></td>
+<td>
+<p>Color to shade the nonsignificant areas.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha.diff</code></td>
+<td>
+<p>Level of transparency to mark the nonsignificant areas.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.grid</code></td>
+<td>
+<p>Resolution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nlevels</code></td>
+<td>
+<p>Levels of contour lines.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zlim</code></td>
+<td>
+<p>A two item array giving the lower and upper limits for the z-
+axis scale. NULL to choose automatically.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlim</code></td>
+<td>
+<p>A two item array giving the lower and upper limits for the x-
+axis scale. NULL to choose automatically.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylim</code></td>
+<td>
+<p>A two item array giving the lower and upper limits for the y-
+axis scale. NULL to choose automatically.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p>Title of plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>Label x-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>Label y-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rm.ranef</code></td>
+<td>
+<p>Logical: whether or not to remove random effects. 
+Default is TRUE. Alternatively a string (or vector of strings) with the 
+name of the random effect(s) to remove.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>transform.view</code></td>
+<td>
+<p>List with two functions for transforming 
+the values on the x- and y-axis respectively. If one of the axes 
+need to be transformed, set the other to NULL (no transformation). 
+(See <code>fvisgam</code> for more info.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hide.label</code></td>
+<td>
+<p>Logical: whether or not to hide the label 
+(i.e., 'difference'). Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dec</code></td>
+<td>
+<p>Numeric: number of decimals for rounding the color legend. 
+When NULL (default), no rounding. If -1 (default), automatically determined. 
+Note: if value = -1 (default), rounding will be applied also when 
+<code>zlim</code> is provided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>f</code></td>
+<td>
+<p>Scaling factor to determine the CI from the se, for marking the 
+difference with 0. Only applies when <code>se</code> is smaller or equal to zero 
+and <code>show.diff</code> is set to TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print.summary</code></td>
+<td>
+<p>Logical: whether or not to print a summary.
+Default set to the print info messages option 
+(see <code>infoMessages</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Optional arguments for <code>plotsurface</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>If the result is not being plotted, a list is 
+returned with the estimated difference (<code>est</code>) and the standard error 
+over the estimate (<code>se.est</code>) and the x-values (<code>x</code>) is returned.
+</p>
+
+
+<h3>Warning</h3>
+
+<p>When the argument <code>show.diff</code> is set to TRUE a shading area indicates 
+where the confidence intervals include zero. Or, in other words, the areas 
+that are not significantly different from zero. Be careful with the 
+interpretation, however, as the precise shape of the surface is dependent 
+on model constraints such as the value of <code>choose.k</code> and the 
+smooth function used, and the size of the confidence intervals are 
+dependent on the model fit and model characteristics 
+(see <code>vignette('acf', package='itsadug')</code>). In addition, the value of 
+<code>n.grid</code> determines the precision of the plot.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Martijn Wieling, reimplemented by Jacolien van Rij
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other Testing for significance: 
+<code>compareML()</code>,
+<code>plot_diff()</code>,
+<code>report_stats()</code>,
+<code>wald_gam()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(simdat)
+## Not run: 
+m1 &lt;- bam(Y ~ Group + te(Time, Trial, by=Group),
+    data=simdat)
+plot_diff2(m1, view=c('Time', 'Trial'), 
+    comp=list(Group=c('Children', 'Adults')))
+
+## End(Not run)
+</code></pre>
+
+
+</div>

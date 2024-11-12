@@ -1,0 +1,125 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ishalfn</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Bayesian inference for the true inverse mean/rate of half-normal/half-Gaussian distribution.</h2>
+
+<h3>Description</h3>
+
+<p>Generates random numbers from the prior and posterior distributions of the inverse stable-half-normal model. The random variates can be used to simulate prior and posterior predictive distributions as well.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ishalfn(x, B, alp, rho)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>vector of half-normal/half-Gaussian data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>test size for the adaptive rejection sampling algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alp</code></td>
+<td>
+<p>value between 0 and 1 that controls the shape of the inverse stable prior.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+<p>positive value that scales the mean of the inverse stable prior.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>list consisting of the vectors of random numbers from the prior and posterior distributions, the accepted sample size, and the acceptance probability of the adaptive rejection sampling procedure (Algorithm 2 of the first reference below).
+</p>
+
+
+<h3>References</h3>
+
+<p>Cahoy and Sedransk (2019). <em>Inverse stable prior for exponential models.</em>  Journal of Statistical Theory and Practice, 13, Article 29.
+&lt;doi:10.1007/s42519-018-0027-2&gt;
+</p>
+<p>Meerschaert and Straka (2013). <em>Inverse stable subordinators.</em> Math. Model. Nat. Phenom.,  8(2), 1-16.
+&lt;doi:10.1051/mmnp/20138201&gt;
+</p>
+<p>Mainardi, Mura, and Pagnini (2010). <em>The M-Wright Function in Time-Fractional Diffusion Processes: A Tutorial Survey</em>. Int. J. Differ. Equ., Volume 2010.
+&lt;doi:10.1155/2010/104505&gt;
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+alp=0.95
+require(fdrtool)
+dat=rhalfnorm(100, theta=sqrt(pi/2) )
+rho=1/mean(dat)
+
+
+#b=length(dat)/2
+#a=sum(dat^2)/pi
+#rho=optimize(function(r){exp(-b)*(b/a)^b - (r^b)*exp(-a*r)}, c(0,20),  tol=10^(-50)  )$min
+
+out= ishalfn(dat, B=1000000, alp , rho)
+#prior samples
+thetprior=unlist(out[2])
+summary(thetprior)
+
+#posterior samples
+thet=unlist(out[1])
+
+#95% Credible intervals
+quantile (thet, c(0.025,0.975) )
+summary(thet)
+
+#The accepted sample size:
+unlist(out[3])
+
+#The acceptance probability:
+unlist(out[4])
+
+#Plotting with normalization to have a maximum of 1
+#for comparing prior and posterior
+out2=density(thet)
+ymaxpost=max(out2$y)
+out3=density(thetprior)
+ymaxprior=max(out3$y)
+plot(out2$x,out2$y/ymaxpost, xlim=c(0,2), col="blue", type="l",
+ xlab="theta", ylab="density", lwd=2,  frame.plot=FALSE)
+lines(out3$x,out3$y/ymaxprior, lwd=2,col="red")
+#points(dat,rep(0,length(dat)), pch='*')
+
+
+#Generating 1000 random numbers from the Inverse Stable (alpha=0.4,rho=5) prior
+U1 = runif(1000)
+U2 = runif(1000)
+alp=0.4
+rho=5
+stab = ( ( sin(alp*pi*U1)*sin((1-alp)*pi*U1)^(1/alp-1) )
+/ (  ( sin(pi*U1)^(1/alp) )*abs(log(U2))^(1/alp-1))  )
+#Inverse stable random numbers are below:
+#rho*stab^(-alp)
+
+
+</code></pre>
+
+
+</div>

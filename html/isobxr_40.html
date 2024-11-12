@@ -1,0 +1,399 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sim.single_run</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Run a single isotope box-model simulation</h2>
+
+<h3>Description</h3>
+
+<p>A function to run the isobxr stable isotope box model,
+assessing the design of the model and automatically running <code>solve_numerically</code>
+or <code>solve_analytically</code> depending on system design.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sim.single_run(
+  workdir,
+  SERIES_ID,
+  flux_list,
+  coeff_list,
+  t_max,
+  n_steps,
+  isobxr_master_file = "0_ISOBXR_MASTER",
+  suppress_messages = FALSE,
+  export.diagrams = FALSE,
+  export.delta_plot = FALSE,
+  export.data_as_csv_xlsx = FALSE,
+  plot.time_as_log10 = TRUE,
+  plot.time_unit = NULL,
+  show.delta_plot = TRUE,
+  inspect_inputs = TRUE,
+  save_outputs = FALSE,
+  return_data = FALSE,
+  solver = "auto",
+  n_zeros_RUN_IDs = 4,
+  FORCING_RAYLEIGH = NULL,
+  FORCING_SIZE = NULL,
+  FORCING_DELTA = NULL,
+  FORCING_ALPHA = NULL,
+  COMPOSITE = FALSE,
+  COMPO_SERIES_n = NaN,
+  COMPO_SERIES_FAMILY = NaN,
+  EXPLORER = FALSE,
+  EXPLO_SERIES_n = NaN,
+  EXPLO_SERIES_FAMILY = NaN,
+  isobxr_master = NULL,
+  diagram_pdf.widh_height = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>workdir</code></td>
+<td>
+<p>Working directory of <strong><em>isobxr excel master file</em></strong>
+and where output files will be stored if exported by user.
+(character string)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SERIES_ID</code></td>
+<td>
+<p>Name of the series the run belongs to. <br>
+It determines the folder in which the output files will be stored inside workdir.<br>
+(character string)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>flux_list</code></td>
+<td>
+<p>Name of the list of fluxes and initial box sizes to be used for the run, <br>
+calling (by its header name) a single column of the <strong>FLUXES</strong> sheet
+of the <strong><em>isobxr excel master file</em></strong>. <br>
+(character string)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coeff_list</code></td>
+<td>
+<p>Name of the list of fractionation coefficients to be used for the run, <br>
+calling (by its header name) a single column of the <strong>COEFFS</strong> sheet
+of the <strong><em>isobxr excel master file</em></strong>. <br>
+(character string)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t_max</code></td>
+<td>
+<p>Run duration, given in the same time units as unit declared in <strong>CONSTANTS</strong> <br>
+spreadsheet of <strong><em>isobxr excel master file</em></strong> in the <strong>TIME_UNIT</strong> column.
+(integer)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_steps</code></td>
+<td>
+<p>Number of calculation steps. <br>
+It determines the resolution of the run. <br>
+(integer)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>isobxr_master_file</code></td>
+<td>
+<p>Name of <strong><em>isobxr excel master file</em></strong>. <br>
+Default is "0_ISOBXR_MASTER".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>suppress_messages</code></td>
+<td>
+<p>If TRUE, hides all information and warning messages regarding run. <br>
+Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>export.diagrams</code></td>
+<td>
+<p>If TRUE, exports box-model flux and fractionation diagrams as pdf. <br>
+Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>export.delta_plot</code></td>
+<td>
+<p>If TRUE, exports delta and size time evolution plots of the evolution
+of the system, as pdf. <br>
+Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>export.data_as_csv_xlsx</code></td>
+<td>
+<p>If TRUE, exports all results and run conditions as csv and xlsx files, <br>
+to DIGEST directory. <br>
+Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.time_as_log10</code></td>
+<td>
+<p>If TRUE, uses logarithmic time scale in plot. <br>
+Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.time_unit</code></td>
+<td>
+<p>Time unit to use on plot if different from native time unit. <br>
+Character string, to be selected among the following:<br><em>micros, ms, s, min, h, d, wk, mo, yr, kyr, Myr, Gyr</em><br>
+Default is NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>show.delta_plot</code></td>
+<td>
+<p>If TRUE, prints delta and size time evolution plots in R.
+Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inspect_inputs</code></td>
+<td>
+<p>If TRUE, inspects and proof checks format of input taken from
+<strong><em>isobxr excel master file</em></strong>. <br>
+(Inspection run by <code>read.isobxr_master</code> function.) <br>
+Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>save_outputs</code></td>
+<td>
+<p>If TRUE, saves all run outputs to local working directory (workdir). <br>
+By default, run outputs are stored in a temporary directory and erased if not saved. <br>
+Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return_data</code></td>
+<td>
+<p>If TRUE, returns all data (inputs and outputs) as a list. <br>
+Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>solver</code></td>
+<td>
+<p>Determines what solver to used: "analytical" or "numerical". <br>
+Default is "auto" for automatic selection of adapted solver.
+Note that this option returns warnings or prevents user to run when solver wished is
+not adapted to system solution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_zeros_RUN_IDs</code></td>
+<td>
+<p>Number of figures used in iteration of RUNs of a given series (SERIES_ID). <br>
+Default is 4: the run IDs of a given series range between 0001 and 9999.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FORCING_RAYLEIGH</code></td>
+<td>
+<p><em>OPTIONAL</em> <br>
+Dataframe describing the forcing on a fractionation coefficient
+by a Rayleigh isotope distillation, <br>
+as a function of flux intensities and a fundamental fractionation coefficient. <br>
+Dataframe formatting details are in isobxr vignette. <br>
+Default is NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FORCING_SIZE</code></td>
+<td>
+<p><em>OPTIONAL</em> <br>
+Dataframe describing the forcing on one or several box sizes (mass of element X). <br>
+The newly defined sizes for the given set of boxes
+overwrite their sizes as previously defined in <strong><em>isobxr excel master file</em></strong>. <br>
+Dataframe formatting details are in isobxr vignette. <br>
+Default is NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FORCING_DELTA</code></td>
+<td>
+<p><em>OPTIONAL</em> <br>
+Dataframe describing the forcing on one or several boxes
+initial isotope composition expressed as delta values. <br>
+The newly defined delta values for the given set of boxes
+overwrite the delta values as previously defined in <strong><em>isobxr excel master file</em></strong>. <br>
+Dataframe formatting details are in isobxr vignette. <br>
+Default is NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FORCING_ALPHA</code></td>
+<td>
+<p><em>OPTIONAL</em> <br>
+Dataframe describing the forcing on one or several
+fractionation coefficients from one reservoir to another. <br>
+The newly defined alpha values for the given set of boxes
+overwrite the alpha values as previously defined in <strong><em>isobxr excel master file</em></strong>. <br>
+Dataframe formatting details are in isobxr vignette. <br>
+Default is NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>COMPOSITE</code></td>
+<td>
+<p><em>NOT TO BE USED IN SINGLE RUN</em>  <br>
+Logical value automatically defined in <code>sim.scenario</code>. <br>
+Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>COMPO_SERIES_n</code></td>
+<td>
+<p><em>NOT TO BE USED IN SINGLE RUN</em>  <br>
+Iteration of the composite run for the given series it belongs to,
+automatically defined in <code>sim.scenario</code>.  <br>
+Default is NaN.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>COMPO_SERIES_FAMILY</code></td>
+<td>
+<p><em>NOT TO BE USED IN SINGLE RUN</em> <br>
+Composite run series family, automatically defined in
+<code>sim.scenario</code>. <br>
+Default is NaN.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>EXPLORER</code></td>
+<td>
+<p><em>NOT TO BE USED IN SINGLE RUN</em> <br>
+Logical value automatically defined in <code>sweep.final_nD</code>
+or <code>sweep.dyn_2D</code>. <br>
+Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>EXPLO_SERIES_n</code></td>
+<td>
+<p><em>NOT TO BE USED IN SINGLE RUN</em>  <br>
+Iteration of the sweep run for the given series it belongs to,
+automatically defined in <code>sweep.final_nD</code> or <code>sweep.dyn_2D</code>. <br>
+Default is NaN.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>EXPLO_SERIES_FAMILY</code></td>
+<td>
+<p><em>NOT TO BE USED IN SINGLE RUN</em>  <br>
+Sweep run series family, automatically defined in
+<code>sweep.final_nD</code> or <code>sweep.dyn_2D</code>. <br>
+Default is NaN.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>isobxr_master</code></td>
+<td>
+<p>isobxr_master list of input dataframes formatted by
+<code>read.isobxr_master</code> <br>
+Overwrites isobxr_master_file.
+Default is NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diagram_pdf.widh_height</code></td>
+<td>
+<p>Vector of width and height in inches of the pdf diagrams.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A results data set as a list containing the following components:
+</p>
+
+<ol>
+<li> <p><strong>inputs</strong> input data:
+</p>
+
+<ol>
+<li> <p><strong>CONSTS</strong> data frame of all run specific constants.
+</p>
+</li>
+<li> <p><strong>INITIAL</strong> data frame of delta and sizes at t = 0 in all boxes.
+</p>
+</li>
+<li> <p><strong>FLUXES</strong> data frame of all fluxes intensities (row ID: FROM / col ID: TO)
+</p>
+</li>
+<li> <p><strong>COEFFS</strong> data frame of all fractionation coefficient values (row ID: FROM / col ID: TO)
+</p>
+</li>
+<li> <p><strong>BOX_META</strong> data frame of box specific metadata (e.g., flux balance, residence times, layout position )
+</p>
+</li>
+<li> <p><strong>bx.groups</strong> list of box names grouped by relevant categories (e.g., disconnected boxes, infinite boxes)
+</p>
+</li>
+<li> <p><strong>LOG</strong> data frame of run specific LOG excerpt.
+</p>
+</li>
+</ol>
+</li>
+<li> <p><strong>outputs</strong> output data:
+</p>
+
+<ol>
+<li> <p><strong>solver</strong>
+</p>
+</li>
+<li> <p><strong>final_state</strong>
+</p>
+</li>
+<li> <p><strong>delta_vs_t</strong>
+</p>
+</li>
+<li> <p><strong>size_vs_t</strong>
+</p>
+</li>
+<li> <p><strong>for analytical solutions</strong>
+</p>
+
+<ol><li> <p><strong>diffeq_solutions</strong> solutions of differential equations, <br>
+including relaxation times, eigenvalues, constants, eigenvectors
+</p>
+</li></ol>
+</li>
+</ol>
+</li>
+<li> <p><strong>paths</strong> list of run specific paths
+</p>
+</li>
+</ol>
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+sim.single_run(workdir = "/Users/username/Documents/1_ABC_tutorial",
+               SERIES_ID = "1_ABC_balanced_closed",
+               flux_list = "Fx1_ABC_bal",
+               coeff_list = "a1",
+               t_max = 2500,
+               n_steps = 2500)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

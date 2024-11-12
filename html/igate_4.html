@@ -1,0 +1,231 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>igate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>igate function for continuous target variables</h2>
+
+<h3>Description</h3>
+
+<p>This function performs an initial Guided Analysis for parameter testing and controlband extraction (iGATE)
+on a dataset and returns those parameters found to be influential.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">igate(df, versus = 8, target, test = "w", ssv = NULL,
+  outlier_removal_target = TRUE, outlier_removal_ssv = TRUE,
+  good_end = "low", savePlots = FALSE, image_directory = tempdir())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>Data frame to be analysed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>versus</code></td>
+<td>
+<p>How many Best of the Best and Worst of the Worst do we collect? By default, we will collect 8 of each.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target</code></td>
+<td>
+<p>Target varaible to be analysed. Must be continuous. Use <code>categorical.igate</code> for categorical target.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test</code></td>
+<td>
+<p>Statistical hypothesis test to be used to determine influential
+process parameters. Choose between Wilcoxon Rank test (<code>"w"</code>, default) and Student's t-test (<code>"t"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ssv</code></td>
+<td>
+<p>A vector of suspected sources of variation. These are the variables
+in <code>df</code> which we believe might have an influence on the target variable and
+will be tested. If no list of ssv is provided, the test will be performed
+on all numeric variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outlier_removal_target</code></td>
+<td>
+<p>Logical. Should outliers (with respect to the target variable)
+be removed from df (default: <code>TRUE</code>)? Important: This only makes sense if no
+prior outlier removal has been performed on df, i.e. <code>df</code> still contains all
+the data. Otherwise calculation for outlier threshold will be falsified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outlier_removal_ssv</code></td>
+<td>
+<p>Logical. Should outlier removal be performed for each ssv (default: <code>TRUE</code>)?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>good_end</code></td>
+<td>
+<p>Are low (default) or high values of target variable good? This is needed
+to determine the control bands.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>savePlots</code></td>
+<td>
+<p>Logical, only relevant if <code>outlier_removal_target</code> is TRUE. If  <code>savePlots == FALSE</code>
+(the default) the boxplot of the target variable will be output to the standard output device for plots, usually
+the console. If <code>TRUE</code>, the boxplot will additionally be saved to <code>image_directory</code> as a png file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>image_directory</code></td>
+<td>
+<p>Directory to which plots should be saved. This is only used if <code>savePlots = TRUE</code> and
+defaults to the temporary directory of the current R session, i.e. <code>tempdir()</code>. To save plots to the current
+working directory set <code>savePlots = TRUE</code> and <code>image_directory = getwd()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>We collect the Best of the Best and the Worst of the Worst
+dynamically dependent on the current ssv. That means, for each ssv we first
+remove all the observations with missing values for that ssv from df.
+Then, based on the remaining observations, we select versus observations with
+the best values for the target variable (“Best of the Best”, short BOB)  and
+versus observations with the worst values for the target variable
+(“Worst of the Worst”, short WOW). By default, we select 8 of each.
+Next, we compare BOB and WOW using the the counting method and the specified
+hypothesis test. If the distributions of the ssv in BOB and WOW are
+significantly different, the current ssv has been identified as influential
+to the target variable. An ssv is considered influential, if the test returns
+a count larger/ equal to 6 and/ or a p-value of less than 0.05.
+For the next ssv we again start with the entire dataset df, remove all
+the observations with missing values for that new ssv and then select our
+new BOB and WOW. In particular, for each ssv we might select different observations.
+This dynamic selection is necessary, because in case of an incomplete data set,
+if we select the same BOB and WOW for all the ssv, we might end up with many
+missing values for particular ssv. In that case the hypothesis test loses
+statistical power, because it is used on a smaller sample or worse, might
+fail altogether if the sample size gets too small.
+</p>
+<p>For those ssv determined to be significant, control bands are extracted. The rationale is:
+If the value for an ssv is in the interval [<code>good_lower_bound</code>,<code>good_upper_bound</code>]
+the target is likely to be good. If it is in the interval
+[<code>bad_lower_bound</code>,<code>bad_upper_bound</code>], the target is likely to be bad.
+</p>
+<p>Furthermore some summary statistics are provided: When selecting the <code>versus</code> BOB/ WOW, tied values for target
+can mean that the <code>versus</code> BOB/ WOW are not uniquely determined. In that case we randomly select
+from the tied observations to give us exactly <code>versus</code> observations per group.
+<code>ties_lower_end, cometition_lower_end, ties_upper_end, competition_upper_end</code>
+quantify this randomness. How to interpret these values: <em>lower end</em> refers to
+the group whose <code>target</code> values are <em>low</em> and <em>upper end</em> to the one whose
+<code>target</code> values are high. For example if a low value for <code>target</code> is good,
+<em>lower end</em> refers to the BOB and <em>upper end</em> to the WOW. We determine the <code>versus</code>
+BOB/ WOW via
+</p>
+<p><code>lower_end &lt;- df[min_rank(df$target)&lt;=versus,]</code>
+</p>
+<p>If there are tied observations, <code>nrow(lower_end)</code> can be larger than <code>versus</code>. In <code>ties_lower_end</code> we
+record how many observations in <code>lower_end$target</code> have the <em>highest</em> value and in <code>competition_lower_end</code>
+we record for how many places they are competing, i.e.
+<code>competing_for_lower &lt;- versus - (nrow(lower_end) - ties_lower_end)</code>.
+The values for <code>ties_upper_end</code> and <code>competition_upper_end</code> are determined analogously.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame with the following columns
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+<code>Causes</code> </td>
+<td style="text-align: left;"> Those ssv that have been found to be influential to the target variable.</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>Count</code> </td>
+<td style="text-align: left;"> The value returned by the counting method. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>p.value</code> </td>
+<td style="text-align: left;"> The p-value of the hypothesis test performed, i.e. either of the
+Wilcoxon rank test (in case <code>test = "w"</code>) or the t-test (if <code>test = "t"</code>).</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>good_lower_bound</code> </td>
+<td style="text-align: left;"> The lower bound for this <code>Cause</code> for good quality.</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>good_upper_bound</code> </td>
+<td style="text-align: left;"> The upper bound for this <code>Cause</code> for good quality.</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>bad_lower_bound</code> </td>
+<td style="text-align: left;"> The lower bound for this <code>Cause</code> for bad quality.</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>bad_upper_bound</code> </td>
+<td style="text-align: left;"> The upper bound for this <code>Cause</code> for bad quality.</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>na_removed</code> </td>
+<td style="text-align: left;"> How many missing values were in the data set for this <code>Cause</code>?</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>ties_lower_end</code> </td>
+<td style="text-align: left;"> Number of tied observations at lower end of <code>target</code> when selecting the
+<code>versus</code> BOB/ WOW.</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>competition_lower_end</code> </td>
+<td style="text-align: left;"> For how many positions are the <code>tied_obs_lower</code> competing?</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>ties_upper_end</code> </td>
+<td style="text-align: left;"> Number of tied observations at upper end of <code>target</code> when selecting the
+<code>versus</code> BOB/ WOW.</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>competition_upper_end</code> </td>
+<td style="text-align: left;"> For how many positions are the <code>tied_obs_upper</code> competing?</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>adjusted.p.values</code> </td>
+<td style="text-align: left;"> The <code>p.values</code> adjusted via Bonferroni correction.
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">igate(iris, target = "Sepal.Length")
+
+</code></pre>
+
+
+</div>

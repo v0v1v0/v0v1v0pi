@@ -1,0 +1,187 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>injsummary</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimate injury summary statistics</h2>
+
+<h3>Description</h3>
+
+<p>Calculate injury summary statistics such as injury incidence and injury
+burden (see Bahr et al. 20), including total number of injuries, number of
+days lost due to injury, total time of exposure etc., by means of a (widely
+used) Poisson method, negative binomial, zero-inflated poisson or
+zero-inflated negative binomial, on a player and overall basis.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">injsummary(
+  injd,
+  var_type_injury = NULL,
+  method = c("poisson", "negbin", "zinfpois", "zinfnb"),
+  conf_level = 0.95,
+  quiet = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>injd</code></td>
+<td>
+<p><code>injd</code> <strong>S3</strong> object (see
+<code>prepare_all()</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var_type_injury</code></td>
+<td>
+<p>Character specifying the name of the column according
+to which compute injury summary statistics. It should refer to a
+(categorical) variable that describes the "type of injury". Optional,
+defaults to <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>Method to estimate injury incidence and injury burden. One of
+"poisson", "negbin", "zinfpois" or "zinfnb"; characters that stand for
+Poisson method, negative binomial method, zero-inflated Poisson and
+zero-inflated negative binomial.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf_level</code></td>
+<td>
+<p>Confidence level (defaults to 0.95).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>Logical, whether or not to silence the warning messages
+(defaults to <code>FALSE</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list of two data frames comprising player-wise and overall injury
+summary statistics, respectively, that constitute an <code>injds</code>
+<strong>S3</strong> object. Both of them made up of the following columns:
+</p>
+
+<ul>
+<li> <p><code>ninjuries</code>: number of injuries sustained by the player or
+overall in the team over the given period specified by the <code>injd</code>
+data frame.
+</p>
+</li>
+<li> <p><code>ndayslost</code>: number of days lost by the player or overall
+in the team due to injury over the given period specified by the
+<code>injd</code> data frame.
+</p>
+</li>
+<li> <p><code>mean_dayslost</code>: average of number of days lost (i.e.
+<code>ndayslost</code>) playerwise or overall in the team.
+</p>
+</li>
+<li> <p><code>median_dayslost</code>: median of number of days lost (i.e.
+<code>ndayslost</code>) playerwise or overall in the team.
+</p>
+</li>
+<li> <p><code>iqr_dayslost</code>: interquartile range of number of days lost
+(i.e. <code>ndayslost</code>) playerwise or overall in the team.
+</p>
+</li>
+<li> <p><code>totalexpo</code>: total exposure that the player has been under risk
+of sustaining an injury.
+</p>
+</li>
+<li> <p><code>injincidence</code>: injury incidence, number of injuries per unit of
+exposure.
+</p>
+</li>
+<li> <p><code>injburden</code>: injury burden, number of days lost per unit of
+exposure.
+</p>
+</li>
+<li> <p><code>var_type_injury</code>: only if it is specified as an argument to
+function.
+</p>
+</li>
+</ul>
+<p>Apart from this column names, they may further include these other columns
+depending on the user's specifications to the function:
+</p>
+
+<ul>
+<li> <p><code>percent_ninjuries</code>: percentage (%) of number of injuries of
+that type relative to all types of injuries (if <code>var_type_injury</code>
+specified).
+</p>
+</li>
+<li> <p><code>percent_dayslost</code>: percentage (%) of number of days lost
+because of injuries of that type relative to the total number of days
+lost because of all types of injuries (if <code>var_type_injury</code>
+specified).
+</p>
+</li>
+<li> <p><code>injincidence_sd</code> and <code>injburden_sd</code>: estimated standard
+deviation, by the specified <code>method</code> argument, of injury incidence
+(<code>injincidence</code>) and injury burden (<code>injburden</code>), for the
+overall injury summary statistics (the 2nd element of the function
+output).
+</p>
+</li>
+<li> <p><code>injincidence_lower</code> and <code>injburden_lower</code>: lower bound
+of, for example, 95% confidence interval (if <code>conf_level = 0.95</code>)
+of injury incidence (<code>injincidence</code>) and injury burden
+(<code>injburden</code>), for the overall injury summary statistics (the 2nd
+element of the function output).
+</p>
+</li>
+<li> <p><code>injincidence_upper</code> and <code>injburden_upper</code>: the same (as
+above item) applies but for the upper bound.
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+<p>Bahr R., Clarsen B., &amp; Ekstrand J. (2018). Why we should focus on the burden
+of injuries and illnesses, not just their incidence. <em>British Journal of
+Sports Medicine</em>, 52(16), 1018–1021.
+https://doi.org/10.1136/bjsports-2017-098160
+</p>
+<p>Waldén M., Mountjoy M., McCall A., Serner A., Massey A., Tol J. L.,
+... &amp; Andersen T. E. (2023). Football-specific extension of the IOC
+consensus statement: methods for recording and reporting of epidemiological
+data on injury and illness in sport 2020. <em>British journal of sports
+medicine</em>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+df_exposures &lt;- prepare_exp(raw_df_exposures, player = "player_name",
+                            date = "year", time_expo = "minutes_played")
+df_injuries  &lt;- prepare_inj(raw_df_injuries, player = "player_name",
+                            date_injured = "from", date_recovered = "until")
+injd         &lt;- prepare_all(data_exposures = df_exposures,
+                            data_injuries  = df_injuries,
+                            exp_unit = "matches_minutes")
+
+
+injsummary(injd)
+injsummary(injd, var_type_injury = "injury_type")
+</code></pre>
+
+
+</div>

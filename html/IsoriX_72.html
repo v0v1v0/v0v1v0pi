@@ -1,0 +1,275 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>prepsources</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Filter and aggregate the raw source dataset</h2>
+
+<h3>Description</h3>
+
+<p>This function prepares the available dataset to be used for creating the
+isoscape (e.g. <code>GNIPDataDE</code>). This function allows the trimming of data
+by months, years and location, and for the aggregation of selected data per
+location, location:month combination or location:year combination. The
+function can also be used to randomly exclude some observations.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">prepsources(
+  data,
+  month = 1:12,
+  year,
+  long_min = -180,
+  long_max = 180,
+  lat_min = -90,
+  lat_max = 90,
+  split_by = NULL,
+  prop_random = 0,
+  random_level = "source",
+  col_source_value = "source_value",
+  col_source_ID = "source_ID",
+  col_lat = "lat",
+  col_long = "long",
+  col_elev = "elev",
+  col_month = "month",
+  col_year = "year"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A <em>dataframe</em> containing raw isotopic measurements of sources</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>month</code></td>
+<td>
+<p>A <em>numeric vector</em> indicating the months to select from.
+Should be a vector of round numbers between 1 and 12. The default is 1:12
+selecting all months.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>year</code></td>
+<td>
+<p>A <em>numeric vector</em> indicating the years to select from.
+Should be a vector of round numbers. The default is to select all years
+available.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>long_min</code></td>
+<td>
+<p>A <em>numeric</em> indicating the minimum longitude to select
+from. Should be a number between -180 and 180 (default = -180).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>long_max</code></td>
+<td>
+<p>A <em>numeric</em> indicating the maximal longitude to select
+from. Should be a number between -180 and 180 (default = 180).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lat_min</code></td>
+<td>
+<p>A <em>numeric</em> indicating the minimum latitude to select
+from. Should be a number between -90 and 90 (default = -90).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lat_max</code></td>
+<td>
+<p>A <em>numeric</em> indicating the maximal latitude to select
+from (default = 90).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>split_by</code></td>
+<td>
+<p>A <em>string</em> indicating whether data should be aggregated
+per location (<code>split_by = NULL</code>, the default), per location:month
+combination (<code>split_by = "month"</code>), or per location:year combination
+(<code>split_by = "year"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prop_random</code></td>
+<td>
+<p>A <em>numeric</em> indicating the proportion of observations
+or sampling locations (depending on the argument for <code>random_level</code>)
+that will be kept. If <code>prop_random</code> is greater than 0, then the
+function will return a list containing two dataframes: one containing the
+selected data, called <code>selected_data</code>, and one containing the
+remaining data, called <code>remaining_data</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random_level</code></td>
+<td>
+<p>A <em>string</em> indicating the level at which random draws
+can be performed. The two possibilities are <code>"obs"</code>, which indicates
+that observations are randomly drawn taken independently of their location,
+or "source" (default), which indicates that observations are randomly drawn
+at the level of sampling locations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col_source_value</code></td>
+<td>
+<p>A <em>string</em> indicating the column containing the
+isotopic measurements</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col_source_ID</code></td>
+<td>
+<p>A <em>string</em> indicating the column containing the ID of
+each sampling location</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col_lat</code></td>
+<td>
+<p>A <em>string</em> indicating the column containing the latitude
+of each sampling location</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col_long</code></td>
+<td>
+<p>A <em>string</em> indicating the column containing the longitude
+of each sampling location</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col_elev</code></td>
+<td>
+<p>A <em>string</em> indicating the column containing the elevation
+of each sampling location</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col_month</code></td>
+<td>
+<p>A <em>string</em> indicating the column containing the month of
+sampling</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col_year</code></td>
+<td>
+<p>A <em>string</em> indicating the column containing the year of
+sampling</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function aggregates the data as required for the IsoriX workflow. Three
+aggregation schemes are possible for now. The most simple one, used as
+default, aggregates the data so to obtained a single row per sampling
+location. Datasets prepared in this way can be readily fitted with the
+function <code>isofit</code> to build an isoscape. It is also possible to
+aggregate data in a different way in order to build sub-isoscapes
+representing temporal variation in isotope composition, or in order to
+produce isoscapes weighted by the amount of precipitation (for isoscapes on
+precipitation data only). The two possible options are to either split the
+data from each location by month or to split them by year. This is set with
+the <code>split_by</code> argument of the function. Datasets prepared in this way
+should be fitted with the function <code>isomultifit</code>.
+</p>
+<p>The function also allows the user to filter the sampling locations based on
+time (years and/ or months) and space (locations given in geographic
+coordinates, i.e. longitude and latitude) to calculate tailored isoscapes
+matching e.g. the time of sampling and speeding up the model fit by
+cropping/clipping a certain area. The dataframe produced by this function can
+be used as input to fit the isoscape (see <code>isofit</code> and
+<code>isomultifit</code>).
+</p>
+
+
+<h3>Value</h3>
+
+<p>This function returns a <em>dataframe</em> containing the filtered data
+aggregated by sampling location, or a <em>list</em>, see above argument
+<code>prop_random</code>. For each sampling location the mean and variance sample
+estimates are computed.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Create a processed dataset for Germany
+GNIPDataDEagg &lt;- prepsources(data = GNIPDataDE)
+
+head(GNIPDataDEagg)
+
+## Create a processed dataset for Germany per month
+GNIPDataDEmonthly &lt;- prepsources(
+  data = GNIPDataDE,
+  split_by = "month"
+)
+
+head(GNIPDataDEmonthly)
+
+## Create a processed dataset for Germany per year
+GNIPDataDEyearly &lt;- prepsources(
+  data = GNIPDataDE,
+  split_by = "year"
+)
+
+head(GNIPDataDEyearly)
+
+## Create isoscape-dataset for warm months in germany between 1995 and 1996
+GNIPDataDEwarm &lt;- prepsources(
+  data = GNIPDataDE,
+  month = 5:8,
+  year = 1995:1996
+)
+
+head(GNIPDataDEwarm)
+
+
+## Create a dataset with 90% of obs
+GNIPDataDE90pct &lt;- prepsources(
+  data = GNIPDataDE,
+  prop_random = 0.9,
+  random_level = "obs"
+)
+
+lapply(GNIPDataDE90pct, head) # show beginning of both datasets
+
+## Create a dataset with half the weather sources
+GNIPDataDE50pctsources &lt;- prepsources(
+  data = GNIPDataDE,
+  prop_random = 0.5,
+  random_level = "source"
+)
+
+lapply(GNIPDataDE50pctsources, head)
+
+
+## Create a dataset with half the weather sources split per month
+GNIPDataDE50pctsourcesMonthly &lt;- prepsources(
+  data = GNIPDataDE,
+  split_by = "month",
+  prop_random = 0.5,
+  random_level = "source"
+)
+
+lapply(GNIPDataDE50pctsourcesMonthly, head)
+
+</code></pre>
+
+
+</div>

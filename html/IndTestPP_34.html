@@ -1,0 +1,163 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>uniongentri</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculating the set of close points</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates the set of close points
+of each  occurence point in the first process of a vector of two or three processes.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">uniongentri(posx, posy, posz=NULL,  info = FALSE, PA = FALSE,
+	procName=c('X','Y','Z'),...)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>posx</code></td>
+<td>
+<p>Numeric vector. Position of the occurrence points in the first process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>posy</code></td>
+<td>
+<p>Numeric vector. Position of the occurrence points in the second process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>posz</code></td>
+<td>
+<p>Optional. Numeric vector. Position of the occurrence points in the third process. Only used when three
+processes are involved.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>info</code></td>
+<td>
+<p>Optional. Logical flag. If it is TRUE,  information about the generated points is shown  on the screen and
+dotcharts and bivariate charts of the  occurrence points in the processes are displayed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>procName</code></td>
+<td>
+<p>Vector of character strings. Names of the processes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PA</code></td>
+<td>
+<p>Optional. Logical flag. If it is TRUE, the close point relation  is
+broadened by including the previous and the following points to the overlapping
+intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments to be passed to the function <code>plot</code>  if  <code>info=T</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A point in a process is close to a point in another
+process,  if  their time intervals overlap; the time interval of a point is the interval
+between itself and the previous  point in the same process. If there are three processes,  
+the set of close points of <code class="reqn">t_{x_k}</code>,<code class="reqn">S_{x_i; xyz}</code>, is defined as
+the set of  the pairs of points <code class="reqn">(t_{y_j}, t_{z_k})</code> such that  <code class="reqn">t_{x_i}</code> is  close to <code class="reqn">t_{y_j}</code> and <code class="reqn">t_{y_j}</code> is  close to 
+<code class="reqn">t_{z_k}</code>. If there are  two processes,  <code class="reqn">S_{x_i; xy}</code> is the set of   points
+<code class="reqn">t_{y_j}</code> such that  <code class="reqn">t_{x_i}</code> is  close to <code class="reqn">t_{y_j}</code>.
+This definition can be broadened, see  argument <code>PA</code>, by adding to the set two more points, the previous and the following ones.
+</p>
+<p>The algortihm to calculate the sets of close points  (in the case of three processes) is the following, 
+see Abaurrea et al. (2015) for details: First,  given two processes, the pairs of close points  in those
+processes are calculated. If the  last
+point occurs in the first process,  there is a censored time interval in the second process (the point overlaps a time interval whose occurrence point has not been observed)
+and that pair is not considered). This step is performed for all the combinations of  pairs of processes. The basic
+close point relation is commutative,   and only three different  pairs (XY, YZ, XZ) must be considered. 
+This is not the case of the broadened  definition, where the six pairs (XY, YX, YZ, ZY, XZ, ZX) must be  calculated.
+</p>
+<p>Once all the pairs of close points are obtained,  the set of close points for each point <code class="reqn">t_{x_i}</code> is obtained
+by concatenating the adequate pairs of points from all the  possible orders of the three  processes: XYZ,
+XZY and YXZ for the basic definition, and the six possible permutations for the broadened definition.
+The final set of close points of <code class="reqn">t_{x_i}</code> is  the union of the different pairs  from  all the possible permutations.
+</p>
+
+
+<h3>Value</h3>
+
+<p> A list with elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>First elements of the 3-tuples  of points <code class="reqn">(t_{x_i}, t_{y_i}, t_{z_i})</code> in the sets of close points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iX</code></td>
+<td>
+<p>Position  i (=1,2,3....) of the  point <code class="reqn">t_{x_i}</code> in the first process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>Second elements of the 3-tuples  of points <code class="reqn">(t_{x_i}, t_{y_i}, t_{z_i})</code> in the sets of close points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iY</code></td>
+<td>
+<p>Position  i (=1,2,3....) of the  point <code class="reqn">t_{y_i}</code> in the second process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Z</code></td>
+<td>
+<p>Third elements of the 3-tuples  of points <code class="reqn">(t_{x_i}, t_{y_i}, t_{z_i})</code> in the sets of close points. 
+It is NULL if <code>posz=NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iZ</code></td>
+<td>
+<p>Position i (=1,2,3....) of the  point <code class="reqn">t_{z_i}</code> in the third process. 
+It is NULL if posz=NULL.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Abaurrea, J. Asin, J. and Cebrian, A.C. (2015). A Bootstrap Test of Independence Between Three Temporal Nonhomogeneous Poisson Processes 
+and its Application to Heat Wave Modeling. <em>Environmental and Ecological Statistics</em>.</p>
+
+
+<h3>See Also</h3>
+
+<p><code>TestIndNH</code>, <code>DistSim</code>, <code>DistObs</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+set.seed(123)
+posx&lt;-sort(runif(20,0,1000))
+posy&lt;-sort(runif(25,0,1000))
+posz&lt;-sort(runif(40,0,1000))
+aux&lt;-uniongentri(posx, posy, posz, info=TRUE)
+</code></pre>
+
+
+</div>

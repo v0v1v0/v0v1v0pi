@@ -1,0 +1,431 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>relation-locate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Locate relationships between two ivs</h2>
+
+<h3>Description</h3>
+
+<p>This family of functions locates different types of relationships between
+two ivs. It works similar to <code>base::match()</code>, where <code>needles[i]</code> checks for
+a relationship in all of <code>haystack</code>. Unlike <code>match()</code>, <em>all</em> matching
+relationships are returned, rather than just the first.
+</p>
+
+<ul>
+<li> <p><code>iv_locate_overlaps()</code> locates a specific <code>type</code> of overlap between the two
+ivs.
+</p>
+</li>
+<li> <p><code>iv_locate_precedes()</code> locates where <code>needles[i]</code> precedes (i.e. comes
+before) any interval in <code>haystack</code>.
+</p>
+</li>
+<li> <p><code>iv_locate_follows()</code> locates where <code>needles[i]</code> follows (i.e. comes
+after) any interval in <code>haystack</code>.
+</p>
+</li>
+</ul>
+<p>These functions return a two column data frame. The <code>needles</code> column is an
+integer vector pointing to locations in <code>needles</code>. The <code>haystack</code> column is
+an integer vector pointing to locations in <code>haystack</code> with a matching
+relationship.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iv_locate_overlaps(
+  needles,
+  haystack,
+  ...,
+  type = "any",
+  missing = "equals",
+  no_match = NA_integer_,
+  remaining = "drop",
+  multiple = "all",
+  relationship = "none"
+)
+
+iv_locate_precedes(
+  needles,
+  haystack,
+  ...,
+  closest = FALSE,
+  missing = "equals",
+  no_match = NA_integer_,
+  remaining = "drop",
+  multiple = "all",
+  relationship = "none"
+)
+
+iv_locate_follows(
+  needles,
+  haystack,
+  ...,
+  closest = FALSE,
+  missing = "equals",
+  no_match = NA_integer_,
+  remaining = "drop",
+  multiple = "all",
+  relationship = "none"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>needles, haystack</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[iv]⁠</code>
+</p>
+<p>Interval vectors used for relation matching.
+</p>
+
+<ul>
+<li>
+<p> Each element of <code>needles</code> represents the interval to search for.
+</p>
+</li>
+<li> <p><code>haystack</code> represents the intervals to search in.
+</p>
+</li>
+</ul>
+<p>Prior to comparison, <code>needles</code> and <code>haystack</code> are coerced to the same type.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>These dots are for future extensions and must be empty.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[character(1)]⁠</code>
+</p>
+<p>The type of relationship to find. One of:
+</p>
+
+<ul>
+<li> <p><code>"any"</code>: Finds any overlap whatsoever between an interval in <code>needles</code>
+and an interval in <code>haystack</code>.
+</p>
+</li>
+<li> <p><code>"within"</code>: Finds when an interval in <code>needles</code> is completely within
+(or equal to) an interval in <code>haystack</code>.
+</p>
+</li>
+<li> <p><code>"contains"</code>: Finds when an interval in <code>needles</code> completely contains
+(or equals) an interval in <code>haystack</code>.
+</p>
+</li>
+<li> <p><code>"equals"</code>: Finds when an interval in <code>needles</code> is exactly equal to
+an interval in <code>haystack</code>.
+</p>
+</li>
+<li> <p><code>"starts"</code>: Finds when the start of an interval in <code>needles</code> matches the
+start of an interval in <code>haystack</code>.
+</p>
+</li>
+<li> <p><code>"ends"</code>: Finds when the end of an interval in <code>needles</code> matches the end
+of an interval in <code>haystack</code>.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>missing</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[integer(1) / "equals" / "drop" / "error"]⁠</code>
+</p>
+<p>Handling of missing intervals in <code>needles</code>.
+</p>
+
+<ul>
+<li> <p><code>"equals"</code> considers missing intervals in <code>needles</code> as exactly equal
+to missing intervals in <code>haystack</code> when determining if there is a
+matching relationship between them.
+</p>
+</li>
+<li> <p><code>"drop"</code> drops missing intervals in <code>needles</code> from the result.
+</p>
+</li>
+<li> <p><code>"error"</code> throws an error if any intervals in <code>needles</code> are missing.
+</p>
+</li>
+<li>
+<p> If a single integer is provided, this represents the value returned in
+the <code>haystack</code> column for intervals in <code>needles</code> that are missing.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>no_match</code></td>
+<td>
+<p>Handling of <code>needles</code> without a match.
+</p>
+
+<ul>
+<li> <p><code>"drop"</code> drops <code>needles</code> with zero matches from the result.
+</p>
+</li>
+<li> <p><code>"error"</code> throws an error if any <code>needles</code> have zero matches.
+</p>
+</li>
+<li>
+<p> If a single integer is provided, this represents the value returned in
+the <code>haystack</code> column for values of <code>needles</code> that have zero matches. The
+default represents an unmatched needle with <code>NA</code>.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>remaining</code></td>
+<td>
+<p>Handling of <code>haystack</code> values that <code>needles</code> never matched.
+</p>
+
+<ul>
+<li> <p><code>"drop"</code> drops remaining <code>haystack</code> values from the result.
+Typically, this is the desired behavior if you only care when <code>needles</code>
+has a match.
+</p>
+</li>
+<li> <p><code>"error"</code> throws an error if there are any remaining <code>haystack</code>
+values.
+</p>
+</li>
+<li>
+<p> If a single integer is provided (often <code>NA</code>), this represents the value
+returned in the <code>needles</code> column for the remaining <code>haystack</code> values
+that <code>needles</code> never matched. Remaining <code>haystack</code> values are always
+returned at the end of the result.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>multiple</code></td>
+<td>
+<p>Handling of <code>needles</code> with multiple matches. For each needle:
+</p>
+
+<ul>
+<li> <p><code>"all"</code> returns all matches detected in <code>haystack</code>.
+</p>
+</li>
+<li> <p><code>"any"</code> returns any match detected in <code>haystack</code> with no guarantees on
+which match will be returned. It is often faster than <code>"first"</code> and
+<code>"last"</code> if you just need to detect if there is at least one match.
+</p>
+</li>
+<li> <p><code>"first"</code> returns the first match detected in <code>haystack</code>.
+</p>
+</li>
+<li> <p><code>"last"</code> returns the last match detected in <code>haystack</code>.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>relationship</code></td>
+<td>
+<p>Handling of the expected relationship between
+<code>needles</code> and <code>haystack</code>. If the expectations chosen from the list below
+are invalidated, an error is thrown.
+</p>
+
+<ul>
+<li> <p><code>"none"</code> doesn't perform any relationship checks.
+</p>
+</li>
+<li> <p><code>"one-to-one"</code> expects:
+</p>
+
+<ul>
+<li>
+<p> Each value in <code>needles</code> matches at most 1 value in <code>haystack</code>.
+</p>
+</li>
+<li>
+<p> Each value in <code>haystack</code> matches at most 1 value in <code>needles</code>.
+</p>
+</li>
+</ul>
+</li>
+<li> <p><code>"one-to-many"</code> expects:
+</p>
+
+<ul>
+<li>
+<p> Each value in <code>needles</code> matches any number of values in <code>haystack</code>.
+</p>
+</li>
+<li>
+<p> Each value in <code>haystack</code> matches at most 1 value in <code>needles</code>.
+</p>
+</li>
+</ul>
+</li>
+<li> <p><code>"many-to-one"</code> expects:
+</p>
+
+<ul>
+<li>
+<p> Each value in <code>needles</code> matches at most 1 value in <code>haystack</code>.
+</p>
+</li>
+<li>
+<p> Each value in <code>haystack</code> matches any number of values in <code>needles</code>.
+</p>
+</li>
+</ul>
+</li>
+<li> <p><code>"many-to-many"</code> expects:
+</p>
+
+<ul>
+<li>
+<p> Each value in <code>needles</code> matches any number of values in <code>haystack</code>.
+</p>
+</li>
+<li>
+<p> Each value in <code>haystack</code> matches any number of values in <code>needles</code>.
+</p>
+</li>
+</ul>
+<p>This performs no checks, and is identical to <code>"none"</code>, but is provided to
+allow you to be explicit about this relationship if you know it exists.
+</p>
+</li>
+<li> <p><code>"warn-many-to-many"</code> doesn't assume there is any known relationship, but
+will warn if <code>needles</code> and <code>haystack</code> have a many-to-many relationship
+(which is typically unexpected), encouraging you to either take a closer
+look at your inputs or make this relationship explicit by specifying
+<code>"many-to-many"</code>.
+</p>
+</li>
+</ul>
+<p><code>relationship</code> is applied after <code>filter</code> and <code>multiple</code> to allow potential
+multiple matches to be filtered out first.
+</p>
+<p><code>relationship</code> doesn't handle cases where there are zero matches. For that,
+see <code>no_match</code> and <code>remaining</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>closest</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[TRUE / FALSE]⁠</code>
+</p>
+<p>Should only the closest relationship be returned?
+</p>
+<p>If <code>TRUE</code>, will only return the closest interval(s) in <code>haystack</code> that
+the current value of <code>needles</code> either precedes or follows. Note that
+multiple intervals can still be returned if there are ties, which can
+be resolved using <code>multiple</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A data frame containing two integer columns named <code>needles</code> and <code>haystack</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Detecting relationships
+</p>
+<p>Detecting relationships pairwise
+</p>
+<p>Locating relations from Allen's Interval Algebra
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x &lt;- iv_pairs(
+  as.Date(c("2019-01-05", "2019-01-10")),
+  as.Date(c("2019-01-07", "2019-01-15")),
+  as.Date(c("2019-01-20", "2019-01-31"))
+)
+
+y &lt;- iv_pairs(
+  as.Date(c("2019-01-01", "2019-01-03")),
+  as.Date(c("2019-01-04", "2019-01-08")),
+  as.Date(c("2019-01-07", "2019-01-09")),
+  as.Date(c("2019-01-10", "2019-01-20")),
+  as.Date(c("2019-01-15", "2019-01-20"))
+)
+
+x
+y
+
+# Find any overlap between `x` and `y`
+loc &lt;- iv_locate_overlaps(x, y)
+loc
+
+iv_align(x, y, locations = loc)
+
+# Find where `x` contains `y` and drop results when there isn't a match
+loc &lt;- iv_locate_overlaps(x, y, type = "contains", no_match = "drop")
+loc
+
+iv_align(x, y, locations = loc)
+
+# Find where `x` precedes `y`
+loc &lt;- iv_locate_precedes(x, y)
+loc
+
+iv_align(x, y, locations = loc)
+
+# Filter down to find only the closest interval in `y` of all the intervals
+# where `x` preceded it
+loc &lt;- iv_locate_precedes(x, y, closest = TRUE)
+
+iv_align(x, y, locations = loc)
+
+# Note that `closest` can result in duplicates if there is a tie.
+# `2019-01-20` appears as an end date twice in `haystack`.
+loc &lt;- iv_locate_follows(x, y, closest = TRUE)
+loc
+
+iv_align(x, y, locations = loc)
+
+# Force just one of the ties to be returned by using `multiple`.
+# Here we just request any of the ties, with no guarantee on which one.
+loc &lt;- iv_locate_follows(x, y, closest = TRUE, multiple = "any")
+loc
+
+iv_align(x, y, locations = loc)
+
+# ---------------------------------------------------------------------------
+
+a &lt;- iv(NA, NA)
+b &lt;- iv(c(NA, NA), c(NA, NA))
+
+# By default, missing intervals in `needles` are seen as exactly equal to
+# missing intervals in `haystack`, which means that they overlap
+iv_locate_overlaps(a, b)
+
+# If you'd like missing intervals in `needles` to always be considered
+# unmatched, set `missing = NA`
+iv_locate_overlaps(a, b, missing = NA)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,92 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iiw</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Given a proportional hazards model for visit intensities, compute inverse-intensity weights.</h2>
+
+<h3>Description</h3>
+
+<p>For a longitudinal dataset subject to irregular observation, use a Cox proportional hazards model for visit intensities to compute inverse intensity weights
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iiw(phfit, data, id, time, first)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>phfit</code></td>
+<td>
+<p>coxph object for the visit process</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>The dataset featuring longitudinal data subject to irregular observation for which inverse-intensity weights are desired</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>character string indicating which column of the data identifies subjects</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time</code></td>
+<td>
+<p>character string indicating which column of the data contains the time at which the visit occurred</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>first</code></td>
+<td>
+<p>logical variable. If TRUE, the first observation for each individual is assigned an intensity of 1. This is appropriate if the first visit is a baseline visit at which recruitment to the study occurred; in this case the baseline visit is observed with probability 1.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A vector of inverse-intensity weights for each row of the dataset. The first observation for each subject is assumed to have an intensity of 1.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other iiw: 
+<code>iiw.weights()</code>,
+<code>iiwgee()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(nlme)
+library(survival)
+library(geeM)
+library(data.table)
+data(Phenobarb)
+Phenobarb$event &lt;- 1-as.numeric(is.na(Phenobarb$conc))
+data &lt;- Phenobarb
+data &lt;- data[data$event==1,]
+data$id &lt;- as.numeric(data$Subject)
+data &lt;- data[data$time&lt;16*24,]
+data &lt;- lagfn(data, lagvars=c("time","conc"), id="Subject", time="time", lagfirst = NA)
+head(data)
+
+mph &lt;- coxph(Surv(time.lag,time,event)~I(conc.lag&gt;0 &amp; conc.lag&lt;=20) + I(conc.lag&gt;20 &amp; conc.lag&lt;=30)
+ + I(conc.lag&gt;30)+ cluster(id),,data=data)
+summary(mph)
+data$weight &lt;- iiw(mph,data,"id","time",TRUE)
+head(data)
+</code></pre>
+
+
+</div>

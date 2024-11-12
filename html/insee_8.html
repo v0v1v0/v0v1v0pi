@@ -1,0 +1,143 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_insee_idbank</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get data from INSEE series idbank</h2>
+
+<h3>Description</h3>
+
+<p>Get data from INSEE series idbank
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_insee_idbank(
+  ...,
+  limit = TRUE,
+  startPeriod = NULL,
+  endPeriod = NULL,
+  firstNObservations = NULL,
+  lastNObservations = NULL,
+  includeHistory = NULL,
+  updatedAfter = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>one or several series key (idbank)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>limit</code></td>
+<td>
+<p>by default, the function get_insee_idbank has a 1200-idbank limit.
+Set limit argument to FALSE to ignore the limit or modify the limit with the following command : Sys.setenv(INSEE_idbank_limit = 1200)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>startPeriod</code></td>
+<td>
+<p>start date of data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>endPeriod</code></td>
+<td>
+<p>end date of data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>firstNObservations</code></td>
+<td>
+<p>get the first N observations for each key series (idbank)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lastNObservations</code></td>
+<td>
+<p>get the last N observations for each key series (idbank)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>includeHistory</code></td>
+<td>
+<p>boolean to access the previous releases (not available on all series)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>updatedAfter</code></td>
+<td>
+<p>starting point for querying the previous releases (format yyyy-mm-ddThh:mm:ss)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Get data from INSEE series idbanks.
+The user can disable the download display in the console with the following command :
+Sys.setenv(INSEE_download_verbose = "FALSE")
+</p>
+
+
+<h3>Value</h3>
+
+<p>a tibble with the data
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+#example 1 : import price index of industrial products and turnover index : manufacture of wood
+data = get_insee_idbank("001558315", "010540726")
+
+#example 2 : unemployment data
+
+library(magrittr)
+library(dplyr)
+library(ggplot2)
+
+df_idbank_list_selected =
+  get_idbank_list("CHOMAGE-TRIM-NATIONAL") %&gt;%  #unemployment dataset
+  filter(SEXE == 0) %&gt;% #men and women
+  add_insee_title()
+
+idbank_list_selected = df_idbank_list_selected %&gt;% pull(idbank)
+
+unem = get_insee_idbank(idbank_list_selected)
+
+#example 3 : French GDP growth rate
+
+df_idbank_list_selected =
+  get_idbank_list("CNT-2014-PIB-EQB-RF") %&gt;%  # Gross domestic product balance
+  filter(FREQ == "T") %&gt;% #quarter
+  filter(OPERATION == "PIB") %&gt;% #GDP
+  filter(NATURE == "TAUX") %&gt;% #rate
+  filter(CORRECTION == "CVS-CJO") #SA-WDA, seasonally adjusted, working day adjusted
+
+idbank = df_idbank_list_selected %&gt;% pull(idbank)
+
+data = get_insee_idbank(idbank) %&gt;%
+  add_insee_metadata()
+
+#plot
+ggplot(data, aes(x = DATE, y = OBS_VALUE)) +
+geom_col() +
+ggtitle("French GDP growth rate, quarter-on-quarter, sa-wda") +
+labs(subtitle = sprintf("Last updated : %s", data$TIME_PERIOD[1]))
+
+
+</code></pre>
+
+
+</div>

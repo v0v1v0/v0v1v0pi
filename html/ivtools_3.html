@@ -1,0 +1,172 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>estfun</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Computes the estimating function sum for <code>"ivmod"</code>  
+objects, fitted with <code>estmethod="g"</code>.
+</h2>
+
+<h3>Description</h3>
+
+<p><code>estfun</code> computes the estimating function <code class="reqn">H(\psi)</code>
+for a <code>"ivmod"</code> object, fitted with <code>estmethod="g"</code>, 
+for a range of values of <code class="reqn">\psi</code>. The <code>estfun</code> is not implemented 
+for <code>"ivah"</code> objects, since G-estimation in additive hazards models
+is based on a recursive estimation technique, and not standard estimating equations.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">estfun(object, lower, upper, step)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>an object of class <code>"ivmod"</code>, fitted with <code>estmethod="g"</code>.   
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower</code></td>
+<td>
+
+<p>an optional vector of lower values for <code class="reqn">\psi</code>. Defaults to <code class="reqn">\psi-0.5</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper</code></td>
+<td>
+
+<p>an optional vector of upper values for <code class="reqn">\psi</code>. Defaults to <code class="reqn">\psi+0.5</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>step</code></td>
+<td>
+
+<p>an optional vector of steps between <code>lower</code> and <code>upper</code>. Defaults to 0.01
+for each element of <code class="reqn">\psi</code>. 
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+ 
+<p><code>estfun</code> may be useful for visual inspection of the estimating 
+function, to make sure that a solution to the estimating equation 
+</p>
+<p style="text-align: center;"><code class="reqn">H(\psi)=0</code>
+</p>
+
+<p>was found, see ‘Examples’. For the <code class="reqn">i</code>:th element of <code class="reqn">\psi</code>, the estimating
+function sum is computed for a range of values within (<code>lower[i]</code>, <code>upper[i]</code>), at the 
+G-estimate of the remaining elements of <code class="reqn">\psi</code>.  
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>"estfun"</code> is a list containing 
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>f</code></td>
+<td>
+
+<p>a named list of matricies; one matrix for each element of <code class="reqn">\psi</code>. 
+The first column of the <code class="reqn">i</code>:th matrix contains the values for the <code class="reqn">i</code>:th
+element of <code class="reqn">\psi</code> at which the estimating function sum is computed, the 
+second column contains the values of the estimating function sum. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>est</code></td>
+<td>
+
+<p>the G-estimate of <code class="reqn">\psi</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Arvid Sjolander. 
+</p>
+
+
+<h3>References</h3>
+
+<p>Burgess S, Granell R, Palmer TM, Sterne JA, Didelez V. (2014). 
+Lack of identification in semiparametric instrumental variable models with 
+binary outcomes. <em>American Journal of Epidemiology</em> <b>180</b>(1), 111-119.
+</p>
+<p>Vansteelandt S., Bowden J., Babanezhad M., Goetghebeur E. (2011). 
+On instrumental variables estimation of causal odds ratios.
+<em>Statistical Science</em> <b>26</b>(3), 403-422.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+set.seed(9)
+
+##Note: the parameter values in the examples below are chosen to make 
+##Y0 independent of Z, which is necessary for Z to be a valid instrument.
+
+n &lt;- 1000
+psi0 &lt;- 0.5
+psi1 &lt;- 0.2
+
+##---Example 1: linear model and interaction between X and L---
+
+L &lt;- rnorm(n)
+Z &lt;- rnorm(n, mean=L)
+X &lt;- rnorm(n, mean=Z)
+m0 &lt;- X-Z+L 
+Y &lt;- rnorm(n, mean=psi0*X+psi1*X*L+m0)
+data &lt;- data.frame(L, Z, X, Y)
+
+#G-estimation
+fitZ.L &lt;- glm(formula=Z~L, data=data)
+fitIV &lt;- ivglm(estmethod="g", X="X", Y="Y", fitZ.L=fitZ.L, data=data, 
+  formula=~L, link="identity")
+summary(fitIV)
+H &lt;- estfun(fitIV)
+plot(H)
+
+##---Example 2: logistic model and no covariates--- 
+
+Z &lt;- rbinom(n, 1, 0.5)
+X &lt;- rbinom(n, 1, 0.7*Z+0.2*(1-Z)) 
+m0 &lt;- plogis(1+0.8*X-0.39*Z)
+Y &lt;- rbinom(n, 1, plogis(psi0*X+log(m0/(1-m0)))) 
+data &lt;- data.frame(Z, X, Y)
+
+#G-estimation
+fitZ.L &lt;- glm(formula=Z~1, data=data)
+fitY.LZX &lt;- glm(formula=Y~X+Z+X*Z, family="binomial", data=data)
+fitIV &lt;- ivglm(estmethod="g", X="X", fitZ.L=fitZ.L, fitY.LZX=fitY.LZX, 
+  data=data, link="logit")
+summary(fitIV)
+H &lt;- estfun(fitIV)
+plot(H)
+
+</code></pre>
+
+
+</div>

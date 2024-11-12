@@ -1,0 +1,142 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>scatter_performance</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Performance Scatter Plot of Two Configurations</h2>
+
+<h3>Description</h3>
+
+<p>Create a scatter plot that displays the performance of two configurations on
+a provided experiment matrix. Each point in the plot represents an instance
+and the color of the points indicates if one configuration is better than
+the other.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">scatter_performance(
+  experiments,
+  x_id,
+  y_id,
+  rpd = TRUE,
+  filename = NULL,
+  interactive = base::interactive(),
+  instance_names = NULL
+)
+
+scatter_training(irace_results, ...)
+
+scatter_test(irace_results, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>experiments</code></td>
+<td>
+<p>Experiment matrix obtained from irace training or testing data. Configurations
+in columns and instances in rows. As in irace, column names (configurations ids)
+should be characters. Row names will be used as instance names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x_id, y_id</code></td>
+<td>
+<p>Configuration IDs for x-axis and y-axis, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rpd</code></td>
+<td>
+<p>(<code>logical(1)</code>) TRUE to plot performance as the relative
+percentage deviation to best results per instance, FALSE to plot raw
+performance.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filename</code></td>
+<td>
+<p>(<code>character(1)</code>) File name to save the plot, for example <code>"~/path/example/filename.png"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interactive</code></td>
+<td>
+<p>(<code>logical(1)</code>) TRUE if the report may use interactive features (using <code>plotly::ggplotly()</code>, <code>plotly::plot_ly()</code> and <code>DT::renderDataTable()</code>) or FALSE if such features must be disabled. Defaults to the value returned by <code>interactive()</code>,</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>instance_names</code></td>
+<td>
+<p>Either a character vector of instance names in the
+same order as <code>rownames(experiments)</code> or a function that takes
+<code>rownames(experiments)</code> as input.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>irace_results</code></td>
+<td>
+<p>The data generated when loading the <code>.Rdata</code> file created by <code>irace</code> (or the filename of that file).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments passed to <code>scatter_performance()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The performance matrix is assumed to be provided in the format of the irace
+experiment matrix thus, NA values are allowed. Consequently the number of
+evaluations can differ between configurations due to the elimination process
+applied by irace. This plot only shows performance data only for instances
+in which both configurations are executed.
+</p>
+<p><code>scatter_training()</code> compares the performance of two configurations on the
+training instances. The performance data is obtained from the evaluations
+performed by irace during the execution process.
+</p>
+<p><code>scatter_test()</code> compares the performance of two configurations on the test
+instances. The performance data is obtained from the test evaluations
+performed by irace.  Note that testing is not enabled by default in irace
+and should be enabled in the scenario setup. Moreover, configuration ids
+provided in <code>x_id</code> and <code>y_id</code> should belong to elite configuration set
+evaluated in the test (see the irace package user guide for more details).
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>ggplot2::ggplot()</code> object
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">iraceResults &lt;- read_logfile(system.file(package="irace", "exdata",
+                                         "irace-acotsp.Rdata", mustWork = TRUE))
+best_id &lt;- iraceResults$iterationElites[length(iraceResults$iterationElites)]
+scatter_performance(iraceResults$experiments, x_id = 1, y_id = best_id)
+iraceResults &lt;- read_logfile(system.file(package="iraceplot", "exdata",
+                                         "guide-example.Rdata", mustWork = TRUE))
+scatter_training(iraceResults, x_id = 806, y_id = 809)
+ 
+scatter_training(iraceResults, x_id = 806, y_id = 809, rpd = FALSE)
+
+iraceResults &lt;- read_logfile(system.file(package="iraceplot", "exdata",
+                                         "guide-example.Rdata", mustWork = TRUE))
+scatter_test(iraceResults, x_id = 92, y_id = 119)
+ 
+scatter_test(iraceResults, x_id = 92, y_id = 119, rpd=FALSE)
+
+</code></pre>
+
+
+</div>

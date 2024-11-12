@@ -1,0 +1,208 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>assume</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Define a theoretical distribution</h2>
+
+<h3>Description</h3>
+
+<p>This function allows the user to define a null distribution based on
+theoretical methods. In many infer pipelines, <code>assume()</code> can be
+used in place of <code>generate()</code> and <code>calculate()</code> to create a null
+distribution. Rather than outputting a data frame containing a
+distribution of test statistics calculated from resamples of the observed
+data, <code>assume()</code> outputs a more abstract type of object just containing
+the distributional details supplied in the <code>distribution</code> and <code>df</code> arguments.
+However, <code>assume()</code> output can be passed to <code>visualize()</code>, <code>get_p_value()</code>,
+and <code>get_confidence_interval()</code> in the same way that simulation-based
+distributions can.
+</p>
+<p>To define a theoretical null distribution (for use in hypothesis testing),
+be sure to provide a null hypothesis via <code>hypothesize()</code>. To define a
+theoretical sampling distribution (for use in confidence intervals),
+provide the output of <code>specify()</code>. Sampling distributions (only
+implemented for <code>t</code> and <code>z</code>) lie on the scale of the data, and will be
+recentered and rescaled to match the corresponding <code>stat</code> given in
+<code>calculate()</code> to calculate the observed statistic.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">assume(x, distribution, df = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>The output of <code>specify()</code> or <code>hypothesize()</code>, giving the
+observed data, variable(s) of interest, and (optionally) null hypothesis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distribution</code></td>
+<td>
+<p>The distribution in question, as a string. One of
+<code>"F"</code>, <code>"Chisq"</code>, <code>"t"</code>, or <code>"z"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>Optional. The degrees of freedom parameter(s) for the <code>distribution</code>
+supplied, as a numeric vector. For <code>distribution = "F"</code>, this should have
+length two (e.g. <code>c(10, 3)</code>). For <code>distribution = "Chisq"</code> or
+<code>distribution = "t"</code>, this should have length one. For
+<code>distribution = "z"</code>, this argument is not required. The package
+will supply a message if the supplied <code>df</code> argument is different from
+recognized values. See the Details section below for more information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Currently ignored.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Note that the assumption being expressed here, for use in theory-based
+inference, only extends to <em>distributional</em> assumptions: the null
+distribution in question and its parameters. Statistical inference with
+infer, whether carried out via simulation (i.e. based on pipelines
+using <code>generate()</code> and <code>calculate()</code>) or theory (i.e. with <code>assume()</code>),
+always involves the condition that observations are independent of
+each other.
+</p>
+<p><code>infer</code> only supports theoretical tests on one or two means via the
+<code>t</code> distribution and one or two proportions via the <code>z</code>.
+</p>
+<p>For tests comparing two means, if <code>n1</code> is the group size for one level of
+the explanatory variable, and <code>n2</code> is that for the other level, <code>infer</code>
+will recognize the following degrees of freedom (<code>df</code>) arguments:
+</p>
+
+<ul>
+<li> <p><code>min(n1 - 1, n2 - 1)</code>
+</p>
+</li>
+<li> <p><code>n1 + n2 - 2</code>
+</p>
+</li>
+<li>
+<p> The <code>"parameter"</code> entry of the analogous <code>stats::t.test()</code> call
+</p>
+</li>
+<li>
+<p> The <code>"parameter"</code> entry of the analogous <code>stats::t.test()</code> call with <code>var.equal = TRUE</code>
+</p>
+</li>
+</ul>
+<p>By default, the package will use the <code>"parameter"</code> entry of the analogous
+<code>stats::t.test()</code> call with <code>var.equal = FALSE</code> (the default).
+</p>
+
+
+<h3>Value</h3>
+
+<p>An infer theoretical distribution that can be passed to helpers
+like <code>visualize()</code>, <code>get_p_value()</code>, and <code>get_confidence_interval()</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># construct theoretical distributions ---------------------------------
+
+# F distribution
+# with the `partyid` explanatory variable
+gss %&gt;%
+  specify(age ~ partyid) %&gt;%
+  assume(distribution = "F")
+
+# Chi-squared goodness of fit distribution
+# on the `finrela` variable
+gss %&gt;%
+  specify(response = finrela) %&gt;%
+  hypothesize(null = "point",
+              p = c("far below average" = 1/6,
+                    "below average" = 1/6,
+                    "average" = 1/6,
+                    "above average" = 1/6,
+                    "far above average" = 1/6,
+                    "DK" = 1/6)) %&gt;%
+  assume("Chisq")
+
+# Chi-squared test of independence
+# on the `finrela` and `sex` variables
+gss %&gt;%
+  specify(formula = finrela ~ sex) %&gt;%
+  assume(distribution = "Chisq")
+
+# T distribution
+gss %&gt;%
+  specify(age ~ college) %&gt;%
+  assume("t")
+
+# Z distribution
+gss %&gt;%
+  specify(response = sex, success = "female") %&gt;%
+  assume("z")
+
+## Not run: 
+# each of these distributions can be passed to infer helper
+# functions alongside observed statistics!
+
+# for example, a 1-sample t-test -------------------------------------
+
+# calculate the observed statistic
+obs_stat &lt;- gss %&gt;%
+  specify(response = hours) %&gt;%
+  hypothesize(null = "point", mu = 40) %&gt;%
+  calculate(stat = "t")
+
+# construct a null distribution
+null_dist &lt;- gss %&gt;%
+  specify(response = hours) %&gt;%
+  assume("t")
+
+# juxtapose them visually
+visualize(null_dist) +
+  shade_p_value(obs_stat, direction = "both")
+
+# calculate a p-value
+get_p_value(null_dist, obs_stat, direction = "both")
+
+# or, an F test ------------------------------------------------------
+
+# calculate the observed statistic
+obs_stat &lt;- gss %&gt;%
+  specify(age ~ partyid) %&gt;%
+  hypothesize(null = "independence") %&gt;%
+  calculate(stat = "F")
+
+# construct a null distribution
+null_dist &lt;- gss %&gt;%
+  specify(age ~ partyid) %&gt;%
+  assume(distribution = "F")
+
+# juxtapose them visually
+visualize(null_dist) +
+  shade_p_value(obs_stat, direction = "both")
+
+# calculate a p-value
+get_p_value(null_dist, obs_stat, direction = "both")
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

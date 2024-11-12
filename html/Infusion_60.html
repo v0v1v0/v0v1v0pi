@@ -1,0 +1,269 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>declare_latent</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Modeling and predicting latent variables
+</h2>
+
+<h3>Description</h3>
+
+<p>Latent variables are unobserved variables which, for given model parameters, are random. Since they are unobserved, they cannot appear in data nor used to infer parameters. However, they can be predicted if their joint distribution with the data is learned from the reference table. Thus for inference about latent variables, these should be returned along summary statistics by the simulation function generating the samples for the reference table, but they should be declared as such so that later inference steps can distinguish them from both parameters and summary statistics. The <code>declare_latent</code> function is used for that purpose. 
+</p>
+<p>The <code>pplatent</code> function can be used to point-predict latent values, by their inferred mean or median given the (projected) summary statistics and fitted parameter values. 
+</p>
+<p>The <code>latint</code> function provides prediction intervals for the latent variable, accounting for uncertainty in parameter estimates, using a bootstrap method (see Details).     
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">declare_latent(reftable, latentVars)
+pplatent(object, type="mean",
+         newDP=NULL,
+         sumstats= t(get_from(object,"stat.obs")), 
+         pars=t(object$MSL$MSLE), 
+         size=1000L, ...)
+latint(object, nsim=199L, levels=c(0.025,0.975), 
+       sumstats= t(get_from(object,"stat.obs")), 
+       Simulate, control.Simulate=get_from(object,"control.Simulate"), 
+       bootSamples=NULL,
+       ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>reftable</code></td>
+<td>
+
+<p>A reference table of simulation as returned by <code>add_reftable</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>latentVars</code></td>
+<td>
+
+<p>A vector of names of variables to be treated as latent variables.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>An object of class <code>SLik_j</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+
+<p>Character: the only handled non-default value is <code>"median"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newDP, sumstats, pars</code></td>
+<td>
+
+<p>Matrices of data and/or (<em>projected</em>) summary statistics, with one column for each variable. <code>newDP</code> should contain both, and if NULL, is constructed from the next two arguments, <code>sumstats</code> holding statistics and <code>pars</code> holding parameters.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>levels</code></td>
+<td>
+
+<p>Numeric vector: one-sided confidence levels (cumulative probabilities at which quantiles of the predictive distribution will be returned).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+
+<p>Integer: number of bootstrap replicates.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size</code></td>
+<td>
+
+<p>Integer: number of draws for estimating the median.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Simulate</code></td>
+<td>
+
+<p>May be used to provide the simulation function if it is not stored in the <code>object</code>; usage is then as for <code>add_reftable</code>. If it is set to NULL, bootstrap samples will instead be drawn from the gaussian mixture fit, but this shoudl be avoided for good performance. When the argument is missing (default), the <code>Simulate</code> information is sought in the <code>object</code>, and if absent, the gaussian mixture fit is used with a warning. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control.Simulate</code></td>
+<td>
+
+<p>A list of arguments of the <code>Simulate</code> function (see<code>add_simulation</code>). The default value should be used unless you understand enough of its structure to modify it wisely (e.g., it may contain the path of an executable used to perform the fit on one machine and a different path may be specified to compute the prediction interval on another machine).  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bootSamples</code></td>
+<td>
+
+<p>A data frame. The bootstrap samples may be provided by this argument, otherwise they will be automatically simulated by the function provided by the <code>Simulate</code> argument.  The boot samples may for example be obtained by calling <code>simulate(</code>&lt;<em>Slik_j object</em>&gt;<code>, SGP=TRUE)</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>For <code>pplatent</code>: Not currently used. For <code>latint</code>: may be used to pass arguments <code>verbose</code>, <code>nb_cores</code>, <code>packages</code>, <code>env</code>, <code>control.Simulate</code>, <code>cluster_args</code>, and <code>cl_seed</code>, with usage as described for <code>add_reftable</code>, to the bootstrap sample simulation step. Parallelisation controls will also be used for the other steps of the bootstrap procedure.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>latint</code> function aims to provide intervals for the latent variable <code class="reqn">V</code>, with controlled coverage for given parameter values. The parametric bootstrap method of Lawless &amp; Fredette (2005) can be adapted to the present problem. First, new data <code class="reqn">D^*</code> and new latent values <code class="reqn">V^*</code> are jointly simulated, given the summary-ML estimates (this uses the sample-generating process simulator, but these simulations are not added to the reference table). Second, their original method requires the evaluation for each new <code class="reqn">(D^*,V^*)</code> of <code class="reqn">F_V(V=V^*|D^*;\theta(D^*))</code>, the value of the cumulative distribution function <code class="reqn">F_V</code> of <code class="reqn">V</code> evaluated at <code class="reqn">V=V^*</code> values, given <code class="reqn">D^*</code> and given new parameter estimates <code class="reqn">\theta(D^*)</code>. 
+It also requires the quantile function of <code class="reqn">V</code> for the original data and parameter estimates. <code>latint</code> uses the fit of the multivariate gaussian mixture model to the reference table, stored in the fit object, for fast parameter refitting and for fast estimation of these functions on each bootstrap sample <code class="reqn">(D^*,V^*)</code>. 
+</p>
+<p><code>latint(., levels=c(0.5))</code> will return the median of the predictive distribution, 
+conceptually distinct from the plug-in prediction by <code>pplatent(slik_j, type="median")</code>   
+</p>
+<p>Quantile computations in <code>pplatent</code> and <code>latint</code> are approximate and might be modified in some future version, but were sufficient to obtain reasonable results in simulations. 
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>declare_latent</code> returns the input <code>reftable</code> with modified attributes. <code>pplatent</code> returns a vector of predicted latent values.
+</p>
+<p><code>pplatent</code> returns a single numeric value or a vector.
+<code>latint</code> returns a list of matrices. Each matrix has with one column per element of <code>levels</code>, and one row per row of <code>sumstats</code>. There is one such matrix for each latent variable.  
+</p>
+
+
+<h3>References</h3>
+
+<p>Lawless J. F., Fredette M. (2005) Frequentist prediction intervals and predictive distributions. Biometrika 92: 529–542, &lt;doi:10.1093/biomet/92.3.529&gt;
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+  ##### A toy example motivated by some inference problem for genomic data #####
+  # A model with three parameters logNe, Vs and Es is fitted.
+  # Data from 100 loci are here summarized by three genome-wide summary statistics 
+  # (slogNe, sVs and sEs), and one locus-specific statistic that will provide 
+  # information about a locus-specific latent variable.
+  
+  ## Simulation function 
+  genomloc &lt;- function(logNe=parvec["logNe"],Es=parvec["Es"],Vs=parvec["Vs"], 
+                       latent=TRUE, # returns the latent value by default
+                       parvec) {
+    slogNe &lt;- rnorm(1,logNe, sd=0.3)
+    genom_s &lt;- rgamma(99, shape=Es/Vs,scale=Vs) # all loci except the focal one
+    sEs &lt;- mean(genom_s)
+    sVs &lt;- var(genom_s)
+    latentv &lt;- rgamma(1, shape=Es/Vs,scale=Vs) # locus-specific latent variable to predict
+    sloc &lt;- rnorm(1, mean=latentv-sEs,sd=latentv/3) # locus-specific statistic
+    resu &lt;- list(slogNe=slogNe,sEs=sEs,sVs=sVs, sloc=sloc)
+    if (latent) resu$latentv &lt;- latentv
+    unlist(resu)
+  } 
+  #
+  ## simulated data, standing for the actual data to be analyzed:  
+  set.seed(123)
+  Sobs &lt;- genomloc(logNe=4,Es=0.05, Vs=0.1,latent=FALSE) ## no latent value
+  #
+  workflow_design &lt;- get_workflow_design(npar=3L, n_proj_stats=4L, n_latent=1L)
+  parsp &lt;- init_reftable(lower=c(logNe=2,Es=0.001,Vs=0.001), 
+                         upper=c(logNe=6,Es=0.2,Vs=0.2),
+                         nUnique=workflow_design$init_reft_size)
+  simuls &lt;- add_reftable(Simulate=genomloc, parsTable=parsp)
+  
+  simuls &lt;- declare_latent(simuls,"latentv") 
+
+  ## Projections are not necessary here since the number of statistics is minimal,
+  # but will be discussed later.
+  { ############ Without projections
+    { ## Usual workflow for estimation: 
+      densv &lt;- infer_SLik_joint(simuls,stat.obs=Sobs)
+      slik_j &lt;- MSL(densv) ## find the maximum of the log-likelihood surface
+      slik_j &lt;- refine(slik_j,maxit=2,update_projectors=TRUE)
+      # plot1Dprof(slik_j) ## 1D profiles show parameter inference is OK
+    }
+    { ## inference about latent values:
+      pplatent(slik_j)
+      pplatent(slik_j, type="median")
+      latint(slik_j, nsim=999, levels=c(0.025,0.5,0.975))
+    }
+    { ## Assessing prediction of latent variable:
+      # Builds testing set:
+      test_simuls &lt;- t(replicate(1000, genomloc(logNe=4,Es=0.05, Vs=0.1)))
+      test_data &lt;- test_simuls[,-5]
+      # Point prediction:
+      pred &lt;- pplatent(slik_j, sumstats = test_data)
+      
+      plot(test_simuls[,"latentv"], pred); abline(0,1) # prediction vs. true latent values
+    }
+  }
+  
+  { ########## Beyond standard use of projections for estimation of parameter values, 
+    # projections can also be used when several individual-level statistics inform about 
+    # the latent variable, to reduce them to a single summary statistic.
+    # Projection will then be needed at the prediction step too.
+    
+    { # projection with latent variable as response:
+      platent &lt;- (project("latentv", data=simuls, stats=c("slogNe","sEs","sVs","sloc")))
+      # (This example only serves to show the syntax since no dimention reduction occurs)
+      
+      dprojectors &lt;- list(SLOC=platent,slogNe=NULL,sEs=NULL, sVs=NULL)
+      
+      # =&gt; As soon as one projection is used, The 'projectors' argument must include 
+      # all projectors used for the inference, whether for parameters or for latent variables. 
+      # NULL projectors should then be declared for raw statistics retained 
+      # in the projected reference table.
+      
+      # Apply projections on simulated statistics and 'data':
+      projSimuls &lt;- project(simuls,projectors=dprojectors,verbose=FALSE)
+      projSobs &lt;- project(Sobs,projectors=dprojectors)
+    }
+    
+    { ## Estimation: 
+      ddensv &lt;- infer_SLik_joint(projSimuls,stat.obs=projSobs)
+      dslik_j &lt;- MSL(ddensv) ## find the maximum of the log-likelihood surface
+      dslik_j &lt;- refine(dslik_j,maxit=2,update_projectors=TRUE)
+      # plot1Dprof(dslik_j)
+    }
+    
+    { ## Assessing prediction of latent variable: do not forget to project!
+      
+      test_simuls &lt;- t(replicate(1000, genomloc(logNe=4,Es=0.05, Vs=0.1)))
+      test_data &lt;- test_simuls[,-5] # removing column of latent variable
+      ptest_data &lt;- project(test_data,projectors=dprojectors,verbose=FALSE) # Here!
+      pred &lt;- pplatent(dslik_j, sumstats = ptest_data)
+      
+      plot(test_simuls[,"latentv"], pred); abline(0,1)
+    }
+  }
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

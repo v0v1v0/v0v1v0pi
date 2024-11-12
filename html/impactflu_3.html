@@ -1,0 +1,171 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>method1</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Analysis methods from Tokars (2018)</h2>
+
+<h3>Description</h3>
+
+<p>Method 1 was said to be as current. Method 3 was determined to be the least
+biased.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">method1(init_pop_size, vaccinations, cases, ve)
+
+method3(init_pop_size, vaccinations, cases, ve)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>init_pop_size</code></td>
+<td>
+<p>Integer initial population size</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vaccinations</code></td>
+<td>
+<p>Integer vector counts of vaccinations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cases</code></td>
+<td>
+<p>Integer vector counts of cases</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ve</code></td>
+<td>
+<p>Vector vaccine effectiveness. If length 1, assumed to not vary with
+time.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A tibble with the following columns (method-dependent):
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>cases</code></td>
+<td>
+<p>Observed cases</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vaccinations</code></td>
+<td>
+<p>Observed vaccinations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ve</code></td>
+<td>
+<p>Assumed vaccine effectiveness</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pvac</code></td>
+<td>
+<p>Proportion of the starting population vaccinated</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vc_lag</code></td>
+<td>
+<p>Vaccine coverage lagged</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pops</code></td>
+<td>
+<p>Susceptible population</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pflu</code></td>
+<td>
+<p>Infection risk</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>popn</code></td>
+<td>
+<p>Non-cases is absence of vaccination</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cases_novac</code></td>
+<td>
+<p>Cases in absence of vaccination</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>avert</code></td>
+<td>
+<p>Expected number of vaccinations</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Tokars JI, Rolfes MA, Foppa IM, Reed C. An evaluation and update
+of methods for estimating the number of influenza cases averted by
+vaccination in the United States. Vaccine. 2018;36(48):7331–7337.
+doi:10.1016/j.vaccine.2018.10.026
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(dplyr)
+
+# Simulate a population
+nsam &lt;- 1e6L
+ndays &lt;- 304L
+pop_tok &lt;- sim_reference(
+  init_pop_size = nsam,
+  vaccinations = generate_counts(nsam, ndays, 0.55, mean = 100, sd = 50),
+  cases_novac = generate_counts(nsam, ndays, 0.12, mean = 190, sd = 35),
+  ve = 0.48,
+  lag = 14,
+  deterministic = TRUE
+)
+
+# Summarise by month
+pop_tok_month &lt;- pop_tok %&gt;%
+  mutate(
+    datestamp = generate_dates(
+      timepoint, lubridate::ymd("2017-08-01"), "day"
+    ),
+    year = lubridate::year(datestamp),
+    month = lubridate::month(datestamp)
+ ) %&gt;%
+ group_by(year, month) %&gt;%
+ summarise(
+   vaccinations = sum(vaccinations), cases = sum(cases), ve = mean(ve)
+ ) %&gt;%
+ ungroup()
+
+# Estimate averted cases using the two different methods
+m1 &lt;- method1(
+  nsam, pop_tok_month$vaccinations, pop_tok_month$cases, pop_tok_month$ve
+)
+m3 &lt;- method3(
+  nsam, pop_tok_month$vaccinations, pop_tok_month$cases, pop_tok_month$ve
+)
+sum(m1$avert)
+sum(m3$avert)
+</code></pre>
+
+
+</div>

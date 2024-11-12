@@ -1,0 +1,151 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ablation</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Performs ablation between two configurations (from source to target).</h2>
+
+<h3>Description</h3>
+
+<p>Ablation is a method for analyzing the differences between two configurations.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ablation(
+  iraceResults,
+  src = 1L,
+  target = NULL,
+  ab.params = NULL,
+  type = c("full", "racing"),
+  n_instances = 1L,
+  seed = 1234567,
+  ablationLogFile = "log-ablation.Rdata",
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>iraceResults</code></td>
+<td>
+<p>(<code>list()</code>|<code>character(1)</code>) <code>iraceResults</code> object created by <span class="pkg">irace</span> and typically saved in the log file <code>irace.Rdata</code>. If a character string is given, then it is interpreted as the path to the log file from which the <code>iraceResults</code> object will be loaded.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>src, target</code></td>
+<td>
+<p>Source and target configuration IDs. By default, the first configuration ever evaluated (ID 1) is used as <code>src</code> and the best configuration found by irace is used as target.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ab.params</code></td>
+<td>
+<p>Specific parameter names to be used for the ablation. They must be in <code>parameters$names</code>. By default, use all parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Type of ablation to perform: <code>"full"</code> will execute each configuration on all <code>n_instances</code> to determine the best-performing one; <code>"racing"</code> will apply racing to find the best configurations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_instances</code></td>
+<td>
+<p>(<code>integer(1)</code>) Number of instances used in <code>"full"</code> ablation will be <code>n_instances * scenario$firstTest</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>(<code>integer(1)</code>) Integer value to use as seed for the random number generation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ablationLogFile</code></td>
+<td>
+<p>(<code>character(1)</code>) Log file to save the ablation log. If <code>NULL</code>, the results are not saved to a file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments to override scenario settings, e.g., <code>debugLevel</code>, <code>parallel</code>, etc.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list containing the following elements:
+</p>
+
+<dl>
+<dt>configurations</dt>
+<dd>
+<p>Configurations tested in the ablation.</p>
+</dd>
+<dt>instances</dt>
+<dd>
+<p>A matrix with the instances used in the experiments. First column has the
+instances IDs from <code>iraceResults$scenario$instances</code>, second column the seed assigned to the instance.</p>
+</dd>
+<dt>experiments</dt>
+<dd>
+<p>A matrix with the results of the experiments (columns are configurations, rows are instances).</p>
+</dd>
+<dt>scenario</dt>
+<dd>
+<p>Scenario object with the settings used for the experiments.</p>
+</dd>
+<dt>trajectory</dt>
+<dd>
+<p>IDs of the best configurations at each step of the ablation.</p>
+</dd>
+<dt>best</dt>
+<dd>
+<p>Best configuration found in the experiments.</p>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p>Leslie Pérez Cáceres and Manuel López-Ibáñez
+</p>
+
+
+<h3>References</h3>
+
+<p>C. Fawcett and H. H. Hoos. Analysing differences between algorithm
+configurations through ablation. Journal of Heuristics, 22(4):431–458, 2016.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plotAblation()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+logfile &lt;- system.file(package="irace", "exdata", "sann.rda")
+# Execute ablation between the first and the best configuration found by irace.
+ablog &lt;- ablation(logfile, ablationLogFile = NULL)
+plotAblation(ablog)
+# Execute ablation between two selected configurations, and selecting only a
+# subset of parameters, directly reading the setup from the irace log file.
+ablog &lt;- ablation(logfile, src = 1, target = 10,
+                  ab.params = c("temp"), ablationLogFile = NULL)
+plotAblation(ablog)
+
+
+</code></pre>
+
+
+</div>

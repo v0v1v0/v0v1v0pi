@@ -1,0 +1,114 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>DCOffsetTimesMetric</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>DC Offset Detection</h2>
+
+<h3>Description</h3>
+
+<p>The DCOffsetTimesMetric() function returns times where a shift in the signal mean is detected.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">DCOffsetTimesMetric(st, windowSecs, incrementSecs, threshold)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>st</code></td>
+<td>
+<p>a <code>Stream</code> object containing a seismic signal</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>windowSecs</code></td>
+<td>
+<p>chunk size (secs) used in DCOffset calculations (default=<code>1800</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>incrementSecs</code></td>
+<td>
+<p>increment (secs) for starttime of sequential chunks (default=<code>windowSecs/2</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>threshold used in the detection metric (default=<code>0.9</code>)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Conceptually, this algorithm asserts:  If the difference in means between sequential chunks of seismic signal
+is greater than the typical std dev of a chunk then this marks a DC offset shift.
+</p>
+
+<p>Details of the algorithm are as follows
+</p>
+<pre>
+# Merge all traces in the time period, filling gaps with missing values
+# Break up the signal into windowSecs chunks spaced incrementSecs apart
+# For each chunk calculate:
+#     signal mean, signal standard deviation
+# Resulting mean and std dev arrays are of length 47 for 24 hours of signal
+# Metric = abs(lagged difference of chunk means) / mean(chunk std devs)
+# DC offset = times when Metric &gt; threshold
+</pre>
+
+
+<h3>Value</h3>
+
+<p>A list with a single <code>MultipleTimeValueMetric</code> object is returned.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The denominator of this metric was tested with both <code>mean(chunk std devs)</code> and with
+<code>median(chunk std devs)</code> to identify a "typical" value for the chunk standard deviation.
+It was found that using <code>median</code> resulted false offset detects whenever there was
+a large seismic signal in an otherwise lo-noise signal.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+# Get a signal with a DC offset problem
+starttime &lt;- as.POSIXct("2012-10-26",tz="GMT")
+endtime &lt;- starttime + 2*24*3600
+st &lt;- getDataselect(iris,"IU","TARA","00","BHZ",starttime,endtime)
+
+# Calculate the metric
+metricList &lt;- DCOffsetTimesMetric(st)
+
+# Extract values from the first element of the list
+offsetTimes &lt;- metricList[[1]]@values
+
+# Plot the signal and mark locations where a DC offset was detected
+plot(st)
+abline(v=offsetTimes,col='red')
+
+## End(Not run)
+</code></pre>
+
+
+</div>

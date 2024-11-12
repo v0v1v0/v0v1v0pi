@@ -1,0 +1,203 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>input_eval</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Obtain component inputs</h2>
+
+<h3>Description</h3>
+
+<p>Obtain component inputs
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">input_eval(...)
+
+## S3 method for class 'component'
+input_eval(component, data, ...)
+
+## S3 method for class 'component_list'
+input_eval(components, data, ...)
+
+## S3 method for class 'bru_input'
+input_eval(input, data, env = NULL, null.on.fail = FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Unused.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>component</code></td>
+<td>
+<p>A component.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A <code>data.frame</code>, <code>tibble</code>, <code>sf</code>, <code>list</code>, or <code style="white-space: pre;">⁠Spatial*⁠</code> object of
+covariates and/or point locations.
+If <code>NULL</code>, return the component's map.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An list of mapper input values, formatted for the full component mapper
+(of type <code>bru_mapper_pipe</code>)
+</p>
+
+
+<h3>Methods (by class)</h3>
+
+
+<ul><li> <p><code>input_eval(bru_input)</code>: Attempts to evaluate a component input (e.g. <code>main</code>,
+<code>group</code>, <code>replicate</code>, or <code>weight</code>), and process the results:
+</p>
+
+<ol>
+<li>
+<p> If <code>eval()</code> failed, return NULL or map everything to 1
+(see the <code>null.on.fail</code> argument). This should normally not
+happen, unless the component use logic is incorrect,
+(e.g. via <code>include</code>/<code>exclude</code>)
+leading to missing columns for a certain likelihood in a
+multi-<code>like()</code> model.
+</p>
+</li>
+<li>
+<p> If we obtain a function, apply the function to the data object
+</p>
+</li>
+<li>
+<p> If we obtain an object supported by <code>eval_spatial()</code>, extract the values
+of that data frame at the point locations
+</p>
+</li>
+<li>
+<p> Else we obtain a vector and return as-is. This happens when input
+references a column of the data points, or some other complete expression
+</p>
+</li>
+</ol>
+</li></ul>
+<h3>Simple covariates and the map parameter</h3>
+
+<p>It is not unusual for a random effect act on a transformation of a covariate. In other frameworks this
+would mean that the transformed covariate would have to be calculated in advance and added to the
+data frame that is usually provided via the <code>data</code> parameter. inlabru provides the option to do
+this transformation automatically. For instance, one might be interested in the effect of a covariate
+<code class="reqn">x^2</code>. In inla and other frameworks this would require to add a column <code>xsquared</code> to the
+input data frame and use the formula
+</p>
+<ul><li>
+<p><code>formula = y ~ f(xsquared, model = "linear")</code>,</p>
+</li></ul>
+<p>In inlabru this can be achieved in several ways of using the <code>main</code> parameter
+(<code>map</code> in version 2.1.13 and earlier), which does not need to be named.
+</p>
+
+<ul>
+<li>
+<p><code>components = y ~ psi(main = x^2, model = "linear")</code>
+</p>
+</li>
+<li>
+<p><code>components = y ~ psi(x^2, model = "linear")</code>
+</p>
+</li>
+<li>
+<p><code>components = y ~ psi(mySquareFun(x), model = "linear")</code>,
+</p>
+</li>
+<li>
+<p><code>components = y ~ psi(myOtherSquareFun, model = "linear")</code>,
+</p>
+</li>
+</ul>
+<p>In the first example inlabru will interpret the map parameter as an expression to be evaluated within
+the data provided. Since <code class="reqn">x</code> is a known covariate it will know how to calculate it. The second
+example is an expression as well but it uses a function called <code>mySquareFun</code>. This function is
+defined by user but has to be accessible within the work space when setting up the components.
+The third example provides the function <code>myOtherSquareFun</code>. In this case,
+inlabru will call the function as <code>myOtherSquareFun(.data.)</code>, where <code>.data.</code>
+is the data provided via the <code>like()</code> <code>data</code> parameter.
+The function needs to know what parts of the data to use to construct the
+needed output. For example,
+</p>
+<div class="sourceCode"><pre>myOtherSquareFun &lt;- function(data) {
+  data[ ,"x"]^2
+}
+</pre></div>
+
+
+<h3>Spatial Covariates</h3>
+
+<p>When fitting spatial models it is common to work with covariates that depend on space, e.g. sea
+surface temperature or elevation. Although it is straightforward to add this data to the input
+data frame or write a covariate function like in the previous section there is an even more
+convenient way in inlabru. Spatial covariates are often stored as <code>SpatialPixelsDataFrame</code>,
+<code>SpatialPixelsDataFrame</code> or <code>RasterLayer</code> objects. These can be provided directly via
+the input expressions if they are supported by <code>eval_spatial()</code>, and
+the <code>like()</code> data is an <code>sf</code> or <code>SpatialPointsDataFrame</code> object.
+<code>inlabru</code> will then automatically
+evaluate and/or interpolate the covariate at your data locations when using code like
+</p>
+<div class="sourceCode"><pre>components = y ~ psi(mySpatialPixels, model = "linear")
+</pre></div>
+<p>For more precise control, use the the <code>layer</code> and <code>selector</code> arguments (see <code>component()</code>),
+or call <code>eval_spatial()</code> directly, e.g.:
+</p>
+<div class="sourceCode"><pre>components = y ~ psi(eval_spatial(mySpatialPixels, where = .data.), model = "linear")
+</pre></div>
+
+
+<h3>Coordinates</h3>
+
+<p>A common spatial modelling component when using inla are SPDE models. An important feature of
+inlabru is that it will automatically calculate the so called A-matrix (a component model matrix)
+which maps SPDE
+values at the mesh vertices to values at the data locations. For this purpose, the input
+can be set to <code>coordinates</code>, which is the <code>sp</code> package function that extracts point
+coordinates from the <code>SpatialPointsDataFrame</code> that was provided as input to <code>like()</code>. The code for
+this would look as follows:
+</p>
+<div class="sourceCode"><pre>components = y ~ field(coordinates, model = inla.spde2.matern(...))
+</pre></div>
+<p>Since <code>coordinates</code> is a function from the <code>sp</code> package, this results in
+evaluation of <code>sp::coordinates(.data.)</code>, which loses any CRS information
+from the data object.
+</p>
+<p>For <code>sf</code> data with a geometry column (by default named <code>geometry</code>), use
+</p>
+<div class="sourceCode"><pre>components = y ~ field(geometry, model = inla.spde2.matern(...))
+</pre></div>
+<p>Since the CRS information is part of the geometry column of the <code>sf</code> object,
+this retains CRS information, so this is more robust, and allows the model
+to be built on a different CRS than the observation data.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Fabian E. Bachl <a href="mailto:bachlfab@gmail.com">bachlfab@gmail.com</a>, Finn Lindgren <a href="mailto:finn.lindgren@gmail.com">finn.lindgren@gmail.com</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>component()</code>
+</p>
+
+
+</div>

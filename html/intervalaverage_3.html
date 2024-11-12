@@ -1,0 +1,181 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>intervalintersect</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Intersect intervals within groups</h2>
+
+<h3>Description</h3>
+
+<p>Given two tables each containing a set of intervals, find all interval intersections within groups.
+Returns a data.table containing all columns from both tables.
+One use of this function is to take a table  containing an address history
+(a table containing the intervals when study participants lived at past addresses)
+and join it to an exposure history table (a complete set of exposure predictions
+for each address, where the exposures are stored as the average value over a
+set of intervals) returning the set of
+exposure intervals at addresses clipped to exactly when the participant lived at that address.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">intervalintersect(
+  x,
+  y,
+  interval_vars,
+  group_vars = NULL,
+  interval_vars_out = c("start", "end"),
+  verbose = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A data.table with two columns defining closed intervals (see also interval_vars parameter)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>A data.table with two columns defining closed intervals (see also interval_vars parameter)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interval_vars</code></td>
+<td>
+<p>Either a length-2 character vector denoting column names in both x and y or a named
+length-2 character vector where the names are column names in x and the values are column names in y.
+These column names specify columns in x and y that define
+closed (inclusive) starting and ending intervals. The column name
+specifying the lower-bound column must be specified first.
+these columns in x and y must all be of the same class and either be integer or IDate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group_vars</code></td>
+<td>
+<p>NULL, or either a character vector denoting the column name(s) in x and y,
+or a named character vector where the name is the column name in x and the value is the column name in y.
+This/these column(s) serve as an additional keying variable in the join (ie in addition to the interval join)
+such that intervals in x will only be joined to overlapping in intervals in y where the group_vars values are the same.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interval_vars_out</code></td>
+<td>
+<p>The column names of the interval columns in the return data.table.
+By default the return table will contain columns <code>c("start","end")</code>.
+If your input tables already contain these columns,
+you need to either specify <code>interval_vars_out</code> to be non-conflicting names with columns in x and y.
+Or you rename columns in x and y to not contain columns named <code>c("start","end")</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Prints additional information about the function processing.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>All intervals are treated as closed (ie inclusive of the start and end values in the columns
+specified by interval_vars)
+</p>
+<p>x and y are not copied but rather passed by reference to function internals
+but the order of these data.tables is restored on function completion or error,
+</p>
+<p>Technically speaking this is just an inner cartesian join where the last two join variables are
+doing a non-equi join for partial overlaps. Then each interval intersect is calculated using max and min.
+</p>
+<p>If there are columns with the same names in both x and y (including interval_vars
+but excepting group_vars), the return value will still return both columns. The column in y
+will be names as it was originally and the column in x will be prepended with the letter i followed with a dot:
+<code>i.</code> <br></p>
+<p>Note that the function returns the same result if you switch x and y
+(with the exception of switched column names in the case of column name conflicts as just discussed)
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data.table with columns <code>interval_vars_out</code> which denote the start and
+stop period for each interval. This return table also contains columns in x and y. See details
+for how naming conflicts are dealt with.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>is.overlapping</code> To test if a table contains overlapping intervals within values of <code>group_vars</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(42)
+y &lt;- data.table(addr_id=c(1,2,2,3,5),
+ppt_id=c(1,1,1,2,2),
+addr_start=c(1L,10L,12L,1L,1L),
+addr_end=c(9L,11L,14L,17L,10L))
+x &lt;- data.table(addr_id=rep(1:4,each=3),
+exposure_start=rep(c(1L,8L,15L),times=4),
+exposure_end=rep(c(7L,14L,21L),times=4),
+exposure_value=c(rnorm(12))
+)
+intervalintersect(x,y,
+interval_vars=c(exposure_start="addr_start",exposure_end="addr_end"),
+"addr_id")
+y2 &lt;- data.table(addr_id=c(1,2,2,2,3),
+ppt_id=c(1,1,1,1,2),
+addr_start=c(1L,2L,3L,4L,1L),
+addr_end=c(9L,12L,13L,8L,10L))
+
+#intervalintersect will still work when there are overlapping intervals within a table:
+is.overlapping(y2,interval_vars =c("addr_start","addr_end") ,group_vars="addr_id")
+
+intervalintersect(x,y2,
+                 interval_vars=c(exposure_start="addr_start",exposure_end="addr_end"),
+"addr_id")
+
+
+x2 &lt;- data.table(addr_id=rep(1:4,each=3),
+exposure_start=rep(c(1L,7L,14L),times=4),
+                exposure_end=rep(c(7L,14L,21L),times=4),
+exposure_value=c(rnorm(12))
+)
+is.overlapping(x2,interval_vars =c("exposure_start","exposure_end") ,group_vars="addr_id")
+
+intervalintersect(x2,y2,
+interval_vars=c(exposure_start="addr_start",exposure_end="addr_end"),
+"addr_id")
+#however, it may be meaningful isolate intervals of partial-overlap within
+#each table and deal with them
+#prior to intersecting the tables together:
+
+x2z &lt;- isolateoverlaps(x2,interval_vars=c("exposure_start","exposure_end"),group_vars=c("addr_id"),
+interval_vars_out=c("exposure_start2","exposure_end2"))
+x2b &lt;- x2z[, list(exposure_value=mean(exposure_value)),
+ by=c("addr_id","exposure_start2","exposure_end2")]
+data.table::setnames(x2b, c("exposure_start2","exposure_end2"),c("exposure_start","exposure_end"))
+
+y2z &lt;- isolateoverlaps(y2,interval_vars=c("addr_start","addr_end"),group_vars=c("addr_id"),
+interval_vars_out = c("addr_start2","addr_end2"))
+y2b &lt;- unique(y2z[, list(addr_id, ppt_id,addr_start2,addr_end2)])
+data.table::setnames(y2b, c("addr_start2","addr_end2"), c("addr_start","addr_end"))
+
+intervalintersect(x2b,y2b,
+interval_vars=c(exposure_start="addr_start",exposure_end="addr_end"),
+"addr_id")
+
+</code></pre>
+
+
+</div>

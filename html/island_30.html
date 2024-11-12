@@ -1,0 +1,259 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>upgma_model_selection</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Model selection function based on a upgma grouping algorithm</h2>
+
+<h3>Description</h3>
+
+<p><code>upgma_model_selection</code> function conducts a model selection procedure intended to find an optimal
+partition that mimimize AIC values. Maximum likelihood estimation of model parameters
+(Colonization, Extinction) or (Colonization, Extinction, Detectability, P_0) is performed
+assuming either perfect detectability or imperfect detectability, respectively. In the latter case,
+the input data frame should contain multiple transects per sampling time. This function can handle
+missing data defining a heterogeneous sampling structure across the rows of the input data matrix.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">upgma_model_selection(
+  Data,
+  Time,
+  Factor,
+  Tags,
+  Colonization = 1,
+  Extinction = 1,
+  Detectability_Value = 0.5,
+  Phi_Time_0_Value = 0.5,
+  Tol = 1e-08,
+  MIT = 100,
+  C_MAX = 10,
+  C_min = 0,
+  E_MAX = 10,
+  E_min = 0,
+  D_MAX = 0.99,
+  D_min = 0,
+  P_MAX = 0.99,
+  P_min = 0.01,
+  I_0 = 0,
+  I_1 = 1,
+  I_2 = 2,
+  I_3 = 3,
+  z = 2,
+  Verbose = 0,
+  MV_FLAG = 0.1,
+  PerfectDetectability = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Data</code></td>
+<td>
+<p>data frame containing presence data per time (in cols) and sites (in rows)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Time</code></td>
+<td>
+<p>an array of length n containing increasing sampling times</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Factor</code></td>
+<td>
+<p>column number containing the 'data frame' factor used to split total data into level-based groups</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Tags</code></td>
+<td>
+<p>array of factor level names: name[i] is the level tag (short name) for the i-th level.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Colonization</code></td>
+<td>
+<p>guess value to initiate search / parameter value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Extinction</code></td>
+<td>
+<p>guess value to initiate search / parameter value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Detectability_Value</code></td>
+<td>
+<p>guess value to initiate search / parameter value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Phi_Time_0_Value</code></td>
+<td>
+<p>guess value to initiate search / parameter value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Tol</code></td>
+<td>
+<p>stopping criteria of the search algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MIT</code></td>
+<td>
+<p>max number of iterations of the search algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C_MAX</code></td>
+<td>
+<p>max value for the possible range of colonization values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C_min</code></td>
+<td>
+<p>min value for the possible range of colonization values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>E_MAX</code></td>
+<td>
+<p>max value for the possible range of colonization values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>E_min</code></td>
+<td>
+<p>min value for the possible range of colonization values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D_MAX</code></td>
+<td>
+<p>max value for the possible range of colonization values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D_min</code></td>
+<td>
+<p>min value for the possible range of colonization values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>P_MAX</code></td>
+<td>
+<p>max value for the possible range of colonization values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>P_min</code></td>
+<td>
+<p>min value for the possible range of colonization values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>I_0</code></td>
+<td>
+<p>has to be 0, 1, 2, or 3. Defaults to 0</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>I_1</code></td>
+<td>
+<p>has to be 0, 1, 2, or 3. Defaults to 1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>I_2</code></td>
+<td>
+<p>has to be 0, 1, 2, or 3. Defaults to 2</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>I_3</code></td>
+<td>
+<p>has to be 0, 1, 2, or 3. Defaults to 3</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+<p>dimension of the parameter subspace for which the optimization process will take place. Default is 2</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Verbose</code></td>
+<td>
+<p>more/less (1/0) information about the optimization algorithm will be printed out.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MV_FLAG</code></td>
+<td>
+<p>missing value flag (to specify sites and times where no sample exists)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PerfectDetectability</code></td>
+<td>
+<p>TRUE means 'Perfect Detectability'. Of course, FALSE means 'Imperfect Detectability'</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The output matrix contains a row for the S different binary partitions of the set of S groups.
+Searches are conducted using Nelder-Mead simplex method in a bounded parameter space which means that in case a
+neg loglikelihood (NLL) evaluation is called out from these boundaries, the returned value for this NLL
+evaluation is artifically given as the maximum number the machine can hold. The input is a data frame
+containing presence data per time (in cols) and sites (in rows). Different factors (for instance, OTU,
+location, etc) can slide the initial data frame in their different levels, accordingly. Each initial group
+(usually, species, OUTs, factors, ...) is named by a short-length-character label (ideally, 3 or 4 characters).
+The length of Tags array should match the number of levels in which the given factor is subdivided. All labels
+should have the same character length to fulfill memmory alignment requriement of the shared object called by
+.C(...) function. I_0, I_1, I_2, and I_3 are model parameter keys. They are used to define a 4D-vector (Index).
+The model parameter keys correspond to the colonization (0), extinction (1), detectability (2), and Phi_0 (3) model
+parameters in case detectability is imperfect or, alternatively, only colonization (0) and extinction (1)
+in case detectability is perfect. For instance, if (I_0, I_1) is (1, 0), searches will take place within
+the paremeter space defined by extinction, as the first axis, and colonization, as the second.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The function generates, as an output, a Sx6 matrix with the following 6 columns (for the S different partitions):
+(No of Model Parameters, NLL, AIC, AIC_c, AIC_d, AIC_w) which compares all upgma-generarated
+partitions. It also produces .tex code to generate a table of the best grouping and a summary of the model selection process.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+Data &lt;- lakshadweepPLUS[[1]]
+Guild_Tag = c("Alg", "Cor", "Mac", "Mic", "Omn", "Pis", "Zoo")
+Time &lt;- as.vector(c(2000, 2000, 2001, 2001, 2001, 2001, 2002, 2002, 2002,
+2002, 2003, 2003, 2003, 2003, 2010, 2010, 2011, 2011, 2011, 2011, 2012,
+2012, 2012, 2012, 2013, 2013, 2013, 2013))
+R &lt;- upgma_model_selection(Data, Time, Factor = 3, Tags = Guild_Tag,
+PerfectDetectability = FALSE, z = 4)
+Guild_Tag = c("Agt", "Kad", "Kvt")
+R &lt;- upgma_model_selection(Data, Time, Factor = 2, Tags = Guild_Tag,
+PerfectDetectability = FALSE, z = 4)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

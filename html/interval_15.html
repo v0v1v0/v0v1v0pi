@@ -1,0 +1,153 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>initcomputeMLE</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>functions to calculate initial NPMLE of the distribution</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>icfit</code> calculates the NPMLE of a distribution for interval censored data using an E-M algorithm 
+with polishing and checking the Kuhn-Tucker conditions (see <code>icfit</code> help details). 
+It allows functions for the initfit option in order to calculate the starting value of the distribution in the E-M algorithm. 
+Because <code>icfit</code> checks the Kuhn-Tucker conditions, we can try functions without doing extensive quality control,
+since if the starting distribution is not close to the true NPMLE the only downside is a slower convergence. But if the 
+initfit function is the true NPMLE then convergence happens on the first iteration. Functions must input 5 objects, L,R, Lin, Rin, 
+and A, but need not use all of them.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">initcomputeMLE(L,R,Lin,Rin,A=NULL,max.inner=10,max.outer=1000,tol=1e-9)
+initEMICM(L=NULL,R=NULL,Lin=NULL,Rin=NULL,A=NULL,maxiter=1000,tol=1e-7)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>L</code></td>
+<td>
+<p>numeric vector of left endpoints of censoring interval (equivalent to first element of Surv when type='interval2', see <code>icfit</code> details)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+<p>numeric vector of right endpoints of censoring interval (equivalent to second element of Surv function when type='interval2', see <code>icfit</code> details)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Lin</code></td>
+<td>
+<p>logical vector, should L be included in the interval? (see <code>icfit</code> details)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Rin</code></td>
+<td>
+<p>logical vector, should R be included in the interval? (see <code>icfit</code> details)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>clique matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.inner</code></td>
+<td>
+<p>see <code>computeMLE</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.outer</code></td>
+<td>
+<p>see <code>computeMLE</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>see either <code>computeMLE</code> or  <code>EMICM</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+<p>see <code>EMICM</code> </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>In order to work correctly within <code>icfit</code> the function should output a list with at least a 'pf' element 
+giving the estimated mass of the distribution for a series of intervals. 
+Further, if an 'intmap' element is included (describing the series of intervals) it will be used by <code>icfit</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The function <code>initcomputeMLE</code> outputs an icfit object with 'pf' and 'intmap' values and some other values
+defined in  the help for <code>computeMLE</code>.
+</p>
+<p>The function <code>initEMICM</code> outputs an icsurv object with a 'pf' element but no 'intmap' element, in addition to 
+some other values defined in the help for <code>EMICM</code>. 
+</p>
+<p>Here we define pf and intmap:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>pf</code></td>
+<td>
+<p>vector of estimated probabilities of the distribution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intmap</code></td>
+<td>
+<p>2 by k matrix, where the ith column defines an interval 
+corresponding to the probability, pf[i]</p>
+</td>
+</tr>
+</table>
+<h3>Warning</h3>
+
+<p>In rare cases the  <code>computeMLE</code> function (and hence the  <code>initcomputeMLE</code> function) can cause R to crash 
+(at least for version 0.1-3 of the <code>MLEcens</code> package).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>The wrappers for the functions were written by M. Fay, but the real work are the calculation engines:
+</p>
+<p>The calculation engine for <code>initcomputeMLE</code> is <code>computeMLE</code> and was written by Marloes Maathuis, with  
+part of the code for the optimization step is adapted from code that was written by Piet Groeneboom.
+</p>
+<p>The calculation engine for <code>initEMICM</code> is <code>EMICM</code> and was written by Alain Vandal and Robert Gentleman 
+</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>icfit</code>,   <code>computeMLE</code>,  <code>EMICM</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## If you want speed and trust the MLEcens package, then there is no need to use icfit at all
+## (but the convergence checks in icfit do not take much additional time)
+data(bcos)
+fit&lt;-initcomputeMLE(bcos$left,bcos$right)
+summary(fit)
+plot(fit)
+</code></pre>
+
+
+</div>

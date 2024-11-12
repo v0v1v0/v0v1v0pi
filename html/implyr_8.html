@@ -1,0 +1,174 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>copy_to</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Copy a (very small) local data frame to Impala</h2>
+
+<h3>Description</h3>
+
+<p><code>copy_to</code> inserts the contents of a local data frame into a new Impala
+table. <code>copy_to</code> is intended to be used only with very small data
+frames. It uses the SQL <code>INSERT ... VALUES()</code> technique, which is not
+suitable for loading large amounts of data. By default, this function will
+throw an error if you attempt to copy a data frame with more than 1000
+row/column positions. You can increase this limit at your own risk by setting
+the option <code>implyr.copy_to_size_limit</code> to a higher number.
+</p>
+<p>This package does not provide tools for loading larger amounts of local data
+into Impala tables. This is because Impala can query data stored in several
+different filesystems and storage systems (HDFS, Apache Kudu, Apache HBase,
+Amazon S3, Microsoft ADLS, and Dell EMC Isilon) and Impala does not include
+built-in capability for loading local data into these systems.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'src_impala'
+copy_to(
+  dest,
+  df,
+  name = deparse(substitute(df)),
+  overwrite = FALSE,
+  types = NULL,
+  temporary = TRUE,
+  unique_indexes = NULL,
+  indexes = NULL,
+  analyze = FALSE,
+  external = FALSE,
+  force = FALSE,
+  field_terminator = NULL,
+  line_terminator = NULL,
+  file_format = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dest</code></td>
+<td>
+<p>an object with class with class <code>src_impala</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>a (very small) local data frame</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name</code></td>
+<td>
+<p>name for the new Impala table</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overwrite</code></td>
+<td>
+<p>whether to overwrite existing table data (currently ignored)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>types</code></td>
+<td>
+<p>a character vector giving variable types to use for the columns</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>temporary</code></td>
+<td>
+<p>must be set to <code>FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unique_indexes</code></td>
+<td>
+<p>not used</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indexes</code></td>
+<td>
+<p>not used</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>analyze</code></td>
+<td>
+<p>whether to run <code>COMPUTE STATS</code> after adding data to the
+new table</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>external</code></td>
+<td>
+<p>whether the new table will be externally managed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>force</code></td>
+<td>
+<p>whether to silently continue if the table already exists</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>field_terminator</code></td>
+<td>
+<p>the deliminter to use between fields in text file
+data. Defaults to the ASCII control-A (hex 01) character</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>line_terminator</code></td>
+<td>
+<p>the line terminator. Defaults to <code>"\n"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>file_format</code></td>
+<td>
+<p>the storage format to use. Options are <code>"TEXTFILE"</code>
+(default) and <code>"PARQUET"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments passed on to methods</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object with class <code>tbl_impala</code>, <code>tbl_sql</code>,
+<code>tbl_lazy</code>, <code>tbl</code>
+</p>
+
+
+<h3>Note</h3>
+
+<p>Impala does not support temporary tables. When using <code>copy_to()</code>
+to insert local data into an Impala table, you must set <code>temporary =
+  FALSE</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(nycflights13)
+dim(airlines) # airlines data frame is very small
+# [1] 16  2
+
+## Not run: 
+copy_to(impala, airlines, temporary = FALSE)
+## End(Not run)
+</code></pre>
+
+
+</div>

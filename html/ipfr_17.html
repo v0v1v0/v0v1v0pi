@@ -1,0 +1,77 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>synthesize</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Creates a synthetic population based on ipu results</h2>
+
+<h3>Description</h3>
+
+<p>A simple function that takes the <code>weight_tbl</code> output from
+<code>ipu</code> and randomly samples based on the weight.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">synthesize(weight_tbl, group_by = NULL, primary_id = "id")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>weight_tbl</code></td>
+<td>
+<p>the <code>data.frame</code> of the same name output by
+<code>ipu</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group_by</code></td>
+<td>
+<p>if provided, the <code>data.frame</code> will be grouped by this
+variable before sampling. If not provided, tidyverse/dplyr groupings will
+be respected. If no grouping info is present, samples are drawn from the
+entire table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>primary_id</code></td>
+<td>
+<p>The field used to join the primary and secondary seed
+tables. Only necessary if <code>secondary_seed</code> is provided.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A <code>data.frame</code> with one record for each synthesized member of
+the population (e.g. household). A <code>new_id</code> column is created, but
+the previous <code>primary_id</code> column is maintained to facilitate joining
+back to other data sources (e.g. a person attribute table).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">hh_seed &lt;- dplyr::tibble(
+id = c(1, 2, 3, 4),
+siz = c(1, 2, 2, 1),
+weight = c(1, 1, 1, 1),
+geo_cluster = c(1, 1, 2, 2)
+)
+hh_targets &lt;- list()
+hh_targets$siz &lt;- dplyr::tibble(
+  geo_cluster = c(1, 2),
+  `1` = c(75, 100),
+  `2` = c(25, 150)
+)
+result &lt;- ipu(hh_seed, hh_targets, max_iterations = 5)
+synthesize(result$weight_tbl, "geo_cluster")
+</code></pre>
+
+
+</div>

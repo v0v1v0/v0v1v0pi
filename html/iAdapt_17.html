@@ -1,0 +1,183 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sim.trials</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate full trial (both stages) x times</h2>
+
+<h3>Description</h3>
+
+<p>Results are displayed in a matrix format, where each row 
+represents one trial simulation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sim.trials(
+  numsims,
+  dose,
+  dose.tox,
+  p1,
+  p2,
+  K,
+  coh.size,
+  m,
+  v,
+  N,
+  stop.rule = 9,
+  cohort = 1,
+  samedose = TRUE,
+  nbb = 100
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>numsims</code></td>
+<td>
+<p>number of simulated trials</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dose</code></td>
+<td>
+<p>number of doses to be tested (scalar)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dose.tox</code></td>
+<td>
+<p>vector of true toxicities for each dose. Values range from 0 - 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p1</code></td>
+<td>
+<p>toxicity under null (unsafe DLT rate). Values range from 0 - 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p2</code></td>
+<td>
+<p>toxicity under alternative (safe DLT rate). Values range from 0 - 1; p1 &gt; p2</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>threshold for LR. Takes integer values: 1,2,...(recommended K=2)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coh.size</code></td>
+<td>
+<p>cohort size (number of patients) per dose (Stage 1)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>vector of mean efficacies per dose. Values range from 0 - 100. 
+(e.g, T cell persistence - values b/w 5 and 80 per cent)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v</code></td>
+<td>
+<p>vector of efficacy variances per dose. Values range from 0 - 1. (e.g., 0.01)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>total sample size for stages 1&amp;2</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stop.rule</code></td>
+<td>
+<p>if only dose 1 safe, allocate up to 9 (default) patients at dose 1 
+to collect more info.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cohort</code></td>
+<td>
+<p>cohort size (number of patients) per dose (Stage 2). Default is 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>samedose</code></td>
+<td>
+<p>designates whether the next patient is allocated to the same dose 
+as the previous patient. Default is TRUE. Function adjusts accordingly.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nbb</code></td>
+<td>
+<p>binomial parameter (default = 100 cells per patient)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>List of the following objects:
+</p>
+
+<ul>
+<li>
+<p> sim.Y - estimated efficacy per each dose assignment 
+</p>
+</li>
+<li>
+<p> sim.d - dose assignment for each patient in the trial 
+</p>
+</li>
+<li>
+<p> safe.d - indicator of whether dose was declared safe
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Number of pre-specified dose levels
+dose &lt;- 5
+
+# Vector of true toxicities associated with each dose
+dose.tox &lt;- c(0.05, 0.10, 0.20, 0.35, 0.45)       
+
+# Acceptable (p_yes) and unacceptable (p_no) DLT rates used for establishing safety
+p_no &lt;- 0.40                                     
+p_yes &lt;- 0.15    
+
+# Likelihood-ratio (LR) threshold
+K &lt;- 2                                          
+
+# Cohort size used in stage 1
+coh.size &lt;- 3 
+
+# Vector of true mean efficacies per dose (here mean percent persistence per dose)
+m &lt;- c(5, 15, 40, 65, 80)   # MUST BE THE SAME LENGTH AS dose.tox                  
+
+# Efficacy(equal) variance per dose
+v &lt;- rep(0.01, 5) 
+
+# Total sample size (stages 1&amp;2)                            
+N &lt;- 25                                        
+
+# Stopping rule: if dose 1 is the only safe dose, allocate up to 9 pts.
+stop.rule &lt;- 9 
+
+sim.trials(numsims = 10, dose, dose.tox, p1 = p_no, p2 = p_yes, K, 
+coh.size, m, v, N, stop.rule = stop.rule, cohort = 1, samedose = TRUE, nbb = 100)
+
+</code></pre>
+
+
+</div>

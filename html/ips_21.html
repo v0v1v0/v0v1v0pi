@@ -1,0 +1,119 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>EmptyCells</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Identify/Delete Spurious Rows and Columns from DNA Alignments</h2>
+
+<h3>Description</h3>
+
+<p>After subsetting (see e.g. <code>DNAbin</code>), DNA sequence
+alignments can contain rows and columns that consist entirely of missing
+and/or ambiguous character states. <code>identifyEmptyCells</code> will identify
+and <code>deleteEmptyCells</code> will delete all such rows (taxa) and columns
+(characters) from a DNA sequence alignment.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">deleteEmptyCells(
+  DNAbin,
+  margin = c(1, 2),
+  nset = c("-", "n", "?"),
+  quiet = FALSE
+)
+
+identifyEmptyCells(
+  DNAbin,
+  margin = c(1, 2),
+  nset = c("-", "n", "?"),
+  quiet = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>DNAbin</code></td>
+<td>
+<p>An object of class <code>DNAbin</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>margin</code></td>
+<td>
+<p>A vector giving the subscripts the function will be applied
+over: <code>1</code> indicates rows, <code>2</code> indicates columns, and <code>c(1,
+2)</code> indicates rows and columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nset</code></td>
+<td>
+<p>A vector of mode character; rows or columns that consist
+<strong>only</strong> of the characters given in <code>nset</code> will be deleted from
+the alignment. Allowed are <code>"-"</code>, <code>"?"</code>,<code>"n"</code>, <code>"b"</code>,
+<code>"d"</code>,<code>"h"</code>, <code>"v"</code>, <code>"r"</code>,<code>"y"</code>, <code>"s"</code>,
+<code>"w"</code>,<code>"k"</code>, and <code>"m"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>Logical: if set to <code>TRUE</code>, screen output will be
+suppressed.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For faster execution, <code>deleteEmptyCells</code> handles sequences in
+<span class="pkg">ape</span>'s bit-level coding scheme.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>DNAbin</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Cornish-Bowden, A. 1984. Nomenclature for incompletely specified
+bases in nucleic acid sequences: recommendations 1984. <em>Nucleic Acids
+Res.</em> <strong>13</strong>: 3021–3030.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>trimEnds</code>, <code>deleteGaps</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  # COX1 sequences of bark beetles
+  data(ips.cox1)
+  # introduce completely ambiguous rows and colums
+  x &lt;- as.character(ips.cox1[1:6, 1:60])
+  x[3, ] &lt;- rep("n", 60)
+  x[, 20:24] &lt;- rep("-", 6)
+  x &lt;- as.DNAbin(x)
+  image(x)
+  # identify those rows and colums
+  (id &lt;- identifyEmptyCells(x))
+  xx &lt;- x[-id$row, -id$col]
+  # delete those rows and colums
+  x &lt;- deleteEmptyCells(x)
+  image(x)
+  identical(x, xx)
+</code></pre>
+
+
+</div>

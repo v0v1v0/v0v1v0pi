@@ -1,0 +1,288 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>raxml</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Maximum Likelihood Tree Estimation with RAxML</h2>
+
+<h3>Description</h3>
+
+<p>Provides an interface to the C program <b>RAxML</b> (see
+Reference section) for maximum likelihood estimation of tree topology and/or
+branch lengths, rapid and conventional non-parametric bootstrapping, mapping
+splits onto individual topologies, and a lot more. See the RAxML manual for
+details, especially if you are a new user of RAxML.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">raxml(
+  DNAbin,
+  m = "GTRCAT",
+  f,
+  N,
+  p,
+  b,
+  x,
+  k,
+  weights,
+  partitions,
+  outgroup,
+  backbone = NULL,
+  file = paste0("fromR_", Sys.Date()),
+  exec,
+  threads
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>DNAbin</code></td>
+<td>
+<p>A matrix of DNA sequences of class <code>DNAbin</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>A vector of mode <code>"character"</code> defining a model of molecular
+evolution; currently only GTR model available.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>f</code></td>
+<td>
+<p>A vector of mode <code>"character"</code> selecting an RAxML algorithm
+analogous to the <code>-f</code> flag (see Detail section and RAxML manual).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>Either of mode <code>"integer"</code> or <code>"character"</code>. Integers give
+the number of independent searches on different starting tree or replicates
+in bootstrapping. Alternatively, one of four bootstopping criteria can be
+chosen: <code>"autoFC"</code>, <code>"autoMR"</code>, <code>"autoMRE"</code>, or
+<code>"autoMRE_IGN"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>Integer, setting a random seed for the parsimony starting trees.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>Integer, setting a random seed for bootstrapping.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Integer, setting a random seed for rapid bootstrapping.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>Logical, if <code>TRUE</code>, the branch lengths of bootstrapped trees are
+recorded.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>A vector of mode <code>"numeric"</code> giving integers to assign
+individual weights to each column of the alignment. (-a)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>partitions</code></td>
+<td>
+<p>A data frame giving the partitions of the alignment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outgroup</code></td>
+<td>
+<p>A vector of mode <code>"character"</code> containing the names of
+the outgroup taxa.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>backbone</code></td>
+<td>
+<p>A <code>phylo</code> object representing a backbone tree.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>A vector of mode <code>"character"</code> giving a name for the output
+files.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exec</code></td>
+<td>
+<p>A vector of mode <code>"character"</code> giving the path to the
+directory containing the RAxML executable. The default value will work on
+Mac OS X if the folder containing the executable is renamed to
+<code>"RAxML-8.0.3"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threads</code></td>
+<td>
+<p>Integer, giving the number of parallel threads to use (PTHREADS
+only).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>There are some limitations of this wrapper compared to RAxML run
+directly from the command line. </p>
+ <ol>
+<li>
+<p> Only DNA is allowed as
+data type. </p>
+</li>
+<li>
+<p> Option <code>f</code> can only take a limited number of values
+(<code>d</code>, <code>a</code>). </p>
+</li>
+</ol>
+<p>RAxML needs the specification of random seeds for parsimony estimation of
+starting trees and for bootstrap resampling. The corresponding argument
+names in <code>raxml</code> are identical to the flags used by RAxML (<code>-p</code>,
+<code>-b</code>, and <code>-x</code>). If you choose not to give any values,
+<code>raxml</code> will generate a (different) value for each required random
+seed every time it is called. Be aware that <code>set.seed</code> will work
+only for <code>p</code>, but not for <code>b</code> or <code>x</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with a variable number of elements, depending on the analysis
+chosen: </p>
+
+<table>
+<tr>
+<td style="text-align: left;"> <code>"info"</code> </td>
+<td style="text-align: left;"> RAxML log file as character
+ string</td>
+</tr>
+<tr>
+<td style="text-align: left;"> <code>"bestTree"</code> </td>
+<td style="text-align: left;"> MLE of tree</td>
+</tr>
+<tr>
+<td style="text-align: left;"> <code>"bipartitions"</code> </td>
+<td style="text-align: left;">
+ MLE of tree annotated with bootstrap proportions</td>
+</tr>
+<tr>
+<td style="text-align: left;"> <code>"bootstrap"</code> </td>
+<td style="text-align: left;">
+ bootstrapped trees</td>
+</tr>
+<tr>
+<td style="text-align: left;"> </td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>RAxML is a C program and the source code is not contained in this
+package. This means that in order to run this function you will need to
+install RAxML yourself. See
+<a href="https://cme.h-its.org/exelixis/web/software/raxml/">https://cme.h-its.org/exelixis/web/software/raxml/</a> for the most recent
+documentation and source code of RAxML. Depending on where you chose to
+install RAxML, you need to adjust the <code>exec</code> argument.
+</p>
+<p><code>raxml</code> was last tested and running fine on Mac OS X with RAxML 8.0.29.
+Please be aware that calling third-party software from within R is a
+platform-specific process and I cannot guarantee that <code>raxml</code> will
+behave properly on any system.
+</p>
+
+
+<h3>References</h3>
+
+<p>(in chronological order)
+</p>
+<p>Stamatakis, A., T. Ludwig and H. Meier. 2004. RAxML-III: A fast program for
+maximum likelihood-based inference of large phylogenetic trees.
+<em>Bioinformatics</em> <b>1</b>: 1–8.
+</p>
+<p>Stamatakis, A. 2006. RAxML-VI-HPC: Maximum likelihood-based phylogenetic
+analyses with thousands of taxa and mixed models. <em>Bioinformatics</em>
+<b>22</b>: 2688–2690.
+</p>
+<p>Stamatakis, A., P. Hoover, and J. Rougemont. 2008. A rapid bootstrap
+algorithm for the RAxML web-servers. <em>Syst. Biol.</em> <b>75</b>: 758–771.
+</p>
+<p>Pattengale, N. D., M. Alipour, O. R. P. Bininda-Emonds, B. M. E. Moret, and
+A. Stamatakis. 2010. How many bootstrap replicates are necessary?
+<em>Journal of Computational Biology</em> <b>17</b>: 337-354.
+</p>
+<p>Stamatakis, A. 2014. RAxML Version 8: A tool for phylogenetic analysis and
+post-analysis of large phylogenies. <em>Bioinformatics</em> Advance Access.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>raxml.partitions</code> to store partitioning information in a
+data frame suitable for input as <code>partitions</code> argument in <code>raxml</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## bark beetle sequences
+data(ips.cox1)
+data(ips.16S)
+data(ips.28S)
+
+ips &lt;- cbind(ips.cox1, ips.16S, ips.28S,
+            fill.with.gaps = TRUE)
+
+exec &lt;- "/Applications/RAxML-code/standard-RAxML/raxmlHPC-PTHREADS-AVX"
+w &lt;- sample(1:5, ncol(ips.cox1), replace = TRUE)
+
+## Not run: 
+
+# Simple tree search with GTRCAT and GTRGAMMA
+tr &lt;- raxml(ips.cox1, f = "d", N = 2, p = 1234,
+           exec = exec) # -1743.528461
+tr &lt;- raxml(ips.cox1, m = "GTRGAMMA", f = "d", N = 2, p = 1234,
+           exec = exec)
+   
+# Applying weights to columns                   
+tr &lt;- raxml(ips.cox1, f = "d", N = 2, p = 1234,
+           weights = w, exec = exec) # -1743.528461
+
+# Rapid bootstrap
+tr &lt;- raxml(ips.cox1, m = "GTRGAMMA",
+           f = "a", N = 10, p = 1234, x = 1234,
+           exec = exec)
+
+# Rapid bootstrap with automatic halt
+tr &lt;- raxml(ips.cox1, m = "GTRGAMMA",
+           f = "a", N = "autoMRE", p = 1234, x = 1234,
+           exec = exec)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

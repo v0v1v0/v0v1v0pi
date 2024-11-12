@@ -1,0 +1,213 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>findMAIN</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>findMAIN.</h2>
+
+<h3>Description</h3>
+
+<p><code>findMAIN</code> will evaluate an ESI spectrum for the potential main adducts, 
+rank obtained suggestions and allow the deduction of the neutral mass of the measured 
+molecule.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">findMAIN(
+  spec,
+  adductmz = NULL,
+  ionmode = c("positive", "negative")[1],
+  adducthyp = NULL,
+  ms2spec = NULL,
+  rules = NULL,
+  mzabs = 0.01,
+  ppm = 5,
+  mainpkthr = 0.005,
+  collapseResults = TRUE
+)
+
+## S3 method for class 'findMAIN'
+plot(x, rank = 1, correct_mass = NULL, ...)
+
+## S3 method for class 'findMAIN'
+print(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>spec</code></td>
+<td>
+<p>A mass spectrum. Either a matrix or data frame, the first two columns of which 
+are assumed to contain the 'mz' and 'intensity' values, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adductmz</code></td>
+<td>
+<p>Manually specified peak for which <code>adducthyp</code> should be tested, 
+or 'NULL' (default), to test all main peaks. What is a main peak, is governed by 
+<code>mainpkthr</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ionmode</code></td>
+<td>
+<p>Ionization mode, either "positive" or "negative". Can be abbreviated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adducthyp</code></td>
+<td>
+<p>Adduct hypotheses to test for each main peak. Defaults to 
+<code>c("[M+H]+","[M+Na]+","[M+K]+")</code> for positive mode and 
+<code>c("[M-H]-","[M+Cl]-","[M+HCOOH-H]-")</code> for negative mode.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ms2spec</code></td>
+<td>
+<p>Second spectrum limiting main peak selection. If available, MS^E or bbCID 
+spectra may allow further exclusion of false positive adduct ions, as ions of the intact 
+molecule (protonated molecule, adduct ions) should have lower intensity in the high-energy 
+trace than in low-energy trace.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rules</code></td>
+<td>
+<p>Adduct/fragment relationships to test, e.g. <code>c("[M+Na]+", "[M+H-H2O]+")</code>, 
+or 'NULL' for default set (see <code>Adducts</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mzabs</code></td>
+<td>
+<p>Allowed mass error, absolute (Da).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ppm</code></td>
+<td>
+<p>Allowed mass error, relative (ppm), which is _added_ to 'mzabs'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mainpkthr</code></td>
+<td>
+<p>Intensity threshold for main peak selection, relative to base peak.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>collapseResults</code></td>
+<td>
+<p>If a neutral mass hypothesis was found more than once (due to multiple 
+adducts suggesting the same neutral mass), return only the one with the highest adduct peak. 
+Should normally kept at <code>TRUE</code>, the default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Object of class findMAIN.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rank</code></td>
+<td>
+<p>Rank of the suggestion to plot (can be a numeric vector).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>correct_mass</code></td>
+<td>
+<p>If provided will indicate correct suggestion by green color.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further parameters.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Electrospray ionization (ESI) mass spectra frequently contain a number of different 
+adduct ions, multimers and in-source fragments <code>[M+H]+, [M+Na]+, [2M+H]+, [M+H-H2O]+</code>, 
+making it difficult to decide on the compound's neutral mass. This functions aims 
+at determining the main adduct ion and its type (protonated, sodiated etc.) of a spectrum, 
+allowing subsequent database searches e.g. using MS-FINDER, SIRIUS or similar.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list-like 'findMAIN' object for which 'print', 'summary' and 'plot' methods are available.
+Each list element represents a potential spectra annotation, ranked according to 
+a combined score. The spectrum is annotated with columns indicating the determined
+isotopic groups (isogr) and their likely charge. Further, information on the potential 
+set of adducts and their ppm error is attached.
+The score aims to integrate all this information using formula S=sum(w_i x s_i).
+In short, we sum up i weighted score components (currently i=4). Currently these
+components are calculated based on the explained intensity (adduct sets which
+annotate a higher amount of the total spectrum intensity are better), the mass error
+(adduct sets with lower mass error are better), the support by isotopic peaks
+(adduct sets with fitting isotopes are better) and the number of adducts (adduct 
+sets with a larger number of adducts are better).
+The individual scores for each adduct set are attached as an attribute to the
+respective list element and can be easily observed by applying the 'summary' or 
+the 'plot' function on the 'findMAIN' object.
+</p>
+
+
+<h3>References</h3>
+
+<p>Jaeger C, Meret M, Schmitt CA, Lisec J (2017), &lt;doi:10.1002/rcm.7905&gt;.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+utils::data(esi_spectrum, package = "InterpretMSSpectrum")
+fmr &lt;- InterpretMSSpectrum::findMAIN(esi_spectrum)
+plot(fmr)
+head(summary(fmr))
+InterpretMSSpectrum::InterpretMSSpectrum(fmr[[1]], precursor=263, param="ESIpos")
+fmr &lt;- InterpretMSSpectrum::findMAIN(esi_spectrum[6:9,], adducthyp = "[M+H]+")
+plot(fmr)
+
+# set up a spectrum containing a double charged peak
+spec &lt;- data.frame(mz = c(372.1894, 372.6907, 373.1931, 380), int = c(100, 40, 8, 2))
+InterpretMSSpectrum:::findiso(spec)
+# allow a double charged adduct hypothesis (not standard)
+fmr &lt;- InterpretMSSpectrum::findMAIN(spec, adducthyp = c("[M+H]+", "[M+2H]2+"))
+summary(fmr)
+attr(fmr[[1]],"scores")
+plot(fmr, rank = 1:4)
+plot(fmr, rank = 2)
+
+# add the correct M+H to this spectrum as a minor peak
+spec &lt;- rbind(spec, c(742.3648+1.007, 10))
+(fmr &lt;- InterpretMSSpectrum::findMAIN(spec, adducthyp = c("[M+H]+", "[M+2H]2+")))
+summary(fmr)
+plot(fmr, rank = 1)
+plot(fmr, rank = 2)
+
+# compare specific hypotheses manually
+# get correct result
+InterpretMSSpectrum::findMAIN(spec, adductmz = 743.3718, adducthyp = "[M+H]+")
+# enforce wrong result
+InterpretMSSpectrum::findMAIN(spec, adductmz = 743.3718, adducthyp = "[M+2H]2+")
+
+
+</code></pre>
+
+
+</div>

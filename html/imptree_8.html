@@ -1,0 +1,168 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>node_imptree</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Classification with Imprecise Probabilities</h2>
+
+<h3>Description</h3>
+
+<p>Access probability information of nodes
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">node_imptree(x, idx = NULL)
+
+## S3 method for class 'node_imptree'
+print(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>imptree</code> or <code>node_imptree</code>,
+respectively. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>idx</code></td>
+<td>
+<p>numeric or integer vector of indices specifying
+the sequential node access from the root node.
+Numeric values are coerced to integer as
+by <code>as.integer</code>
+(and hence truncated towards zero). <br>
+If <code>NULL</code> the probability information of 
+the root node are accessed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments passed to <code>print</code> methods</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function acceses the properties of a specific node 
+of an imprecise tree. 
+An existence check on the stored C++ object reference is 
+carried out at first. If the reference is not valid the 
+original call for <code>"x"</code> is printed as error.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>node_imptree</code> containing 
+information on the properties of the node as a list:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>probint</code></td>
+<td>
+<p>matrix containing the bounds of the imprecise
+probability distribution and the absolute observed frequencies
+of the classification variable within the node.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>depth</code></td>
+<td>
+<p>The depth of the node with the tree.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>splitter</code></td>
+<td>
+<p>The name of the variable used for splitting
+as character; <code>NA</code> if node is a leaf.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>children</code></td>
+<td>
+<p>The number of children of the node.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>traindataIdx</code></td>
+<td>
+<p>Vector giving the indexes of the 
+training data contained within the node</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ipmodel</code></td>
+<td>
+<p>List giving details about the used 
+imprecise probability model to obatin the credal set:
+</p>
+
+<dl>
+<dt>iptype</dt>
+<dd>
+<p>used IP model:
+<code>"IDM"</code>, <code>"NPI"</code> or <code>"NPIapprox"</code></p>
+</dd>
+<dt>s</dt>
+<dd>
+<p>If <code>iptpye == "IDM"</code> the IDM's parameter 's',
+otherwise this list entry is missing</p>
+</dd>
+</dl>
+</td>
+</tr>
+</table>
+<p>The printing function returns the
+<code>node_imptree</code> object invisibly.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Paul Fink <a href="mailto:Paul.Fink@stat.uni-muenchen.de">Paul.Fink@stat.uni-muenchen.de</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>imptree</code>, for global information on 
+the generated tree <code>summary.imptree</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("carEvaluation")
+
+## create a tree with IDM (s=1) to full size
+## carEvaluation, leaving the first 10 observations out
+ip &lt;- imptree(acceptance~., data = carEvaluation[-(1:10),], 
+  method="IDM", method.param = list(splitmetric = "globalmax", s = 1), 
+  control = list(depth = NULL, minbucket = 1))
+
+## obtain information on the root node
+node_imptree(x = ip, idx = NULL)
+
+## obtain information on the 2nd note in the 1st level
+node_imptree(x = ip, idx = c(1, 2))
+
+## reference to an invalid index and/or level generates error
+## Not run: 
+node_imptree(x = ip, idx = c(1,10))  # no 10th node on 1st level
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

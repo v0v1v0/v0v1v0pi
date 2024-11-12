@@ -1,0 +1,143 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>img_complexity</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Image complexity</h2>
+
+<h3>Description</h3>
+
+<p><code>img_complexity</code> returns the complexity of an image via image
+compression. Higher values indicate higher image complexity.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">img_complexity(imgfile, algorithm = "zip", rotate = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>imgfile</code></td>
+<td>
+<p>Either a character string containing the path to the image
+file (or URL) or an an image in form of a matrix (grayscale image) or array
+(color image) of numeric values representing the pre-loaded image (e.g. by
+using <code>img_read()</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algorithm</code></td>
+<td>
+<p>Character string that specifies which image compression
+algorithm to use. Currently implemented are <code>zip</code> with deflate
+compression (default), <code>jpg</code>, <code>gif</code>, and <code>png</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rotate</code></td>
+<td>
+<p>logical. Should the compressed file size of the rotated image
+also be computed? (see details)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function returns the visual complexity of an image. Visual
+complexity is calculated as ratio between the compressed and uncompressed
+image file size. Preferably, the original image is an uncompressed image
+file.
+</p>
+<p>The function takes the file path of an image file (or URL) or a pre-loaded
+image as input argument (<code>imgfile</code>) and returns the ratio of the
+compressed divided by the uncompressed image file size. Values can range
+between almost 0 (virtually completely compressed image, thus extremely
+simple image) and 1 (no compression possible, thus extremely complex
+image).
+</p>
+<p>You can choose between different image compression algorithms. Currently
+implemented are <code>zip</code> with deflate compression (default), <code>jpg</code>,
+<code>gif</code>, and <code>png</code>. See Mayer &amp; Landwehr (2018) for a discussion of
+different image compression algorithms for measuring visual complexity.
+</p>
+<p>As most compression algorithms do not depict horizontal and vertical
+redundancies equally, the function includes an optional <code>rotate</code>
+parameter (default: <code>FALSE</code>). Setting this parameter to <code>TRUE</code>
+has the following effects: first, the image is rotated by 90 degrees.
+Second, a compressed version of the rotated image is created. Finally,
+the overall compressed image's file size is computed as the minimum of
+the original image's file size and the file size of the rotated image.
+</p>
+<p>As <code>R</code>'s built-in <code>bmp</code> device creates (a) indexed instead of
+True Color images and (b) creates files with different file sizes depending
+on the operating system, the function relies on the <code>magick</code> package
+to write (and read) images.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a numeric value: the ratio of the compressed divided by the
+uncompressed image file size
+</p>
+
+
+<h3>References</h3>
+
+<p>Donderi, D. C. (2006). Visual complexity: A Review.
+<em>Psychological Bulletin</em>, <em>132</em>, 73–97.
+doi: <a href="https://doi.org/10.1037/0033-2909.132.1.73">10.1037/0033-2909.132.1.73</a>
+</p>
+<p>Forsythe, A., Nadal, M., Sheehy, N., Cela-Conde, C. J., &amp; Sawey,
+M. (2011). Predicting Beauty: Fractal Dimension and Visual Complexity in
+Art. <em>British Journal of Psychology</em>, <em>102</em>, 49–70.
+doi: <a href="https://doi.org/10.1348/000712610X498958">10.1348/000712610X498958</a>
+</p>
+<p>Mayer, S. &amp; Landwehr, J, R. (2018). Quantifying Visual Aesthetics
+Based on Processing Fluency Theory: Four Algorithmic Measures for
+Antecedents of Aesthetic Preferences. <em>Psychology of Aesthetics,
+Creativity, and the Arts</em>, <em>12</em>(4), 399–431.
+doi: <a href="https://doi.org/10.1037/aca0000187">10.1037/aca0000187</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>img_read</code>, <code>img_contrast</code>,
+<code>img_self_similarity</code>, <code>img_simplicity</code>,
+<code>img_symmetry</code>, <code>img_typicality</code>,
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Example image with high complexity: trees
+trees &lt;- img_read(system.file("example_images", "trees.jpg", package = "imagefluency"))
+#
+# display image
+grid::grid.raster(trees)
+#
+# get complexity
+img_complexity(trees)
+
+
+# Example image with low complexity: sky
+sky &lt;- img_read(system.file("example_images", "sky.jpg", package = "imagefluency"))
+#
+# display image
+grid::grid.raster(sky)
+#
+# get complexity
+img_complexity(sky)
+
+</code></pre>
+
+
+</div>

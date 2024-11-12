@@ -1,0 +1,168 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>MAF.options</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Control of MAF design and training
+</h2>
+
+<h3>Description</h3>
+
+<p>Masked Autoregressive Flows can be used by <span class="pkg">Infusion</span> to infer various densities.
+This functionality requires the <span class="pkg">mafR</span> package, and is requested through the <code>using</code> argument of 
+<code>infer.SLik.joint</code> or <code>refine</code> (see Details).
+</p>
+<p><code>config_mafR</code> is a convenient way to reset the Python session (erasing all results stored in its memory), and in particular to enforce GPU usage.
+</p>
+<p><code>MAF.options</code> is a wrapper for <code>Infusion.options</code> which facilitates the specification of 
+options that control the design of Masked Autoregressive Flows and their training.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">config_mafR(torch_device, ...)
+MAF.options(template = "zuko-like", ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>torch_device</code></td>
+<td>
+
+<p>character: <code>"cpu"</code>, <code>"cuda"</code> (or <code>"cuda:0"</code>, etc., useful if several GPUs are available) or <code>"mps"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>template</code></td>
+<td>
+
+<p>Defines a template list of options, subsequently modified by options specified through the ..., if any.
+Possible values of <code>template</code> are <code>"zuko-like"</code>, <code>"PSM19"</code>, <code>NULL</code>, or a <code>list</code> of options. The default value <code>"zuko-like"</code> reproduces <span class="pkg">Infusion</span>'s defaults. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>For <code>MAF.options</code>: a named value, or several of them, that override or complete the <code>template</code> values. For <code>config_mafR</code>: for development purposes; not documented.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><b>Possible <code>using</code> values:</b>
+</p>
+<p>With <code>using="c.mafR"</code> four different MAFs are computed in every iteration:
+the density of statistics given parameters (providing the likelihood), the joint density, the instrumental density of parameters, and the “instrumental posterior” density of parameters given the data.
+</p>
+<p>With <code>using="MAFmix"</code>, MAFs are computed only for the joint density and the instrumental density. The likelihood is deduced from them and a multivariate Gaussian mixture model is used to infer the “instrumental posterior” density.
+</p>
+<p><code>using="mafR"</code> can be used to let <span class="pkg">Infusion</span> select one of the above options. <code>"MAFmix"</code> is currently called as it is faster, but this is liable to change in the future, so do not use this if you want a repeatable workflow.
+</p>
+<p><b>Possible <code>template</code> values for <code>MAF.options</code>:</b>
+</p>
+<p><code>"PSM19"</code> defines a template list of control values recommended by Papamakarios et al. (2019, Section 5.1).
+<code>"zuko-like"</code> defines a template list of values inspired from the tutorials of the <span class="pkg">zuko</span> Python package, with some extra twists. Concretely, their definition is
+</p>
+<pre>
+    if (template == "zuko-like") {
+        optns &lt;- list(design_hidden_layers = .design_hidden_layers_MGM_like, 
+            MAF_patience = 30, MAF_auto_layers = 3L, Adam_learning_rate = 0.001)
+    }
+    else if (template == "PSM19") {
+        optns &lt;- list(design_hidden_layers = .design_hidden_layers_PSM19, 
+            MAF_patience = 20, MAF_auto_layers = 5L, Adam_learning_rate = 1e-04)
+    }
+</pre>
+<p>and any replacement value should match the types (function, numeric, integer...) of the shown values, and the formals of the internal functions, in order to avoid cryptic errors. 
+</p>
+<p>The internal <code>.design_hidden_layers...</code> functions return a vector of numbers <code class="reqn">H_i</code> of hidden values per layer <code class="reqn">i</code> of the neural network. THevector has an attribute giving the resulting approximate number of parameters <code class="reqn">P</code> of the deep-learning model according to Supplementary Table 1 of Papamakarios et al. 2017. <code class="reqn">H_i=</code><code>50L</code> for <code>"PSM19"</code>. For <code>"zuko-like"</code>, a typically higher value will be used. It is defined as a power of two such that <code class="reqn">P</code> is of the order of 8 to 16 times the default number of parameters of the multivariate gaussian mixture model that could be used instead of MAFs.     
+</p>
+<p>Other controls which can be modified through the ... are <br><code> * MAF_validasize</code>, a function which returns the size of the validation set,
+whose default definition returns 5% of its input value <code>nr</code> which is the number of samples in the reference table (consistently with Papamakarios et al., 2019);<br><code> * MAF_batchsize</code>, a function that returns the batch size for the Adam optimizer. Its default simply returns <code>100L</code>, but non-default functions can be defined, with at least the ... as formal arguments (more elaborate formals are possible but not part of the API).
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>config_mafR</code> is used for its side effects. Returns NULL invisibly.
+</p>
+<p><code>MAF.options</code> returns the result of calling <code>Infusion.options</code> on the arguments defined by the <code>template</code> and the ... . Hence, it is a list of <b>previous</b> values of the affected options. 
+</p>
+
+
+<h3>References</h3>
+
+<p>Papamakarios, G., T. Pavlakou, and I. Murray (2017) Masked Autoregressive
+Flow for Density Estimation. Pp. 2335–2344 in I. Guyon, U. V. Luxburg,
+S. Bengio, H. Wallach, R. Fergus, S. Vishwanathan, and R. Garnett, eds.
+Advances in Neural Information Processing Systems 30. Curran Associates,
+Inc.<br>
+http://papers.nips.cc/paper/6828-masked-autoregressive-flow-for-density-estimation
+</p>
+<p>Rozet, F., Divo, F., Schnake, S (2023) Zuko: Normalizing flows in PyTorch. 
+https://doi.org/10.5281/zenodo.7625672
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>save_MAFs</code> for saving and loading MAF objects.</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  MAF.options(template = "zuko-like", 
+              Adam_learning_rate=1e-4,
+              MAF_batchsize = function(...) 100L)
+
+## Not run: 
+## These examples require the mafR package, 
+## and a Python installation with cuda capabilities.
+
+if (requireNamespace("mafR", quietly=TRUE)) {
+
+config_mafR() # set default: "cpu", i.e. GPU not used
+config_mafR("cuda") # sets cuda as GPU backend 
+config_mafR() # reset python session, keeping latest backend
+
+
+  config_mafR(torch_device="cuda")
+  
+  # function for sampling from N(.,sd=1)
+  toyrnorm &lt;- function(mu) {
+    sam &lt;- rnorm(n=40,mean=mu,sd=1)
+    return(c(mean1=mean(sam)))
+  } 
+
+  # simulated data, standing for the actual data to be analyzed:  
+  set.seed(123)
+  Sobs &lt;- toyrnorm(mu=4) 
+
+  parsp &lt;- init_reftable(lower=c(mu=2.8), 
+                         upper=c(mu=5.2))
+  simuls &lt;- add_reftable(Simulate="toyrnorm", parsTable=parsp)
+
+  MAF.options(template = "zuko-like")
+  densv &lt;- infer_SLik_joint(simuls,stat.obs=Sobs, using="mafR")
+
+  # Usual workflow using inferred surface:
+  slik_j &lt;- MSL(densv, eval_RMSEs = FALSE) ## find the maximum of the log-likelihood surface
+  # ETC.
+  
+  save_MAFs(slik_j, prefix = "toy_") # See its distinct documentation.
+}
+
+## End(Not run)
+</code></pre>
+
+
+</div>

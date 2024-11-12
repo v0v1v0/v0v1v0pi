@@ -1,0 +1,159 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>probe_interaction</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Probe interaction effects via simple slopes and plotting</h2>
+
+<h3>Description</h3>
+
+<p><code>probe_interaction</code> is a convenience function that allows users to call
+both <code>sim_slopes</code> and <code>interact_plot</code> with a single
+call.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">probe_interaction(model, pred, modx, mod2 = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A regression model. The function is tested with <code>lm</code>,
+<code>glm</code>, <code>svyglm</code>, <code>merMod</code>,
+<code>rq</code>, <code>brmsfit</code>,
+<code>stanreg</code> models.
+Models from other classes may work as well but are not officially
+supported. The model should include the interaction of interest.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pred</code></td>
+<td>
+<p>The name of the predictor variable involved
+in the interaction. This can be a bare name or string. Note that it
+is evaluated using <code>rlang</code>, so programmers can use the <code style="white-space: pre;">⁠!!⁠</code> syntax
+to pass variables instead of the verbatim names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modx</code></td>
+<td>
+<p>The name of the moderator variable involved
+in the interaction. This can be a bare name or string. The same
+<code>rlang</code> proviso applies as with <code>pred</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mod2</code></td>
+<td>
+<p>Optional. The name of the second moderator
+variable involved in the interaction. This can be a bare name or string.
+The same <code>rlang</code> proviso applies as with <code>pred</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments accepted by <code>sim_slopes</code> and
+<code>interact_plot</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function simply merges the nearly-equivalent arguments needed to call
+both <code>sim_slopes</code> and <code>interact_plot</code> without the
+need for re-typing their common arguments. Note that each function is called
+separately and they re-fit a separate model for each level of each
+moderator; therefore, the runtime may be considerably longer than the
+original model fit. For larger models, this is worth keeping in mind.
+</p>
+<p>Sometimes, you may want different parameters when doing simple slopes
+analysis compared to when plotting interaction effects. For instance, it is
+often easier to interpret the regression output when variables are
+standardized; but plots are often easier to understand when the variables
+are in their original units of measure.
+</p>
+<p><code>probe_interaction</code> does not
+support providing different arguments to each function. If that is needed,
+use <code>sim_slopes</code> and <code>interact_plot</code> directly.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>simslopes</code></td>
+<td>
+<p>The <code>sim_slopes</code> object created.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interactplot</code></td>
+<td>
+<p>The <code>ggplot</code> object created by
+<code>interact_plot</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Jacob Long <a href="mailto:jacob.long@sc.edu">jacob.long@sc.edu</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other interaction tools: 
+<code>johnson_neyman()</code>,
+<code>sim_margins()</code>,
+<code>sim_slopes()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Using a fitted model as formula input
+fiti &lt;- lm(Income ~ Frost + Murder * Illiteracy,
+  data=as.data.frame(state.x77))
+probe_interaction(model = fiti, pred = Murder, modx = Illiteracy,
+                  modx.values = "plus-minus")
+# 3-way interaction
+fiti3 &lt;- lm(Income ~ Frost * Murder * Illiteracy,
+  data=as.data.frame(state.x77))
+probe_interaction(model = fiti3, pred = Murder, modx = Illiteracy,
+                  mod2 = Frost, mod2.values = "plus-minus")
+
+# With svyglm
+if (requireNamespace("survey")) {
+library(survey)
+data(api)
+dstrat &lt;- svydesign(id = ~1, strata = ~stype, weights = ~pw,
+                    data = apistrat, fpc = ~fpc)
+regmodel &lt;- svyglm(api00 ~ ell * meals + sch.wide, design = dstrat)
+probe_interaction(model = regmodel, pred = ell, modx = meals,
+                  modx.values = "plus-minus", cond.int = TRUE)
+
+# 3-way with survey and factor input
+regmodel3 &lt;- svyglm(api00 ~ ell * meals * sch.wide, design = dstrat)
+probe_interaction(model = regmodel3, pred = ell, modx = meals,
+                  mod2 = sch.wide)
+# Can try different configurations of 1st vs 2nd mod
+probe_interaction(model = regmodel3, pred = ell, modx = sch.wide,
+                  mod2 = meals)
+}
+
+</code></pre>
+
+
+</div>

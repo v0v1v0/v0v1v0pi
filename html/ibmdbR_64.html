@@ -1,0 +1,209 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>idaTree</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Decision and Regression tree</h2>
+
+<h3>Description</h3>
+
+<p>This function generates a tree model based on the contents of an IDA data frame (<code>ida.data.frame</code>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">idaTree( form, data, id, minsplit=50, maxdepth=10, qmeasure=NULL,
+         minimprove=0.01, eval=NULL, valtable=NULL, modelname=NULL)
+
+
+## S3 method for class 'idaTree'
+plot(x,...)  
+## S3 method for class 'idaTree'
+predict(object, newdata, id, ...)  
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>form</code></td>
+<td>
+<p>A <code>formula</code> object that specifies both the name of the column that contains the categorical 
+target variable and either a list of columns separated by plus symbols (each column corresponds to one predictor 
+variable) or a single period (to specify that all other columns in the IDA data frame are to be used as predictors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>An IDA data frame that contains the input data for the function. The input IDA data frame 
+must include a column that contains a unique ID for each row.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>The name of the column that contains a unique ID for each row of the input data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minsplit</code></td>
+<td>
+<p>The minimum number of rows a node must contain to be split further.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxdepth</code></td>
+<td>
+<p>The maximum depth (that is, the number of hierarchical levels) of the generated tree.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qmeasure</code></td>
+<td>
+<p>The measure that is to be used to prune the tree. 
+For a decision tree, allowed values are <code>"Acc"</code> (this is the default) and <code>"wAcc"</code>. 
+For a regression tree, allowed values are <code>"mse"</code> (this is the default), <code>"r2"</code>, <code>"pearson"</code>, and <code>"spearman"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minimprove</code></td>
+<td>
+<p>The minimum improvement. A node is not split further unless the split improves the 
+class impurity by at least the amount specified for this parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eval</code></td>
+<td>
+<p>The criterion that is to be used to calculate each split.
+For a decision tree, allowed values are <code>"entropy"</code> (this is the default) and <code>"gini"</code>.
+For a regression tree, the only allowed value is <code>"variance"</code> (this is the default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>valtable</code></td>
+<td>
+<p>When the output tree is to be pruned using external data, use this parameter 
+to specify the fully-qualified name of the table that contains that data. Otherwise, specify NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modelname</code></td>
+<td>
+<p>The name under which the model is stored in the database.
+This is the name that is specified when using functions such as <code>idaRetrieveModel</code> or <code>idaDropModel</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>An object of the class <code>idaTree</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of the class <code>idaTree</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p>A IDA data frame that contains the data to which to apply the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments to be passed to plot or predict.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The idaTree function uses a top-down, iterative procedure to generate a decision-tree or regression-tree model,
+depending on the type of the target variable. The resulting model comprises a network of nodes and connectors, 
+and each subnode is the endpoint of a binary split.
+</p>
+<p>A node is not split further when any of the following are true:
+</p>
+
+<ul>
+<li>
+<p> The node has a uniform class (and therefore cannot be split further).
+</p>
+</li>
+<li>
+<p> Additional splits do not improve the class impurity by at least the amount specified by <code>minimprove</code>.
+</p>
+</li>
+<li>
+<p> The number of rows contained by the node is less than the value specified by <code>minsplit</code>.
+</p>
+</li>
+<li>
+<p> The tree depth reaches the value specified by <code>maxdepth</code>.
+</p>
+</li>
+</ul>
+<p>If variable that is used to determine a split does not have a value, the corresponding row remains in the node that is being split.
+</p>
+<p>The output of the print function for a idaTree object is a textual description of the corresponding model.
+</p>
+<p>The output of the plot function for a idaTree object is a graphical representation of the corresponding model.
+</p>
+<p>Models are stored persistently in the database under the name <code>modelname</code>. Model names cannot have more than 64 characters and
+cannot contain white spaces. They need to be quoted like table names, otherwise they will be treated upper case by default. Only one
+model with a given name is allowed in the database at a time. If a model with <code>modelname</code> already exists, you need to drop it with <code>idaDropModel</code>
+first before you can create another one with the same name. The model name can be used to retrieve the model later (<code>idaRetrieveModel</code>).
+</p>
+<p>The <code>predict.idaTree</code> method applies the model to the data in a table and returns a IDA data frame that contains
+a list of tuples, each of which comprises one row ID and one prediction.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The idaTree function returns an object of classes <code>idaTree</code> and <code>rpart</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>idaRetrieveModel</code>, <code>idaDropModel</code>, <code>idaListModels</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+
+#Create a pointer to the table IRIS
+idf &lt;- ida.data.frame('IRIS')
+
+#Create a tree model
+tr &lt;- idaTree(Species~.,idf,"ID",modelname="MYTREEMODEL")
+
+#Print the model
+print(tr)
+
+#Plot the model
+plot(tr)
+
+#Apply the model to data
+pred &lt;- predict(tr,idf,id="ID")
+
+#Inspect the predictions
+head(pred)
+
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

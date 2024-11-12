@@ -1,0 +1,163 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>gendata</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Data generator for intrinsic dimension estimation.</h2>
+
+<h3>Description</h3>
+
+<p><code>gendata</code> generates various artificial datasets for intrinsic dimension estimation experiments.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">gendata(
+  DataName = "SwissRoll",
+  n = 300,
+  p = NULL,
+  noise = NULL,
+  ol = NULL,
+  curv = 1,
+  seed = 123,
+  sorted = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>DataName</code></td>
+<td>
+<p>Name of dataset, one of the following: 
+</p>
+
+<ul>
+<li>
+<p> SwissRoll: SwissRoll data, 2D manifold in 3D space.
+</p>
+</li>
+<li>
+<p> NDSwissRoll: Non-deformable SwissRoll data, 2D manifold in 3D space.
+</p>
+</li>
+<li>
+<p> Moebius: Moebius strip, 2D manifold in 3D space.
+</p>
+</li>
+<li>
+<p> SphericalShell: Spherical Shell, (p-1)-dimensional manifold in p-dimensional space.
+</p>
+</li>
+<li>
+<p> Sinusoidal: Sinusoidal data, 1D manifold in 3D space.
+</p>
+</li>
+<li>
+<p> Spiral: Spiral-shaped 1D manifold in 2D space.
+</p>
+</li>
+<li>
+<p> Cylinder: Cylinder-shaped 2D manifold in 3D space.
+</p>
+</li>
+<li>
+<p> SShape: S-shaped 2D manifold in 3D space.
+</p>
+</li>
+<li>
+<p> ldbl: LDB(line - disc - filled ball - line), embedded in 3D space (original dataset).
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>number of data points to be generated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>ambient dimension of the dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>noise</code></td>
+<td>
+<p>parameter to control noise level in the dataset. In many cases,
+it is used for <code>sd</code> of <code>rnorm</code> used inside the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ol</code></td>
+<td>
+<p>percentage of outliers, i.e., n * ol outliers are added to the generated dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>curv</code></td>
+<td>
+<p>a parameter to control the complexity of the embedded manifold.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>random number seed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sorted</code></td>
+<td>
+<p>logical. If <code>TRUE</code>, the index of the generated dataset is sorted
+with respect to x-axis for the ease of visualization.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function generates various artificial datasets often used in 
+manifold learning and dimension estimation researches.
+For some datasets, complexity of the shape is controlled by the parameter <code>curv</code>.
+The parameters <code>noise</code> and <code>outlier</code> are used for adding noise and/or 
+outliers for the dataset.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Data matrix. For <code>ldbl</code> dataset, it outputs a list composed of
+<code>x</code>: data matrix and <code>tDim</code>: true intrinsic dimension for each point.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Hideitsu Hino <a href="mailto:hideitsu.hino@gmail.com">hideitsu.hino@gmail.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## global intrinsic dimension estimate
+x &lt;- gendata(DataName='SwissRoll')
+estmle &lt;- lbmle(x=x,k1=3,k2=5)
+print(estmle)
+
+## local intrinsic dimension estimate
+tmp &lt;- gendata(DataName='ldbl',n=1000)
+x &lt;- tmp$x
+estmada &lt;- mada(x=x,local=TRUE)
+head(estmada)  ## estimated local intrinsic dimensions
+head(tmp$tDim) ## true local intrinsic dimensions
+</code></pre>
+
+
+</div>

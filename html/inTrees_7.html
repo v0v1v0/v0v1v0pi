@@ -1,0 +1,92 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>formatGBM</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+internal
+</h2>
+
+<h3>Description</h3>
+
+<p>internal
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">formatGBM(gbmList, splitBin,X)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>gbmList</code></td>
+<td>
+
+
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>splitBin</code></td>
+<td>
+
+
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+
+<p>predictor variable matrix
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>No return value
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##---- Should be DIRECTLY executable !! ----
+##-- ==&gt;  Define data, use random,
+##--	or do  help(data=index)  for the standard data sets.
+
+## The function is currently defined as
+function (gbmList, splitBin,X) 
+{
+    for (j in 1:length(gbmList$list)) {
+        a &lt;- gbmList$list[[j]]
+        rownames(a) &lt;- 1:nrow(a)
+        a$status &lt;- a$SplitVar
+        a &lt;- a[, c("LeftNode", "RightNode", "MissingNode", "SplitVar", 
+            "SplitCodePred", "status")]
+        a[which(a[, "SplitVar"] &gt;= 0), c("SplitVar", "LeftNode", 
+            "RightNode", "MissingNode")] &lt;- a[which(a[, "SplitVar"] &gt;= 
+            0), c("SplitVar", "LeftNode", "RightNode", "MissingNode")] + 
+            1
+        ix &lt;- a$MissingNode[which(a$MissingNode &gt; 0)]
+        if (length(ix) &gt; 0) 
+            a$status[ix] &lt;- 10
+        a &lt;- a[, c("LeftNode", "RightNode", "SplitVar", "SplitCodePred", 
+            "status")]
+        cat &lt;- which(sapply(X, is.factor) &amp; !sapply(X, is.ordered))
+        ix &lt;- which(a[, "SplitVar"] %in% cat)
+        for (i in ix) a[i, "SplitCodePred"] &lt;- splitBin[a[i, 
+            "SplitCodePred"] + 1]
+        colnames(a) &lt;- c("left daughter", "right daughter", "split var", 
+            "split point", "status")
+        gbmList$list[[j]] &lt;- a
+    }
+    return(gbmList)
+  }
+</code></pre>
+
+
+</div>

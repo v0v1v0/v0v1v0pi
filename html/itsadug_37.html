@@ -1,0 +1,179 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot_parametric</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Visualization of group estimates.</h2>
+
+<h3>Description</h3>
+
+<p>Plots a smooth from a <code>gam</code> or 
+<code>bam</code> model based on predictions.
+In contrast with the default <code>plot.gam</code>, this function 
+plots the summed effects and optionally removes the random effects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">plot_parametric(
+  x,
+  pred,
+  cond = list(),
+  parametricOnly = FALSE,
+  rm.ranef = TRUE,
+  col = "black",
+  se = 1.96,
+  print.summary = getOption("itsadug_print"),
+  main = NULL,
+  xlab = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A gam object, produced by <code>gam</code> or 
+<code>bam</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pred</code></td>
+<td>
+<p>A named list of the values to use for the predictor terms 
+to plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cond</code></td>
+<td>
+<p>A named list of the values to use for the other predictor terms 
+(not in view). Used for choosing between smooths that share the same view 
+predictors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parametricOnly</code></td>
+<td>
+<p>Logical: whether or not to cancel out all smooth 
+terms and only use the predictors in the parametric summary.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rm.ranef</code></td>
+<td>
+<p>Logical: whether or not to remove random effects. 
+Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p>The colors for the lines and the error bars of the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se</code></td>
+<td>
+<p>If less than or equal to zero then only the predicted surface is 
+plotted, but if greater than zero, then the predicted values plus 
+confidence intervals are plotted. The value of se will be multiplied with 
+the standard error (i.e., 1.96 results in 95%CI and 2.58).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print.summary</code></td>
+<td>
+<p>Logical: whether or not to print summary.
+Default set to the print info messages option 
+(see <code>infoMessages</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p>Changing the main title for the plot, see also title.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>Changing the label for the x axis, 
+defaults to a description of x.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other options to pass on to <code>dotplot_error</code>, 
+see <code>par</code></p>
+</td>
+</tr>
+</table>
+<h3>Warning</h3>
+
+<p>Use <code>parametricOnly</code> with care! When set to TRUE, all smooth 
+predictors are set to 0. Note that this might result in strange 
+predictions, because a value of 0 does not always represents a realistic 
+situation (e.g., body temperature of 0 is highly unlikely).  
+Note that linear slopes are not set to zero, because they are 
+considered as parametric terms. If <code>cond</code> does not specify a value for 
+these continuous predictors, the closes value to the mean is automatically  
+selected.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jacolien van Rij, based on a function of Fabian Tomaschek
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot.gam</code>
+</p>
+<p>Other Functions for model inspection: 
+<code>dispersion()</code>,
+<code>fvisgam()</code>,
+<code>gamtabs()</code>,
+<code>inspect_random()</code>,
+<code>plot_data()</code>,
+<code>plot_smooth()</code>,
+<code>plot_topo()</code>,
+<code>pvisgam()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(simdat)
+## Not run: 
+m1 &lt;- bam(Y ~ Group + te(Time, Trial, by=Group)
+    + s(Time, Subject, bs='fs', m=1), data=simdat)
+plot_parametric(m1, pred=list(Group=c('Adults', 'Children')))
+# Note the summary that is printed.
+
+# use rm.ranef to cancel random effects:
+plot_parametric(m1, pred=list(Group=c('Adults', 'Children')),
+    rm.ranef = TRUE)
+
+# It is possible to get estimates that do not make sense:
+out &lt;- plot_parametric(m1, 
+    pred=list(Group=c('Adults', 'Children'), Subject=c('a01', 'a02', 'c01')))
+print(out)
+
+## End(Not run)
+
+# see the vignette for examples:
+vignette('overview', package='itsadug')
+</code></pre>
+
+
+</div>

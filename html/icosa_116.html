@@ -1,0 +1,99 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>surfacecentroid</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Surface centroid point of a spherical point cloud</h2>
+
+<h3>Description</h3>
+
+<p>This function the projected place of the centroid from a pointset on the sphere.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">surfacecentroid(x, ...)
+
+## S4 method for signature 'matrix'
+surfacecentroid(x, output = "polar", center = c(0, 0, 0), radius = authRadius)
+
+## S4 method for signature 'data.frame'
+surfacecentroid(x, ...)
+
+## S4 method for signature 'SpatialPoints'
+surfacecentroid(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>(<code>matrix</code> or <code>data.frame</code>) Numeric data, XYZ or longitude-latitude coordinates of the set of points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arguments passed to the <code>matrix</code>-method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output</code></td>
+<td>
+<p>(<code>character</code>) The coordinate system of the output points. Can either be <code>"polar"</code> for
+longitude-latitude or <code>"cartesian"</code> for XYZ data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>center</code></td>
+<td>
+<p>(<code>numeric</code>) The center of the sphere in XYZ coordinates (default is 0,0,0).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>radius</code></td>
+<td>
+<p>(<code>numeric</code>) The radius of the circle in case the input points have only polar coordinates.
+Unused when XYZ coordinates are entered. Defaults to the authalic radius of Earth ca. 6371.007km.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function implements great circle calculations to infer on the place of the centroid, which makes it resource demanding. This is necessary
+to avoid a particual error that frequently occurrs with other methods for centroid calculation, namely that the place of the centroid is right,
+but on the opposite hemisphere.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Either an XYZ or a long-lat <code>numeric</code> vector.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># generate some random points
+allData &lt;- rpsphere(1000)
+# select only a subset
+points&lt;-allData[allData[,3]&gt;1500,]
+# transform to 2d
+ points2 &lt;- CarToPol(points, norad=TRUE)
+# the spherical centroid
+sc &lt;- surfacecentroid(points2, output="polar")
+sc
+
+#3d plot
+plot(points2, xlim=c(-180, 180), ylim=c(-90, 90))
+points(sc[1], sc[2], col="red", cex=5, pch=3)
+
+</code></pre>
+
+
+</div>

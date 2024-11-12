@@ -1,0 +1,116 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>expandYearlyCosts</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Expand cost values per year of the database over relevant periods of impact</h2>
+
+<h3>Description</h3>
+
+<p>For costs that occur over several years, this function repeats the 
+cost value per year over each year of the relevant period of impact.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">expandYearlyCosts(costdb, startcolumn, endcolumn)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>costdb</code></td>
+<td>
+<p>The <b>'InvaCost' database</b>, usually obtained with
+<code>data(invacost)</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>startcolumn</code></td>
+<td>
+<p>Name of the column containing starting years</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>endcolumn</code></td>
+<td>
+<p>Name of the column containing ending years</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A <code>data.frame</code> containing the 'InvaCost' database where 
+all costs occurring over several years are repeated for each year.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Information on the beginning and ending years was not directly provided in
+literature sources of economic costs for a substantial part of entries in the 
+database (<code>Probable_starting_year</code> and <code>Probable_ending_year 
+columns</code>). 
+Therefore, for papers for which this information was not available,  
+educated guesses were made by the 'InvaCost' team on the probable starting 
+and ending years. These educated guesses were designed 
+to be conservative, and make no assumption as of whether the economic impacts 
+have been continued after the publication year of the material where the cost
+was collected.
+Therefore, we used the publication year as the probable ending year. For 
+costs repeated over several years but for which no information with respect 
+to the exact periods of impact was available, we counted only a single year.
+These educated guesses are included in the columns (columns 
+<code>Probable_starting_year_adjusted</code> and 
+<code>Probable_ending_year_adjusted</code>), and we recommend using them the base 
+scenario, as its conservative assumptions limit over-estimations of the 
+costs.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Boris Leroy <a href="mailto:leroy.boris@gmail.com">leroy.boris@gmail.com</a>, Andrew Kramer, Anne-Charlotte
+Vaissière, Christophe Diagne
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://github.com/Farewe/invacost">https://github.com/Farewe/invacost</a>
+</p>
+<p>Leroy Boris, Kramer Andrew M, Vaissière Anne-Charlotte, Kourantidou Melina,
+Courchamp Franck &amp; Diagne Christophe (2022). Analysing economic costs 
+of invasive alien species with the invacost R package. Methods in Ecology
+and Evolution. <a href="https://doi.org/10.1111/2041-210X.13929">doi:10.1111/2041-210X.13929</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(invacost) 
+
+### Cleaning steps
+# Eliminating data with no information on starting and ending years
+invacost &lt;- invacost[-which(is.na(invacost$Probable_starting_year_adjusted)), ]
+invacost &lt;- invacost[-which(is.na(invacost$Probable_ending_year_adjusted)), ]
+# Keeping only observed and reliable costs
+invacost &lt;- invacost[invacost$Implementation == "Observed", ]
+invacost &lt;- invacost[which(invacost$Method_reliability == "High"), ]
+# Eliminating data with no usable cost value
+invacost &lt;- invacost[-which(is.na(invacost$Cost_estimate_per_year_2017_USD_exchange_rate)), ]
+
+### Expansion
+
+db.over.time &lt;- expandYearlyCosts(invacost,
+                                  startcolumn = "Probable_starting_year_adjusted",
+                                  endcolumn = "Probable_ending_year_adjusted")
+                                  
+</code></pre>
+
+
+</div>

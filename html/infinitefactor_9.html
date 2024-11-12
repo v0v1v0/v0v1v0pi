@@ -1,0 +1,245 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>interactionMGSP</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Factor regression model with interactions using the Multiplicative Gamma Shrinkage Prior
+</h2>
+
+<h3>Description</h3>
+
+<p>Perform a regression of y onto X and all 2 way interactions in X using the latent factor model introduced in Ferrari and Dunson (2020). This version uses the Multiplicative Gamma Shrinkage Prior introduced in Bhattacharya and Dunson (2011).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">interactionMGSP(y, X, nrun, burn, thin = 1, 
+              delta_rw = 0.0526749, a = 1/2, k = NULL, 
+              output = c("covMean", "covSamples", "factSamples", 
+              "sigSamples", "coefSamples","errSamples"), 
+              verbose = TRUE, dump = FALSE, filename = "samps.Rds", 
+              buffer = 10000, adapt = "burn", augment = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>response vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>predictor matrix (n x p).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nrun</code></td>
+<td>
+<p>number of iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>burn</code></td>
+<td>
+<p>burn-in period.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thin</code></td>
+<td>
+<p>thinning interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta_rw</code></td>
+<td>
+<p>metropolis-hastings proposal variance.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+<p>shrinkage hyperparameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>number of factors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output</code></td>
+<td>
+<p>output type, a vector including some of: c("covMean", "covSamples", "factSamples", "sigSamples", "coefSamples", "numFactors", "errSamples").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>logical. Show progress bar?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dump</code></td>
+<td>
+<p>logical. Save samples to a file during sampling?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filename</code></td>
+<td>
+<p>if dump: filename to address list of posterior samples</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>buffer</code></td>
+<td>
+<p>if dump: how often to save samples</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adapt</code></td>
+<td>
+<p>logical or "burn". Adapt proposal variance in metropolis hastings step? if "burn", will adapt during burn in and not after.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>augment</code></td>
+<td>
+<p>additional sampling steps as an expression</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>some of:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>covMean</code></td>
+<td>
+<p>X covariance posterior mean</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>omegaSamps</code></td>
+<td>
+<p>X covariance posterior samples</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambdaSamps</code></td>
+<td>
+<p>Posterior factor loadings samples (rotationally ambiguous)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>etaSamps</code></td>
+<td>
+<p>Posterior factor samples (rotationally ambiguous)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigmaSamps</code></td>
+<td>
+<p>Posterior marginal variance samples (see notation in Bhattacharya and Dunson (2011))</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phiSamps</code></td>
+<td>
+<p>Posterior main effect coefficient samples in factor form (rotationally ambiguous)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PsiSamps</code></td>
+<td>
+<p>Posterior interaction effect coefficient samples in factor form (rotationally ambiguous)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interceptSamps</code></td>
+<td>
+<p>Posterior induced intercept samples</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mainEffectSamps</code></td>
+<td>
+<p>Posterior induced main effect coefficient samples</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interactionSamps</code></td>
+<td>
+<p>Posterior induced interaction coefficient samples</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ssySamps</code></td>
+<td>
+<p>Posterior irreducible error samples</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Evan Poworoznek
+</p>
+<p>Federico Ferrari</p>
+
+
+<h3>References</h3>
+
+<p>Ferrari, Federico, and David B. Dunson. "Bayesian Factor Analysis for Inference on Interactions." arXiv preprint arXiv:1904.11603 (2019).
+</p>
+<p>Bhattacharya, Anirban, and David B. Dunson. "Sparse Bayesian infinite factor models." Biometrika (2011): 291-306.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>interactionMGSP</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">k0 = 5
+p = 20
+n = 50
+
+lambda = matrix(rnorm(p*k0, 0, 0.01), ncol = k0)
+lambda[sample.int(p, 40, replace = TRUE) +
+         p*(sample.int(k0, 40, replace = TRUE)-1)] = rnorm(40, 0, 1)
+lambda[1:7, 1] = rnorm(7, 2, 0.5)
+lambda[8:14, 2] = rnorm(7, -2, 0.5)
+lambda[15:20, 3] = rnorm(6, 2, 0.5)
+lambda[,4] = rnorm(p, 0, 0.5)
+lambda[,5] = rnorm(p, 0, 0.5)
+plotmat(varimax(lambda)[[1]])
+
+X = matrix(rnorm(n*k0),n,k0)%*%t(lambda) + matrix(rnorm(n*p), n, p)
+
+beta_true = numeric(p); beta_true[c(1,3,6,8,10,11)] =c(1,1,0.5,-1,-2,-0.5)
+Omega_true = matrix(0,p,p)
+Omega_true[1,2] = 1; Omega_true[5,2] = -1; Omega_true[10,8] = 1; 
+Omega_true[11,5] = -2; Omega_true[1,1] = 0.5; 
+Omega_true[2,3] = 0.5; 
+Omega_true = Omega_true + t(Omega_true)
+y = X%*%beta_true + diag(X%*%Omega_true%*%t(X)) +  rnorm(n,0.5)
+
+intmgsp = interactionMGSP(y, X, 1000, 500, k = 5)
+</code></pre>
+
+
+</div>

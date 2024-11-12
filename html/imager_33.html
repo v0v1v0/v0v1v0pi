@@ -1,0 +1,112 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>as.raster.cimg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Convert a cimg object to a raster object for plotting</h2>
+
+<h3>Description</h3>
+
+<p>raster objects are used by R's base graphics for plotting. R wants hexadecimal RGB values for plotting, e.g. gray(0) yields #000000, meaning black. If you want to control precisely how numerical values are turned into colours for plotting, you need to specify a colour scale using the colourscale argument (see examples). Otherwise the default is "gray" for grayscale images, "rgb" for colour. These expect values in [0..1], so the default is to rescale the data to [0..1]. If you wish to over-ride that behaviour, set rescale=FALSE.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'cimg'
+as.raster(
+  x,
+  frames,
+  rescale = TRUE,
+  colourscale = NULL,
+  colorscale = NULL,
+  col.na = rgb(0, 0, 0, 0),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an image (of class cimg)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>frames</code></td>
+<td>
+<p>which frames to extract (in case depth &gt; 1)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rescale</code></td>
+<td>
+<p>rescale so that pixel values are in [0,1]? (subtract min and divide by range). default TRUE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colourscale</code></td>
+<td>
+<p>a function that returns RGB values in hexadecimal</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colorscale</code></td>
+<td>
+<p>same as above in American spelling</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.na</code></td>
+<td>
+<p>which colour to use for NA values, as R rgb code. The default is "rgb(0,0,0,0)", which corresponds to a fully transparent colour.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>ignored</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a raster object
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Simon Barthelme
+</p>
+
+
+<h3>See Also</h3>
+
+<p>plot.cimg, rasterImage
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#A raster is a simple array of RGB values
+as.raster(boats) %&gt;% str
+#By default as.raster rescales input values, so that:
+all.equal(as.raster(boats),as.raster(boats/2)) #TRUE
+#Setting rescale to FALSE changes that
+as.raster(boats,rescale=FALSE) %&gt;% plot
+as.raster(boats/2,rescale=FALSE) %&gt;% plot
+#For grayscale images, a colourmap should take a single value and
+#return  an RGB code
+#Example: mapping grayscale value to saturation
+cscale &lt;- function(v) hsv(.5,v,1)
+grayscale(boats) %&gt;% as.raster(colourscale=cscale) %&gt;% plot
+</code></pre>
+
+
+</div>

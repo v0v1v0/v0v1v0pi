@@ -1,0 +1,84 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ch2matrix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Convert capture histories in text format to a matrix
+</h2>
+
+<h3>Description</h3>
+
+<p>The function takes capture histories in any of the following formats and converts it to a matrix of integers with one column for each capture occasion and one row for each capture history.
+</p>
+<p>Possible formats for <code>ch</code> are:
+</p>
+<p>1a. a proper CH matrix: numeric, &gt; 1 column – returned unchanged.<br>
+1b. the same, as a data frame.
+</p>
+<p>2a. a character vector with "100110", "001100", etc, consisting entirely of digits (no letters, spaces, or symbols).<br>
+2b. the same, as a factor.<br>
+2c. a numeric vector with 100110, 1100, etc (leading zeros dropped).
+</p>
+<p>3a. a 1-column data frame with 2a, b or c.<br>
+3b. a 1-column matrix with 2a or 2c.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ch2matrix(ch)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>ch</code></td>
+<td>
+
+<p>capture histories in a suitable format, see Description.
+</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p>A matrix of integers with one column for each capture occasion and one row for each capture history.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Mike Meredith
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Create some example data
+raw &lt;- c("1000", "1000", "1100", "1100", "1100", "1110",
+  "0110", "0110", "0111", "0101", "0010", "0011", "0001")
+
+ch1 &lt;- ch2matrix(raw)                 # character vector
+cbind(raw, ch1)
+ch &lt;- ch2matrix(factor(raw))          # factor
+all(ch == ch1)
+ch &lt;- ch2matrix(as.numeric(raw))      # numeric
+all(ch == ch1)
+ch &lt;- ch2matrix(matrix(raw, ncol=1))  # 1 column matrix
+all(ch == ch1)
+ch &lt;- ch2matrix(data.frame(raw=raw))  # 1 column data frame
+all(ch == ch1)
+
+# Error messages:
+try(ch2matrix(matrix(rep(raw, 2), ncol=2)))     # 2 column matrix -&gt; error
+try(ch2matrix(data.frame(raw=raw, dummy=raw)))  # 2 column data frame -&gt; error
+
+raw[2] &lt;- "11000"          # wrong length
+try(ch2matrix(raw))        # error
+ch2matrix(as.numeric(raw)) # this works, leading zeros not expected.
+</code></pre>
+
+
+</div>

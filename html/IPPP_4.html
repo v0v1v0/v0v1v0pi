@@ -1,0 +1,125 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>IPPPconddens</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Conditional Probability Density Given the Location of one Event</h2>
+
+<h3>Description</h3>
+
+<p>Given knowledge of the location of one event, this function determines the probability density function (pdf) of the distribution of the n-th point above/below
+the known event.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">IPPPconddens(x, pointlocation, xrate, yrate, nthpoint = 1, mode = "forward")</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Points at which the values of the pdf are determined</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pointlocation</code></td>
+<td>
+<p>Location of the known event</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xrate</code></td>
+<td>
+<p>Vector of (strictly increasing) real numbers</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yrate</code></td>
+<td>
+<p>Vector of strictly positive real numbers of the same length as xrate. The vectors xrate and yrate form the rate function r in the sense that r=approxfun(xrate,yrate)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nthpoint</code></td>
+<td>
+<p>OPTIONAL, default is 1. Setting this to a value i will determine the pdf of the ith event above/below the event at the position pointlocation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mode</code></td>
+<td>
+<p>OPTIONAL, default is "forward". Determines whether the pdf for points above(right) the known event is determined (mode="forward"), or whether the pdf for points below(left) the known event is determined (mode="backward")</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The value of the rate function r below min(xrate) is set to r(min(xrate)), and for values above max(xrate) it is set to r(max(xrate)). Both r(min(xrate)) and r(max(xrate)) need to be strictly positive for the results to be correct.</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a list containing two entries:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code> x </code></td>
+<td>
+<p>Duplicate of the input of the same name</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code> densval </code></td>
+<td>
+<p>Vector consisting of the values of the conditional probability density, evaluated at x</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Niklas Hohmann</p>
+
+
+<h3>References</h3>
+
+<p>Hohmann, Niklas. "Conditional Densities and Simulations of Inhomogeneous Poisson Point Processes: The R package "IPPP"" arXiv 2019. &lt;arXiv:1901.10754&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>IPPPnthpointdens</code> for the probability density of the location of the of the n-th event, given that a fixed number of events occur.
+</p>
+<p><code>vignette("IPPP")</code> for an overview of the features of the IPPP package and some background.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#define rate function
+xrate=seq(0,2*pi,length.out=1000)
+yrate=sin(xrate)+1.01
+plot(xrate,yrate,type="l",main="Rate Function")
+#define known event:
+pointlocation=3
+lines(c(3,3),c(0,3),lwd=3)
+#values where the density is calulated:
+x=xrate
+#simulate the pdf of the event above the known event:
+r1=IPPPconddens(x,pointlocation,xrate,yrate)
+lines(r1$x,r1$densval,col="red",lwd=3)
+#simulate the pdf of the event below the known event:
+r2=IPPPconddens(x,pointlocation,xrate,yrate,mode="backward")
+lines(r2$x,r2$densval,col="blue",lwd=3)
+#simulate the pdf of the third event below the known event:
+r2=IPPPconddens(x,pointlocation,xrate,yrate,mode="backward",nthpoint=3)
+lines(r2$x,r2$densval,col="green",lwd=3)
+</code></pre>
+
+
+</div>

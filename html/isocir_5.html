@@ -1,0 +1,110 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cirgenes</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>A set of angular measurements from cell-cycle experiments with genes.</h2>
+
+<h3>Description</h3>
+
+<p>A data set taken from some cell-cycle experiments with the purpose of running some examples of the functions of the package <b>isocir</b>.  See details.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">data(cirgenes)</code></pre>
+
+
+<h3>Format</h3>
+
+<p>The set has a single element:
+</p>
+
+<dl>
+<dt><code>cirgenes</code></dt>
+<dd>
+<p>a matrix with the measures of several cell-cycle experiments.</p>
+</dd>
+</dl>
+<h3>Details</h3>
+
+<p>This data are located in the unit circle <code class="reqn">[0,2\pi]</code>.  
+</p>
+<p>That matrix <code>cirgenes</code>  has in its rows the peak expression points for the genes, see Source.  The columns of the matrix are the experiments.  There are 16 genes (rows) and 10 experiments (columns).  The experiments are not held under the same conditions so that the data cannot be considered as replications.
+</p>
+
+
+<h3>Source</h3>
+
+<p>Initially, the data come from the experiments of Oliva et al. (2005), Peng et al. (2005) and Rustici et al. (2004).  They are the observed points of peak expressions of some genes along the cell cycle of the S. Pombe yeast and have been obtained using the Random Periods Model developed in Liu et al. (2004).   The source of that data is http://www.cyclebase.org/CyclebaseSearch, Gauthier (2007).
+</p>
+
+
+<h3>References</h3>
+
+<p>Fernandez, M. A., Rueda, C. and Peddada, S. D. (2012).
+Identification of a core set of signature cell cycle genes whose relative order of time to peak expression is conserved across
+species, <em>Nucl. Acids Res.</em> <b>40</b>, n7: pp 2823–2832. doi:10.1093/nar/gkr1077.
+<a href="https://academic.oup.com/nar/article/40/7/2823/1183140">https://academic.oup.com/nar/article/40/7/2823/1183140</a>
+</p>
+<p>Gauthier, N. (2007). 
+Cyclebase.org - A Comprehensive Multi-Organism Online Database of Cell-Cycle Experiments.
+<em>Nucleic Acids Research</em>. <b>36</b>, pp 854–859. http://www.cyclebase.org/CyclebaseSearch.
+</p>
+<p>Liu, D., Umbach, D., Peddada, S., Li, L., Crockett, P., Weinberg, C. (2004). 
+A Random Periods Model for Expression of Cell-Cycle Genes.
+<em>The National Academy of Sciences of the USA</em>. <b>101</b>(19), pp 7240–7245.
+</p>
+<p>Oliva, A., Rosebrock, A., Ferrezuelo, F., Pyne, S., Chen, H., Skiena, S., Futcher, B. and Leatherwood, J. (2005). 
+The Cell Cycle-Regulated Genes of Schizosaccharomyces pombe.
+<em>Plos biology</em>. <b>3</b>.
+</p>
+<p>Peng, X., Karuturi, R., Miller, L., Lin, K., Jia, Y., Kondu, P., Wang, L., Wong, L., Liu, E., Balasubramanian, M. and Liu, J. (2005). 
+Identification of Cell Cycle-Regulated Genes in Fission Yeast. 
+<em>The American Society for Cell Biology</em>. <b>16</b>, pp 1026–1042.
+</p>
+<p>Rustici, G., Mata, J., Kivinen, K., Lio, P., Penkett, C., Burns, G., Hayles, J., Brazma, A., Nurse, P., and Bahler, J. (2004). 
+Periodic Gene Expression program of the fission yeast cell cycle. 
+<em>Nature Genetics</em>. <b>36</b>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>datareplic</code>, <code>cirdata</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(cirgenes)
+
+# These values of kappa estimations were obtained by using the calculations
+# explained in Fern?ndez et al (2012).
+
+kappas &lt;- c(2.64773, 3.24742, 2.15936, 4.15314, 4.54357,
+               29.07610, 6.51408, 14.19445, 5.66920, 11.12889)
+
+allresults &lt;- list()
+resultIsoCIRE &lt;- matrix(ncol = ncol(cirgenes), nrow = nrow(cirgenes))
+
+SCEs &lt;- vector(mode = "numeric", length = nrow(cirgenes))
+pvalues &lt;- vector(mode = "numeric", length = nrow(cirgenes))
+
+for (i in 1 : nrow(cirgenes)) {
+    k &lt;- kappas[i]
+    genes &lt;- as.numeric(cirgenes[i, ])
+    allresults[[i]] &lt;- cond.test(genes, groups=c(1:length(genes)), kappa = k)
+    resultIsoCIRE[i, !is.na(cirgenes[i, ])] &lt;- round(unlist(allresults[[i]]$CIRE), digits = 3)
+    SCEs[i] &lt;- allresults[[i]]$SCE
+    pvalues[i] &lt;- allresults[[i]]$pvalue
+ }
+
+# resultIsoCIRE is a matrix with the CIRE for each experiment
+# pvalues is a vector with the result of the test
+
+</code></pre>
+
+
+</div>

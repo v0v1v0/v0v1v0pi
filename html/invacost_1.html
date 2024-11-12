@@ -1,0 +1,170 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>computeAvgTotCost</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate the cumulative and average annual cost over a single period of time</h2>
+
+<h3>Description</h3>
+
+<p>This simple function calculates the cumulative cost average annual cost of
+invasive alien species over a single period of time. It is used internally
+by <code>summarizeCosts</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">computeAvgTotCost(
+  costdb,
+  cost.column = "Cost_estimate_per_year_2017_USD_exchange_rate",
+  year.column = "Impact_year",
+  min.year = NULL,
+  max.year = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>costdb</code></td>
+<td>
+<p>The <b>expanded 'InvaCost' database</b> output from 
+<code>expandYearlyCosts</code>,
+where annual costs occurring over several years are repeated for each year.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cost.column</code></td>
+<td>
+<p>Name of the cost column to use in <code>costdb</code> (usually, 
+choose between the exchange rate (default) or Purchase Power Parity cost per 
+year)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>year.column</code></td>
+<td>
+<p>Name of the year column to use in <code>costdb</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.year</code></td>
+<td>
+<p>The minimum year of the period (specify only if different from
+the range of data)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.year</code></td>
+<td>
+<p>The minimum year of the period (specify only if different from
+the range of data)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a named <code>list</code> with 5 elements
+</p>
+
+<ul>
+<li>
+<p><code>initial_year</code>: first year in the data
+</p>
+</li>
+<li>
+<p><code>final_year</code>: last year in the data
+</p>
+</li>
+<li>
+<p><code>time_span</code>: the difference between initial and final years.
+</p>
+</li>
+<li>
+<p><code>total_cost</code>: total cost.
+</p>
+</li>
+<li>
+<p><code>annual.cost</code>: cost per year
+</p>
+</li>
+<li>
+<p><code>number_estimates</code>: the number of cost estimates before expansion 
+via <code>expandYearlyCosts</code>
+</p>
+</li>
+<li>
+<p><code>number_year_values</code>: the number of costs per year included
+</p>
+</li>
+</ul>
+<h3>Note</h3>
+
+<p>Arguments <code>min.year</code> and <code>max.year</code> do not filter the data. Only 
+specify them if you wish to change the interval over which averages are 
+calculated. For example, if your data have values from 1960 to 1964 but you
+want to calculated the average value from 1960 to 1969, set 
+<code>min.year = 1960</code> and <code>max.year = 1969</code>.
+</p>
+<p>However, if you want to calculate values for an interval narrower than your
+data, filter the data BEFORE running this function.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Boris Leroy <a href="mailto:leroy.boris@gmail.com">leroy.boris@gmail.com</a>, Andrew Kramer, Anne-Charlotte
+Vaissière, Christophe Diagne
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://github.com/Farewe/invacost">https://github.com/Farewe/invacost</a>
+</p>
+<p>Leroy Boris, Kramer Andrew M, Vaissière Anne-Charlotte, Kourantidou Melina,
+Courchamp Franck &amp; Diagne Christophe (2022). Analysing economic costs 
+of invasive alien species with the invacost R package. Methods in Ecology
+and Evolution. <a href="https://doi.org/10.1111/2041-210X.13929">doi:10.1111/2041-210X.13929</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>expandYearlyCosts</code> to get the database in appropriate format.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(invacost)
+
+### Cleaning steps
+# Eliminating data with no information on starting and ending years
+invacost &lt;- invacost[-which(is.na(invacost$Probable_starting_year_adjusted)), ]
+invacost &lt;- invacost[-which(is.na(invacost$Probable_ending_year_adjusted)), ]
+# Keeping only observed and reliable costs
+invacost &lt;- invacost[invacost$Implementation == "Observed", ]
+invacost &lt;- invacost[which(invacost$Method_reliability == "High"), ]
+# Eliminating data with no usable cost value
+invacost &lt;- invacost[-which(is.na(invacost$Cost_estimate_per_year_2017_USD_exchange_rate)), ]
+
+### Expansion
+
+db.over.time &lt;- expandYearlyCosts(invacost,
+                                  startcolumn = "Probable_starting_year_adjusted",
+                                  endcolumn = "Probable_ending_year_adjusted")
+                                  
+### Analysis
+res &lt;- computeAvgTotCost(db.over.time,
+                         min.year = 1960,
+                         max.year = 2020) # Excluding data after 2020 (e.g. planned budgets)
+res
+</code></pre>
+
+
+</div>

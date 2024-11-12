@@ -1,0 +1,132 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>incRenv_old</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Matching environmental and nest temperatures - Old version</h2>
+
+<h3>Description</h3>
+
+<p>This function takes a data frame with recordings of environmental temperature and another
+with nest temperatures and merges both per unit of time. The user can do this work manually, however, 
+<code>incRenv</code> is thought to
+automate data preparation (in combination with <code>incRprep</code>) to use 
+<code>incRscan</code> after.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">incRenv_old(
+  data.nest,
+  data.env,
+  env.temperature.name,
+  env.date.name,
+  env.date.format,
+  env.timezone
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data.nest</code></td>
+<td>
+<p>data frame containing nest temperature recordings. It must have two compulsory
+columns 'date' and 'hour' displaying dates and the hour of each observation. These two columns
+are provided if the user uses <code>incRprep</code> before.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.env</code></td>
+<td>
+<p>data frame containing environmental temperatures to be merged with nest temperature
+records. Please, provide date and time of each observation in one unique column as requested 
+for <code>incRprep</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>env.temperature.name</code></td>
+<td>
+<p>name of the column containing temperature recordings in the 
+<em>data.env</em> data frame.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>env.date.name</code></td>
+<td>
+<p>name of the column containing date and time in the 
+<em>data.env</em> data frame.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>env.date.format</code></td>
+<td>
+<p>format of <em>env.date.name</em>. Similar to <code>incRprep</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>env.timezone</code></td>
+<td>
+<p>time zone of the environmental recordings. Similar to <code>incRprep</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function is thought to be used after <code>incRprep</code> as it uses some of the
+additional variables created by <code>incRprep</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The original <em>data.nest</em> with an additional column for hour-averaged environmental
+temperature. This new variable is thought to serve as <em>env_temp</em> in
+<code>incRscan</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Pablo Capilla-Lasheras
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>incRprep</code> <code>incRscan</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(incR_envdata)  # environmental data
+head (incR_envdata)
+
+data(incR_rawdata)  # loading nest data
+head (incR_rawdata)
+
+# the first step in to format the raw data using incRprep
+new.data &lt;- incRprep (data=incR_rawdata,
+                      date.name= "DATE",
+                      date.format= "%d/%m/%Y %H:%M",
+                      timezone="GMT",
+                      temperature.name="temperature")
+                      
+# then use incRenv to merge environmental data
+new.data2 &lt;- incRenv_old (data.nest = new.data,
+                      data.env = incR_envdata, 
+                      env.temperature.name = "env_temperature", 
+                      env.date.name = "DATE", 
+                      env.date.format = "%d/%m/%Y %H:%M", 
+                      env.timezone = "GMT")
+                     
+head (new.data2, 3)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,186 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>idtw2vec</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Incremental vector-based DTW 
+</h2>
+
+<h3>Description</h3>
+
+<p>Update the DTW distance for new observations of two time series. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">idtw2vec(Q, newObs, dist_method = c("norm1", "norm2", "norm2_square"),
+         step_pattern = c("symmetric2", "symmetric1"),
+         gcm_lc = NULL, gcm_lr = NULL, nC = NULL, ws = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Q</code></td>
+<td>
+<p>Either <code>Q</code> is (a) a time series (vector or matrix for multivariate time series) or (b) <code>Q</code> is a cost matrix, so a matrix storing the local distances of the time series <code>Q</code> and <code>newObs</code>. If <code>Q</code> and <code>newObs</code> are matrices, they need to have the same number of columns. If <code>Q</code> is a cost matrix, see details...
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newObs</code></td>
+<td>
+<p>time series as vector or matrix, or if <code>Q</code> is a cost matrix newObs must equals <code>"cm"</code>. If <code>newObs</code> is a time series, see details... 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist_method</code></td>
+<td>
+<p>character, describes the method of distance measure. See also <code>dtw</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>step_pattern</code></td>
+<td>
+<p>character, describes the step pattern. See also <code>dtw</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gcm_lc</code></td>
+<td>
+<p>vector, last column of global cost matrix of previous calculation. If NULL (necessary for the initial calculation), then DTW is calculated and the last column and last row are returned to start upcoming incremental calculations. (default = NULL)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gcm_lr</code></td>
+<td>
+<p>vector, last row of global cost matrix of previous calculation (default = NULL). 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nC</code></td>
+<td>
+
+<p>integer, is the length of the original time series C, of which newObs are the new observations. Length of time series C exclusive new observations, such that <code>length(c(C, newObs)) = nC + length(newObs)</code>. Necessary if ws is not NULL.  (default = NULL)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ws</code></td>
+<td>
+
+<p>integer, describes the window size for the sakoe chiba window. If NULL, then no window is applied. (default = NULL)
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If new observations are recorded only for C and the only interest is a fast update of the DTW distance, the last row is not required, neither for the current nor for future incremental calculations.
+</p>
+<p>If <code>Q</code> is a cost matrix, it needs to store either the distances of <code>Q</code> and new observations of <code>C</code> (running calculations, in that case gcm_lc != NULL), or it stores the distances of <code>Q</code> and the entire time series <code>C</code> (initial calculation, in that case gcm_lc = NULL).
+</p>
+<p>If <code>newObs</code> is a time series, it stores either new Observations of <code>C</code> (running calculations) or the complete time series <code>C</code> (initial calculation).
+</p>
+<p>no matrices are allocated, no matrices are returned
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>distance</code></td>
+<td>
+<p>the DTW distance</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gcm_lc_new</code></td>
+<td>
+<p>the last column of the new global cost matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gcm_lr_new</code></td>
+<td>
+<p>the last row of the new global cost matrix. Only if the input vector <code>gcm_lr</code> is not NUll and represents the last row of the previous global cost matrix, <code>gcm_lr_new</code> actually is the last row of the updated global cost matrix. Otherwise, if <code>gcm_lr</code> is NULL then <code>gcm_lr_new</code> is only the last row of the new part (concerning the new observations) of the global cost matrix.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>normalized_distance</code></td>
+<td>
+<p>the normalized DTW distance, see also <code>dtw</code></p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+
+<ul>
+<li>
+<p> Leodolter, M.; Pland, C.; Brändle, N; <em>IncDTW: An R Package for Incremental Calculation of Dynamic Time Warping</em>. Journal of Statistical Software, 99(9), 1-23. doi: <a href="https://doi.org/10.18637/jss.v099.i09">10.18637/jss.v099.i09</a>
+</p>
+</li>
+<li>
+<p> Sakoe, H.; Chiba, S., <em>Dynamic programming algorithm optimization for spoken word recognition, Acoustics, Speech, and Signal Processing</em> [see also IEEE Transactions on Signal Processing], IEEE Transactions on , vol.26, no.1, pp. 43-49, Feb 1978. http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1163055
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#--- Do the vector-based incremental DTW 
+# calculation and compare it with the basic
+Q &lt;- cumsum(rnorm(100))
+C &lt;- Q[11:100] + rnorm(90, 0, 0.5)
+
+# initial calculation
+res0 &lt;- idtw2vec(Q = Q, newObs = C, gcm_lc = NULL)
+
+# incremental calculation for new observations
+nobs &lt;- rnorm(10)
+res1 &lt;- idtw2vec(Q, newObs = nobs, gcm_lc = res0$gcm_lc_new)
+
+# compare with result from scratch
+res2 &lt;- dtw2vec(Q, c(C, nobs))
+res1$distance - res2$distance
+
+
+
+#--- Perform an incremental DTW calculation with a 
+#  customized distance function. 
+d_cos &lt;- function(x, y){
+   1 - sum(x * y)/(sqrt(sum(x^2)) * sqrt(sum(y^2))) 
+}
+
+x &lt;- matrix(rnorm(100), ncol = 5, nrow = 20)
+y &lt;- matrix(rnorm(150), ncol = 5, nrow = 30)
+cm1 &lt;- cm(x, y, dist_method = d_cos)
+
+# initial calculation
+res0 &lt;- idtw2vec(Q = cm(x, y[1:20,], dist_method = d_cos), 
+                 newObs =  "cm")
+
+# incremental calculation for new observations
+res1 &lt;- idtw2vec(Q = cm(x, y[21:30,], d_cos), newObs =  "cm", 
+         gcm_lc = res0$gcm_lc_new)$distance
+
+# compare with result from scratch
+res2 &lt;- dtw2vec(Q = cm1, C = "cm")$distance
+res1 - res2
+
+</code></pre>
+
+
+</div>

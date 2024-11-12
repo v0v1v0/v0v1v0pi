@@ -1,0 +1,102 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>tecator.cv</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Results of I-prior cross-validation experiment on Tecator data set</h2>
+
+<h3>Description</h3>
+
+<p>Results of I-prior cross-validation experiment on Tecator data set
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">tecator.cv
+</code></pre>
+
+
+<h3>Format</h3>
+
+<p>Results from iprior_cv cross validation experiment. This is a list of
+seven, with each component bearing the results for the linear, quadratic,
+cubic, fBm-0.5, fBm-MLE and SE I-prior models. The seventh is a summarised
+table of the results.
+</p>
+
+
+<h3>Details</h3>
+
+<p>For the fBm and SE kernels, it seems numerical issues arise when using a
+direct optimisation approach. Terminating the algorithm early (say using a
+relaxed stopping criterion) seems to help.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Results from the six experiments
+print(tecator.cv[[1]], "RMSE")
+print(tecator.cv[[2]], "RMSE")
+print(tecator.cv[[3]], "RMSE")
+print(tecator.cv[[4]], "RMSE")
+print(tecator.cv[[5]], "RMSE")
+print(tecator.cv[[6]], "RMSE")
+
+# Summary of results
+print(tecator.cv[[7]])
+
+## Not run: 
+
+# Prepare data set
+data(tecator, package = "caret")
+endpoints &lt;- as.data.frame(endpoints)
+colnames(endpoints) &lt;- c("water", "fat", "protein")
+absorp &lt;- -t(diff(t(absorp)))  # this takes first differences using diff()
+fat &lt;- endpoints$fat
+
+# Here is the code to replicate the results
+mod1.cv &lt;- iprior_cv(fat, absorp, folds = Inf)
+mod2.cv &lt;- iprior_cv(fat, absorp, folds = Inf, kernel = "poly2",
+                     est.offset = TRUE)
+mod3.cv &lt;- iprior_cv(fat, absorp, folds = Inf, kernel = "poly3",
+                     est.offset = TRUE)
+mod4.cv &lt;- iprior_cv(fat, absorp, method = "em", folds = Inf, kernel = "fbm",
+                     control = list(stop.crit = 1e-2))
+mod5.cv &lt;- iprior_cv(fat, absorp, folds = Inf, kernel = "fbm",
+                     est.hurst = TRUE, control = list(stop.crit = 1e-2))
+mod6.cv &lt;- iprior_cv(fat, absorp, folds = Inf, kernel = "se",
+                     est.lengthscale = TRUE, control = list(stop.crit = 1e-2))
+
+tecator_res_cv &lt;- function(mod) {
+  res &lt;- as.numeric(apply(mod$res[, -1], 2, mean))  # Calculate RMSE
+  c("Training RMSE" = res[1], "Test RMSE" = res[2])
+}
+
+tecator_tab_cv &lt;- function() {
+  tab &lt;- t(sapply(list(mod1.cv, mod2.cv, mod3.cv, mod4.cv, mod5.cv, mod6.cv),
+                  tecator_res_cv))
+  rownames(tab) &lt;- c("Linear", "Quadratic", "Cubic", "fBm-0.5", "fBm-MLE",
+                     "SE-MLE")
+  tab
+}
+
+tecator.cv &lt;- list(
+  "linear"   = mod1.cv,
+  "qudratic" = mod2.cv,
+  "cubic"    = mod3.cv,
+  "fbm-0.5"  = mod4.cv,
+  "fbm-MLE"  = mod5.cv,
+  "SE"       = mod6.cv,
+  "summary"  = tecator_tab_cv()
+)
+
+## End(Not run)
+
+
+</code></pre>
+
+
+</div>

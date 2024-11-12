@@ -1,0 +1,149 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>in_case</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>A pipe-friendly general vectorized if</h2>
+
+<h3>Description</h3>
+
+<p>This function allows you to vectorize multiple if_else() statements.
+If no cases match, NA is returned.
+This function derived from <code>dplyr::case_when()</code>.
+Unlike <code>dplyr::case_when()</code>, <code>in_case()</code> supports piping elegantly and
+attempts to handle inconsistent types (see examples).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">in_case(..., preserve = FALSE, default = NA)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>&lt;<code>dynamic-dots</code>&gt; A sequence of two-sided
+formulas.
+The left hand side (LHS) determines which values match this case.
+The right hand side (RHS) provides the replacement value.
+</p>
+<p>The LHS must evaluate to a logical vector.
+</p>
+<p>Both LHS and RHS may have the same length of either 1 or <code>n</code>.
+The value of <code>n</code> must be consistent across all cases.
+The case of <code>n == 0</code> is treated as a variant of <code>n != 1</code>.
+</p>
+<p><code>NULL</code> inputs are ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>preserve</code></td>
+<td>
+<p>If <code>TRUE</code>, unmatched elements of the input will be
+returned unmodified.
+(The elements may have their type coerced to be compatible with
+replacement values.)
+If <code>FALSE</code>, unmatched elements of the input will be replaced
+with <code>default</code>.
+Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>default</code></td>
+<td>
+<p>If <code>preserve</code> is <code>FALSE</code>, a value to replace unmatched
+elements of the input.
+Defaults to <code>NA</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A vector of length 1 or n, matching the length of the logical input
+or output vectors.
+Inconsistent lengths will generate an error.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>in_case_fct()</code> to return a factor and
+<code>in_case_list()</code> to return a list
+</p>
+<p><code>switch_case()</code> a simpler alternative for when each case involves
+<code>==</code> or <code>%in%</code>
+</p>
+<p><code>fn_case()</code>, a simpler alternative for when each case uses the
+same function
+</p>
+<p><code>if_case()</code>, a pipeable alternative to <code>dplyr::if_else()</code>
+</p>
+<p><code>dplyr::case_when()</code>, from which this function is derived
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Non-piped statements are handled the same as dplyr::case_when()
+x &lt;- 1:30
+in_case(
+  x %% 15 == 0 ~ "fizz buzz",
+  x %%  3 == 0 ~ "fizz",
+  x %%  5 == 0 ~ "buzz",
+  TRUE         ~ x
+)
+
+# A vector can be directly piped into in_case() without error
+1:30 %&gt;%
+  in_case(
+    . %% 15 == 0 ~ "fizz buzz",
+    . %%  3 == 0 ~ "fizz",
+    . %%  5 == 0 ~ "buzz",
+    TRUE         ~ .
+  )
+
+# in_case() silently converts types
+1:30 %&gt;%
+  in_case(
+    . %% 15 == 0 ~ 35,
+    . %%  3 == 0 ~ 5,
+    . %%  5 == 0 ~ 7,
+    TRUE         ~ NA
+  )
+
+x &lt;- 1:30
+try(
+  dplyr::case_when(
+    x %% 15 == 0 ~ 35,
+    x %%  3 == 0 ~ 5,
+    x %%  5 == 0 ~ 7,
+    TRUE         ~ NA
+  )
+)
+
+# default and preserve make it easier to handle unmatched values
+1:30 %&gt;%
+  in_case(
+    . %% 15 == 0 ~ "fizz buzz",
+    . %%  3 == 0 ~ "fizz",
+    . %%  5 == 0 ~ "buzz",
+    default      = "pass"
+  )
+
+1:30 %&gt;%
+  in_case(
+    . %% 15 == 0 ~ "fizz buzz",
+    . %%  3 == 0 ~ "fizz",
+    . %%  5 == 0 ~ "buzz",
+    preserve     = TRUE
+  )
+</code></pre>
+
+
+</div>

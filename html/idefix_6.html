@@ -1,0 +1,157 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Decode</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Coded design to readable design.</h2>
+
+<h3>Description</h3>
+
+<p>Transforms a coded design matrix into a design containing character attribute
+levels, ready to be used in a survey. The frequency of each attribute level
+in the design is also included in the output.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Decode(
+  des,
+  n.alts,
+  lvl.names,
+  coding,
+  alt.cte = NULL,
+  c.lvls = NULL,
+  no.choice = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>des</code></td>
+<td>
+<p>A numeric matrix which represents the design matrix. Each row is a
+profile.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.alts</code></td>
+<td>
+<p>Numeric value indicating the number of alternatives per choice
+set.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lvl.names</code></td>
+<td>
+<p>A list containing character vectors with the values of each
+level of each attribute.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coding</code></td>
+<td>
+<p>A character vector denoting the type of coding used for each
+attribute. See also <code>Profiles</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alt.cte</code></td>
+<td>
+<p>A binary vector indicating for each alternative if an
+alternative specific constant is present. The default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c.lvls</code></td>
+<td>
+<p>A list containing numeric vectors with the attribute levels for
+each continuous attribute. The default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>no.choice</code></td>
+<td>
+<p>An integer indicating the no choice alternative. The default
+is <code>NULL</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>des</code> A design matrix, this can also be a single choice set. See for
+example the output of Modfed or CEA.
+</p>
+<p>In <code>lvl.names</code>, the number of character vectors in the list should equal
+the number of attributes in de choice set. The number of elements in each
+character vector should equal the number of levels for that attribute.
+</p>
+<p>Valid arguments for <code>coding</code> are <code>C</code>, <code>D</code> and <code>E</code>. When
+using <code>C</code> the attribute will be treated as continuous and no coding will
+be applied. All possible levels of that attribute should then be specified in
+<code>c.lvls</code>. If <code>D</code> (dummy coding) is used
+<code>contr.treatment</code> will be applied to that attribute. The first
+attribute wil be used as reference level.  For <code>E</code> (effect coding)
+<code>contr.sum</code> is applied, in this case the last attribute level is
+used as reference level.
+</p>
+<p>If <code>des</code> contains columns for alternative specific constants,
+<code>alt.cte</code> should be specified. In this case, the first column(s) (equal
+to the number of nonzero elements in <code>alt.cte</code>) will be removed from
+<code>des</code> before decoding the alternatives.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>design</code></td>
+<td>
+<p>A character matrix which represents the design.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lvl.balance</code></td>
+<td>
+<p>A list containing the frequency of appearance of each
+attribute level in the design.</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Example without continuous attributes.
+design &lt;- example_design 
+coded &lt;- c("D", "D", "D") # Coding.
+# Levels as they should appear in survey. 
+al &lt;- list(
+  c("$50", "$75", "$100"), # Levels attribute 1.
+  c("2 min", "15 min", "30 min"), # Levels attribute 2.
+  c("bad", "moderate", "good") # Levels attribute 3.
+) 
+# Decode
+Decode(des = design, n.alts = 2, lvl.names = al, coding = coded) 
+
+# Example with alternative specific constants
+design &lt;- example_design2 
+coded &lt;- c("D", "D", "D") # Coding.
+# Levels as they should appear in survey. 
+al &lt;- list(
+  c("$50", "$75", "$100"), # Levels attribute 1.
+  c("2 min", "15 min", "30 min"), # Levels attribute 2.
+  c("bad", "moderate", "good") # Levels attribute 3.
+) 
+# Decode
+Decode(des = design, n.alts = 3, lvl.names = al, coding = coded, alt.cte = c(1, 1, 0)) 
+
+## End(Not run)
+</code></pre>
+
+
+</div>

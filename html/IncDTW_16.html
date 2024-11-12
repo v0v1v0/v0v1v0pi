@@ -1,0 +1,183 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dtw_dismat</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+DTW Distance Matrix/ Distance Vector
+</h2>
+
+<h3>Description</h3>
+
+<p>Calculate a matrix of pairwise DTW distances for a set of univariate or multivariate time series. The output matrix (or dist object) of DTW distances can easily be applied for clustering the set of time series. Or calculate a vector of DTW distances of a set of time series all relative to one query time series. Parallel computations are possible.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dtw_dismat(lot, dist_method = c("norm1", "norm2", "norm2_square"),
+         step_pattern = c("symmetric2", "symmetric1"), normalize = TRUE,
+         ws = NULL, threshold = NULL,
+         return_matrix = FALSE, ncores = NULL, useRcppParallel = TRUE)
+
+dtw_disvec(Q, lot, dist_method = c("norm1", "norm2", "norm2_square"),
+         step_pattern = c("symmetric2", "symmetric1"), normalize = TRUE,
+         ws = NULL, threshold = NULL, ncores = NULL)
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Q</code></td>
+<td>
+<p>time series, vector (univariate) or matrix (multivariate)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lot</code></td>
+<td>
+<p>List of time series. Each entry of the list is a time series as described in <code>dtw2vec</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist_method</code></td>
+<td>
+<p>character, describes the method of distance measure. See also <code>dtw</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>step_pattern</code></td>
+<td>
+<p>character, describes the step pattern. See also <code>dtw</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>normalize</code></td>
+<td>
+<p>logical, whether to return normalized pairwise distances or not. If <code>step_pattern == 'symmetric1'</code> only non-normalized distances can be returned (default = TRUE)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ws</code></td>
+<td>
+
+<p>integer, describes the window size for the sakoe chiba window. If NULL, then no window is applied. (default = NULL)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>numeric, the threshold for early abandoning. In the calculation of the global cost matrix a possible path stops as soon as the threshold is reached. Facilitates faster calculations in case of low threshold. (default = FALSE)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return_matrix</code></td>
+<td>
+<p>logical, If FALSE (default) the distance matrix is returned as <code>dist</code> object. If TRUE a symmetric matrix of differences is returned.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncores</code></td>
+<td>
+<p>integer, number of cores to be used for parallel computation of the distance matrix. If <code>ncores = NULL</code> (default) then ncores is set to the number of available cores minus 1. If <code>ncores = 0</code> then no parallel computation is performed and standard <code>sapply</code> instead of <code>parallel::parSapply</code> is applied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>useRcppParallel</code></td>
+<td>
+<p>logical, if the package RcppParallel (TRUE, default) or parallel  (FALSE) is used for parallel computation</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>By setting the parameter <code>return_matrix = FALSE</code> (default) the output value <code>dismat</code> of <code>dtw_dismat</code> is a <code>dist</code> object and can easily be passed to standard clustering functions (see examples).
+</p>
+<p>No matrices are allocated for calculating the pairwise distances.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>input</code></td>
+<td>
+<p>the function input parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dismat</code></td>
+<td>
+<p>the matrix of pairwise DTW distances, either as matrix or dist object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>disvec</code></td>
+<td>
+<p>the vector DTW distances</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+
+#--- Example for clustering a set of time series by feeding well known 
+# clustering methods with DTW-distance objects. First we simulate 
+# two prototype random walks and some cluster members. The cluster
+# members are simulated by adding noise and randomly stretching and 
+# comressing the time series, to get time warped time series of 
+# varying lengths. The built clusters are 1:6 and 7:12.
+set.seed(123)
+N &lt;- 100
+rw_a &lt;- cumsum(rnorm(N))
+rw_b &lt;- cumsum(rnorm(N))
+sth &lt;- sample(seq(0, 0.2, 0.01), size = 10)
+cmp &lt;- sample(seq(0, 0.2, 0.01), size = 10)
+lot &lt;- c(list(rw_a), 
+         lapply(1:5, function(i){ 
+           simulate_timewarp(rw_a + rnorm(N), sth[i], cmp[i]) 
+         }),
+         list(rw_b),
+         lapply(6:10, function(i){ 
+           simulate_timewarp(rw_b + rnorm(N), sth[i], cmp[i]) 
+         }))
+
+
+# Next get the distance matrix, as dist object. Per default all 
+# minus 1 available cores are used:
+result &lt;- dtw_dismat(lot = lot, dist_method = "norm2", ws = 50, 
+                     return_matrix = FALSE)
+class(result$dismat)
+
+
+# Finally you can cluster the result with the following
+#  well known methods:
+require(cluster)
+myclus &lt;- hclust(result$dismat)
+plot(myclus)
+summary(myclus)
+
+myclus &lt;- agnes(result$dismat)
+plot(myclus)
+summary(myclus)
+
+myclus &lt;- pam(result$dismat, k=2)
+plot(myclus)
+summary(myclus)
+myclus$medoids
+
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

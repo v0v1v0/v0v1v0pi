@@ -1,0 +1,154 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ICSKATwrapper</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>ICSKATwrapper.R</h2>
+
+<h3>Description</h3>
+
+<p>Wrapper to fit the null model and run ICSKAT all in one instead of separately - offers some functionality
+for error checking or using different initial values when fit fails to converge.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ICSKATwrapper(
+  left_dmat,
+  right_dmat,
+  initValues,
+  lt,
+  rt,
+  obs_ind,
+  tpos_ind,
+  gMat,
+  PH = TRUE,
+  nKnots = 1,
+  maxIter = 3,
+  eps = 10^(-6),
+  runOnce = FALSE,
+  returnNull = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>left_dmat</code></td>
+<td>
+<p>n*(p+nknots+2) design matrix for left end of interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>right_dmat</code></td>
+<td>
+<p>n*(p+nknots+2) design matrix for right end of interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initValues</code></td>
+<td>
+<p>(p+nknots+2)*1 vector of coefficients to initialize the Newton-Raphson.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lt</code></td>
+<td>
+<p>Left side of interval times.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rt</code></td>
+<td>
+<p>Right side of interval times.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>obs_ind</code></td>
+<td>
+<p>n*1 vector of whether the event was observed before last follow-up.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tpos_ind</code></td>
+<td>
+<p>n*1 vector of whether the event was observed after follow-up started (t&gt;0).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gMat</code></td>
+<td>
+<p>n*q matrix of genotypes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PH</code></td>
+<td>
+<p>Boolean for whether to fit PH model (TRUE) or PO model (FALSE).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nKnots</code></td>
+<td>
+<p>Number of knots in the spline.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxIter</code></td>
+<td>
+<p>Number of times to try the fit if initial values do not lead to convergence.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>Difference in L2 norm of fitted null coefficients that stops the Newton Raphson.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>runOnce</code></td>
+<td>
+<p>Boolean, if true then just go through the algorithm once with the initial
+values for coefficients, updating the variance matrix, useful for bootstrapping.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>returnNull</code></td>
+<td>
+<p>Return a list with the skat output and null model, or just return the skat output (FALSE).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Either a list with skatOutput and nullFit (two lists), or just skatOutput.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(0)
+gMat &lt;- matrix(data=rbinom(n=2000, size=2, prob=0.3), nrow=100)
+xMat &lt;- matrix(data=rnorm(200), nrow=100)
+bhFunInv &lt;- function(x) {x}
+obsTimes &lt;- 1:5
+etaVec &lt;- rep(0, 100)
+outcomeDat &lt;- gen_IC_data(bhFunInv = bhFunInv, obsTimes = obsTimes, windowHalf = 0.1,
+probMiss = 0.1, etaVec = etaVec)
+lt &lt;- outcomeDat$leftTimes
+rt &lt;- outcomeDat$rightTimes
+tpos_ind &lt;- as.numeric(lt &gt; 0)
+obs_ind &lt;- as.numeric(rt != Inf)
+dmats &lt;- make_IC_dmat(xMat, lt, rt, obs_ind, tpos_ind)
+ICSKATwrapper(left_dmat = dmats$left_dmat, right_dmat = dmats$right_dmat,
+initValues = rep(0, ncol(xMat) + 3), lt = lt, rt = rt, obs_ind = obs_ind,
+tpos_ind = tpos_ind, gMat = gMat, returnNull = TRUE)
+
+</code></pre>
+
+
+</div>

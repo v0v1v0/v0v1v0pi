@@ -1,0 +1,93 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>except</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simple Error Handling</h2>
+
+<h3>Description</h3>
+
+<p>Use this method to handle errors. The function evaluates an expression,
+and if it raises an error then evaluates a second expression.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">tryExcept(expr, except = { }, error = function(e) { })
+
+expr %except% except
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>expr</code></td>
+<td>
+<p>Expression to be evaluated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>except</code></td>
+<td>
+<p>Expression to be evaluated if <code>expr</code> raises an error. By default it is
+an empty expression.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>error</code></td>
+<td>
+<p>Handler function for an <code>error</code> condition occurred during the evaluation
+of <code>expr</code>. It's output is not used, as the output in case of an error is the
+evaluation of <code>except</code>. By default it is an empty function.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>tryExcept</code> is a wrapper around <code>tryCatch</code>,
+but it allows you to evaluate an expression <code>except</code> when an error occurs to
+the first expression argument <code>expr</code>. Note that, if <code>expr</code> raises
+an error, the code evaluated before the error will be in use.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># No errors are raised
+tryExcept(stop())
+
+# If 'expr' has no errors
+tryExcept({
+  foo &lt;- "foo"
+}, except = {
+  foo &lt;- "foo bar"
+})
+print(foo) # "foo"
+
+# If 'expr' has an error
+tryExcept({
+  foo &lt;- "foo"
+  stop()
+}, except = {
+  foo &lt;- "foo bar"
+})
+print(foo) # "foo bar"
+
+# Running it with the infix operator
+{foo &lt;- "foo"} %except% {foo &lt;- "foo bar"}
+print(foo) # "foo"
+
+{ foo &lt;- "foo"
+  stop()
+} %except% {
+  foo &lt;- "foo bar"
+}
+print(foo) # "foo bar"
+</code></pre>
+
+
+</div>

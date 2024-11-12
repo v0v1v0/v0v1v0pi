@@ -1,0 +1,148 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getGeneralValueMetrics</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Retrieve measurements from the MUSTANG BSS </h2>
+
+<h3>Description</h3>
+
+<p>The <code>getGeneralValueMetrics</code> method of the <code>IrisClient</code> makes a request of the MUSTANG database
+and returns a dataframe containing metrics measurments.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getGeneralValueMetrics(obj, network, station, location, channel, 
+                           starttime, endtime, metricName, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+<p> an <code>IrisClient</code> object </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>network</code></td>
+<td>
+<p> a character string with the two letter seismic network code </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>station</code></td>
+<td>
+<p> a character string with the station code </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>location</code></td>
+<td>
+<p> a character string with the location code, can be "" for wildcard all </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>channel</code></td>
+<td>
+<p> a character string with the three letter channel code, can be "" for wildcard all </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>starttime</code></td>
+<td>
+<p> a POSIXct class specifying the starttime (GMT) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>endtime</code></td>
+<td>
+<p> a POSIXct class specifying the endtime (GMT) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>metricName</code></td>
+<td>
+<p> a character string containing one or more comma separated metric names </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>optional arguments
+<code>constraint</code> a character string containing value constraints 
+<code>url</code> optional url of the MUSTANG measurements service 
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A blank location code should be specified as <code>location="--"</code>; Using <code>location=""</code> will return all location codes.
+</p>
+<p>The default MUSTANG measurement service when <code>url</code> is not specified is:
+</p>
+<p><code>http://service.iris.edu/mustang/measurements/1/query?</code>
+</p>
+<p>Data returned from MUSTANG are converted into an <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> dataframe.
+</p>
+<p>The optional <code>constraint</code> parameter is used to add constraints to the query as defined
+in the <a href="http://service.iris.edu/mustang/measurements/1">MUSTANG measurements web service documentation</a>.
+Any string passed in with the <code>constraint</code> parameter will be appended to the request url following an ampersand.
+</p>
+<p>Error returns from the BSS will stop evaluation and generate an error message.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A dataframe with the following columns:
+</p>
+<pre>
+~metricName~, value, additional values,  snclq, starttime, endtime, loadtime
+</pre>
+<p>The <code>loadtime</code> column contains the time at which this record was loaded into the database.
+</p>
+<p>The dataframe rows will be sorted by metricName and increasing starttime.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan.s.callahan@gmail.com">jonathan.s.callahan@gmail.com</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>createBssUrl</code>,
+<code>getPsdMetrics</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  ## Not run: 
+# Open a connection to IRIS DMC webservices (including the BSS)
+iris &lt;- new("IrisClient", debug=TRUE)
+
+starttime &lt;- as.POSIXct("2016-08-01", tz="GMT")
+endtime &lt;- starttime + 30*24*3600
+metricName &lt;- "sample_max"
+
+# Get the measurement dataframe
+juneStats &lt;- getGeneralValueMetrics(iris,"IU","ANMO","","BH[12Z]",
+                                        starttime,endtime,metricName)
+
+print(juneStats)
+  
+## End(Not run)
+</code></pre>
+
+
+</div>

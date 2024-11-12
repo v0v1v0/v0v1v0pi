@@ -1,0 +1,119 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>crossCorrelationMetric</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Correlation between channels</h2>
+
+<h3>Description</h3>
+
+<p>The crossCorrelationMetric() function calculates the maximum absolute correlation (<code>polarity_check</code>) 
+and lag at maximum correlation (<code>timing_drift</code>) associated with two streams of seismic data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">crossCorrelationMetric(st1, st2, maxLagSecs=10, filter)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>st1</code></td>
+<td>
+<p>a <code>Stream</code> object containing a seismic signal</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>st2</code></td>
+<td>
+<p>a <code>Stream</code> object containing a seismic signal</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxLagSecs</code></td>
+<td>
+<p>maximum number of seconds of lag to use</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filter</code></td>
+<td>
+<p>a <span class="pkg">signal</span> package filter to be applied before cross-correlating, optional</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<p>Details of the algorithm are as follows:
+</p>
+
+<ul>
+<li>
+<p>Both signals are demeaned and detrended
+</p>
+</li>
+<li>
+<p>If one signal has a higher sampling rate, it is decimated to the lower sampling rate using an IIR filter if it is a multiple of the lower sample rate. See (<code>signal::decimate</code>).
+</p>
+</li>
+<li>
+<p>Both signals are filtered, by default with a Butterworth 2-pole low pass filter with a 0.1 Hz (10 second) corner frequency. See (<code>signal::filter</code>).
+</p>
+</li>
+<li>
+<p>Signals are cross-correlated using the <code>stats::ccf()</code> function.
+</p>
+</li>
+</ul>
+<p>The maximum absolute correlation is saved as <code>polarity_check</code> while the lag at peak correlation is saved as <code>timing_drift</code>.
+</p>
+<p><b>Note:</b> For cross-correlation, seismic signals must not have any gaps – they must be contained in a single <code>Trace</code> object.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with one <code>GeneralValueMetric</code> object is returned.
+The metric names is <code>polarity_check</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The metricList generated for this two-channel metric will have an additional <code>sncl2</code> attribute identifying the SNCL in <code>st2</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a> (R code),
+Mary Templeton <a href="mailto:mary.templeton@earthscope.org">mary.templeton@earthscope.org</a> (algorithm)
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  ## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+# Get the same signal, shifted by 3 seconds
+starttime &lt;- as.POSIXct("2013-11-12 07:09:45",tz="GMT")
+endtime &lt;- starttime + 600
+st1 &lt;- getSNCL(iris,"NM.SLM.00.BHZ",starttime,endtime)
+st2 &lt;- getSNCL(iris,"NM.SLM.00.BHZ",starttime+3,endtime+3)
+
+# Cross-correlate
+crossCorrelationMetric(st1,st2)
+  
+## End(Not run)
+</code></pre>
+
+
+</div>

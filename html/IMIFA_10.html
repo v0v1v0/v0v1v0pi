@@ -1,0 +1,118 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>G_priorDensity</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot Pitman-Yor / Dirichlet Process Priors</h2>
+
+<h3>Description</h3>
+
+<p>Plots the prior distribution of the number of clusters under a Pitman-Yor / Dirichlet process prior, for a sample of size <code>N</code> at given values of the concentration parameter <code>alpha</code> and optionally also the <code>discount</code> parameter. Useful for soliciting sensible priors (or fixed values) for <code>alpha</code> or <code>discount</code> under the <code>"IMFA"</code> and <code>"IMIFA"</code> methods for <code>mcmc_IMIFA</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">G_priorDensity(N,
+               alpha,
+               discount = 0,
+               show.plot = TRUE,
+               type = "h")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>The sample size.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>The concentration parameter. Must be specified and must be strictly greater than <code>-discount</code>. The case <code>alpha=0</code> is accommodated. When <code>discount</code> is negative <code>alpha</code> must be a positive integer multiple of <code>abs(discount)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>discount</code></td>
+<td>
+<p>The discount parameter for the Pitman-Yor process. Must be less than 1, but typically lies in the interval [0, 1). Defaults to 0 (i.e. the Dirichlet process). When <code>discount</code> is negative <code>alpha</code> must be a positive integer multiple of <code>abs(discount)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>show.plot</code></td>
+<td>
+<p>Logical indicating whether the plot should be displayed (default = <code>TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>The type of plot to be drawn, as per <code>plot</code>. Defaults to <code>"h"</code>: histogram-like vertical lines.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>All arguments are vectorised. Users can also consult <code>G_expected</code>, <code>G_variance</code>, and <code>G_calibrate</code> in order to solicit sensible priors.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A plot of the prior distribution if <code>show.plot</code> is <code>TRUE</code>. Density values are returned invisibly. Note that the density values may not strictly sum to one in certain cases, as values small enough to be represented as zero may well be returned.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The actual density values are returned invisibly. Therefore, they can be visualised as desired by the user even if <code>show.plot</code> is <code>FALSE</code>.
+</p>
+<p>Requires use of the <code>Rmpfr</code> and <code>gmp</code> libraries; may encounter difficulty and slowness for large <code>N</code>, especially with non-zero <code>discount</code> values. Despite the high precision arithmetic used, the functions can be unstable for small values of <code>discount</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Keefe Murphy - &lt;<a href="mailto:keefe.murphy@mu.ie">keefe.murphy@mu.ie</a>&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>De Blasi, P., Favaro, S., Lijoi, A., Mena, R. H., Prunster, I., and Ruggiero, M. (2015) Are Gibbs-type priors the most natural generalization of the Dirichlet process?, <em>IEEE Transactions on Pattern Analysis and Machine Intelligence</em>, 37(2): 212-229.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>G_moments</code>, <code>Rmpfr</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Plot Dirichlet process priors for different values of alpha
+(DP      &lt;- G_priorDensity(N=50, alpha=c(3, 10, 25)))
+
+# Verify that these alpha/discount values produce Pitman-Yor process priors with the same mean
+alpha    &lt;- c(19.23356, 6.47006, 1)
+discount &lt;- c(0, 0.47002, 0.7300045)
+G_expected(N=50, alpha=alpha, discount=discount)
+
+# Now plot them to examine tail behaviour as discount increases
+# Non-zero discount requires loading the "Rmpfr" library
+suppressMessages(require("Rmpfr"))
+(PY      &lt;- G_priorDensity(N=50, alpha=alpha, discount=discount, type="l"))
+
+# Other special cases of the PYP are also facilitated
+G_priorDensity(N=50, alpha=c(alpha, 27.1401, 0),
+               discount=c(discount, -27.1401/100, 0.8054448), type="b")
+</code></pre>
+
+
+</div>

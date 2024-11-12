@@ -1,0 +1,179 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>gg.bru_prediction</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Geom for predictions</h2>
+
+<h3>Description</h3>
+
+<p>This geom serves to visualize <code>prediction</code> objects which usually results from a call to
+<code>predict.bru()</code>. Predictions objects provide summary statistics (mean, median, sd, ...) for
+one or more random variables. For single variables (or if requested so by setting <code>bar = TRUE</code>),
+a boxplot-style geom is constructed to show the statistics. For multivariate predictions the
+mean of each variable (y-axis) is plotted agains the row number of the varriable in the prediction
+data frame (x-axis) using <code>geom_line</code>. In addition, a <code>geom_ribbon</code> is used to show
+the confidence interval.
+</p>
+<p>Note: <code>gg.bru_prediction</code> also understands the format of INLA-style posterior summaries, e.g.
+<code>fit$summary.fixed</code> for an inla object <code>fit</code>
+</p>
+<p>Requires the <code>ggplot2</code> package.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'bru_prediction'
+gg(data, mapping = NULL, ribbon = TRUE, alpha = NULL, bar = FALSE, ...)
+
+## S3 method for class 'prediction'
+gg(data, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A prediction object, usually the result of a <code>predict.bru()</code> call.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mapping</code></td>
+<td>
+<p>a set of aesthetic mappings created by <code>aes</code>. These are passed on to <code>geom_line</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ribbon</code></td>
+<td>
+<p>If TRUE, plot a ribbon around the line based on the smalles and largest
+quantiles present in the data, found by matching names starting with <code>q</code> and
+followed by a numerical value.  <code>inla()</code>-style <code>numeric+"quant"</code> names are converted
+to inlabru style before matching.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>The ribbons numeric alpha (transparency) level in <code style="white-space: pre;">⁠[0,1]⁠</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bar</code></td>
+<td>
+<p>If TRUE plot boxplot-style summary for each variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arguments passed on to <code>geom_line</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Concatenation of a <code>geom_line</code> value and optionally a <code>geom_ribbon</code> value.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other geomes for inla and inlabru predictions: 
+<code>gg()</code>,
+<code>gg.data.frame()</code>,
+<code>gg.matrix()</code>,
+<code>gm()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+if (bru_safe_inla() &amp;&amp;
+    require(sn, quietly = TRUE) &amp;&amp;
+    require(ggplot2, quietly = TRUE)) {
+  # Generate some data
+
+  input.df &lt;- data.frame(x = cos(1:10))
+  input.df &lt;- within(input.df, y &lt;- 5 + 2 * cos(1:10) + rnorm(10, mean = 0, sd = 0.1))
+
+  # Fit a model with fixed effect 'x' and intercept 'Intercept'
+
+  fit &lt;- bru(y ~ x, family = "gaussian", data = input.df)
+
+  # Predict posterior statistics of 'x'
+
+  xpost &lt;- predict(fit, NULL, formula = ~x_latent)
+
+  # The statistics include mean, standard deviation, the 2.5% quantile, the median,
+  # the 97.5% quantile, minimum and maximum sample drawn from the posterior as well as
+  # the coefficient of variation and the variance.
+
+  xpost
+
+  # For a single variable like 'x' the default plotting method invoked by gg() will
+  # show these statisics in a fashion similar to a box plot:
+  ggplot() +
+    gg(xpost)
+
+
+  # The predict function can also be used to simultaneously estimate posteriors
+  # of multiple variables:
+
+  xipost &lt;- predict(fit,
+    newdata = NULL,
+    formula = ~ c(
+      Intercept = Intercept_latent,
+      x = x_latent
+    )
+  )
+  xipost
+
+  # If we still want a plot in the previous style we have to set the bar parameter to TRUE
+
+  p1 &lt;- ggplot() +
+    gg(xipost, bar = TRUE)
+  p1
+
+  # Note that gg also understands the posterior estimates generated while running INLA
+
+  p2 &lt;- ggplot() +
+    gg(fit$summary.fixed, bar = TRUE)
+  multiplot(p1, p2)
+
+  # By default, if the prediction has more than one row, gg will plot the column 'mean' against
+  # the row index. This is for instance usefuul for predicting and plotting function
+  # but not very meaningful given the above example:
+
+  ggplot() +
+    gg(xipost)
+
+  # For ease of use we can also type
+
+  plot(xipost)
+
+  # This type of plot will show a ribbon around the mean, which viszualizes the upper and lower
+  # quantiles mentioned above (2.5 and 97.5%). Plotting the ribbon can be turned of using the
+  # \code{ribbon} parameter
+
+  ggplot() +
+    gg(xipost, ribbon = FALSE)
+
+  # Much like the other geomes produced by gg we can adjust the plot using ggplot2 style
+  # commands, for instance
+
+  ggplot() +
+    gg(xipost) +
+    gg(xipost, mapping = aes(y = median), ribbon = FALSE, color = "red")
+}
+
+</code></pre>
+
+
+</div>

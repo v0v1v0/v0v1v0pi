@@ -1,0 +1,75 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>timesMetric2Xml</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create XML for the BSS</h2>
+
+<h3>Description</h3>
+
+<p>The <code>timesMetric2Xml</code> function converts a <code>MultipleTimeValueMetric</code> into an
+XML structure appropriate for submitting to the MUSTANG Backend Storage System (BSS).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">timesMetric2Xml(metric)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>metric</code></td>
+<td>
+<p>a <code>MultipleTimeValueMetric</code> object</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p>A character string with BSS formatted XML is returned.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  ## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+# Get the waveform
+starttime &lt;- as.POSIXct("2012-01-24", tz="GMT")
+endtime &lt;- as.POSIXct("2012-01-25", tz="GMT")
+st &lt;- getDataselect(iris,"AK","PIN","","BHZ",starttime,endtime)
+
+# Make sure we're working with a single snclq
+unique_ids &lt;- uniqueIds(st)
+if (length(unique_ids) &gt; 1) {
+  stop(paste("meanMetric: Stream has",unique_ids,"unique identifiers"))
+}
+snclq &lt;- unique_ids[1]
+
+# get the upDownTimes with a minimum signal length and minimum gap (secs)
+upDownTimes &lt;- getUpDownTimes(st, min_signal=30, min_gap=60)
+  
+# Create and return a MultipleTimeValue metric from the upDownTimes
+m &lt;- new("MultipleTimeValueMetric", snclq=snclq, starttime=starttime, 
+         endtime=endtime, metricName="up_down_times", values=upDownTimes)
+
+# Show the XML version of the metric
+bssXml &lt;- timesMetric2Xml(m)
+cat(bssXml)
+  
+## End(Not run)
+</code></pre>
+
+
+</div>

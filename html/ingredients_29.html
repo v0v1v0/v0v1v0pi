@@ -1,0 +1,237 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>feature_importance</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Feature Importance</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates permutation based feature importance.
+For this reason it is also called the Variable Dropout Plot.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">feature_importance(x, ...)
+
+## S3 method for class 'explainer'
+feature_importance(
+  x,
+  loss_function = DALEX::loss_root_mean_square,
+  ...,
+  type = c("raw", "ratio", "difference"),
+  n_sample = NULL,
+  B = 10,
+  variables = NULL,
+  variable_groups = NULL,
+  N = n_sample,
+  label = NULL
+)
+
+## Default S3 method:
+feature_importance(
+  x,
+  data,
+  y,
+  predict_function = predict,
+  loss_function = DALEX::loss_root_mean_square,
+  ...,
+  label = class(x)[1],
+  type = c("raw", "ratio", "difference"),
+  n_sample = NULL,
+  B = 10,
+  variables = NULL,
+  N = n_sample,
+  variable_groups = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an explainer created with function <code>DALEX::explain()</code>, or a model to be explained.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loss_function</code></td>
+<td>
+<p>a function thet will be used to assess variable importance</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>character, type of transformation that should be applied for dropout loss.
+"raw" results raw drop losses, "ratio" returns <code>drop_loss/drop_loss_full_model</code>
+while "difference" returns <code>drop_loss - drop_loss_full_model</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_sample</code></td>
+<td>
+<p>alias for <code>N</code> held for backwards compatibility. number of observations that should be sampled for calculation of variable importance.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>integer, number of permutation rounds to perform on each variable. By default it's <code>10</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variables</code></td>
+<td>
+<p>vector of variables. If <code>NULL</code> then variable importance will be tested for each variable from the <code>data</code> separately. By default <code>NULL</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variable_groups</code></td>
+<td>
+<p>list of variables names vectors. This is for testing joint variable importance.
+If <code>NULL</code> then variable importance will be tested separately for <code>variables</code>.
+By default <code>NULL</code>. If specified then it will override <code>variables</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>number of observations that should be sampled for calculation of variable importance.
+If <code>NULL</code> then variable importance will be calculated on whole dataset (no sampling).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label</code></td>
+<td>
+<p>name of the model. By default it's extracted from the <code>class</code> attribute of the model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>validation dataset, will be extracted from <code>x</code> if it's an explainer
+NOTE: It is best when target variable is not present in the <code>data</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>true labels for <code>data</code>, will be extracted from <code>x</code> if it's an explainer</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predict_function</code></td>
+<td>
+<p>predict function, will be extracted from <code>x</code> if it's an explainer</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Find more details in the <a href="https://ema.drwhy.ai/featureImportance.html">Feature Importance Chapter</a>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>an object of the class <code>feature_importance</code>
+</p>
+
+
+<h3>References</h3>
+
+<p>Explanatory Model Analysis. Explore, Explain, and Examine Predictive Models. <a href="https://ema.drwhy.ai/">https://ema.drwhy.ai/</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library("DALEX")
+library("ingredients")
+
+model_titanic_glm &lt;- glm(survived ~ gender + age + fare,
+                         data = titanic_imputed, family = "binomial")
+
+explain_titanic_glm &lt;- explain(model_titanic_glm,
+                               data = titanic_imputed[,-8],
+                               y = titanic_imputed[,8])
+
+fi_glm &lt;- feature_importance(explain_titanic_glm, B = 1)
+plot(fi_glm)
+
+
+
+fi_glm_joint1 &lt;- feature_importance(explain_titanic_glm,
+                   variable_groups = list("demographics" = c("gender", "age"),
+                   "ticket_type" = c("fare")),
+                   label = "lm 2 groups")
+
+plot(fi_glm_joint1)
+
+fi_glm_joint2 &lt;- feature_importance(explain_titanic_glm,
+                   variable_groups = list("demographics" = c("gender", "age"),
+                                          "wealth" = c("fare", "class"),
+                                          "family" = c("sibsp", "parch"),
+                                          "embarked" = "embarked"),
+                   label = "lm 5 groups")
+
+plot(fi_glm_joint2, fi_glm_joint1)
+
+library("ranger")
+model_titanic_rf &lt;- ranger(survived ~., data = titanic_imputed, probability = TRUE)
+
+explain_titanic_rf &lt;- explain(model_titanic_rf,
+                              data = titanic_imputed[,-8],
+                              y = titanic_imputed[,8],
+                              label = "ranger forest",
+                              verbose = FALSE)
+
+fi_rf &lt;- feature_importance(explain_titanic_rf)
+plot(fi_rf)
+
+fi_rf &lt;- feature_importance(explain_titanic_rf, B = 6) # 6 replications
+plot(fi_rf)
+
+fi_rf_group &lt;- feature_importance(explain_titanic_rf,
+                   variable_groups = list("demographics" = c("gender", "age"),
+                   "wealth" = c("fare", "class"),
+                   "family" = c("sibsp", "parch"),
+                   "embarked" = "embarked"),
+                   label = "rf 4 groups")
+
+plot(fi_rf_group, fi_rf)
+
+HR_rf_model &lt;- ranger(status ~., data = HR, probability = TRUE)
+
+explainer_rf  &lt;- explain(HR_rf_model, data = HR, y = HR$status,
+                         model_info = list(type = 'multiclass'))
+
+fi_rf &lt;- feature_importance(explainer_rf, type = "raw",
+                            loss_function = DALEX::loss_cross_entropy)
+head(fi_rf)
+plot(fi_rf)
+
+HR_glm_model &lt;- glm(status == "fired"~., data = HR, family = "binomial")
+explainer_glm &lt;- explain(HR_glm_model, data = HR, y = as.numeric(HR$status == "fired"))
+fi_glm &lt;- feature_importance(explainer_glm, type = "raw",
+                             loss_function = DALEX::loss_root_mean_square)
+head(fi_glm)
+plot(fi_glm)
+
+
+</code></pre>
+
+
+</div>

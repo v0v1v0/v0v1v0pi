@@ -1,0 +1,208 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>wald_gam</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Function for post-hoc comparison of the contrasts in a single GAMM model.</h2>
+
+<h3>Description</h3>
+
+<p>Function for post-hoc comparison of the intercept differences 
+for different factors in a single GAMM model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">wald_gam(
+  model,
+  comp = NULL,
+  select = NULL,
+  t.test = FALSE,
+  null.hypothesis = 0,
+  summ = NULL,
+  signif.stars = TRUE,
+  print.output = getOption("itsadug_print")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>Model, currently only implemented for models generated with 
+<code>bam</code> or <code>gam</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comp</code></td>
+<td>
+<p>Named list with predictors (specified as names) and their levels
+to compare. Defaults to NULL, which returns all comparisons, 
+unless <code>select</code> is specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>select</code></td>
+<td>
+<p>Contrast matrix for manually specified contrasts. 
+Alternatively, a vector or list could be provided as input. 
+See examples below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t.test</code></td>
+<td>
+<p>Logical default = FALSE), whether or not to return 
+the t-test scores instead of the Wald test. Only implemented for 
+Gaussian models.  This option is not implemented for use with <code>select</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>null.hypothesis</code></td>
+<td>
+<p>Numeric, value of null hypothesis. Defaults to 0 and 
+is generally not changed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>summ</code></td>
+<td>
+<p>Optional summary object. Defaults to NULL. For very large GAMM 
+models it takes a long time to retrieve the summary. In these cases the 
+summary could be provided to reduce processing time. 
+However, it is generally recommended not to specifify a summary object, 
+to reduce the chance of mismatch errors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>signif.stars</code></td>
+<td>
+<p>Logical (default = TRUE). Whether or not to display 
+stars indicating the level of significance on 95% confidence level.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print.output</code></td>
+<td>
+<p>Logical: whether or not to print the output. 
+By default controlled globally in the package options:  
+If the function <code>infoMessages</code> is set to TRUE, the output 
+will be automatically printed.
+Could be also set by explicitly providing TRUE or FALSE. See examples.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Optionally returns a data frame with test statistics.
+</p>
+
+
+<h3>Warning</h3>
+
+<p>This function is intended for testing intercept differences only.
+This function compares purely the parametric components, without 
+considering any interactions with smooth terms. So this could be 
+considered as a partial effect comparison. For comparing the averages 
+of conditions use <code>get_difference</code>, which outputs the 
+difference in summed effects for different factor levels.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Petar Milin and Jacolien van Rij.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot_parametric</code>, <code>plot_diff</code>, 
+<code>plot_diff2</code>
+</p>
+<p>Other Testing for significance: 
+<code>compareML()</code>,
+<code>plot_diff2()</code>,
+<code>plot_diff()</code>,
+<code>report_stats()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(simdat)
+# Convert Condition to factorial predictor for illustration purposes:
+simdat$Condition &lt;- as.factor(simdat$Condition)
+
+infoMessages('on')
+
+## Not run: 
+# some arbitrary model:
+m1 &lt;- bam(Y ~ Condition*Group  
+\t+ s(Time, by=Condition) 
+\t+ s(Time, by=Group)
+\t+ s(Subject, bs='re'), 
+\tdata=simdat)
+
+# print summary to inspect parametric terms:
+summary(m1)
+
+# return all contrasts:
+wald_gam(m1)
+
+# USE OF COMP
+# return only contrasts for Adults:
+wald_gam(m1, comp=list(Condition=levels(simdat$Condition)))
+# return specific contrasts:
+wald_gam(m1, comp=list(Condition=c('-1', '0', '1'), 
+    Group=c('Adults', 'Children')))
+
+# USE OF SELECT
+# Specify contrast matrix. 
+# Note that intercept should be 0.
+# Example: Compare Condition 0 with Conditions 2 and 3 for children.
+# Method 1: matrix or vector:
+R = matrix( c(0,-2,0,1,1,0,0,0,0,0,0,0), nrow=1)
+wald_gam(m1, select=R) 
+wald_gam(m1, select=c(0,-2,0,1,1,0,0,0,0,0,0,0)) 
+# Method 2: list
+# first list element are reference coefficients, 
+# second list element are coefficients to compare
+wald_gam(m1, select=list(2, c(4,5))) 
+# Replication of contrasts given in summary:
+wald_gam(m1, select=c(0,1,0,0,0,0,0,0,0,0,0,0))
+
+# USE OF T.TEST
+# This option is not implemented for use with select
+# Compare with second line of parametric summary:
+wald_gam(m1, comp=list(Condition=c('-1', '0'), 
+    Group='Children'), t.test=TRUE)
+# Compare with Wald test:
+wald_gam(m1, comp=list(Condition=c('-1', '0'), 
+    Group='Children'))
+
+# exclude significance stars:
+wald_gam(m1, comp=list(Condition=c('-1', '0'), 
+    Group='Children'), signif.stars=FALSE)
+
+# do not print output, but save table for later use:
+test &lt;- wald_gam(m1, comp=list(Condition=c('-1', '0'), 
+    Group='Children'), print.output=FALSE)
+test
+# alternative way:
+infoMessages('off')
+test2 &lt;- wald_gam(m1, comp=list(Condition=c('-1', '0'), 
+    Group='Children'))
+infoMessages('on')
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

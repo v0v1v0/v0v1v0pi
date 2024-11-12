@@ -1,0 +1,117 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>show_observations</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Adds a Layer with Observations to a Profile Plot</h2>
+
+<h3>Description</h3>
+
+<p>Function <code>show_observations</code> adds a layer to a plot created with
+<code>plot.ceteris_paribus_explainer</code> for selected observations.
+Various parameters help to decide what should be plotted, profiles, aggregated profiles, points or rugs.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">show_observations(
+  x,
+  ...,
+  size = 2,
+  alpha = 1,
+  color = "#371ea3",
+  variable_type = "numerical",
+  variables = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a ceteris paribus explainer produced with function <code>ceteris_paribus()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other explainers that shall be plotted together</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size</code></td>
+<td>
+<p>a numeric. Size of lines to be plotted</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>a numeric between <code>0</code> and <code>1</code>. Opacity of lines</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>color</code></td>
+<td>
+<p>a character. Either name of a color or name of a variable that should be used for coloring</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variable_type</code></td>
+<td>
+<p>a character. If <code>numerical</code> then only numerical variables will be plotted.
+If <code>categorical</code> then only categorical variables will be plotted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variables</code></td>
+<td>
+<p>if not <code>NULL</code> then only <code>variables</code> will be presented</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a <code>ggplot2</code> layer
+</p>
+
+
+<h3>References</h3>
+
+<p>Explanatory Model Analysis. Explore, Explain, and Examine Predictive Models. <a href="https://ema.drwhy.ai/">https://ema.drwhy.ai/</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library("DALEX")
+library("ingredients")
+
+library("ranger")
+
+rf_model &lt;- ranger(survived ~., data = titanic_imputed, probability = TRUE)
+
+explainer_rf &lt;- explain(rf_model,
+                        data = titanic_imputed[,-8],
+                        y = titanic_imputed[,8],
+                        label = "ranger forest",
+                        verbose = FALSE)
+
+selected_passangers &lt;- select_sample(titanic_imputed, n = 100)
+cp_rf &lt;- ceteris_paribus(explainer_rf, selected_passangers)
+cp_rf
+
+plot(cp_rf, variables = "age", color = "grey") +
+show_observations(cp_rf, variables = "age", color = "black") +
+  show_rugs(cp_rf, variables = "age", color = "red")
+
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,95 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>inqc</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Wrapper for QC'ing all variables</h2>
+
+<h3>Description</h3>
+
+<p>This function calls functions which perform QC for all climate variables
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">inqc(homefolder = "./", blend = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>homefolder</code></td>
+<td>
+<p>path to the homefolder, as string</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>blend</code></td>
+<td>
+<p>logical flag which means performing (if TRUE) QC on blended time series</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>QC results, in both formats (verbose and workable file in exact ECA&amp;D format)
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#Set a temporal working directory:
+wd &lt;- tempdir(); wd0 &lt;- setwd(wd)
+#Create subdirectory where raw data files have to be located
+dir.create(file.path(wd, 'raw'))
+#NON-BLENDED ECA&amp;D SERIES
+#Extract the non-blended ECA&amp;D data and station files from the example data folder
+#Only TX (maximum air temperature) and CC (cloud cover) data are used in the example
+path2txlist&lt;-system.file("extdata", "ECA_blend_source_tx.txt", package = "INQC")
+txlist&lt;-readr::read_lines_raw(path2txlist)
+readr::write_lines(txlist,'ECA_blend_source_tx.txt')
+path2txdata&lt;-system.file("extdata", "TX_SOUID132734.txt", package = "INQC")
+txdata&lt;-readr::read_lines_raw(path2txdata)
+readr::write_lines(txdata, file=paste(wd,'/raw/TX_SOUID132734.txt',sep=''))
+path2cclist&lt;-system.file("extdata", "ECA_blend_source_cc.txt", package = "INQC")
+cclist&lt;-readr::read_lines_raw(path2cclist)
+readr::write_lines(cclist,'ECA_blend_source_cc.txt')
+path2ccdata&lt;-system.file("extdata", "CC_SOUID132727.txt", package = "INQC")
+ccdata&lt;-readr::read_lines_raw(path2ccdata)
+readr::write_lines(ccdata, file=paste(wd,'/raw/CC_SOUID132727.txt',sep=''))
+#This is the MAIN starting point of the INQC software calculation:
+inqc(homefolder='./',blend=FALSE) #Work with non-blended ECA&amp;D data
+#Remove some temporary files
+list = list.files(pattern = "Rfwf")
+file.remove(list)
+#The QC results can be found in the directory:
+print(wd)
+#BLENDED ECA&amp;D SERIES
+#Extract the blended ECA&amp;D data and station files from the example data folder
+#Only TX (maximum air temperature) and CC (cloud cover) data are used in the example
+path2list&lt;-system.file("extdata", "stations.txt", package = "INQC")
+list&lt;-readr::read_lines_raw(path2list)
+readr::write_lines(list,file=paste(wd,'/raw/stations.txt',sep=''))
+path2txdata&lt;-system.file("extdata", "TX_STAID000002.txt", package = "INQC")
+txdata&lt;-readr::read_lines_raw(path2txdata)
+readr::write_lines(txdata, file=paste(wd,'/raw/TX_STAID000002.txt',sep=''))
+path2ccdata&lt;-system.file("extdata", "CC_STAID000001.txt", package = "INQC")
+ccdata&lt;-readr::read_lines_raw(path2ccdata)
+readr::write_lines(ccdata, file=paste(wd,'/raw/CC_STAID000001.txt',sep=''))
+#This is the MAIN starting point of the INQC software calculation:
+inqc(homefolder='./',blend=TRUE) #work with blended ECA&amp;D data
+#Remove some temporary files
+list = list.files(pattern = "Rfwf")
+file.remove(list)
+#The QC results can be found in the directory:
+print(wd)
+#Return to user's working directory:
+setwd(wd0)
+</code></pre>
+
+
+</div>

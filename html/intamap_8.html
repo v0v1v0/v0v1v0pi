@@ -1,0 +1,301 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>createIntamapObject</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create an object for interpolation within the intamap package</h2>
+
+<h3>Description</h3>
+
+<p>This is a help function for creating an object (see <code>intamap-package</code>
+to be used for interpolation within the <code>intamap-package</code>
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">createIntamapObject(observations, obsChar, formulaString,
+            predictionLocations=100, targetCRS, boundaries, boundaryLines,
+            intCRS, params=list(), boundFile, lineFile, class="idw",
+            outputWhat, blockWhat = "none",...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>observations</code></td>
+<td>
+<p>a 
+<code>SpatialPointsDataFrame</code>, 
+<code>SpatialPixelsDataFrame</code>, 
+<code>SpatialGridDataFrame</code>,
+<code>SpatialLinesDataFrame</code> or
+<code>SpatialPolygonsDataFrame</code> with observations. Note that there
+are only few methods that can actually handle interpolation of
+observations with a support</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>obsChar</code></td>
+<td>
+<p>list with observation characteristics, used by some interpolation methods</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formulaString</code></td>
+<td>
+<p>formula that defines the dependent variable as a linear model 
+of independent variables; suppose the dependent variable has name <code>z</code>, 
+for ordinary and simple kriging use the formula <code>z~1</code>; 
+for universal kriging, suppose <code>z</code> is linearly dependent on 
+<code>x</code> and <code>y</code>, use the formula <code>z~x+y</code>. The formulaString defaults
+to <code>"value~1"</code> if <code>value</code> is a part of the data set. 
+If not, the first column of the data set is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predictionLocations</code></td>
+<td>
+<p>either a <code>Spatial</code>* object with 
+prediction locations or an integer with the requested number
+of prediction locations. If <code>boundaries</code> are supported, 
+the sampled prediction locations will be sampled within the 
+<code>boundaries</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>targetCRS</code></td>
+<td>
+<p>the wanted projection for the interpolated map</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boundaries</code></td>
+<td>
+<p><code>SpatialPolygonsDataFrame</code> with the boundaries
+of regions in the prediction region</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boundaryLines</code></td>
+<td>
+<p><code>SpatialPointsDataFrame</code> with the boundaries between
+pairs of regions discretized as points. 
+Will be read from file if <code>lineFile</code> is 
+given or will be created from <code>boundaries</code> if not.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intCRS</code></td>
+<td>
+<p>a particular projection requested for the interpolation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>params</code></td>
+<td>
+<p>parameters for the interpolation, given as exceptions to the 
+default parameters set in the function <code>getIntamapParams</code>. It is also possible to pass
+a <code>methodParameters</code> from an earlier call, as defined from the function
+<code>methodParameters</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boundFile</code></td>
+<td>
+<p>Filename where boundaries can be found, e.g. a shapefile </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lineFile</code></td>
+<td>
+<p>Filename where paired points on boundaries can be found</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>class</code></td>
+<td>
+<p>setting the class(es) of the object, see <code>intamap-package</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outputWhat</code></td>
+<td>
+<p>List defining the requested type of output. Parameters:
+</p>
+
+<dl>
+<dt><code>mean = TRUE</code></dt>
+<dd>
+<p>Usual kriging prediction </p>
+</dd>
+<dt><code>variance = TRUE</code></dt>
+<dd>
+<p>Usual kriging error </p>
+</dd>
+<dt><code>quantile</code></dt>
+<dd>
+<p>The estimated quantile for a certain threshold</p>
+</dd>
+<dt><code>excprob</code></dt>
+<dd>
+<p>Exceedance probability for a certain threshold</p>
+</dd>
+<dt><code>cumdistr</code></dt>
+<dd>
+<p>The cumulative distribution for a certain value</p>
+</dd>
+<dt><code>MOK</code></dt>
+<dd>
+<p>Assumed unbiased prediction using the MOK method for the threshold given.
+See <code>unbiasedKrige</code></p>
+</dd>
+<dt><code>IWQSEL</code></dt>
+<dd>
+<p>Assumed unbiased prediction using the IWQSEL method for the threshold given.
+See <code>unbiasedKrige</code></p>
+</dd>
+<dt><code>...</code></dt>
+<dd>
+<p>Additional prediction types that do not exist in the default parameter set,
+particularly parameters necessary for new methods within the 
+<code>intamap-package</code>.</p>
+</dd>
+</dl>
+<p>The list defaults to list (mean = TRUE) for objects of class IDW and 
+list(mean=TRUE, variance = TRUE) for all other objects.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>blockWhat</code></td>
+<td>
+<p>List defining particular output for block predictions. These include:
+</p>
+
+<dl>
+<dt><code>blockMax</code></dt>
+<dd>
+<p>logical; whether to predict maximum within block, if block predictions</p>
+</dd>
+<dt><code>blockMin</code></dt>
+<dd>
+<p>logical; whether to predict mimimum within block, if block predictions</p>
+</dd>
+<dt><code>fat</code></dt>
+<dd>
+<p>Prediction of area within block above a <code>threshold</code> (<code>fat = threshold</code></p>
+</dd>
+<dt><code>blockMaxVar</code></dt>
+<dd>
+<p>logical; whether to predict the variance of the prediction of max within the block, 
+similarly it is possible to set
+<code>blockMinVar = TRUE</code> and <code>fatVar = threshold</code></p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+ 
+
+<ul>
+<li>
+<p> Either: other elements that can be used by particular interpolation methods. 
+These are added to the object as named elements.
+</p>
+</li>
+<li>
+<p> Or: elements that have been created 
+in earlier calls to one of the functions in the <code>intamap-package</code>, 
+and that are
+not supposed to change in the second call. By adding these
+elements to the object in <code>createIntamapObject</code>, they can be reused 
+without having to re-estimate them. Typical examples are the elements created 
+from a call to <code>preProcess</code>
+</p>
+</li>
+</ul>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function is a help function for creating an object (see
+<code>intamap-package</code>) for interpolation within the 
+<code>intamap-package</code>.
+The function uses some default values if certain elements are not included.
+</p>
+<p>If <code>createIntamapObject</code> is called without predictionLocations, or if a number
+is given, the function will sample a set of predictionLocations. These will
+be sampled from a regular grid.
+</p>
+<p>targetCRS and intCRS are not mandatory variables, but are recommended if the 
+user wants predictions of a certain projection. intCRS is not necessary if
+the targetCRS is given and has a projection (is not lat-long). It is recommended
+to include the argument intCRS if all projected elements are lat-long, as many of 
+the interpolation methods do not work optimal with lat-long data. 
+</p>
+<p>The ...-argument can be used for arguments necessary for new methods not being 
+a part of the <code>intamap-package</code>.  It is also a method for reusing previously calculated
+elements that can be assumed to be unchanged for the second interpolation.  
+
+
+</p>
+
+
+<h3>Value</h3>
+
+ 
+<p>An object with observations, prediction locations, parameters and possible
+additional elements for automatic interpolation. The object will have class
+equal to the value of argument <code>class</code>, and methods in the 
+<code>intamap-package</code> will dispatch on the
+object according to this class.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Jon Olav Skoien </p>
+
+
+<h3>References</h3>
+
+ 
+<p>Pebesma, E., Cornford, D., Dubois, G., Heuvelink, G.B.M., Hristopulos, D., Pilz, J., Stohlker, U., Morin, G., Skoien, J.O. INTAMAP: The design and implementation f an interoperable automated interpolation Web Service. Computers and Geosciences 37 (3), 2011. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>intamap-package</code> and <code>getIntamapParams</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># set up data:
+data(meuse)
+coordinates(meuse) = ~x+y
+meuse$value = log(meuse$zinc)
+data(meuse.grid)
+gridded(meuse.grid) = ~x+y
+proj4string(meuse) = CRS("+init=epsg:28992")
+proj4string(meuse.grid) = CRS("+init=epsg:28992")
+
+# set up intamap object:
+idwObject = createIntamapObject(
+	observations = meuse,
+	predictionLocations = meuse.grid,
+	targetCRS = "+init=epsg:3035",
+	class = "idw"
+)
+</code></pre>
+
+
+</div>

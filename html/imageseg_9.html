@@ -1,0 +1,193 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>resizeImages</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Resize and save images</h2>
+
+<h3>Description</h3>
+
+<p>Resize and save images
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">resizeImages(
+  imageDir,
+  fileNames,
+  pattern,
+  patternInclude = TRUE,
+  type,
+  dimensions,
+  validRegion,
+  preserveAspect = TRUE,
+  filter = NULL,
+  colorspace,
+  binary,
+  gravity = "Center",
+  imageFormats = c("JPG|TIF|PNG|JPEG|TIFF"),
+  outDir,
+  cores = 1,
+  compression = "Lossless"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>imageDir</code></td>
+<td>
+<p>Character. Directory containing raw images</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fileNames</code></td>
+<td>
+<p>character. File names to load (they will still be filtered by <code>pattern</code>, if defined)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pattern</code></td>
+<td>
+<p>character. Pattern to search in file names</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>patternInclude</code></td>
+<td>
+<p>logical. Include images with pattern in file names (TRUE) or exclude (FALSE)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>character. "canopy" or "understory". Will set image dimensions accordingly to predefined c(256, 256) or c(160, 256), respectively (optional). Alternatively, use <code>dimensions</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dimensions</code></td>
+<td>
+<p>integer. image dimensions provides as c(width, height) in pixels. If specified, overrides <code>type</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>validRegion</code></td>
+<td>
+<p>character. If defined, use string as argument <code>geometry</code> in <code>image_crop</code> (output of <code>geometry_area</code>), which will crop all images to the same region before resizing (optional). If undefined, don't crop.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>preserveAspect</code></td>
+<td>
+<p>logical. If TRUE, images will be cropped to aspect ratio of output before resizing (thus preserving original aspect ratio, but losing parts of the image). If FALSE, images will be simply resized from their input size to the desired output (not preserving aspect ratio).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filter</code></td>
+<td>
+<p>character. Resampling filter. Passed to argument <code>filter</code> in <code>image_resize</code>. See <code>magick::filter_types()</code> for available options. Default is LanczosFilter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colorspace</code></td>
+<td>
+<p>character. If defined, image will be converted to the requested colorspace. If undefined, colorspace will remain unchanged. Must be a valid argument to  <code>magick::colorspace_types()</code>. In practice, only "sRGB" and "Gray" will be relevant.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>binary</code></td>
+<td>
+<p>logical. If colorspace is "Gray", make the output binary?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gravity</code></td>
+<td>
+<p>if preserveAspect = TRUE and images need to be cropped, the <code>gravity</code> argument to use in <code>image_crop</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>imageFormats</code></td>
+<td>
+<p>character. Image file formats to read.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outDir</code></td>
+<td>
+<p>character. Directory to save resized images in.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>integer. Number of cores to use for parallel processing</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>compression</code></td>
+<td>
+<p>character. Compression type to use in <code>image_write</code>. See <code>compress_types</code>. By default, "Lossless" for grayscale images, "Undefined" for color images.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Resizing is done by <code>image_resize</code> and will ensure that the resized images have exactly the desired dimensions.
+</p>
+<p>If <code>preserveAspect = TRUE</code>, input images will first be cropped to the maximum area with the aspect ratio of the desired output (1:1 (square) for <code>type = "canopy"</code>, 5:8 for <code>type = "understory"</code>), by default in the center of the input image (argument <code>gravity</code>). This will usually lead to the loss of parts of the image, but the remaining part of the image is not deformed compared to the original.
+Alternatively, if <code>preserveAspect = FALSE</code>, input images will be resized to the requested dimensions without cropping (thus no loss of part of the image), but the aspect ratio changes. If aspect ratio changes too strongly it may negatively affect model performance.
+</p>
+<p>Resizing is done using "!" in the geometry syntax. See <code>geometry</code> for details.
+</p>
+<p>compression = "Lossless" is used to ensure no compression artefacts in saved images (which would for example introduce grayscale values in black/white images). If small file sizes are important, you can change it to save compressed images.
+</p>
+
+
+<h3>Value</h3>
+
+<p>No R output, only resized images are saved on disk
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example 1: Canopy
+wd_can &lt;- system.file("images/canopy/raw",
+                      package = "imageseg")
+
+wd_out_can &lt;- file.path(tempdir(), "canopy", "resized")
+resizeImages(imageDir = wd_can,
+             type = "canopy",
+             outDir = wd_out_can)
+
+filename_resized &lt;- list.files(wd_out_can, full.names = TRUE)
+
+# check output
+img_can &lt;- magick::image_read(filename_resized)
+img_can
+
+# Example 2: Understory
+wd_us &lt;- system.file("images/understory/raw",
+                      package = "imageseg")
+wd_out_us &lt;- file.path(tempdir(), "understory", "resized")
+
+# note, these are png images
+resizeImages(imageDir = wd_us,
+             type = "understory",
+             outDir = wd_out_us)
+
+filename_resized &lt;- list.files(wd_out_us, full.names = TRUE)
+
+# check output
+img_us &lt;- magick::image_read(filename_resized)
+img_us
+
+</code></pre>
+
+
+</div>

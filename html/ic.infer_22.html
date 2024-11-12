@@ -1,0 +1,524 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>orlm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Functions for order restricted linear regression estimation and testing </h2>
+
+<h3>Description</h3>
+
+<p>Function orlm calculates order-restricted linear models (linear equality and 
+inequality constraints). It uses the internal function boot.orlm for bootstrapping, 
+which in turn uses the internal functions orlm_forboot... . 
+The remaining functions extract coefficients, provide a residual plot, give a 
+short printout or a more extensive summary.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">orlm(model, ui, ci, ...)
+## S3 method for class 'lm'
+orlm(model, ui, ci, index = 2:length(coef(model)), meq = 0, 
+    orig.out = FALSE, boot = FALSE, B = 1000, fixed = FALSE, 
+    tol = sqrt(.Machine$double.eps), ...)
+## Default S3 method:
+orlm(model, ui, ci, index = NULL, meq = 0, 
+    tol = sqrt(.Machine$double.eps), df.error = NULL, ...)
+boot.orlm(model, B = 1000, fixed = FALSE, ui, ci, index, meq)
+orlm_forboot.fixed(data, indices, ...)
+orlm_forboot(data, indices, index = index, ...)
+## S3 method for class 'orlm'
+coef(object, ...)
+## S3 method for class 'orlm'
+plot(x, caption = "Residuals vs Fitted", 
+        panel = if (add.smooth) panel.smooth else points, sub.caption = NULL, 
+        main = "", ..., id.n = 3, labels.id = names(x$residuals), cex.id = 0.75, 
+        add.smooth = getOption("add.smooth"), label.pos = c(4, 2), 
+        cex.caption = 1)
+## S3 method for class 'orlm'
+print(x, digits = max(3, getOption("digits") - 3), ...)
+## S3 method for class 'orlm'
+summary(object, display.unrestr = FALSE, brief = FALSE, 
+        digits = max(3, getOption("digits") - 3), 
+        scientific = FALSE, overall.tests = TRUE, 
+        bootCIs = TRUE, bty = "perc", level = 0.95, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p> a linear model object (class <code>lm</code>) with data included 
+</p>
+<p>OR
+</p>
+<p>a covariance matrix of Y and all regressors (in this order)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ui</code></td>
+<td>
+<p> matrix (or vector in case of one single restriction only) 
+defining the left-hand side of the restriction 
+</p>
+<p><code>ui%*%beta &gt;= ci</code>,
+</p>
+<p>where beta is the parameter vector;         
+the first few of these restrictions can be declared equality- instead
+of inequality restrictions (cf. argument <code>meq</code>); 
+if only part of the elements of beta are subject to restrictions, 
+the columns of <code>ui</code> can be restricted to these elements, if their 
+index numbers are provided in <code>index</code>; by default, <code>index</code> 
+excludes the intercept, i.e. the columns of <code>ui</code> refer to the 
+non-intercept elements of <code>coef(model)</code>
+</p>
+<p>Rows of <code>ui</code> must be linearly independent; 
+in case of linearly dependent rows the function gives an error 
+message with a hint which subset of rows is independent.
+Note that the restrictions must define a (possibly translated) cone,
+i.e. e.g. interval restrictions on a parameter are not permitted. 
+</p>
+<p>See <code>contr.diff</code> for examples of how to comfortably 
+define various types of restriction.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci</code></td>
+<td>
+<p> vector on the right-hand side of the restriction (cf. <code>ui</code>) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>index</code></td>
+<td>
+<p> index numbers of the components of beta, 
+which are subject to the specified constraints 
+as <code>ui%*%beta[index] &gt;= ci</code>,
+default is <code>index = 2:length(coef(model))</code>, 
+i.e. <code>ui</code> is supposed to have columns for all coefficients 
+except the intercept;
+</p>
+<p>CAUTIONs: 
+</p>
+<p>- <code>index</code> refers to the position of the coefficient in the model. 
+The first coefficient is usually the intercept (which is therefore 
+per default excluded from restrictions).
+</p>
+<p>- If the intercept is included into restrictions (model with intercept, 
+index containing the element <code>1</code>, intercept-related column of ui 
+not consisting of zeroes only), R-squared values may become unreasonable, 
+if the restriction on the intercept is active. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meq</code></td>
+<td>
+<p> integer number (default 0) giving the number of rows of <code>ui</code> that 
+are used for equality restrictions instead of inequality 
+restrictions. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>orig.out</code></td>
+<td>
+<p> should the original model be included in the output list ? 
+(default: <code>FALSE</code>) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot</code></td>
+<td>
+<p>should bootstrapping be conducted ? (default: <code>FALSE</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p> number of bootstrap samples (default: <code>1000</code>) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed</code></td>
+<td>
+<p> should bootstrapping consider the sample as fixed and bootstrap 
+residuals ? (default: <code>FALSE</code>) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p> data handed to bootstrap sampling routine </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indices</code></td>
+<td>
+<p> indices for sampling </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>numerical tolerance value; 
+estimates closer to 0 than <code>tol</code> are set to exactly 0</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.error</code></td>
+<td>
+<p> error degrees of freedom (number of observations minus 
+number of colummns of covariance matrix) for <code>orlm.default</code>;
+required in order to calculate adequate covariance matrix and tests; 
+valid coefficient estimates can also be obtained for arbitrary 
+values of <code>df.error</code>  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> Further options  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>object of class <code>orlm</code> (created by function <code>orlm</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>object of class <code>orlm</code> (created by function <code>orlm</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>caption</code></td>
+<td>
+<p> like in function <code>plot.lm</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>panel</code></td>
+<td>
+<p> like in function <code>plot.lm</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sub.caption</code></td>
+<td>
+<p> like in function <code>plot.lm</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p> like in function <code>plot.lm</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id.n</code></td>
+<td>
+<p> like in function <code>plot.lm</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>labels.id</code></td>
+<td>
+<p> like in function <code>plot.lm</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex.id</code></td>
+<td>
+<p> like in function <code>plot.lm</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add.smooth</code></td>
+<td>
+<p> like in function <code>plot.lm</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label.pos</code></td>
+<td>
+<p> like in function <code>plot.lm</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex.caption</code></td>
+<td>
+<p> like in function <code>plot.lm</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p> number of digits to display </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>display.unrestr</code></td>
+<td>
+<p> if <code>TRUE</code>, also display unrestricted model; 
+default: <code>FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>brief</code></td>
+<td>
+<p> if <code>TRUE</code>, suppress printing of restrictions; 
+default: <code>FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scientific</code></td>
+<td>
+<p> if <code>FALSE</code>, suppresses scientific format; 
+default: <code>FALSE</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overall.tests</code></td>
+<td>
+<p> if <code>FALSE</code>, suppresses output of overall model tests;
+default: <code>TRUE</code>; for models with large sets of restrictions, 
+tests can take up substantial time because of weight calculation </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bootCIs</code></td>
+<td>
+<p> if <code>FALSE</code>, suppresses bootstrap confidence intervals, even 
+though the <code>obj</code> contains a <code>bootout</code> element; 
+default: <code>TRUE</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bty</code></td>
+<td>
+<p> type of bootstrap confidence interval; any of 
+<code>"perc"</code>, <code>"bca"</code>, <code>"norm"</code> or <code>"basic"</code>, 
+cf. function <code>boot.ci</code> from package <code>boot</code>,
+default: <code>"perc"</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+<p> confidence level for bootstrap confidence intervals,
+default: <code>0.95</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Function <code>orlm</code> performs order restricted linear model analysis. 
+Functions <code>coef.orlm</code>, <code>plot.orlm</code>, <code>print.orlm</code>, and 
+<code>summary.orlm</code> provide methods for reporting the results on an object 
+of S3 class orlm. The functions directly referring to bootstrapping are internal 
+and should not be called by the user but are called from within function <code>orlm</code> 
+if option <code>boot</code> is set to <code>TRUE</code>.
+</p>
+<p>Of course, bootstrapping is not possible, if function <code>orlm</code> is applied 
+to a covariance matrix, since the raw data are not available in this case. Also 
+note that the intercept is not estimated in this case but can easily be estimated 
+from the resulting estimate if the variable means are known (cf. example).
+</p>
+<p>The output from summary.orlm provides information about the restrictions, 
+a comparison of $R^2$-values for unrestricted and restricted model, 
+restricted estimates, and 
+</p>
+<p>- if requested (option <code>boot</code> set to <code>TRUE</code> in function <code>orlm</code> and 
+option <code>bootCIs</code> set to <code>TRUE</code> in the summary function)
+with bootstrap confidence intervals, 
+</p>
+<p>- if requested (option <code>overall.tests</code> set to <code>TRUE</code>) 
+several restriction-related tests (implemented by calls to <code>ic.test</code>):
+The analogue to the overall F-Test in the ordinary linear model is the test of 
+all coefficients but intercept equal to 0 within the restricted parameter 
+space. In addition, three tests related to the restriction are reported:
+</p>
+<p>Test 1: H0: Restriction valid with equality  vs. H1: at least one inequality
+</p>
+<p>Test 2: H0: Restriction valid   vs.  H1: restriction violated
+</p>
+<p>Test 3: H0: Restriction violated or valid with equality 
+vs. H1: all restrictions valid with inequality
+</p>
+<p>Test 3 is conducted in case of no equality-restrictions only.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The output of function <code>orlm</code> belongs to S3 classes <code>orlm</code> and <code>orest</code>. 
+It is a list with the following items:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>b.restr </code></td>
+<td>
+<p>restricted estimate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b.unrestr </code></td>
+<td>
+<p>unrestricted estimate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R2</code></td>
+<td>
+<p>R-squared</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>residuals </code></td>
+<td>
+<p> residuals of restricted model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitted.values </code></td>
+<td>
+<p>fitted values of restricted model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>observation weights </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>orig.R2</code></td>
+<td>
+<p>R-squared of unrestricted model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.error</code></td>
+<td>
+<p>error degrees of freedom of unrestricted model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s2 </code></td>
+<td>
+<p>MSE of unrestricted model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Sigma</code></td>
+<td>
+<p>variance covariance matrix of beta-hat in unrestricted model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>origmodel </code></td>
+<td>
+<p>unrestricted model itself (<code>NULL</code>, 
+if <code>orig.out=FALSE</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ui</code></td>
+<td>
+<p> as input</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci</code></td>
+<td>
+<p> as input</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>restr.index</code></td>
+<td>
+<p> the input vector index </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meq</code></td>
+<td>
+<p> as input</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iact</code></td>
+<td>
+<p> active restrictions, i.e. restrictions that are satisfied with 
+equality in the solution, as output by <code>solve.QP</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bootout </code></td>
+<td>
+<p>object of class boot obtained by bootstrapping, 
+will be used by summary.orlm for calculating bootstrap confidence 
+intervals; <code>NULL</code> if <code>boot=FALSE</code></p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Package versions up to 1.1-4 had a bug in function ic.test that caused 
+the p-value of the overall model test to be too large.</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Ulrike Groemping, BHT Berlin </p>
+
+
+<h3>References</h3>
+
+<p> Shapiro, A. (1988) Towards a unified theory of inequality-constrained 
+testing in multivariate analysis. <em>International Statistical Review</em> 
+<b>56</b>, 49–62</p>
+
+
+<h3>See Also</h3>
+
+<p> See also <code>ic.est</code>, <code>ic.test</code>, 
+<code>or.relimp</code>, <code>solve.QP</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">limo &lt;- lm(swiss)
+## restricted linear model with restrictions that
+## - Education and Examination have same coefficient
+## - Catholic and Infant.Mortality have non-negative coefficients
+orlimo &lt;- orlm(limo, ui=rbind(c(0,1,-1,0,0),c(0,0,0,1,0),c(0,0,0,0,1)), meq=1)
+orlimo
+plot(orlimo)
+summary(orlimo)
+## same model using index vector
+orlimo &lt;- orlm(limo, ui=rbind(c(1,-1,0,0),c(0,0,1,0),c(0,0,0,1)), index=3:6, meq=1)
+
+## reduced number of bootstrap samples below reasonable size for example run time
+orlimo &lt;- orlm(limo, ui=rbind(c(1,-1,0,0),c(0,0,1,0),c(0,0,0,1)), 
+    index=3:6, meq=1, boot=TRUE, B=100)
+summary(orlimo)
+
+## bootstrap considering data as fixed 
+orlimof &lt;- orlm(limo, ui=rbind(c(1,-1,0,0),c(0,0,1,0),c(0,0,0,1)), 
+    index=3:6, meq=1, boot=TRUE, B=100, fixed=TRUE)
+summary(orlimof, brief=TRUE)
+</code></pre>
+
+
+</div>

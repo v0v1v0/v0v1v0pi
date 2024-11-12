@@ -1,0 +1,136 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>show_residuals</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Adds a Layer with Residuals to a Profile Plot</h2>
+
+<h3>Description</h3>
+
+<p>Function <code>show_residuals</code> adds a layer to a plot created with
+<code>plot.ceteris_paribus_explainer</code> for selected observations.
+Note that the <code>y</code> argument has to be specified in the <code>ceteris_paribus</code> function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">show_residuals(
+  x,
+  ...,
+  size = 0.75,
+  alpha = 1,
+  color = c(`TRUE` = "#8bdcbe", `FALSE` = "#f05a71"),
+  variables = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a ceteris paribus explainer produced with function <code>ceteris_paribus()</code>.
+Note that <code>y</code> parameter shall be supplied in this function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other explainers that shall be plotted together</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size</code></td>
+<td>
+<p>a numeric. Size of lines to be plotted</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>a numeric between <code>0</code> and <code>1</code>. Opacity of lines</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>color</code></td>
+<td>
+<p>a character. Either name of a color or name of a variable that should be used for coloring</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variables</code></td>
+<td>
+<p>if not <code>NULL</code> then only <code>variables</code> will be presented</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a <code>ggplot2</code> layer
+</p>
+
+
+<h3>References</h3>
+
+<p>Explanatory Model Analysis. Explore, Explain, and Examine Predictive Models. <a href="https://ema.drwhy.ai/">https://ema.drwhy.ai/</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library("DALEX")
+library("ingredients")
+library("ranger")
+
+johny_d &lt;- data.frame(
+  class = factor("1st", levels = c("1st", "2nd", "3rd", "deck crew", "engineering crew",
+                                   "restaurant staff", "victualling crew")),
+  gender = factor("male", levels = c("female", "male")),
+  age = 8,
+  sibsp = 0,
+  parch = 0,
+  fare = 72,
+  embarked = factor("Southampton", levels = c("Belfast", "Cherbourg", "Queenstown", "Southampton"))
+)
+
+
+model_titanic_rf &lt;- ranger(survived ~., data = titanic_imputed, probability = TRUE)
+
+explain_titanic_rf &lt;- explain(model_titanic_rf,
+                              data = titanic_imputed[,-8],
+                              y = titanic_imputed[,8],
+                              label = "ranger forest",
+                              verbose = FALSE)
+
+johny_neighbours &lt;- select_neighbours(data = titanic_imputed,
+                                      observation = johny_d,
+                                      variables = c("age", "gender", "class",
+                                                  "fare", "sibsp", "parch"),
+                                      n = 10)
+
+cp_neighbours &lt;- ceteris_paribus(explain_titanic_rf,
+                                 johny_neighbours,
+                                 y = johny_neighbours$survived == "yes",
+                                 variable_splits = list(age = seq(0,70, length.out = 1000)))
+
+plot(cp_neighbours, variables = "age") +
+  show_observations(cp_neighbours, variables = "age")
+
+
+cp_johny &lt;- ceteris_paribus(explain_titanic_rf, johny_d,
+                            variable_splits = list(age = seq(0,70, length.out = 1000)))
+
+plot(cp_johny, variables = "age", size = 1.5, color = "#8bdcbe") +
+  show_profiles(cp_neighbours, variables = "age", color = "#ceced9") +
+  show_observations(cp_johny, variables = "age", size = 5, color = "#371ea3") +
+  show_residuals(cp_neighbours, variables = "age")
+
+
+</code></pre>
+
+
+</div>

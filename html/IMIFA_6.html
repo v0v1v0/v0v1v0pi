@@ -1,0 +1,101 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>gumbel_max</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate Cluster Labels from Unnormalised Log-Probabilities using the Gumbel-Max Trick</h2>
+
+<h3>Description</h3>
+
+<p>Samples cluster labels for N observations from G clusters efficiently using log-probabilities and the so-called Gumbel-Max trick, without requiring that the log-probabilities be normalised; thus redundant computation can be avoided.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">gumbel_max(probs,
+           slice = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>probs</code></td>
+<td>
+<p>An N x G matrix of unnormalised probabilities on the log scale, where N is he number of observations that require labels to be sampled and G is the number of active clusters s.t. sampled labels can take values in <code>1:G</code>. Typically <code>N &gt; G</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>slice</code></td>
+<td>
+<p>A logical indicating whether or not the indicator correction for slice sampling has been applied to <code>probs</code>. Defaults to <code>FALSE</code> but is <code>TRUE</code> for the <code>"IMIFA"</code> and <code>"IMFA"</code> methods under <code>mcmc_IMIFA</code>. Details of this correction are given in Murphy et. al. (2020). When set to <code>TRUE</code>, this results in a speed-improvement when <code>probs</code> contains non-finite values (e.g. <code>-Inf</code>, corresponding to zero on the probability scale).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Computation takes place on the log scale for stability/underflow reasons (to ensure negligible probabilities won't cause computational difficulties); in any case, many functions for calculating multivariate normal densities already output on the log scale.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A vector of N sampled cluster labels, with the largest label no greater than G.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Though the function is available for standalone use, note that no checks take place, in order to speed up repeated calls to the function inside <code>mcmc_IMIFA</code>.
+</p>
+<p>If the normalising constant is required for another reason, e.g. to compute the log-likelihood, it can be calculated by summing the output obtained by calling <code>rowLogSumExps</code> on <code>probs</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Keefe Murphy - &lt;<a href="mailto:keefe.murphy@mu.ie">keefe.murphy@mu.ie</a>&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Murphy, K., Viroli, C., and Gormley, I. C. (2020) Infinite mixtures of infinite factor analysers, <em>Bayesian Analysis</em>, 15(3): 937-963. &lt;<a href="https://doi.org/10.1214/19-BA1179">doi:10.1214/19-BA1179</a>&gt;.
+</p>
+<p>Yellott, J. I. Jr. (1977) The relationship between Luce's choice axiom, Thurstone's theory of comparative judgment, and the double exponential distribution, <em>Journal of Mathematical Psychology</em>, 15(2): 109-144.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>mcmc_IMIFA</code>, <code>rowLogSumExps</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Create weights for 3 components
+  G         &lt;- 3
+  weights   &lt;- seq_len(G)
+
+# Call gumbel_max() repeatedly to obtain samples of the labels, zs
+  iters     &lt;- 10000
+  zs        &lt;- replicate(iters, gumbel_max(probs=log(weights)))
+
+# Compare answer to the normalised weights
+  tabulate(zs, nbins=G)/iters
+  (normalised &lt;- as.numeric(weights/sum(weights)))
+
+# Simulate a matrix of Dirichlet weights &amp; the associated vector of N labels
+  N       &lt;- 400
+  G       &lt;- 8
+  sizes   &lt;- seq(from=85, to=15, by=-10)
+  weights &lt;- matrix(rDirichlet(N * G, alpha=1, nn=sizes), byrow=TRUE, nrow=N, ncol=G)
+  (zs     &lt;- gumbel_max(probs=log(weights)))
+</code></pre>
+
+
+</div>

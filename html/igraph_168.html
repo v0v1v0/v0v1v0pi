@@ -1,0 +1,169 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cluster_label_prop</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Finding communities based on propagating labels</h2>
+
+<h3>Description</h3>
+
+<p>This is a fast, nearly linear time algorithm for detecting community
+structure in networks. In works by labeling the vertices with unique labels
+and then updating the labels by majority voting in the neighborhood of the
+vertex.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cluster_label_prop(
+  graph,
+  weights = NULL,
+  ...,
+  mode = c("out", "in", "all"),
+  initial = NULL,
+  fixed = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>The input graph. Note that the algorithm wsa originally
+defined for undirected graphs. You are advised to set ‘mode’ to
+<code>all</code> if you pass a directed graph here to treat it as
+undirected.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>The weights of the edges. It must be a positive numeric vector,
+<code>NULL</code> or <code>NA</code>. If it is <code>NULL</code> and the input graph has a
+‘weight’ edge attribute, then that attribute will be used. If
+<code>NULL</code> and no such attribute is present, then the edges will have equal
+weights. Set this to <code>NA</code> if the graph was a ‘weight’ edge
+attribute, but you don't want to use it for community detection. A larger
+edge weight means a stronger connection for this function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>These dots are for future extensions and must be empty.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mode</code></td>
+<td>
+<p>Logical, whether to consider edge directions for the label propagation,
+and if so, in which direction the labels should propagate. Ignored for undirected graphs.
+"all" means to ignore edge directions (even in directed graphs).
+"out" means to propagate labels along the natural direction of the edges.
+"in" means to propagate labels backwards (i.e. from head to tail).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial</code></td>
+<td>
+<p>The initial state. If <code>NULL</code>, every vertex will have a
+different label at the beginning. Otherwise it must be a vector with an
+entry for each vertex. Non-negative values denote different labels, negative
+entries denote vertices without labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed</code></td>
+<td>
+<p>Logical vector denoting which labels are fixed. Of course this
+makes sense only if you provided an initial state, otherwise this element
+will be ignored. Also note that vertices without labels cannot be fixed.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function implements the community detection method described in:
+Raghavan, U.N. and Albert, R. and Kumara, S.: Near linear time algorithm to
+detect community structures in large-scale networks. Phys Rev E 76, 036106.
+(2007). This version extends the original method by the ability to take edge
+weights into consideration and also by allowing some labels to be fixed.
+</p>
+<p>From the abstract of the paper: “In our algorithm every node is
+initialized with a unique label and at every step each node adopts the label
+that most of its neighbors currently have. In this iterative process densely
+connected groups of nodes form a consensus on a unique label to form
+communities.”
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>cluster_label_prop()</code> returns a
+<code>communities()</code> object, please see the <code>communities()</code>
+manual page for details.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Tamas Nepusz <a href="mailto:ntamas@gmail.com">ntamas@gmail.com</a> for the C implementation,
+Gabor Csardi <a href="mailto:csardi.gabor@gmail.com">csardi.gabor@gmail.com</a> for this manual page.
+</p>
+
+
+<h3>References</h3>
+
+<p>Raghavan, U.N. and Albert, R. and Kumara, S.: Near linear time
+algorithm to detect community structures in large-scale networks. <em>Phys
+Rev E</em> 76, 036106. (2007)
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>communities()</code> for extracting the actual results.
+</p>
+<p><code>cluster_fast_greedy()</code>, <code>cluster_walktrap()</code>,
+<code>cluster_spinglass()</code>, <code>cluster_louvain()</code> and
+<code>cluster_leiden()</code> for other community detection methods.
+</p>
+<p>Community detection
+<code>as_membership()</code>,
+<code>cluster_edge_betweenness()</code>,
+<code>cluster_fast_greedy()</code>,
+<code>cluster_fluid_communities()</code>,
+<code>cluster_infomap()</code>,
+<code>cluster_leading_eigen()</code>,
+<code>cluster_leiden()</code>,
+<code>cluster_louvain()</code>,
+<code>cluster_optimal()</code>,
+<code>cluster_spinglass()</code>,
+<code>cluster_walktrap()</code>,
+<code>compare()</code>,
+<code>groups()</code>,
+<code>make_clusters()</code>,
+<code>membership()</code>,
+<code>modularity.igraph()</code>,
+<code>plot_dendrogram()</code>,
+<code>split_join_distance()</code>,
+<code>voronoi_cells()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+g &lt;- sample_gnp(10, 5 / 10) %du% sample_gnp(9, 5 / 9)
+g &lt;- add_edges(g, c(1, 12))
+cluster_label_prop(g)
+
+</code></pre>
+
+
+</div>

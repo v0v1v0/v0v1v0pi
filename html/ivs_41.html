@@ -1,0 +1,144 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iv-containers</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Containers</h2>
+
+<h3>Description</h3>
+
+<p>This family of functions revolves around computing interval <em>containers</em>.
+A container is defined as the widest interval that isn't contained by any
+other interval.
+</p>
+
+<ul>
+<li> <p><code>iv_containers()</code> returns all of the containers found within <code>x</code>.
+</p>
+</li>
+<li> <p><code>iv_identify_containers()</code> identifies the containers that each interval in
+<code>x</code> falls in. It replaces <code>x</code> with a list of the same size where each element
+of the list contains the containers that the corresponding interval in <code>x</code>
+falls in. This is particularly useful alongside <code>tidyr::unnest()</code>.
+</p>
+</li>
+<li> <p><code>iv_identify_container()</code> is similar in spirit to
+<code>iv_identify_containers()</code>, but is useful when you suspect that each interval
+in <code>x</code> is contained within exactly 1 container. It replaces <code>x</code> with an iv of
+the same size where each interval is the container that the corresponding
+interval in <code>x</code> falls in. If any interval falls in more than one container,
+an error is thrown.
+</p>
+</li>
+<li> <p><code>iv_locate_containers()</code> returns a two column data frame with a <code>key</code>
+column containing the result of <code>iv_containers()</code> and a <code>loc</code> list-column
+containing integer vectors that map each interval in <code>x</code> to the container
+that it falls in.
+</p>
+</li>
+</ul>
+<h3>Usage</h3>
+
+<pre><code class="language-R">iv_containers(x)
+
+iv_identify_containers(x)
+
+iv_identify_container(x)
+
+iv_locate_containers(x)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[iv]⁠</code>
+</p>
+<p>An interval vector.</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+
+<ul>
+<li>
+<p> For <code>iv_containers()</code>, an iv with the same type as <code>x</code>.
+</p>
+</li>
+<li>
+<p> For <code>iv_identify_containers()</code>, a list-of containing ivs with the same size
+as <code>x</code>.
+</p>
+</li>
+<li>
+<p> For <code>iv_identify_container()</code>, an iv with the same type as <code>x</code>.
+</p>
+</li>
+<li>
+<p> For <code>iv_locate_containers()</code>, a two column data frame with a <code>key</code> column
+containing the result of <code>iv_containers()</code> and a <code>loc</code> list-column containing
+integer vectors.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(dplyr, warn.conflicts = FALSE)
+library(tidyr)
+
+x &lt;- iv_pairs(
+  c(4, 6),
+  c(1, 5),
+  c(2, 3),
+  c(NA, NA),
+  c(NA, NA),
+  c(9, 12),
+  c(9, 14)
+)
+x
+
+# Containers are intervals which aren't contained in any other interval.
+# They are always returned in ascending order.
+# If any missing intervals are present, a single one is retained.
+iv_containers(x)
+
+# `iv_identify_container()` is useful alongside `group_by()` and
+# `summarize()` if you know that each interval is contained within exactly
+# 1 container
+df &lt;- tibble(x = x)
+df &lt;- mutate(df, container = iv_identify_container(x))
+df
+
+df %&gt;%
+  group_by(container) %&gt;%
+  summarize(n = n())
+
+# If any interval is contained within multiple containers,
+# then you can't use `iv_identify_container()`
+y &lt;- c(x, iv_pairs(c(0, 3), c(8, 13)))
+y
+
+try(iv_identify_container(y))
+
+# Instead, use `iv_identify_containers()` to identify every container
+# that each interval falls in
+df &lt;- tibble(y = y, container = iv_identify_containers(y))
+df
+
+# You can use `tidyr::unchop()` to see the containers that each interval
+# falls in
+df %&gt;%
+  mutate(row = row_number(), .before = 1) %&gt;%
+  unchop(container)
+
+# A more programmatic interface to `iv_identify_containers()` is
+# `iv_locate_containers()`, which returns the containers you get from
+# `iv_containers()` alongside the locations in the input that they contain.
+iv_locate_containers(y)
+</code></pre>
+
+
+</div>

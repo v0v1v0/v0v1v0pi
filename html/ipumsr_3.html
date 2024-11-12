@@ -1,0 +1,187 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>add_to_extract</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Add values to an existing IPUMS extract definition</h2>
+
+<h3>Description</h3>
+
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental"><img src="../help/figures/lifecycle-experimental.svg" alt="[Experimental]"></a>
+</p>
+<p>Add or replace values in an existing <code>ipums_extract</code> object.
+This function is an S3 generic whose behavior will depend on the
+subclass (i.e. collection) of the extract being modified.
+</p>
+
+<ul>
+<li>
+<p> To add to an <strong>IPUMS Microdata</strong> extract definition, click
+here. This includes:
+</p>
+
+<ul>
+<li>
+<p> IPUMS USA
+</p>
+</li>
+<li>
+<p> IPUMS CPS
+</p>
+</li>
+<li>
+<p> IPUMS International
+</p>
+</li>
+<li>
+<p> IPUMS Time Use (ATUS, AHTUS, MTUS)
+</p>
+</li>
+<li>
+<p> IPUMS Health Surveys (NHIS, MEPS)
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p> To add to an <strong>IPUMS NHGIS</strong> extract definition, click
+here
+</p>
+</li>
+</ul>
+<p>This function is marked as experimental because it is typically not the best
+option for maintaining reproducible extract definitions and may be retired
+in the future. For reproducibility, users should strive to build extract
+definitions with <code>define_extract_micro()</code> or <code>define_extract_nhgis()</code>.
+</p>
+<p>If you have a complicated extract definition to revise, but do not have
+the original extract definition code that created it, we suggest that you
+save the revised extract as a JSON file with <code>save_extract_as_json()</code>. This
+will create a stable version of the extract definition that
+can be used in the future as needed.
+</p>
+<p>To remove existing values from an extract definition, use
+<code>remove_from_extract()</code>.
+</p>
+<p>Learn more about the IPUMS API in <code>vignette("ipums-api")</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">add_to_extract(extract, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>extract</code></td>
+<td>
+<p>An <code>ipums_extract</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments specifying the extract fields and values to
+add to the extract definition.
+</p>
+<p>All arguments available in <code>define_extract_micro()</code> (for microdata
+extract requests) or <code>define_extract_nhgis()</code> (for NHGIS extract requests)
+can be passed to <code>add_to_extract()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of the same class as <code>extract</code> containing the modified
+extract definition
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>remove_from_extract()</code> to remove values from an extract definition.
+</p>
+<p><code>define_extract_micro()</code> or <code>define_extract_nhgis()</code> to define an
+extract request manually.
+</p>
+<p><code>submit_extract()</code> to submit an extract request for processing.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Microdata extracts
+usa_extract &lt;- define_extract_micro(
+  collection = "usa",
+  description = "2013 ACS Data",
+  samples = "us2013a",
+  variables = c("SEX", "AGE", "YEAR")
+)
+
+# Add new samples and variables
+add_to_extract(
+  usa_extract,
+  samples = c("us2014a", "us2015a"),
+  variables = var_spec("MARST", data_quality_flags = TRUE)
+)
+
+# Update existing variables
+add_to_extract(
+  usa_extract,
+  variables = var_spec("SEX", case_selections = "1")
+)
+
+# Modify/add multiple variables
+add_to_extract(
+  usa_extract,
+  variables = list(
+    var_spec("SEX", case_selections = "1"),
+    var_spec("RELATE")
+  )
+)
+
+# NHGIS extracts
+nhgis_extract &lt;- define_extract_nhgis(
+  datasets = ds_spec(
+    "1990_STF1",
+    data_tables = c("NP1", "NP2"),
+    geog_levels = "county"
+  )
+)
+
+# Add a new dataset or time series table
+add_to_extract(
+  nhgis_extract,
+  datasets = ds_spec(
+    "1980_STF1",
+    data_tables = "NT1A",
+    geog_levels = c("county", "state")
+  )
+)
+
+# Update existing datasets/time series tables
+add_to_extract(
+  nhgis_extract,
+  datasets = ds_spec("1990_STF1", c("NP1", "NP2"), "state")
+)
+
+# Modify/add multiple datasets or time series tables
+add_to_extract(
+  nhgis_extract,
+  time_series_tables = list(
+    tst_spec("CW3", geog_levels = "state"),
+    tst_spec("CW4", geog_levels = "state")
+  )
+)
+
+# Values that can only take a single value are replaced
+add_to_extract(nhgis_extract, data_format = "fixed_width")$data_format
+</code></pre>
+
+
+</div>

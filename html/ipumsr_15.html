@@ -1,0 +1,280 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>define_extract_nhgis</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Define an IPUMS NHGIS extract request</h2>
+
+<h3>Description</h3>
+
+<p>Define the parameters of an IPUMS NHGIS extract request to be submitted via
+the IPUMS API.
+</p>
+<p>Use <code>get_metadata_nhgis()</code> to browse and identify data sources for use
+in NHGIS extract definitions. For general information, see the NHGIS
+<a href="https://www.nhgis.org/data-availability">data source overview</a> and the
+<a href="https://www.nhgis.org/frequently-asked-questions-faq">FAQ</a>.
+</p>
+<p>Learn more about the IPUMS API in <code>vignette("ipums-api")</code> and
+NHGIS extract definitions in <code>vignette("ipums-api-nhgis")</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">define_extract_nhgis(
+  description = "",
+  datasets = NULL,
+  time_series_tables = NULL,
+  shapefiles = NULL,
+  geographic_extents = NULL,
+  breakdown_and_data_type_layout = NULL,
+  tst_layout = NULL,
+  data_format = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>description</code></td>
+<td>
+<p>Description of the extract.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>datasets</code></td>
+<td>
+<p>List of dataset specifications for any
+<a href="https://www.nhgis.org/overview-nhgis-datasets">datasets</a>
+to include in the extract request. Use <code>ds_spec()</code> to create a
+<code>ds_spec</code> object containing a dataset specification. See examples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time_series_tables</code></td>
+<td>
+<p>List of time series table specifications for any
+<a href="https://www.nhgis.org/time-series-tables">time series tables</a>
+to include in the extract request. Use <code>tst_spec()</code> to create a
+<code>tst_spec</code> object containing a time series table specification. See
+examples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shapefiles</code></td>
+<td>
+<p>Names of any <a href="https://www.nhgis.org/gis-files">shapefiles</a>
+to include in the extract request.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>geographic_extents</code></td>
+<td>
+<p>Vector of geographic extents to use for
+all of the <code>datasets</code> in the extract definition (for instance, to obtain
+data within a particular state). Use <code>"*"</code> to select all available extents.
+</p>
+<p>Required when any of the <code>datasets</code> included in the extract definition
+include <code>geog_levels</code> that require extent selection. See
+<code>get_metadata_nhgis()</code> to determine if a geographic level requires extent
+selection. At the time of writing, NHGIS supports extent selection only
+for blocks and block groups.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>breakdown_and_data_type_layout</code></td>
+<td>
+<p>The desired layout
+of any <code>datasets</code> that have multiple data types or breakdown values.
+</p>
+
+<ul>
+<li> <p><code>"single_file"</code> (default) keeps all data types and breakdown values in
+one file
+</p>
+</li>
+<li> <p><code>"separate_files"</code> splits each data type or breakdown value into its
+own file
+</p>
+</li>
+</ul>
+<p>Required if any <code>datasets</code> included in the extract definition consist of
+multiple data types (for instance, estimates and margins of error) or have
+multiple breakdown values specified. See <code>get_metadata_nhgis()</code> to
+determine whether a requested dataset has multiple data types.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tst_layout</code></td>
+<td>
+<p>The desired layout of all <code>time_series_tables</code> included in
+the extract definition.
+</p>
+
+<ul>
+<li> <p><code>"time_by_column_layout"</code> (wide format, default): rows correspond to
+geographic units, columns correspond to different times in the time
+series
+</p>
+</li>
+<li> <p><code>"time_by_row_layout"</code> (long format): rows correspond to a single
+geographic unit at a single point in time
+</p>
+</li>
+<li> <p><code>"time_by_file_layout"</code>: data for different times are provided in
+separate files
+</p>
+</li>
+</ul>
+<p>Required when an extract definition includes any <code>time_series_tables</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_format</code></td>
+<td>
+<p>The desired format of the extract data file.
+</p>
+
+<ul>
+<li> <p><code>"csv_no_header"</code> (default) includes only a minimal header in the first
+row
+</p>
+</li>
+<li> <p><code>"csv_header"</code> includes a second, more descriptive header row.
+</p>
+</li>
+<li> <p><code>"fixed_width"</code> provides data in a fixed width format
+</p>
+</li>
+</ul>
+<p>Note that by default, <code>read_nhgis()</code> removes the additional header row in
+<code>"csv_header"</code> files.
+</p>
+<p>Required when an extract definition includes any <code>datasets</code> or
+<code>time_series_tables</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>An NHGIS extract definition must include at least one dataset, time series
+table, or shapefile specification.
+</p>
+<p>Create an NHGIS dataset specification with <code>ds_spec()</code>. Each dataset
+must be associated with a selection of <code>data_tables</code> and <code>geog_levels</code>. Some
+datasets also support the selection of <code>years</code> and <code>breakdown_values</code>.
+</p>
+<p>Create an NHGIS time series table specification with <code>tst_spec()</code>. Each time
+series table must be associated with a selection of <code>geog_levels</code> and
+may optionally be associated with a selection of <code>years</code>.
+</p>
+<p>See examples or <code>vignette("ipums-api-nhgis")</code> for more details about
+specifying datasets and time series tables in an NHGIS extract definition.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>nhgis_extract</code> containing
+the extract definition.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>get_metadata_nhgis()</code> to find data to include in an extract definition.
+</p>
+<p><code>submit_extract()</code> to submit an extract request for processing.
+</p>
+<p><code>save_extract_as_json()</code> and <code>define_extract_from_json()</code> to share an
+extract definition.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Extract definition for tables from an NHGIS dataset
+# Use `ds_spec()` to create an NHGIS dataset specification
+nhgis_extract &lt;- define_extract_nhgis(
+  description = "Example NHGIS extract",
+  datasets = ds_spec(
+    "1990_STF3",
+    data_tables = "NP57",
+    geog_levels = c("county", "tract")
+  )
+)
+
+nhgis_extract
+
+# Use `tst_spec()` to create an NHGIS time series table specification
+define_extract_nhgis(
+  description = "Example NHGIS extract",
+  time_series_tables = tst_spec("CL8", geog_levels = "county"),
+  tst_layout = "time_by_row_layout"
+)
+
+# To request multiple datasets, provide a list of `ds_spec` objects
+define_extract_nhgis(
+  description = "Extract definition with multiple datasets",
+  datasets = list(
+    ds_spec("2014_2018_ACS5a", "B01001", c("state", "county")),
+    ds_spec("2015_2019_ACS5a", "B01001", c("state", "county"))
+  )
+)
+
+# If you need to specify the same table or geographic level for
+# many datasets, you may want to make a set of datasets before defining
+# your extract request:
+dataset_names &lt;- c("2014_2018_ACS5a", "2015_2019_ACS5a")
+
+dataset_spec &lt;- purrr::map(
+  dataset_names,
+  ~ ds_spec(
+    .x,
+    data_tables = "B01001",
+    geog_levels = c("state", "county")
+  )
+)
+
+define_extract_nhgis(
+  description = "Extract definition with multiple datasets",
+  datasets = dataset_spec
+)
+
+# You can request datasets, time series tables, and shapefiles in the same
+# definition:
+define_extract_nhgis(
+  description = "Extract with datasets and time series tables",
+  datasets = ds_spec("1990_STF1", c("NP1", "NP2"), "county"),
+  time_series_tables = tst_spec("CL6", "state"),
+  shapefiles = "us_county_1990_tl2008"
+)
+
+# Geographic extents are applied to all datasets in the definition
+define_extract_nhgis(
+  description = "Extent selection",
+  datasets = list(
+    ds_spec("2018_2022_ACS5a", "B01001", "blck_grp"),
+    ds_spec("2017_2021_ACS5a", "B01001", "blck_grp")
+  ),
+  geographic_extents = c("010", "050")
+)
+
+# Extract specifications can be indexed by name
+names(nhgis_extract$datasets)
+
+nhgis_extract$datasets[["1990_STF3"]]
+
+## Not run: 
+# Use the extract definition to submit an extract request to the API
+submit_extract(nhgis_extract)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

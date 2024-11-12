@@ -1,0 +1,143 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>measure</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Prediction error measures</h2>
+
+<h3>Description</h3>
+
+<p>This function measures the prediction errors including
+the IMSE (integrated mean squared error) of type 1 and 2, the integrated
+absolute error, and the supremum absolute error.
+When the true survival curve is unknown but the observed interval is available,
+IMSE is used. When the true survival curve is known, the integrated and supremum
+absolute errors are used.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">measure(
+  surv.hat,
+  timepoints,
+  tau,
+  method = c("all", "imse", "int.error"),
+  L = NULL,
+  R = NULL,
+  surv.true = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>surv.hat</code></td>
+<td>
+<p>the estimated survival curve matrix with rows representing
+the observations and the columns representing the time points at which the
+survival curve is estimated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timepoints</code></td>
+<td>
+<p>a vector of time points at which the survival curve is estimated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau</code></td>
+<td>
+<p>the study end time. ([0, <code>tau</code>] is the window for the analysis.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>Which measure will be used? Either <code>imse</code>, <code>int.error</code> (<code>int.error</code>
+returns both integrated and supremum absolute errors), or <code>all</code> (both) should be entered.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L, R</code></td>
+<td>
+<p>the left and right interval endpoints. These are required when <code>method == "imse"</code>
+or <code>"all"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv.true</code></td>
+<td>
+<p>the true survival curve matrix with rows representing
+the observations and the columns representing the time points at which the
+survival curve is evaluated. This is required when <code>method == "int.error"</code>
+or <code>"all"</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For details of the error measures, see
+Cho H., Jewell N. J., and Kosorok M. R. (2020+). "Interval censored
+recursive forest"
+</p>
+
+
+<h3>Value</h3>
+
+<p>A vector of prediction errors:
+</p>
+
+<ul>
+<li> <p><code>imse.type1</code> and <code>imse.type2</code>
+when <code>method == "imse"</code>
+</p>
+</li>
+<li> <p><code>int.error</code> and <code>sup.error</code>
+when <code>method == "int.error"</code>
+</p>
+</li>
+<li> <p><code>imse.type1</code>, <code>imse.type2</code>, <code>int.error</code>, and <code>sup.error</code>
+when <code>method == "all"</code>
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Hunyong Cho hunycho@live.unc.edu, based on the code and the documents of
+<code>randomForest</code> by Andy Liaw and Matthew Wiener.
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://arxiv.org/abs/1912.09983">Cho H., Jewell N. J., and Kosorok M. R. (2020+). "Interval censored
+recursive forests"</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># rats data example.
+# Note that this is a toy example. Use a larger ntree and nfold in practice.
+library(survival)  # for Surv()
+data(rat2)
+L = ifelse(rat2$tumor, 0, rat2$survtime)
+R = ifelse(rat2$tumor, rat2$survtime, Inf)
+
+set.seed(1)
+rats.icrf &lt;-
+  icrf(Surv(L, R, type = "interval2") ~ dose.lvl + weight + male + cage.no,
+       data = rat2, ntree = 10, nfold = 3)
+
+measure(rats.icrf$predicted.Sm, timepoints = rats.icrf$time.points,
+        tau = rats.icrf$tau, method = "imse", L = L, R = R)
+
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,101 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>immunr_hclust</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Clustering of objects or distance matrices</h2>
+
+<h3>Description</h3>
+
+<p>Clusters the data with one of the following methods:
+</p>
+<p>- <code>immunr_hclust</code> clusters the data using the hierarchical clustering from hcut;
+</p>
+<p>- <code>immunr_kmeans</code> clusters the data using the K-means algorithm from kmeans;
+</p>
+<p>- <code>immunr_dbscan</code> clusters the data using the DBSCAN algorithm from dbscan.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">immunr_hclust(.data, .k = 2, .k.max = nrow(.data) - 1, .method = "complete", .dist = TRUE)
+
+immunr_kmeans(.data, .k = 2, .k.max = as.integer(sqrt(nrow(.data))) + 1,
+.method = c("silhouette", "gap_stat"))
+
+immunr_dbscan(.data, .eps, .dist = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>.data</code></td>
+<td>
+<p>Matrix or data frame with features, distance matrix or output from repOverlapAnalysis or geneUsageAnalysis functions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.k</code></td>
+<td>
+<p>The number of clusters to create, defined as <code>k</code> to hcut or as <code>centers</code> to kmeans.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.k.max</code></td>
+<td>
+<p>Limits the maximum number of clusters. It is passed as <code>k.max</code> to fviz_nbclust for <code>immunr_hclust</code> and <code>immunr_kmeans</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.method</code></td>
+<td>
+<p>Passed to hcut or as fviz_nbclust.
+</p>
+<p>In case of hcut the agglomeration method is going to be used (argument <code>hc_method</code>).
+</p>
+<p>In case of fviz_nbclust it is the method to be used for estimating the optimal number of clusters (argument <code>method</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.dist</code></td>
+<td>
+<p>If TRUE then ".data" is expected to be a distance matrix. If FALSE then the euclidean distance is computed for the input objects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.eps</code></td>
+<td>
+<p>Local radius for expanding clusters, minimal distance between points to expand clusters. Passed as <code>eps</code> to dbscan.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>immunr_hclust</code> - list with two elements. The first element is an output from hcut.
+The second element is an output from fviz_nbclust
+</p>
+<p><code>immunr_kmeans</code> - list with three elements. The first element is an output from kmeans.
+The second element is an output from fviz_nbclust.
+The third element is the input dataset <code>.data</code>.
+</p>
+<p><code>immunr_dbscan</code> - list with two elements. The first element is an output from dbscan.
+The second element is the input dataset <code>.data</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(immdata)
+gu &lt;- geneUsage(immdata$data, .norm = TRUE)
+immunr_hclust(t(as.matrix(gu[, -1])), .dist = FALSE)
+
+gu[is.na(gu)] &lt;- 0
+immunr_kmeans(t(as.matrix(gu[, -1])))
+</code></pre>
+
+
+</div>

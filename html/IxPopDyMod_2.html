@@ -1,0 +1,107 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>config</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create a <code>config</code> object</h2>
+
+<h3>Description</h3>
+
+<p>Make a <code>config</code> object from the input parameters, and ensure that the inputs
+meet the requirements for the model. The returned object is a complete
+description of a model run scenario.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">config(
+  cycle,
+  initial_population,
+  preds = NULL,
+  steps = 365L,
+  max_duration = 365L,
+  verbose = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>cycle</code></td>
+<td>
+<p>A tick's <code>life_cycle</code> test</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial_population</code></td>
+<td>
+<p>Named numeric vector indicating starting population
+for each life stage. Life stages not specified are assumed to be 0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>preds</code></td>
+<td>
+<p>Optional input <code>predictors</code> data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>steps</code></td>
+<td>
+<p>Numeric vector of length one indicating the duration to run the
+model over in days.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_duration</code></td>
+<td>
+<p>Numeric vector of length one. Determines the maximum
+number of days that a duration-based transition can last, after which ticks
+are removed from the model/die. Default of 365 is likely sensible for most
+cases.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Boolean; whether to warn about coercion to inputs</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A <code>config</code> object
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># We build a simple example config
+my_config &lt;- config(
+  cycle = life_cycle(
+    transition("a", "b", function() 0.1, "probability"),
+    transition("b", "a", function() 10, "probability")
+  ),
+  initial_population = c(a = 1)
+)
+
+# If we make a change to an existing `config`, it is a good idea to check
+# whether it is still valid by calling `config()` on it again. For example,
+# here we set the initial_population of a life stage that is not included in
+# the life cycle.
+my_config$initial_population &lt;- c(a = 1, c = 1)
+
+## Not run: 
+# Now, we re-run the validations, which will throw an error
+do.call(config, my_config)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,136 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>interval2rate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Conversion of interval estimates to rates</h2>
+
+<h3>Description</h3>
+
+<p>Conversion of interval estimates to rates
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">interval2rate(
+  data,
+  minint = data$mu/100,
+  maxint = data$mu + 3 * data$sigma,
+  digits = max(3L, getOption("digits") - 3L),
+  method = "exact"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>An object of class <code>intRvals</code>, usually a result of a call to estinterval</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minint</code></td>
+<td>
+<p>the minimum interval value from which numerical integrations converting to rates are started</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxint</code></td>
+<td>
+<p>the maximum interval value up to which numerical integrations converting to rates are continued</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>the number of digits for printing to screen</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>A string equal to 'exact' or 'taylor'. When 'exact' exact formula or numeric integration
+is used. When 'taylor' a Taylor approximation is used as in standard propagation of uncertainty in the case of division.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+
+<h4>Gamma-distributed intervals</h4>
+
+<p>When inter-arrival times (intervals) follow a gamma distribution with mean <code class="reqn">\mu</code> and
+standard deviation <code class="reqn">\sigma</code>, i.e. follow the probability density function
+<code>GammaDist(shape=</code><code class="reqn">\alpha=\mu^2/\sigma^2</code><code>, scale=</code><code class="reqn">\beta=\sigma^2/\mu)</code>,
+then the associated distribution of rates is given by an inverse gamma distribution
+with shape parameter <code class="reqn">\alpha</code> and scale parameter <code class="reqn">1/\beta</code>.
+</p>
+<p>The mean of this inverse gamma distribution is given by the formula
+</p>
+<p style="text-align: center;"><code class="reqn">\mu_{rate}=\mu/(\mu^2 - \sigma^2)</code>
+</p>
+
+<p>provided that <code class="reqn">\alpha &gt; 1</code>, i.e. <code class="reqn">\mu &gt; \sigma</code>.
+</p>
+<p>The variance of this inverse gamma distribution is given by the formula
+</p>
+<p style="text-align: center;"><code class="reqn">\sigma^2_{rate}=\mu^2\sigma^2/((\mu^2 - \sigma^2)(\mu^2 - 2\sigma^2)^2</code>
+</p>
+
+<p>provided that <code class="reqn">\alpha &gt; 2</code>, i.e. <code class="reqn">\mu &gt; sqrt(2) * \sigma</code>.
+</p>
+<p>Values <code class="reqn">\mu</code> and <code class="reqn">\sigma</code> are estimated on the interval data, and
+above formula are used to calculate the estimated mean and variance of the arrival rate.
+</p>
+<p>If these formula cannot be used (because the provisions on the value
+of <code class="reqn">\alpha</code> are not met), numerical integration is used instead,
+analagous to the procedure for normal-distributed intervals, see below.
+</p>
+
+
+
+<h4>Normal-distributed intervals</h4>
+
+<p>When inter-arrival times (intervals) <code class="reqn">x</code> follow a normal distribution with mean <code class="reqn">\mu</code> and
+standard deviation <code class="reqn">\sigma</code>, i.e. follow the probability density function
+<code>Normal(mean=</code><code class="reqn">\mu</code><code>, sd=</code><code class="reqn">\sigma)</code>,
+then the mean rate (<code class="reqn">\mu_{rate}</code>) can be calculated numerically by:
+</p>
+<p style="text-align: center;"><code class="reqn">\mu_{rate}=\int_0^\infty (1/x) * \phi(x | \mu,\sigma)</code>
+</p>
+
+<p>and the variance of the rate (<code class="reqn">\sigma^2_{rate}</code>) by:
+</p>
+<p style="text-align: center;"><code class="reqn">\sigma^2_{rate}=\int_0^\infty (1/x^2) * \phi(x | \mu,\sigma) -\mu_{rate}^2</code>
+</p>
+
+<p>This approximation is only valid for distributions that have a negligable
+density near <code class="reqn">x=0</code>, such that the distribution can be effectively
+truncated before <code class="reqn">x</code> approaches zero, where the integral is not defined.
+For interval data with intervals <code class="reqn">x</code>
+near zero, use of a gamma distribution is recommended instead.
+</p>
+
+
+
+<h3>Value</h3>
+
+<p>The function <code>interval2rate</code> computes and returns a named vector with the rate mean and standard deviation
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(goosedrop)
+dr=estinterval(goosedrop$interval)
+interval2rate(dr)
+</code></pre>
+
+
+</div>

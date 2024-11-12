@@ -1,0 +1,188 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>break_down_uncertainty</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Explanation Level Uncertainty of Sequential Variable Attribution</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates the break down algorithm for <code>B</code> random orderings.
+Then it calculates the distribution of attributions for these different orderings.
+Note that the <code>shap()</code> function is just a simplified interface to the <code>break_down_uncertainty()</code> function
+with a default value set to <code>B=25</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">break_down_uncertainty(x, ..., keep_distributions = TRUE, B = 10)
+
+## S3 method for class 'explainer'
+break_down_uncertainty(
+  x,
+  new_observation,
+  ...,
+  keep_distributions = TRUE,
+  B = 10
+)
+
+## Default S3 method:
+break_down_uncertainty(
+  x,
+  data,
+  predict_function = predict,
+  new_observation,
+  label = class(x)[1],
+  ...,
+  path = NULL,
+  keep_distributions = TRUE,
+  B = 10
+)
+
+shap(x, ..., B = 25)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an explainer created with function <code>explain</code> or a model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep_distributions</code></td>
+<td>
+<p>if <code>TRUE</code> then we will keep distribution for predicted values. It's needed by the describe function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>number of random paths</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>new_observation</code></td>
+<td>
+<p>a new observation with columns that correspond to variables used in the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>validation dataset, will be extracted from <code>x</code> if it is an explainer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predict_function</code></td>
+<td>
+<p>predict function, will be extracted from <code>x</code> if it is an explainer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label</code></td>
+<td>
+<p>name of the model. By default it's extracted from the 'class' attribute of the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>path</code></td>
+<td>
+<p>if specified, then this path will be highlighed on the plot. Use <code>average</code> in order to show an average effect</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>an object of the <code>break_down_uncertainty</code> class.
+</p>
+
+
+<h3>References</h3>
+
+<p>Explanatory Model Analysis. Explore, Explain and Examine Predictive Models. <a href="https://ema.drwhy.ai">https://ema.drwhy.ai</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>break_down</code>, <code>local_attributions</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library("DALEX")
+library("iBreakDown")
+set.seed(1313)
+model_titanic_glm &lt;- glm(survived ~ gender + age + fare,
+                       data = titanic_imputed, family = "binomial")
+explain_titanic_glm &lt;- explain(model_titanic_glm,
+                               data = titanic_imputed,
+                               y = titanic_imputed$survived,
+                           label = "glm")
+
+# there is no explanation level uncertanity linked with additive models
+bd_glm &lt;- break_down_uncertainty(explain_titanic_glm, titanic_imputed[1, ])
+bd_glm
+plot(bd_glm)
+
+## Not run: 
+## Not run:
+library("randomForest")
+set.seed(1313)
+model &lt;- randomForest(status ~ . , data = HR)
+new_observation &lt;- HR_test[1,]
+
+explainer_rf &lt;- explain(model,
+                        data = HR[1:1000, 1:5])
+
+bd_rf &lt;- break_down_uncertainty(explainer_rf,
+                           new_observation)
+bd_rf
+plot(bd_rf)
+
+# example for regression - apartment prices
+# here we do not have intreactions
+model &lt;- randomForest(m2.price ~ . , data = apartments)
+explainer_rf &lt;- explain(model,
+                        data = apartments_test[1:1000, 2:6],
+                        y = apartments_test$m2.price[1:1000])
+
+bd_rf &lt;- break_down_uncertainty(explainer_rf, apartments_test[1,])
+bd_rf
+plot(bd_rf)
+
+bd_rf &lt;- break_down_uncertainty(explainer_rf, apartments_test[1,], path = 1:5)
+plot(bd_rf)
+
+bd_rf &lt;- break_down_uncertainty(explainer_rf,
+                                     apartments_test[1,],
+                                     path = c("floor", "no.rooms", "district",
+                                         "construction.year", "surface"))
+plot(bd_rf)
+
+bd &lt;- break_down(explainer_rf,
+                    apartments_test[1,])
+plot(bd)
+
+s &lt;- shap(explainer_rf,
+                   apartments_test[1,])
+plot(s)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

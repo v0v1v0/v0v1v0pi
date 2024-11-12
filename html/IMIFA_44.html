@@ -1,0 +1,283 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mcmc_IMIFA</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Adaptive Gibbs Sampler for Nonparametric Model-based Clustering using models from the IMIFA family</h2>
+
+<h3>Description</h3>
+
+<p>Carries out Gibbs sampling for all models from the IMIFA family, facilitating model-based clustering with dimensionally reduced factor-analytic covariance structures, with automatic estimation of the number of clusters and cluster-specific factors as appropriate to the method employed. Factor analysis with one group (FA/IFA), finite mixtures (MFA/MIFA), overfitted mixtures (OMFA/OMIFA), infinite factor models which employ the multiplicative gamma process (MGP) shrinkage prior (IFA/MIFA/OMIFA/IMIFA), and infinite mixtures which employ Pitman-Yor / Dirichlet Process Mixture Models (IMFA/IMIFA) are all provided.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mcmc_IMIFA(dat,
+           method = c("IMIFA", "IMFA",
+                      "OMIFA", "OMFA",
+                      "MIFA", "MFA",
+                      "IFA", "FA",
+                      "classify"),
+           range.G = NULL,
+           range.Q = NULL,
+           MGP = mgpControl(...),
+           BNP = bnpControl(...),
+           mixFA = mixfaControl(...),
+           alpha = NULL,
+           storage = storeControl(...),
+           ...)
+
+## S3 method for class 'IMIFA'
+print(x,
+      ...)
+
+## S3 method for class 'IMIFA'
+summary(object,
+        ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dat</code></td>
+<td>
+<p>A matrix or data frame such that rows correspond to observations (<code>N</code>) and columns correspond to variables (<code>P</code>). Non-numeric variables will be discarded if they are explicitly coded as factors or ordinal factors; otherwise they will be treated as though they were continuous. Rows with missing entries will be also be automatically removed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>An acronym for the type of model to fit where:
+</p>
+
+<dl>
+<dt><code>"FA"</code></dt>
+<dd>
+<p>Factor Analysis</p>
+</dd>
+<dt><code>"IFA"</code></dt>
+<dd>
+<p>Infinite Factor Analysis</p>
+</dd>
+<dt><code>"MFA"</code></dt>
+<dd>
+<p>Mixtures of Factor Analysers</p>
+</dd>
+<dt><code>"MIFA"</code></dt>
+<dd>
+<p>Mixtures of Infinite Factor Analysers</p>
+</dd>
+<dt><code>"OMFA"</code></dt>
+<dd>
+<p>Overfitted Mixtures of Factor Analysers</p>
+</dd>
+<dt><code>"OMIFA"</code></dt>
+<dd>
+<p>Overfitted Mixtures of Infinite Factor Analysers</p>
+</dd>
+<dt><code>"IMFA"</code></dt>
+<dd>
+<p>Infinite Mixtures of Factor Analysers</p>
+</dd>
+<dt><code>"IMIFA"</code></dt>
+<dd>
+<p>Infinite Mixtures of Infinite Factor Analysers</p>
+</dd>
+</dl>
+<p>In principle, of course, one could overfit the <code>"MFA"</code> or <code>"MIFA"</code> models, but it is recommend to use the corresponding model options which begin with ‘O’ instead. Note that the <code>"classify"</code> method is not yet implemented.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>range.G</code></td>
+<td>
+<p>Depending on the method employed, either the range of values for the number of clusters, or the conservatively high starting value for the number of clusters. Defaults to (and must be!) <code>1</code> for the <code>"FA"</code> and <code>"IFA"</code> methods. For the <code>"MFA"</code> and <code>"MIFA"</code> models this is to be given as a range of candidate models to explore. For the <code>"OMFA"</code>, <code>"OMIFA"</code>, <code>"IMFA"</code>, and <code>"IMIFA"</code> models, this is the conservatively high number of clusters with which the chain is to be initialised (default = <code>max(25, ceiling(3 * log(N)))</code> for large N, or <code>min(N-1, ceiling(3 * log(N)))</code> for small N&lt;=50).
+</p>
+<p>For the <code>"OMFA"</code>, and <code>"OMIFA"</code> models this upper limit remains fixed for the entire length of the chain; the upper limit for the for the <code>"IMFA"</code> and <code>"IMIFA"</code> models can be specified via <code>trunc.G</code> (see <code>bnpControl</code>), which must satisfy <code>range.G &lt;= trunc.G &lt; N</code>.
+</p>
+<p>If <code>length(range.G) * length(range.Q)</code> is large, consider not storing unnecessary parameters (via <code>storeControl</code>), or breaking up the range of models to be explored into chunks and sending each chunk to <code>get_IMIFA_results</code> separately.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>range.Q</code></td>
+<td>
+<p>Depending on the method employed, either the range of values for the number of latent factors or, for methods ending in IFA, the conservatively high starting value for the number of cluster-specific factors, in which case the default starting value is <code>round(3 * log(P))</code>.
+</p>
+<p>For methods ending in IFA, different clusters can be modelled using different numbers of latent factors (incl. zero); for methods not ending in IFA it is possible to fit zero-factor models, corresponding to simple diagonal covariance structures. For instance, fitting the <code>"IMFA"</code> model with <code>range.Q=0</code> corresponds to a vanilla Pitman-Yor / Dirichlet Process Mixture Model.
+</p>
+<p>If <code>length(range.G) * length(range.Q)</code> is large, consider not storing unnecessary parameters (via <code>storeControl</code>), or breaking up the range of models to be explored into chunks and sending each chunk to <code>get_IMIFA_results</code>.
+</p>
+<p>See <code>Ledermann</code> for bounds on <code>range.Q</code>; this is useful in both the finite factor and infinite factor settings, as one may wish to ensure the fixed number of factors, or upper limits on the number of factors, respectively, respects this bound to yield indentifiable solutions, particularly in low-dimensional settings. It has also been argued that <code>range.Q</code> should not exceed <code>floor((P - 1)/2)</code>. In both cases, a warning is returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MGP</code></td>
+<td>
+<p>A list of arguments pertaining to the multiplicative gamma process (MGP) shrinkage prior and adaptive Gibbs sampler (AGS). For use with the infinite factor models <code>"IFA"</code>, <code>"MIFA"</code>, <code>"OMIFA"</code>, and <code>"IMIFA"</code> only. Defaults are set by a call to <code>mgpControl</code>, with further checking of validity by <code>MGP_check</code> (though arguments can also be supplied here directly).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>BNP</code></td>
+<td>
+<p>A list of arguments pertaining to the Bayesian Nonparametric Pitman-Yor / Dirichlet process priors, for use with the infinite mixture models <code>"IMFA"</code> and <code>"IMIFA"</code>, or select arguments related to the Dirichlet concentration parameter for the overfitted mixtures <code>"OMFA"</code> and <code>"OMIFA"</code>. Defaults are set by a call to <code>bnpControl</code> (though arguments can also be supplied here directly).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mixFA</code></td>
+<td>
+<p>A list of arguments pertaining to <em>all other</em> aspects of model fitting, e.g. MCMC settings, cluster initialisation, and hyperparameters common to every <code>method</code> in the <code>IMIFA</code> family. Defaults are set by a call to <code>mixfaControl</code> (though arguments can also be supplied here directly).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>Depending on the method employed, either the hyperparameter of the Dirichlet prior for the cluster mixing proportions, or the Pitman-Yor / Dirichlet process concentration parameter. Defaults to <code>1</code> for the finite mixture models <code>"MFA"</code> and <code>"MIFA"</code>, and must be a strictly positive scalar. Not relevant for the <code>"FA"</code> and <code>"IFA"</code> methods.
+</p>
+
+<dl>
+<dt>Under the <code>"IMFA"</code> and <code>"IMIFA"</code> models:</dt>
+<dd>
+<p><code>alpha</code> defaults to a simulation from the prior if <code>learn.alpha</code> is <code>TRUE</code>, otherwise <code>alpha</code> <em>must</em> be specified. Must be positive, unless non-zero <code>discount</code> is supplied or <code>learn.d=TRUE</code> (the default), in which case it must be greater than <code>-discount</code>. Under certain conditions, <code>alpha</code> can remain fixed at <code>0</code> (see <code>bnpControl</code>). Additionally, when <code>discount</code> is negative, <code>alpha</code> must be a positive integer multiple of <code>abs(discount)</code> (default=<code>range.G * abs(discount)</code>).</p>
+</dd>
+<dt>Under the <code>"OMFA"</code> and <code>"OMIFA"</code> models:</dt>
+<dd>
+<p><code>alpha</code> defaults to a simulation from the prior if <code>learn.alpha</code> is <code>TRUE</code>, otherwise <code>alpha</code> defaults to <code>0.5/range.G</code>. If supplied, <code>alpha</code> must be positive, and you are supplying the numerator of <code>alpha/range.G</code>.
+</p>
+<p>If <code>alpha</code> remains fixed (i.e. <code>learn.alpha=FALSE</code>), <code>alpha</code> should be less than half the dimension (per cluster!) of the free parameters of the smallest model considered in order to ensure superfluous clusters are emptied (for <code>"OMFA"</code>, this corresponds to the smallest <code>range.Q</code>; for <code>"OMIFA"</code>, this corresponds to a zero-factor model) [see: <code>PGMM_dfree</code> and Rousseau and Mengersen (2011)].</p>
+</dd>
+</dl>
+<p>See <code>bnpControl</code> for further details of specifying <code>alpha</code> or specifying a prior for <code>alpha</code> under the <code>"IMFA"</code>, <code>"IMIFA"</code>, <code>"OMFA"</code>, or <code>"OMIFA"</code> methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>storage</code></td>
+<td>
+<p>A vector of named logical indicators governing storage of parameters of interest for all models in the IMIFA family. Defaults are set by a call to <code>storeControl</code>. It may be useful not to store certain parameters if memory is an issue.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>An alternative means of passing control parameters directly via the named arguments of <code>mixfaControl</code>, <code>mgpControl</code>, <code>bnpControl</code>, and <code>storeControl</code>. Do not pass the output from calls to those functions here!</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x, object</code></td>
+<td>
+<p>Object of class <code>"IMIFA"</code>, for the <code>print.IMIFA</code> and <code>summary.IMIFA</code> functions, respectively.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Creates a raw object of class <code>"IMIFA"</code> from which the optimal/modal model can be extracted by <code>get_IMIFA_results</code>. Dedicated <code>print</code> and <code>summary</code> functions exist for objects of class <code>"IMIFA"</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of lists of lists of class <code>"IMIFA"</code> to be passed to <code>get_IMIFA_results</code>. If the returned object is <code>x</code>, candidate models are accessible via subsetting, where <code>x</code> is of the following form:
+</p>
+<p><code>x[[1:length(range.G)]][[1:length(range.Q)]]</code>.
+</p>
+<p>However, these objects of class "IMIFA" should rarely if ever be manipulated by hand - use of the <code>get_IMIFA_results</code> function is <em>strongly</em> advised.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Further control over the specification of advanced function arguments can be obtained with recourse to the following functions:
+</p>
+
+<dl>
+<dt><strong><code>mgpControl</code></strong></dt>
+<dd>
+<p>Supply arguments (with defaults) pertaining to the multiplicative gamma process (MGP) shrinkage prior and adaptive Gibbs sampler (AGS). For use with the infinite factor models <code>"IFA"</code>, <code>"MIFA"</code>, <code>"OMIFA"</code>, and <code>"IMIFA"</code> only.</p>
+</dd>
+<dt><strong><code>bnpControl</code></strong></dt>
+<dd>
+<p>Supply arguments (with defaults) pertaining to the Bayesian Nonparametric Pitman-Yor / Dirichlet process priors, for use with the infinite mixture models <code>"IMFA"</code> and <code>"IMIFA"</code>. Certain arguments related to the Dirichlet concentration parameter for the overfitted mixtures <code>"OMFA"</code> and <code>"OMIFA"</code> can be supplied in this manner also.</p>
+</dd>
+<dt><strong><code>mixfaControl</code></strong></dt>
+<dd>
+<p>Supply arguments (with defaults) pertaining to <em>all other</em> aspects of model fitting (e.g. MCMC settings, cluster initialisation, and hyperparameters common to every <code>method</code> in the <code>IMIFA</code> family.</p>
+</dd>
+<dt><strong><code>storeControl</code></strong></dt>
+<dd>
+<p>Supply logical indicators governing storage of parameters of interest for all models in the IMIFA family. It may be useful not to store certain parameters if memory is an issue (e.g. for large data sets or for a large number of MCMC iterations after burnin and thinning).</p>
+</dd>
+</dl>
+<p>Note however that the named arguments of these functions can also be supplied directly. Parameter starting values are obtained by simulation from the relevant prior distribution specified in these control functions, though initial means and mixing proportions are computed empirically.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Keefe Murphy - &lt;<a href="mailto:keefe.murphy@mu.ie">keefe.murphy@mu.ie</a>&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Murphy, K., Viroli, C., and Gormley, I. C. (2020) Infinite mixtures of infinite factor analysers, <em>Bayesian Analysis</em>, 15(3): 937-963. &lt;<a href="https://doi.org/10.1214/19-BA1179">doi:10.1214/19-BA1179</a>&gt;.
+</p>
+<p>Bhattacharya, A. and Dunson, D. B. (2011) Sparse Bayesian infinite factor models, <em>Biometrika</em>, 98(2): 291-306.
+</p>
+<p>Kalli, M., Griffin, J. E. and Walker, S. G. (2011) Slice sampling mixture models, <em>Statistics and Computing</em>, 21(1): 93-105.
+</p>
+<p>Rousseau, J. and Mengersen, K. (2011) Asymptotic Behaviour of the posterior distribution in overfitted mixture models, <em>Journal of the Royal Statistical Society: Series B (Statistical Methodology)</em>, 73(5): 689-710.
+</p>
+<p>McNicholas, P. D. and Murphy, T. B. (2008) Parsimonious Gaussian mixture models, <em>Statistics and Computing</em>, 18(3): 285-296.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>get_IMIFA_results</code>, <code>mixfaControl</code>, <code>mgpControl</code>, <code>bnpControl</code>, <code>storeControl</code>, <code>Ledermann</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># data(olive)
+# data(coffee)
+
+# Fit an IMIFA model to the olive data. Accept all defaults.
+# simIMIFA &lt;- mcmc_IMIFA(olive, method="IMIFA")
+# summary(simIMIFA)
+
+# Fit an IMIFA model assuming a Pitman-Yor prior.
+# Control the balance between the DP and PY priors using the kappa parameter.
+# simPY    &lt;- mcmc_IMIFA(olive, method="IMIFA", kappa=0.75)
+# summary(simPY)
+
+# Fit a MFA model to the scaled olive data, with isotropic uniquenesses (i.e. MPPCA).
+# Allow diagonal covariance as a special case where range.Q = 0.
+# Don't store the scores. Accept all other defaults.
+# simMFA   &lt;- mcmc_IMIFA(olive, method="MFA", n.iters=10000, range.G=3:6, range.Q=0:3,
+#                        score.switch=FALSE, centering=FALSE, uni.type="isotropic")
+
+# Fit a MIFA model to the centered &amp; scaled coffee data, w/ cluster labels initialised by K-Means.
+# Note that range.Q doesn't need to be specified. Allow IFA as a special case where range.G=1.
+# simMIFA  &lt;- mcmc_IMIFA(coffee, method="MIFA", n.iters=10000, range.G=1:3, z.init="kmeans")
+
+# Fit an IFA model to the centered and pareto scaled olive data.
+# Note that range.G doesn't need to be specified. We can optionally supply a range.Q starting value.
+# Enforce additional shrinkage using alpha.d1, alpha.d2, prop, and eps (via mgpControl()).
+# simIFA   &lt;- mcmc_IMIFA(olive, method="IFA", n.iters=10000, range.Q=4, scaling="pareto",
+#                        alpha.d1=2.5, alpha.d2=4, prop=0.6, eps=0.12)
+
+# Fit an OMIFA model to the centered &amp; scaled coffee data.
+# Supply a sufficiently small alpha value. Try varying other hyperparameters.
+# Accept the default value for the starting number of factors,
+# but supply a value for the starting number of clusters.
+# Try constraining uniquenesses to be common across both variables and clusters.
+# simOMIFA &lt;- mcmc_IMIFA(coffee, method="OMIFA", range.G=10, psi.alpha=3,
+#                        phi.hyper=c(2, 1), alpha=0.8, uni.type="single")
+</code></pre>
+
+
+</div>

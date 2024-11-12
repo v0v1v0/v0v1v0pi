@@ -1,0 +1,179 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ISOpure.step1.CPE</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Perform first step of ISOpure purification algorithm</h2>
+
+<h3>Description</h3>
+
+<p>Performs the first step of the ISOpure purification algorithm, taking tumor data 
+normal profiles and returning the a list, ISOpureS1model, with all the updated parameters.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ISOpure.step1.CPE(tumordata, BB, PP, MIN_KAPPA, logging.level) 
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>tumordata</code></td>
+<td>
+<p>a GxD matrix representing gene expression profiles of heterogeneous (mixed) 
+tumor samples, where G is the number of genes, D is the number of tumor samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>BB</code></td>
+<td>
+<p>represents B = [b_1 ... b_(K-1)] matrix (from Genome Medicine paper) a Gx(K-1) 
+matrix, where (K-1) is the number of normal profiles <code class="reqn">(\beta_1,...,\beta_(K-1))</code>, 
+G is the number of genes.  These are the normal profiles representing normal cells that 
+contaminate the tumor samples  (i.e. normal samples from the same tissue location as the 
+tumor).  The minimum element of BB must be greater than 0 – i.e. every gene/transcript 
+must be observed on some level in each normal sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PP</code></td>
+<td>
+<p>a GxM matrix, representing the expression profiles whose convex combination form 
+the prior over the purified cancer profile learned. </p>
+</td>
+</tr>
+</table>
+<table>
+<tr style="vertical-align: top;">
+<td><code>MIN_KAPPA</code></td>
+<td>
+<p>(optional) The minimum value allowed for the strength parameter kappa placed
+over the reference cancer profile m (see Quon et al, 2013).  By default, this is set to 
+1/min(BB), such that the log likelihood of the model is always finite.  However, when the 
+min(BB) is very small, this forces MIN_KAPPA to be very large, and can sometimes cause the 
+reference profile m to look too much like a 'normal profile' (and therefore you may observe 
+the tumor samples having low % cancer content estimates).  If this is the case, you can try 
+setting MIN_KAPPA=1, or some other small value.  For reference, for the data presented in 
+Quon et al., 2013, MIN_KAPPA is on the order of 10^5.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>logging.level</code></td>
+<td>
+<p>(optional) A string that gives the logging threshold for futile.logger. The
+possible options are 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'. Currently the 
+messages in ISOpureR are only in the categories 'INFO', 'WARN', and 'FATAL', and the default 
+setting is 'INFO'.  Setting a setting for the entire package will over-ride the setting for
+a particular function.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>ISOpureS1model, a list with the following important fields:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>theta</code></td>
+<td>
+<p>a DxK matrix, giving the fractional composition of each tumor sample.  Each row 
+represents a tumor sample that was part of the input, and the first K-1 columns correspond 
+to the fractional composition with respect to the Source Panel contaminants.  The last 
+column represents the fractional composition of the pure cancer cells.  In other words,	
+each row sums to 1, and element (i,j) of the matrix denotes the fraction of tumor i 
+attributable to component j (where the last column refers to cancer cells, and the first 
+K-1 columns refer to different 'normal cell' components).  The 'cancer', or tumor purity, 
+estimate of each tumor is simply the last column of theta.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alphapurities</code></td>
+<td>
+<p>tumor purities (alpha_i in paper), same as the last column of the theta 
+variable, pulled out for user convenience.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mm</code></td>
+<td>
+<p>reference cancer profile, in the form of parameters of a multinomial or discrete 
+distribution (sum of elements is 1).  This is the same as the purified cancer profile that 
+ISOLATE was designed to learn.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>omega</code></td>
+<td>
+<p>a Mx1 vector describing the convex combination weights learned by ISOpure step 1 
+over the PPtranspose matrix, that when applied to the Site of Origin Panel, forms the prior 
+over the reference cancer profile. When ISOpure step 1 is used in a similar fashion to the 
+ISOLATE algorithm, entry i indicates the "probability" that the normal profile in the 
+i-th column of PP is the site of origin of the secondary tumors stored in tumordata.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>total_loglikelihood</code></td>
+<td>
+<p>log likelihood of the model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vv</code></td>
+<td>
+<p>(internal parameter) hyper-parameters from Dirichlet distribution, representing both
+mean and strength of a Dirichlet distribution over theta</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kappa</code></td>
+<td>
+<p>(internal parameter) the strength parameter over the Dirichlet distribution over 
+the reference cancer parameter, mm</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mm_weights, theta_weights, omega_weights</code></td>
+<td>
+<p>(internal parameters) used in the optimization
+of mm, theta, and omega (instead of performing constrained optimization on these 
+positively constrained variables directly, we optimize their logs in an unconstrained 
+fashion.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log_BBtranspose, PPtranspose, log_all_rates:</code></td>
+<td>
+<p> (internal parameters) used in the 
+calculations of loglikelihood</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MIN_KAPPA</code></td>
+<td>
+<p>(internal parameter) as described in the Arguments section</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Gerald Quon, Catalina Anghel, Francis Nguyen</p>
+
+
+<h3>References</h3>
+
+<p>G Quon, S Haider, AG Deshwar, A Cui, PC Boutros, QD Morris. <em>Computational purification of 
+individual tumor gene expression profiles</em>. Genome Medicine (2013) 5:29, 
+<a href="http://genomemedicine.com/content/5/3/29">http://genomemedicine.com/content/5/3/29</a>.
+</p>
+<p>G Quon, QD Morris. <em>ISOLATE: a computational strategy for identifying the primary origin of
+cancers using high-thoroughput sequencing</em>. Bioinformatics 2009, 25:2882-2889 
+<a href="http://bioinformatics.oxfordjournals.org/content/25/21/2882">http://bioinformatics.oxfordjournals.org/content/25/21/2882</a>.
+</p>
+
+
+</div>

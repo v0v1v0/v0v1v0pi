@@ -1,0 +1,93 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>hilbertFFT</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Hilbert FFT</h2>
+
+<h3>Description</h3>
+
+<p>The <code>hilbertFFT</code> function returns the complex Hilbert FFT of a timeseries signal.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">hilbertFFT(x)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a numeric vector</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>This function is intended for internal use by the hilbert() and envelope() methods of 
+<code>Trace</code> objects.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A complex vector containing the Hilbert FFT of <code>x</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>This algorithm is adapted from code in the <span class="pkg">seewave</span> package.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+starttime &lt;- as.POSIXct("2010-02-27 06:00:00", tz="GMT")
+endtime &lt;- as.POSIXct("2010-02-27 09:00:00", tz="GMT")
+
+# Get the waveform
+st &lt;- getDataselect(iris,"IU","ANMO","00","BHZ",starttime,endtime)
+tr &lt;- st@traces[[1]]
+
+# Demean, detrend, cosine taper
+tr &lt;- DDT(tr)
+
+# Calculate Hilbert FFT of the trace data
+hfft &lt;- hilbertFFT(tr@data)
+
+# Plot signal, with Hilbert envelope
+layout(1)
+plot(tr@data, type='l', col='gray80', main="Signal and Envelope")
+points(Mod(hfft), type='l', col='blue')
+
+# 2 rows
+layout(matrix(seq(2)))
+
+# Show that Imaginary component of Hilbert transform has the
+# original signal shifted by 90 degrees
+ccf(tr@data,tr@data,lag.max=200,main="Auto-correlation of signal data")
+ccf(tr@data,Im(hfft),lag.max=200,main="90 deg phase shift with Hilber transform")
+
+# Restore default layout
+layout(1)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,237 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>expand</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Expand an existing classification tree.</h2>
+
+<h3>Description</h3>
+
+<p>This function is used to grow an existing classification tree, typically
+using more relaxed parameter settings than those used when the tree was
+created, or if fine-scale control over the tree-learning operation
+is required.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">expand(
+  tree,
+  clades = "0",
+  refine = "Viterbi",
+  iterations = 50,
+  nstart = 20,
+  minK = 2,
+  maxK = 2,
+  minscore = 0.9,
+  probs = 0.5,
+  retry = TRUE,
+  resize = TRUE,
+  maxsize = 1000,
+  recursive = TRUE,
+  cores = 1,
+  quiet = FALSE,
+  verbose = FALSE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>tree</code></td>
+<td>
+<p>an object of class <code>"insect"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clades</code></td>
+<td>
+<p>a vector of character strings giving the binary indices
+matching the labels of the nodes that are to be expanded.
+Defaults to "0", meaning all subclades are expanded.
+See below for further details on clade indexing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>refine</code></td>
+<td>
+<p>character string giving the iterative model refinement
+method to be used in the partitioning process. Valid options are
+<code>"Viterbi"</code> (Viterbi training; the default option) and
+<code>"BaumWelch"</code> (a modified version of the Expectation-Maximization
+algorithm).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterations</code></td>
+<td>
+<p>integer giving the maximum number of training-classification
+iterations to be used in the splitting process.
+Note that this is not necessarily the same as the number of Viterbi training
+or Baum Welch iterations to be used in model training, which can be set
+using the argument <code>"maxiter"</code> (eventually passed to
+<code>train</code> via the dots argument "...").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nstart</code></td>
+<td>
+<p>integer. The number of random starting sets to be chosen
+for initial k-means assignment of sequences to groups. Defaults to 20.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minK</code></td>
+<td>
+<p>integer. The minimum number of furications allowed at each inner
+node of the tree. Defaults to 2 (all inner nodes are bifuricating).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxK</code></td>
+<td>
+<p>integer. The maximum number of furications allowed at each inner
+node of the tree. Defaults to 2 (all inner nodes are bifuricating).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minscore</code></td>
+<td>
+<p>numeric between 0 and 1. The minimum acceptable value
+for the <em>n</em>th percentile of Akaike weights (where <em>n</em> is
+the value given in <code>"probs"</code>, for the node to be split and the
+recursion process to continue.
+At any given node, if the <em>n</em>th percentile of Akaike weights
+falls below this threshold, the recursion process for the node will
+terminate. As an example, if <code>minscore = 0.95</code> and
+<code>probs = 0.5</code> (the default settings), and after generating two
+candidate PHMMs to occupy the candidate subnodes the median
+Akaike weight is less than 0.95, the splitting process will
+terminate and the function will simply return the unsplit root node.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probs</code></td>
+<td>
+<p>numeric between 0 and 1. The percentile of Akaike weights
+to test against the minimum score threshold given in <code>"minscore"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>retry</code></td>
+<td>
+<p>logical indicating whether failure to split a node based on
+the criteria outlined in 'minscore' and 'probs' should prompt a second
+attempt with different initial groupings. These groupings are based on
+maximum kmer frequencies rather than k-means division, which can give
+suboptimal groupings when the cluster sizes are different (due to
+the up-weighting of larger clusters in the k-means algorithm).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resize</code></td>
+<td>
+<p>logical indicating whether the models should be free to
+change size during the training process or if the number of modules
+should be fixed. Defaults to TRUE. Only applicable if
+<code>refine = "Viterbi"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxsize</code></td>
+<td>
+<p>integer giving the upper bound on the number of modules
+in the PHMMs. If NULL, no maximum size is enforced.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>recursive</code></td>
+<td>
+<p>logical indicating whether the splitting process
+should continue recursively until the discrimination criteria
+are not met (TRUE; default), or whether a single split should
+take place at each of the nodes specified in <code>clades</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>integer giving the number processors for multithreading. Defaults to 1.
+This argument may alternatively be a 'cluster' object,
+in which case it is the user's responsibility to close the socket
+connection at the conclusion of the operation,
+e.g. by running <code>parallel::stopCluster(cores)</code>.
+The string 'autodetect' is also accepted, in which case the maximum
+number of cores to use is one less than the total number of cores
+available.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>logical indicating whether feedback should be printed
+to the console.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>logical indicating whether extra feedback should be
+printed to the console, including progress at each split.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments to be passed on to <code>train</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The clade indexing system used here is based on character strings,
+where "0" refers to the root node,
+"01" is the first child node, "02" is the second child node,
+"011" is the first child node of the first child node, etc.
+Note that this means each node cannot have more than 9 child nodes.
+</p>
+
+
+<h3>Value</h3>
+
+<p>an object of class <code>"insect"</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Shaun Wilkinson
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>learn</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+  data(whales)
+  data(whale_taxonomy)
+  ## split the first node
+  set.seed(123)
+  tree &lt;- learn(whales, db = whale_taxonomy, recursive = FALSE)
+  ## expand only the first clade
+  tree &lt;- expand(tree, clades = "1")
+ 
+</code></pre>
+
+
+</div>

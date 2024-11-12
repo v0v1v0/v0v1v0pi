@@ -1,0 +1,149 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>write.fas</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Write DNA Sequences to File</h2>
+
+<h3>Description</h3>
+
+<p>Write DNA sequences and morphological data to FASTA, PHYLIP, or NEXUS formatted files.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">	
+write.fas(x, file, block.width = FALSE, 
+    truncate = FALSE, append = FALSE)
+
+write.phy(x, file, block.width = FALSE, 
+    strict = FALSE)
+
+write.nex(x, file, block.width = 60, 
+    taxblock = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>an object of class <code>DNAbin</code> (usually as matrix, but <code>write.fas</code> also accepts lists) or a list of objects of class <code>DNAbin</code> (only <code>write.nex</code>) or a data frame containing standard (morphological, etc.) data (only <code>write.nex</code>).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+
+<p>a character string giving the filename; a special case is <code>file = ""</code>, which causes the file content to be written on the standard output connection (i.e. the console). If <code>file</code> is left unspecified (default), the file content is returned as a vector of mode <code>"character"</code> and can be used as a building block for more complex data files.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>block.width</code></td>
+<td>
+
+<p>an integer, giving the number of characters per line.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>truncate</code></td>
+<td>
+
+<p>truncation of taxon names to the number of characters given as a integer, otherwise (default) taxon names will not be changed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>append</code></td>
+<td>
+
+<p>logical, if <code>TRUE</code> the sequences will be appended to <code>file</code> (if it exists).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>strict</code></td>
+<td>
+
+<p>logical, if <code>TRUE</code> the names of the sequences will be truncated to 10 strings.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>taxblock</code></td>
+<td>
+
+<p>logical, if <code>TRUE</code>, a tax block will be added to the NEXUS file.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>write.nex</code> can handle multiple DNA sequence alignments, which are handed over as a list of objects of class <code>DNAbin</code>. Correct matching of the rows in the alignments is cared for automatically, hence the individual alignments can contain different numbers of samples and samples need not be in the same order.
+</p>
+
+
+<h3>Value</h3>
+
+<p>None, except when called with <code>file</code> left unspecified, which causes the file content to be returned as a vector of mode <code>"character"</code>. This is particularly useful for constructing special types of input files, e.g. for MrBayes (<code>mrbayes</code>).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Christoph Heibl</p>
+
+
+<h3>References</h3>
+
+<p>Maddison, D.R., D.L. Swofford, and W.P. Maddison. 1997. NEXUS: an extensible file format for systematic information. <em>Syst. Biol.</em> <b>46</b>: 590-621.</p>
+
+
+<h3>See Also</h3>
+
+<p><code>read.fas</code>, <code>read.phy</code>, and <code>read.nex</code> for reading of DNA sequence files.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(ips.cox1)
+data(ips.28S)
+
+## Examples for FASTA files
+## ------------------------
+write.fas(ips.cox1[1:5, 1:120], block.width = 60)
+
+## Examples for PHYLIP files
+## ------------------------
+write.phy(ips.cox1[1:5, 1:20], block.width = 40)
+
+## Examples for NEXUS files
+## ------------------------
+x &lt;- list(cox1 = ips.cox1[1:5, 1:10], 
+          rna28S = ips.28S[1:5, 1:30])
+write.nex(x, block.width = 20)
+
+# Truncation of taxonnames:
+# -------------------------
+rownames(ips.cox1)[1] &lt;- "AVeeeeeeeeeeeeeeeeeryLongName"
+write.fas(ips.cox1, truncate = 10)
+
+# If truncation leads to identical taxonnames,
+# a warning will be issued:
+# -------------------------
+rownames(ips.cox1)[1:2] &lt;- "AVeeeeeeeeeeeeeeeeeryLongName"
+write.fas(ips.cox1, truncate = 10)
+</code></pre>
+
+
+</div>

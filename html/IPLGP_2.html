@@ -1,0 +1,160 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>GBLUP.fit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Muti-trait GBLUP Model</h2>
+
+<h3>Description</h3>
+
+<p>Built the muti-trait GBLUP model using the phenotypic and genotypic data of a
+training population by 'mmer' from R package 'sommer'. Then, output the fitted
+values of the training population.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">GBLUP.fit(t1, t2, t3, t4, t5, geno = NULL, K = NULL, outcross = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>t1</code></td>
+<td>
+<p>vector. The phenotype of trait1. The missing value must be coded as NA.
+The length of all triat must be the same.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t2</code></td>
+<td>
+<p>vector. The phenotype of trait2. The missing value must be coded as NA.
+The length of all triat must be the same.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t3</code></td>
+<td>
+<p>vector. The phenotype of trait3. The missing value must be coded as NA.
+The length of all triat must be the same.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t4</code></td>
+<td>
+<p>vector. The phenotype of trait4. The missing value must be coded as NA.
+The length of all triat must be the same.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t5</code></td>
+<td>
+<p>vector. The phenotype of trait5. The missing value must be coded as NA.
+The length of all triat must be the same.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>geno</code></td>
+<td>
+<p>matrix. An n*p matrix with n individuals and p markers of the
+training population. The markers must be coded as 1, 0, or -1 for alleles AA,
+Aa, or aa. The missing value must have been already imputed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>matrix. An n*n matrix denotes the genomic relationship matrix of the
+training population if geno is set to be NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outcross</code></td>
+<td>
+<p>logical. A logical variable, if outcross is set to be TRUE,
+the crop is regarded as an outcross crop. The kinship matrix of dominance
+effects are also considered in the model. The geno data must be given when
+outcross being TRUE.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fitted.value</code></td>
+<td>
+<p>The fitted values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitted.A</code></td>
+<td>
+<p>The additive effect part of fitted values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitted.D</code></td>
+<td>
+<p>The dominance effect part of fitted values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu</code></td>
+<td>
+<p>The average value of fitted values.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Due to restrictions on the use of the funtion 'mmer', if an unknown error occurs
+during use, please try to input the phenotype data as the format shown in the
+example.
+</p>
+
+
+<h3>References</h3>
+
+<p>Habier D, Fernando RL, Dekkers JCM. 2007. The impact of genetic relationship
+information on genome-assisted breeding values. Genetics 177:2389-2397.
+</p>
+<p>VanRaden PM. 2008. Efficient methods to compute genomic predictions.
+J Dairy Sci. 91:4414-4423.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>mmer</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># generate simulated data
+set.seed(2000)
+t1 &lt;- rnorm(50,30,10)
+t2 &lt;- rnorm(50,10,5)
+t3 &lt;- rnorm(50,20,20)
+t4 &lt;- NULL
+t5 &lt;- NULL
+
+# run with the marker score matrix
+geno.test &lt;- matrix(sample(c(1, -1), 5000, replace = TRUE), 50, 100)
+result1 &lt;- GBLUP.fit(t1, t2, t3, t4, t5, geno = geno.test)
+result1$fitted.value
+
+# run with the genomic relationship matrix
+K.test &lt;- geno.test%*%t(geno.test)/ncol(geno.test)
+result2 &lt;- GBLUP.fit(t1, t2, t3, t4, t5, K = K.test)
+result2$fitted.value
+</code></pre>
+
+
+</div>

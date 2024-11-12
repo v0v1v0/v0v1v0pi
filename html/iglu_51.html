@@ -1,0 +1,126 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pgs</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate Personal Glycemic State (PGS)</h2>
+
+<h3>Description</h3>
+
+<p>The function mad produces PGS values in a tibble object.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pgs(data, dur_length = 20, end_length = 30)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>DataFrame object with column names "id", "time", and "gl". Should only be data for 1 subject. In case multiple subject ids are detected, a warning is produced and only 1st subject is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dur_length</code></td>
+<td>
+<p>Numeric value specifying the minimum duration in minutes to
+be considered an episode. Note dur_length should be a multiple of the data recording
+interval otherwise the function will round up to the nearest multiple.
+Default is 20 minutes to match the original PGS definition.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>end_length</code></td>
+<td>
+<p>Numeric value specifying the minimum duration in minutes of
+improved glycemia for an episode to end.
+Default is 30 minutes to match original PGS definition.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A tibble object with 1 row for each subject, a column for subject id and
+a column for PGS values is returned. NA glucose values are
+omitted from the calculation. The formula for PGS is as follows,
+where GVP = glucose variability percentage, MG = mean glucose,
+PTIR = percent time in range, and N54, N70 are the number of hypoglycemic episodes
+per week in the ranges &lt;54 mg/dL and 54 to &lt;70 mg/dL level respectively.
+</p>
+<p style="text-align: center;"><code class="reqn">
+PGS = f(GVP) + g(MG) + h(PTIR) + j(N54, N70)
+</code>
+</p>
+
+<p>The component functions are listed below.
+</p>
+<p style="text-align: center;"><code class="reqn">
+\newline
+f(GVP) = 1 + \frac{9}{1+\exp(-0.049(GVP - 65.47))}
+\newline
+g(MG) = 1 + 9(\frac{1}{1+\exp(0.1139(MG - 72.08))} + \frac{1}{1+\exp(-0.09195(MG - 157.57))})
+\newline
+h(PTIR) = 1+\frac{9}{1+\exp(0.0833(PTIR - 55.04))}
+\newline
+j(N54, N70) = a(N54) + b(N70)
+\newline
+a(N54) = 0.5+4.5(1-\exp(-0.91093N54)
+</code>
+</p>
+
+<p>and b(N70) is defined such that b(N70) = <code class="reqn">0.5714N70 + 0.625</code> if N70 &lt;= 7.65, and b(N70) = 5 otherwise.
+</p>
+<p>Note that the duration thresholds for episodes
+are NOT the same as the episode_calculation defaults. The defaults chosen for
+PGS are those that match the original PGS paper definition, while the
+episode_calculation defaults match the consensus.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A tibble object with two columns:
+subject id and corresponding PGS value.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Elizabeth Chun
+</p>
+
+
+<h3>References</h3>
+
+<p>Hirsch et al. (2017): A Simple Composite Metric for the Assessment of Glycemic
+Status from Continuous Glucose Monitoring Data: Implications for Clinical Practice
+and the Artificial Pancreas
+<em>Diabetes Technol Ther</em> <strong>19(S3)</strong> .S38-S48,
+<a href="https://doi.org/10.1089/dia.2017.0080">doi:10.1089/dia.2017.0080</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>episode_calculation()
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(example_data_1_subject)
+pgs(example_data_1_subject)
+
+
+</code></pre>
+
+
+</div>

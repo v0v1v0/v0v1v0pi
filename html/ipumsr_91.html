@@ -1,0 +1,168 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>remove_from_extract.nhgis_extract</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Remove values from an existing NHGIS extract definition</h2>
+
+<h3>Description</h3>
+
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental"><img src="../help/figures/lifecycle-experimental.svg" alt="[Experimental]"></a>
+</p>
+<p>Remove existing values from an IPUMS NHGIS extract definition. All
+fields are optional, and if omitted, will be unchanged.
+</p>
+<p>This function is marked as experimental because it is typically not the best
+option for maintaining reproducible extract definitions and may be retired
+in the future. For reproducibility, users should strive to build extract
+definitions with <code>define_extract_nhgis()</code>.
+</p>
+<p>If you have a complicated extract definition to revise, but do not have
+the original extract definition code that created it, we suggest that you
+save the revised extract as a JSON file with <code>save_extract_as_json()</code>. This
+will create a stable version of the extract definition that
+can be used in the future as needed.
+</p>
+<p>To add new values to an IPUMS NHGIS extract definition, use
+<code>add_to_extract()</code>.
+</p>
+<p>Learn more about the IPUMS API in <code>vignette("ipums-api")</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'nhgis_extract'
+remove_from_extract(
+  extract,
+  datasets = NULL,
+  time_series_tables = NULL,
+  geographic_extents = NULL,
+  shapefiles = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>extract</code></td>
+<td>
+<p>An <code>ipums_extract</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>datasets</code></td>
+<td>
+<p>Dataset specifications to remove from the extract definition.
+All <code>data_tables</code>, <code>geog_levels</code>,
+<code>years</code>, and <code>breakdown_values</code> associated with the specified
+<code>datasets</code> will also be removed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time_series_tables</code></td>
+<td>
+<p>Names of the time series tables
+to remove from the extract definition. All <code>geog_levels</code> and <code>years</code>
+associated  with the specified <code>time_series_tables</code> will also be removed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>geographic_extents</code></td>
+<td>
+<p>Geographic extents to remove from the extract
+definition.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shapefiles</code></td>
+<td>
+<p>Shapefiles to remove from the extract definition.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Ignored</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Any extract fields that are rendered irrelevant after modifying the extract
+will be automatically removed. (For instance, if all <code>time_series_tables</code>
+are removed from an extract, <code>tst_layout</code> will also be
+removed.) Thus, it is not necessary to explicitly remove these values.
+</p>
+<p>If the supplied extract definition comes from
+a previously submitted extract request, this function will reset the
+definition to an unsubmitted state.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A modified <code>nhgis_extract</code> object
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>add_to_extract()</code> to add values
+to an extract definition.
+</p>
+<p><code>submit_extract()</code> to submit an extract request.
+</p>
+<p><code>download_extract()</code> to download extract data files.
+</p>
+<p><code>define_extract_nhgis()</code> to create a new extract definition.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">extract &lt;- define_extract_nhgis(
+  datasets = ds_spec(
+    "1990_STF1",
+    data_tables = c("NP1", "NP2", "NP3"),
+    geog_levels = "county"
+  ),
+  time_series_tables = list(
+    tst_spec("CW3", c("state", "county")),
+    tst_spec("CW5", c("state", "county"))
+  )
+)
+
+# Providing names of datasets or time series tables will remove them and
+# all of their associated specifications from the extract:
+remove_from_extract(
+  extract,
+  time_series_tables = c("CW3", "CW5")
+)
+
+# To remove detailed specifications from a dataset or time series table,
+# use `ds_spec()` or `tst_spec()`. The named dataset or time series table
+# will be retained in the extract, but modified by removing the indicated
+# specifications:
+remove_from_extract(
+  extract,
+  datasets = ds_spec("1990_STF1", data_tables = c("NP2", "NP3"))
+)
+
+# To make multiple modifications, use a list of `ds_spec()` or `tst_spec()`
+# objects:
+remove_from_extract(
+  extract,
+  time_series_tables = list(
+    tst_spec("CW3", geog_levels = "county"),
+    tst_spec("CW5", geog_levels = "state")
+  )
+)
+</code></pre>
+
+
+</div>

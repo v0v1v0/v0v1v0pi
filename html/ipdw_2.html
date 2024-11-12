@@ -1,0 +1,87 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>errorGen</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generate interpolation error stats from validation datasets</h2>
+
+<h3>Description</h3>
+
+<p>Generate error statistics from validation point datasets overlaid on a raster surface
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">errorGen(
+  finalraster,
+  validation.sf_ob,
+  validation.data,
+  plot = FALSE,
+  title = ""
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>finalraster</code></td>
+<td>
+<p>RasterLayer object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>validation.sf_ob</code></td>
+<td>
+<p>sf object with points geometry</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>validation.data</code></td>
+<td>
+<p>data.frame</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>logical. Plot comparison?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>title</code></td>
+<td>
+<p>Plot labels</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>List of error statistics
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(sf)
+validation.data &lt;- data.frame(rnorm(10, mean = 0.2, sd = 1))
+names(validation.data) &lt;- c("validation")
+validation.sf_ob &lt;- validation.data
+validation.data &lt;- as.numeric(unlist(validation.data))
+xy &lt;- data.frame(x = c(0:9), y = rep(1, 10))
+validation.sf_ob &lt;- st_as_sf(cbind(validation.sf_ob, xy), coords = c("x", "y"))
+
+m &lt;- matrix(NA, 1, 10)
+out.ras &lt;- raster(m, xmn = 0, xmx = ncol(m), ymn = 0, ymx = nrow(m))
+out.ras[] &lt;- validation.data + rnorm(ncell(out.ras), mean = 0.01, sd = 0.2)
+
+valid.stats &lt;- errorGen(out.ras, validation.sf_ob, validation.data, plot = TRUE,
+  title = "Validation Plot")
+valid.stats
+</code></pre>
+
+
+</div>

@@ -1,0 +1,296 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plotFit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plotting fitted models</h2>
+
+<h3>Description</h3>
+
+<p>Generic function for plotting predictions from various types of fitted 
+models. <code>plotFit</code> currently supports objects of class 
+<code>lm</code>, <code>glm</code>, and 
+<code>nls</code>. A default method also exists which may be used for 
+plotting the fitted mean response from other model fits (e.g., 
+<code>lqs</code> and <code>rlm</code> from the <strong>MASS</strong> 
+package).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">plotFit(object, ...)
+
+## Default S3 method:
+plotFit(
+  object,
+  type = c("response", "link"),
+  interval = c("none", "both", "confidence", "prediction"),
+  level = 0.95,
+  data,
+  adjust = c("none", "Bonferroni", "Scheffe"),
+  k,
+  ...,
+  shade = FALSE,
+  extend.range = FALSE,
+  hide = TRUE,
+  col.conf = if (shade) grDevices::grey(0.7) else "black",
+  col.pred = if (shade) grDevices::grey(0.9) else "black",
+  border.conf = col.conf,
+  border.pred = col.pred,
+  col.fit = "black",
+  lty.conf = if (shade) 1 else 2,
+  lty.pred = if (shade) 1 else 3,
+  lty.fit = 1,
+  lwd.conf = 1,
+  lwd.pred = 1,
+  lwd.fit = 1,
+  n = 500,
+  xlab,
+  ylab,
+  xlim,
+  ylim
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>A fitted model object. Typically, an object that inherits from 
+class <code>lm</code>, <code>glm</code>, or 
+<code>nls</code> (but others may work too).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional optional arguments passed on to 
+<code>plot</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>The type of prediction required. The default is on the scale of 
+the response variable; the alternative <code>"link"</code> is on the scale of the 
+linear predictor. This option is only used when plotting 
+<code>glm</code> objects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interval</code></td>
+<td>
+<p>A character string indicating if a prediction band, 
+confidence band, both, or none should be plotted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+<p>The desired confidence level.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>An optional data frame containing the variables in the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adjust</code></td>
+<td>
+<p>A character string indicating the type of adjustment (if any) 
+to make to the confidence/prediction bands.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>An integer to be used in computing the critical value for the 
+confidence/prediction bands. Only needed when <code>adjust = "Bonferroni"</code>,
+or when <code>adjust = "Scheffe"</code> and <code>interval = "prediction"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shade</code></td>
+<td>
+<p>A logical value indicating if the band should be shaded.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>extend.range</code></td>
+<td>
+<p>A logical value indicating if the fitted regression line
+and bands (if any) should extend to the edges of the plot. Default is 
+<code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hide</code></td>
+<td>
+<p>A logical value indicating if the fitted model should be plotted 
+on top of the points (<code>FALSE</code>) or behind them (<code>TRUE</code>). Default is 
+<code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.conf</code></td>
+<td>
+<p>Shade color for confidence band.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.pred</code></td>
+<td>
+<p>Shade color for prediction band.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>border.conf</code></td>
+<td>
+<p>The color to use for the confidence band border.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>border.pred</code></td>
+<td>
+<p>The color to use for the prediction band border.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.fit</code></td>
+<td>
+<p>The color to use for the fitted line.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lty.conf</code></td>
+<td>
+<p>Line type to use for confidence band border.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lty.pred</code></td>
+<td>
+<p>Line type to use for prediction band border.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lty.fit</code></td>
+<td>
+<p>Line type to use for the fitted regression line.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lwd.conf</code></td>
+<td>
+<p>Line width to use for confidence band border.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lwd.pred</code></td>
+<td>
+<p>Line width to use for prediction band border.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lwd.fit</code></td>
+<td>
+<p>Line width to use for the fitted regression line.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>The number of predictor values at which to evaluate the fitted model
+(larger gives a smoother plot).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>A title for the x axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>A title for the y axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlim</code></td>
+<td>
+<p>The x limits (x1, x2) of the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylim</code></td>
+<td>
+<p>The y limits (y1, y2) of the plot.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>No return value (called for side effects).
+</p>
+
+
+<h3>Note</h3>
+
+<p>By default, the plotted intervals are unadjusted (i.e., pointwise) intervals.
+For simultaneous intervals, use <code>adjust = "Bonferroni"</code> or 
+<code>adjust = "Scheffe"</code>. For the Bonferroni adjustment, you must specify a 
+value for <code>k</code>, the number of intervals for which the coverage is to hold 
+simultaneously. For the Scheffe adjustment, specifying a value for <code>k</code> 
+is only required when <code>interval = "prediction"</code>; if 
+<code>interval = "confidence"</code>, <code>k</code> is set equal to <code class="reqn">p</code>, the number 
+of regression parameters. For example, if <code>object</code> is a simple linear 
+regression model, then calling <code>plotFit</code> with 
+<code>interval = "confidence"</code> and <code>adjust = "Scheffe"</code> will plot the 
+<a href="https://en.wikipedia.org/wiki/Working-Hotelling_procedure">Working-Hotelling band</a>.
+</p>
+<p>Confidence/prediction bands for nonlinear regression (i.e., objects of class
+<code>nls</code>) are based on the linear approximation described in 
+Bates &amp; Watts (2007).
+</p>
+
+
+<h3>References</h3>
+
+<p>Bates, D. M., and Watts, D. G. (2007)
+<em>Nonlinear Regression Analysis and its Applications</em>. Wiley.
+</p>
+<p>Florent Baty, Christian Ritz, Sandrine Charles, Martin Brutsche, 
+Jean-Pierre Flandrois, Marie-Laure Delignette-Muller (2015). 
+A Toolbox for Nonlinear Regression in R: The Package nlstools. 
+<em>Journal of Statistical Software</em>, <b>66</b>(5), 1-21.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plotfit</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># A nonlinear least squares example (see ?datasets::Puromycin and 
+# ?investr::predFit)
+data(Puromycin, package = "datasets")
+Puromycin2 &lt;- Puromycin[Puromycin$state == "treated", ][, 1:2]
+Puro.nls &lt;- nls(rate ~ Vm * conc/(K + conc), data = Puromycin2,
+                start = c(Vm = 200, K = 0.05))
+plotFit(Puro.nls, interval = "both", pch = 19, shade = TRUE, 
+        col.conf = "skyblue4", col.pred = "lightskyblue2")  
+</code></pre>
+
+
+</div>

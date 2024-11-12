@@ -1,0 +1,146 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iNEXT4steps</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Main function for complete 4-step analysis</h2>
+
+<h3>Description</h3>
+
+<p><code>iNEXT4steps</code> computes all statistics in the complete 4-step analysis and visualizes the output. It computes sample completeness, observed and asymptotic diversity, size-based and coverage-based standardized diversity, and evenness.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iNEXT4steps(
+  data,
+  q = seq(0, 2, 0.2),
+  datatype = "abundance",
+  nboot = 30,
+  conf = 0.95,
+  nT = NULL,
+  details = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>(a) For <code>datatype = "abundance"</code>, data can be input as a vector of species abundances (for a single assemblage), matrix/data.frame (species by assemblages), or a list of species abundance vectors. <br>
+(b) For <code>datatype = "incidence_raw"</code>, data can be input as a list of matrix/data.frame (species by sampling units); data can also be input as a matrix/data.frame by merging all sampling units across assemblages based on species identity; in this case, the number of sampling units (nT, see below) must be input.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>a numerical vector specifying the orders of q that will be used to compute sample completeness and evenness as well as plot the relevant profiles. Default is <code>seq(0, 2, by = 0.2)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>datatype</code></td>
+<td>
+<p>data type of input data: individual-based abundance data (<code>datatype = "abundance"</code>) or species by sampling-units incidence matrix (<code>datatype = "incidence_raw"</code>) with all entries being 0 (non-detection) or 1 (detection).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nboot</code></td>
+<td>
+<p>a positive integer specifying the number of bootstrap replications when assessing sampling uncertainty and constructing confidence intervals. Enter 0 to skip the bootstrap procedures. Default is 30.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf</code></td>
+<td>
+<p>a positive number &lt; 1 specifying the level of confidence interval. Default is 0.95.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nT</code></td>
+<td>
+<p>(required only when <code>datatype = "incidence_raw"</code> and input data in a single matrix/data.frame) a vector of positive integers specifying the number of sampling units in each assemblage. If assemblage names are not specified (i.e., <code>names(nT) = NULL</code>), then assemblages are automatically named as "Assemblage1", "Assemblage2",..., etc.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>details</code></td>
+<td>
+<p>a logical variable to indicate whether the detailed numerical values for each step are displayed. Default is <code>FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a list of three of objects: <br><br><code>$summary</code> Numerical table for each individual step.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Assemblage</code></td>
+<td>
+<p>the assemblage names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qTD</code></td>
+<td>
+<p>'Species richness' represents the taxonomic diversity of order q=0; 'Shannon diversity' represents the taxonomic diversity of order q=1, 'Simpson diversity' represents the taxonomic diversity of order q=2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TD_obs</code></td>
+<td>
+<p>the observed taxonomic diversity value of order q.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TD_asy</code></td>
+<td>
+<p>the estimated asymptotic diversity value of order q.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s.e.</code></td>
+<td>
+<p>the bootstrap standard error of the estimated asymptotic diversity of order q.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qTD.LCL, qTD.UCL</code></td>
+<td>
+<p>the bootstrap lower and upper confidence limits for the estimated asymptotic diversity of order q at the specified level in the setting (with a default value of 0.95).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Pielou J'</code></td>
+<td>
+<p>a widely used evenness measure based on Shannon entropy.</p>
+</td>
+</tr>
+</table>
+<p><br><br><code>$figure</code> six figures including five individual figures (for STEPS 1, 2a, 2b, 3 and 4 respectively) and a complete set of five plots. <br><br><code>$details</code> (only when <code>details = TRUE</code>). The numerical output for plotting all figures. <br><br></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Complete 4-step analysis for abundance data
+data(Data_spider)
+Four_Steps_out1 &lt;- iNEXT4steps(data = Data_spider, datatype = "abundance")
+Four_Steps_out1
+
+
+## Complete 4-step analysis for incidence data
+data(Data_woody_plant)
+Four_Steps_out2 &lt;- iNEXT4steps(data = Data_woody_plant, datatype = "incidence_raw")
+Four_Steps_out2
+
+
+
+</code></pre>
+
+
+</div>

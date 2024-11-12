@@ -1,0 +1,114 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>vis.immunr_dynamics</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Visualise clonotype dynamics</h2>
+
+<h3>Description</h3>
+
+<p>Visualise clonotype dynamics
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'immunr_dynamics'
+vis(.data, .plot = c("smooth", "area", "line"), .order = NA, .log = FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>.data</code></td>
+<td>
+<p>Output from the trackClonotypes function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.plot</code></td>
+<td>
+<p>Character. Either "smooth", "area" or "line". Each specifies a type of plot for visualisation of clonotype dynamics.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.order</code></td>
+<td>
+<p>Numeric or character vector. Specifies the order to samples, e.g., it used for ordering samples
+by timepoints. Either See "Examples" below for more details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.log</code></td>
+<td>
+<p>Logical. If TRUE then use log-scale for the frequency axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Not used here.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A ggplot2 object.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Load an example data that comes with immunarch
+data(immdata)
+
+# Make the data smaller in order to speed up the examples
+immdata$data &lt;- immdata$data[c(1, 2, 3, 7, 8, 9)]
+immdata$meta &lt;- immdata$meta[c(1, 2, 3, 7, 8, 9), ]
+
+# Option 1
+# Choose the first 10 amino acid clonotype sequences
+# from the first repertoire to track
+tc &lt;- trackClonotypes(immdata$data, list(1, 10), .col = "aa")
+# Choose the first 20 nucleotide clonotype sequences
+# and their V genes from the "MS1" repertoire to track
+tc &lt;- trackClonotypes(immdata$data, list("MS1", 20), .col = "nt+v")
+
+# Option 2
+# Choose clonotypes with amino acid sequences "CASRGLITDTQYF" or "CSASRGSPNEQYF"
+tc &lt;- trackClonotypes(immdata$data, c("CASRGLITDTQYF", "CSASRGSPNEQYF"), .col = "aa")
+
+# Option 3
+# Choose the first 10 clonotypes from the first repertoire
+# with amino acid sequences and V segments
+target &lt;- immdata$data[[1]] %&gt;%
+  select(CDR3.aa, V.name) %&gt;%
+  head(10)
+tc &lt;- trackClonotypes(immdata$data, target)
+
+# Visualise the output regardless of the chosen option
+# Therea are three way to visualise it, regulated by the .plot argument
+vis(tc, .plot = "smooth")
+vis(tc, .plot = "area")
+vis(tc, .plot = "line")
+
+# Visualising timepoints
+# First, we create an additional column in the metadata with randomly choosen timepoints:
+immdata$meta$Timepoint &lt;- sample(1:length(immdata$data))
+immdata$meta
+# Next, we create a vector with samples in the right order,
+# according to the "Timepoint" column (from smallest to greatest):
+sample_order &lt;- order(immdata$meta$Timepoint)
+# Sanity check: timepoints are following the right order:
+immdata$meta$Timepoint[sample_order]
+# Samples, sorted by the timepoints:
+immdata$meta$Sample[sample_order]
+# And finally, we visualise the data:
+vis(tc, .order = sample_order)
+</code></pre>
+
+
+</div>

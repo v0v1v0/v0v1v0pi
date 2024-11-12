@@ -1,0 +1,238 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>image_pal</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create a color palette from an image</h2>
+
+<h3>Description</h3>
+
+<p>Derive qualitative, sequential and divergent color palettes from an image on
+disk or at a URL.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">image_pal(
+  file,
+  n = 9,
+  type = c("qual", "seq", "div"),
+  k = 100,
+  bw = c(0, 1),
+  brightness = c(0, 1),
+  saturation = c(0, 1),
+  seq_by = "hsv",
+  div_center = "#FFFFFF",
+  seed = NULL,
+  plot = FALSE,
+  labels = TRUE,
+  label_size = 1,
+  label_color = "#000000",
+  keep_asp = TRUE,
+  quantize = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>character, file path or URL to an image.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>integer, number of colors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>character, type of palette: qualitative, sequential or divergent
+(<code>"qual"</code>, <code>"seq"</code>, or <code>"div"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>integer, the number of k-means cluster centers to consider in the
+image. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bw</code></td>
+<td>
+<p>a numeric vector of length two giving the lower and upper quantiles
+to trim trim near-black and near-white colors in RGB space.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>brightness</code></td>
+<td>
+<p>as above, trim possible colors based on brightness in HSV space.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>saturation</code></td>
+<td>
+<p>as above, trim possible colors based on saturation in HSV space.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seq_by</code></td>
+<td>
+<p>character, sort sequential palette by HSV dimensions in a
+specific order, e.g., <code>"hsv"</code>, <code>"svh"</code>. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>div_center</code></td>
+<td>
+<p>character, color used for divergent palette center,
+defaults to white.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>numeric, set the seed for reproducible results.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>logical, plot the palette.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>labels</code></td>
+<td>
+<p>logical, show hex color values in plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label_size</code></td>
+<td>
+<p>numeric, label size in plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label_color</code></td>
+<td>
+<p>text label color.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep_asp</code></td>
+<td>
+<p>logical, adjust rectangles in plot to use the image aspect ratio.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quantize</code></td>
+<td>
+<p>logical, quantize the reference thumbnail image in the plot
+using the derived color palette. See <code>image_quantmap()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Ordering colors is a challenging problem. There are many ways to do it; none
+are perfect. Color is a multi-dimensional property; any reduction to a a one
+dimensional color spectrum necessarily removes information.
+</p>
+<p>Creating a sequential palette from an arbitrary image that contains several
+hues, at different saturation and brightness levels, and making a palette
+that looks sequential is particularly problematic. This function does a
+decent job of creating qualitative, sequential and divergent palettes from
+images, but additional tweaking of function arguments is needed on a case by
+case basis. This can include trimming the extreme values of the color
+distribution in terms of brightness, saturation and presence of
+near-black/white colors as pre-processing steps. There is also variation in
+possible palettes from a given image, depending on the image complexity and
+other properties, though you can set the random seed for reproducibility.
+</p>
+<p>The number of k-means centers <code>k</code> defines the maximum number of unique colors
+to consider in the image for color binning prior to palette construction.
+This is different from <code>n</code>, the number of colors are desired in the derived
+palette. It is limited by the number of unique colors in the image. Larger <code>k</code>
+may allow for better palette construction under some conditions, but takes
+longer to run. <code>k</code> applies to sequential and qualitative palettes, but not
+divergent palettes.
+</p>
+
+
+<h3>Value</h3>
+
+<p>character vector of hex colors, optionally draws a plot
+</p>
+
+
+<h3>Trimming color distribution</h3>
+
+<p>Some pre-processing can be done to limit undesirable colors from ending up in
+a palette. <code>bw</code> specifically drops near-black and near-white colors as soon
+as the image is loaded by looking at the average values in RGB space.
+<code>brightness</code> and <code>saturation</code> trimming are applied subsequently to trim lower
+and upper quantiles of the HSV value and saturation, respectively. If you have
+already trimmed black and white, keep in mind these two arguments will trim
+further from what remains of the color distribution.
+</p>
+
+
+<h3>Choosing appropriate palette type</h3>
+
+<p>Keep in mind that many images simple do not make sense to try to derive
+sensible color palettes from. For images that do lend themselves to a useful
+color palette derivation, some may only make sense to consider for a divergent
+palette, or an increasing/decreasing sequential palette, or only a qualitative
+palette if there are too many colors that are difficult to order. For divergent
+palettes in particular, it is recommended to trim white, e.g. <code>bw = c(0, 0.9)</code>,
+depending on the white space of a given image, since the divergent palettes
+are centered on white.
+</p>
+
+
+<h3>Sorting sequential palettes</h3>
+
+<p><code>seq_by = "hsv"</code> orders the final palette by hue, then saturation, then value
+(brightness). This default is not meant to be ideal for all images. It works
+better in cases where sequential palettes may contain several distinct hues,
+but not much variation in saturation or brightness. However, for example,
+palettes derived from an image with relatively little variation in hue may
+appear more sorted to the human eye if ordered by hue last using <code>"svh"</code> or
+<code>"vsh"</code>, depending on whether you want the palette to appear to transition
+more from lower saturation or lower brightness to the predominant hue.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>image_quantmap()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(1)
+x &lt;- system.file("blue-yellow.jpg", package = "imgpalr")
+
+# Focus on bright, saturated colors for divergent palette:
+image_pal(x, n = 3, type = "div",
+  saturation = c(0.75, 1), brightness = c(0.75, 1), plot = TRUE)
+
+
+image_pal(x, n = 5, type = "seq", k = 2, saturation = c(0.5, 1),
+  brightness = c(0.25, 1), seq_by = "hsv")
+
+</code></pre>
+
+
+</div>

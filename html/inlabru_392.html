@@ -1,0 +1,171 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>lgcp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Log Gaussian Cox process (LGCP) inference using INLA</h2>
+
+<h3>Description</h3>
+
+<p>This function performs inference on a LGCP observed via points residing
+possibly multiple dimensions. These dimensions are defined via the left hand
+side of the formula provided via the model parameter. The left hand side
+determines the intensity function that is assumed to drive the LGCP. This may
+include effects that lead to a thinning (filtering) of the point process. By
+default, the log intensity is assumed to be a linear combination of the
+effects defined by the formula's RHS.
+</p>
+<p>More sophisticated models, e.g.
+non-linear thinning, can be achieved by using the predictor argument. The
+latter requires multiple runs of INLA for improving the required
+approximation of the predictor. In many applications the LGCP is only
+observed through subsets of the dimensions the process is living in. For
+example, spatial point realizations may only be known in sub-areas of the
+modelled space. These observed subsets of the LGCP domain are called samplers
+and can be provided via the respective parameter. If samplers is NULL it is
+assumed that all of the LGCP's dimensions have been observed completely.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">lgcp(
+  components,
+  data,
+  samplers = NULL,
+  domain = NULL,
+  ips = NULL,
+  formula = . ~ .,
+  ...,
+  options = list(),
+  .envir = parent.frame()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>components</code></td>
+<td>
+<p>A formula describing the latent components</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A data frame or <code>SpatialPoints(DataFrame)</code> object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>samplers</code></td>
+<td>
+<p>A data frame or <code style="white-space: pre;">⁠Spatial[Points/Lines/Polygons]DataFrame⁠</code>
+objects</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>domain</code></td>
+<td>
+<p>Named list of domain definitions</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ips</code></td>
+<td>
+<p>Integration points (overrides <code>samplers</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>If NULL, the linear combination implied by the <code>components</code> is
+used as a predictor for the point location intensity. If a (possibly
+non-linear) expression is provided the respective Taylor approximation is
+used as a predictor. Multiple runs of INLA are then required for a better
+approximation of the posterior.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments passed on to <code>like()</code>. In particular,
+optional <code>E</code>, a single numeric used rescale all integration weights by a fixed
+factor.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>options</code></td>
+<td>
+<p>See <code>bru_options_set()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.envir</code></td>
+<td>
+<p>The evaluation environment to use for special arguments
+(<code>E</code>, <code>Ntrials</code>, <code>weights</code>, <code>scale</code>) if not found in response_data or data.
+Defaults to the calling environment.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An <code>bru()</code> object
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+if (bru_safe_inla() &amp;&amp;
+  require(ggplot2, quietly = TRUE) &amp;&amp;
+  require(fmesher, quietly = TRUE)) {
+  # Load the Gorilla data
+  data &lt;- gorillas_sf
+
+  # Plot the Gorilla nests, the mesh and the survey boundary
+  ggplot() +
+    geom_fm(data = data$mesh) +
+    gg(data$boundary, fill = "blue", alpha = 0.2) +
+    gg(data$nests, col = "red", alpha = 0.2)
+
+  # Define SPDE prior
+  matern &lt;- INLA::inla.spde2.pcmatern(
+    data$mesh,
+    prior.sigma = c(0.1, 0.01),
+    prior.range = c(0.1, 0.01)
+  )
+
+  # Define domain of the LGCP as well as the model components (spatial SPDE
+  # effect and Intercept)
+  cmp &lt;- geometry ~ field(geometry, model = matern) + Intercept(1)
+
+  # Fit the model (with int.strategy="eb" to make the example take less time)
+  fit &lt;- lgcp(cmp, data$nests,
+    samplers = data$boundary,
+    domain = list(geometry = data$mesh),
+    options = list(control.inla = list(int.strategy = "eb"))
+  )
+
+  # Predict the spatial intensity surface
+  lambda &lt;- predict(
+    fit,
+    fm_pixels(data$mesh, mask = data$boundary),
+    ~ exp(field + Intercept)
+  )
+
+  # Plot the intensity
+  ggplot() +
+    gg(lambda, geom = "tile") +
+    geom_fm(data = data$mesh, alpha = 0, linewidth = 0.05) +
+    gg(data$nests, col = "red", alpha = 0.2)
+}
+
+
+</code></pre>
+
+
+</div>

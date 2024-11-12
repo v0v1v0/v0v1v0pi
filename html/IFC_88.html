@@ -1,0 +1,114 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>data_add_pops</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Add Population to IFC_data Object</h2>
+
+<h3>Description</h3>
+
+<p>Adds populations to an already existing 'IFC_data' object.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">data_add_pops(
+  obj,
+  pops,
+  pnt_in_poly_algorithm = 1,
+  pnt_in_poly_epsilon = 1e-12,
+  display_progress = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+<p>an 'IFC_data' object extracted by ExtractFromDAF(extract_features = TRUE) or ExtractFromXIF(extract_features = TRUE).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pops</code></td>
+<td>
+<p>a list of population(s) to add to 'obj'. Each element of this list will be coerced by <code>buildPopulation</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pnt_in_poly_algorithm</code></td>
+<td>
+<p>algorithm used to determine if object belongs to a polygon region or not. Default is 1.<br>
+Note that for the moment only 1(Trigonometry) is available.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pnt_in_poly_epsilon</code></td>
+<td>
+<p>epsilon to determine if object belongs to a polygon region or not. It only applies when algorithm is 1. Default is 1e-12.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>display_progress</code></td>
+<td>
+<p>whether to display a progress bar. Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments to be passed.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A warning will be thrown if a provided population is already existing in 'obj'.<br>
+In such a case this population will not be added to 'obj'.<br>
+If any input population is not well defined and can't be created then an error will occur.
+</p>
+
+
+<h3>Value</h3>
+
+<p>an IFC_data object with pops added.
+</p>
+
+
+<h3>Source</h3>
+
+<p>For pnt_in_poly_algorithm, Trigonometry, is an adaptation of Jeremy VanDerWal's code <a href="https://github.com/jjvanderwal/SDMTools">https://github.com/jjvanderwal/SDMTools</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">if(requireNamespace("IFCdata", quietly = TRUE)) {
+  ## use a daf file
+  file_daf &lt;- system.file("extdata", "example.daf", package = "IFCdata")
+  daf &lt;- ExtractFromDAF(fileName = file_daf)
+  ## copy 1st population from existing daf
+  pop &lt;- daf$pops[[1]]
+  if(length(pop) != 0) {
+    pop_copy &lt;- pop
+    ## modify name, obj and type of copied population
+    pop_copy$name &lt;- paste0(pop_copy$name,"_copy")
+    pop_copy$obj &lt;- (which(pop_copy$obj)-1)[1]
+    pop_copy$type &lt;- "T"
+    ## create new object with this new population
+    dafnew &lt;- data_add_pops(obj = daf, pops = list(pop_copy))
+  }
+} else {
+  message(sprintf('Please run `install.packages("IFCdata", repos = "%s", type = "source")` %s',
+                  'https://gitdemont.github.io/IFCdata/',
+                  'to install extra files required to run this example.'))
+}
+</code></pre>
+
+
+</div>

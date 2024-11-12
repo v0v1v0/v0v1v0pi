@@ -1,0 +1,141 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>simulate_Isingland</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate a 2D Ising landscape</h2>
+
+<h3>Description</h3>
+
+<p>Perform a numeric simulation using the landscape. The simulation is performed
+using a similar algorithm as Glauber dynamics, that the transition possibility
+is determined by the difference in the potential function, and the steady-state
+distribution is the same as the Boltzmann distribution (if not setting <code>beta2</code>).
+Note that, the conditional transition possibility of this simulation
+may be different from Glauber dynamics or other simulation methods.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">simulate_Isingland(l, ...)
+
+## S3 method for class ''2d_Isingland''
+simulate_Isingland(
+  l,
+  mode = "single",
+  initial = 0,
+  length = 100,
+  beta2 = l$beta,
+  ...
+)
+
+## S3 method for class ''2d_Isingland_matrix''
+simulate_Isingland(
+  l,
+  mode = "single",
+  initial = 0,
+  length = 100,
+  beta2 = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>l</code></td>
+<td>
+<p>An <code>Isingland</code> object constructed with <code>make_2d_Isingland()</code> or <code>make_2d_Isingland_matrix()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Not in use.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mode</code></td>
+<td>
+<p>One of <code>"single"</code>, <code>"distribution"</code>. Do you want to simulate
+the state of a single system stochastically or simulate the distribution
+of the states? <code>"single"</code> is used by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial</code></td>
+<td>
+<p>An integer indicating the initial number
+of active nodes for the simulation. Float numbers will be
+converted to an integer automatically.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>length</code></td>
+<td>
+<p>An integer indicating the simulation length.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta2</code></td>
+<td>
+<p>The <code class="reqn">beta</code> value used for simulation. By default use
+the same value as for landscape construction. Manually setting this
+value can make the system easier or more difficult to transition
+to another state, but will alter the steady-state distribution as well.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>In each simulation step, the system can have one more active node, one
+less active node, or the same number of active nodes (if possible; so if all
+nodes are already active then it is not possible to have one more active node).
+The possibility of the three cases is determined by their potential function:
+</p>
+<p style="text-align: center;"><code class="reqn">P(n_{t}=b|n_{t-1}=a) = \frac{e^{-\beta U(b)}}{\sum_{i \in \{a-1,a,a+1\},0\leq i\leq N}e^{-\beta U(i)}}, \ \mathrm{if} \ b\in\{a-1,a,a+1\}\ \&amp;\ 0\leq i\leq N; 0, \mathrm{otherwise},</code>
+</p>
+
+<p>where <code class="reqn">n_{t}</code> is the number of active nodes at the time <code class="reqn">t</code>, and
+<code class="reqn">U(n)</code> is the potential function.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>sim_Isingland</code> object with the following components:
+</p>
+
+<ul>
+<li> <p><code>output</code> A tibble of the simulation output.
+</p>
+</li>
+<li> <p><code>landscape</code> The landscape object supplied to this function.
+</p>
+</li>
+<li> <p><code>mode</code> A character representing the mode of the simulation.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+Nvar &lt;- 10
+m &lt;- rep(0, Nvar)
+w &lt;- matrix(0.1, Nvar, Nvar)
+diag(w) &lt;- 0
+result1 &lt;- make_2d_Isingland(m, w)
+plot(result1)
+
+set.seed(1614)
+sim1 &lt;- simulate_Isingland(result1, initial = 5)
+plot(sim1)
+
+</code></pre>
+
+
+</div>

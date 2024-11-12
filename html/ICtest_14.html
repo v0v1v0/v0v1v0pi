@@ -1,0 +1,160 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ladle</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Ladle estimate for an arbitrary matrix
+</h2>
+
+<h3>Description</h3>
+
+<p>The ladle estimates the rank of a symmetric matrix <code class="reqn">S</code> by combining the classical screeplot with an estimate of the rank from the bootstrap eigenvector variability of <code class="reqn">S</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ladle(x, S, n.boots = 200, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p><code>n</code> x <code>p</code> data matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>S</code></td>
+<td>
+<p>Function for computing a <code>q</code> x <code>q</code> symmetric matrix from the data <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.boots</code></td>
+<td>
+<p>The number of bootstrap samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Furhter parameters passed to <code>S</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Assume that the eigenvalues of the population version of <code>S</code> are <code class="reqn">\lambda_1 &gt;= ... &gt;= \lambda_k &gt; \lambda_k+1 = ... = \lambda_p</code>. The ladle estimates the true value of <code class="reqn">k</code> (for example the rank of <code>S</code>) by combining the classical screeplot with estimate of <code class="reqn">k</code> from the bootstrap eigenvector variability of <code>S</code>.
+</p>
+<p>For applying the ladle to either PCA, FOBI or SIR, see the dedicated functions <code>PCAladle</code>, <code>FOBIladle</code>, <code>SIRladle</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of class <code>ladle</code> containing:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>method </code></td>
+<td>
+<p>The string “general”.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k </code></td>
+<td>
+<p>The estimated value of k.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fn </code></td>
+<td>
+<p>A vector giving the measures of variation of the eigenvectors using the bootstrapped eigenvectors for the different number of components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phin </code></td>
+<td>
+<p>The normalized eigenvalues of the S matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gn </code></td>
+<td>
+<p>The main criterion for the ladle estimate - the sum of fn and phin. k is the value where gn takes its minimum.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>The eigenvalues of the covariance matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.name</code></td>
+<td>
+<p>The name of the data for which the ladle estimate was computed.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Joni Virta
+</p>
+
+
+<h3>References</h3>
+
+<p>Luo, W. and Li, B. (2016), Combining Eigenvalues and Variation of Eigenvectors for Order Determination, Biometrika, 103. 875-887. &lt;doi:10.1093/biomet/asw051&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>PCAladle</code>, <code>FOBIladle</code>, <code>SIRladle</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Function for computing the left CCA matrix
+S_CCA &lt;- function(x, dim){
+  x1 &lt;- x[, 1:dim]
+  x2 &lt;- x[, -(1:dim)]
+  stand &lt;- function(x){
+    x &lt;- as.matrix(x)
+    x &lt;- sweep(x, 2, colMeans(x), "-")
+    eigcov &lt;- eigen(cov(x), symmetric = TRUE)
+    x%*%(eigcov$vectors%*%diag((eigcov$values)^(-1/2))%*%t(eigcov$vectors))
+  }
+  
+  x1stand &lt;- stand(x1)
+  x2stand &lt;- stand(x2)
+  
+  crosscov &lt;- cov(x1stand, x2stand)
+  
+  tcrossprod(crosscov)
+}
+
+# Toy data with two canonical components
+n &lt;- 200
+x1 &lt;- matrix(rnorm(n*5), n, 5)
+x2 &lt;- cbind(x1[, 1] + rnorm(n, sd = sqrt(0.5)),
+            -1*x1[, 1] + x1[, 2] + rnorm(n, sd = sqrt(0.5)),
+            matrix(rnorm(n*3), n, 3))
+x &lt;- cbind(x1, x2)
+
+# The ladle estimate
+ladle_1 &lt;- ladle(x, S_CCA, dim = 5)
+ladleplot(ladle_1)
+</code></pre>
+
+
+</div>

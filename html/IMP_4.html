@@ -1,0 +1,79 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>staticPerfMeasures</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Model evaluation measures for Binary classification models</h2>
+
+<h3>Description</h3>
+
+<p>Generates &amp; plots the following performance evaluation &amp; validation measures for Binary Classification Models - Hosmer Lemeshow goodness of fit tests,
+Calibration plots, Lift index &amp; gain charts &amp; concordance-discordance measures
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">staticPerfMeasures(list_models, g, perf_measures = c("hosmer", "calibration",
+  "lift", "concord"), sample_size_concord = 5000)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>list_models</code></td>
+<td>
+<p>A list of one (or more) dataframes for each model whose performance is to be evaluated. Each dataframe should comprise of 2 columns with the first column indicating the class labels (0 or 1)
+and the second column providing the raw predicted probabilities</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>g</code></td>
+<td>
+<p>The number of groups for binning. The predicted probabilities are binned as follows
+</p>
+<p>For Hosmer-Lemshow (HL) test: Predicted probabilities binned as per g unique quantiles i.e. cut_points = unique(quantile(predicted_prob,seq(0,1,1/g)))
+</p>
+<p>For Lift-Index &amp; Gain charts: Same as HL test, however if g &gt; unique(predicted_probability), the predicted probabilities
+are used as such without binning
+</p>
+<p>For calibration plots, g equal sized intervals are created (of width 1/g each)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>perf_measures</code></td>
+<td>
+<p>Select the required performance evaluation and validation measure/s, from the following
+options - c('hosmer','calibration','lift','concord'). Default option is All</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sample_size_concord</code></td>
+<td>
+<p>For computing concordance-discordance measures (and c-statistic) a random sample
+is drawn from each dataset (if nrow(dataset) &gt; 5000). Default sample size of 5000 can be adjusted by changing the value of this
+argument</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A nested list with 2 components - a list of dataframes and a list of plots - containing
+the outcomes of the different performance evaluations carried out.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">model_1 &lt;- glm(Species ~ Sepal.Length,data=iris,family=binomial)
+model_2 &lt;- glm(Species ~ Sepal.Width, data=iris, family = binomial)
+df1 &lt;- data.frame(model_1$y,fitted(model_1))
+df2 &lt;- data.frame(model_2$y,fitted(model_2))
+staticPerfMeasures(list(df1,df2),g=10, perf_measures = c("hosmer","lift"))
+</code></pre>
+
+
+</div>

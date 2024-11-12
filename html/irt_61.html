@@ -1,0 +1,281 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>est_ability</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimate Examinee Ability</h2>
+
+<h3>Description</h3>
+
+<p>This function estimates examinee ability using different methods, including
+Owen's Bayesian estimation, Maximum Likelihood estimation,
+Maximum-a-Posteriori and Expected-a-Posteriori.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">est_ability(
+  resp,
+  ip = NULL,
+  method = c("eap", "ml", "map", "bm", "owen", "sum_score"),
+  ...,
+  prior_dist = c("norm", "unif", "lnorm", "gamma", "t", "cauchy"),
+  prior_pars = c(0, 1),
+  theta_range = c(-5, 5),
+  number_of_quads = 41,
+  tol = 1e-06,
+  output_type = c("list", "data.frame", "tibble")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>resp</code></td>
+<td>
+<p>A <code>Response_set-class</code>, <code>matrix</code> or a
+<code>data.frame</code> object holding responses. Missing responses are excluded
+from the ability estimation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ip</code></td>
+<td>
+<p>An <code>Item-class</code>, <code>Itempool-class</code> or a
+<code>Testlet-class</code> object. If <code>ip</code> is not an
+<code>Itempool-class</code> object, the function attempts to convert it.
+While the default is <code>NULL</code>, this argument is required for all methods
+except when <code>method = "sum_score"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>The method used for ability estimation. The default is
+<code>"eap"</code>.
+</p>
+<p>Available methods:
+</p>
+
+<dl>
+<dt><strong><code>'sum_score'</code></strong></dt>
+<dd>
+<p>Basic sum (raw) score of responses.</p>
+</dd>
+<dt><strong><code>'owen'</code></strong></dt>
+<dd>
+<p>Owen's Bayesian Ability Estimation.
+</p>
+<p>This method is suitable for dichotomous IRT models (e.g., 'Rasch',
+'1PL', '2PL', '3PL' and '4PL'). Testlet groupings are ignored and items
+within testlets are treated as standalone items.
+</p>
+<p>Formulas were implemented in Owen (1975) and Vale (1977). The original
+formulation does not include the D parameter. If <code>D = 1</code>, the
+original solution is obtained. If <code>D = 1.7</code>, the <code>a</code>
+parameter is multiplied by this number.
+</p>
+<p>The user needs to provide prior parameters, i.e., <code>prior_pars</code>.
+These should be a numeric vector of length two, with the first
+component as the prior mean and the second as the prior standard
+deviation (not variance). For example, if the prior mean is 0.1 and the
+prior standard deviation is 2, set the prior parameters as
+<code>prior_pars = c(0.1, 2)</code>.
+</p>
+</dd>
+<dt><strong><code>'ml'</code></strong></dt>
+<dd>
+<p>Maximum Likelihood Ability Estimation
+via Newton-Raphson Algorithm.</p>
+</dd>
+<dt><strong><code>'eap'</code></strong></dt>
+<dd>
+<p>Expected-a-Posteriori Ability Estimation.
+Prior information must be provided for this function. The number of
+quadrature points can also be specified using the argument
+<code>number_of_quads</code>. </p>
+</dd>
+<dt>
+<strong><code>'map'</code></strong> or <strong><code>'bm'</code></strong>
+</dt>
+<dd>
+<p>Maximum-a-Posteriori
+Ability Estimation (or Bayes Modal estimation). Prior information must
+be provided for this function. Currently, only <code>'norm'</code> prior
+distribution is available.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments passed to specific methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior_dist</code></td>
+<td>
+<p>The shape of the prior distribution. Available options are:
+</p>
+
+<dl>
+<dt>'norm'</dt>
+<dd>
+<p>Normal distribution</p>
+</dd>
+<dt>'unif'</dt>
+<dd>
+<p>Uniform distribution</p>
+</dd>
+<dt>'t'</dt>
+<dd>
+<p>t distribution</p>
+</dd>
+<dt>'cauchy'</dt>
+<dd>
+<p>Cauchy distribution</p>
+</dd>
+</dl>
+<p>The default value is <code>'norm'</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior_pars</code></td>
+<td>
+<p>Parameters of the prior distribution. Default value is
+<code>c(0, 1)</code>, where 0 is the mean and 1 is the standard deviation of the
+default normal prior distribution. For example, uniform prior parameter can
+be set as <code>c(a, b)</code> where <code>a</code> is the minimum value and <code>b</code>
+is the maximum value. For <code>t</code> distribution, prior parameter can be set
+as <code>df</code> to represent the degree of freedom. For Cauchy distribution,
+prior parameters can be set as <code>c(location, scale)</code>.
+</p>
+<p>If method is <code>"owen"</code>, provide <code>c(&lt;Prior Mean&gt;, &lt;Prior SD&gt;)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta_range</code></td>
+<td>
+<p>The limits of the ability estimation scale. The estimation
+result will be bounded within this interval. Default is <code>c(-5, 5)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>number_of_quads</code></td>
+<td>
+<p>Number of quadratures. The default value is 41. As
+this number increases, the precision of the estimate will also increase.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>The precision level of ability estimate. The final ability
+estimates will be rounded to remove precision smaller than the <code>tol</code>
+value. Default is <code>1e-06</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output_type</code></td>
+<td>
+<p>A string specifying the output type of the function.
+Default is <code>"list"</code>. Options include:
+</p>
+
+<dl>
+<dt>"list"</dt>
+<dd>
+<p>Function returns a <code>list</code> object with elements
+<code>est</code> and <code>se</code>.</p>
+</dd>
+<dt>"data.frame"</dt>
+<dd>
+<p>Function returns a <code>data.frame</code> object with
+columns <code>examinee_id</code>, <code>est</code> and <code>se</code>.</p>
+</dd>
+<dt>"tibble"</dt>
+<dd>
+<p>If the <code>tibble</code> package is available, the function
+returns a <code>tibble</code> object with columns <code>examinee_id</code>,
+<code>est</code> and <code>se</code>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>est</code> The estimated examinee abilities. If the response vector
+for a subject contains all <code>NA</code>s, then <code>est</code> will be <code>NA</code> to
+differentiate from cases where all answers are incorrect.
+</p>
+<p><code>se</code> The standard errors of the ability estimates. For
+<code>"sum_score"</code> method, all standard errors will be <code>NA</code>. For
+Bayesian methods (like EAP, MAP or Owen's), this value is the square root
+of the posterior variance.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Emre Gonulates
+</p>
+
+
+<h3>References</h3>
+
+<p>Owen, R. J. (1975). A Bayesian sequential procedure for quantal response in
+the context of adaptive mental testing. Journal of the American Statistical
+Association, 70(350), 351-356.
+</p>
+<p>Vale, C. D., &amp; Weiss, D. J. (1977). A Rapid Item-Search Procedure for
+Bayesian Adaptive Testing. Research Report 77-4. Minneapolis, MN.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">ip &lt;- generate_ip(n = 7)
+resp &lt;- sim_resp(ip, theta = rnorm(3))
+
+### EAP estimation ###
+est_ability(resp, ip)
+est_ability(resp, ip, number_of_quads = 81)
+# The default prior_dist is 'norm'. prior_pars = c(mean, sd)
+est_ability(resp, ip, prior_pars = c(0, 3))
+# prior_pars = c(min, max)
+est_ability(resp, ip, prior_dist = 'unif',  prior_pars = c(-3, 3))
+# prior_pars = c(df)
+est_ability(resp, ip, prior_dist = 't',  prior_pars = 3)
+# prior_pars = c(location, scale)
+est_ability(resp, ip, prior_dist = 'cauchy',  prior_pars = c(0, 1))
+
+
+### MAP estimation (Bayes Modal estimation) ###
+est_ability(resp, ip, method = "map")
+# The default prior_dist is 'norm'. prior_pars = c(mean, sd)
+est_ability(resp, ip, method = "map", prior_pars = c(0, 2))
+
+
+### Maximum Likelihood estimation ###
+est_ability(resp, ip, method = 'ml')
+est_ability(resp, ip, method = 'ml', tol = 1e-8)
+est_ability(resp = rep(1, length(ip)), ip, method = 'ml')
+est_ability(resp = rep(1, length(ip)), ip, method = 'ml',
+            theta_range = c(-3, 3))
+
+### Owen's Bayesian ability estimation ###
+est_ability(resp, ip, method = 'owen')
+est_ability(resp, ip, method = 'owen', prior_pars = c(0, 3))
+
+
+
+</code></pre>
+
+
+</div>

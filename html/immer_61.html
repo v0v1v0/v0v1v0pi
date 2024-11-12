@@ -1,0 +1,425 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>immer_jml</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Joint Maximum Likelihood Estimation for the Partial Credit Model
+with a Design Matrix for Item Parameters
+and <code class="reqn">\varepsilon</code>-Adjustment Bias Correction
+</h2>
+
+<h3>Description</h3>
+
+<p>Estimates the partial credit model with a design matrix for item
+parameters with joint maximum likelihood (JML). The  <code class="reqn">\varepsilon</code>-adjustment
+bias correction is implemented with reduces bias of the
+JML estimation method (Bertoli-Barsotti, Lando &amp; Punzo, 2014).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">immer_jml(dat, A=NULL, maxK=NULL, center_theta=TRUE, b_fixed=NULL, weights=NULL,
+     irtmodel="PCM", pid=NULL, rater=NULL, eps=0.3, est_method="eps_adj", maxiter=1000,
+     conv=1e-05, max_incr=3, incr_fac=1.1, maxiter_update=10, maxiter_line_search=6,
+     conv_update=1e-05, verbose=TRUE, use_Rcpp=TRUE, shortcut=TRUE)
+
+## S3 method for class 'immer_jml'
+summary(object, digits=3, file=NULL, ...)
+
+## S3 method for class 'immer_jml'
+logLik(object, ...)
+
+## S3 method for class 'immer_jml'
+IRT.likelihood(object, theta=seq(-9,9,len=41), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dat</code></td>
+<td>
+
+<p>Data frame with polytomous item responses <code class="reqn">0,1,\ldots, K</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+
+<p>Design matrix (items <code class="reqn">\times</code> categories <code class="reqn">\times</code> basis parameters).
+Entries for categories are for <code class="reqn">1,\ldots,K</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxK</code></td>
+<td>
+<p>Optional vector with maximum category per item</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>center_theta</code></td>
+<td>
+
+<p>Logical indicating whether the trait estimates should be centered
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b_fixed</code></td>
+<td>
+
+<p>Matrix with fixed <code class="reqn">b</code> parameters
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>irtmodel</code></td>
+<td>
+<p>Specified item response model. Can be one of the two
+partial credit model parametrizations <code>PCM</code> and <code>PCM2</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>Optional vector of sampling weights</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pid</code></td>
+<td>
+<p>Person identifier</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rater</code></td>
+<td>
+<p>Optional rater identifier</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+
+<p>Adjustment parameter <code class="reqn">\varepsilon</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>est_method</code></td>
+<td>
+
+<p>Estimation method. Can be <code>'eps_adj'</code> for the <code class="reqn">\varepsilon</code>-adjustment,
+<code>'jml'</code> for the JML without bias correction and
+<code>'jml_bc'</code> for JML with bias correction.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+
+<p>Maximum number of iterations
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conv</code></td>
+<td>
+
+<p>Convergence criterion
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_incr</code></td>
+<td>
+
+<p>Maximum increment
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>incr_fac</code></td>
+<td>
+<p>Factor for shrinking increments from <code>max_incr</code>
+in every iteration</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter_update</code></td>
+<td>
+
+<p>Maximum number of iterations for parameter updates
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter_line_search</code></td>
+<td>
+<p>Maximum number of iterations within line search</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conv_update</code></td>
+<td>
+
+<p>Convergence criterion for updates
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>Logical indicating whether convergence progress should be displayed
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>use_Rcpp</code></td>
+<td>
+
+<p>Logical indicating whether <span class="pkg">Rcpp</span> package should be used
+for computation.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shortcut</code></td>
+<td>
+<p>Logical indicating whether a computational shortcut should be used
+for efficiency reasons</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>Object of class <code>immer_jml</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>Number of digits after decimal to print</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>Name of a file in which the output should be sunk</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta</code></td>
+<td>
+<p>Grid of <code class="reqn">\theta</code> values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments to be passed.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function uses the partial credit model as
+<code class="reqn">P(X_i=h | \theta ) \propto \exp( h \theta - b_{ih} )</code> with
+<code class="reqn">b_{ih}=\sum_l a_{ihl} \xi_l</code> where the values <code class="reqn">a_{ihl}</code>
+are included in the design matrix <code>A</code> and <code class="reqn">\xi_l</code> denotes
+basis item parameters.
+</p>
+<p>The adjustment parameter <code class="reqn">\varepsilon</code> is applied to the sum score
+as the sufficient statistic for the person parameter. In more detail,
+extreme scores <code class="reqn">S_p=0</code> (minimum score) or <code class="reqn">S_p=M_p</code> (maximum score)
+are adjusted to <code class="reqn">S_p^\ast=\varepsilon</code> or <code class="reqn">S_p^\ast=M_p - \varepsilon</code>,
+respectively. Therefore, the adjustment possesses more influence on
+parameter estimation for datasets with a small number of items.
+</p>
+
+
+<h3>Value</h3>
+
+<p>List with following entries
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>Item parameters <code class="reqn">b_{ih}</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta</code></td>
+<td>
+<p>Person parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta_se</code></td>
+<td>
+<p>Standard errors for person parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xsi</code></td>
+<td>
+<p>Basis parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xsi_se</code></td>
+<td>
+<p>Standard errors for bias parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probs</code></td>
+<td>
+<p>Predicted item response probabilities</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>person</code></td>
+<td>
+<p>Data frame with person scores</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dat_score</code></td>
+<td>
+<p>Scoring matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>score_pers</code></td>
+<td>
+<p>Sufficient statistics for persons</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>score_items</code></td>
+<td>
+<p>Sufficient statistics for items</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loglike</code></td>
+<td>
+<p>Log-likelihood value</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Bertoli-Barsotti, L., Lando, T., &amp; Punzo, A. (2014). Estimating a Rasch Model via
+fuzzy empirical probability functions. In D. Vicari, A. Okada, G. Ragozini &amp;
+C. Weihs (Eds.).
+<em>Analysis and Modeling of Complex Data in Behavioral and Social Sciences</em>,
+Springer.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See <code>TAM::tam.jml</code> for
+joint maximum likelihood estimation. The <code class="reqn">varepsilon</code>-adjustment
+is also implemented in <code>sirt::mle.pcm.group</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#############################################################################
+# EXAMPLE 1: Rasch model
+#############################################################################
+
+data(data.read, package="sirt")
+dat &lt;- data.read
+
+#---  Model 1: Rasch model with JML and epsilon-adjustment
+mod1a &lt;- immer::immer_jml(dat)
+summary(mod1a)
+
+## Not run: 
+#- JML estimation, only handling extreme scores
+mod1b &lt;- immer::immer_jml( dat, est_method="jml")
+summary(mod1b)
+
+#- JML estimation with (I-1)/I bias correction
+mod1c &lt;- immer::immer_jml( dat, est_method="jml_bc" )
+summary(mod1c)
+
+# compare different estimators
+round( cbind( eps=mod1a$xsi, JML=mod1b$xsi, BC=mod1c$xsi ), 2 )
+
+#---  Model 2: LLTM by defining a design matrix for item difficulties
+A &lt;- array(0, dim=c(12,1,3) )
+A[1:4,1,1] &lt;- 1
+A[5:8,1,2] &lt;- 1
+A[9:12,1,3] &lt;- 1
+
+mod2 &lt;- immer::immer_jml(dat, A=A)
+summary(mod2)
+
+#############################################################################
+# EXAMPLE 2: Partial credit model
+#############################################################################
+
+library(TAM)
+data(data.gpcm, package="TAM")
+dat &lt;- data.gpcm
+
+#-- JML estimation in TAM
+mod0 &lt;- TAM::tam.jml(resp=dat, bias=FALSE)
+summary(mod0)
+
+# extract design matrix
+A &lt;- mod0$A
+A &lt;- A[,-1,]
+
+#-- JML estimation
+mod1 &lt;- immer::immer_jml(dat, A=A, est_method="jml")
+summary(mod1)
+
+#-- JML estimation with epsilon-adjusted bias correction
+mod2 &lt;- immer::immer_jml(dat, A=A, est_method="eps_adj")
+summary(mod2)
+
+#############################################################################
+# EXAMPLE 3: Rating scale model with raters | Use design matrix from TAM
+#############################################################################
+
+data(data.ratings1, package="sirt")
+dat &lt;- data.ratings1
+
+facets &lt;- dat[,"rater", drop=FALSE]
+resp &lt;- dat[,paste0("k",1:5)]
+
+#* Model 1: Rating scale model in TAM
+formulaA &lt;- ~ item + rater + step
+mod1 &lt;- TAM::tam.mml.mfr(resp=resp, facets=facets, formulaA=formulaA,
+                pid=dat$idstud)
+summary(mod1)
+
+#* Model 2: Same model estimated with JML
+resp0 &lt;- mod1$resp
+A0 &lt;- mod1$A[,-1,]
+mod2 &lt;- immer::immer_jml(dat=resp0, A=A0, est_method="eps_adj")
+summary(mod2)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

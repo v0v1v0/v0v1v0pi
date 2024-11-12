@@ -1,0 +1,98 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getIPD</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Reconstruct individual patient data (IPD) from Scanned Kaplan-Meier(K-M) curves</h2>
+
+<h3>Description</h3>
+
+<p>After the raw dataset is processed using the <code>preprocess</code> function, we can use the <code>getIPD()</code> function to reconstruct the IPD.
+Here the total number of events (tot.events) is an optional input; and the treatment arm can be arbitrarily assigned to label the
+patients' treatment group (Typically, 0 for the control group, and 1 for the treatment group). <br><br>
+The output is the reconstructed IPD in the form of a three-column table (i.e.,time, patient status, and treatment group ID). <br><br>
+In addition, in order to evaluate the accuracy of our reconstruction process, we will calculate the survival probabilities at each read-in time points
+based on the reconstructed IPD, then compare them with the corresponding read-in survival probabilities. The test statistics are also included in the
+output.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getIPD(prep,armID=1,tot.events=NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>prep</code></td>
+<td>
+<p>the class object returned from the <code>preprocess()</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>armID</code></td>
+<td>
+<p>the arbitrary lable used as the group indicator for the reconstructed IPD. Typically 0 for the control group and 1 for the treatment group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tot.events</code></td>
+<td>
+<p>the total number of events. This may not be available for some published curves, thus this input is optional.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>getIPD()</code> returns a list object, including four items as follows. <br><br>
+IPD:  the estimated individual patient in a three-column table (i.e.time, status, and treatment group indicator).  <br><br>
+Points:   the data frame shows estimations of parameters at each read-in time points. <br><br>
+riskmat:  the data frame shows index of read-in points within each time interval, as well as the estimated numbers of censored patients and events within each time interval.<br><br>
+kstest:   the test statistics and p value of Kolmogorov-Smirnov test when comparing the distributions of estimated and read-in K-M curves. The null hypothesis is the read-in and estimated survival probabilities are from the same distribution.<br><br>
+precision:   a list shows the root mean squre error(RMSE), mean absolute error and max absolute error which measure the differences between the estimated and read-in survival probabilities. <br><br>
+endpts:  the number of patients remaining at the end of trial.<br><br></p>
+
+
+<h3>References</h3>
+
+<p>Guyot P, Ades AE, Ouwens MJ, Welton NJ. Enhanced secondary analysis of survival data: reconstructing the data from published Kaplan-Meier survival curves. BMC Med Res Methodol.2012; 1:9.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Radiationdata$radio is a dataset exported from ScanIt software ================
+radio &lt;- Radiationdata$radio
+
+# Load time points when the patients numbers =======
+# at risk reported (i.e. trisk in month) =========
+trisk &lt;- Radiationdata$trisk
+
+# Load the numbers of patients at risk reported (i.e. nrisk) ======
+# at the time points (trisk) ========
+nrisk.radio &lt;- Radiationdata$nrisk.radio
+
+# Use the trisk and nrisk as input for preprocess and reconstruction ============
+pre_radio_1 &lt;- preprocess(dat=Radiationdata$radio, trisk=trisk,
+             nrisk=nrisk.radio,totalpts=NULL,maxy=100)
+est_radio_1 &lt;- getIPD(prep=pre_radio_1,armID=0,tot.events=NULL)
+
+# Output include reconstructed individual patients data =========================
+head(est_radio_1$IPD)
+
+# When trisk and nrisk were not available, then we must input ====================
+# the initial number of patients   ===============================================
+pre_radio_2 &lt;- preprocess(dat=Radiationdata$radio, totalpts=213,maxy=100)
+est_radio_2 &lt;- getIPD(prep=pre_radio_2,armID=0,tot.events=NULL)
+
+# Output include reconstructed individual patients data ==========================
+head(est_radio_2$IPD)
+</code></pre>
+
+
+</div>

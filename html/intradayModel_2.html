@@ -1,0 +1,129 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>decompose_volume</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Decompose Intraday Volume into Several Components</h2>
+
+<h3>Description</h3>
+
+<p>This function decomposes the intraday volume into daily, seasonal, and intraday dynamic components according to (Chen et al., 2016).
+If <code>purpose = “analysis”</code> (aka Kalman smoothing), the optimal components are conditioned on both the past and future observations.
+Its mathematical expression is <code class="reqn">\hat{x}_{\tau} = E[x_{\tau}|\{y_{j}\}_{j=1}^{M}]</code>,
+where <code class="reqn">M</code> is the total number of bins in the dataset.
+</p>
+<p>If <code>purpose = “forecast”</code> (aka Kalman forecasting), the optimal components are conditioned on only the past observations.
+Its mathematical expression is <code class="reqn">\hat{x}_{\tau+1} = E[x_{\tau+1}|\{y_{j}\}_{j=1}^{\tau}]</code>.
+</p>
+<p>Three measures are used to evaluate the model performance:
+</p>
+<ul>
+<li>
+<p>Mean absolute error (MAE):
+<code class="reqn">\frac{1}{M}\sum_{\tau=1}^M|\hat{y}_{\tau} - y_{\tau}|</code> ;
+</p>
+</li>
+<li>
+<p>Mean absolute percent error (MAPE):
+<code class="reqn">\frac{1}{M}\sum_{\tau=1}^M\frac{|\hat{y}_{\tau} - y_{\tau}|}{y_{\tau}}</code> ;
+</p>
+</li>
+<li>
+<p>Root mean square error (RMSE):
+<code class="reqn">\sqrt{\sum_{\tau=1}^M\frac{\left(\hat{y}_{\tau} - y_{\tau}\right)^2}{M}}</code> .
+</p>
+</li>
+</ul>
+<h3>Usage</h3>
+
+<pre><code class="language-R">decompose_volume(purpose, model, data, burn_in_days = 0)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>purpose</code></td>
+<td>
+<p>String <code>"analysis"/"forecast"</code>. Indicates the purpose of using the provided model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A model object of class "<code>volume_model</code>" from <code>fit_volume()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>An n_bin * n_day matrix or an <code>xts</code> object storing intraday volume.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>burn_in_days</code></td>
+<td>
+<p>Number of initial days in the burn-in period for forecast. Samples from the first <code>burn_in_days</code> are used to warm up the model and then are discarded.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list containing the following elements:
+</p>
+
+<ul>
+<li>
+<p><code>original_signal</code>: A vector of original intraday volume;
+</p>
+</li>
+<li>
+<p><code>smooth_signal</code> / <code>forecast_signal</code>: A vector of smooth/forecast intraday volume;
+</p>
+</li>
+<li>
+<p><code>smooth_components</code> /<code>forecast_components</code>: A list of smooth/forecast components: daily, seasonal, intraday dynamic, and residual components.
+</p>
+</li>
+<li>
+<p><code>error</code>: A list of three error measures: mae, mape, and rmse.
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Shengjie Xiu, Yifan Yu and Daniel P. Palomar
+</p>
+
+
+<h3>References</h3>
+
+<p>Chen, R., Feng, Y., and Palomar, D. (2016). Forecasting intraday trading volume: A Kalman filter approach. Available at SSRN 3101695.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(intradayModel)
+data(volume_aapl)
+volume_aapl_training &lt;- volume_aapl[, 1:20]
+volume_aapl_testing &lt;- volume_aapl[, 21:50]
+model_fit &lt;- fit_volume(volume_aapl_training, fixed_pars = list(a_mu = 0.5, var_mu = 0.05),
+                        init_pars = list(a_eta = 0.5))
+
+# analyze training volume
+analysis_result &lt;- decompose_volume(purpose = "analysis", model_fit, volume_aapl_training)
+
+# forecast testing volume
+forecast_result &lt;- decompose_volume(purpose = "forecast", model_fit, volume_aapl_testing)
+
+# forecast testing volume with burn-in
+forecast_result &lt;- decompose_volume(purpose = "forecast", model_fit, volume_aapl[, 1:50],
+                             burn_in_days = 20)
+
+</code></pre>
+
+
+</div>

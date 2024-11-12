@@ -1,0 +1,80 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>txtn</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Comparison of tx an tn data (for "non-blended" ECA&amp;D data)</h2>
+
+<h3>Description</h3>
+
+<p>This function compares tx an tn data. First it looks for the closest station and then merges both
+data frames. If one value is flagged, looks at the ecdfs of tx and tn. If the target variable (e.g tx) is central
+(between quantiles 0.2 and 0.8) and the other variable (e.g. tn) is outside this range, the value is not flagged,
+assuming the other variable is the culprit
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">txtn(y, id)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>two columns with date and data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>name of a file ("xx_SOUIDxxxxxx.txt", non-blended) we are working with</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>list of positions which do not pass this QC test. If all positions pass the test, returns NULL
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#Set a temporal working directory:
+wd &lt;- tempdir(); wd0 &lt;- setwd(wd)
+#Create subdirectory where raw data files have to be located
+dir.create(file.path(wd, "raw"))
+#Extract the non-blended ECA&amp;D data and station files from the example data folder
+path2txlist&lt;-system.file("extdata", "ECA_blend_source_tx.txt", package = "INQC")
+txlist&lt;-readr::read_lines_raw(path2txlist)
+readr::write_lines(txlist,"ECA_blend_source_tx.txt")
+path2txdata&lt;-system.file("extdata", "TX_SOUID132734.txt", package = "INQC")
+txdata&lt;-readr::read_lines_raw(path2txdata)
+readr::write_lines(txdata, file=paste(wd,"/raw/TX_SOUID132734.txt",sep=""))
+path2tnlist&lt;-system.file("extdata", "ECA_blend_source_tn.txt", package = "INQC")
+tnlist&lt;-readr::read_lines_raw(path2tnlist)
+readr::write_lines(tnlist,"ECA_blend_source_tn.txt")
+path2tndata&lt;-system.file("extdata", "TN_SOUID132733.txt", package = "INQC")
+tndata&lt;-readr::read_lines_raw(path2tndata)
+readr::write_lines(tndata, file=paste(wd,"/raw/TN_SOUID132733.txt",sep=""))
+#Read the tn data
+y&lt;-readecad(input=path2tndata,missing= -9999)[,3:4]
+options("homefolder"="./"); options("blend"=FALSE)
+listonator(check=TRUE)
+#Call txtn()
+txtn(y,"TN_SOUID132733.txt")
+#Introduce error values in the tn data
+y[c(1,3),2]&lt;-100
+#Call txtn()
+txtn(y,"TN_SOUID132733.txt")
+#Return to user's working directory:
+setwd(wd0)
+</code></pre>
+
+
+</div>

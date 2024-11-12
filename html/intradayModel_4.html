@@ -1,0 +1,98 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>forecast_volume</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Forecast One-bin-ahead Intraday Volume</h2>
+
+<h3>Description</h3>
+
+<p>This function forecasts one-bin-ahead intraday volume.
+Its mathematical expression is <code class="reqn">\hat{y}_{\tau+1} = E[y_{\tau+1}|\{y_{j}\}_{j=1}^{\tau}]</code>.
+It is a wrapper of <code>decompose_volume()</code> with <code>purpose = "forecast"</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">forecast_volume(model, data, burn_in_days = 0)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A model object of class "<code>volume_model</code>" from <code>fit_volume()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>An n_bin * n_day matrix or an <code>xts</code> object storing intraday volume.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>burn_in_days</code></td>
+<td>
+<p>Number of initial days in the burn-in period. Samples from the first <code>burn_in_days</code> are used to warm up the model and then are discarded.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list containing the following elements:
+</p>
+
+<ul>
+<li>
+<p><code>original_signal</code>: A vector of original intraday volume;
+</p>
+</li>
+<li>
+<p><code>forecast_signal</code>: A vector of forecast intraday volume;
+</p>
+</li>
+<li>
+<p><code>forecast_components</code>: A list of the three forecast components: daily, seasonal, intraday dynamic, and residual components.
+</p>
+</li>
+<li>
+<p><code>error</code>: A list of three error measures: mae, mape, and rmse.
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Shengjie Xiu, Yifan Yu and Daniel P. Palomar
+</p>
+
+
+<h3>References</h3>
+
+<p>Chen, R., Feng, Y., and Palomar, D. (2016). Forecasting intraday trading volume: A Kalman filter approach. Available at SSRN 3101695.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(intradayModel)
+data(volume_aapl)
+volume_aapl_training &lt;- volume_aapl[, 1:20]
+volume_aapl_testing &lt;- volume_aapl[, 21:50]
+model_fit &lt;- fit_volume(volume_aapl_training, fixed_pars = list(a_mu = 0.5, var_mu = 0.05),
+                        init_pars = list(a_eta = 0.5))
+                        
+# forecast testing volume
+forecast_result &lt;- forecast_volume(model_fit, volume_aapl_testing)
+
+# forecast testing volume with burn-in
+forecast_result &lt;- forecast_volume(model_fit, volume_aapl[, 1:50], burn_in_days = 20)
+
+</code></pre>
+
+
+</div>

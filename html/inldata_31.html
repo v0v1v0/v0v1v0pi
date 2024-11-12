@@ -1,0 +1,133 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>make_data_release</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create Data Release</h2>
+
+<h3>Description</h3>
+
+<p>Create U.S. Geological Survey (USGS) data release product
+from R-package datasets and their documentation.
+Requires that the <span class="pkg">xml2</span> and <span class="pkg">jsonlite</span> packages are available.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">make_data_release(
+  metadata,
+  package,
+  destdir = getwd(),
+  ...,
+  bounding = NULL,
+  rngdates = NULL,
+  validate = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>metadata</code></td>
+<td>
+<p>'character' string or named 'list'.
+Either the path to a JSON formatted metadata file that contains general information
+for the USGS data release (see <em>Examples</em> section),
+or a named list with the equivalent information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>package</code></td>
+<td>
+<p>'character' string.
+Name of a package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>destdir</code></td>
+<td>
+<p>'character' string.
+Destination directory to write files, with tilde-expansion performed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments to be passed to the <code>write_datasets</code> function.
+The <code>formats</code> argument, which is specified within the function, is the exception.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bounding</code></td>
+<td>
+<p>'bbox', 'sf', 'SpatRaster', or 'PackedSpatRaster' spatial feature.
+Object to compute spatial bounding coordinates from, see <code>sf::st_bbox</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rngdates</code></td>
+<td>
+<p>'Date' or 'POSIXct' vector.
+Object to compute the date range of observations from.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>validate</code></td>
+<td>
+<p>'logical' flag.
+Whether to perform a metadata validation and stop execution if errors are found.
+See <code>validate_metadata</code> function for system requirements.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Citation entries for the <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> package (software release) and accompanying data release
+should be included in the package CITATION file, and documented in that order.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Named list of metadata created for spatial and non-spatial datasets.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>J.C. Fisher, U.S. Geological Survey, Idaho Water Science Center
+</p>
+<p>A.R. Trcka, U.S. Geological Survey, Idaho Water Science Center
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>parse_rd_db</code> function for reading and parsing R-package documentation.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">destdir &lt;- tempfile("")
+rngdates &lt;- c(samples$sample_dt, gwl$lev_dt) |&gt; range()
+l &lt;- make_data_release(
+  metadata = system.file("extdata/metadata.json", package = "inldata"),
+  package = "inldata",
+  destdir = destdir,
+  include = "crs",
+  quiet = TRUE,
+  bounding = sites,
+  rngdates = rngdates
+)
+str(l, 1)
+
+unlink(destdir, recursive = TRUE)
+</code></pre>
+
+
+</div>

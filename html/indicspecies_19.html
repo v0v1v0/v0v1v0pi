@@ -1,0 +1,197 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plotniche</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Draws a single resource niche</h2>
+
+<h3>Description</h3>
+
+<p>Function <code>plotniche</code> draws a resource niche on the resource space computed by means of principal coordinates analysis. Resource relationships are given in distance matrix <code>D</code>, the species resource use is given in <code>P</code> and the availability of resources is given by vector <code>q</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">plotniche(
+  P,
+  D = NULL,
+  q = NULL,
+  mode = "multiple",
+  Np = NULL,
+  Nq = NULL,
+  nboot = 1000,
+  alpha = 0.05,
+  species = NULL,
+  axes = c(1, 2),
+  chull = TRUE,
+  bubbles = TRUE,
+  writeName = FALSE,
+  add = FALSE,
+  col = "black",
+  lty = 1,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>P</code></td>
+<td>
+<p>Data frame containing the relative or absolute usage that a set of species (in rows) make of a set of resources (in columns).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>Object of type <code>dist</code> containing distance values between resources. If no distance matrix is provided (i.e. if <code>D==NULL</code>), the distances between resources is assumed to be maximum.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>Vector with the availability of each resource.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mode</code></td>
+<td>
+<p>Either <code>mode = "single"</code> (rows of matrix P are individual observations to be pooled for a single niche) or <code>mode = "multiple"</code> (rows in P represent different niches).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Np</code></td>
+<td>
+<p>Vector with the number of observations per species from which the values in <code>P</code> come (in <code>mode = "multiple"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Nq</code></td>
+<td>
+<p>The number of observations per species from which the values in <code>q</code> come.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nboot</code></td>
+<td>
+<p>Number of boostrap samples used to compute bias-corrected percentile confidence intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>Used to set the confidence level (i.e. <code>alpha = 0.05</code> means 95 percent confidence interval).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>species</code></td>
+<td>
+<p>Specifies which species niche is to be plot. This parameter is mandatory and can be either an numeric index or a string for a species name.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>axes</code></td>
+<td>
+<p>PCoA axes used for plotting.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>chull</code></td>
+<td>
+<p>Logical flag indicating whether or not convex hulls should be drawn (only in <code>type="single"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bubbles</code></td>
+<td>
+<p>Logical flag to draws bubbles proportional to resource preference data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>writeName</code></td>
+<td>
+<p>Logical flag indicating whether or not the name of the species should be drawn beside the centroid.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add</code></td>
+<td>
+<p>If <code>TRUE</code>, the current plot is used. This is helpful to draw more than one species on the same plot (see examples).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p>Color of the centroid and confidence interval arrows.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lty</code></td>
+<td>
+<p>Line type of the confidence interval arrows.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional graphical parameters.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The method is described in De Caceres et al. (in prep). If the distance matrix is not specified (i.e. if <code>D=NULL</code>) the function assumes that all resources are at a maximum distance (<code>d=1</code>). If the resource availability vector <code>q</code> is given then the values in <code>P</code> are taken as assessments of resource use and the species preference is calculated taking into account resource availability. Otherwise resource use is equated to resource preference. The function can also plot bootstrap confidence intervals following the bias-corrected percentile method (Manly 2007). If If <code>mode = "multiple"</code> and <code>Np != NULL</code>, bootstrap samples for a given species are generated assuming a multinomial distribution with the proportions calculated from the corresponding row values in <code>P</code>, and the number of observations comes from the corresponding element in <code>Np</code>. If <code>mode = "single"</code> then the bootstrapped units are the rows of matrix <code>P</code>. In both cases, if <code>Nq</code> is indicated, the availability of resources is also bootstrapped. The bias-corrected percentile method was described for overlap niche measures in Mueller and Altenberg (1985) and is extended here for all niche metrics except <code>nichearea</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Miquel De Caceres Ainsa, EMF-CREAF
+</p>
+
+
+<h3>References</h3>
+
+<p>Mueller, L.D. and L. Altenberg. 1985. Statistical Inference on Measures of Niche Overlap. Ecology 66:1204-1210.
+</p>
+<p>Manly, B.F.J. 2007. Randomization, bootstrap and Monte Carlo methods in biology. Chapman and Hall texts in statistical science series. 2nd edition.
+</p>
+<p>De Caceres, M., Sol, D., Lapiedra, O. and P. Legendre. (2011) A framework for estimating niche metrics using the resemblance between qualitative resources. Oikos 120: 1341-1350.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See <code>nichevar</code> and <code>nicheoverlap</code> to obtain a resource niche metrics.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Loads example data
+data(birds)
+
+plotniche(birdsbreed, D = resourceD, mode="multiple", species=10) 
+plotniche(birdsbreed, D = resourceD, mode="multiple", 
+          Np = rowSums(birdsbreed), Nq = 100, species=10) 
+plotniche(birdsbreed, D = resourceD, 
+          q = c(0.18, 0.24, 0.22, 0.21, 0.15), mode="multiple", species=10)
+plotniche(birdsbreed, D = resourceD, 
+          q = c(0.18, 0.24, 0.22, 0.21, 0.15), mode="multiple", 
+          Np = rowSums(birdsbreed), Nq = 100, species=10)
+
+#draw two species
+plotniche(birdsbreed, D = resourceD, mode="multiple", 
+          Np = rowSums(birdsbreed), Nq = 100, species=10, writeName=TRUE, 
+          bubbles=FALSE, chull=FALSE) 
+plotniche(birdsbreed, D = resourceD,  mode="multiple", 
+          Np = rowSums(birdsbreed), Nq = 100, species=1, writeName=TRUE, 
+          bubbles=FALSE, chull=FALSE, add=TRUE, col="red", lty=2) 
+</code></pre>
+
+
+</div>

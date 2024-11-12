@@ -1,0 +1,114 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.SLik_j</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Evaluate log-likelihood for given parameters
+</h2>
+
+<h3>Description</h3>
+
+<p>As the Title says. As likelihood is obtained as a prediction from a statistical model for the likelihood surface, this has been implemented as a method of the <code>predict</code> generic, for objects created by the up-to-date workflow using gaussian mixture modelling of a joint distribution of parameters and statistics. Hence, it has a <code>newdata</code> argument, as shared by many <code>predict</code> methods; but these <code>newdata</code> should be parameter values, not data). You can use the alternative <code>summLik</code> extractor if you do not like this syntax.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'SLik_j'
+predict(
+  object, newdata, log = TRUE, which = "safe", 
+  tstat = t(get_from(object,"stat.obs")), 
+  solve_t_chol_sigma_lists = object$clu_params$solve_t_chol_sigma_lists, 
+  constr_tuning= FALSE,
+  ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>an object of class <code>SLik_j</code>, as produced by <code>infer_SLik_joint</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+
+<p>A matrix, whose rows each contain a full vector of the fitted parameters; or a single vector. If parameter names are not provided (as column names in the matrix case), then the vector is assumed to be ordered as <code>object$colTypes$fittedPars</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+
+<p>Boolean: whether to return log-likelihood or likelihood.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>which</code></td>
+<td>
+
+<p><code>"safe"</code> or <code>"lik"</code>. The default protects against some artefacts of extrapolation: see Details. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tstat</code></td>
+<td>
+
+<p>The data (as projected summary statistics). Defaults to the data input in the inference procedure (i.e., the projected statistics used as <code>stat.obs</code> argument of <code>infer_SLik_joint</code>). 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>solve_t_chol_sigma_lists</code></td>
+<td>
+<p>For programming purposes. Do not change this argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constr_tuning</code></td>
+<td>
+<p>positive number, or FALSE: controls the effect of parameter constraints specified by the <code>constr_crits</code> argument of <code>infer_SLik_joint</code> on the evaluation of summary log-likelihood. When it is <code>FALSE</code> (or 0), no penalty is applied; when this is <code>Inf</code>, the log-likelihood of parameters violating constraints will be <code>-Inf</code>. Intermediate values allow an intermediate penalization (the source code should be consulted for further details), but their use is not recommended. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>For consistency with the generic. Currently ignored.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>An  object of class <code>SLik_j</code> contains a simulated joint distribution of parameters and (projected) summary statistics, and a fit of a multivariate gaussian mixture model to this simulated distribution, the “jointdens”, from which a marginal density “pardens” of parameters can be deduced. The raw likelihood(P;D) is the probability of the data D given the parameters P, viewed as function the parameters and for fixed data. It is inferred as jointdens(D,P)/pardens(P) (for different P, each of jointdens and pardens are probabilities from a single (multivariate) gaussian mixture model, but this is not so for their ratio). 
+</p>
+<p>When pardens(P) is low, indicating that the region of parameter space around P has been poorly sampled in the reference table, inference of likelihood in such regions is unreliable. Spuriously high likelihood may be inferred, which results notably in poor inference based on likelihood ratios. For this reason, it is often better to use the argument  <code>which="safe"</code> whereby the likelihood may be penalized where pardens(P) is low. The penalization is applied to cases where the uncorrected likelihood is higher than the maximum one in the reference table, and pardens(P) is lower than a threshold also determined from the reference table. The source code should be consulted for further details.  
+</p>
+
+
+<h3>Value</h3>
+
+<p>Numeric: a single value, or a vector of (log-)likelihoods for different rows of the input <code>newdata</code>. When <code>which="safe"</code>, a <code>"lowdens"</code> attribute will be added when at least on parameter points had a low “pardens” (see Details).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## see help("example_reftable")
+</code></pre>
+
+
+</div>

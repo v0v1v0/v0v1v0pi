@@ -1,0 +1,142 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_all_performance_boot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Function to evaluate different nan imputation methods with bootstrap</h2>
+
+<h3>Description</h3>
+
+<p>The get_all_performance_boot function is designed to evaluate different
+methods of imputing missing values into a dataset. The evaluation is
+performed using bootstrapping to ensure robustness of the results
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_all_performance_boot(data, to_impute, regressors, nb = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>dataframe with rows = observations and columns = quantitative
+variables</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>to_impute</code></td>
+<td>
+<p>string , name of the variables where there are NANs to
+impute</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>regressors</code></td>
+<td>
+<p>vector of string with names of the variables to use to
+apply 1st, 4th imputation method</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nb</code></td>
+<td>
+<p>number of bootstrap samples</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function calculates performance metrics, such as:
+</p>
+<p>- <code class="reqn"> R^2= [1/N * [({\sum_{i=1}^N(P_i - (\bar{P})(O_i -
+(\bar{O})]/\sigma_{P}*\sigma_{O}]^2}</code>,
+</p>
+<p>- <code class="reqn">RMSE= (1/N * ({\sum_{i=1}^N(P_i - O_i)^2)^{1/2}}</code>
+</p>
+<p>and
+</p>
+<p>- <code class="reqn">MAE = 1/N * {\sum_{i=1}^N|{P_i - O_i}|}</code>
+</p>
+<p>for each imputation method
+</p>
+<p>Supported Imputation Methods:
+</p>
+<p>1. Linear Regression Imputation (lm_imputation): it uses a linear regression
+model to predict and impute missing values
+</p>
+<p>2. Median Imputation (median_imputation): it replaces missing values with the
+median of observed values
+</p>
+<p>3. Mean Imputation (mean_imputation): it replaces missing values with the mean
+of observed values
+</p>
+<p>4. Hot Deck Imputation (hot_deck_imputation): it replaces missing values with
+similar observed values
+</p>
+<p>5. Expectation-Maximization Imputation (EM_imputation): it uses the
+Expectation-Maximization algorithm to estimate and impute missing values
+</p>
+<p>Evaluate different methods of imputing missing values using bootstrapping
+and calculate performance metrics for each method
+</p>
+
+
+<h3>Value</h3>
+
+<p>It returns a performance measures dataframe with rows = methods
+and columns = methods' performances averaged over bootstraps.
+</p>
+
+
+<h3>Note</h3>
+
+<p>For the methods Median Imputation and Mean Imputation, it is not
+possible to calculate the R^2 value.  This is because the standard deviation
+is zero based on the following R^2 formula:
+</p>
+<p><code class="reqn"> R^2= [1/N * [({\sum_{i=1}^N(P_i - (\bar{P})(O_i -
+(\bar{O})]/\sigma_{P}*\sigma_{O}]^2}</code>
+</p>
+<p>where:
+</p>
+<p>- <code class="reqn">N</code> is the number of imputations,
+</p>
+<p>- <code class="reqn">O_i</code> are the observed data point,
+</p>
+<p>- <code class="reqn">P_i</code> are the imputed data point,
+</p>
+<p>- <code class="reqn">\bar{O}</code> are the average of the observed data,
+</p>
+<p>- <code class="reqn">\bar{P}</code> are the average of the imputed data,
+</p>
+<p>- <code class="reqn">\sigma_{P}</code> are the standard deviation of the imputed data,
+</p>
+<p>- <code class="reqn">\sigma_{O}</code> are the standard deviation of the observed data.
+</p>
+
+
+<h3>References</h3>
+
+<p>OECD/European Union/EC-JRC (2008), Handbook on Constructing
+Composite Indicators: Methodology and User Guide, OECD Publishing, Paris,
+&lt;https://doi.org/10.1787/9789264043466-en&gt;
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("airquality")
+regressors&lt;-colnames(airquality[,c(3,4)])
+suppressWarnings(get_all_performance_boot(data =airquality,"Ozone",regressors = regressors,nb=100))
+
+</code></pre>
+
+
+</div>

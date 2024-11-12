@@ -1,0 +1,112 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>calc_irg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>IRG</h2>
+
+<h3>Description</h3>
+
+<p>Calculate the instantaneous rate of green-up.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">calc_irg(DT, id = "id", year = "yr", scaled = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>DT</code></td>
+<td>
+<p>data.table of model parameters (output from model_params).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>id column. default is 'id'. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>year</code></td>
+<td>
+<p>year column name. default is 'yr'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scaled</code></td>
+<td>
+<p>boolean indicating if irg should be rescaled between 0-1 within id and year. If TRUE, provide id and year. Default is TRUE.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The DT argument expects a data.table of model estimated parameters for double logistic function of NDVI for each year and individual. Since it is the rate of green-up, model parameters required are only xmidS and scalS.
+</p>
+<p>The scaled argument is used to optionally rescale the IRG result to 0-1, for each year and individual.
+</p>
+<p>The id argument is used to split between sampling units. This may be a point id, polygon id, pixel id, etc. depending on your analysis. This should match the id provided to filtering functions.
+The formula used is described in Bischoff et al. (2012):
+</p>
+<p style="text-align: center;"><code class="reqn">IRG = (exp((t + xmidS) / scalS)) / (2 * scalS * (exp(1) ^ ((t + xmidS) / scalS)) + (scalS * (exp(1) ^ ((2 * t) / scalS))) + (scalS * exp(1) ^ ((2 * xmidS) / scalS)))</code>
+</p>
+
+<p>(See the "Getting started with irg vignette" for a better formatted formula.)
+</p>
+
+
+<h3>Value</h3>
+
+<p>Extended data.table 'irg' column of instantaneous rate of green-up calculated for each day of the year, for each individual and year.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other irg: 
+<code>irg()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Load data.table
+library(data.table)
+
+# Read in example data
+ndvi &lt;- fread(system.file("extdata", "sampled-ndvi-MODIS-MOD13Q1.csv", package = "irg"))
+
+# Filter and scale NDVI time series
+filter_ndvi(ndvi)
+scale_doy(ndvi)
+scale_ndvi(ndvi)
+
+# Guess starting parameters
+model_start(ndvi)
+
+# Double logistic model parameters given starting parameters for nls
+mods &lt;- model_params(
+  ndvi,
+  return = 'models',
+  xmidS = 'xmidS_start',
+  xmidA = 'xmidA_start',
+  scalS = 0.05,
+  scalA = 0.01
+)
+
+# Fit double logistic curve to NDVI time series
+fit &lt;- model_ndvi(mods, observed = FALSE)
+
+# Calculate IRG for each day of the year
+calc_irg(fit)
+</code></pre>
+
+
+</div>

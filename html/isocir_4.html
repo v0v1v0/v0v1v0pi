@@ -1,0 +1,140 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>CIRE</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Circular Isotonic Regresssion Estimator</h2>
+
+<h3>Description</h3>
+
+<p>This function obtains the Circular Isotonic Regression Estimator (CIRE) of a set of data assuming an order among them.  See details for a full explanation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">CIRE (data, groups=NULL, circular = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>vector or matrix of data to be processed.  See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groups</code></td>
+<td>
+<p>a numeric vector representing the assumed order of data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>circular</code></td>
+<td>
+<p>logical,  by default <code>TRUE</code> is the order wrapped around the circle (circular order). If <code>FALSE</code> the order is not closed.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>It uses the algorithm developed in Rueda et al (2009).  The final solution is found in a computationally efficient way by searching for the feasible solution with the smallest SCE, see <code>sce</code>.  The order can be chosen by the user and is set using the <code>groups</code> argument. The order is defined in <code>groups</code> by a numeric vector with the positions in the order of each element.  An example of order would be the simple circular order, defined by the set <code class="reqn">C_{sco}</code>.
+</p>
+<p style="text-align: center;"><code class="reqn"> C_{sco}=\{\phi=(\phi_1,\phi_2,\ldots,\phi_q)\in
+[0,2\pi]^q:\phi_{1}\leq\phi_{2}\leq\ldots\leq\phi_{q}\leq\phi_{1}\}
+ </code>
+</p>
+
+<p>This order is wrapped around the circle.  However, if the user wants the order not to be wrapped, then <code>circular = FALSE</code> and the order would be the simple order, for instance:
+</p>
+<p style="text-align: center;"><code class="reqn"> C_{so}=\{\phi=(\phi_1,\phi_2,\ldots,\phi_q)\in
+[0,2\pi]^q:0\leq\phi_{1}\leq\phi_{2}\leq\ldots\leq\phi_{q}\leq 2\pi\}
+ </code>
+</p>
+
+<p>For further information see the vignette of this package <b>isocir</b>.
+</p>
+<p>The argument <code>data</code> is a vector with the unrestricted circular means or a matrix whose columns are the replications of the data and the rows are the populations.  All the values must belong to the interval <code class="reqn">[0,2\pi]</code>.  
+</p>
+<p>The argument <code>groups</code> is a numeric vector with length equal to the number of populations, <em>q</em>. Each value of the argument establishes the level of the order the corresponding population is assigned to.  The default value is the sequence corresponding to the simple order (1, 2, ..., q), circular if <code>closed=TRUE</code>.  Notice that no particular order is assumed among the populations belonging to the same level set.
+</p>
+
+
+<h3>Value</h3>
+
+<p>It returns an S3 object of class <code>isocir</code> that is a list with the next elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>cirmeans</code></td>
+<td>
+<p>A list with the unrestricted circular means in the same form as the order introduced by <code>groups</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SCE</code></td>
+<td>
+<p>Sum of Circular Errors of the final CIRE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CIRE</code></td>
+<td>
+<p>A list with the ordered estimations, the result of the algorithm that obtained the CIRE.</p>
+</td>
+</tr>
+</table>
+<p>The Circular Isotonic Regression Estimator is returned as a list just to see the groups of the order. In case you would like to use it as a vector just run: <code>unlist(object$CIRE)</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Author(s):  Sandra Barragán based on the SAS routines written by Miguel A. Fernández.  Maintainer:  &lt;sandra.barragan@gmail.com&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Mardia, K. and Jupp, P. (2000).
+<em>Directional Statistics</em>, Chichester: Wiley.
+</p>
+<p>Rueda, C., Fernandez, M. A. and Peddada, S. D. (2009).
+Estimation of parameters subject to order restrictions on a circle with application to estimation of phase angles of cell-cycle genes.
+<em>Journal of the American Statistical Association</em>, <b>104</b>, n485; pp 338–347. <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2742472/">https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2742472/</a>
+</p>
+<p>Fernandez, M. A., Rueda, C. and Peddada, S. D. (2012).
+Identification of a core set of signature cell cycle genes whose relative order of time to peak expression is conserved across
+species, <em>Nucl. Acids Res.</em> <b>40</b>, n7: pp 2823–2832. doi:10.1093/nar/gkr1077.
+<a href="https://academic.oup.com/nar/article/40/7/2823/1183140">https://academic.oup.com/nar/article/40/7/2823/1183140</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>sce</code>, <code>cond.test</code>, <code>mrl</code>, <code>isocir</code>, <code>plot.isocir</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# We consider the following data from the package that are random circular data:
+data(cirdata)
+circular_ordered_estimator &lt;- CIRE(cirdata)
+# We can take the vector of the CIRE estimators:
+circular_ordered_estimator $CIRE
+# And the SCE:
+circular_ordered_estimator $SCE
+
+# Random data with a more complex order:
+CIRE(cirdata, groups=c(1,1,2,3,5,3,4,6))
+
+</code></pre>
+
+
+</div>

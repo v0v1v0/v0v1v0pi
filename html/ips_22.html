@@ -1,0 +1,141 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>eoi</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Identification of Stem-Lineage-Edges and MRCAs</h2>
+
+<h3>Description</h3>
+
+<p><code>noi</code> (<strong>n</strong>ode <strong>o</strong>f <strong>i</strong>nterest)
+identifies the most recent common ancestor (MRCA) and <code>eoi</code>
+(<strong>e</strong>dge <strong>o</strong>f <strong>i</strong>nterest) its subtending stem-lineage
+edge of one or more sets of taxa/tips.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">eoi(phy, node, group, regex = FALSE, stem = FALSE, monophyletic = FALSE)
+
+noi(phy, group, regex = FALSE, stem = FALSE, monophyletic = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>phy</code></td>
+<td>
+<p>An object of class <code>phylo</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>node</code></td>
+<td>
+<p>A vector of mode <code>"numeric"</code> giving the nodes numbers of the nodes whose subtending stem-lineages will be identified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group</code></td>
+<td>
+<p>A vector or list of vectors of mode <code>character</code> specifying
+the taxon set(s). Will be ignored if <code>node</code> is given.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>regex</code></td>
+<td>
+<p>A logical, if <code>regex = TRUE</code>, taxon sets are matched to the
+tip labels as regular expressions of the form <code>"taxon1|taxon2"</code>;
+otherwise strings will be matched exactly (see <code>which</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stem</code></td>
+<td>
+<p>Logical, ...</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>monophyletic</code></td>
+<td>
+<p>Logical, ...</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A vector of mode <code>"numeric"</code> containing node numbers.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>mrca</code>; <code>descendants</code> for the contrary
+operation to <code>noi</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># molecular phylogeny of Ips bark beetles
+# ---------------------------------------
+data(ips.tree)
+ips.tree &lt;- ladderize(ips.tree)
+ips.tree &lt;- fixNodes(ips.tree)
+clade1 &lt;- descendants(ips.tree, 44, labels = TRUE)
+mrca &lt;- noi(ips.tree, clade1)
+stem_lineage &lt;- eoi(ips.tree, mrca)
+ecol &lt;- rep("black", Nedge(ips.tree))
+ecol[stem_lineage] &lt;- "red"
+plot(ips.tree, no.margin = TRUE, edge.color = ecol)
+nodelabels(node = mrca, pch = 22, col = "blue")
+#gen &lt;- sapply(viperidae$tip.label, function(x) unlist(strsplit(x, "_"))[1])
+#tax &lt;- data.frame(genus = gen, species = viperidae$tip.label, row.names = NULL)
+
+# group can be a list
+# -------------------
+#myclades &lt;- split(tax$species, tax$genus)
+#nds &lt;- noi(viperidae, myclades)
+#plot(viperidae)
+#nodeInfo(nds)
+
+# group might contain tip numbers
+# -------------------------------
+#group &lt;- list(c(17, 22), c(13, 1))
+#plot(viperidae)
+#append2tips(phy, tips = unlist(group), pch = 19)
+#nds &lt;- noi(viperidae, myclades)
+#nodeInfo(nds)
+
+# the 'group' argument can also take regular expressions
+# ------------------------------------------------------
+#rex &lt;- "aspis"
+#node &lt;- noi(viperidae, rex, regex = TRUE)
+#plot.phylo(viperidae, tip.color = 0, edge.color = 0)
+#box.clades(viperidae, nodes = node, col = "#D2A6A7", align = "all")
+#plot.phylo.upon(viperidae)
+#nodelabels(node = node, pch = 21, cex = 1.2, col = "red", bg = "#D2A6A7")
+
+# if the 'group' argument is a list of elements of length 2,
+# n = length(group) nodes of interest will be returned
+# ----------------------------------------------------
+#group &lt;- list(
+#    c("Vipera_berus", "Vipera_ursinii"),
+#    c("Vipera_aspis_ssp._aspis", "Vipera_latastei"),
+#    c("Vipera_ammodytes_ssp._ammodytes",
+#        "Vipera_ammodytes_ssp._montandoni"),
+#    c("Macrovipera_lebetina", "Vipera_wagneri")
+#)
+#clades &lt;- noi(viperidae, group)
+#plot.phylo(viperidae, tip.color = 0, edge.color = 0)
+#box.clades(viperidae, nodes = clades, col = c("#FFFFA5", "#D2A6A7",
+#    "#A7D2A5", "#A5A6D2"), align = "all")
+#plot.phylo.upon(viperidae)
+</code></pre>
+
+
+</div>

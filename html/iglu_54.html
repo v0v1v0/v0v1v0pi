@@ -1,0 +1,145 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot_glu</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot time series and lasagna plots of glucose measurements</h2>
+
+<h3>Description</h3>
+
+<p>The function 'plot_glu' supports several plotting methods for both single and multiple
+subject data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">plot_glu(
+  data,
+  plottype = c("tsplot", "lasagna"),
+  datatype = c("all", "average", "single"),
+  lasagnatype = c("unsorted", "timesorted"),
+  LLTR = 70,
+  ULTR = 180,
+  subjects = NULL,
+  inter_gap = 45,
+  tz = "",
+  color_scheme = c("blue-red", "red-orange"),
+  log = F,
+  static_or_gui = c("ggplot", "plotly")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>DataFrame with column names ("id", "time", and "gl").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plottype</code></td>
+<td>
+<p><strong>Default: "tsplot".</strong> One of ('tsplot', 'lasagna'). String corresponding to the desired plot type. Options are
+'tsplot' for a time series plot and 'lasagna' for a lasagna plot. See the ‘lasagnatype' parameter for further options corresponding to the ’lasagna' 'plottype'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>datatype</code></td>
+<td>
+<p>String corresponding to data aggregation used for plotting, currently supported options are 'all' which plots all glucose measurements within the first <code>maxd</code> days for each subject, and 'average' which plots average 24 hour glucose values across days for each subject</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lasagnatype</code></td>
+<td>
+<p>String corresponding to plot type when using <code>datatype = "average"</code>, currently supported options are 'unsorted' for an unsorted lasagna plot, 'timesorted' for a lasagna plot with glucose values sorted within each time point across subjects, and '‘subjectsorted'’ for a lasagna plot with glucose values sorted within each subject across time points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LLTR</code></td>
+<td>
+<p><strong>Default: 70.</strong> Lower Limit of Target Range in mg/dL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ULTR</code></td>
+<td>
+<p><strong>Default: 180.</strong> Upper Limit of Target Range in mg/dL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subjects</code></td>
+<td>
+<p>String or list of strings corresponding to subject names in 'id' column of data. Default is all subjects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inter_gap</code></td>
+<td>
+<p><strong>Default: 45</strong>. The maximum allowable gap (in minutes). Gaps larger than this will not be connected in the time series plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tz</code></td>
+<td>
+<p>A character string specifying the time zone to be used. System-specific (see <code>as.POSIXct</code>), but " " is the current time zone, and "GMT" is UTC (Universal Time, Coordinated). Invalid values are most commonly treated as UTC, on some platforms with a warning.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>color_scheme</code></td>
+<td>
+<p><strong>Default: "blue-red".</strong> String corresponding to the chosen color scheme when the ‘plottype' is ’lasagna'. By default, 'blue-red' scheme is used, with the values below ‘LLTR' colored in shades of blue, and values above 'ULTR' colored in shades of red. The alternative ’red-orange' scheme mimics AGP output from <code>agp</code> with low values colored in red, in-range values colored in green, and high values colored in yellow and orange.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p><strong>Default: FALSE.</strong> Boolean indicating whether 'log10' of glucose values should be taken.
+When 'log = TRUE', the glucose values, LLTR, and ULTR will all be log transformed, and time series plots will
+be on a semilogarithmic scale.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>static_or_gui</code></td>
+<td>
+<p><strong>Default: "ggplot".</strong> One of ("ggplot", "plotly"). Returns either a ggplot (static image) or Plotly chart (interactive GUI).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For the default option 'plottype = tsplot', a time series graph for each subject is
+produced with hypo- and hyperglycemia cutoffs shown as horizontal red lines.
+The time series plots for all subjects chosen (all by default) are displayed
+on a grid.
+</p>
+<p>The 'lasagna' plot type works best when the datatype argument is set to average.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Any output from the plot object
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(example_data_1_subject)
+plot_glu(example_data_1_subject)
+
+data(example_data_5_subject)
+plot_glu(example_data_5_subject, subjects = 'Subject 2')
+plot_glu(example_data_5_subject, plottype = 'tsplot', tz = 'EST', LLTR = 70, ULTR = 150)
+plot_glu(example_data_5_subject, plottype = 'lasagna', lasagnatype = 'timesorted')
+
+</code></pre>
+
+
+</div>

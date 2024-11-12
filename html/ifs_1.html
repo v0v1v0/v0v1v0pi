@@ -1,0 +1,180 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ifs</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+IFS estimator
+</h2>
+
+<h3>Description</h3>
+
+<p>Distribution function estimator based on sample quantiles.  
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ifs(x, p, s, a, k = 5)
+ifs.flex(x, p, s, a, k = 5, f = NULL)
+IFS(y, k = 5, q = 0.5, f = NULL, n = 512, maps = c("quantile", 
+    "wl1", "wl2"))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>where to estimate the distribution function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>the vector of coefficients <code class="reqn">p_i</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s</code></td>
+<td>
+<p>the vector of coefficients <code class="reqn">s_i</code> in: <code class="reqn">w_i = s_i *x + a_i</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+<p>the vector of coefficients <code class="reqn">a_i</code> in: <code class="reqn">w_i = s_i *x + a_i</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>number of iterations, default = 5</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>a vector of sample observations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>the proportion of quantiles to use in the construction of the 
+estimator, default = 0.5. The number of quantiles is the 
+<code>q * length(y)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>f</code></td>
+<td>
+<p>the starting point in the space of distribution functions</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>the number of points in which to calculate the IFS</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maps</code></td>
+<td>
+<p>type of affine maps</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This estimator is intended to estimate the continuous distribution
+function of a random variable on [0,1]. The estimator is a continuous
+function not everywhere differentiable.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The estimated value of the distribution function for <code>ifs</code> and <code>ifs.flex</code> or
+a list of ‘x’ and ‘y’ coordinates of the IFS(x) graph for <code>IFS</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>It is asymptotically as good as the empirical distribution function
+(see Iacus and La Torre, 2001).  
+This function is called by IFS. If you need to call the function
+several times, you should better use <code>ifs</code> providing the
+points and coefficients once instead of <code>IFS</code>.
+Empirical evidence shows that the IFS-estimator is better than the edf (even 
+for very small samples) in the sup-norm metric. It is also better in the MSE
+sense outside of the distribution's tails if the sample quantiles are used
+as points.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>S. M. Iacus</p>
+
+
+<h3>References</h3>
+
+<p>Iacus, S.M, La Torre, D. (2005)
+Approximating distribution functions by iterated function systems, 
+<em>Journal of Applied Mathematics and Decision Sciences</em>,
+1, 33-46.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ecdf</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">require(ifs)
+
+
+y&lt;-rbeta(50,.5,.1)
+
+# uncomment if you want to test the normal distribution
+# y&lt;-sort(rnorm(50,3,1))/6
+
+
+IFS.est &lt;- IFS(y)
+xx &lt;- IFS.est$x
+tt &lt;- IFS.est$y
+
+ss &lt;- pbeta(xx,.5,.1)
+
+# uncomment if you want to test the normal distribution   
+# ss &lt;- pnorm(6*xx-3)
+     
+par(mfrow=c(2,1))   
+  
+plot(ecdf(y),xlim=c(0,1),main="IFS estimator versus EDF")
+lines(xx,ss,col="blue")
+lines(xx,tt,col="red")
+
+
+# calculates MSE
+
+
+ww &lt;- ecdf(y)(xx)
+mean((ww-ss)^2)
+mean((tt-ss)^2)
+
+plot(xx,(ww-ss)^2,main="MSE",type="l",xlab="x",ylab="MSE(x)")
+lines(xx,(tt-ss)^2,col="red")
+</code></pre>
+
+
+</div>

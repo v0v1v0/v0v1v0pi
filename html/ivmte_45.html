@@ -1,0 +1,217 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>gmmEstimate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>GMM estimate of TE under point identification</h2>
+
+<h3>Description</h3>
+
+<p>If the user sets the argument <code>point = TRUE</code> in the function
+<code>ivmte</code>, then it is assumed that the treatment effect
+parameter is point identified. The observational equivalence
+condition is then set up as a two-step GMM problem. Solving this
+GMM problem recovers the coefficients on the MTR functions m0 and
+m1. Combining these coefficients with the target gamma moments
+allows one to estimate the target treatment effect.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">gmmEstimate(
+  sset,
+  gstar0,
+  gstar1,
+  center = NULL,
+  subsetList = NULL,
+  n = NULL,
+  redundant = NULL,
+  identity = FALSE,
+  nMoments,
+  splines,
+  noisy = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>sset</code></td>
+<td>
+<p>a list of lists constructed from the function
+genSSet. Each inner list should include a coefficient
+corresponding to a term in an IV specification, a matrix of the
+estimates of the gamma moments conditional on (X, Z) for the
+control group, and a matrix of the estimates of the gamma
+moments conditional on (X, Z) for the treated group. The column
+means of the last two matrices is what is used to generate the
+gamma moments.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gstar0</code></td>
+<td>
+<p>vector, the target gamma moments for the control
+group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gstar1</code></td>
+<td>
+<p>vector, the target gamma moments for the treated
+group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>center</code></td>
+<td>
+<p>numeric, the GMM moment equations from the original
+sample. When bootstrapping, the solution to the point
+identified case obtained from the original sample can be passed
+through this argument to recenter the bootstrap distribution of
+the J-statistic.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subsetList</code></td>
+<td>
+<p>list of subset indexes, one for each IV-like
+specification.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>number of observations in the data. This option is only
+used when subsetting is involved.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>redundant</code></td>
+<td>
+<p>vector of integers indicating which components in
+the S-set are redundant.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>identity</code></td>
+<td>
+<p>boolean, default set to <code>FALSE</code>. Set to
+<code>TRUE</code> if GMM point estimate should use the identity
+weighting matrix (i.e. one-step GMM).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nMoments</code></td>
+<td>
+<p>number of linearly independent moments. This option
+is used to determine the cause of underidentified cases.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>splines</code></td>
+<td>
+<p>boolean, set to <code>TRUE</code> if the MTRs involve
+splines. This option is used to determine the cause of
+underidentified cases.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>noisy</code></td>
+<td>
+<p>boolean, default set to <code>TRUE</code>. If <code>TRUE</code>,
+then messages are provided throughout the estimation
+procedure. Set to <code>FALSE</code> to suppress all messages,
+e.g. when performing the bootstrap.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a list containing the point estimate of the treatment
+effects, and the MTR coefficient estimates. The moment
+conditions evaluated at the solution are also returned, along
+with the J-test results. However, if the option <code>center</code>
+is passed, then the moment conditions and J-test are centered
+(this is to perform the J-test via bootstrap).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">dtm &lt;- ivmte:::gendistMosquito()
+
+## Declare empty list to be updated (in the event multiple IV like
+## specifications are provided
+sSet &lt;- list()
+
+## Declare MTR formulas
+formula1 = ~ 0 + u
+formula0 = ~ 0 + u
+
+## Construct object that separates out non-spline components of MTR
+## formulas from the spline components. The MTR functions are
+## obtained from this object by the function 'genSSet'.
+splinesList = list(removeSplines(formula0), removeSplines(formula1))
+
+## Construct MTR polynomials
+polynomials0 &lt;- polyparse(formula = formula0,
+                 data = dtm,
+                 uname = u,
+                 as.function = FALSE)
+polynomials1 &lt;- polyparse(formula = formula0,
+                 data = dtm,
+                 uname = u,
+                 as.function = FALSE)
+
+## Generate propensity score model
+propensityObj &lt;- propensity(formula = d ~ z,
+                            data = dtm,
+                            link = "linear")
+
+## Generate IV estimates
+ivEstimates &lt;- ivEstimate(formula = ey ~ d | z,
+                          data = dtm,
+                          components = l(intercept, d),
+                          treat = d,
+                          list = FALSE)
+
+## Generate target gamma moments
+targetGamma &lt;- genTarget(treat = "d",
+                         m0 = ~ 1 + u,
+                         m1 = ~ 1 + u,
+                         target = "atu",
+                         data = dtm,
+                         splinesobj = splinesList,
+                         pmodobj = propensityObj,
+                         pm0 = polynomials0,
+                         pm1 = polynomials1)
+
+## Construct S-set. which contains the coefficients and weights
+## corresponding to various IV-like estimands
+sSet &lt;- genSSet(data = dtm,
+                sset = sSet,
+                sest = ivEstimates,
+                splinesobj = splinesList,
+                pmodobj = propensityObj$phat,
+                pm0 = polynomials0,
+                pm1 = polynomials1,
+                ncomponents = 2,
+                scount = 1,
+                yvar = "ey",
+                dvar = "d",
+                means = FALSE)
+
+## Obtain point estimates using GMM
+gmmEstimate(sset = sSet$sset,
+            gstar0 = targetGamma$gstar0,
+            gstar1 = targetGamma$gstar1)
+
+</code></pre>
+
+
+</div>

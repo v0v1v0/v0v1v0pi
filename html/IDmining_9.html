@@ -1,0 +1,155 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>MINDEX_SP</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>The Multipoint Morisita Index for Spatial Patterns</h2>
+
+<h3>Description</h3>
+
+<p>Computes the multipoint Morisita index for spatial patterns (i.e. 2-dimensional patterns).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">MINDEX_SP(X, scaleQ=1:5, mMin=2, mMax=5, Wlim_x=NULL, Wlim_y=NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>A <code class="reqn">N \times 2</code> <code>matrix</code>, <code>data.frame</code> or <code>data.table</code> containing the <code class="reqn">X</code> and <code class="reqn">Y</code>
+coordinates of <code class="reqn">N</code> data points. The <code class="reqn">X</code> coordinates must be given in the first column
+and the <code class="reqn">Y</code> coordinates in the second column.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scaleQ</code></td>
+<td>
+<p>Either a single value or a vector. It contains the value(s) of <code class="reqn">Q^{(1/2)}</code>
+chosen by the user where <code class="reqn">Q</code> is the number of cells (or quadrats) of
+the <code class="reqn">2D</code> grid (by default: <code>scaleQ = 1:5</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mMin</code></td>
+<td>
+<p>The minimum value of <code class="reqn">m</code> (by default: <code>mMin = 2</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mMax</code></td>
+<td>
+<p>The maximum value of <code class="reqn">m</code> (by default: <code>mMax = 5</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Wlim_x</code></td>
+<td>
+<p>A vector controlling the spatial extent of the <code class="reqn">2D</code> gird along the
+<code class="reqn">X</code> axis. It consists of two real values, i.e. <code>Wlim_x &lt;- c(a,b)</code> where
+<code class="reqn">b &gt; a</code> (by default: <code>Wlim_x &lt;- c(min(X[,1]),max(X[,1]))</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Wlim_y</code></td>
+<td>
+<p>A vector controlling the spatial extent of the <code class="reqn">2D</code> gird along the
+<code class="reqn">Y</code> axis. It consists of two real values, i.e. <code>Wlim_y &lt;- c(a,b)</code> where
+<code class="reqn">b &gt; a</code> (by default: <code>Wlim_y &lt;- c(min(X[,2]),max(X[,2]))</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<ol>
+<li> <p><code class="reqn">Q^{(1/2)}</code> is the number of grid cells (or quadrats) along each of the two axes.
+</p>
+</li>
+<li> <p><code class="reqn">Q^{(1/2)}</code> is directly related to <code class="reqn">\delta</code> (see References).
+</p>
+</li>
+<li> <p><code class="reqn">\delta</code> is the diagonal length of the grid cells.
+</p>
+</li>
+</ol>
+<h3>Value</h3>
+
+<p>A <code>data.frame</code> containing the value of the m-Morisita index for each value of
+<code class="reqn">\delta</code> and <code class="reqn">m</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jean Golay <a href="mailto:jeangolay@gmail.com">jeangolay@gmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>J. Golay, M. Kanevski, C. D. Vega Orozco and M. Leuenberger (2014).
+The multipoint Morisita index for the analysis of spatial patterns,
+<a href="https://www.sciencedirect.com/science/article/pii/S0378437114002659">Physica A 406:191–202</a>.
+</p>
+<p>L. Telesca, J. Golay and M. Kanevski (2015). Morisita-based space-clustering analysis of Swiss seismicity,
+<a href="https://www.sciencedirect.com/science/article/pii/S0378437114008425">Physica A 419:40–47</a>.
+</p>
+<p>L. Telesca, M. Lovallo, J. Golay and M. Kanevski (2016). Comparing seismicity declustering techniques
+by means of the joint use of Allan Factor and Morisita index,
+<a href="https://link.springer.com/article/10.1007/s00477-015-1030-8">Stochastic Environmental Research and Risk Assessment 30(1):77-90</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">sim_dat &lt;- SwissRoll(1000)
+
+m &lt;- 2
+scaleQ &lt;- 1:15 # It starts with a grid of 1^2 cell (or quadrat).
+               # It ends with a grid of 15^2 cells (or quadrats).
+mMI &lt;- MINDEX_SP(sim_dat[,c(1,2)], scaleQ, m, 5)
+
+plot(mMI[,1],mMI[,2],pch=19,col="black",xlab="",ylab="")
+title(xlab=expression(delta),cex.lab=1.5,line=2.5)
+title(ylab=expression(I['2,'*delta]),cex.lab=1.5,line=2.5)
+
+## Not run: 
+require(colorRamps)
+colfunc &lt;- colorRampPalette(c("blue","red"))
+color &lt;- colfunc(4)
+dev.new(width=5,height=4)
+plot(mMI[5:15,1],mMI[5:15,2],pch=19,col=color[1],xlab="",ylab="",
+     ylim=c(1,max(mMI[,5])))
+title(xlab=expression(delta),cex.lab=1.5,line=2.5)
+title(ylab=expression(I['2,'*delta]),cex.lab=1.5,line=2.5)
+for(i in 3:5){
+  points(mMI[5:15,1],mMI[5:15,i],pch=19,col=color[i-1])
+}
+legend.text&lt;-c("m=2","m=3","m=4","m=5")
+legend.pch=c(19,19,19,19)
+legend.lwd=c(NA,NA,NA,NA)
+legend.col=c(color[1],color[2],color[3],color[4])
+legend("topright",legend=legend.text,pch=legend.pch,lwd=legend.lwd,
+       col=legend.col,ncol=1,text.col="black",cex=0.9,box.lwd=1,bg="white")
+
+xlim_l &lt;- c(-5,5)     # By default, the spatial extent of the grid is set so
+ylim_l &lt;- c(-6,6)     # that it is the same as the spatial extent of the data.
+xlim_s &lt;- c(-0.6,0.2) # But it can be modified to cover either a larger (l)
+ylim_s &lt;- c(-1,0.5)   # or a smaller (s) study area (or validity domain).
+
+mMI_l &lt;- MINDEX_SP(sim_dat[,c(1,2)], scaleQ, m, 5, xlim_l, ylim_l)
+mMI_s &lt;- MINDEX_SP(sim_dat[,c(1,2)], scaleQ, m, 5, xlim_s, ylim_s)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

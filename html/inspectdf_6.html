@@ -1,0 +1,141 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>inspect_num</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Summary and comparison of numeric columns</h2>
+
+<h3>Description</h3>
+
+<p>For a single dataframe, summarise the numeric columns.  If two 
+dataframes are supplied, compare numeric columns appearing in both dataframes.  
+For grouped dataframes, summarise numeric columns separately for each group.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">inspect_num(df1, df2 = NULL, breaks = 20, include_int = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df1</code></td>
+<td>
+<p>A dataframe.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df2</code></td>
+<td>
+<p>An optional second dataframe for comparing categorical levels.
+Defaults to <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>breaks</code></td>
+<td>
+<p>Integer number of breaks used for histogram bins, passed to 
+<code>graphics::hist()</code>.  Defaults to 20.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include_int</code></td>
+<td>
+<p>Logical flag, whether to include integer columns in numeric summaries.
+Defaults to <code>TRUE</code>.
+<code>hist(..., breaks)</code>.  See <code>?hist</code> for more details.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For a <strong>single dataframe</strong>, the tibble returned contains the columns: <br></p>
+
+<ul>
+<li> <p><code>col_name</code>, a character vector containing the column names in <code>df1</code>
+</p>
+</li>
+<li> <p><code>min</code>, <code>q1</code>, <code>median</code>, <code>mean</code>, <code>q3</code>, <code>max</code> and 
+<code>sd</code>, the minimum, lower quartile, median, mean, upper quartile, maximum and 
+standard deviation for each numeric column.
+</p>
+</li>
+<li> <p><code>pcnt_na</code>, the percentage of each numeric feature that is missing
+</p>
+</li>
+<li> <p><code>hist</code>, a named list of tibbles containing the relative frequency of values 
+falling in bins determined by <code>breaks</code>.
+</p>
+</li>
+</ul>
+<p>For a <strong>pair of dataframes</strong>, the tibble returned contains the columns: <br></p>
+
+<ul>
+<li> <p><code>col_name</code>, a character vector containing the column names in <code>df1</code>
+and <code>df2</code>
+</p>
+</li>
+<li> <p><code>hist_1</code>, <code>hist_2</code>, a list column for histograms of each of <code>df1</code> and <code>df2</code>.
+Where a column appears in both dataframe, the bins used for <code>df1</code> are reused to 
+calculate histograms for <code>df2</code>.
+</p>
+</li>
+<li>
+<p>jsd, a numeric column containing the Jensen-Shannon divergence.  This measures the 
+difference in distribution of a pair of binned numeric features.  Values near to 0 indicate
+agreement of the distributions, while 1 indicates disagreement.
+</p>
+</li>
+<li> <p><code>pval</code>, the p-value corresponding to a NHT that the true frequencies of histogram bins are equal.
+A small p indicates evidence that the the two sets of relative frequencies are actually different.  The test
+is based on a modified Chi-squared statistic.
+</p>
+</li>
+</ul>
+<p>For a <strong>grouped dataframe</strong>, the tibble returned is as for a single dataframe, but where 
+the first <code>k</code> columns are the grouping columns.  There will be as many rows in the result 
+as there are unique combinations of the grouping variables.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>tibble</code> containing statistical summaries of the numeric 
+columns of <code>df1</code>, or comparing the histograms of <code>df1</code> and <code>df2</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Alastair Rushworth
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>show_plot</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Load dplyr for starwars data &amp; pipe
+library(dplyr)
+
+# Single dataframe summary
+inspect_num(starwars)
+
+# Paired dataframe comparison
+inspect_num(starwars, starwars[1:20, ])
+
+# Grouped dataframe summary
+starwars %&gt;% group_by(gender) %&gt;% inspect_num()
+</code></pre>
+
+
+</div>

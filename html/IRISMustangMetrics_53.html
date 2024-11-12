@@ -1,0 +1,95 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>stateOfHealthMetric</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>State of Health metrics</h2>
+
+<h3>Description</h3>
+
+<p>The <code>stateOfHealthMetric</code> function extracts accumulated miniSEED quality flags and a measure
+of timing quality associated with the incoming seismic signal.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">stateOfHealthMetric(st)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>st</code></td>
+<td>
+<p> a <code>Stream</code> object containing a seismic signal</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>The miniSEED flags and timing_qual values are described in the SEED manual
+(<a href="http://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf">http://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf</a>).
+</p>
+<p>Each <code>Stream</code> object contains "accumulators" with counts of the number of times 
+each bit flag was set during the parsing of a miniSEED file.  Metrics are reported
+for a subset of these flags as show in the code snippet below:
+</p>
+<pre>
+  # act_flags
+  calibration_signal &lt;- st@act_flags[1]
+  timing_correction &lt;- st@act_flags[2]
+  event_begin &lt;- st@act_flags[3]
+  event_end &lt;- st@act_flags[4]
+  event_in_progress &lt;- st@act_flags[7]
+  
+  # io_flags
+  clock_locked &lt;- st@io_flags[6]
+                   
+  # dq_flags
+  amplifier_saturation &lt;- st@dq_flags[1]
+  digitizer_clipping &lt;- st@dq_flags[2]
+  spikes &lt;- st@dq_flags[3]
+  glitches &lt;- st@dq_flags[4]
+  missing_padded_data &lt;- st@dq_flags[5]
+  telemetry_sync_error &lt;- st@dq_flags[6]
+  digital_filter_charging &lt;- st@dq_flags[7]
+</pre>
+<p>An additional "timing quality" metric gives the average value for the <code>timing_qual</code>
+value associated with each block of miniSEED data.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of <code>SingleValueMetric</code> objects is returned.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  ## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+# Get the waveform
+starttime &lt;- as.POSIXct("2012-01-24", tz="GMT")
+endtime &lt;- as.POSIXct("2012-01-25", tz="GMT")
+st &lt;- getDataselect(iris,"AK","PIN","","BHZ",starttime,endtime)
+
+# Generate State of Health metrics and show the results
+metricList &lt;- stateOfHealthMetric(st)
+dummy &lt;- lapply(metricList, show)
+  
+## End(Not run)
+</code></pre>
+
+
+</div>

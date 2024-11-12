@@ -1,0 +1,148 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pcm_ic</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Multiple change-point detection in the mean via minimising an information
+criterion</h2>
+
+<h3>Description</h3>
+
+<p>This function performs the Isolate-Detect methodology based on an information
+criterion approach, in order to detect multiple change-points in the mean of
+a noisy data sequence, with the noise following the Gaussian distribution.
+More information on how this approach works as well as the relevant literature
+reference are given in Details.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pcm_ic(x, th_const = 0.9, Kmax = 200, penalty = c("ssic_pen", "sic_pen"),
+  points = 10)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A numeric vector containing the data in which you would like to find
+change-points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>th_const</code></td>
+<td>
+<p>A positive real number with default value equal to 0.9. It is
+used to define the threshold value that will be used at the first step of the
+model selection based Isolate-Detect method; see Details for more information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Kmax</code></td>
+<td>
+<p>A positive integer with default value equal to 200. It is the
+maximum allowed number of estimated change-points in the solution path algorithm,
+described in Details below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>penalty</code></td>
+<td>
+<p>A character vector with names of the penalty functions used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>points</code></td>
+<td>
+<p>A positive integer with default value equal to 10. It defines
+the distance between two consecutive end- or start-points of the right- or
+left-expanding intervals, respectively.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The approach followed in <code>pcm_ic</code> in order to detect
+the change-points is based on identifying the set of change-points that
+minimise an information criterion. At first, we employ <code>sol_path_pcm</code>,
+which overestimates the number of change-points using <code>th_const</code> in order to define the
+threshold, and then sorts the obtained estimates in a way that the estimate, which
+is most likely to be correct appears first, whereas the least likely to
+be correct, appears last. Let <code class="reqn">J</code> be the number of estimates
+that this overestimation approach returns. We will obtain a vector
+<code class="reqn">b = (b_1, b_2, ..., b_J)</code>, with the estimates ordered as explained above. We define
+the collection <code class="reqn">\left\{M_j\right\}_{j = 0,1,\ldots,J}</code>, where <code class="reqn">M_0</code> is the empty set
+and <code class="reqn">M_j = \left\{b_1,b_2,...,b_j\right\}</code>. Among the collection of models
+<code class="reqn">M_j, j=0,1,...,J</code>, we select the one that minimises a predefined Information
+Criterion. The obtained set of change-points is apparently a subset of the solution path
+given in <code>sol_path_pcm</code>. More details can be found in
+“Detecting multiple generalized change-points by isolating single ones”,
+Anastasiou and Fryzlewicz (2018), preprint.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with the following components:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+   </td>
+</tr>
+<tr>
+<td style="text-align: left;"> <code>sol_path</code> </td>
+<td style="text-align: left;"> A vector containing the solution path.
+   </td>
+</tr>
+<tr>
+<td style="text-align: left;"> <code>ic_curve</code>   </td>
+<td style="text-align: left;"> A list with values of the chosen information criteria.
+   </td>
+</tr>
+<tr>
+<td style="text-align: left;"> <code>cpt_ic</code> </td>
+<td style="text-align: left;"> A list with the change-points detected for each information
+  criterion considered.
+   </td>
+</tr>
+<tr>
+<td style="text-align: left;"> <code>no_cpt_ic </code> </td>
+<td style="text-align: left;"> The number of change-points detected for each information
+  criterion considered.
+ </td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Andreas Anastasiou, <a href="mailto:a.anastasiou@lse.ac.uk">a.anastasiou@lse.ac.uk</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ID_pcm</code> and <code>ID</code>, which employ this function.
+In addition, see <code>cplm_ic</code> for the case of detecting changes in
+a continuous, piecewise-linear signal using the information criterion based approach.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">single.cpt &lt;- c(rep(4,1000),rep(0,1000))
+single.cpt.noise &lt;- single.cpt + rnorm(2000)
+cpt.single.ic &lt;- pcm_ic(single.cpt.noise)
+
+three.cpt &lt;- c(rep(4,500),rep(0,500),rep(-4,500),rep(1,500))
+three.cpt.noise &lt;- three.cpt + rnorm(2000)
+cpt.three.ic &lt;- pcm_ic(three.cpt.noise)
+</code></pre>
+
+
+</div>

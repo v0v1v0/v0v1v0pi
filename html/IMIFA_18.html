@@ -1,0 +1,121 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ltrgamma</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Left Truncated Gamma Distributions</h2>
+
+<h3>Description</h3>
+
+<p>Functions to draw pseudo-random numbers from, or calculate the expectation of, left-truncated gamma distributions (see Details below).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">rltrgamma(n,
+          shape,
+          rate = 1,
+          trunc = 1)
+
+exp_ltrgamma(shape,
+             rate = 1,
+             trunc = 1,
+             inverse = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Number of observations to generate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shape</code></td>
+<td>
+<p>Shape parameter for the desired gamma distribution. Must be strictly positive</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rate</code></td>
+<td>
+<p>Rate parameter for the desired gamma distribution. Must be strictly positive.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trunc</code></td>
+<td>
+<p>The point of left truncation (corresponding to <code class="reqn">\tau</code> below). Defaults to <code>1</code>. Must be non-negative. When <code>inverse</code> is <code>TRUE</code>, this becomes the point of <em>right</em> truncation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inverse</code></td>
+<td>
+<p>A logical indicating whether to calculate the expectation for a right-truncated <em>inverse</em> gamma distribution instead of a left-truncated gamma distribution. Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The left-truncated gamma distribution has PDF:
+</p>
+<p style="text-align: center;"><code class="reqn">f(x|\alpha, \beta) = \frac{\beta^\alpha}{(\Gamma(\alpha)-\Gamma(\alpha, \tau\beta))}x^{\alpha-1}e^{-x\beta}</code>
+</p>
+
+<p>for <code class="reqn">0\le\tau\le x</code>, and <code class="reqn">\min(\tau,\beta) &gt; 0</code>, where <code class="reqn">\alpha</code> and <code class="reqn">\beta</code> are the <code>shape</code> and <code>rate</code> parameters, respectively, <code class="reqn">\tau</code> is the cutoff point at which <code>trunc</code>ation occurs, and <code class="reqn">\Gamma(\alpha, \tau\beta)</code> is the upper incomplete gamma function.
+</p>
+
+
+<h3>Value</h3>
+
+<p>For <code>rltrgamma</code>, a vector of length <code>n</code> giving draws from the left-truncated gamma distribution with the specified <code>shape</code> and <code>rate</code> parameters, and truncation point <code>trunc</code>.
+</p>
+<p>For <code>exp_ltrgamma</code>, the expected value of a left-truncated (inverse) gamma distribution.
+</p>
+
+
+<h3>Note</h3>
+
+<p><code>rltrgamma</code> is invoked internally for the <code>"IFA"</code>, <code>"MIFA"</code>, <code>"OMIFA"</code>, and <code>"IMIFA"</code> models to draw column shrinkage parameters for all but the first loadings column under the MGP prior when <code>truncated=TRUE</code> (which is <strong>not</strong> the default) is supplied to <code>mgpControl</code>, at the expense of slightly longer run times. <code>exp_ltrgamma</code> is used within <code>MGP_check</code> to check the validity of the MGP hyperparameters when <code>truncated=TRUE</code> (which is again, <strong>not</strong> the default). Both functions always assume <code>trunc=1</code> for these internal usages.
+</p>
+<p>Note also that no arguments are recycled, i.e. all arguments must be of length <code>1</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Keefe Murphy - &lt;<a href="mailto:keefe.murphy@mu.ie">keefe.murphy@mu.ie</a>&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Dagpunar, J. S. (1978) Sampling of variates from a truncated gamma distribution, <em>Statistical Computation and Simulation</em>, 8(1): 59-64.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>mgpControl</code>, <code>MGP_check</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Generate left-truncated Ga(3.1, 2.1, 1) variates
+rltrgamma(n=10, shape=3.1, rate=2.1)
+
+# Calculate the expectation of a Ga(3.1, 2.1, 1) distribution
+exp_ltrgamma(shape=3.1, rate=2.1)
+
+# Calculate the expectation of an inverse gamma distribution right-truncated at 2
+exp_ltrgamma(shape=3.1, rate=2.1, trunc=2, inverse=TRUE)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,171 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iterLap</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Iterated Laplace Approximation
+</h2>
+
+<h3>Description</h3>
+
+<p>Iterated Laplace Approximation
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iterLap(post, ..., GRobj = NULL, vectorized = FALSE, startVals = NULL,
+        method = c("nlminb", "nlm", "Nelder-Mead", "BFGS"), control = NULL,
+        nlcontrol = list())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>post</code></td>
+<td>
+
+<p>log-posterior density
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional arguments to log-posterior density
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>GRobj</code></td>
+<td>
+
+<p>object of class mixDist, for example resulting from a call to GRApprox
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vectorized</code></td>
+<td>
+
+<p>Logical determining, whether <code>post</code> is vectorized    
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>startVals</code></td>
+<td>
+
+<p>Starting values for GRApprox, when GRobj is not specified.
+Vector of starting values if dimension=1
+otherwise matrix of starting values with the starting values in the rows
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>Type of optimizer to be used.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+
+<p>List with entries:<br><code>gridSize</code> Determines the size of the grid for each component<br><code>delta</code> Stopping criterion based on the maximum error on the grid<br><code>maxDim</code> Maximum number of components allowed (default 20)<br><code>eps</code> Stopping criterion based on normalization
+constant of approximation<br><code>info</code> How much information should be displayed during
+iterations: 0 - none, 1 - minimum information, 2 - maximum information<br></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nlcontrol</code></td>
+<td>
+
+<p>Control list for the used optimizer.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Produces an object of class mixDist: A list with entries<br><code>weights</code> Vector of weights for individual components<br><code>means</code> Matrix of component medians of components<br><code>sigmas</code> List containing scaling matrices<br><code>eigenHess</code> List containing eigen decompositions of scaling matrices<br><code>dets</code> Vector of determinants of scaling matrix<br><code>sigmainv</code> List containing inverse scaling matrices<br></p>
+
+
+<h3>Author(s)</h3>
+
+<p>Bjoern Bornkamp
+</p>
+
+
+<h3>References</h3>
+
+<p>Bornkamp, B. (2011). Approximating Probability Densities by Iterated
+Laplace Approximations, <em>Journal of Computational and Graphical
+Statistics</em>, <b>20</b>(3), 656–669.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  #### banana example
+  banana &lt;- function(pars, b, sigma12){
+    dim &lt;- 10
+    y &lt;- c(pars[1], pars[2]+b*(pars[1]^2-sigma12), pars[3:dim])
+    cc &lt;- c(1/sqrt(sigma12), rep(1, dim-1))
+    return(-0.5*sum((y*cc)^2))
+  }
+
+  ###############################################################
+  ## first perform multi mode Laplace approximation
+  start &lt;- rbind(rep(0,10),rep(-1.5,10),rep(1.5,10))
+  grObj &lt;- GRApprox(banana, start, b = 0.03, sigma12 = 100)
+  ## print mixDist object
+  grObj
+  ## summary method
+  summary(grObj)
+  ## importance sampling using the obtained mixDist object 
+  ## using a mixture of t distributions with 10 degrees of freedom
+  isObj &lt;- IS(grObj, nSim=1000, df = 10, post=banana, b = 0.03,
+              sigma12 = 100)
+  ## effective sample size
+  isObj$ESS
+  ## independence Metropolis Hastings algorithm
+  imObj &lt;- IMH(grObj, nSim=1000, df = 10, post=banana, b = 0.03,
+               sigma12 = 100)
+  ## acceptance rate
+  imObj$accept
+
+  ###############################################################
+  ## now use iterated Laplace approximation
+  ## and use Laplace approximation above as starting point
+  iL &lt;- iterLap(banana, GRobj = grObj, b = 0.03, sigma12 = 100)
+  isObj2 &lt;- IS(iL, nSim=10000, df = 100, post=banana, b = 0.03,
+               sigma12 = 100)
+  ## residual resampling to obtain unweighted sample
+  samples &lt;- resample(1000, isObj2)
+  ## plot samples in the first two dimensions
+  plot(samples[,1], samples[,2], xlim=c(-40,40), ylim = c(-40,20))
+  ## independence Metropolis algorithm
+  imObj2 &lt;- IMH(iL, nSim=1000, df = 10, post=banana, b = 0.03,
+                sigma12 = 100)
+  imObj2$accept
+  plot(imObj2$samp[,1], imObj2$samp[,2], xlim=c(-40,40), ylim = c(-40,20))
+
+  ## IMH and IS can exploit multiple cores, example for two cores
+  ## Not run: 
+  isObj3 &lt;- IS(iL, nSim=10000, df = 100, post=banana, b = 0.03,
+               sigma12 = 100, cores = 2)
+  
+## End(Not run)
+
+</code></pre>
+
+
+</div>

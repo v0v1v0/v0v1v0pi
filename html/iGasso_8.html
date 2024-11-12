@@ -1,0 +1,115 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>SKATplus</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>A Gene- or Pathway-Based Test of Association
+<code>SKATlus</code> provides enhanced power over SKAT by properly estimating the null distribution of SKAT.</h2>
+
+<h3>Description</h3>
+
+
+<p>This version uses only subjects with lower phenotypic values for estimating the null distribution. That is, the "controls" are those of lower phenotypic values. When "controls" are of higher phenotypic values, change the sign of the phenotypic values in order to use this function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">SKATplus(
+  y,
+  G,
+  X = NULL,
+  out_type = "D",
+  tau = NULL,
+  permutation = FALSE,
+  B = 1000
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>a vector of phenotype on <code class="reqn">n</code> subjects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>G</code></td>
+<td>
+<p>an <code class="reqn">n \times m</code> matrix of SNP genotypes of <code class="reqn">n</code> study subjects at <code class="reqn">m</code> loci.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>a matrix of covariates. It has <code class="reqn">n</code> rows.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>out_type</code></td>
+<td>
+<p>an indicator of the outcome type. <code>"C"</code> for the continuous outcome and <code>"D"</code> for the dichotomous outcome.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau</code></td>
+<td>
+<p>proportion of selected subjects used for SKATplus.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>permutation</code></td>
+<td>
+<p>an indicator. Use permutation for p-value or not.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>the number of permutations if <code>permutation=TRUE</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with class "<code>htest</code>" containing the following components:
+* statistic the value of the test statistic, which is the same as SKAT statistic.
+* parameter sample size and the number of SNPs
+* p.value the p-value for SKATplus computed using Davies' method.
+* method a character string indicting the test performed.
+* data.name a character string giving the name of the data.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Kai Wang <code>&lt;kai-wang@uiowa.edu&gt;</code>
+</p>
+
+
+<h3>References</h3>
+
+<p>Wang, K. (2016) Boosting the power of the sequence kernel association test (SKAT) almost surely by properly estimating its null distribution. <em>A J Hum Genet</em>. 99 (1), 104-114.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">    n=1000
+    y = c(rep(1, n/2), rep(0, n/2))
+    maf = seq(0.05, 0.5, 0.05)
+    g = NULL
+    for (j in 1:10){
+       geno.freq = c(maf[j]^2, 2*maf[j]*(1-maf[j]), (1-maf[j])^2)
+       g = cbind(g, sample(c(0,1,2), n, replace=TRUE, prob=geno.freq))
+       }
+       SKATplus(y, g, X=NULL, out_type="D", tau=NULL, permutation=FALSE, B=1000)
+
+</code></pre>
+
+
+</div>

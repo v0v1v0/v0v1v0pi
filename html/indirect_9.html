@@ -1,0 +1,89 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>muSigma</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Function to estimate mean and covariance for unknown parameters 
+<code class="reqn">\beta</code>.</h2>
+
+<h3>Description</h3>
+
+<p>Function to estimate mean and covariance for unknown parameters 
+<code class="reqn">\beta</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">muSigma(Z, X = NULL, fit.method = "KL", wls.method = "default")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Z</code></td>
+<td>
+<p>list of design points and link function that is an output of 
+function <code>designLink</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>model matrix for model formula and design points. The covariates 
+must correspond to the description of design points in <code>Z</code>, but can be
+transformed etc. If <code>NULL</code> then <code>X</code> will be coerced by applying 
+<code>as.matrix()</code> to <code>Z$design</code>. The matrix <code>X</code> should be full 
+rank when subsetted to the elicited design points. If a column of <code>X</code> 
+has the name <code>offset</code> then this column is treated as an offset during 
+estimation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fit.method</code></td>
+<td>
+<p>character, <code>moment</code>, <code>KL</code>. See <code>mV</code>. Default
+is <code>KL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wls.method</code></td>
+<td>
+<p>character giving the numerical solution method: <code>QR</code>, 
+using the QR decomposition, <code>SVD</code>, using the singular value 
+decomposition, or option <code>default</code> that uses <code>solve()</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>list of <code>mu</code>, numeric vector of location parameters for the 
+normal prior; <code>Sigma</code>, the covariance matrix; and <code>log.like</code>, a 
+scalar
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">X &lt;- matrix(c(1, 1, 0, 1), nrow = 2) # design
+Z &lt;- designLink(design = X)
+Z &lt;- elicitPt(Z, design.pt = 1,
+  lower.CI.bound = -1,
+  median = 0,
+  upper.CI.bound = 1,
+  comment = "The first completed elicitation scenario.")
+Z &lt;- elicitPt(Z, design.pt = 2,
+  lower.CI.bound = -2,
+  median = 1,
+  upper.CI.bound = 2,
+  comment = "The second completed elicitation scenario.")
+prior &lt;- muSigma(Z, X, fit.method = "KL")
+prior$mu
+prior$Sigma   
+</code></pre>
+
+
+</div>

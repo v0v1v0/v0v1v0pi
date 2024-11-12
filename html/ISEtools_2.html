@@ -1,0 +1,315 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>analyseISE</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Ion selective electrode characterisation and estimation of sample concentrations
+</h2>
+
+<h3>Description</h3>
+
+<p>Use Bayesian calibration to estimate parameters for y = a + b log(x + c) + error, where error follows a normal distribution with mean 0 and standard deviation sigma.  The limit of detection (false positive/negative method or S/N=3 method) is also estimated.  These values are then used to the estimate sample concentrations.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">analyseISE(data, model.path=NA, model.name=NA, Z=NA, temperature = 21,
+	burnin=25000, iters = 50000, chains=4, thin = 1,
+	a.init= NA, b.init=NA, cstar.init=NA, logc.limits = c(-8.9, -1.9), 
+	sigma.upper = 5, diagnostic.print=FALSE, offset = 1,
+	alpha = 0.05, beta = 0.05, SN = NA, program="OpenBUGS")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>Calibration and experimental data (of class 'ISEdata'; see loadISEdata)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model.path</code></td>
+<td>
+
+<p>The directory where the BUGS model is located (defaults to 'models' sub-directory under the location of ISEtools package, e.g. '.../ISEtools/models')
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model.name</code></td>
+<td>
+
+<p>The name of the BUGS model (e.g. 'Single_ISE_model.txt') (defaults are located in ISEtools package)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Z</code></td>
+<td>
+
+<p>Ionic valence (e.g. for lead, Z = 2)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>temperature</code></td>
+<td>
+
+<p>temperature in degrees C
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>burnin</code></td>
+<td>
+
+<p>Initial number of Monte Carlo simulations to discard.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iters</code></td>
+<td>
+
+<p>Total number of iterations.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>chains</code></td>
+<td>
+
+<p>Number of parallel MCMC chains
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thin</code></td>
+<td>
+
+<p>Thinning rate, equal to 1/Proportion of simulations saved (e.g. thin = 10 records every tenth iteration).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a.init</code></td>
+<td>
+
+<p>Initial value for parameter a
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b.init</code></td>
+<td>
+
+<p>Initial value for parameter b
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cstar.init</code></td>
+<td>
+
+<p>Initial value for parameter cstar (c = cstar^10)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>logc.limits</code></td>
+<td>
+
+<p>Upper and lower limits for log c initial values
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma.upper</code></td>
+<td>
+
+<p>Upper limit for initial value of sigma
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diagnostic.print</code></td>
+<td>
+
+<p>logical flag indicating whether a diagnostic printout is desired (default is F) 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+
+<p>The initial value for the slope is based on the last data point as sorted by concentration (i.e. the Nth point) and the (N - offset) data point.  The default is offset = 1, corresponding to the last and second to last data points.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+
+<p>False positive rate used for detection threshold (not output) to calculate LOD(alpha, beta) only returned if SN = NA
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+
+<p>False negative rate used to calculate LOD(alpha, beta) only returned if SN = NA
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SN</code></td>
+<td>
+
+<p>Desired signal-to-noise ratio for LOD(S/N) calculations (default is to calculate the S/N equivalent based on alpha, beta)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>program</code></td>
+<td>
+
+<p>Choice of "OpenBUGS" (default and recommended for Windows or Linux) or "jags" (for macOS, see manual for warnings).
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>analyseISE returns a list of class 'analyseISE'.  Individual components include:<br></p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>SampleID </code></td>
+<td>
+<p>Sample identification number </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log10x.exp </code></td>
+<td>
+<p>Estimated concentration (log scale, mol/l) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ahat </code></td>
+<td>
+<p>Estimated value for a (from the median of the posterior distribution) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bhat </code></td>
+<td>
+<p>Estimated value for b (from the median of the posterior distribution) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>chat </code></td>
+<td>
+<p>Estimated value for c (from the median of the posterior distribution) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cstarhat </code></td>
+<td>
+<p>Estimated value for cstar (from the median of the posterior distribution) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigmahat </code></td>
+<td>
+<p>Estimated value for cstar (from the median of the posterior distribution) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LOD.info </code></td>
+<td>
+<p>List describing LOD method (alpha, beta or S/N) and corresponding values (alpha, beta, SN) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LOD.hat </code></td>
+<td>
+<p>Estimated value for the limit of detection (from the median of the posterior distribution) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>&lt;parametername&gt;.lcl </code></td>
+<td>
+<p>Lower limit for the above parameters (e.g. ahat.lcl, bhat.lcl, ...) (from the 2.5th percentile of the posterior distribution) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>&lt;parametername&gt;.ucl </code></td>
+<td>
+<p>Upper limit for the above parameters (from the 97.5th percentile of the posterior distribution) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LOD.Q1 </code></td>
+<td>
+<p>25th percentile estimated value of the limit of detection</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LOD.Q3 </code></td>
+<td>
+<p>75th percentile estimated value of the limit of detection</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Peter Dillingham, <a href="mailto:peter.dillingham@otago.ac.nz">peter.dillingham@otago.ac.nz</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Dillingham, P.W., Radu, T., Diamond, D., Radu, A. and McGraw, C.M. (2012). Bayesian Methods for Ion Selective Electrodes. <em>Electroanalysis</em>, <strong>24</strong>, 316-324. &lt;doi:10.1002/elan.201100510&gt;
+</p>
+<p>Dillingham, P.W., Alsaedi, B.S.O. and McGraw, C.M. (2017). Characterising uncertainty in instrumental limits of detection when sensor response is non-linear. <em>2017 IEEE SENSORS</em>, Glasgow, United Kingdom, pp. 1-3. &lt;doi:10.1109/ICSENS.2017.8233898&gt;
+</p>
+<p>Dillingham, P.W., Alsaedi, B.S.O., Radu, A., and McGraw, C.M. (2019). Semi-automated data analysis for ion-selective electrodes and arrays using the R package ISEtools. <em>Sensors</em> <strong>19</strong>(20), 4544. &lt;doi: 10.3390/s19204544&gt;
+</p>
+<p>Dillingham, P.W., Alsaedi, B.S.O., Granados-Focil, S., Radu, A., and McGraw, C.M. (2020). Establishing meaningful Limits of Detection for ion-selective electrodes and other nonlinear sensors <em>ACS Sensors</em>, <strong>5</strong>, 250-257. &lt;doi:10.1021/acssensors.9b02133&gt;
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Fast-running example with only 100 MCMC iterations for testing:
+data(LeadStdAdd)
+example2test = analyseISE(LeadStdAdd, Z = 2, temperature = 21, 
+  burnin=100, iters=200, chains=1, a.init=c(176, 146, -112), 
+  b.init=c(29, 30, 31), cstar.init=c(0.26, 0.27, 0.22), program="jags")
+print(example2test)
+summary(example2test)
+plot(example2test, ylim = c(-7, -3), xlab = "ID (Sample)", 
+     ylab = expression(paste(log[10], " ", Pb^{paste("2","+",sep="")} )))
+
+# Full example with 100,000 iterations (25,000 by 4 chains):
+data(LeadStdAdd)
+example2 = analyseISE(LeadStdAdd, Z = 2, temperature = 21)
+print(example2)
+summary(example2)
+plot(example2, ylim = c(-7, -3), xlab = "ID (Sample)", 
+	ylab = expression(paste(log[10], " ", Pb^{paste("2","+",sep="")} )))
+
+</code></pre>
+
+
+</div>

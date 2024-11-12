@@ -1,0 +1,747 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Manningtrap</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Trapezoidal cross-section for the Gauckler-Manning-Strickler equation</h2>
+
+<h3>Description</h3>
+
+<p>This function solves for one missing variable in the Gauckler-Manning-
+Strickler equation for a trapezoidal cross-section and uniform flow. The
+<code>uniroot</code> function is used to obtain the missing parameters.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Manningtrap(
+  Q = NULL,
+  n = NULL,
+  m = NULL,
+  m1 = NULL,
+  m2 = NULL,
+  Sf = NULL,
+  y = NULL,
+  b = NULL,
+  Temp = NULL,
+  units = c("SI", "Eng"),
+  type = c("symmetrical", "non-symmetrical"),
+  output = c("list", "data.table")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Q</code></td>
+<td>
+<p>numeric vector that contains the discharge value (m^3/s or ft^3/s),
+if known.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>numeric vector that contains the Manning's roughness coefficient n,
+if known.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>numeric vector that contains the symmetric "cross-sectional side slope
+of m:V (horizontal:vertical)", if known.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m1</code></td>
+<td>
+<p>numeric vector that contains the non-symmetric "cross-sectional side
+slope of m1:V (horizontal:vertical)", if known.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m2</code></td>
+<td>
+<p>numeric vector that contains the non-symmetric "cross-sectional side
+slope of m2:V (horizontal:vertical)", if known.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Sf</code></td>
+<td>
+<p>numeric vector that contains the bed slope (m/m or ft/ft),
+if known.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>numeric vector that contains the flow depth (m or ft), if known.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>numeric vector that contains the bottom width, if known.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Temp</code></td>
+<td>
+<p>numeric vector that contains the temperature (degrees C or degrees
+Fahrenheit), if known. Otherwise, the default value is 20 degrees Celsius
+(68 degrees Fahrenheit).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>units</code></td>
+<td>
+<p>character vector that contains the system of units [options are
+<code>SI</code> for International System of Units or <code>Eng</code> for English units
+(United States Customary System in the United States and Imperial Units in
+the United Kingdom)]</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>character vector that contains the type of trapezoid (symmetrical
+or non-symmetrical). The symmetrical trapezoid uses <code>m</code> while the non-
+symmetrical trapezoid uses <code>m1</code> and <code>m2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output</code></td>
+<td>
+<p>character vector that contains the output type, either it will
+be a <code>list</code> or <code>data.table</code>. The list is
+the easiest to obtain a singular value. Please see the examples and the
+vignettes.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Parameters Definitions from Chow pages 7, 13, 20, 22-23
+"The depth of flow y is the vertical distance of the lowest point of a
+channel section from the free surface."
+</p>
+<p>"The top width Temp is the width of channel section at the free surface."
+</p>
+<p>"The water area A is water area of the flow normal to the direction of flow."
+</p>
+<p>"The wetted perimeters P is the length of the line of intersection of the
+channel wetted surface with a cross-sectional plane normal to the direction
+of flow."
+</p>
+<p>"The hydraulic radius R is the ratio of the water area to its wetted
+perimeters."
+</p>
+<p>"The hydraulic radius D is the ratio of the water area to the top width."
+</p>
+<p>"The section factor for critical-flow computation Z is the product of the
+water area and the square root of the hydraulic depth."
+</p>
+<p>"The section factor for uniform-flow computation AR^2/3 is the product of the
+water area and the two-thirds power of the hydraulic radius."
+</p>
+<p>"A channel built with unvarying cross section and constant bottom slope is
+called a prismatic channel. Otherwise, the channel is nonprismatic."
+</p>
+<p>"For any flow, the discharge Q at a channel section is expressed by Q = V A
+where V is the mean velocity and A is the flow cross-sectional area normal
+to the direction of the flow, since the mean velocity is defined as the
+discharge divided by the cross-sectional area."
+</p>
+<p>"The effect of viscosity relative to inertia can be represented by the
+Reynolds number. ..."
+</p>
+<p>"The effect of gravity upon the state of flow is represented by a ratio of
+inertial forces to gravity forces. This ratio is given by the Froude
+number. ..."
+</p>
+<p>The References for the following equations, include, but are not limited to:
+Chow pages 5, 7, 13, 21, 23, 28; Schall pages 4-17 and 5-5; Wikimedia
+Conversion and Manning
+</p>
+<p>Gauckler-Manning-Strickler equation is expressed as
+</p>
+<p style="text-align: center;"><code class="reqn">V = \frac{K_n}{n}R^\frac{2}{3}S^\frac{1}{2}</code>
+</p>
+
+
+<dl>
+<dt><em>V</em></dt>
+<dd>
+<p>the mean velocity (m/s or ft/sec)</p>
+</dd>
+<dt><em>n</em></dt>
+<dd>
+<p>Manning's roughness coefficient (dimensionless)</p>
+</dd>
+<dt><em>R</em></dt>
+<dd>
+<p>the hydraulic radius (m or ft)</p>
+</dd>
+<dt><em>S</em></dt>
+<dd>
+<p>the slope of the channel bed (m/m or ft/ft)</p>
+</dd>
+<dt><em>K_n</em></dt>
+<dd>
+<p>the conversion constant – 1.0 for SI and
+3.2808399 ^ (1 / 3) for English units – m^(1/3)/s or ft^(1/3)/s</p>
+</dd>
+</dl>
+<p>This equation is also expressed as
+</p>
+<p style="text-align: center;"><code class="reqn">Q = \frac{K_n}{n}\frac{A^\frac{5}{3}}{P^\frac{2}{3}}S^\frac{1}{2}</code>
+</p>
+
+
+<dl>
+<dt><em>Q</em></dt>
+<dd>
+<p>the discharge [m^3/s or ft^3/s (cfs)] is VA</p>
+</dd>
+<dt><em>n</em></dt>
+<dd>
+<p>Manning's roughness coefficient (dimensionless)</p>
+</dd>
+<dt><em>P</em></dt>
+<dd>
+<p>the wetted perimeters of the channel (m or ft)</p>
+</dd>
+<dt><em>A</em></dt>
+<dd>
+<p>water area (m^2 or ft^2)</p>
+</dd>
+<dt><em>S</em></dt>
+<dd>
+<p>the slope of the channel bed (m/m or ft/ft)</p>
+</dd>
+<dt><em>K_n</em></dt>
+<dd>
+<p>the conversion constant – 1.0 for SI and
+3.2808399 ^ (1 / 3) for English units – m^(1/3)/s or ft^(1/3)/s</p>
+</dd>
+</dl>
+<p>Other important equations regarding the trapezoidal cross-section follow:
+</p>
+<p style="text-align: center;"><code class="reqn">R = \frac{A}{P}</code>
+</p>
+
+
+<dl>
+<dt><em>R</em></dt>
+<dd>
+<p>the hydraulic radius (m or ft)</p>
+</dd>
+<dt><em>A</em></dt>
+<dd>
+<p>water area (m^2 or ft^2)</p>
+</dd>
+<dt><em>P</em></dt>
+<dd>
+<p>the wetted perimeters of the channel (m or ft)</p>
+</dd>
+</dl>
+<p style="text-align: center;"><code class="reqn">A = y\left(b + my\right)</code>
+</p>
+
+
+<dl>
+<dt><em>A</em></dt>
+<dd>
+<p>water area (m^2 or ft^2)</p>
+</dd>
+<dt><em>y</em></dt>
+<dd>
+<p>the flow depth (normal depth in this function) [m or ft]</p>
+</dd>
+<dt><em>m</em></dt>
+<dd>
+<p>the horizontal side slope</p>
+</dd>
+<dt><em>b</em></dt>
+<dd>
+<p>the bottom width (m or ft)</p>
+</dd>
+</dl>
+<p style="text-align: center;"><code class="reqn">P = b + 2y\sqrt{\left(1 + m^2\right)}</code>
+</p>
+
+
+<dl>
+<dt><em>P</em></dt>
+<dd>
+<p>the wetted perimeters of the channel (m or ft)</p>
+</dd>
+<dt><em>y</em></dt>
+<dd>
+<p>the flow depth (normal depth in this function) [m or ft]</p>
+</dd>
+<dt><em>m</em></dt>
+<dd>
+<p>the horizontal side slope</p>
+</dd>
+<dt><em>b</em></dt>
+<dd>
+<p>the bottom width (m or ft)</p>
+</dd>
+</dl>
+<p style="text-align: center;"><code class="reqn">B = b + 2my</code>
+</p>
+
+
+<dl>
+<dt><em>B</em></dt>
+<dd>
+<p>the top width of the channel (m or ft)</p>
+</dd>
+<dt><em>y</em></dt>
+<dd>
+<p>the flow depth (normal depth in this function) [m or ft]</p>
+</dd>
+<dt><em>m</em></dt>
+<dd>
+<p>the horizontal side slope</p>
+</dd>
+<dt><em>b</em></dt>
+<dd>
+<p>the bottom width (m or ft)</p>
+</dd>
+</dl>
+<p style="text-align: center;"><code class="reqn">D = \frac{A}{B}</code>
+</p>
+
+
+<dl>
+<dt><em>D</em></dt>
+<dd>
+<p>the hydraulic depth (m or ft)</p>
+</dd>
+<dt><em>A</em></dt>
+<dd>
+<p>water area (m^2 or ft^2)</p>
+</dd>
+<dt><em>B</em></dt>
+<dd>
+<p>the top width of the channel (m or ft)</p>
+</dd>
+</dl>
+<p style="text-align: center;"><code class="reqn">Z = \frac{[(b + my)y]^1.5}{\sqrt{b + 2my}}</code>
+</p>
+
+
+<dl>
+<dt><em>Z</em></dt>
+<dd>
+<p>the Section factor (m or ft)</p>
+</dd>
+<dt><em>y</em></dt>
+<dd>
+<p>the flow depth (normal depth in this function) [m or ft]</p>
+</dd>
+<dt><em>m</em></dt>
+<dd>
+<p>the horizontal side slope</p>
+</dd>
+<dt><em>b</em></dt>
+<dd>
+<p>the bottom width (m or ft)</p>
+</dd>
+</dl>
+<p style="text-align: center;"><code class="reqn">E = y + \frac{Q^2}{2gA^2}</code>
+</p>
+
+
+<dl>
+<dt><em>E</em></dt>
+<dd>
+<p>the Specific Energy (m or ft)</p>
+</dd>
+<dt><em>Q</em></dt>
+<dd>
+<p>the discharge [m^3/s or ft^3/s (cfs)] is VA</p>
+</dd>
+<dt><em>g</em></dt>
+<dd>
+<p>gravitational acceleration (m/s^2 or ft/sec^2)</p>
+</dd>
+<dt><em>A</em></dt>
+<dd>
+<p>water area (m^2 or ft^2)</p>
+</dd>
+<dt><em>y</em></dt>
+<dd>
+<p>the flow depth (normal depth in this function) [m or ft]</p>
+</dd>
+</dl>
+<p style="text-align: center;"><code class="reqn">VH = \frac{V^2}{2g}</code>
+</p>
+
+
+<dl>
+<dt><em>VH</em></dt>
+<dd>
+<p>the Velocity Head (m or ft)</p>
+</dd>
+<dt><em>V</em></dt>
+<dd>
+<p>the mean velocity (m/s or ft/sec)</p>
+</dd>
+<dt><em>g</em></dt>
+<dd>
+<p>gravitational acceleration (m/s^2 or ft/sec^2)</p>
+</dd>
+</dl>
+<p style="text-align: center;"><code class="reqn">w = {y}\sqrt{m^2 + 1}</code>
+</p>
+
+
+<dl>
+<dt><em>w</em></dt>
+<dd>
+<p>the Wetted Length (m or ft)</p>
+</dd>
+<dt><em>m</em></dt>
+<dd>
+<p>the horizontal side slope</p>
+</dd>
+<dt><em>y</em></dt>
+<dd>
+<p>the flow depth (normal depth in this function) [m or ft]</p>
+</dd>
+</dl>
+<p style="text-align: center;"><code class="reqn">\\tau_0 = {\\gamma}{RS}</code>
+</p>
+
+
+<dl>
+<dt><em>\tau_0</em></dt>
+<dd>
+<p>"mean boundary shear stress" (N/m^2 or lbf/ft^2)</p>
+</dd>
+<dt><em>\gamma</em></dt>
+<dd>
+<p>unit weight of water at the given temperature (N/m^3 or lbf/ft^3)</p>
+</dd>
+<dt><em>R</em></dt>
+<dd>
+<p>the hydraulic radius (m or ft)</p>
+</dd>
+<dt><em>S</em></dt>
+<dd>
+<p>the slope of the channel bed ["average bottom slope (equal to energy slope for uniform flow)"] (m/m or ft/ft)</p>
+</dd>
+</dl>
+<p style="text-align: center;"><code class="reqn">\\tau_d = {\\gamma}{yS}</code>
+</p>
+
+
+<dl>
+<dt><em>\tau_d</em></dt>
+<dd>
+<p>"shear stress in channel at maximum depth" (N/m^2 or lbf/ft^2)</p>
+</dd>
+<dt><em>\gamma</em></dt>
+<dd>
+<p>unit weight of water at the given temperature (N/m^3 or lbf/ft^3)</p>
+</dd>
+<dt><em>y</em></dt>
+<dd>
+<p>the flow depth ("maximum depth of flow in the channel for the design discharge") [m or ft]</p>
+</dd>
+<dt><em>S</em></dt>
+<dd>
+<p>the slope of the channel bed ["average bottom slope (equal to energy slope for uniform flow)"] (m/m or ft/ft)</p>
+</dd>
+</dl>
+<p># where
+</p>
+<p style="text-align: center;"><code class="reqn">\\gamma = {g}{\\rho}</code>
+</p>
+
+
+<dl>
+<dt><em>\gamma</em></dt>
+<dd>
+<p>unit weight of water at the given temperature (N/m^3 or lbf/ft^3)</p>
+</dd>
+<dt><em>g</em></dt>
+<dd>
+<p>gravitational acceleration (m/s^2 or ft/sec^2)</p>
+</dd>
+<dt><em>\rho</em></dt>
+<dd>
+<p>density of the fluid at a certain temperature (kg/m^3 or slugs/ft^3)</p>
+</dd>
+</dl>
+<p style="text-align: center;"><code class="reqn">\\gamma = {\\rho}\frac{g}{g_c}</code>
+</p>
+
+
+<dl>
+<dt><em>\gamma</em></dt>
+<dd>
+<p>unit weight of water at the given temperature (lbf/ft^3)</p>
+</dd>
+<dt><em>\rho</em></dt>
+<dd>
+<p>density of the fluid at a certain temperature (lbm/ft^3)</p>
+</dd>
+<dt><em>g</em></dt>
+<dd>
+<p>gravitational acceleration (m/s^2 or ft/sec^2)</p>
+</dd>
+<dt><em>gc</em></dt>
+<dd>
+<p>gravitational constant (32.2 lbm-ft/lbf-sec^2) used for dimensional analysis so that the Reynolds number will be dimensionless with US Customary units</p>
+</dd>
+</dl>
+<p style="text-align: center;"><code class="reqn">K = \frac{k(A * R ^ (2 / 3))}{n}</code>
+</p>
+
+
+<dl>
+<dt><em>K</em></dt>
+<dd>
+<p>channel conveyance (m^3/s or ft^3/sec)</p>
+</dd>
+<dt><em>k</em></dt>
+<dd>
+<p>unit conversion factor (1 in SI and 3.2808399^(1/3) in US Customary units</p>
+</dd>
+<dt><em>A</em></dt>
+<dd>
+<p>water area (m^2 or ft^2)</p>
+</dd>
+<dt><em>R</em></dt>
+<dd>
+<p>the hydraulic radius (m or ft)</p>
+</dd>
+<dt><em>n</em></dt>
+<dd>
+<p>Manning's roughness coefficient (dimensionless)</p>
+</dd>
+</dl>
+<p>A rough turbulent zone check is performed on the water flowing in the
+channel using the Reynolds number (Re). The Re equation follows:
+</p>
+<p style="text-align: center;"><code class="reqn">Re = \frac{\\rho RV}{\\mu}</code>
+</p>
+
+
+<dl>
+<dt><em>Re</em></dt>
+<dd>
+<p>Reynolds number (dimensionless)</p>
+</dd>
+<dt><em>\rho</em></dt>
+<dd>
+<p>water density (kg/m^3 or slug/ft^3)</p>
+</dd>
+<dt><em>R</em></dt>
+<dd>
+<p>the hydraulic radius (m or ft)</p>
+</dd>
+<dt><em>V</em></dt>
+<dd>
+<p>the mean velocity (m/s or ft/sec)</p>
+</dd>
+<dt><em>\mu</em></dt>
+<dd>
+<p>dynamic viscosity (* 10^-3 kg/m*s or * 10^-5 lb*sec/ft^2)</p>
+</dd>
+</dl>
+<p>A critical flow check is performed on the water flowing in the channel
+using the Froude number (Fr). The Fr equation follows:
+</p>
+<p style="text-align: center;"><code class="reqn">Fr = \frac{V}{\left(\sqrt{g * D}\right)}</code>
+</p>
+
+
+<dl>
+<dt><em>Fr</em></dt>
+<dd>
+<p>the Froude number (dimensionless)</p>
+</dd>
+<dt><em>V</em></dt>
+<dd>
+<p>the mean velocity (m/s or ft/sec)</p>
+</dd>
+<dt><em>g</em></dt>
+<dd>
+<p>gravitational acceleration (m/s^2 or ft/sec^2)</p>
+</dd>
+<dt><em>D</em></dt>
+<dd>
+<p>the hydraulic depth (m or ft)</p>
+</dd>
+</dl>
+<h3>Value</h3>
+
+<p>the missing parameters (Q, n, b, m, m1, m2, Sf, or y) &amp; V (velocity),
+Flow depth (y), Bottom width (b), symmetric side slope (m), Slope (Sf),
+A (area), P (wetted perimeters), R (hydraulic radius), B (top width), D
+(hydraulic depth), w (Wetted Length), w1 (Wetted Length for a
+non-symmetric trapezoid), w2 (Wetted Length for a non-symmetric trapezoid),
+Z (Section Factor), E (Specific Energy), K (conveyance), Vel_Head (Velocity
+Head), Re (Reynolds number), Fr (Froude number), taud (maximum shear
+stress), tau0 (average shear stress) as a <code>list</code>.
+Alternatively, the Flow depth (y), Flow area (A), Wetted Perimeters (P),
+Top Width (B), Bottom width (b), Hydraulic Radius (R), Hydraulic Depth (D),
+Flow Mean Velocity (V), Flow Discharge (Q), Manning's roughness coefficient
+(n), Slope (Sf), Temperature, Absolute Temperature, Saturated Liquid
+Density, Absolute or Dynamic Viscosity, Kinematic Viscosity, Froude number
+(Fr), Reynolds number (Re), symmetric side slope (m), non-symmetric side
+slope (m1), non-symmetric side slope (m2), Wetted Length (w), Wetted Length
+for a non-symmetric trapezoid (w1), Wetted Length for a non-symmetric
+trapezoid (w2), Section Factor (Z), conveyance (K), Specific Energy (E),
+Velocity Head (Vel_Head), Maximum Shear Stress (taud), Average Shear Stress
+(tau0) along with the associated units can be returned in a <code>data.table</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Assumption: Surface water temperature of 20 degrees Celsius (68 degrees
+Fahrenheit) at atmospheric pressure
+</p>
+<p>Note: Units must be consistent
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Irucka Embry
+</p>
+
+
+<h3>References</h3>
+
+
+<ol>
+<li>
+<p> Harlan Bengtson, "Calculation of Open Channel Flow Hydraulic Radius: Calculate using Trapezoid Area", Bright Hub Engineering Hydraulics in Civil Engineering, <a href="https://www.brighthubengineering.com/hydraulics-civil-engineering/67126-calculation-of-hydraulic-radius-for-uniform-open-channel-flow/">https://www.brighthubengineering.com/hydraulics-civil-engineering/67126-calculation-of-hydraulic-radius-for-uniform-open-channel-flow/</a>.
+</p>
+</li>
+<li>
+<p> Andrew Chadwick, John Morfett, and Martin Borthwick, <em>Hydraulics in Civil and Environmental Engineering</em>, Fourth Edition, New York City, New York: Spon Press, 2004, pages 132-133.
+</p>
+</li>
+<li>
+<p> R.J. Charbeneau, "Topic 8: Open Channel Flow", CE 365K Hydraulic Engineering Design, The University of Texas at Austin Cockrell School of Engineering Department of Civil, Architectural and Environmental Engineering, <a href="https://www.caee.utexas.edu/prof/maidment/CE365KSpr14/Visual/OpenChannels.pdf">https://www.caee.utexas.edu/prof/maidment/CE365KSpr14/Visual/OpenChannels.pdf</a>.
+</p>
+</li>
+<li>
+<p> Ven Te Chow, Ph.D., <em>Open-Channel Hydraulics</em>, McGraw-Hill Classic Textbook Reissue, New York City, New York: McGraw-Hill Book Company, 1988, pages 7-8, 13, 20-23, 28, 39-43.
+</p>
+</li>
+<li>
+<p> John C. Crittenden, R. Rhodes Trussell, David W. Hand, Kerry J. Howe, George Tchobanoglous, <em>MWH's Water Treatment: Principles and Design</em>, Third Edition, Hoboken, New Jersey: John Wiley &amp; Sons, Inc., 2012, pages 1861-1862.
+</p>
+</li>
+<li>
+<p> Prof. Dr. Aminuddin Ab Ghani, "Specific Energy &amp; Hydraulic Jump", Universiti Sains Malaysia (USM) Engineering Campus River Engineering and Urban Drainage Research Centre (REDACE), <a href="https://web.archive.org/web/20200110165556/https://redac.eng.usm.my/EAH/Handouts/Specific%20Energy%202011.pdf">https://web.archive.org/web/20200110165556/https://redac.eng.usm.my/EAH/Handouts/Specific%20Energy%202011.pdf</a>. Retrieved thanks to the Internet Archive: Wayback Machine
+</p>
+</li>
+<li>
+<p> Tyler G. Hicks, P.E., <em>Civil Engineering Formulas: Pocket Guide</em>, 2nd Edition, New York City, New York: The McGraw-Hill Companies, Inc., 2002, pages 423, 425.
+</p>
+</li>
+<li>
+<p> Gary P. Merkley, "BIE6300 - Irrigation &amp; Conveyance Control Systems, Spring 2004", 2004, Biological and Irrigation Engineering - OCW. Course 2, <a href="https://digitalcommons.usu.edu/ocw_bie/2/">https://digitalcommons.usu.edu/ocw_bie/2/</a>.
+</p>
+</li>
+<li>
+<p> Dan Moore, P.E., NRCS Water Quality and Quantity Technology Development Team, Portland Oregon, "Using Mannings Equation with Natural Streams", August 2011, <a href="https://web.archive.org/web/20210416091858/https://www.wcc.nrcs.usda.gov/ftpref/wntsc/H&amp;H/xsec/manningsNaturally.pdf">https://web.archive.org/web/20210416091858/https://www.wcc.nrcs.usda.gov/ftpref/wntsc/H&amp;H/xsec/manningsNaturally.pdf</a>. Retrieved thanks to the Internet Archive: Wayback Machine
+</p>
+</li>
+<li>
+<p> Robert L. Mott and Joseph A. Untener, <em>Applied Fluid Mechanics</em>, Seventh Edition, New York City, New York: Pearson, 2015, pages 376, 392.
+</p>
+</li>
+<li>
+<p> The NIST Reference on Constants, Units, and Uncertainty, Fundamental Constants Data Center of the NIST Physical Measurement Laboratory, "standard acceleration of gravity g_n", <a href="https://physics.nist.gov/cgi-bin/cuu/Value?gn">https://physics.nist.gov/cgi-bin/cuu/Value?gn</a>.
+</p>
+</li>
+<li>
+<p> James D. Schall, Everett V. Richardson, and Johnny L. Morris, U.S. Department of Transportation Federal Highway Administration &amp; National Highway Institute (NHI) and Office of Bridge Technology (HIBTemp), <em>Introduction to Highway Hydraulics: Hydraulic Design Series Number 4</em>, Fourth Edition, June 2008, pages 4-5, 4-16 - 4-17 and 5-5, <a href="https://www.fhwa.dot.gov/engineering/hydraulics/pubs/08090/HDS4_608.pdf">https://www.fhwa.dot.gov/engineering/hydraulics/pubs/08090/HDS4_608.pdf</a>.
+</p>
+</li>
+<li>
+<p> Terry W. Sturm, <em>Open Channel Hydraulics</em>, 2nd Edition, New York City, New York: The McGraw-Hill Companies, Inc., 2010, pages 2, 8, 36, 102, 120, 153.
+</p>
+</li>
+<li>
+<p> US Department of Transportation Federal Highway Administration (FHWA), "Urban Drainage Design Manual", Hydraulic Engineering Circular No. 22, Third Edition, Publication No. FHWA-NHI-10-009 September 2009 (Revised August 2013), pages 5-7 - 5-8, <a href="https://www.fhwa.dot.gov/engineering/hydraulics/library_arc.cfm?pub_number=22&amp;id=140">https://www.fhwa.dot.gov/engineering/hydraulics/library_arc.cfm?pub_number=22&amp;id=140</a>.
+</p>
+</li>
+<li>
+<p> Ali R.Vatankhah, "Explicit solutions for critical and normal depths in trapezoidal and parabolic open channels", <em>Ain Shams Engineering Journal</em>, Volume 4, Issue 1, March 2013, Pages 17-23, <a href="https://www.sciencedirect.com/science/article/pii/S2090447912000329">https://www.sciencedirect.com/science/article/pii/S2090447912000329</a>.
+</p>
+</li>
+<li>
+<p> Wikimedia Foundation, Inc. Wikipedia, 15 May 2019, "Conversion of units", <a href="https://en.wikipedia.org/wiki/Conversion_of_units">https://en.wikipedia.org/wiki/Conversion_of_units</a>.
+</p>
+</li>
+<li>
+<p> Wikimedia Foundation, Inc. Wikipedia, 23 May 2019, "Manning formula", <a href="https://en.wikipedia.org/wiki/Manning_formula">https://en.wikipedia.org/wiki/Manning_formula</a>.
+</p>
+</li>
+</ol>
+<h3>See Also</h3>
+
+<p><code>Manningrect</code> for a rectangular cross-section, <code>Manningtri</code>
+for a triangular cross-section, <code>Manningpara</code> for a parabolic
+cross-section, and <code>Manningcirc</code> for a circular cross-section.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Example 1
+
+library(iemisc)
+# Exercise 4.1 from Sturm (page 153)
+
+uu &lt;- Manningtrap(Q = 3000, b = 40, m = 3, Sf = 0.002, n = 0.025,
+units = "Eng", type = "symmetrical", output = "list")
+# Q = 3000 cfs, b = 40 ft, m = 3, Sf = 0.002 ft/ft, n = 0.025,
+# units = English units
+# This will solve for y since it is missing and y will be in ft
+
+uu$y # only returns y
+
+uu # returns all results
+
+
+
+# Example 2
+
+# Please refer to the iemisc: Manning... Examples using iemiscdata
+# [https://www.ecoccs.com/R_Examples/Manning_iemiscdata_Examples.pdf] and iemisc:
+# Open Channel Flow Examples involving Geometric Shapes with the
+# Gauckler-Manning-Strickler Equation
+# [https://www.ecoccs.com/R_Examples/Open-Channel-Flow_Examples_Geometric_Shapes.pdf]
+# for the cross-section examples using iemiscdata
+
+
+
+
+
+
+
+
+</code></pre>
+
+
+</div>

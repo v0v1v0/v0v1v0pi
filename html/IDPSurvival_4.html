@@ -1,0 +1,122 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>isurvdiff.smax</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Maximum values of s for which the IDP test returns a determinate decision
+</h2>
+
+<h3>Description</h3>
+
+<p>Search for the maximum values of parameter s for which the IDP test <code>isurvdiff(formula,...)</code>
+issues a determinate decision. 
+The function test values of s up to the parameter smax. If for smax the IDP test is still determinate,  
+<code>isurvdiff.smax</code> returns list(smax,testout). If for s=0 the test is already indeterminate,  
+<code>isurvdiff.smax</code> returns list(-1,testout), where testout is the last executed test.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">isurvdiff.smax(formula, ..., verbose=FALSE, accuracy=0.05, smax=12)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>a formula expression of the form <code>Surv(time, status) ~ predictor</code>. 
+A single predictor is admitted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>whether to display each value of s that is tried</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>accuracy</code></td>
+<td>
+<p>to which precision s should be computed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smax</code></td>
+<td>
+<p>to which maximum value s should be tried</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>All arguments of <code>isurvdiff.smax</code> are passed to <code>isurvdiff</code> to perform the test.
+Refer to the help of <code>isurvdiff</code> for more details about the arguments.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>s</code></td>
+<td>
+
+<p>The maximum value of s for which the test returns a determinate decision (H=0 or H=1).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test0</code></td>
+<td>
+
+<p>The value returned by <code>isurvdiff(formula,...)</code> for the last test performed.
+Refer to the help of <code>isurvdiff</code> for more details.
+</p>
+</td>
+</tr>
+</table>
+<h3>METHOD</h3>
+
+<p>This function implements the IDP sum-rank test describe in Mangili and others (2014).
+</p>
+
+
+<h3>References</h3>
+
+<p>Benavoli, A., Mangili, F., Zaffalon, M. and Ruggeri, F. (2014). Imprecise Dirichlet process with application to the hypothesis test on the probability that X &lt; Y.  <em>ArXiv e-prints</em>, <a href="http://adsabs.harvard.edu/abs/2014arXiv1402.2755B">http://adsabs.harvard.edu/abs/2014arXiv1402.2755B</a>. 
+</p>
+<p>Mangili, F., Benavoli, A., Zaffalon, M. and de Campos, C. (2014). Imprecise Dirichlet Process for the estimate and comparison of survival functions with censored data. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>Surv</code>,
+<code>isurvdiff</code>.  
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(lung,package='survival')
+lung &lt;- lung[1:40,]	# reduced data set just to ensure that the
+ 					# example is very fast to run for building the package
+test &lt;-isurvdiff.smax(Surv(time,status)~sex,lung,groups=c(1,2), 
+	 	alternative = 'two.sided', nsamples=1000) 
+                    # better to use larger value of nsamples
+					# this small value is to run it quickly
+print(test$test0)
+cat("Maximum s giving the same decision: ",test$s)
+
+</code></pre>
+
+
+</div>

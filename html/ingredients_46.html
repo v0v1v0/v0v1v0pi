@@ -1,0 +1,75 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>print.ceteris_paribus_explainer</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Prints Individual Variable Explainer Summary</h2>
+
+<h3>Description</h3>
+
+<p>Prints Individual Variable Explainer Summary
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'ceteris_paribus_explainer'
+print(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an individual variable profile explainer produced with the <code>ceteris_paribus()</code> function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments that will be passed to <code>head()</code></p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">library("DALEX")
+library("ingredients")
+titanic_small &lt;- select_sample(titanic_imputed, n = 500, seed = 1313)
+
+# build a model
+model_titanic_glm &lt;- glm(survived ~ gender + age + fare,
+                         data = titanic_small,
+                         family = "binomial")
+
+explain_titanic_glm &lt;- explain(model_titanic_glm,
+                               data = titanic_small[,-8],
+                               y = titanic_small[,8])
+
+cp_glm &lt;- ceteris_paribus(explain_titanic_glm, titanic_small[1,])
+cp_glm
+
+
+library("ranger")
+
+apartments_rf_model &lt;- ranger(m2.price ~., data = apartments)
+
+explainer_rf &lt;- explain(apartments_rf_model,
+                        data = apartments_test[,-1],
+                        y = apartments_test[,1],
+                        label = "ranger forest",
+                        verbose = FALSE)
+
+apartments_small &lt;- select_sample(apartments_test, 10)
+
+cp_rf &lt;- ceteris_paribus(explainer_rf, apartments_small)
+cp_rf
+
+</code></pre>
+
+
+</div>

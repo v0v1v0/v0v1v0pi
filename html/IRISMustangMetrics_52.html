@@ -1,0 +1,152 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>STALTAMetric</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Maximum STA/LTA of a signal</h2>
+
+<h3>Description</h3>
+
+<p>The STALTAMetric() function calculates the maximum of STA/LTA over
+the incoming seismic signal.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">STALTAMetric(st, staSecs, ltaSecs, increment, algorithm)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>st</code></td>
+<td>
+<p>a <code>Stream</code> object containing a seismic signal</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>staSecs</code></td>
+<td>
+<p>length of the <b>s</b>hort term averaging window in seconds (default=3)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ltaSecs</code></td>
+<td>
+<p>length of the <b>l</b>ong term averaging window in seconds (default=30)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algorithm</code></td>
+<td>
+<p>algorithm to be used (default="classic_LR")</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>increment</code></td>
+<td>
+<p>increment used when sliding the averaging windows to the next location (default=1)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Currently supported algorithms include:
+</p>
+
+<ul>
+<li>
+<p><code>"classic_RR"</code>
+</p>
+</li>
+<li>
+<p><code>"classic_LR"</code>
+</p>
+</li>
+<li>
+<p><code>"EarleAndShearer_envelope"</code>
+</p>
+</li>
+</ul>
+<p>This metric applies the <code>STALTA</code> method of <code>Trace</code> objects
+to every <code>Trace</code> in <code>st</code> with the following parameter settings:
+</p>
+
+<ul>
+<li>
+<p><code>demean=TRUE</code>
+</p>
+</li>
+<li>
+<p><code>detrend=TRUE</code>
+</p>
+</li>
+<li>
+<p><code>taper=0.0</code>
+</p>
+</li>
+</ul>
+<p>The final metric value is the maximum STALTA value found in any <code>Trace</code>
+in this <code>Stream</code>.
+</p>
+<p>Further details are given in the documentation for <code>STALTA.Trace()</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with a single <code>SingleValueMetric</code> object is returned. The metric
+name is <code>max_stalta</code>.
+</p>
+
+
+<h3>Note</h3>
+
+
+<p>The <code>STALTA</code> method of <code>Trace</code> objects returns a numeric vector of STA/LTA values
+that has the same length as the signal data.  This is a moderately time consuming operation.
+By comparison, finding the maximum value of this vector of STA/LTA values is very fast.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://en.wikipedia.org/wiki/First_break_picking">First break picking</a> (Wikipedia)
+</p>
+<p><a href="https://www.crewes.org/Documents/ResearchReports/2014/CRR201476.pdf">Automatic time-picking of first arrivals on large seismic datasets</a> (Wong 2014)
+</p>
+<p><a href="http://www.fcaglp.unlp.edu.ar/~velis/papers/PickingGeop10.pdf">Automatic first-breaks picking: New strategies and algorithms</a> (Sabbione and Velis 2010)
+)
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  ## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+# Get the waveform
+starttime &lt;- as.POSIXct("2012-02-12",tz="GMT")
+endtime &lt;- as.POSIXct("2012-02-13",tz="GMT")
+st &lt;- getDataselect(iris,"AK","GHO","","BHN",starttime,endtime)
+
+# Calculate the STA/LTA metric and show the results
+metricList &lt;- STALTAMetric(st)
+dummy &lt;- lapply(metricList, show)
+  
+## End(Not run)
+</code></pre>
+
+
+</div>

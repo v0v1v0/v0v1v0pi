@@ -1,0 +1,174 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>aic.islasso</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Optimization for the selection of the tuning parameter
+</h2>
+
+<h3>Description</h3>
+
+<p>This function performs a minimization of the AIC/BIC criterion for selecting the tuning parameter in “<code>islasso</code>”.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">aic.islasso(object, method = c("AIC", "BIC", "AICc", "GCV", "GIC"), 
+  interval, g = 0, y, X, 
+  intercept = FALSE, family = gaussian(), alpha = 1, offset, 
+  weights, unpenalized, control = is.control(), trace = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>a fitted model object of class "islasso".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>the criterion to optimize, AIC, BIC, AICc, GCV, GIC.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interval</code></td>
+<td>
+<p>the  lower and upper limits of <code class="reqn">\lambda</code> wherein the AIC/BIC criterion should be optimized. Can be missing, if <code>object</code> has been obtained via cross-validation (and therefore includes the range of lambdas)  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>g</code></td>
+<td>
+<p>a value belonging to the interval [0, 1]. Classical BIC is returned by letting g = 0 (default value), whereas extended BIC corresponds to the case g = 0.5.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>if <code>object</code> is missing, the response vector of length n.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>if <code>object</code> is missing, the design matrix of dimension n * p.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intercept</code></td>
+<td>
+<p>if <code>object</code> is missing, if TRUE the intercept is added to the model matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>if <code>object</code> is missing, a description of the error distribution, <code>family=gaussian</code>, <code>family=binomial</code> and <code>family=poisson</code> are implemented with canonical link.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>The elasticnet mixing parameter, with <code class="reqn">0\le\alpha\le 1</code>. The penalty is defined
+as </p>
+<p style="text-align: center;"><code class="reqn">(1-\alpha)/2||\beta||_2^2+\alpha||\beta||_1.</code>
+</p>
+ <p><code>alpha=1</code>
+is the lasso penalty, and <code>alpha=0</code> the ridge penalty.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+<p>this can be used to specify an a priori known component to be included in the linear predictor during fitting. This should be NULL or a numeric vector of length equal to the number of cases.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>observation weights. Default is 1 for each observation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unpenalized</code></td>
+<td>
+<p>a vector used to specify the unpenalized estimators; unpenalized has to be a vector of logicals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>a list of parameters for controlling the fitting process (see <code>islasso.control</code> for more details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trace</code></td>
+<td>
+<p>Should the iterative procedure be printed? TRUE is the default value.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Minimization of the Akaike Information Criterion (AIC), or Bayesian Information Criterion (BIC) or several other criteria are sometimes employed to select the tuning parameter as an alternative to the cross validation. The model degrees of freedom (not necessarly integers as in the plain lasso) used in all methods are computed as trace of the hat matrix at convergence. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>the optimal lambda value is returned
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Maintainer: Gianluca Sottile &lt;gianluca.sottile@unipa.it&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>islasso.fit</code>, <code>summary.islasso</code>, <code>residuals.islasso</code>, <code>logLik.islasso</code>, <code>predict.islasso</code> and <code>deviance.islasso</code> methods.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(1)
+n &lt;- 100
+p &lt;- 100
+p1 &lt;- 20  #number of nonzero coefficients
+coef.veri &lt;- sort(round(c(seq(.5, 3, l=p1/2), seq(-1, -2, l=p1/2)), 2))
+sigma &lt;- 1
+
+coef &lt;- c(coef.veri, rep(0, p-p1))
+
+X &lt;- matrix(rnorm(n*p), n, p)
+mu &lt;- drop(X%*%coef)
+y &lt;- mu + rnorm(n, 0, sigma)
+
+o &lt;- islasso(y ~ ., data = data.frame(y = y, X))
+
+## Not run: 
+#use the evaluation interval of the fit
+lambda_aic &lt;- aic.islasso(o, method = "AIC") 
+
+#overwrites the evaluation interval for lambda
+lambda_bic &lt;- aic.islasso(o, interval = c(.1, 30), method = "BIC") 
+
+#overwrites the evaluation interval for lambda using eBIC criterion
+lambda_ebic &lt;- aic.islasso(o, interval = c(.1, 30), method = "BIC", g = .5) 
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,442 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ivah</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Instrumental variable estimation of the causal exposure effect in 
+additive hazards (AH) models 
+</h2>
+
+<h3>Description</h3>
+
+<p><code>ivah</code> performs instrumental variable estimation of the causal exposure effect in 
+AH models with individual-level data. Below, <code class="reqn">Z</code>, <code class="reqn">X</code>, and 
+<code class="reqn">T</code> are the instrument, the exposure, and the outcome, respectively. 
+<code class="reqn">L</code> is a vector of covariates that we wish to control for in the analysis; 
+these would typically be confounders for the instrument and the outcome.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ivah(estmethod, X, T, fitZ.L=NULL, fitX.LZ=NULL, fitT.LX=NULL, data,  
+  ctrl=FALSE, clusterid=NULL, event, max.time, max.time.psi, n.sim=100, 
+  vcov.fit=TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>estmethod</code></td>
+<td>
+
+<p>a string specifying the desired estimation method; either <code>"ts"</code> for two-stage
+estimation, or <code>"g"</code> for G-estimation. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+
+<p>a string specifying the name of the exposure <code class="reqn">X</code> in <code>data</code>. This is not needed if 
+<code>fitX.LZ</code> is specified.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>T</code></td>
+<td>
+
+<p>a string specifying the name of the follow-up time <code class="reqn">T</code> in <code>data</code>. This is not needed if 
+<code>fitT.LZ</code> is specified.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitZ.L</code></td>
+<td>
+
+<p>an object of class <code>"glm"</code>, as returned by the <code>glm</code> function 
+in the <span class="pkg">stats</span> package. This is a fitted GLM for <code class="reqn">E(Z|L)</code>. If there are no covariates,
+then <code>fitZ.L</code> may be specified as a model with an intercept only. This argument
+is not used when <code>estmethod="ts"</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitX.LZ</code></td>
+<td>
+
+<p>an object of class <code>"glm"</code>, as returned by the <code>glm</code> function 
+in the <span class="pkg">stats</span> package. This is a fitted GLM for <code class="reqn">E(X|L,Z)</code>. This argument
+is not used when <code>estmethod="g"</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitT.LX</code></td>
+<td>
+
+<p>If <code>estmethod="ts"</code>, then this is an object of class <code>"ah"</code>, as 
+returned by the <code>ah</code> function in the <span class="pkg">ivtools</span> package. 
+In this case it is a fitted AH model for <code class="reqn">\lambda(t|L,X)</code>. 
+This argument is not used when <code>estmethod="g"</code>.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>a data frame containing the variables in the model. The covariates, instrument,
+exposure and outcome can have arbitrary names, e.g. they don't need to 
+be called <code>L</code>, <code>Z</code>, <code>X</code> and <code>T</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ctrl</code></td>
+<td>
+
+<p>logical. Should the control function <code class="reqn">R=X-\hat{X}</code> be used when re-fitting 
+<code>fitY</code>? This argument is not used when <code>estmethod="g"</code>.   
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clusterid</code></td>
+<td>
+
+<p>an optional string containing the name of a cluster identification variable when 
+data are clustered. Specifying <code>clusterid</code> corrects the standard errors
+but does not affect the estimates. This argument is not used when 
+<code>estmethod="g"</code>, since correction for clustered data is currently not implemented
+for G-estimation. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event</code></td>
+<td>
+
+<p>a string specifying the name of the status indicator, 0="no event", 1="event".
+This argument is not used when <code>estmethod="ts"</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.time</code></td>
+<td>
+
+<p>optional follow-up for estimating <code class="reqn">B(t)</code> with G-estimation. 
+Defaults to maximal observed follow-up time in <code>data</code>.
+This argument is not used when <code>estmethod="ts"</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.time.psi</code></td>
+<td>
+
+<p>optional follow-up for estimating <code class="reqn">\psi</code> with G-estimation. 
+Defaults to maximal observed follow-up time in <code>data</code>.
+This argument is not used when <code>estmethod="ts"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.sim</code></td>
+<td>
+
+<p>optional number of resamplings for testing goodness-of-fit of constant effects model
+for G-estimation. Defaults to 100. This argument is not used when <code>estmethod="ts"</code>.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vcov.fit</code></td>
+<td>
+
+<p>logical. Should the variance-covariance matrix be computed? 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>optional arguments passed on to the <code>nleqslv</code> function, which is used to 
+solve the estimating equations when <code>estmethod="g"</code>. See the help pages 
+for <code>nleqslv</code>. This argument is not used when <code>estmethod="ts"</code>. 
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+ 
+<p>The <code>ivah</code> estimates different parameters, depending on whether
+<code>estmethod="ts"</code> or <code>estmethod="g"</code>. If <code>estmethod="ts"</code>, then 
+<code>ivah</code> uses two-stage estimation to estimate the parameter <code class="reqn">\psi</code> in the causal AH model
+</p>
+<p style="text-align: center;"><code class="reqn">\lambda(t|L,Z,X)-\lambda_0(t|L,Z,X)=m^T(L)X\psi.</code>
+</p>
+
+<p>Here, <code class="reqn">\lambda_0(t|L,Z,X)</code> is counterfactual hazard function,
+had the exposure been set to 0. The vector function <code class="reqn">m(L)</code> contains interaction terms
+between <code class="reqn">L</code> and <code class="reqn">X</code>. These are specified 
+implicitly through the model <code>fitY</code>. The model <code>fitX.LZ</code> is used to 
+construct predictions <code class="reqn">\hat{X}=\hat{E}(X|L,Z)</code>. These predictions are 
+subsequently used to re-fit the model <code>fitY</code>, with <code class="reqn">X</code> replaced with 
+<code class="reqn">\hat{X}</code>. The obtained coefficient(s) for <code class="reqn">X</code> is the two-stage 
+estimator of <code class="reqn">\psi</code>.  
+</p>
+<p>If <code>estmethod="g"</code>, then <code>ivah</code> uses G-estimation to estimate the function 
+<code class="reqn">B(t)</code> in the causal AH model
+</p>
+<p style="text-align: center;"><code class="reqn">\lambda(t|L,Z,X)-\lambda_0(t|L,Z,X)=XdB(t).</code>
+</p>
+ 
+<p>It also delivers an estimate of <code class="reqn">dB(t)</code> assuming that this function is 
+constant across time (=<code class="reqn">\psi</code>).
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>ivah</code> returns an object of class <code>"ivah"</code>, which inherits from 
+class <code>"ivmod"</code>. An object of class <code>"ivah"</code> is a list containing 
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+
+<p>the matched call. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>input</code></td>
+<td>
+
+<p><code>input</code> is a list containing all input arguments     
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>est</code></td>
+<td>
+
+<p>a vector containing the estimate of <code class="reqn">\psi</code>.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vcov</code></td>
+<td>
+
+<p>the variance-covariance matrix for the estimate of <code class="reqn">\psi</code>, 
+obtained with the sandwich formula. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>estfunall</code></td>
+<td>
+
+<p>a matrix of all subject-specific contributions to the estimating functions used in the estimation process.
+One row for each subject, one column for each parameter. If <code>estmethod="ts"</code>,
+then the first columns correspond to the parameters estimated by <code>fitX.LZ</code>, and
+the last columns correspond to the parameters estimated by the re-fitted model 
+<code>fitY</code>. If <code>estmethod="g"</code>, then <code>estfunall</code> is NULL. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d.estfun</code></td>
+<td>
+
+<p>the jacobian matrix of <code>colMeans(estfun)</code>. If <code>estmethod="g"</code>, 
+then <code>d.estfun</code> is NULL.    
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>converged</code></td>
+<td>
+
+<p>logical. Was a solution found to the estimating equations?   
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitY</code></td>
+<td>
+
+<p>the re-fitted model <code>fitY</code> used in the estimation process when <code>estmethod="ts"</code>.
+This element is NULL when <code>estmethod="g"</code>.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stime</code></td>
+<td>
+
+<p>the ordered event times within (0,max.time). This element is NULL when <code>estmethod="ts"</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+
+<p>the estimate of <code class="reqn">B(t)</code>. This element is NULL when <code>estmethod="ts"</code>.   
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se_B</code></td>
+<td>
+
+<p>the standard error of the estimate of <code class="reqn">B(t)</code>. This element is NULL when <code>estmethod="ts"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pval_0</code></td>
+<td>
+
+<p>p-value corresponding to supremum test of the null <code class="reqn">B(t)=0</code>. 
+This element is NULL when <code>estmethod="ts"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps_B</code></td>
+<td>
+
+<p>the iid-decomposition of <code class="reqn">\sqrt{n}(\hat{B}(t) - B(t))</code>. 
+This element is NULL when <code>estmethod="ts"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pval_psi</code></td>
+<td>
+
+<p>p-value corresponding to the null <code class="reqn">\psi=0</code>. 
+This element is NULL when <code>estmethod="ts"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pval_GOF_sup</code></td>
+<td>
+
+<p>p-value corresponding to supremum test of the null <code class="reqn">B(t)=\psi</code>.  
+This element is NULL when <code>estmethod="ts"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pval_GOF_CvM</code></td>
+<td>
+
+<p>as pval_GOF_sup but now based on the Cramer Von Mises test statistic.  
+This element is NULL when <code>estmethod="ts"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>GOF.resamp</code></td>
+<td>
+
+<p>a matrix with first row the ordered jump times in (0,max.time.bet),
+second row the observed test process, and the remaining rows are 
+50 processes sampled under the null. 
+This element is NULL when <code>estmethod="ts"</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p><code>ivah</code> allows for weights. However, these are defined implicitly 
+through the input models. Thus, when models are used as input to <code>ivah</code>, 
+these models have to be fitted with the same weights.
+</p>
+<p>Left-truncation and correction of standard errors for clustered data are currently not
+implemented when <code>estmethod="g"</code>.     
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Arvid Sjolander and Torben Martinussen. 
+</p>
+
+
+<h3>References</h3>
+
+<p>Martinussen T., Vansteelandt S., Tchetgen Tchetgen E.J., Zucker D.M. (2017). 
+Instrumental variables estimation of exposure effects on a time-to-event 
+endpoint using structural cumulative survival models. 
+<em>Epidemiology</em> <b>73</b>(4): 1140-1149.
+</p>
+<p>Sjolander A., Martinussen T. (2019). Instrumental variable estimation with the R package ivtools.
+<em>Epidemiologic Methods</em> <b>8</b>(1), 1-20.
+</p>
+<p>Tchetgen Tchetgen E.J., Walter S., Vansteelandt S., Martinussen T., Glymour M. (2015).
+Instrumental variable estimation in a survival context. <em>Epidemiology</em> <b>26</b>(3): 402-410. 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+require(ahaz)
+
+set.seed(9)
+
+n &lt;- 1000
+psi0 &lt;- 0.2
+psi1 &lt;- 0.0
+
+U &lt;- runif(n)
+L &lt;- runif(n)
+Z &lt;- rbinom(n, 1, plogis(-0.5+L)) 
+X &lt;- runif(n, min=Z+U, max=2+Z+U)
+T &lt;- rexp(n, rate=psi0*X+psi1*X*L+0.2*U+0.2*L)
+C &lt;- 5  #administrative censoring at t=5
+d &lt;- as.numeric(T&lt;C)
+T &lt;- pmin(T, C) 
+data &lt;- data.frame(L, Z, X, T, d)
+#break ties
+data$T &lt;- data$T+rnorm(n=nrow(data), sd=0.001)
+
+#two-stage estimation
+fitX.LZ &lt;- glm(formula=X~Z+L, data=data)
+fitT.LX &lt;- ah(formula=Surv(T, d)~X+L+X*L, data=data)
+fitIV &lt;- ivah(estmethod="ts", fitX.LZ=fitX.LZ, fitT.LX=fitT.LX, data=data, 
+  ctrl=TRUE)
+summary(fitIV)
+
+#G-estimation
+fitZ.L &lt;- glm(formula=Z~L, family="binomial", data=data)
+fitIV &lt;- ivah(estmethod="g", X="X", T="T", fitZ.L=fitZ.L, data=data,  
+  event="d", max.time=4, max.time.psi=4, n.sim=100)
+summary(fitIV)
+plot(fitIV)
+
+
+
+</code></pre>
+
+
+</div>

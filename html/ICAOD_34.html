@@ -1,0 +1,118 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sens.control</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Returns Control Parameters To Find Maximum of The Sensitivity (Derivative) Function Over The Design Space</h2>
+
+<h3>Description</h3>
+
+<p>It returns  some arguments of the <code>nloptr</code> function including the list of control parameters.
+This function is used to find the maximum of the sensitivity (derivative) function over the design space in order to
+calculate the efficiency lower bound (ELB).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sens.control(
+  x0 = NULL,
+  optslist = list(stopval = -Inf, algorithm = "NLOPT_GN_DIRECT_L", xtol_rel = 1e-08,
+    ftol_rel = 1e-08, maxeval = 1000),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x0</code></td>
+<td>
+<p>Vector of starting values for maximizing the sensitivity (derivative) function over the design space <code class="reqn">x</code>.
+It will be passed to the optimization function <code>nloptr</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optslist</code></td>
+<td>
+<p>A list. It will be passed to the argument <code>opts</code>  of the function <code>nloptr</code> to find the maximum of the sensitivity function over the design space. See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments will be passed to <code>nl.opts</code> from package <code>nloptr</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>ELB is a measure of  proximity of a design to the optimal design without knowing the latter.
+Given a design, let <code class="reqn">\epsilon</code> be the global maximum
+of the sensitivity (derivative) function with respect the vector of the model predictors <code class="reqn">x</code> over the design space.
+ELB is given by </p>
+<p style="text-align: center;"><code class="reqn">ELB = p/(p + \epsilon),</code>
+</p>
+
+<p>where <code class="reqn">p</code> is the number of model parameters. Obviously,
+calculating ELB requires finding <code class="reqn">\epsilon</code> and therefore,
+a maximization problem to be solved. The function <code>nloptr</code>
+is used here to solve this maximization problem. The arguments <code>x0</code> and <code>optslist</code>
+will be passed to this function as follows:
+</p>
+<p>Argument <code>x0</code> provides the user initial values for this maximization problem
+and will be passed to the argument with the same name
+in the function  <code>nloptr</code>.
+</p>
+<p>Argument <code>optslist</code> will be passed to the argument <code>opts</code> of the function <code>nloptr</code>.
+<code>optslist</code> is a <code>list</code> and the most important components are listed as follows:
+</p>
+
+<dl>
+<dt><code>stopval</code></dt>
+<dd>
+<p>Stop minimization when an objective value &lt;= <code>stopval</code> is found. Setting <code>stopval</code> to <code>-Inf</code> disables this stopping criterion (default).</p>
+</dd>
+<dt><code>algorithm</code></dt>
+<dd>
+<p>Defaults to <code>NLOPT_GN_DIRECT_L</code>. DIRECT-L is a deterministic-search algorithm based on systematic division of the search domain into smaller and smaller hyperrectangles.</p>
+</dd>
+<dt><code>xtol_rel</code></dt>
+<dd>
+<p>Stop when an optimization step (or an estimate of the optimum) changes every parameter by less than <code>xtol_rel</code> multiplied by the absolute value of the parameter. Criterion is disabled if <code>xtol_rel</code> is non-positive.</p>
+</dd>
+<dt><code>ftol_rel</code></dt>
+<dd>
+<p>Stop when an optimization step (or an estimate of the optimum) changes the objective function value by less than <code>ftol_rel</code> multiplied by the absolute value of the function value. Criterion is disabled if <code>ftol_rel</code> is non-positive. </p>
+</dd>
+<dt><code>maxeval</code></dt>
+<dd>
+<p>Stop when the number of function evaluations exceeds <code>maxeval</code>. Criterion is disabled if <code>maxeval</code> is non-positive.</p>
+</dd>
+</dl>
+<p>For more details, see <code>?nloptr::nloptr.print.options</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>ELB must be <code>0 &lt;=ELB &lt;= 1</code>.
+When the computed ELB is larger than one (equivalently <code class="reqn">\epsilon</code> is negative), it may be a signal that the obtained <code class="reqn">\epsilon</code> is not the global maximum.
+To overcome this issue, please increase
+the value of the parameter <code>maxeval</code> to allow the
+optimization algorithm to find the global maximum
+of the sensitivity (derivative) function over the design space.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">sens.control()
+sens.control(optslist = list(maxeval = 1000))
+</code></pre>
+
+
+</div>

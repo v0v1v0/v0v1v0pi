@@ -1,0 +1,123 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>igroup_process</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Handle unexpected additional grouping structure</h2>
+
+<h3>Description</h3>
+
+<p>This function is designed to be used by a package author within an enclosing
+function. The enclosing function is assumed to take as input a dataframe and
+have an <code>iface</code> specified for that dataframe.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">igroup_process(df = NULL, fn, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>a dataframe from an enclosing function in which the grouping may or
+may not have been correctly supplied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fn</code></td>
+<td>
+<p>a function to call with the correctly grouped dataframe as specified
+by the <code>iface</code> in the enclosing function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>passed onto <code>iconvert</code> this could be used to supply
+<code>.prune</code> parameters. triple dot parameters in the enclosing function will
+be separately handled and automatically passed to <code>fn</code> so in general should
+not be passed to <code>igroup_process</code> as an intermediary although it probably
+won't hurt. This behaviour is similar to <code>NextMethod</code> in S3 method
+dispatch.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function detects when the grouping of the input has additional groups
+over and above those in the specification and intercepts them, regrouping
+the dataframe and applying <code>fn</code> group-wise using an equivalent of a
+<code>dplyr::group_modify</code>. The parameters provided to the enclosing function will be
+passed to <code>fn</code> and they should have compatible method signatures.
+</p>
+
+
+<h3>Value</h3>
+
+<p>the result of calling <code>fn(df, ...)</code> on each unexpected group
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# This specification requires that the dataframe is grouped only by the color
+# column
+i_diamond_price = interfacer::iface(
+  color = enum(`D`,`E`,`F`,`G`,`H`,`I`,`J`, .ordered=TRUE) ~ "the color column",
+  price = integer ~ "the price column",
+  .groups = ~ color
+)
+
+# An example function which would be exported in a package
+ex_mean = function(df = i_diamond_price, extra_param = ".") {
+  
+  # When called with a dataframe with extra groups `igroup_process` will 
+  # regroup the dataframe according to the structure 
+  # defined for `i_diamond_price` and apply the inner function to each group
+  # after first calling `ivalidate` on each group.
+  
+  igroup_process(df, 
+    
+    # the real work of this function is provided as an anonymous inner
+    # function (but can be any other function e.g. package private function)
+    # or a purrr style lambda.
+    
+    function(df, extra_param) {
+      message(extra_param, appendLF = FALSE)
+      return(df %&gt;% dplyr::summarise(mean_price = mean(price)))
+    }
+    
+  )
+}
+
+# The correctly grouped dataframe. The `ex_mean` function calculates the mean
+# price for each `color` group.
+ggplot2::diamonds %&gt;% 
+  dplyr::group_by(color) %&gt;% 
+  ex_mean(extra_param = "without additional groups...") %&gt;% 
+  dplyr::glimpse()
+  
+# If an additionally grouped dataframe is provided by the user. The `ex_mean` 
+# function calculates the mean price for each `cut`,`clarity`, and `color` 
+# combination.
+
+ggplot2::diamonds %&gt;% 
+  dplyr::group_by(cut, color, clarity) %&gt;% 
+  ex_mean() %&gt;% 
+  dplyr::glimpse()
+  
+# The output of this is actually grouped by cut then clarity as
+# color is consumed by the igroup_dispatch summarise.
+
+</code></pre>
+
+
+</div>

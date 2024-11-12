@@ -1,0 +1,124 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cranometer</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Measures the speed of downloading from different CRAN mirrors</h2>
+
+<h3>Description</h3>
+
+<p>Estimates the speed of each CRAN mirror by measuring the time it takes to download the NEWS file.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cranometer(ms = getCRANmirrors(all = FALSE, local.only = FALSE), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ms</code></td>
+<td>
+<p>- the output of getCRANmirrors.  Defaults to using all of the mirrors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>not in use</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>It works by downloading the latest NEWS file (288 Kbytes at the moment, so not huge) 
+from each of the mirror sites in the CRAN mirrors list. 
+If you want to test it on a subset then call getCRANmirrors yourself and subset it somehow.
+</p>
+<p>It runs on the full CRAN list and while designing this package I've yet to find a 
+timeout or error so I'm not sure what will happen if download.file
+fails. It returns a data frame like you get from getCRANmirrors but
+with an extra 't' column giving the elapsed time to get the NEWS file.
+</p>
+<p>CAVEATS: if your network has any local caching then these results
+will be wrong, since your computer will probably be getting the
+locally cached NEWS file and not the one on the server. Especially if
+you run it twice. Oh, I should have put cacheOK=FALSE in the
+download.file - but even that might get overruled somewhere. Also,
+sites may have good days and bad days, good minutes and bad minutes,
+your network may be congested on a short-term basis, etc etc.
+</p>
+<p>There may also be a difference in reliability, which would not so easily be measured by an individual user.
+</p>
+<p>Later that year, Barry also wrote Cranography. See: <a href="https://www.maths.lancs.ac.uk/~rowlings/R/Cranography/">https://www.maths.lancs.ac.uk/~rowlings/R/Cranography/</a>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a data.frame with details on mirror sites and the time it took to download their NEWS file.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Barry Rowlingson &lt;b.rowlingson@lancaster.ac.uk&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p>freegeoip, myip, cranometer
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# this can take some time
+x &lt;- cranometer() 
+
+time_order &lt;- order(x$t)
+
+# a quick overview of the fastest mirrors
+head(x[time_order,c(1:4, 9)], 20)
+
+# a dotchart of the fastest mirrors
+with(x[rev(time_order),],
+ dotchart(t, labels =Name,
+ cex = .5, xlab = "Timing of CRAN mirror")
+ )
+
+# tail(geonames_df)
+# tail(x)
+require(plyr)
+ss &lt;- !(x$Name == "0-Cloud")
+gvis_df &lt;- ddply(x[ss,], .(CountryCode), function(xx) {
+  ss &lt;- which.min(xx$t) 
+  if(length(ss) == 0) ss &lt;- 1
+  data.frame(time = xx$t[ss], name = xx$Name[ss] )
+})
+gvis_df &lt;- gvis_df[!is.na(gvis_df$time), ]
+
+require2("googleVis")
+Geo&lt;-gvisGeoMap(gvis_df,
+              locationvar = "CountryCode",
+               numvar="time",
+               hovervar = "name",
+               options=list(
+                            colors='[0xA5EF63, 
+                             0xFFB581, 0xFF8747]')
+              )
+# Display chart
+plot(Geo) 
+
+## End(Not run)
+</code></pre>
+
+
+</div>

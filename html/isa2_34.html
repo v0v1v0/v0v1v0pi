@@ -1,0 +1,259 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>isa.sweep</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create a hierarchical structure of ISA biclusters</h2>
+
+<h3>Description</h3>
+
+<p>Relate the biclusters found in many ISA runs on the same input data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S4 method for signature 'matrix'
+isa.sweep(data, ...)
+## S4 method for signature 'list'
+sweep.graph(sweep.result, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>The input matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments, see details
+below. <code>sweep.graph</code> has no additional arguments currently.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sweep.result</code></td>
+<td>
+<p>An ISA result with hierarchy information in the
+seed data, typically calculated by the <code>isa.sweep</code> function.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>isa.sweep</code> can be called as
+</p>
+<pre>
+    isa.sweep(data, normed.data, isaresult,
+              method = c("cor"), neg.cor = TRUE,  
+	      cor.limit = 0.9)
+	    </pre>
+<p>where the arguments are:	    
+</p>
+
+<dl>
+<dt>data</dt>
+<dd>
+<p>The input matrix.</p>
+</dd>
+<dt>normed.data</dt>
+<dd>
+<p>The normalized input matrix, usually the output of
+the <code>isa.normalize</code> function.</p>
+</dd>
+<dt>isaresult</dt>
+<dd>
+<p>An object containing the biclusters, the result of
+<code>isa</code> or <code>isa.iterate</code>.</p>
+</dd>
+<dt>method</dt>
+<dd>
+<p>Character scalar giving the method to determine which
+seed converged which bicluster. Right now only ‘<code>cor</code>’
+is supported, this is based on Pearson correlation.</p>
+</dd>
+<dt>neg.cor</dt>
+<dd>
+<p>Logical scalar, whether to consider negative
+correlation as convergence.</p>
+</dd>
+<dt>cor.limit</dt>
+<dd>
+<p>Numeric scalar giving the minimum correlation for
+convergence.</p>
+</dd>
+</dl>
+<p>Many ISA runs with different thresholds typically create a bunch of
+biclusters and it is useful to visualize how these are related.
+</p>
+<p>From a set of biclusters for which of the <code>thr.row</code> and
+<code>thr.col</code> parameters was the same, but the other was not,
+<code>isa.sweep</code> creates a hierarchy of modules.
+</p>
+<p>The hierarchy is a directed graph of modules in which every node has
+an out degree at most one. An edge pointing from module <code class="reqn">m</code> to
+module <code class="reqn">n</code> means that module <code class="reqn">n</code> is “part of” module
+<code class="reqn">m</code>; in the sense that an ISA iteration started from module
+<code class="reqn">n</code> converges to module <code class="reqn">m</code> at the (milder) thresholds of
+module <code class="reqn">m</code>.
+</p>
+<p>The information about the module relationships is stored in a column
+of the seed data.
+</p>
+<p><code>sweep.graph</code> takes the output of <code>isa.sweep</code> and creates a
+graph object of it. For this the ‘igraph’ package is required
+to be installed on the system.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>isa.sweep</code> returns a named list with the same components as in
+the input (<code>isaresult</code>), but the ‘<code>father</code>’ and the
+‘<code>level</code>’ columns are
+added to the ‘<code>seeddata</code>’ member. <code>father</code> contains
+the edges of the sweep graph: if bicluster <code class="reqn">m</code> is the father of
+bicluster <code class="reqn">n</code> that means that bicluster <code class="reqn">n</code> converges to
+bicluster <code class="reqn">m</code> at the same threshold parameters that were used to
+find biclusters <code class="reqn">m</code>.
+</p>
+<p><code>level</code> is a simple numbering of the different thresholds for
+which the sweep tree was built. I.e. the most strict threshold is
+level one, the second most is level two, etc.  
+</p>
+<p><code>sweep.graph</code> returns and igraph graph with a lot of attributes:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>1</code></td>
+<td>
+<p>The <code>layout</code> graph attribute contains a two-column matrix
+with the coordinates for an optimal tree-like layout to plot the
+graph.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>2</code></td>
+<td>
+<p>The <code>width</code> and <code>height</code> graph attributes contain the
+optimal width and height of the plot, in inches.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>3</code></td>
+<td>
+<p>The <code>thr</code> vertex attribute contains the ISA threshold that
+varies along the sweeping.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>4</code></td>
+<td>
+<p>The <code>id</code> vertex attribute contains the id of the module, these
+correspond to the indices in the result matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>5</code></td>
+<td>
+<p>The <code>rows</code> and <code>cols</code> vertex attributes contain the
+number of rows and columns in the module.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>6</code></td>
+<td>
+<p>The <code>shape</code>, <code>size</code>, <code>size2</code>, <code>label</code> vertex
+attributes and the <code>arrow.size</code> edge attribute contain various
+graphical parameters.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p> Gabor Csardi <a href="mailto:Gabor.Csardi@unil.ch">Gabor.Csardi@unil.ch</a> </p>
+
+
+<h3>References</h3>
+
+<p>Bergmann S, Ihmels J, Barkai N: Iterative signature algorithm for the
+analysis of large-scale gene expression data <em>Phys Rev E Stat
+Nonlin Soft Matter Phys.</em> 2003 Mar;67(3 Pt 1):031902. Epub 2003 Mar 11.
+</p>
+<p>Ihmels J, Friedlander G, Bergmann S, Sarig O, Ziv Y, Barkai N:
+Revealing modular organization in the yeast transcriptional network
+<em>Nat Genet.</em> 2002 Aug;31(4):370-7. Epub 2002 Jul 22
+</p>
+<p>Ihmels J, Bergmann S, Barkai N:
+Defining transcription modules using large-scale gene expression data
+<em>Bioinformatics</em> 2004 Sep 1;20(13):1993-2003. Epub 2004 Mar 25.
+</p>
+
+
+<h3>See Also</h3>
+
+ <p>isa2-package for a short introduction on the Iterative
+Signature Algorithm. See <code>isa</code> for an easy way of running
+ISA.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## In-silico data
+set.seed(1)
+insili &lt;- isa.in.silico()
+
+## Do ISA with a bunch of row thresholds while keeping the column
+## threshold fixed. This is quite an artificial example...
+isares &lt;- isa(insili[[1]], thr.row=c(0.5,1,2), thr.col=0)
+
+## Create a nice tree from the modules, we need the normed data for this
+nm &lt;- isa.normalize(insili[[1]])
+isa.tree &lt;- isa.sweep(insili[[1]], nm, isares)
+network &lt;- sweep.graph(isa.tree)
+
+## Plot the network of modules, only if the igraph package is
+## installed
+if (interactive() &amp;&amp; require(igraph) &amp;&amp;
+    compareVersion(packageDescription("igraph")$Version, "0.6")&gt;=0) {
+  lab &lt;- paste(sep="", seq_len(ncol(isa.tree$rows)), ": ",
+               colSums(isa.tree$rows!=0), ",",
+               colSums(isa.tree$columns!=0))
+  par(mar=c(1,1,1,1))
+  roots &lt;- tapply(topological.sort(network, mode="out"),
+                  clusters(network)$membership, function(x) x[1])
+  rootlevel &lt;- isa.tree$seeddata$level-1
+  coords &lt;- layout.reingold.tilford(network, root=roots,
+                                    rootlevel=rootlevel[roots+1])
+  plot(network, layout=coords,
+       vertex.shape="rectangle", vertex.color="green",
+       vertex.label=lab, vertex.size=30, vertex.size2=10)
+}
+
+## Plot the modules themselves as well
+if (interactive()) {
+  plotModules(isa.tree)
+}
+
+## Yet another plot, the scores for the rows within the modules
+if (interactive()) {
+  layout(matrix( 1:15, ncol=3 ))
+  for (i in seq(ncol(isa.tree$rows))) {
+    par(mar=c(2,2,1,1))
+    plot(isa.tree$rows[,i], axes=FALSE, ylim=c(-1,1))
+    axis(1); axis(2)
+    text(nrow(isa.tree$rows), 1, adj=c(1,1), paste(sep="", "#", i), cex=2)
+  }
+}
+    
+</code></pre>
+
+
+</div>

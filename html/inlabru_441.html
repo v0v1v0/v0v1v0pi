@@ -1,0 +1,169 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sample.lgcp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Sample from an inhomogeneous Poisson process</h2>
+
+<h3>Description</h3>
+
+<p>This function provides point samples from one- and two-dimensional inhomogeneous Poisson processes. The
+log intensity has to be provided via its values at the nodes of an <code>inla.mesh.1d</code> or
+<code>inla.mesh</code> object. In between mesh nodes the log intensity is assumed to be linear.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sample.lgcp(
+  mesh,
+  loglambda,
+  strategy = NULL,
+  R = NULL,
+  samplers = NULL,
+  ignore.CRS = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>mesh</code></td>
+<td>
+<p>An <code>INLA::inla.mesh</code> object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loglambda</code></td>
+<td>
+<p>vector or matrix; A vector of log intensities at the mesh vertices
+(for higher order basis functions, e.g.
+for <code>inla.mesh.1d</code> meshes, <code>loglambda</code> should be given as <code>mesh$m</code> basis
+function weights rather than the values at the <code>mesh$n</code> vertices)
+A single scalar is expanded to a vector of the appropriate length.
+If a matrix is supplied, one process sample for each column is produced.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>strategy</code></td>
+<td>
+<p>Only relevant for 2D meshes. One of <code>'triangulated'</code>, <code>'rectangle'</code>,
+<code>'sliced-spherical'</code>, <code>'spherical'</code>. The <code>'rectangle'</code> method is only valid for
+CRS-less flat 2D meshes.
+If <code>NULL</code> or <code>'auto'</code>, the the likely fastest method is chosen;
+<code>'rectangle'</code> for flat 2D meshes with no CRS,
+<code>'sliced-spherical'</code> for CRS <code>'longlat'</code> meshes, and
+<code>'triangulated'</code> for all other meshes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+<p>Numerical value only applicable to spherical and geographical meshes. It is interpreted as
+<code>R</code> is the equivalent Earth radius, in km, used to scale the lambda intensity.
+For CRS enabled meshes, the default is 6371. For CRS-less spherical meshes, the default is 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>samplers</code></td>
+<td>
+<p>A <code>SpatialPolygonsDataFrame</code> or <code>inla.mesh</code> object.
+Simulated points that fall outside these polygons are discarded.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ignore.CRS</code></td>
+<td>
+<p>logical; if <code>TRUE</code>, ignore any CRS information in the mesh. Default <code>FALSE</code>.
+This affects <code>R</code> and the permitted values for <code>strategy</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For 2D processes on a sphere the <code>R</code> parameter can be used to adjust to sphere's radius implied by
+the mesh. If the intensity is very high the standard <code>strategy</code> "spherical" can cause memory issues.
+Using the "sliced-spherical" strategy can help in this case.
+</p>
+
+<ul>
+<li>
+<p> For crs-less meshes on R2: Lambda is interpreted in the raw coordinate system. Output has an NA CRS.
+</p>
+</li>
+<li>
+<p> For crs-less meshes on S2: Lambda with raw units, after scaling the mesh to radius <code>R</code>, if specified.
+Output is given on the same domain as the mesh, with an NA CRS.
+</p>
+</li>
+<li>
+<p> For crs meshes on R2: Lambda is interpreted as per km^2, after scaling the globe to the Earth radius 6371 km,
+or <code>R</code>, if specified. Output given in the same CRS as the mesh.
+</p>
+</li>
+<li>
+<p> For crs meshes on S2: Lambda is interpreted as per km^2, after scaling the globe to the Earth radius 6371 km,
+or <code>R</code>, if specified. Output given in the same CRS as the mesh.
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>A <code>data.frame</code> (1D case),
+SpatialPoints (2D flat and 3D spherical surface cases)
+SpatialPointsDataFrame (2D/3D surface cases with multiple samples).
+For multiple samples, the <code>data.frame</code> output has a
+column <code>'sample'</code> giving the index for each sample.
+object of point locations.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Daniel Simpson <a href="mailto:dp.simpson@gmail.com">dp.simpson@gmail.com</a> (base rectangle and spherical algorithms),
+Fabian E. Bachl <a href="mailto:bachlfab@gmail.com">bachlfab@gmail.com</a> (inclusion in inlabru, sliced spherical sampling),
+Finn Lindgren <a href="mailto:finn.lindgren@gmail.com">finn.lindgren@gmail.com</a> (extended CRS support, triangulated sampling)
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# The INLA package is required
+if (bru_safe_inla(quietly = TRUE) &amp;&amp;
+  bru_safe_sp() &amp;&amp;
+  require("sp")) {
+  vertices &lt;- seq(0, 3, by = 0.1)
+  mesh &lt;- fm_mesh_1d(vertices)
+  loglambda &lt;- 5 - 0.5 * vertices
+  pts &lt;- sample.lgcp(mesh, loglambda)
+  pts$y &lt;- 0
+  plot(vertices, exp(loglambda), type = "l", ylim = c(0, 150))
+  points(pts, pch = "|")
+}
+
+
+
+# The INLA package is required
+if (bru_safe_inla(quietly = TRUE) &amp;&amp;
+  require(ggplot2, quietly = TRUE) &amp;&amp;
+  bru_safe_sp() &amp;&amp;
+  require("sp")) {
+  data("gorillas", package = "inlabru")
+  pts &lt;- sample.lgcp(gorillas$mesh,
+    loglambda = 1.5,
+    samplers = gorillas$boundary
+  )
+  ggplot() +
+    gg(gorillas$mesh) +
+    gg(pts)
+}
+
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,166 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>gpava</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generalized Pooled-Adjacent-Violators Algorithm (PAVA)</h2>
+
+<h3>Description</h3>
+
+<p>Pooled-adjacent-violators algorithm for general isotone regression problems. It allows for general convex target function, 
+multiple measurements, and different approaches for handling ties.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">gpava(z, y, weights = NULL, solver = weighted.mean, ties = "primary", p = NA)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+<p>Vector of abscissae values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Vector or list of vectors of responses</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>Vector of list of vectors of observation weights</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>solver</code></td>
+<td>
+<p>Either <code>weighted.mean</code>, <code>weighted.median</code>, <code>weighted.fractile</code>, or 
+a user-specified function (see below)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ties</code></td>
+<td>
+<p>Treatment of ties, either "primary", "secondary", or "tertiary"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>Fractile value between 0 and 1 if <code>weighted.fractile</code> is used</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A Pool Adjacent Violators Algorithm framework for minimizing problems
+like 
+</p>
+<p style="text-align: center;"><code class="reqn">\sum_i \sum_{J_i} w_{ij} f(y_{ij}, m_i)</code>
+</p>
+
+<p>under the constraint <code class="reqn">m_1 \le ... \le m_n</code> with <code class="reqn">f</code> a convex function in m. Note that this formulation allows for repeated data in each block
+(i.e. each list element of <code>y</code>, and hence is more general than the usual pava/isoreg ones.  
+</p>
+<p>A solver for the unconstrained <code class="reqn">\sum_k w_k f(y_k, m) -&gt; min!</code> can be specified. 
+Typical cases are <code class="reqn">f(y, m) = |y - m|^p</code> for <code class="reqn">p = 2</code> (solved by weighted mean) and <code class="reqn">p = 1</code> (solved by weighted median), respectively. 
+</p>
+<p>Using the <code>weighted.fractile</code> solver corresponds to the classical minimization procedure in quantile regression. 
+</p>
+<p>The user can also specify his own function <code>foo(y, w)</code> with responses and weights as arguments. It 
+should return a single numerical value. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>Generates an object of class <code>gpava</code>.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Fitted values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Observed response</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+<p>Observed predictors</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>Weights</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>solver</code></td>
+<td>
+<p>Convex function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>Matched call</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>Fractile value</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Kurt Hornik, Jan de Leeuw, Patrick Mair</p>
+
+
+<h3>References</h3>
+
+<p>de Leeuw, J., Hornik, K., Mair, P. (2009). Isotone Optimization in R: Pool-Adjacent-Violators 
+Algorithm (PAVA) and Active Set Methods. Journal of Statistical Software,  32(5), 1-24. 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(pituitary)
+##different tie approaches
+gpava(pituitary[,1],pituitary[,2], ties = "primary")
+gpava(pituitary[,1],pituitary[,2], ties = "secondary")
+gpava(pituitary[,1],pituitary[,2], ties = "tertiary")
+
+##different target functions
+gpava(pituitary[,1],pituitary[,2], solver = weighted.mean)
+gpava(pituitary[,1],pituitary[,2], solver = weighted.median)
+gpava(pituitary[,1],pituitary[,2], solver = weighted.fractile, p = 0.25)
+
+
+##repeated measures
+data(posturo)
+res &lt;- gpava(posturo[,1],posturo[,2:4], ties = "secondary")
+plot(res)
+
+</code></pre>
+
+
+</div>

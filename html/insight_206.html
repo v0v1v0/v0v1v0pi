@@ -1,0 +1,89 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_weights</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get the values from model weights</h2>
+
+<h3>Description</h3>
+
+<p>Returns weighting variable of a model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_weights(x, ...)
+
+## Default S3 method:
+get_weights(x, remove_na = FALSE, null_as_ones = FALSE, na_rm = remove_na, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A fitted model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Currently not used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>remove_na</code></td>
+<td>
+<p>Logical, if <code>TRUE</code>, removes possible missing values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>null_as_ones</code></td>
+<td>
+<p>Logical, if <code>TRUE</code>, will return a vector of <code>1</code>
+if no weights were specified in the model (as if the weights were all set
+to 1).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na_rm</code></td>
+<td>
+<p>Deprecated, use <code>remove_na</code> instead.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The weighting variable, or <code>NULL</code> if no weights were specified.
+If the weighting variable should also be returned (instead of <code>NULL</code>)
+when all weights are set to 1 (i.e. no weighting),
+set <code>null_as_ones = TRUE</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(mtcars)
+set.seed(123)
+mtcars$weight &lt;- rnorm(nrow(mtcars), 1, .3)
+
+# LMs
+m &lt;- lm(mpg ~ wt + cyl + vs, data = mtcars, weights = weight)
+get_weights(m)
+
+get_weights(lm(mpg ~ wt, data = mtcars), null_as_ones = TRUE)
+
+# GLMs
+m &lt;- glm(vs ~ disp + mpg, data = mtcars, weights = weight, family = quasibinomial)
+get_weights(m)
+m &lt;- glm(cbind(cyl, gear) ~ mpg, data = mtcars, weights = weight, family = binomial)
+get_weights(m)
+</code></pre>
+
+
+</div>

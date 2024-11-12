@@ -1,0 +1,247 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bnpControl</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Control settings for the Bayesian Nonparametric priors for infinite mixture models (or shrinkage priors for overfitted mixtures)</h2>
+
+<h3>Description</h3>
+
+<p>Supplies a list of arguments for use in <code>mcmc_IMIFA</code> pertaining to the use of the Bayesian Nonparametric Pitman-Yor / Dirichlet process priors with the infinite mixture models <code>"IMFA"</code> and <code>"IMIFA"</code>. Certain arguments related to the Dirichlet concentration parameter for the overfitted mixtures <code>"OMFA"</code> and <code>"OMIFA"</code> can be supplied in this manner also.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">bnpControl(learn.alpha = TRUE,
+           alpha.hyper = c(2L, 4L),
+           discount = 0,
+           learn.d = TRUE,
+           d.hyper = c(1L, 1L),
+           ind.slice = TRUE,
+           rho = 0.75,
+           trunc.G = NULL,
+           kappa = 0.5,
+           IM.lab.sw = TRUE,
+           thresh = FALSE,
+           exchange = FALSE,
+           zeta = NULL,
+           tune.zeta = list(...),
+           ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>learn.alpha</code></td>
+<td>
+
+<dl>
+<dt>For the <code>"IMFA"</code> and <code>"IMIFA"</code> methods:</dt>
+<dd>
+<p>A logical indicating whether the Pitman-Yor / Dirichlet process concentration parameter is to be learned (defaults to <code>TRUE</code>), or remain fixed for the duration of the chain. If being learned, a Ga(a, b) prior is assumed for <code>alpha</code>; updates take place via Gibbs sampling when <code>discount</code> is zero and via Metropolis-Hastings when <code>discount &gt; 0</code>. If not being learned, <code>alpha</code> <em>must</em> be supplied.
+</p>
+<p>In the special case of <code>discount &lt; 0</code>, <code>alpha</code> must be supplied as a positive integer multiple of <code>abs(discount)</code>; in this instance, <code>learn.alpha</code> is forced to <code>TRUE</code> and <code>alpha</code> is updated with the changing number of components as the positive integer.</p>
+</dd>
+<dt>For the <code>"OMFA"</code> and <code>"OMIFA"</code> methods:</dt>
+<dd>
+<p>A logical indicating whether the Dirichlet concentration parameter is to be learned (defaults to <code>TRUE</code>) or remain fixed for the duration of the chain. If being learned, a Ga(a, b * G) is assumed for <code>alpha</code>, where G is the number of mixture components <code>range.G</code>, and updates take place via Metropolis-Hastings. If not being learned <code>alpha</code> <em>must</em> be supplied.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha.hyper</code></td>
+<td>
+
+<dl>
+<dt>For the <code>"IMFA"</code> and <code>"IMIFA"</code> methods:</dt>
+<dd>
+<p>A vector of length 2 giving hyperparameters for the prior on the Pitman-Yor / Dirichlet process concentration parameter <code>alpha</code>. If <code>isTRUE(learn.alpha)</code>, these are shape and rate parameters of a Gamma distribution. Defaults to Ga(<code>2</code>, <code>4</code>). Choosing a larger rate is particularly important, as it encourages clustering. The prior is shifted to have support on (<code>-discount</code>, <code>Inf</code>) when non-zero <code>discount</code> is supplied and remains fixed (i.e. <code>learn.d=FALSE</code>) or when <code>learn.d=TRUE</code>.</p>
+</dd>
+<dt>For the <code>"OMFA"</code> and <code>"OMIFA"</code> methods:</dt>
+<dd>
+<p>A vector of length 2 giving hyperparameters a and b for the prior on the Dirichlet concentration parameter <code>alpha</code>. If <code>isTRUE(learn.alpha)</code>, these are shape and rate parameters of a Gamma distribution. Defaults to Ga(2, 4). Note that the supplied rate will be multiplied by <code>range.G</code>, to encourage clustering, such that the form of the prior is Ga(a, b * G).</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>discount</code></td>
+<td>
+<p>The discount parameter used when generalising the Dirichlet process to the Pitman-Yor process. Defaults to 0, but typically must lie in the interval [0, 1). If greater than zero, <code>alpha</code> can be supplied greater than <code>-discount</code>. By default, Metropolis-Hastings steps are invoked for updating this parameter via <code>learn.d</code>.
+</p>
+<p>The special case of <code>discount &lt; 0</code> is allowed, in which case <code>learn.d=FALSE</code> is forced and <code>alpha</code> must be supplied as a positive integer multiple of <code>abs(discount)</code>. Fixing <code>discount &gt; 0.5</code> is discouraged (see <code>learn.alpha</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>learn.d</code></td>
+<td>
+<p>Logical indicating whether the <code>discount</code> parameter is to be updated via Metropolis-Hastings (defaults to <code>TRUE</code>, unless <code>discount</code> is supplied as a negative value).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d.hyper</code></td>
+<td>
+<p>Hyperparameters for the Beta(a,b) prior on the <code>discount</code> parameter. Defaults to Beta(1,1), i.e. Uniform(0,1).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ind.slice</code></td>
+<td>
+<p>Logical indicating whether the independent slice-efficient sampler is to be employed (defaults, typically, to <code>TRUE</code>). If <code>FALSE</code> the dependent slice-efficient sampler is employed, whereby the slice sequence <code class="reqn">\xi_1,\ldots,\xi_g</code> is equal to the decreasingly ordered mixing proportions. When <code>thresh</code> &amp;/or <code>exchange</code> are set to <code>TRUE</code> (see below), this argument is forced to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+<p>Parameter controlling the rate of geometric decay for the independent slice-efficient sampler, s.t. <code class="reqn">\xi=(1-\rho)\rho^{g-1}</code>. Must lie in the interval [0, 1). Higher values are associated with better mixing but longer run times. Defaults to <code>0.75</code>, but <code>0.5</code> is an interesting special case which guarantees that the slice sequence <code class="reqn">\xi_1,\ldots,\xi_g</code> is equal to the <em>expectation</em> of the decreasingly ordered mixing proportions. Only relevant when <code>ind.slice</code> is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trunc.G</code></td>
+<td>
+<p>The maximum number of allowable and storable clusters under the <code>"IMIFA"</code> and <code>"IMFA"</code> models. The number of active clusters to be sampled at each iteration is adaptively truncated, with <code>trunc.G</code> as an upper limit for storage reasons. Defaults to <code>max(min(N-1, 50), range.G))</code> and must satisfy <code>range.G &lt;= trunc.G &lt; N</code>. Note that large values of <code>trunc.G</code> may lead to memory capacity issues.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kappa</code></td>
+<td>
+<p>The spike-and-slab prior distribution on the <code>discount</code> hyperparameter is assumed to be a mixture with point-mass at zero and a continuous Beta(a,b) distribution. <code>kappa</code> gives the weight of the point mass at zero (the 'spike'). Must lie in the interval [0,1]. Defaults to <code>0.5</code>. Only relevant when <code>isTRUE(learn.d)</code>. A value of 0 ensures non-zero discount values (i.e. Pitman-Yor) at all times, and <em>vice versa</em>. Note that <code>kappa</code> will default to exactly 0 if <code>alpha&lt;=0</code> and <code>learn.alpha=FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>IM.lab.sw</code></td>
+<td>
+<p>Logical indicating whether the two forced label switching moves are to be implemented (defaults to <code>TRUE</code>) when running one of the infinite mixture models. Note: when <code>exchange=TRUE</code> (see below), this argument is instead forced to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thresh</code></td>
+<td>
+<p>Logical indicating whether the threshold of Fall and Barat (2014) should be incorporated into the slice sampler. See the reference for details. This is an experimental feature (defaults to <code>FALSE</code>) and can work with or without <code>exchange</code> below. Setting <code>thresh=TRUE</code> is <strong>not</strong> recommended unless both <code>learn.alpha</code> and <code>learn.d</code> are <code>FALSE</code>. Setting <code>thresh</code> to <code>TRUE</code> also forces <code>ind.slice</code> to <code>FALSE</code> (see above).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exchange</code></td>
+<td>
+<p>Logical indicating whether the exchangeable slice sampler of Fall and Barat (2014) should be used instead. See the reference for details. This argument can work with or without <code>thresh=TRUE</code> above, though it is also an experimental argument and thus defaults to <code>FALSE</code>. When <code>TRUE</code>, the arguments <code>ind.slice</code> and <code>IM.lab.sw</code> (see above) are both forced to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zeta</code></td>
+<td>
+
+<dl>
+<dt>For the <code>"IMFA"</code> and <code>"IMIFA"</code> methods:</dt>
+<dd>
+<p>Tuning parameter controlling the acceptance rate of the random-walk proposal for the Metropolis-Hastings steps when <code>learn.alpha=TRUE</code>, where <code>2 * zeta</code> gives the full width of the uniform proposal distribution. These steps are only invoked when either <code>discount</code> is non-zero and fixed or <code>learn.d=TRUE</code>, otherwise <code>alpha</code> is learned by Gibbs updates. Must be strictly positive (if invoked). Defaults to <code>2</code>.</p>
+</dd>
+<dt>For the <code>"OMFA"</code> and <code>"OMIFA"</code> methods:</dt>
+<dd>
+<p>Tuning parameter controlling the standard deviation of the log-normal proposal for the Metropolis-Hastings steps when <code>learn.alpha=TRUE</code>. Must be strictly positive (if invoked). Defaults to <code>0.75</code>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tune.zeta</code></td>
+<td>
+<p>A list with the following named arguments, used for tuning <code>zeta</code> (which is either the width of the uniform proposal for the <code>"IMFA"</code> or <code>"IMIFA"</code> methods or the standard deviation of the log-normal proposal for the <code>"OMFA"</code> or <code>"OMIFA"</code> methods) for <code>alpha</code>, via diminishing Robbins-Monro type adaptation, when the <code>alpha</code> parameter is learned via Metropolis-Hastings steps:
+</p>
+
+<dl>
+<dt><code>heat</code></dt>
+<dd>
+<p>The initial adaptation intensity/step-size, such that larger values lead to larger updates. Must be strictly greater than zero. Defaults to <code>1</code> if not supplied but other elements of <code>tune.zeta</code> are.</p>
+</dd>
+<dt><code>lambda</code></dt>
+<dd>
+<p>Iteration rescaling parameter which controls the speed at which adaptation diminishes, such that lower values cause the contribution of later iterations to diminish more slowly. Must lie in the interval (0.5, 1]. Defaults to 1 if not supplied but other elements of <code>tune.zeta</code> are.</p>
+</dd>
+<dt><code>target</code></dt>
+<dd>
+<p>The target acceptance rate. Must lie in the interval [0, 1]. Defaults to <code>0.441</code>, which is optimal for univariate targets, if not supplied but other elements of <code>tune.zeta</code> are.</p>
+</dd>
+<dt><code>start.zeta</code></dt>
+<dd>
+<p>The iteration at which diminishing adaptation begins. Defaults to <code>100</code>.</p>
+</dd>
+<dt><code>stop.zeta</code></dt>
+<dd>
+<p>The iteration at which diminishing adaptation is to stop completely. Defaults to <code>Inf</code>, such that diminishing adaptation is never explicitly made to stop. Must be greater than <code>start.zeta</code>.</p>
+</dd>
+</dl>
+<p>At least one <code>tune.zeta</code> argument must be supplied for diminishing adaptation to be invoked. <code>tune.zeta</code> arguments are only relevant when <code>learn.alpha</code> is <code>TRUE</code> (and, for the <code>"IMFA"</code> and <code>"IMIFA"</code> methods, when either of the following is also true: the <code>discount</code> remains fixed at a non-zero value, or when <code>learn.d</code> is <code>TRUE</code> and <code>kappa &lt; 1</code>). Since Gibbs steps are invoked for updating <code>alpha</code> when <code>discount == 0</code> under the <code>"IMFA"</code> or <code>"IMIFA"</code> methods, adaption occurs according to a running count of the number of iterations with non-zero sampled <code>discount</code> values for those methods. As such, when a mix of Gibbs and MH updates are used, this tuning only targets the <code>target</code> acceptance rates for the MH steps; i.e. acceptances under the Gibbs framework will inflate the acceptance rate further.
+</p>
+<p>If diminishing adaptation is invoked, the posterior mean <code>zeta</code> will be stored. Since caution is advised when employing adaptation, note that acceptance rates of between 10-50% are generally considered adequate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Catches unused arguments.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The crucial concentration parameter <code>alpha</code> is documented within the main <code>mcmc_IMIFA</code> function, and is relevant to all of the <code>"IMIFA"</code>, <code>"IMFA"</code>, <code>"OMIFA"</code>, and <code>"OMFA"</code> methods.
+</p>
+<p>All arguments here are relevant to the <code>"IMFA"</code> and <code>"IMIFA"</code> methods, but the following are also related to the <code>"OMFA"</code> and <code>"OMIFA"</code> methods, and may behave differently in those instances: <code>learn.alpha</code>, <code>alpha.hyper</code>, <code>zeta</code>, and <code>tune.zeta</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A named list in which the names are the names of the arguments related to the BNP prior(s) and the values are the values supplied to the arguments.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Certain supplied arguments will be subject to further checks within <code>mcmc_IMIFA</code>. <code>G_priorDensity</code> and <code>G_moments</code> can help with soliciting sensible DP/PYP priors.
+</p>
+<p>Under the <code>"IMFA"</code> and <code>"IMIFA"</code> methods, a Pitman-Yor process prior is specified by default. A Dirichlet process prior can be easily invoked when the <code>discount</code> is fixed at <code>0</code> and <code>learn.d=FALSE</code>. The normalized stable process can also be specified as a prior distribution, as a special case of the Pitman-Yor process, when <code>alpha</code> remains fixed at <code>0</code> and <code>learn.alpha=FALSE</code> (provided the <code>discount</code> is fixed at a strictly positive value or <code>learn.d=TRUE</code>). The special case of the Pitman-Yor process with negative <code>discount</code> is also allowed as an experimental feature for which caution is advised, though <code>learn.d</code> and <code>learn.alpha</code> are forced to <code>FALSE</code> and <code>TRUE</code>, respectively, in this instance.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Keefe Murphy - &lt;<a href="mailto:keefe.murphy@mu.ie">keefe.murphy@mu.ie</a>&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Murphy, K., Viroli, C., and Gormley, I. C. (2020) Infinite mixtures of infinite factor analysers, <em>Bayesian Analysis</em>, 15(3): 937-963. &lt;<a href="https://doi.org/10.1214/19-BA1179">doi:10.1214/19-BA1179</a>&gt;.
+</p>
+<p>Kalli, M., Griffin, J. E. and Walker, S. G. (2011) Slice sampling mixture models, <em>Statistics and Computing</em>, 21(1): 93-105.
+</p>
+<p>Fall, M. D. and Barat, E. (2014) Gibbs sampling methods for Pitman-Yor mixture models, <em>hal-00740770v2</em>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>mcmc_IMIFA</code>, <code>G_priorDensity</code>, <code>G_moments</code>, <code>mixfaControl</code>, <code>mgpControl</code>, <code>storeControl</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">bnpctrl &lt;- bnpControl(learn.d=FALSE, ind.slice=FALSE, alpha.hyper=c(3, 3))
+
+# data(olive)
+# sim   &lt;- mcmc_IMIFA(olive, "IMIFA", n.iters=5000, BNP=bnpctrl)
+
+# Alternatively specify these arguments directly
+# sim   &lt;- mcmc_IMIFA(olive, "IMIFA", n.iters=5000, learn.d=FALSE,
+#                     ind.slice=FALSE, alpha.hyper=c(3, 3))
+</code></pre>
+
+
+</div>

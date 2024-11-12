@@ -1,0 +1,228 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>biviso</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Bivariate isotonic regression.
+</h2>
+
+<h3>Description</h3>
+
+<p>Bivariate isotonic regression with respect to simple (increasing)
+linear ordering on both variables.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">biviso(y, w = NULL, eps = NULL, eps2 = 1e-9, ncycle = 50000,
+       fatal = TRUE, warn = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+
+<p>The matrix of observations to be isotonized.  It must of course
+have at least two rows and at least two columns.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+
+<p>A matrix of weights, greater than or equal to zero, of the same
+dimension as <code>y</code>.  If left <code>NULL</code> then <code>w</code> is
+created as a matrix all of whose entries are equal to <code>1</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+
+<p>Convergence criterion.  The algorithm is deemed to have converged
+if each entry of the output matrix, after the completion of the
+current iteration, does not differ by more than <code>eps</code> from
+the corresponding entry of the matrix after the completion of the
+previous iteration.  If this argument is not supplied it defaults
+to <code>sqrt(.Machine$double.eps)</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps2</code></td>
+<td>
+
+<p>Criterion used to determine whether isotonicity is “violated”,
+whence whether (further) application of the “pool adjacent violators”
+procedure is required.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncycle</code></td>
+<td>
+
+<p>The maximum number of cycles of the iteration procedure.  Must be
+at least 2 (otherwise an error is given).  If the procedure has not
+converged after <code>ncycle</code> iterations then an error is given.
+(See below.)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fatal</code></td>
+<td>
+
+<p>Logical scalar.  Should the function stop if the subroutine
+returns an error code other than 0 or 4?  If <code>fatal</code> is
+<code>FALSE</code> then output is returned by the function even if
+there was a “serious” fault.  One can set <code>fatal=FALSE</code>
+to inspect the values of the objective matrix at various interim
+stages prior to convergence.  See <b>Examples</b>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn</code></td>
+<td>
+
+<p>Logical scalar. Should a warning be produced if the subroutine
+returns a value of <code>ifault</code> equal to 4 (or to any other
+non-zero value when <code>fatal</code> has been set to <code>FALSE</code>)?
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>See the paper by Bril et al., (<em>References</em>) and the references
+cited therein for details.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A matrix of the same dimensions as <code>y</code> containing the
+corresponding isotonic values.  It has an attribute <code>icycle</code>
+equal to the number of cycles required to achieve convergence
+of the algorithm.
+</p>
+
+
+<h3>Error Messages</h3>
+
+<p>The subroutine comprising Algorithm AS 206 produces an error
+code <code>ifault</code> with values from <code>0</code> to <code>6</code>
+The meaning of these codes is as follows:
+</p>
+
+<ul>
+<li>
+<p> 0: No error.
+</p>
+</li>
+<li>
+<p> 1: Convergence was not attained in <code>ncycle</code> cycles.
+</p>
+</li>
+<li>
+<p> 2: At least one entry of <code>w</code> was negative.
+</p>
+</li>
+<li>
+<p> 3: Either <code>nrow(y)</code> or <code>ncol(y)</code> was less than 2.
+</p>
+</li>
+<li>
+<p> 4: A near-zero weight less than <code>delta=0.00001</code> was
+replaced by <code>delta</code>.
+</p>
+</li>
+<li>
+<p> 5: Convergence was not attained <em>and</em> a non-zero weight
+was replaced by <code>delta</code>.
+</p>
+</li>
+<li>
+<p> 6: All entries of <code>w</code> were less than <code>delta</code>.
+</p>
+</li>
+</ul>
+<p>If <code>ifault==4</code> a warning is given.  All of the other non-zero
+values of <code>ifault</code> result in an error being given.
+</p>
+
+
+<h3>WARNING</h3>
+
+<p>This  function appears not to achieve exact isotonicity, at least
+not quite.  For instance one can do:
+</p>
+<pre>
+    set.seed(42)
+    u  &lt;- matrix(runif(400),20,20)
+    iu &lt;- biviso(u)
+    any(apply(iu,2,is.unsorted))
+</pre>
+<p>and get <code>TRUE</code>.  It turns out that columns 13, 14, and 16 of
+<code>iu</code> have exceptions to isotonicity.  E.g. six of the values
+of <code>diff(iu[,13])</code> are less than zero.  However only one of
+these is less than <code>sqrt(.Machine$double.eps)</code>, and then only
+“marginally” smaller.
+</p>
+<p>So some of these negative values are “numerically different”
+from zero, but not by much.  The largest in magnitude in this
+example, from column 16, is <code>-2.217624e-08</code> — which is
+probably not of “practical importance”.
+</p>
+<p>Note also that this example occurs in a very artificial context in
+which there is no actual isotonic structure underlying the data.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Rolf Turner
+<a href="mailto:rolfturner@posteo.net">rolfturner@posteo.net</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Bril, Gordon; Dykstra, Richard; Pillers Carolyn, and Robertson, Tim ;
+Isotonic regression in two independent variables; Algorithm AS 206;
+JRSSC (Applied Statistics), vol. 33, no. 3, pp. 352-357, 1984.
+</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>pava()</code> <code>pava.sa()</code> <code>ufit()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x &lt;- 1:20
+y &lt;- 1:10
+xy &lt;- outer(x,y,function(a,b){a+b+0.5*a*b}) + rnorm(200)
+ixy &lt;- biviso(xy)
+
+set.seed(42)
+u &lt;- matrix(runif(400),20,20)
+v &lt;- biviso(u)
+progress &lt;- list()
+for(n in 1:9) progress[[n]] &lt;- biviso(u,ncycle=50*n,fatal=FALSE,warn=FALSE)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,142 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Image</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Display the Density of Points in a Scatter Plot by Colors</h2>
+
+<h3>Description</h3>
+
+<p>The density of points in a scatter plot is encoded by color.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Image(x, y = NULL, pixs = 1, zmax = NULL, ztransf = function(x){x},
+      colramp = IDPcolorRamp, factors = c(FALSE, FALSE),
+      matrix = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x, y</code></td>
+<td>
+<p>Coordinates of points whose density is plotted.  If
+<code>x</code> is a matrix or a data.frame, the first two column are used
+as x and y respectively.  <code>y</code> must be in this case NULL.
+<code>x</code> and <code>y</code> may be numeric or factor variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pixs</code></td>
+<td>
+<p>Size of pixel in x- and y-direction in [mm] on the
+plotting device.  When <code>x</code> and <code>y</code> are numeric,
+pixels are square.  When <code>x</code> and <code>y</code> are factors or should
+be handled as factors  (see argument <code>factors</code>), pixels are no
+longer square.  The pixels are enlarged in the dimension in which the
+factors are displayed, so that the rectangular pixels are centered
+at the factor levels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zmax</code></td>
+<td>
+<p>Maximum number of counts per pixel in the plot.  When
+<code>NULL</code>, the density in the scatter plot is encoded from 0
+to maximum number of counts per pixel observed.  <code>zmax</code> must be
+equal or larger than maximum number of counts found. The maximum
+number of counts per pixel is delivered by the return value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ztransf</code></td>
+<td>
+<p>Function to transform the number of counts per
+pixel, which will be mapped by the function in
+<code>colramp</code> to well defined colors.  The user
+has to make  sure that the transformed density lies in the range
+[0,zmax], where zmax is any positive number (&gt;=2).  For examples see
+<code>ipairs</code> and <code>ilagplot</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colramp</code></td>
+<td>
+<p>Color ramp to encode the number of the counts within a
+pixel by color.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>factors</code></td>
+<td>
+<p>Vector of logicals indicating whether <code>x</code> and / or
+<code>y</code> should be handled as factors
+independently of their <code>class</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>matrix</code></td>
+<td>
+<p>Boolean. Should all counts be returned in a xyz-matrix
+or just the maximum.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Before calling <code>Image</code> a plot must have been created by, e.g.,
+calling <code>plot(x,y,type="n")</code>.  This function ensures
+by default that the pixel has the same size in x- and y-direction.  As
+a drawback, pixels may be unequally spaced, when there are only very
+few distinct (integer) values in x- or y-direction.  When this is the
+case, the corresponding dimension should be declared as a factor.
+(cf. argument <code>factors</code>). <br></p>
+<p>This function is based on <span class="pkg">graphics</span>
+</p>
+
+
+<h3>Value</h3>
+
+<p>Maximum number of counts per pixel found (<code>matrix = FALSE</code>) or
+the full matrix.</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Andreas Ruckstuhl, Rene Locher</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>ipairs</code>, <code>ilagplot</code>,
+<code>iplot</code>, <code>image</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">plot.default(iris$Species, iris$Petal.Width, xlim=c(0.5,3.5),
+             type="n", axes=FALSE)
+axis(1, at=1:3, labels=levels(iris$Species))
+axis(2)
+Image(iris$Species, iris$Petal.Width, pixs=3)
+
+##
+x &lt;- rnorm(10000)
+y &lt;- rnorm(10000, 10)
+plot(x+y, y, type="n")
+Image(x+y, y)
+abline(a=0, b=1)
+
+## The above can be merged to
+iplot(x+y, y, legend=FALSE, oma=c(5, 4, 4, 2) + 0.1)
+abline(a=0, b=1)
+</code></pre>
+
+
+</div>

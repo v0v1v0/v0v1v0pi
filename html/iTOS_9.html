@@ -1,0 +1,289 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>binge</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Binge Drinking and High Blood Pressure
+</h2>
+
+<h3>Description</h3>
+
+<p>These unmatched data are from NHANES, and they illustrate multivariate matching.
+The matched version of the data is bingeM, and it was produced by the example in the documentation for the makematch() function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">data("binge")</code></pre>
+
+
+<h3>Format</h3>
+
+<p>A data frame with 4627 observations on the following 17 variables.
+</p>
+
+<dl>
+<dt><code>SEQN</code></dt>
+<dd>
+<p>NHANES identification number</p>
+</dd>
+<dt><code>age</code></dt>
+<dd>
+<p>Age in years</p>
+</dd>
+<dt><code>ageC</code></dt>
+<dd>
+<p>Age cut into four categories, [20,30), [30,45), [45,60)
+and [60,Inf). </p>
+</dd>
+<dt><code>female</code></dt>
+<dd>
+<p>1=female, 0=male</p>
+</dd>
+<dt><code>educationf</code></dt>
+<dd>
+<p>Education in five categories: &lt;9th grade, 9th-11th grade without a high school degree or equivalent, high school degree or equivalent, some college, at least a BA degree.  An ordered factor with levels <code>&lt;9th</code> &lt; <code>9-11</code> &lt; <code>HS</code> &lt; <code>SomeCol</code> &lt; <code>&gt;=BA</code></p>
+</dd>
+<dt><code>education</code></dt>
+<dd>
+<p>The previous variable, educationf, as integer scores, 1-5.</p>
+</dd>
+<dt><code>bmi</code></dt>
+<dd>
+<p>BMI or body mass index.  A measure of obesity.</p>
+</dd>
+<dt><code>waisthip</code></dt>
+<dd>
+<p>Waist-to-hip ratio.  A measure of obesity.</p>
+</dd>
+<dt><code>vigor</code></dt>
+<dd>
+<p>1 if engages in vigorous activity, either in recreation or at work, 0 otherwise </p>
+</dd>
+<dt><code>smokenowf</code></dt>
+<dd>
+<p>Do you smoke now? <code>Everyday</code> &lt; <code>SomeDays</code> &lt; <code>No</code></p>
+</dd>
+<dt><code>smokenow</code></dt>
+<dd>
+<p>The previous variable, smokenowf, as integer scores.</p>
+</dd>
+<dt><code>bpRX</code></dt>
+<dd>
+<p>1=currently taking medication to control high blood pressure, 0=other</p>
+</dd>
+<dt><code>smokeQuit</code></dt>
+<dd>
+<p>1=used to smoke regularly but quit, 0=other.  A current smoker and a never smoker both have value 0.</p>
+</dd>
+<dt><code>AlcGroup</code></dt>
+<dd>
+<p>An ordered factor with levels <code>B</code> &lt; <code>N</code> &lt; <code>P</code></p>
+</dd>
+<dt><code>bpSystolic</code></dt>
+<dd>
+<p>Systolic blood pressure.  The average of up to three measurements.</p>
+</dd>
+<dt><code>bpDiastolic</code></dt>
+<dd>
+<p>Diastolic blood pressure.  The average of up to three measurements.</p>
+</dd>
+<dt><code>bpCombined</code></dt>
+<dd>
+<p>A combined measure of blood pressure.</p>
+</dd>
+</dl>
+<h3>Details</h3>
+
+<p>This data set is intended to illustrate multivariate matching.  See the example
+in the documentation for the makematch() function.
+</p>
+<p>In the examples below, the simple B-N match in Section 4.3 of the iTOS book is
+constructed.  It matches for the propensity score and nothing else.
+</p>
+<p>bpCombined is the sum of two standardized measures, one for systolic blood pressure and one for diastolic blood pressure.  In the larger NHANES data set of individuals at least 20 years of age who are not pregnant, the median and the mad (=median absolute deviation from the median) were determined separately for systolic and diastolic blood pressure. The calculation used the median and mad functions in the 'stats' package, so the mad was by default scaled to resemble the standard deviation for a Normal distribution. bpCombined is the sum of two quantities: systolic blood pressure minus its median divided by its mad plus diastolic blood pressure minus its median divided by its mad.
+</p>
+
+
+<h3>Source</h3>
+
+<p>The data are from the US National Health and Nutrition Examination Survey, NHANES 2017-March 2020 Pre-pandemic.  The 2017-2020 data were affected by COVID-19 and are not a survey.  The complete data are available from the CDC web page.  With minor differences, the data were used as an example in Rosenbaum (2023).
+</p>
+
+
+<h3>References</h3>
+
+<p>Rosenbaum, P. R. (2023) &lt;doi:10.1111/biom.13921&gt; A second evidence factor for a second control group. Biometrics, 79(4), 3968-3980.
+</p>
+<p>Rosenbaum, P.R. and Rubin, D.B. (1985) &lt;doi:10.2307/2683903&gt; Constructing a control group using multivariate matched sampling methods that incorporate the propensity score. The American Statistician, 39(1):33-38.
+</p>
+<p>US National Health and Nutrition Examination Survey, 2017-2020.  Atlanta: US Centers for Disease Control.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(binge)
+attach(binge)
+# A simple goal is to match each of the 206 binge drinkers
+# to one control from each of the two control groups.
+table(AlcGroup)
+# The matching ratios are very different, 19-to-1 or 2.4 to 1.
+table(AlcGroup)/206
+# Before matching, the age distributions are very different.
+boxplot(age~AlcGroup)
+# NHANES does not ask every question of every person, often
+# using either age or sex to determine what will be asked.
+# If we match exactly for age categories that determine what
+# will be asked, then both members of a matched pair will
+# either have an answer or no answer, and this simplifies
+# some analyses, while also beginning the work of controlling
+# an important covariate.
+table(AlcGroup,ageC)
+# Age is going to be a problem for the P controls.  There
+# are 29 bingers B under age 30, but only 19 past bingers P.
+table(AlcGroup,smokenowf)
+# Smoking is a challenge, too.  The 19-to-1 matching ratio
+# for N controls drops to about 4 = 364/92 for everyday
+# smokers, and from 2.43 to 1.44 = 133/92 for P controls.
+# There are too few P controls who smoke SomeDays to
+# match exactly with bingers B.
+detach(binge)
+
+####################################################
+# This example produces the elementary match in
+# Section 4.3 of the iTOS book.
+# It matches binge drinkers (B) to never binge
+# controls (N), matching just for the propensity
+# score.  The match uses both a caliper and a fine
+# balance constraint for the propensity score.
+# Generally, one does not just match for the
+# propensity score, but this is an example.
+# See also the documentation for makematch.
+library(iTOS)
+data(binge)
+#  Make the treatment indicator z for B versus N
+z&lt;-rep(NA,dim(binge)[1])
+z[binge$AlcGroup=="B"]&lt;-1
+z[binge$AlcGroup=="N"]&lt;-0
+
+#  I find it convenient to write a small function
+#  to create a match.  In that way, small
+#  changes in the function can improve the
+#  match by improving covariate balance.
+#  It also documents the details of the match.
+#  It also makes it possible to reproduce the match.
+
+matchPropensity&lt;-function(z,ncontrols=1){
+  #
+  # Some bookkeeping.
+  # Select the B versus N part of the binge data
+  dt&lt;-binge[!is.na(z),]
+  z&lt;-z[!is.na(z)]
+  # Sort data, placing treated (B) first,
+  # and then ordered by SEQN.
+  dt&lt;-dt[order(1-z,dt$SEQN),]
+  z&lt;-z[order(1-z,dt$SEQN)]
+  rownames(dt)&lt;-dt$SEQN
+  names(z)&lt;-dt$SEQN
+
+  #  Initialize the distance matrix on
+  #  the left and right to zero distances
+  left&lt;-startcost(z)
+  right&lt;-startcost(z)
+
+  #  Create the propensity score
+  attach(dt)
+  propmod&lt;-glm(z~age+female+education+smokenow+smokeQuit+bpRX+
+                 bmi+vigor+waisthip,family=binomial)
+  p&lt;-propmod$fitted.values
+
+  # The left distance matrix is changed from zero
+  # by adding a caliper on the propensity score.
+  # The caliper is almost the one used in
+  # Rosenbaum and Rubin (1985, American Statistician).
+  # If two individuals differ on the propensity score
+  # by more than 0.2 times the standard deviation of p,
+  # the distance between them is increased from 0 to 10.
+  # That was the caliper in Rosenbaum and Rubin (1985).
+  # By default, addcaliper doubles the distance (to 20) at
+  # 0.4 = 2 x 0.2 times the standard deviation of p.
+  # Without this doubling feature, the caliper views
+  # everyone who violates the 0.2 caliper as equivalent.
+  left&lt;-addcaliper(left,z,p,penalty=10)
+
+  # The right distance matrix now adds a fine balance
+  # constraint.  The variable (p&gt;0.05)+(p&gt;.1)+(p&gt;.15)+(p&gt;.2)
+  # takes integer values from 0 to 4, taking steps up as
+  # the propensity score increases.
+  # The right distance matrix is 0 if two people fall in
+  # the same category, is 1000 if they fall in adjacent
+  # categories, 2000 if there if there is a category
+  # between them, and so on.  Because 1000 is so much
+  # larger than 10, the fine balance constraint takes
+  # priority over the caliper.
+  right&lt;-addinteger(right,z,(p&gt;0.05)+(p&gt;.1)+(p&gt;.15)+(p&gt;.2))
+
+  # Some more bookkeeping
+  detach(dt)
+  dt&lt;-cbind(dt,z,p)
+
+  # The big step: Use the distance matrices to make the match
+  m&lt;-makematch(dt,left,right,ncontrols=ncontrols)
+
+  # Final bookkeeping
+  m$mset&lt;-as.integer(m$mset)
+  treated&lt;-m$SEQN[m$z==1]
+  treated&lt;-as.vector(t(matrix(treated,length(treated),ncontrols+1)))
+  m&lt;-cbind(m,treated)
+  list(m=m,dt=dt)
+}
+
+# Call the function above to make the match
+mProp&lt;-matchPropensity(z)
+m&lt;-mProp$m
+
+# Make Table 4.3 in the iTOS book.
+t.test(m$age~m$z)$p.value
+t.test(m$female~m$z)$p.value
+t.test(m$education~m$z)$p.value
+t.test(m$bmi~m$z)$p.value
+t.test(m$waisthip~m$z)$p.value
+t.test(m$vigor~m$z)$p.value
+t.test(m$smokenow~m$z)$p.value
+t.test(m$smokeQuit~m$z)$p.value
+t.test(m$bpRX~m$z)$p.value
+t.test(m$p~m$z)$p.value
+dt&lt;-mProp$dt
+tr&lt;-m$z==1
+co&lt;-m$z==0
+un&lt;-!is.element(dt$SEQN,m$SEQN)
+
+vnames&lt;-c("age","female","education","bmi","waisthip","vigor",
+          "smokenow","smokeQuit","bpRX","p")
+o&lt;-matrix(NA,10,3)
+pval&lt;-rep(NA,10)
+names(pval)&lt;-vnames
+rownames(o)&lt;-vnames
+colnames(o)&lt;-c("Treated","Control","Unmatched")
+for (i in 1:10){
+  vname&lt;-vnames[i]
+  vm&lt;-as.vector(m[,colnames(m)==vname])
+  vdt&lt;-as.vector(dt[,colnames(dt)==vname])
+  o[i,1]&lt;-mean(vm[tr])
+  o[i,2]&lt;-mean(vm[co])
+  o[i,3]&lt;-mean(vdt[un])
+  pval[i]&lt;-t.test(vm[tr],vm[co])$p.value
+}
+library(xtable)
+o&lt;-cbind(o,pval)
+xtable(o,digits=c(NA,2,2,2,3))
+m[5:6,]
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,213 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>power_interaction</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Power analysis for interactions</h2>
+
+<h3>Description</h3>
+
+<p>Power analysis for interaction models, by simulation. A set of n.iter simulations is run for each unique combination of model settings.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">power_interaction(
+  n.iter,
+  N,
+  r.x1.y,
+  r.x2.y,
+  r.x1x2.y,
+  r.x1.x2,
+  rel.x1 = 1,
+  rel.x2 = 1,
+  rel.y = 1,
+  k.x1 = 0,
+  k.x2 = 0,
+  k.y = 0,
+  adjust.correlations = TRUE,
+  alpha = 0.05,
+  q = 2,
+  cl = NULL,
+  ss.IQR = 1.5,
+  N.adjustment = 1e+06,
+  detailed_results = FALSE,
+  full_simulation = FALSE,
+  tol = 0.005,
+  iter = 10,
+  skew.x1 = NA,
+  skew.x2 = NA,
+  skew.y = NA
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>n.iter</code></td>
+<td>
+<p>Number of iterations. The number of simulations to run for each unique setting combination. Must be a positive integer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>Sample size. Must be a positive integer. Has no default value. Can be a single value or a vector of values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r.x1.y</code></td>
+<td>
+<p>Pearson's correlation between x1 and y. Must be between -1 and 1.. Has no default value. Can be a single value or a vector of values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r.x2.y</code></td>
+<td>
+<p>Pearson's correlation between x2 and y. Must be between -1 and 1.. Assumed to be the 'moderator' in some functions. Has no default value. Can be a single value or a vector of values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r.x1x2.y</code></td>
+<td>
+<p>Pearson's correlation between the interaction term x1x2 (x1 * x2) and y. Must be between -1 and 1.. Has no default value. Can be a single value or a vector of values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r.x1.x2</code></td>
+<td>
+<p>Pearson's correlation between x1 and x2. Must be between -1 and 1.. Has no default value. Can be a single value or a vector of values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rel.x1</code></td>
+<td>
+<p>Reliability of x1 (e.g. test-retest reliability, ICC, Cronbach's alpha). Default is 1 (perfect reliability). Must be greater than 0 and less than or equal to 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rel.x2</code></td>
+<td>
+<p>Reliability of x2 (e.g. test-retest reliability, ICC, Cronbach's alpha). Default is 1 (perfect reliability). Must be greater than 0 and less than or equal to 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rel.y</code></td>
+<td>
+<p>Reliability of xy (e.g. test-retest reliability, ICC, Cronbach's alpha). Default is 1 (perfect reliability). Must be greater than 0 and less than or equal to 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k.x1</code></td>
+<td>
+<p>Number of discrete values for x1. Can be used to make a variable binary or ordinal.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k.x2</code></td>
+<td>
+<p>Number of discrete values for x2. Can be used to make a variable binary or ordinal.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k.y</code></td>
+<td>
+<p>Number of discrete values for y. Can be used to make a variable binary or ordinal.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adjust.correlations</code></td>
+<td>
+<p>If variables are ordinal or binary, should correlations be adjusted so that output data has the specified correlation structure? Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>The alpha. At what p-value is the interaction deemed significant? Default is 0.05.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>Simple slopes. How many quantiles should x2 be split into for simple slope testing? Default is 2. Simple slope testing returns the effect-size (slope) of y~x1 for the two most extreme quantiles of x2. If q=3 then the two slopes are y~x1 for the bottom 33% of x2, and the top 33% of x2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cl</code></td>
+<td>
+<p>Number of clusters to use for running simulations in parallel (recommended). Default is 1 (i.e. not in parallel).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ss.IQR</code></td>
+<td>
+<p>Simple slope IQR. Multiplier when estimating the distribution of simple slopes within each simulation setting. Default is 1.5.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N.adjustment</code></td>
+<td>
+<p>Sample size for simulations where correlation matrix is corrected to allow for binary/ordinal variables. Default is 1000000</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>detailed_results</code></td>
+<td>
+<p>Default is FALSE. Should detailed results be reported?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>full_simulation</code></td>
+<td>
+<p>Default is FALSE. If TRUE, will return a list that includes the full per-simulation results.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>Correlation adjustment tolerance. When adjust.correlations = TRUE, correlations are adjusted so that the population correlation is within r='tol' of the target. Default = 0.005.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter</code></td>
+<td>
+<p>Max number of iterations to run the correlation adjustment for. Typically only a couple are needed. Default = 10.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>skew.x1</code></td>
+<td>
+<p>No longer supported.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>skew.x2</code></td>
+<td>
+<p>No longer supported.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>skew.y</code></td>
+<td>
+<p>No longer supported.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A data frame containing the power (% significant results) for each unique setting combination. If full_simulation = TRUE will return a list, with one data frame that includes power, and a second that includes raw simulation results.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">power_interaction(n.iter=10, N=10,r.x1.y=0.2, r.x2.y=.2,r.x1x2.y=0.5,r.x1.x2=.2)
+</code></pre>
+
+
+</div>

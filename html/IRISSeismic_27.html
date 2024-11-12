@@ -1,0 +1,199 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getDataAvailability</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Retrieve miniseed trace extents from IRIS DMC</h2>
+
+<h3>Description</h3>
+
+<p>The <code>getDataAvailability</code> method obtains miniseed time extents from the IRIS DMC 
+<code>availability</code> web service and returns it in a dataframe.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getDataAvailability(obj, network, station, location, channel,starttime, endtime,
+                     mergequality, mergesamplerate, mergeoverlap, mergetolerance, 
+                     includerestricted, excludetoolarge)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+ <p><code>IrisClient</code> object </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>network</code></td>
+<td>
+<p> character string with the two letter seismic network code </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>station</code></td>
+<td>
+<p> character string with the station code </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>location</code></td>
+<td>
+<p> character string with the location code </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>channel</code></td>
+<td>
+<p> character string with the three letter channel code </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>starttime</code></td>
+<td>
+<p> POSIXct class specifying the starttime (GMT) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>endtime</code></td>
+<td>
+<p> POSIXct class specifying the endtime (GMT) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mergequality</code></td>
+<td>
+<p>optional logical identifying if timespans with differing qualities are grouped together 
+(default=<code>TRUE</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mergesamplerate</code></td>
+<td>
+<p>optional logical identifying if timespans from data with differing sample rates are grouped 
+together (default=<code>FALSE</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mergeoverlap</code></td>
+<td>
+<p>optional logical identifying if overlapping timespans are merged together (default=<code>TRUE</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mergetolerance</code></td>
+<td>
+<p>optional numeric. Time spans separated by less than or equal to the mergetolerance value
+in seconds are merged together. To have an effect, the mergetolerance value must be larger 
+than 1.5 times the sample period. This implements the mergegaps option in the fdsnws availability 
+web service specification. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>includerestricted</code></td>
+<td>
+<p> optional logical identifying whether to report on restricted data (default=<code>FALSE</code>) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>excludetoolarge</code></td>
+<td>
+<p> optional logical, if TRUE sets the fdsnws availability web service option "limit=500000". default=<code>TRUE</code> </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>getDataAvailability</code> method uses the FDSNWS availability service to obtain start and endtimes for all continuous trace 
+segments in the IRIS (or other) archive for the requested network, station, location, channels and returns that data in a dataframe. 
+Each row of the dataframe represents a unique data trace extent. 
+</p>
+<p>Each of the arguments <code>network</code>, <code>station</code>, <code>location</code> or <code>channel</code> may contain
+a valid code or a wildcard expression, e.g. "BH?" or "*". Empty strings are converted to "*".
+Otherwise the ascii string that is used for these values is simply inserted into the web service request URL.
+</p>
+<p>For more details see the <a href="https://service.iris.edu/fdsnws/availability/1/">web service documentation</a>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A dataframe with the following columns:
+</p>
+<p>mergequality=TRUE and mergesamplerate=FALSE (defaults):
+
+</p>
+<pre>
+  network, station, location, channel, samplerate, starttime, endtime, snclId 
+  </pre>
+<p>mergequality=TRUE and mergesamplerate=TRUE:
+</p>
+<pre>
+  network, station, location, channel, starttime, endtime, snclId
+  </pre>
+<p>mergequality=FALSE and mergesamplerate=FALSE:
+</p>
+<pre>
+  network, station, location, channel, quality, samplerate, starttime, endtime, snclId            
+  </pre>
+<p>mergequality=FALSE and mergesamplerate=TRUE:
+</p>
+<pre>
+  network, station, location, channel, quality, starttime, endtime, snclId
+  </pre>
+<p>Rows are ordered by <code>snclId</code>.
+</p>
+<p>The snclId column, eg. "US.OCWA..BHE", is generated as a convenience. It is not part of
+the normal return from the station web service.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Gillian Sharer <a href="mailto:gillian@iris.washington.edu">gillian@iris.washington.edu</a>
+</p>
+
+
+<h3>References</h3>
+
+
+<p>The IRIS DMC station web service:
+</p>
+<p><a href="https://service.iris.edu/fdsnws/availability/1/">https://service.iris.edu/fdsnws/availability/1/</a>
+<a href="https://service.iris.edu/ph5ws/availability/1/">https://service.iris.edu/ph5ws/availability/1/</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>IrisClient-class</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+starttime &lt;- as.POSIXct("2018-01-01",tz="GMT")
+endtime &lt;- as.POSIXct("2019-01-01",tz="GMT")
+network &lt;- "TA"
+station &lt;- "M22K"
+channel &lt;- "BHZ"
+
+result &lt;- try(traceList &lt;- getDataAvailability(iris,network,station,"*",channel,starttime,endtime))
+if (inherits(result,"try-error")) {
+  message(geterrmessage())
+} else {
+  traceList
+}
+</code></pre>
+
+
+</div>

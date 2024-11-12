@@ -1,0 +1,199 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>imptree</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Classification Trees with Imprecise Probabilities</h2>
+
+<h3>Description</h3>
+
+<p><code>imptree</code> implements Abellan and Moral's tree 
+algorithm (based on Quinlans ID3) for classification. It
+employes either the imprecise Dirichlet model (IDM) or
+nonparametric predictive inference (NPI) to generate the
+imprecise probability distribution of the classification variable
+within a node.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'formula'
+imptree(formula, data = NULL, weights, control,
+  method = c("IDM", "NPI", "NPIapprox"), method.param, ...)
+
+## Default S3 method:
+imptree(x, y, ...)
+
+imptree(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>Formula describing the strucutre
+(class variable ~ featutre variables).
+Any interaction terms trigger an error.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Data.frame to evaluate supplied formula on.
+If not provided the the formula is evaluated 
+on the calling environment</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>Individual weight of the observations
+(default: 1 to each).
+<em>This argument is ignored at the moment.</em></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>A named (partial) list according to the result of
+<code>imptree_control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>Method applied for calculating the probability
+intervals of the class probability. <code>"IDM"</code> for the imprecise
+Dirichlet model (default), <code>"NPI"</code> for use of the 
+nonparametric predictive inference approach and <code>"NPIapprox"</code>
+for use of the approximate algorithm obtaining maximal entropy of
+NPI generated probability intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method.param</code></td>
+<td>
+<p>Named list providing the method specific 
+parameters. See <code>imptree_params</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>optional parameters to be passed to the main function
+<code>imptree.formula</code> or to the call of
+<code>imptree_control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A data.frame or a matrix of feature variables.
+The columns are required to be named.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>The classification variable as a factor.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class <code>imptree</code>, which is a list
+with the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>Original call to <code>imptree</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tree</code></td>
+<td>
+<p>Object reference to the underlying C++ tree object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>train</code></td>
+<td>
+<p>Training data in the form required by the 
+workhorse C++ function.<br>
+It is an integer matrix containing the internal factor
+representations, adjusted for the C++ specific indexing
+starting at 0 and not at 1 as in R.
+Further attributes of the matrix, hold the names of the variables,
+the C++ adjusted index of the classification variabe, as well as
+the levels and number of levels for each variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>The formula describing the data structure</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Paul Fink <a href="mailto:Paul.Fink@stat.uni-muenchen.de">Paul.Fink@stat.uni-muenchen.de</a>,
+based on algorithms by 
+J. Abellán
+and S. Moral for the IDM and R. M. Baker for the NPI approach.
+</p>
+
+
+<h3>References</h3>
+
+<p>Abellán,
+J. and Moral, S. (2005), Upper entropy of credal sets. Applications to 
+credal classification, <em>International Journal of Approximate Reasoning</em>
+<b>39</b>, 235–255.
+</p>
+<p>Strobl, C. (2005), Variable Selection in Classification Trees Based on
+Imprecise Probabilities, <em>ISIPTA'05: Proceedings of the Fourth
+International Symposium on Imprecise Probabilities and Their Applications</em>,
+339–348.
+</p>
+<p>Baker, R. M. (2010), <em>Multinomial Nonparametric Predictive Inference:
+Selection, Classification and Subcategory Data</em>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>predict.imptree</code> for prediction,
+<code>summary.imptree</code> for summary information, 
+<code>imptree_params</code> and <code>imptree_control</code> for
+arguments controlling the creation, <code>node_imptree</code> for
+accessing a specific node in the tree
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("carEvaluation")
+
+## create a tree with IDM (s=1) to full size on
+## carEvaluation, leaving the first 10 observations out
+imptree(acceptance~., data = carEvaluation[-(1:10),], 
+  method="IDM", method.param = list(splitmetric = "globalmax", s = 1), 
+  control = list(depth = NULL, minbucket = 1)) # control args as list
+
+## same setting as above, now passing control args in '...'
+imptree(acceptance~., data = carEvaluation[-(1:10),], 
+  method="IDM", method.param = list(splitmetric = "globalmax", s = 1), 
+  depth = NULL, minbucket = 1)
+
+</code></pre>
+
+
+</div>

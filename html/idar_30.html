@@ -1,0 +1,228 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ipsim</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate Multivariate Point Patterns</h2>
+
+<h3>Description</h3>
+
+<p>These functions simulate  multivariate point patterns from a variety of null models, in the way required to test IDAR(r) functions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  ipsim(pp, mimark,sigma=0, lambda=NULL, namesmark=NULL)
+  ipsimlist(pp, mimark, listsim)
+  simulador2(mimark, milambda, nsim=99)
+  multifocalsimulator(pp, mimark, simulate,nsim=99,nmin=NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>pp</code></td>
+<td>
+<p>A multitype (a.k.a. multivariate) marked point pattern. An object with the ppp format of <span class="pkg">spatstat</span></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mimark</code></td>
+<td>
+<p>Character. Name of the focal species in the multitype <code>pp</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>namesmark</code></td>
+<td>
+<p>Character. If the marks in <code>pp</code> are within a <code>data.frame</code>, the name of the column with the species names</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>Sigma for the Gaussian kernel to estimate the intensity of the point pattern to simulate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>listsim</code></td>
+<td>
+<p>List with simulated point paterns from <code>simulador2</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>intensity surface, e.g., an image from density.ppp or predict.ppm</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>milambda</code></td>
+<td>
+<p>intensity surface, e.g., an image from density.ppp or predict.ppm</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>number of simulations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nmin</code></td>
+<td>
+<p>expected minimum number of points in each simulated pattern</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>simulate</code></td>
+<td>
+<p>either a list of pre-computed univariate point patterns or an expression in the R language indicating how to simulate the patterns.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This functions produce simulated point patterns appropriate to to compute envelopes of IDAR(r) functions. The usual tests of IDAR(r) functions require that the multivariate (i.e. multispecies) pattern remains fixed, except for the focal species, that is simulated acording to, e.g., an (inhomogeneous) Poisson process.
+</p>
+<p><code>ipsim</code> returns the multivariate <code>pp</code> pattern with all species in the same locations except the "focal" one (i.e., the one indicated by the argument <code>mimark</code>) that is simulated using rpoispp. If  an intensity surface (argument <code>lambda</code>) is provided, the focal species will be simulated from this surface. If no <code>lambda</code> is provided but the argument <code>sigma</code> is &gt;0, an intensity surface will be estimated with a Gaussian kernel with the sigma provided (using density.ppp) and the simulation will be made form this surface. If no lambda is provided and <code>sigma</code>=0, a homogeneos Poisson process will be simulated.
+</p>
+<p><code>simulador2</code> generates a list (length = <em>nsim</em>) of marked (with mark = <em>mimark</em>) univariate point patterns from an intensity surface using rpoispp.
+</p>
+<p><code>ipsimlist</code> uses the results of <code>simulador2</code> and the multivariate <code>pp</code> pattern to generate a list of multivariate point patterns with all species in the same locations except the "focal" one (i.e., the one indicated by the argument <code>mimark</code>) that has the locations simulated with <code>simulador2</code>.
+</p>
+<p><code>multifocalsimulator</code> is more flexible and allows the simulation of whichever null model of the focal species that could be described by an R expression.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>ipsim</code> produces a multivariate point pattern (with the ppp format of <span class="pkg">spatstat</span>); <code>ipsimlist</code>  and <code>multifocalsimulator</code> produce a list of multivariate point patterns; <code>simulador2</code> produces a list of univariate marked patterns.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Marcelino de la Cruz <a href="mailto:marcelino.delacruz@urjc.es">marcelino.delacruz@urjc.es</a></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+# Build a multivariate point pattern where maple is simulated according to a Poisson process
+# and where all the other species are keep fixed in their original coordinates.
+# (The warnings are because in the original lansing point pattern there is a dupplicated
+#  point)
+
+data(lansing) 
+ipsim(pp=lansing, mimark="maple")
+
+# Build a multivariate point pattern where maple is simulated according to an Inhomogeneous
+# Poisson process from an intensity surface estimated "on the fly" with a Gaussian kernel with
+# sd = "sigma", and where all the other species are keep fixed in their original coordinates.
+
+ipsim(pp=lansing, mimark="maple", sigma=0.1)
+
+# Build a multivariate point pattern where maple is simulated according to an Inhomogeneous
+# Poisson process from a predefined  intensity surface "lambda" and where all the other
+# species are keep fixed in their original coordinates. "Lambda" is an im object resulting
+# from density.ppp(), from predict.ppm() or converted from any other rasterized image. 
+
+maple.lambda&lt;- density.ppp(lansing[lansing$marks=="maple"])
+ipsim(pp=lansing, mimark="maple", lambda=maple.lambda)
+
+# Build a list of 19 multivariate point pattern where maple is simulated according to an
+# Inhomogeneous Poisson process from a predefined  intensity surface "lambda" and where all
+# the other species are keep fixed in their original coordinates. "Lambda" is an im object
+# resulting  from density.ppp(), # from predict.ppm() or converted from any other rasterized
+# image. 
+
+  # Estimate the intensity of maple
+   maple.lambda&lt;- density(unmark(lansing[lansing$marks=="maple"]))
+
+  # first simulate the individual maple patterns
+   maple.sim&lt;- simulador2(mimark="maple", milambda=maple.lambda, nsim=19)
+
+  # Then, mix the simulated maple patterns with the rest of the multivariate pattern
+  # (which remains "fixed")
+   multi.maple.sim&lt;- ipsimlist(pp=lansing, mimark="maple", listsim=maple.sim)
+
+
+## Use of multifocalsimulator() ##
+
+# The same but in a single step with multifocalsimulator(): Build a list of 19 multivariate
+# point pattern where maple is simulated according to an Inhomogeneous Poisson process
+# from a predefined  intensity surface "lambda" and where all the other species are keep 
+# fixed in their original coordinates. "Lambda" is an im object resulting from density.ppp(),
+# from predict.ppm() or converted from any other rasterized image. 
+
+   # Estimate the intensity of maple
+   maple.lambda&lt;- density(unmark(lansing[lansing$marks=="maple"]))
+
+   # get 99 simulated multivariate point patterns where only maple varies,
+   # according to an inhomogeneous Poisson process
+   multi.maple.sim &lt;- multifocalsimulator(lansing, "maple", nsim=99,
+                                         simulate=expression(rpoispp(maple.lambda)))
+
+## Not run: 
+   # Use the simulated multivariate patterns to compute  envelopes for the ISAR against
+   # a null model of IPP for maple 
+   isar.maple.env&lt;- envelope(lansing, fun=isar, mimark="maple", nsim=99, savefuns=TRUE,
+                                         r=seq(0.01, 0.25, le=100), simulate=multi.maple.sim)
+   plot( isar.maple.env)
+
+
+
+# Use multifocalsimulator()  to compute  envelopes for the ISAR against a null model of
+# Poisson cluster for maple.
+
+   # First, adjust a Poisson Cluster process to maple
+   require(ecespa)
+   maple.pc&lt;- ipc.estK(unmark(lansing[lansing$marks=="maple"]))
+
+  # generate list of simulated multivariate partterns (all other species fixed and maple
+  # simulated according to the adjusted PC process):
+   maple.pc.sim&lt;-multifocalsimulator(pp=lansing, mimark="maple", nsim=99,nmin=NULL,
+                                                 simulate=expression(rIPCP(maple.pc)))
+
+  # compute envelopes
+   isar.maple.pc.env&lt;- envelope(lansing, fun=isar, mimark="maple", nsim=99, savefuns=TRUE, 
+                                            simulate=maple.pc.sim, r=seq(0.01, 0.25, le=100))
+   plot( isar.maple.pc.env)
+
+
+# Compute  envelopes for the IFDAR against a null model of Poisson cluster for sp_44 in
+# San Francisco forest.
+   data(SF)
+   data(SFtraits)
+
+   # first, get the original point pattern but with marks only for the species (i.e., dsicard 
+   # the data.frame of marks and keep only the vector of species names)
+   SFsp&lt;- unmark(SF)
+   marks(SFsp)&lt;- SF$marks$species
+
+   # second, adjust a PCP to sp_44
+   sp_44.pc&lt;- ipc.estK(unmark(SFsp[SFsp$marks=="sp_44"]))
+
+  # third, generate multivariate simulated patterns with only sp_44 varying according
+  # to the adjusted PCP
+   sp_44.pc.sim&lt;-multifocalsimulator(pp=SFsp, mimark="sp_44",nsim=99,nmin=NULL,
+                                                 simulate=expression(rIPCP(sp_44.pc)))
+
+   # finally, compute envelopes
+   ifdar.sp_44.pc.env&lt;- envelope(SFsp, fun=ifdar, mimark="sp_44", traits=SFtraits, r=1:30,
+                        correct.trait.na=TRUE, nsim=99, simulate=sp_44.pc.sim,  savefuns=TRUE)
+
+   plot( ifdar.sp_44.pc.env)
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

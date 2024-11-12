@@ -1,0 +1,179 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot.iva</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Plotting an Object of Class iva
+</h2>
+
+<h3>Description</h3>
+
+<p><code>plot</code> method for the class <code>"iva"</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'iva'
+plot(x, which.dataset = NA, which.source = NA,
+type = "l", xlabs = c(), ylabs = c(), colors = c(),
+oma = c(1, 1, 0, 0), mar = c(2, 2, 1, 1), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>An object of class <code>"iva"</code>, usually the result of a call to <code>NewtonIVA</code> or <code>fastIVA</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>which.dataset</code></td>
+<td>
+
+<p>Positive integer to determine which dataset is returned. If not set, returns all datasets.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>which.source</code></td>
+<td>
+
+<p>Positive integer to determine which dataset is returned. If not set, returns all datasets.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+
+<p>1-character string giving the type of plot desired. For details, see <code>plot</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlabs</code></td>
+<td>
+
+<p>Vector containing the labels for x-axis.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylabs</code></td>
+<td>
+
+<p>Vector containing the labels for y-axis.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colors</code></td>
+<td>
+
+<p>Vector containing the colors for each plot.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>oma</code></td>
+<td>
+
+<p>A vector of the form <code>c(bottom, left, top, right)</code> giving the size of the outer margins in lines of text. For more details, see <code>par</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mar</code></td>
+<td>
+
+<p>A numerical vector of the form <cite>c(bottom, left, top, right)</cite> which gives the number of lines of margin to be specified on the four sides of the plot. For more details, see <code>par</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Further arguments passed to <code>plot</code> function.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Plots either all estimated sources of the object of class <code>"iva"</code> or the estimates for specific dataset and/or source.
+</p>
+
+
+<h3>Value</h3>
+
+<p>No return value, called for plotting the estimated sources of the object of class <code>"iva"</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Mika Sipilä
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>NewtonIVA</code>, <code>fastIVA</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">if (require("LaplacesDemon")) {
+  # Generate sources from multivariate Laplace distribution
+  P &lt;- 4; N &lt;- 1000; D &lt;- 4;
+  S &lt;- array(NA, c(P, N, D))
+
+  for (i in 1:P) {
+    U &lt;- array(rnorm(D * D), c(D, D))
+    Sigma &lt;- crossprod(U)
+    S[i, , ] &lt;- rmvl(N, rep(0, D), Sigma)
+  }
+
+  # Generate mixing matrices from standard normal distribution
+  A &lt;- array(rnorm(P * P * D), c(P, P, D))
+
+  # Generate mixtures
+  X &lt;- array(NaN, c(P, N, D))
+  for (d in 1:D) {
+    X[, , d] &lt;- A[, , d] %*% S[, , d]
+  }
+
+  # Estimate sources and unmixing matrices
+  res_G &lt;- NewtonIVA(X, source_density = "gaussian")
+
+  # Plot all estimated sources
+  plot(res_G)
+
+  # Plot the source estimates for the first dataset only
+  plot(res_G, which.dataset = 1)
+
+  # Plot the source estimates for the second source only
+  plot(res_G, which.source = 2)
+
+  # Plot the source estimate of the second dataset and third source
+  plot(res_G, which.dataset = 2, which.source = 3, type = "p")
+
+  # Plot all source estimates with custom colors and labels
+  plot(res_G, col=c(rep(1, 4), rep(2, 4), rep(3, 4), rep(4, 4)),
+      xlabs = c("Subject 1", "Subject 2", "Subject 3", "Subject 4"),
+      ylabs = c("Channel 1", "Channel 2", "Channel 3", "Channel 4"))
+}
+</code></pre>
+
+
+</div>

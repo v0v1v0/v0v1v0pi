@@ -1,0 +1,349 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iNEXT3D</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>iNterpolation and EXTrapolation with three dimensions of biodiversity</h2>
+
+<h3>Description</h3>
+
+<p><code>iNEXT3D</code> mainly computes standardized 3D estimates with a common sample size or sample coverage for orders q = 0, 1 and 2. It also computes relevant information/statistics.<br><br> 
+For <code>diversity = "TD"</code>, relevant data information is summarized in the output <code>$TDInfo</code>. Diversity estimates for rarefied and extrapolated samples are provided in the output <code>$TDiNextEst</code>, which includes two data frames (<code>"$size_based"</code> and <code>"$coverage_based"</code>) based on two different standardizations; in the size-based standardization, all samples are standardized to a common target sample size, whereas the in the latter standardization, all samples are standardized to a common target level of sample coverage. The asymptotic diversity estimates for q = 0, 1 and 2 are provided in the list <code>$TDAsyEst</code>.<br><br> 
+For <code>diversity = "PD"</code>, the corresponding three lists are <code>$PDInfo</code>, <code>$PDiNextEst</code> and <code>$PDAsyEst</code>.<br> 
+For <code>diversity = "FD"</code>, the corresponding three lists are <code>$FDInfo</code>, <code>$FDiNextEst</code> and <code>$FDAsyEst</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iNEXT3D(
+  data,
+  diversity = "TD",
+  q = c(0, 1, 2),
+  datatype = "abundance",
+  size = NULL,
+  endpoint = NULL,
+  knots = 40,
+  nboot = 50,
+  conf = 0.95,
+  nT = NULL,
+  PDtree = NULL,
+  PDreftime = NULL,
+  PDtype = "meanPD",
+  FDdistM,
+  FDtype = "AUC",
+  FDtau = NULL,
+  FDcut_number = 50
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>(a) For <code>datatype = "abundance"</code>, data can be input as a vector of species abundances (for a single assemblage), matrix/data.frame (species by assemblages), or a list of species abundance vectors. <br>
+(b) For <code>datatype = "incidence_raw"</code>, data can be input as a list of matrices/data.frames (species by sampling units); data can also be input as a single matrix/data.frame by merging all sampling units across assemblages based on species identity; in this case, the number of sampling units (<code>nT</code>, see below) must be specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diversity</code></td>
+<td>
+<p>selection of diversity type: <code>'TD'</code> = Taxonomic diversity, <code>'PD'</code> = Phylogenetic diversity, and <code>'FD'</code> = Functional diversity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>a numerical vector specifying the diversity orders. Default is <code>c(0, 1, 2)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>datatype</code></td>
+<td>
+<p>data type of input data: individual-based abundance data (<code>datatype = "abundance"</code>) or species by sampling-units incidence/occurrence matrix (<code>datatype = "incidence_raw"</code>) with all entries being 0 (non-detection) or 1 (detection).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size</code></td>
+<td>
+<p>an integer vector of sample sizes (number of individuals or sampling units) for which diversity estimates will be computed. 
+If <code>NULL</code>, then diversity estimates will be computed for those sample sizes determined by the specified/default <code>endpoint</code> and <code>knots</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>endpoint</code></td>
+<td>
+<p>an integer specifying the sample size that is the <code>endpoint</code> for rarefaction/extrapolation. 
+If <code>NULL</code>, then <code>endpoint</code> <code>=</code> double reference sample size.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>knots</code></td>
+<td>
+<p>an integer specifying the number of equally-spaced <code>knots</code> (say K, default is 40) between size 1 and the <code>endpoint</code>;
+each knot represents a particular sample size for which diversity estimate will be calculated.  
+If the <code>endpoint</code> is smaller than the reference sample size, then <code>iNEXT3D()</code> computes only the rarefaction esimates for approximately K evenly spaced <code>knots</code>. 
+If the <code>endpoint</code> is larger than the reference sample size, then <code>iNEXT3D()</code> computes rarefaction estimates for approximately K/2 evenly spaced <code>knots</code> between sample size 1 and the reference sample size, and computes extrapolation estimates for approximately K/2 evenly spaced <code>knots</code> between the reference sample size and the <code>endpoint</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nboot</code></td>
+<td>
+<p>a positive integer specifying the number of bootstrap replications when assessing sampling uncertainty and constructing confidence intervals. Enter 0 to skip the bootstrap procedures. Default is 50.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf</code></td>
+<td>
+<p>a positive number &lt; 1 specifying the level of confidence interval. Default is 0.95.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nT</code></td>
+<td>
+<p>(required only when <code>datatype = "incidence_raw"</code> and input data in a single matrix/data.frame) a vector of positive integers specifying the number of sampling units in each assemblage. If assemblage names are not specified (i.e., <code>names(nT) = NULL</code>), then assemblages are automatically named as "assemblage1", "assemblage2",..., etc.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PDtree</code></td>
+<td>
+<p>(required argument for <code>diversity = "PD"</code>), a phylogenetic tree in Newick format for all observed species in the pooled assemblage.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PDreftime</code></td>
+<td>
+<p>(argument only for <code>diversity = "PD"</code>), a vector of numerical values specifying reference times for PD. Default is <code>NULL</code> (i.e., the age of the root of <code>PDtree</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PDtype</code></td>
+<td>
+<p>(argument only for <code>diversity = "PD"</code>), select PD type: <code>PDtype = "PD"</code> (effective total branch length) or <code>PDtype = "meanPD"</code> (effective number of equally divergent lineages). Default is <code>"meanPD"</code>, where <code>meanPD = PD/tree depth</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FDdistM</code></td>
+<td>
+<p>(required argument for <code>diversity = "FD"</code>), a species pairwise distance matrix for all species in the pooled assemblage.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FDtype</code></td>
+<td>
+<p>(argument only for <code>diversity = "FD"</code>), select FD type: <code>FDtype = "tau_values"</code> for FD under specified threshold values, or <code>FDtype = "AUC"</code> (area under the curve of tau-profile) for an overall FD which integrates all threshold values between zero and one. Default is <code>"AUC"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FDtau</code></td>
+<td>
+<p>(argument only for <code>diversity = "FD"</code> and <code>FDtype = "tau_values"</code>), a numerical vector between 0 and 1 specifying tau values (threshold levels). If <code>NULL</code> (default), then threshold is set to be the mean distance between any two individuals randomly selected from the pooled assemblage (i.e., quadratic entropy).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FDcut_number</code></td>
+<td>
+<p>(argument only for <code>diversity = "FD"</code> and <code>FDtype = "AUC"</code>), a numeric number to cut [0, 1] interval into equal-spaced sub-intervals to obtain the AUC value by integrating the tau-profile. Equivalently, the number of tau values that will be considered to compute the integrated AUC value. Default is <code>FDcut_number = 50</code>. A larger value can be set to obtain more accurate AUC value.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a list of three objects: <br><br>
+(1) <code>$TDInfo</code> (<code>$PDInfo</code>, or <code>$FDInfo</code>) for summarizing data information for q = 0, 1 and 2. Refer to the output of <code>DataInfo3D</code> for details. <br><br>
+(2) <code>$TDiNextEst</code> (<code>$PDiNextEst</code>, or <code>$FDiNextEst</code>) for showing diversity estimates for rarefied and extrapolated samples along with related statistics. There are two data frames: <code>"$size_based"</code> and <code>"$coverage_based"</code>. <br><br>
+In <code>"$size_based"</code>, the output includes:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Assemblage</code></td>
+<td>
+<p>the name of assemblage.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Order.q</code></td>
+<td>
+<p>the diversity order of q.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m, mT</code></td>
+<td>
+<p>the target sample size (or number of sampling units for incidence data).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Method</code></td>
+<td>
+<p>Rarefaction, Observed, or Extrapolation, depending on whether the target sample size is less than, equal to, or greater than the size of the reference sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qTD, qPD, qFD</code></td>
+<td>
+<p>the estimated diversity estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qTD.LCL, qPD.LCL, qFD.LCL and qTD.UCL, qPD.UCL, qFD.UCL</code></td>
+<td>
+<p>the bootstrap lower and upper confidence limits for the diversity of order q at the specified level (with a default value of 0.95).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SC</code></td>
+<td>
+<p>the standardized coverage value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SC.LCL, SC.UCL</code></td>
+<td>
+<p>the bootstrap lower and upper confidence limits for coverage at the specified level (with a default value of 0.95).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Reftime</code></td>
+<td>
+<p>the reference times for PD.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Type</code></td>
+<td>
+<p><code>"PD"</code> (effective total branch length) or <code>"meanPD"</code> (effective number of equally divergent lineages) for PD.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Tau</code></td>
+<td>
+<p>the threshold of functional distinctiveness between any two species for FD (under <code>FDtype = tau_values</code>).</p>
+</td>
+</tr>
+</table>
+<p>Similar output is obtained for <code>"$coverage_based"</code>. <br><br>
+(3) <code>$TDAsyEst</code> (<code>$PDAsyEst</code>, or <code>$FDAsyEst</code>) for showing asymptotic diversity estimates along with related statistics: 
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Assemblage</code></td>
+<td>
+<p>the name of assemblage.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qTD, qPD, qFD</code></td>
+<td>
+<p>the diversity order of q.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TD_obs, PD_obs, FD_obs</code></td>
+<td>
+<p>the observed diversity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TD_asy, PD_asy, FD_asy</code></td>
+<td>
+<p>the asymptotic diversity estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s.e.</code></td>
+<td>
+<p>standard error of asymptotic diversity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qTD.LCL, qPD.LCL, qFD.LCL and qTD.UCL, qPD.UCL, qFD.UCL</code></td>
+<td>
+<p>the bootstrap lower and upper confidence limits for asymptotic diversity at the specified level (with a default value of 0.95).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Reftime</code></td>
+<td>
+<p>the reference times for PD.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Type</code></td>
+<td>
+<p><code>"PD"</code> (effective total branch length) or <code>"meanPD"</code> (effective number of equally divergent lineages) for PD.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Tau</code></td>
+<td>
+<p>the threshold of functional distinctiveness between any two species for FD (under <code>FDtype = tau_values</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Compute standardized estimates of taxonomic diversity for abundance data with order q = 0, 1, 2
+data(Brazil_rainforest_abun_data)
+output_TD_abun &lt;- iNEXT3D(Brazil_rainforest_abun_data, diversity = 'TD', q = c(0, 1, 2), 
+                          datatype = "abundance")
+output_TD_abun
+
+
+# Compute standardized estimates of phylogenetic diversity for abundance data with order q = 0, 1, 2
+data(Brazil_rainforest_abun_data)
+data(Brazil_rainforest_phylo_tree)
+data &lt;- Brazil_rainforest_abun_data
+tree &lt;- Brazil_rainforest_phylo_tree
+output_PD_abun &lt;- iNEXT3D(data, diversity = 'PD', q = c(0, 1, 2), datatype = "abundance", 
+                          nboot = 20, PDtree = tree)
+output_PD_abun
+
+
+# Compute standardized estimates of functional diversity for abundance data
+data(Brazil_rainforest_abun_data)
+data(Brazil_rainforest_distance_matrix)
+data &lt;- Brazil_rainforest_abun_data
+distM &lt;- Brazil_rainforest_distance_matrix
+output_FD_abun &lt;- iNEXT3D(data, diversity = 'FD', datatype = "abundance", nboot = 0, 
+                          FDdistM = distM, FDtype = 'AUC')
+output_FD_abun
+
+
+# Compute standardized estimates of taxonomic diversity for incidence data with order q = 0, 1, 2
+data(Fish_incidence_data)
+output_TD_inci &lt;- iNEXT3D(Fish_incidence_data, diversity = 'TD', q = c(0, 1, 2), 
+                          datatype = "incidence_raw")
+output_TD_inci
+
+
+# Compute standardized estimates of phylogenetic diversity for incidence data with order q = 0, 1, 2
+data(Fish_incidence_data)
+data(Fish_phylo_tree)
+data &lt;- Fish_incidence_data
+tree &lt;- Fish_phylo_tree
+output_PD_inci &lt;- iNEXT3D(data, diversity = 'PD', q = c(0, 1, 2), 
+                          datatype = "incidence_raw", nboot = 20, PDtree = tree)
+output_PD_inci
+
+
+# Compute estimates of functional diversity for incidence data
+data(Fish_incidence_data)
+data(Fish_distance_matrix)
+data &lt;- Fish_incidence_data
+distM &lt;- Fish_distance_matrix
+output_FD_inci &lt;- iNEXT3D(data, diversity = 'FD', datatype = "incidence_raw", nboot = 20, 
+                          FDdistM = distM, FDtype = 'AUC')
+output_FD_inci
+
+
+
+</code></pre>
+
+
+</div>

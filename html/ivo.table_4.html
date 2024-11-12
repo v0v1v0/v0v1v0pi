@@ -1,0 +1,196 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ivo_table_masked</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create a masked frequency/contingency table</h2>
+
+<h3>Description</h3>
+
+<p><code>ivo_table_masked()</code> lets you easily create pretty masked tables. If you want the table without masked values use <code>ivo_table()</code> instead.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ivo_table_masked(
+  df,
+  cell = 5,
+  extra_header = TRUE,
+  exclude_missing = FALSE,
+  missing_string = "(Missing)",
+  colsums = FALSE,
+  rowsums = FALSE,
+  sums_string = "Total",
+  caption = NA,
+  highlight_cols = NULL,
+  highlight_rows = NULL,
+  color = "darkgreen",
+  font_name = "Arial",
+  long_table = FALSE,
+  remove_zero_rows = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>A data frame with 1-4 columns</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cell</code></td>
+<td>
+<p>The largest value that will be masked. Defaults to 5, meaning that values between 1 and 5 are masked.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>extra_header</code></td>
+<td>
+<p>Should the variable name be displayed? Defaults to TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exclude_missing</code></td>
+<td>
+<p>Whether to exclude missing values from the table. Defaults to FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>missing_string</code></td>
+<td>
+<p>A string used to indicate missing values. Defaults to "(Missing)".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colsums</code></td>
+<td>
+<p>A logical indicating whether the sum of each column should be computed. Defaults to FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowsums</code></td>
+<td>
+<p>A logical indicating whether the sum of each row should be computed. Defaults to FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sums_string</code></td>
+<td>
+<p>A string that is printed in the column/row where row/column sums are shown. Defaults to "Total".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>caption</code></td>
+<td>
+<p>An optional string containing a table caption.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>highlight_cols</code></td>
+<td>
+<p>A numeric vector containing the indices of the columns that should be highlighted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>highlight_rows</code></td>
+<td>
+<p>A numeric vector containing the indices of the rows that should be highlighted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>color</code></td>
+<td>
+<p>A named color or a color HEX code, used for the lines in the table. Defaults to "darkgreen".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>font_name</code></td>
+<td>
+<p>The name of the font to be used in the table. Defaults to "Arial".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>long_table</code></td>
+<td>
+<p>For one-way tables: FALSE (the default) means that the table will be wide and consist of a single row, TRUE means that the table will be long and consist of a single column.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>remove_zero_rows</code></td>
+<td>
+<p>If set to TRUE, removes all rows that contain nothing but zeros. The default is FALSE.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The functions <code>ivo_table()</code> and <code>ivo_table_masked()</code> takes a <code>data.frame</code> with 1-4 columns. The order of the columns in the <code>data.frame</code> will determine where they will be displayed in the table. The first column will always be displayed at the top of the table. If there are more than one column the following 2-4 columns will be displayed to the left in the order 2, 3, 4. To change how the columns are displayed in the table; change the place of the columns in the <code>data.frame</code> using <code>dplyr::select()</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A stylized <code>flextable</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Måns Thulin and Kajsa Grind
+</p>
+
+
+<h3>See Also</h3>
+
+<p>ivo_table_add_mask
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Generate example data
+example_data &lt;- data.frame(Year = sample(2020:2023, 50, replace = TRUE),
+A = sample(c("Type 1", "Type 2"), 50, replace = TRUE),
+B = sample(c("Apples", "Oranges", "Bananas"), 50, replace = TRUE),
+C = sample(c("Swedish", "Norwegian", "Chilean"), 50, replace = TRUE))
+
+### 1-way tables ###
+data1 &lt;- example_data |&gt; dplyr::select(Year)
+ivo_table_masked(data1) # No masking because all counts are &gt;=5
+ivo_table_masked(data1, cell = 15) # Counts below &lt;=15 are masked
+
+# With pipes
+example_data |&gt; dplyr::select(Year) |&gt; ivo_table()
+
+### 2-way tables ###
+data2 &lt;- example_data |&gt; dplyr::select(A, B)
+ivo_table_masked(data2)
+ivo_table_masked(data2, cell = 7) # Counts &lt;= 7 are masked
+# Row and column sums are also masked:
+ivo_table_masked(
+data2,
+cell = 3,
+colsums = TRUE,
+rowsums = TRUE)
+
+### 3-way tables ###
+data3 &lt;- example_data |&gt; dplyr::select(C, B, Year)
+ivo_table_masked(
+data3,
+cell = 3,
+caption = "Values between 1 and 3 are masked."
+)
+
+### 4-way tables ###
+data4 &lt;- example_data |&gt; dplyr::select(Year, B, C, A)
+ivo_table_masked(data4, colsums = TRUE, rowsums = TRUE)
+</code></pre>
+
+
+</div>

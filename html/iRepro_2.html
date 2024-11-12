@@ -1,0 +1,191 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>intervalICC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Intraclass Correlation Coefficient for Interval-Censored Data
+</h2>
+
+<h3>Description</h3>
+
+<p>The function calculates intraclass correlation coefficient (ICC) for interval-censored data with two repeated measurements. ICC is estimated by maximum likelihood from model with one fixed and one random effect (both intercepts).</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">intervalICC(r1, r2, predefined.classes=FALSE, classes, c.limits, optim.method=1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>r1</code></td>
+<td>
+
+<p>data corresponding to the first measurement. If <code>predefined.classes=TRUE</code> (appropriate for grouped data), this is a vector of length <code class="reqn">n</code>, where each observation is one of the labels given in <code>classes</code>. 
+Otherwise, if <code>predefined.classes=FALSE</code>, <code>r1</code> is a matrix or a data frame with <code class="reqn">n</code> rows and 2 columns, with columns representing lower and upper bounds of censoring intervals (e.g., if <code class="reqn">i</code>-th observation
+lies in the interval [<code class="reqn">a</code>, <code class="reqn">b</code>], then <code>r1[i,]=c(a,b)</code>).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r2</code></td>
+<td>
+
+<p>data corresponding to the second measurement. If <code>predefined.classes=TRUE</code> (appropriate for grouped data), this is a vector of length <code class="reqn">n</code>, where each observation is one of the labels given in <code>classes</code>. 
+Otherwise, if <code>predefined.classes=FALSE</code>, <code>r2</code> is a matrix or a data frame with <code class="reqn">n</code> rows and 2 columns, with columns representing lower and upper bounds of censoring intervals (e.g., if <code class="reqn">i</code>-th observation
+lies in the interval [<code class="reqn">a</code>, <code class="reqn">b</code>], then <code>r2[i,]=c(a,b)</code>).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predefined.classes</code></td>
+<td>
+
+<p>logical, indicating whether observations belong to predefined classes (e.g. grouped data in questionnaires) or each observation has its own lower and upper limit (default; <code>FALSE</code>).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>classes</code></td>
+<td>
+
+<p>a vector with unique labels for the <em>k</em> predefined classes. Required if <code>predefined.classes=TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c.limits</code></td>
+<td>
+
+<p>a matrix or a data frame with <em>k</em> rows and 2 columns, corresponding to lower and upper bounds of censoring intervals for classes. Required if <code>predefined.classes=TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optim.method</code></td>
+<td>
+
+<p>an integer (1 or 2) specifying the optimization method to be used in maximum likelihood estimation (default is 1). Details are given below.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>ICC is estimated by maximum likelihood from random effects model
+</p>
+<p style="text-align: center;"><code class="reqn">Y_{ij} = \mu + b_i + e_{ij},</code>
+</p>
+ 
+<p>where <code class="reqn">b_i</code> and <code class="reqn">e_{ij}</code> are independent and normally distributed with means 0 and variances <code class="reqn">\sigma^2_b</code> and <code class="reqn">\sigma^2</code>, respectively. If data were uncensored, this would be analogous to 
+</p>
+<p><code>lme(ratings~1, random=~1|id, method="ML", data=observed)</code>
+</p>
+<p>in <code>nlme</code> package, where 
+</p>
+<p><code>observed=as.data.frame(rbind(cbind(r1,1:n), cbind(r2,1:n)))</code>
+</p>
+<p>and <code>colnames(observed)=c("ratings","id")</code>.
+To maximize log-likelihood, <code>constrOptim</code> from <code>stats</code> package is used (<code>method=BFGS</code>).
+</p>
+<p>Two available optimization methods, specified by <code>optim.method</code>, correspond to two mathematically equivalent expressions for log-likelihood. The option <code>optim.method=1</code> resulted in slightly more accurate estimates in 
+simulations with grouped data, but <code>optim.method=2</code> was more numerically stable. See the reference for more details.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class "ICCfit". The object is a list with the components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>icc </code></td>
+<td>
+<p>maximum likelihood estimate (MLE) of ICC</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma2.b </code></td>
+<td>
+<p>MLE of between-class variance <code class="reqn">\sigma^2_b</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma2.w </code></td>
+<td>
+<p>MLE of within-class variance <code class="reqn">\sigma^2</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu </code></td>
+<td>
+<p>MLE of mean <code class="reqn">\mu</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loglikelihood </code></td>
+<td>
+<p>log-likelihood evaluated at MLE parameters</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>If there are many observations with same values (i.e. with the same lower and upper bounds), it is advisable to group all observations into <code>classes</code> and use option <code>predefined.classes=TRUE</code>; this will reduce 
+computation time.
+</p>
+<p>Subjects with only one measurement are omitted from ICC calculation. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jelena Kovacic <a href="mailto:jkovacic@imi.hr">jkovacic@imi.hr</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Kovacic J, Varnai VM. Intraclass correlation coefficient for grouped data. <em>Epidemiology</em> 2014;25(5):769–770.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>summary.ICCfit</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example with 6 predefined classes (grouped data)
+classes &lt;- 1:6
+class.limits &lt;- cbind(classes-0.5,classes+0.5)
+r1 &lt;- sample(classes,30,replace=TRUE)
+r2 &lt;- sample(classes,30,replace=TRUE)
+
+intervalICC(r1,r2,predefined.classes=TRUE,classes,class.limits)
+
+# The same result can be obtained with predefined.classes=FALSE option, 
+# although with slower computation time
+rtg1 &lt;- matrix(nrow=30,ncol=2)
+rtg2 &lt;- matrix(nrow=30,ncol=2)
+# when predefined.classes=FALSE, ratings must be given with lower and upper bounds 
+# for each observation:
+for(i in 1:length(classes)){
+  rtg1[r1==classes[i],1] &lt;- class.limits[i,1]
+  rtg1[r1==classes[i],2] &lt;- class.limits[i,2]
+  rtg2[r2==classes[i],1] &lt;- class.limits[i,1]
+  rtg2[r2==classes[i],2] &lt;- class.limits[i,2]
+}
+
+intervalICC(rtg1,rtg2,predefined.classes=FALSE)
+</code></pre>
+
+
+</div>

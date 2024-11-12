@@ -1,0 +1,217 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mdrical</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimate Mean Duration of Recent Infection (MDRI)</h2>
+
+<h3>Description</h3>
+
+<p>Estimates MDRI (point estimate and confidence interval) using binomial
+regression and a maximum likelihood approach
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mdrical(data = NULL, subid_var = NULL, time_var = NULL,
+  functional_forms = c("cloglog_linear", "logit_cubic"),
+  recency_cutoff_time = 730.5, inclusion_time_threshold = 800,
+  recency_rule = "binary_data", recency_vars = NULL,
+  recency_params = NULL, n_bootstraps = 10000, alpha = 0.05,
+  plot = TRUE, parallel = ifelse(n_bootstraps == 0, FALSE, TRUE),
+  cores = parallel::detectCores(), output_bs_parms = FALSE,
+  debug = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A data frame containing variables for subject identifier,
+time (since detectable infection), and variables with biomarker readings or
+recency status (to be specified in recency_vars)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subid_var</code></td>
+<td>
+<p>The variable in the dataframe identifying subjects</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time_var</code></td>
+<td>
+<p>The variable in the dataframe indicating time between
+'time zero' (usually detectable infection) and biomarker measurement</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>functional_forms</code></td>
+<td>
+<p>Select functional form/link function combinations
+for fitting probability of testing recent as a function of time to data using
+binomial regression
+(see Details). Default=all supported functional forms.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>recency_cutoff_time</code></td>
+<td>
+<p>Recency time cut-off ('Big T'). Default = 730.5.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inclusion_time_threshold</code></td>
+<td>
+<p>Data points beyond this time are excluded
+from the calculation (in same unit as recency_cutoff_time, default = 800).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>recency_rule</code></td>
+<td>
+<p>Specified rule for defining recent/non-recent outcomes
+from biomarker data (see Details)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>recency_vars</code></td>
+<td>
+<p>Variables to be used in determining recency outcomes</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>recency_params</code></td>
+<td>
+<p>Vector of numeric parameters (e.g. thresholds) for
+determining recency according to the relevant rule</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_bootstraps</code></td>
+<td>
+<p>Number of subject-level bootstrap resampling operations
+for estimating confidence intervals, default = 10000.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>Confidence level, default=0.05.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>Specifies whether a plot of the probability of testing recent
+over time should be produced</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>Set to TRUE in order to perform bootstrapping in parallel on
+a multicore or multiprocessor system.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>Set number of cores for parallel processing when parallel=TRUE.
+This defaults to four.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output_bs_parms</code></td>
+<td>
+<p>Return a matrix of the fitting parameters for each
+bootstrap iteration.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>debug</code></td>
+<td>
+<p>Enable debugging mode (browser)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The package contains long form documentation in the form of
+vignettes that cover the use of the main fucntions. Use
+browseVignettes(package="inctools") to access them.
+</p>
+<p>Expected data frame format: Before calling the function, please import your dataset into R environment.
+</p>
+<p>time_var: Time since infection; Note: this package does not assume any specific time unit. It is important to specify the
+recency time cut-off 'T' and the time-based data exclusion rule (inclusion_time_threshold) in the same unit as the input times.
+The estimated MDRI will be in this unit.
+</p>
+<p>Method: This function fits a function for probability of testing recent as a function of time to the supplied data using
+binomial regression. This requires binary outcomes (recent/non-recent) coded as 1 for recent and 0 for non-recent test
+resutls. Either a recency status variable must be specified, or a recency rule for determinging recency
+status from a biomarker or set of biomarkers must be specified. Currently only independent biomarker
+thresholds are supported (i.e. all biomarker criteria must be met in order for a specimen to be classified as recent).
+</p>
+<p>Functional forms currently supported for the binomial regression fitting procedure:
+cloglog_linear, logit_cubic
+</p>
+<p>To be implemented in the near future: logit_spline
+</p>
+<p>logit_cubic: Fits a binomial regression to probability of testing recent with a logit link on a polynomial in t of the
+third degree, where t is time since (detectable) infection.
+</p>
+<p>cloglog_linear: Fits a binomial regression to probability of testing recent with a log log link on log(t), where t is
+time since (detectable) infection.
+</p>
+<p>recency_rule: binary_data - supply a binary variable with 1=recent and 0=non-recent in recency_vars.
+</p>
+<p>recency_rule:independent_thresholds: supply one threshold variable per biomarker in recency_vars and the relevant
+thresholds, as well as whether a value below or above each threshold indicates recency in recency_params.
+</p>
+<p>recency_params expects a list of pairs of thresholds and thresholdtypes, with zero indicating a reading below the threshold
+implies recency and 1 that a reading above the threshold implies recency. (Note: two values, a threshold and a
+thresholdtype per variable must be specified in recency_params. For example, if you specify recency_vars =
+c('ODn','ViralLoad') you may specify recency_params = c(1.5,0,500,1), meaning that an ODn reading below 1.5 AND a
+viral load reasing above 500 indicates a recent result. Objects with missing values in its biomarker readings will be
+excluded from caculation.
+</p>
+
+
+<h3>Value</h3>
+
+<p>MDRI Dataframe containing MDRI point estimates, CI lower and upper
+bounds and standard deviation of point estimates produced during
+bootstrapping.
+One row per functional form.
+</p>
+<p>Plots A plot of Probability of testing recent over time for each
+functional form.
+</p>
+<p>Models The fitted GLM models for each functional form.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">mdrical(data=excalibdata,
+        subid_var = "SubjectID",
+        time_var = "DaysSinceEDDI",
+        recency_cutoff_time = 730.5,
+        inclusion_time_threshold = 800,
+        functional_forms = c("cloglog_linear"),
+        recency_rule = "binary_data",
+        recency_vars = "Recent",
+        n_bootstraps = 10,
+        parallel = FALSE,
+        alpha = 0.05,
+        plot = TRUE)
+</code></pre>
+
+
+</div>

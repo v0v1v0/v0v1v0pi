@@ -1,0 +1,374 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ppa</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>The Ping-Pong Algorithm</h2>
+
+<h3>Description</h3>
+
+<p>Run the PPA with the default parameters</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S4 method for signature 'list'
+ppa(data, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>The input, a list of two numeric matrices, with the same
+number of columns. They may contain <code>NA</code> and/or <code>NaN</code>
+values, but then the algorithm might get slower, as R matrix
+multiplication is slower sometimes slower for these matrices,
+depending on your platform.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments, see details below.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Please read the isa2-package manual page for and introductino
+on ISA and PPA.
+</p>
+<p>This function can be called as
+</p>
+<pre>
+    ppa(data, thr.row1 = seq(1, 3, by = 0.5),
+        thr.row2 = seq(1, 3, by = 0.5),
+        thr.col = seq(1, 3, by = 0.5),
+        no.seeds = 100, direction = "updown")
+      </pre>
+<p>where the arguments are:
+</p>
+
+<dl>
+<dt>data</dt>
+<dd>
+<p>The input, a list of two numeric matrices, with the same
+number of columns. They may contain <code>NA</code> and/or <code>NaN</code>
+values, but then the algorithm might get slower, as R matrix
+multiplication is slower sometimes slower for these matrices,
+depending on your platform.</p>
+</dd>
+<dt>thr.row1</dt>
+<dd>
+<p>Numeric scalar or vector giving the threshold
+parameter for the rows of the first matrix. Higher values indicate
+a more stringent threshold and the result comodules will contain
+less rows for the first matrix on average. The threshold is
+measured by the number of standard deviations from the 
+mean, over the values of the first row vector. If it is a vector
+then it must contain an entry for each seed.</p>
+</dd>
+<dt>thr.row2</dt>
+<dd>
+<p>Numeric scalar or vector, the threshold parameter(s)
+for the rows of the second matrix. See <code>thr.row1</code> for
+details.</p>
+</dd>
+<dt>thr.col</dt>
+<dd>
+<p>Numeric scalar or vector giving the threshold
+parameter for the columns of both matrices. The analogue of
+<code>thr.row1</code>.</p>
+</dd>
+<dt>no.seeds</dt>
+<dd>
+<p>Integer scalar, the number of random seeds to use.</p>
+</dd>
+<dt>direction</dt>
+<dd>
+<p>Character vector of length four, one for each matrix
+multiplication performed during a PPA iteration. 
+It specifies whether we are interested in
+rows/columns that are higher (‘<code>up</code>’) than average,
+lower than average (‘<code>down</code>’), or both
+(‘<code>updown</code>’). The first and the second entry both
+corresponds to the common column dimension of the two matrices, so
+they should be equal, otherwise a warning is given.</p>
+</dd>
+</dl>
+<p>The <code>ppa</code> function provides and easy interface to the PPA. It
+runs all sptes of a typical PPA work flow, with their default
+paramers.
+</p>
+<p>This involves:
+</p>
+
+<ol>
+<li>
+<p> Normalizing the input matrices by calling
+<code>ppa.normalize</code>.
+</p>
+</li>
+<li>
+<p> Generating random input seeds via
+<code>generate.seeds</code>.
+</p>
+</li>
+<li>
+<p> Running the PPA with all combinations of the given row1, row2
+and column thresholds (by default 1, 1.5, 2, 2.5, 3); by calling
+<code>ppa.iterate</code>.
+</p>
+</li>
+<li>
+<p> Merging similar co-modules, separately for each threshold
+combination, by calling <code>ppa.unique</code>.
+</p>
+</li>
+<li>
+<p> Filtering the co-modules separately for each threshold
+combination, by calling <code>ppa.filter.robust</code>.
+</p>
+</li>
+<li>
+<p> Putting all co-modules from the run with different thresholds,
+into a single object.
+</p>
+</li>
+<li>
+<p> Merging similar co-modules, again, but now across all
+threshold combinations. If two co-modules are similar, then the
+larger one, the one with milder thresholds is kept.
+</p>
+</li>
+</ol>
+<p>Please see the manual pages of these functions for the details.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A named list is returned with the following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>rows1</code></td>
+<td>
+<p>The first components of the co-modules, corresponding to
+the rows of the first input matrix. Every column corresponds to a
+co-module, if an element (the score of the row) is non-zero, that
+means that that component is included in the co-module, otherwise it
+is not. Scores are between -1 and 1. If two scores have
+the same non-zero sign, then the corresponding first matrix rows are
+collelated. If they have an opposite sign, then they are
+anti-correlated.
+</p>
+<p>If an input seed did not converge within the allowed number of
+iterations, then that column of <code>rows1</code> contains <code>NA</code>
+values. The <code>ppa</code> function does not produce such columns,
+because it always drops the non-convergent seeds via a call to
+<code>ppa.unique</code>. The result of the
+<code>ppa.iterate</code> function might contain such columns,
+though.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rows2</code></td>
+<td>
+<p>This is the same as <code>rows1</code>, but for the second
+input matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>columns</code></td>
+<td>
+<p>The same as <code>rows1</code> and <code>rows2</code>, but for the
+columns of both input matrices.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seeddata</code></td>
+<td>
+<p>A data frame containing information about the
+co-modules. There is one row for each co-module. The data frame has
+the following columns:
+</p>
+
+<dl>
+<dt><code>iterations</code></dt>
+<dd>
+<p>The number of iterations needed for
+convergence.</p>
+</dd>
+<dt><code>oscillation</code></dt>
+<dd>
+<p>The oscillation cycle of this is
+oscillating co-module. Zero otherwise.</p>
+</dd>
+<dt><code>thr.row1</code></dt>
+<dd>
+<p>The threshold used for the rows of the
+first matrix.</p>
+</dd>
+<dt><code>thr.row2</code></dt>
+<dd>
+<p>The threshold used for the rows of the
+second matrix.</p>
+</dd>
+<dt><code>thr.col</code></dt>
+<dd>
+<p>The threshold used for the common column
+dimension.</p>
+</dd>
+<dt><code>freq</code></dt>
+<dd>
+<p>Numeric scalar, the number of times the same
+(or a very similar) co-module was found.</p>
+</dd>
+<dt><code>rob</code></dt>
+<dd>
+<p>The robustness score of the module.</p>
+</dd>
+<dt><code>rob.limit</code></dt>
+<dd>
+<p>The robustness limit that was used to
+filter the module. See <code>ppa.filter.robust</code> for
+details.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rundata</code></td>
+<td>
+
+<p>A named list with information about the PPA run. It has the
+following entries:
+</p>
+
+<dl>
+<dt><code>direction</code></dt>
+<dd>
+<p>Character vector of length four, the
+<code>direction</code> argument of the <code>ppa.iterate</code>
+call.</p>
+</dd>
+<dt><code>convergence</code></dt>
+<dd>
+<p>Character scalar, the convergence
+criteria that was used, see the <code>ppa.iterate</code>
+function for details.</p>
+</dd>
+<dt><code>cor.limit</code></dt>
+<dd>
+<p>Numeric scalar, the correlation
+threshold, that was used if the convergence criteria was
+‘<code>cor</code>’.</p>
+</dd>
+<dt><code>maxiter</code></dt>
+<dd>
+<p>The maximum number of PPA iterations.</p>
+</dd>
+<dt><code>N</code></dt>
+<dd>
+<p>The total number of input seeds that were used to
+find the co-modules.</p>
+</dd>
+<dt><code>prenormalize</code></dt>
+<dd>
+<p>Logical scalar, whether the input
+matrices were pre-normalized, see <code>ppa.normalize</code>
+for details.</p>
+</dd>
+<dt><code>hasNA</code></dt>
+<dd>
+<p>Logical vector of length two. Whether the two
+input matrices contained any <code>NA</code> or <code>NaN</code> values.</p>
+</dd>
+<dt><code>unique</code></dt>
+<dd>
+<p>Logical scalar, whether the co-modules are
+unique, i.e. whether <code>ppa.unique</code> was called.</p>
+</dd>
+<dt><code>oscillation</code></dt>
+<dd>
+<p>Logical scalar, whether the
+<code>ppa.iterate</code> run looked for oscillating modules.</p>
+</dd>
+<dt><code>rob.perms</code></dt>
+<dd>
+<p>The number of data permutations that was
+performed during the robustness filtering, see
+<code>ppa.filter.robust</code> for details.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p> Gabor Csardi <a href="mailto:Gabor.Csardi@unil.ch">Gabor.Csardi@unil.ch</a> </p>
+
+
+<h3>References</h3>
+
+<p>Kutalik Z, Bergmann S, Beckmann, J: A modular approach for integrative
+analysis of large-scale gene-expression and drug-response data
+<em>Nat Biotechnol</em> 2008 May; 26(5) 531-9.
+</p>
+
+
+<h3>See Also</h3>
+
+ <p>isa2-package for a short introduction to the ISA and
+the Ping-Pong algorithms. See the functions mentioned above if you
+want to change the default ISA parameters.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## WE do not run this, it takes relatively long
+## Not run: 
+data &lt;- ppa.in.silico(noise=0.1)
+ppa.result &lt;- ppa(data[1:2], direction="up")
+
+## Find the best bicluster for each block in the input
+## (based on the rows of the first input matrix)
+best &lt;- apply(cor(ppa.result$rows1, data[[3]]), 2, which.max)
+
+## Check correlation
+sapply(seq_along(best),
+       function(x) cor(ppa.result$rows1[,best[x]], data[[3]][,x]))
+
+## The same for the rows of the second matrix
+sapply(seq_along(best),
+       function(x) cor(ppa.result$rows2[,best[x]], data[[4]][,x]))
+
+## The same for the columns
+sapply(seq_along(best),
+       function(x) cor(ppa.result$columns[,best[x]], data[[5]][,x]))
+
+## Plot the data and the modules found
+if (interactive()) {
+  layout(rbind(1:2,c(3,6),c(4,7), c(5,8)))
+  image(data[[1]], main="In-silico data, first matrix")
+  image(data[[2]], main="In-silico data, second matrix")
+  sapply(best[1:3], function(b) image(outer(ppa.result$rows1[,b],
+                                       ppa.result$columns[,b]),
+                                 main=paste("Module", b)))  
+  sapply(best[1:3], function(b) image(outer(ppa.result$rows2[,b],
+                                       ppa.result$columns[,b]),
+                                 main=paste("Module", b)))  
+}
+
+## End(Not run)
+</code></pre>
+
+
+</div>

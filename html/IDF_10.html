@@ -1,0 +1,93 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>IDF.plot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plotting of IDF curves at a chosen station</h2>
+
+<h3>Description</h3>
+
+<p>Plotting of IDF curves at a chosen station
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">IDF.plot(
+  durations,
+  fitparams,
+  probs = c(0.5, 0.9, 0.99),
+  cols = 4:2,
+  add = FALSE,
+  legend = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>durations</code></td>
+<td>
+<p>vector of durations for which to calculate the quantiles.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitparams</code></td>
+<td>
+<p>vector containing parameters mut, sigma0, xi, theta, eta
+(modified location, scale offset, shape, duration offset, duration exponent) for chosen station
+as obtained from <code>gev.d.fit</code>
+(or <code>gev.d.params</code> for model with covariates).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probs</code></td>
+<td>
+<p>vector of non-exceedance probabilities for which to plot IDF curves (p = 1-1/(Return Period))</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cols</code></td>
+<td>
+<p>vector of colors for IDF curves. Should have same length as <code>probs</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add</code></td>
+<td>
+<p>logical indicating if plot should be added to existing plot, default is FALSE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>legend</code></td>
+<td>
+<p>logical indicating if legend should be plotted (TRUE, the default)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional parameters passed on to the <code>plot</code> function</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">data('example',package = 'IDF')
+# fit d-gev
+fit &lt;- gev.d.fit(example$dat,example$d,ydat = as.matrix(example[,c("cov1","cov2")])
+                 ,mutl = c(1,2),sigma0l = 1)
+# get parameters for cov1 = 1, cov2 = 1
+par &lt;- gev.d.params(fit = fit, ydat = matrix(1,1,2))
+# plot quantiles
+IDF.plot(durations = seq(0.5,35,0.2),fitparams = par)
+# add data points
+points(example[example$cov1==1,]$d,example[example$cov1==1,]$dat)
+</code></pre>
+
+
+</div>

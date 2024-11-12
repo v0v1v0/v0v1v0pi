@@ -1,0 +1,132 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>gg.SpatialPoints</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Geom for SpatialPoints objects</h2>
+
+<h3>Description</h3>
+
+<p>This function coerces the <code>SpatialPoints</code> into a <code>data.frame</code> and uses <code>geom_point</code>
+to plot the points. Requires the <code>ggplot2</code> package.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'SpatialPoints'
+gg(data, mapping = NULL, crs = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A SpatialPoints object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mapping</code></td>
+<td>
+<p>Aesthetic mappings created by <code>aes</code> used to update the default
+mapping. The default mapping is
+<code>ggplot2::aes(x = .data[[coordnames(data)[1]]], y = .data[[coordnames(data)[2]]])</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>crs</code></td>
+<td>
+<p>A sp::CRS object defining the coordinate system to project the data to before plotting.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arguments passed on to <code>geom_point</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A <code>geom_point</code> return value
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other geomes for spatial data: 
+<code>gg()</code>,
+<code>gg.SpatRaster()</code>,
+<code>gg.SpatialGridDataFrame()</code>,
+<code>gg.SpatialLines()</code>,
+<code>gg.SpatialPixels()</code>,
+<code>gg.SpatialPixelsDataFrame()</code>,
+<code>gg.SpatialPolygons()</code>,
+<code>gg.sf()</code>,
+<code>gm()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+  if (require(ggplot2, quietly = TRUE) &amp;&amp;
+      bru_safe_sp() &amp;&amp;
+      require("sp")) {
+    # Load Gorilla data
+
+    data("gorillas", package = "inlabru")
+
+    # Plot Gorilla elevation covariate provided as SpatialPixelsDataFrame.
+    # The same syntax applies to SpatialGridDataFrame objects.
+
+    ggplot() +
+      gg(gorillas$gcov$elevation)
+
+    # Add Gorilla survey boundary and nest sightings
+
+    ggplot() +
+      gg(gorillas$gcov$elevation) +
+      gg(gorillas$boundary) +
+      gg(gorillas$nests)
+
+    # Load pantropical dolphin data
+
+    data("mexdolphin", package = "inlabru")
+
+    # Plot the pantropical survey boundary, ship transects and dolphin sightings
+
+    ggplot() +
+      gg(mexdolphin$ppoly) + # survey boundary as SpatialPolygon
+      gg(mexdolphin$samplers) + # ship transects as SpatialLines
+      gg(mexdolphin$points) # dolphin sightings as SpatialPoints
+
+    # Change color
+
+    ggplot() +
+      gg(mexdolphin$ppoly, color = "green") + # survey boundary as SpatialPolygon
+      gg(mexdolphin$samplers, color = "red") + # ship transects as SpatialLines
+      gg(mexdolphin$points, color = "blue") # dolphin sightings as SpatialPoints
+
+
+    # Visualize data annotations: line width by segment number
+
+    names(mexdolphin$samplers) # 'seg' holds the segment number
+    ggplot() +
+      gg(mexdolphin$samplers, aes(color = seg))
+
+    # Visualize data annotations: point size by dolphin group size
+
+    names(mexdolphin$points) # 'size' holds the group size
+    ggplot() +
+      gg(mexdolphin$points, aes(size = size))
+  }
+
+</code></pre>
+
+
+</div>

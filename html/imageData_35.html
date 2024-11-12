@@ -1,0 +1,248 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>splitSplines</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Adds the fits after fitting a natural cubic smoothing spline to subsets 
+of a response to a <code>data.frame</code>
+</h2>
+
+<h3>Description</h3>
+
+<p>Uses <code>fitSpline</code> to fit a spline to a subset of the values 
+of <code>response</code> and stores the fitted values in <code>data</code>. 
+The subsets are those values with the same levels combinations 
+of the factors listed in <code>INDICES</code> and the degrees of 
+smoothing is controlled by <code>df</code>. The derivatives
+of the fitted spline can also be obtained, as can the Relative 
+Growth Rates (RGR).
+</p>
+<p>By default, <code>smooth.spline</code> will issue an error if there are not 
+at least four distinct x-values. On the other hand, 
+<code>fitSpline</code> issues a warning and sets all smoothed values 
+and derivatives to <code>NA</code>. The handling of missing values in the 
+observations is controlled via <code>na.x.action</code> and <code>na.y.action</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">splitSplines(data, response, x, INDICES, df = NULL, smoothing.scale = "identity", 
+             correctBoundaries = FALSE, 
+             deriv = NULL, suffices.deriv=NULL, RGR=NULL, AGR=NULL, sep=".", 
+             na.x.action="exclude", na.y.action = "exclude", ...)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A <code>data.frame</code> containing the column to be smoothed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>response</code></td>
+<td>
+<p>A <code>character</code> giving the name of the column in 
+<code>data</code> that is to be smoothed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A <code>character</code> giving the name of the column in 
+<code>data</code> that contains the values of the predictor variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>INDICES</code></td>
+<td>
+<p>A <code>character</code> giving the name(s) of the 
+<code>factor</code>(s) that define the subsets of <code>response</code> 
+that are to be smoothed separately. If the columns corresponding to 
+<code>INDICES</code> are not <code>factor</code>(s) then they will be 
+coerced to <code>factor</code>(s). The subsets are formed 
+using <code>split</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>A <code>numeric</code> specifying the desired equivalent number of degrees 
+of freedom of the smooth (trace of the smoother matrix). Lower values 
+result in more smoothing. If <code>df = NULL</code>, ordinary leave-one-out 
+cross-validation is used to determine the amount of smooth.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smoothing.scale</code></td>
+<td>
+<p>A <code>character</code> giving the scale on which smoothing 
+is to be performed. The two possibilites are <code>"identity"</code>, for directly 
+smoothing the observed <code>response</code>, and <code>"logarithmic"</code>, for scaling the 
+<code>log</code>-transformed <code>response</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>correctBoundaries</code></td>
+<td>
+<p>A <code>logical</code> indicating whether the fitted 
+spline values are to have the method of Huang (2001) applied 
+to them to correct for estimation bias at the end-points. Note that 
+<code>deriv</code> must be <code>NULL</code> for <code>correctBoundaries</code> to be 
+set to <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>deriv</code></td>
+<td>
+<p>A <code>numeric</code> specifying one or more orders of derivatives 
+that are required.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>suffices.deriv</code></td>
+<td>
+<p>A <code>character</code> giving the characters to be 
+appended to the names of the derivatives.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RGR</code></td>
+<td>
+<p>A <code>character</code> giving the character to be appended 
+to the smoothed <code>response</code> to create the RGR name, 
+but only when <code>smoothing.scale</code> is <code>identity</code>. 
+When <code>smoothing.scale</code> is <code>identity</code>: 
+(i) if <code>RGR</code> is not <code>NULL</code>  
+<code>deriv</code> must include 1 so that the first derivative is 
+available for calculating the RGR; (ii) if <code>RGR</code> is <code>NULL</code>, 
+the RGR is not calculated from the AGR. 
+When <code>smoothing.scale</code> is <code>logarithmic</code>, 
+the RGR is the backtransformed first derivative and so, to obtain it, merely 
+include <code>1</code> in <code>deriv</code> and any suffix for it in 
+<code>suffices.deriv</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>AGR</code></td>
+<td>
+<p>A <code>character</code> giving the character to be appended 
+to the smoothed <code>response</code> to create the AGR name, 
+but only when <code>smoothing.scale</code> is <code>logarithmic</code>. 
+When <code>smoothing.scale</code> is <code>logarithmic</code>: (i) 
+if <code>AGR</code> is not <code>NULL</code>, 
+<code>deriv</code> must include 1 so that the first derivative is 
+available for calculating the AGR; (ii) If <code>AGR</code> is <code>NULL</code>, 
+the AGR is not calculated from the RGR. When <code>smoothing.scale</code> is <code>identity</code>, 
+the AGR is the first derivative and so, to obtain it, merely 
+include <code>1</code> in <code>deriv</code> and any suffix for it in 
+<code>suffices.deriv</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep</code></td>
+<td>
+<p>A <code>character</code> giving the separator to use when the 
+levels of <code>INDICES</code> are combined. This is needed to avoid 
+using a <code>character</code> that occurs in a factor to delimit 
+levels when the levels of <code>INDICES</code> are combined to identify 
+subsets.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.x.action</code></td>
+<td>
+<p>A <code>character</code> string that specifies the action to 
+be taken when values of <code>x</code> are <code>NA</code>. The possible 
+values are <code>fail</code>, <code>exclude</code> or <code>omit</code>. 
+For <code>exclude</code> and <code>omit</code>, predictions and derivatives 
+will only be obtained for nonmissing values of <code>x</code>. 
+The difference between these two codes is that for <code>exclude</code> the returned 
+<code>data.frame</code> will have as many rows as <code>data</code>, the 
+missing values have been incorporated. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.y.action</code></td>
+<td>
+<p>A <code>character</code> string that specifies the action to 
+be taken when values of <code>y</code>, or the <code>response</code>, are 
+<code>NA</code>.  The possible values are <code>fail</code>, <code>exclude</code>, 
+<code>omit</code>, <code>allx</code>, <code>trimx</code>, <code>ltrimx</code> or 
+<code>rtrimx</code>. For  all options, except <code>fail</code>, missing 
+values in <code>y</code> will be removed before smoothing. 
+For <code>exclude</code> and <code>omit</code>, predictions 
+and derivatives will be obtained only for nonmissing values of 
+<code>x</code> that do not have missing <code>y</code> values. Again, the 
+difference between these two is that, only for <code>exclude</code> 
+will the missing values be incorporated into the 
+returned <code>data.frame</code>. For <code>allx</code>, predictions and 
+derivatives will be obtained for all nonmissing <code>x</code>. 
+For <code>trimx</code>, they will be obtained for all nonmissing 
+<code>x</code> between the first and last nonmissing <code>y</code> values 
+that have been ordered for <code>x</code>; for <code>ltrimx</code> and 
+<code>utrimx</code> either the lower or upper missing <code>y</code> 
+values, respectively, are trimmed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>allows for arguments to be passed to <code>smooth.spline</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A <code>data.frame</code> containing  <code>data</code> to which has been 
+added a column with the fitted smooth, the name of the column being 
+<code>response</code> with <code>.smooth</code> appended to it. If <code>deriv</code> is 
+not <code>NULL</code>, columns containing the values of the derivative(s) 
+will be added to <code>data</code>; the name each of these columns will 
+be the value of <code>response</code> with <code>.smooth.dvf</code> appended, 
+where <code>f</code> is the order of the derivative, or  the value of 
+<code>response</code> with <code>.smooth.</code> and the corresponding 
+element of <code>suffices.deriv</code> appended. If <code>RGR</code> is not 
+<code>NULL</code>, the RGR is calculated as the ratio of value of the first 
+derivative of the fitted spline and the fitted value for the spline. 
+Any pre-existing smoothed and derivative columns in <code>data</code> will be 
+replaced. The ordering of the <code>data.frame</code> for the <code>x</code> 
+values will be preserved as far as is possible; the main difficulty 
+is with the handling of missing values by the function <code>merge</code>. 
+Thus, if missing values in <code>x</code> are retained, they will occur at 
+the bottom of each subset of <code>INDICES</code> and the order will be 
+problematic when there are missing values in <code>y</code> and 
+<code>na.y.action</code> is set to <code>omit</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Chris Brien</p>
+
+
+<h3>References</h3>
+
+<p>Huang, C. (2001). Boundary corrected cubic smoothing splines. <em>Journal of Statistical Computation and Simulation</em>, <b>70</b>, 107-121.</p>
+
+
+<h3>See Also</h3>
+
+<p><code>fitSpline</code>, <code>smooth.spline</code>, 
+<code>predict.smooth.spline</code>, <code>splitContGRdiff</code>, <code>split</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(exampleData)
+longi.dat &lt;- splitSplines(longi.dat, response="Area", x="xDays", 
+                          INDICES = "Snapshot.ID.Tag", 
+                          df = 4, deriv=1, suffices.deriv="AGRdv", RGR="RGRdv")
+</code></pre>
+
+
+</div>

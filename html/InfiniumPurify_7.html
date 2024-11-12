@@ -1,0 +1,105 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>InfiniumDMC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Differentially Methylation Calling accounting for tumor purity
+</h2>
+
+<h3>Description</h3>
+
+<p>Infer differentially methylated CpG sites with the consideration of tumor purities.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">InfiniumDMC(tumor.data,normal.data,purity,threshold)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>tumor.data</code></td>
+<td>
+<p>numeric matrix of beta values for tumor samlpes. The rownames of tumor.data
+should be probe names of Infinium 450k array, and colnames should be names of tumor samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>normal.data</code></td>
+<td>
+<p>numeric matrix of beta values for normal samlpes. The rownames of normal.data
+should be probe names of Infinium 450k array, and colnames should be names of normal samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>purity</code></td>
+<td>
+<p>purities for tumor samples. Could be estimated by getPurity, or user specified 
+purities from other tools.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>probability threshold in control-free DM calling. Default is 0.1.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If normal.data is provided, the function tests each CpG site for differential methylation between tumor and normal samples with the consideration of tumor purities by a generalized linear regression. If normal.data is not provided, the function computes posterior probability to rank CpG sites. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame of statistics, p-values and q-values for all CpG sites.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Xiaoqi Zheng <a href="mailto:xqzheng@shnu.edu.cn">xqzheng@shnu.edu.cn</a>.
+</p>
+
+
+<h3>References</h3>
+
+<p>X. Zheng, N. Zhang, H.J. Wu and H. Wu, Estimating and accounting for tumor purity in the analysis of DNA methylation data from cancer studies. <em>Genome biology</em>, in revision. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>dmpFinder</code> in the <span class="pkg">minfi</span> package. 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## load example data
+data(beta.emp)
+
+normal.data &lt;- beta.emp[,1:21]
+tumor.data &lt;- beta.emp[,22:61]
+
+## estimate tumor purity
+purity &lt;- getPurity(tumor.data = tumor.data,normal.data = normal.data)
+
+## DM calling with normal controls
+DMC = InfiniumDMC(tumor.data = tumor.data,normal.data = normal.data,purity = purity)
+
+## DM calling without normal control
+DMC_ctlFree = InfiniumDMC(tumor.data = tumor.data,purity = purity)
+
+</code></pre>
+
+
+</div>

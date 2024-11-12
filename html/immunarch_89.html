@@ -1,0 +1,191 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>repLoad</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Load immune repertoire files into the R workspace</h2>
+
+<h3>Description</h3>
+
+<p>The <code>repLoad</code> function loads repertoire files
+into R workspace in the immunarch format where you can immediately use them for
+the analysis. <code>repLoad</code> automatically detects the right format for
+your files, so all you need is simply provide the path to your files.
+</p>
+<p>See "Details" for more information on supported formats. See "Examples" for
+diving right into it.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">repLoad(.path, .mode = "paired", .coding = TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>.path</code></td>
+<td>
+<p>A character string specifying the path to the input data.
+Input data can be one of the following:
+</p>
+<p>- a single repertoire file.
+In this case <code>repLoad</code> returns an R data.frame;
+</p>
+<p>- a vector of paths to repertoire files.
+Same as in the case with no metadata file presented in the next section below;
+</p>
+<p>- a path to the folder with repertoire files and, if available, metadata file "metadata.txt".
+If the metadata file if presented, then the <code>repLoad</code> returns a list with two elements "data" and "meta".
+"data" is an another list with repertoire R data.frames. "meta" is a data frame with the metadata.
+If the metadata file "metadata.txt" is not presented, then the <code>repLoad</code> creates a dummy metadata file with
+sample names and returns a list with two elements "data" and "meta".
+If input data has multiple chains or cell types stored in the same file
+(for example, like in 10xGenomics repertoire files), such repertoire files will be splitted to different
+R data frames with only one type of chain and cell presented. The metadata file will have additional columns specifying
+cell and chain types for different samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.mode</code></td>
+<td>
+<p>Either "single" for single chain data or "paired" for paired chain data.
+</p>
+<p>Currently "single" works for every format, and "paired" works only for 10X Genomics data.
+</p>
+<p>By default, 10X Genomics data will be loaded as paired chain data, and other files will be loaded as single chain data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.coding</code></td>
+<td>
+<p>A logical value. Set TRUE to get coding-only clonotypes (by defaul). Set FALSE to get all clonotypes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Extra arguments for parsing functions</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The metadata has to be a tab delimited file with first column named "Sample".
+It can have any number of additional columns with arbitrary names.
+The first column should contain base names of files without extensions in
+your folder. Example:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+ Sample </td>
+<td style="text-align: left;"> Sex </td>
+<td style="text-align: left;"> Age </td>
+<td style="text-align: left;"> Status</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+ immunoseq_1 </td>
+<td style="text-align: left;"> M </td>
+<td style="text-align: left;"> 1 </td>
+<td style="text-align: left;"> C</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+ immunoseq_2 </td>
+<td style="text-align: left;"> M </td>
+<td style="text-align: left;"> 2 </td>
+<td style="text-align: left;"> C</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+ immunoseq_3 </td>
+<td style="text-align: left;"> FALSE </td>
+<td style="text-align: left;"> 3 </td>
+<td style="text-align: left;"> A
+</td>
+</tr>
+</table>
+<p>Currently, Immunarch support the following formats:
+</p>
+<p>- "immunoseq" - ImmunoSEQ of any version. http://www.adaptivebiotech.com/immunoseq
+</p>
+<p>- "mitcr" - MiTCR. https://github.com/milaboratory/mitcr
+</p>
+<p>- "mixcr" - MiXCR (the "all" files) of any version. https://github.com/milaboratory/mixcr
+</p>
+<p>- "migec" - MiGEC. http://migec.readthedocs.io/en/latest/
+</p>
+<p>- "migmap" - For parsing IgBLAST results postprocessed with MigMap. https://github.com/mikessh/migmap
+</p>
+<p>- "tcr" - tcR, our previous package. https://imminfo.github.io/tcr/
+</p>
+<p>- "vdjtools" - VDJtools of any version. http://vdjtools-doc.readthedocs.io/en/latest/
+</p>
+<p>- "imgt" - IMGT HighV-QUEST. http://www.imgt.org/HighV-QUEST/
+</p>
+<p>- "airr" - adaptive immune receptor repertoire (AIRR) data format. http://docs.airr-community.org/en/latest/datarep/overview.html
+</p>
+<p>- "10x" - 10XGenomics clonotype annotations tables. https://support.10xgenomics.com/single-cell-vdj/software/pipelines/latest/output/annotation
+</p>
+<p>- "archer" - ArcherDX clonotype tables. https://archerdx.com/
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with two named elements:
+</p>
+<p>- "data" is a list of input samples;
+</p>
+<p>- "meta" is a data frame with sample metadata.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>immunr_data_format for immunarch data format; repSave for file saving;
+repOverlap, geneUsage and repDiversity for starting with immune repertoires basic statistics.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># To load the data from a single file (note that you don't need to specify the data format):
+file_path &lt;- paste0(system.file(package = "immunarch"), "/extdata/io/Sample1.tsv.gz")
+immdata &lt;- repLoad(file_path)
+
+# Suppose you have a following structure in your folder:
+# &gt;_ ls
+# immunoseq1.txt
+# immunoseq2.txt
+# immunoseq3.txt
+# metadata.txt
+
+# To load the whole folder with every file in it type:
+file_path &lt;- paste0(system.file(package = "immunarch"), "/extdata/io/")
+immdata &lt;- repLoad(file_path)
+print(names(immdata))
+
+# We recommend creating a metadata file named "metadata.txt" in the folder.
+
+# In that case, when you load your data you will see:
+# &gt; immdata &lt;- repLoad("path/to/your/folder/")
+# &gt; names(immdata)
+# [1] "data" "meta"
+
+# If you do not have "metadata.txt", you will see the same output,
+# but your metadata will be almost empty:
+# &gt; immdata &lt;- repLoad("path/to/your/folder/")
+# &gt; names(immdata)
+# [1] "data" "meta"
+</code></pre>
+
+
+</div>

@@ -1,0 +1,223 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>CaseCohortIC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Case-Cohort Studies with Interval-Censored Failure Time Data</h2>
+
+<h3>Description</h3>
+
+<p>Provides a sieve semiparametric likelihood approach under the proportional 
+hazards model for analyzing data from a case-cohort design with failure 
+times subject to interval-censoring. The likelihood function is constructed
+using inverse probability weighting, and the sieves are built with 
+Bernstein polynomials. A weighted bootstrap procedure is implemented for 
+variance estimation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">CaseCohortIC(U, V, del1, del2, xi, z, sp, mVal, B, beta = NULL,
+  maxit = 10L, verbose = TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>U</code></td>
+<td>
+<p>numeric vector (n); examination time. 
+See Details for further information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>V</code></td>
+<td>
+<p>numeric vector (n); examination time.
+See Details for further information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>del1</code></td>
+<td>
+<p>integer vector (n); indicator of a left-censored observation I(T&lt;=U).
+See Details for further information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>del2</code></td>
+<td>
+<p>integer vector (n); indicator of an interval-censored observation I(U&lt;T&lt;=V).
+See Details for further information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xi</code></td>
+<td>
+<p>integer vector (n); indicating membership of the case-cohort sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+<p>matrix (nxp); covariates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sp</code></td>
+<td>
+<p>numeric (1); sampling probability 0 &lt; sp &lt; 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mVal</code></td>
+<td>
+<p>integer vector (m); one or more options for the degree of 
+the Bernstein polynomials. If more than one option provided, the value 
+resulting in the lowest
+AIC is selected. The results returned are for only that m-value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>integer (1); number of bootstrap samples used to calculate the variance
+estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p>numeric vector (p); initial values for beta. If NULL, initial
+guess set to 0.5 for each of the p parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxit</code></td>
+<td>
+<p>integer(1); maximum number of calls to optimization method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>logical; TRUE generates progress screen prints.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>optional inputs to "control" of function optim().</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The implementation uses stats::optim() to minimize the likelihood. The
+hard-coded method is "BFGS". Users are able to make changes to the
+'control' input of optim() by passing named inputs through the ellipses.
+If a call to optim() returns convergence = 1, i.e., optim() reached its
+internal maximum number of iterations before convergence was attained,
+the software automatically repeats the call to optim() with input 
+variable par set to the last parameter values. This procedure is 
+repeated at most maxit times.
+</p>
+<p>Input parameters U, V, del1, and del2 are defined as follows. 
+Suppose there are 
+K follow-up examinations at times TE = (T1, T2, ..., TK), and the failure
+time is denoted as TF. 
+For left-censored data, the failure occurs prior to the first 
+follow-up examination (TF &lt; T1); therefore, define U = T1, V = tau, and 
+(del1,del2)=(1,0). For right-censored data, the
+failure has not yet occurred at the last follow-up examination 
+(TF &gt; TK); therefore, define U = 0, V = TK, 
+and (del1,del2)=(0,0). For interval-censored data, the failure occurs
+between two follow-up examinations, e.g. T2 &lt; TF &lt; T3; therefore, 
+define U and V to be the two consecutive follow-up examination times 
+bracketing the failure time TF and (del1,del2)=(0,1).
+</p>
+
+
+<h3>Value</h3>
+
+<p>an object of class CaseCohort (inheriting from ICODS) containing
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>optim</code></td>
+<td>
+<p>a list of the results returned by optim().</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p>the estimated beta parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se</code></td>
+<td>
+<p>the standard error of the estimated beta parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pValue</code></td>
+<td>
+<p>the p-value of the estimated beta parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>the selected degree of the Bernstein polynomials.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>AIC</code></td>
+<td>
+<p>the AIC value for the selected degree of the Bernstein polynomials.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Zhou, Q., Zhou, H., and Cai, J. (2017). Case-cohort studies 
+with interval-censored failure time data. Biometrika, 104(1): 17–29. 
+&lt;doi:10.1093/biomet/asw067&gt;
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(ccData)
+
+result &lt;- CaseCohortIC(U = ccData$U, 
+                       V = ccData$V,  
+                       del1 = ccData$del1,  
+                       del2 = ccData$del2, 
+                       xi = ccData$xi,
+                       z = ccData$z, 
+                       sp = 0.2, 
+                       mVal = 1L,
+                       B = 10L, 
+                       beta = NULL, 
+                       maxit = 10L,
+                       verbose = TRUE)
+
+print(result)
+mVal(result)
+estimate(result)
+optimObj(result)
+minAIC(result)
+summary(result)
+
+</code></pre>
+
+
+</div>

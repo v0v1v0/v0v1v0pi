@@ -1,0 +1,502 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>subjectProfileSummaryPlot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot subject summary profile.</h2>
+
+<h3>Description</h3>
+
+<p>The user can either specify a variable for the standard error
+(<code>seVar</code>),
+or directly the variables for the minimum and maximum values for the error
+bars (<code>minVar</code>, <code>maxVar</code>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">subjectProfileSummaryPlot(
+  data,
+  xVar = NULL,
+  xLab = getLabelVar(xVar, labelVars = labelVars),
+  xAxisExpand = waiver(),
+  xGap = NULL,
+  xGapDiffNew = NULL,
+  meanVar = "statMean",
+  seVar = if ("statSE" %in% colnames(data)) "statSE",
+  minVar = NULL,
+  maxVar = NULL,
+  yLab = paste(c(sub("^stat", "", meanVar), if (!is.null(minVar) &amp; !is.null(maxVar)) {
+  
+      paste0("(", sub("^stat", "", minVar), ", ", sub("^stat", "", maxVar), ")")
+ } else
+    if (!is.null(seVar)) paste("+-", sub("^stat", "", seVar))), collapse = " "),
+  facetVar = NULL,
+  facetScale = "free_y",
+  colorVar = NULL,
+  colorLab = getLabelVar(colorVar, labelVars = labelVars),
+  colorPalette = NULL,
+  labelVars = NULL,
+  useLinetype = TRUE,
+  linetypePalette = NULL,
+  useShape = TRUE,
+  shapePalette = NULL,
+  jitter = NULL,
+  title = NULL,
+  caption = NULL,
+  yTrans = NULL,
+  yLim = NULL,
+  xLim = NULL,
+  yAxisExpand = c(0.05, 0.05),
+  yLimExpand = NULL,
+  xAxisLabs = NULL,
+  sizePoint = GeomPoint$default_aes$size,
+  sizeLine = GeomLine$default_aes$size,
+  sizeLabel = GeomText$default_aes$size,
+  widthErrorBar = GeomErrorbar$default_aes$width,
+  tableText = NULL,
+  tableTextFontface = 1,
+  tableHeight = 0.1,
+  tableYAxisLabs = !is.null(colorVar),
+  tablePlotMargin = unit(0, "pt"),
+  label = FALSE,
+  labelPadding = unit(1, "lines"),
+  byVar = NULL,
+  hLine = NULL,
+  hLineColor = "black",
+  hLineLty = "solid",
+  vLine = NULL,
+  vLineColor = "black",
+  vLineLty = "solid",
+  style = "report",
+  fontname = switch(style, report = "Times", presentation = "Tahoma"),
+  fontsize = switch(style, report = 8, presentation = 10),
+  themeFct = switch(style, report = theme_classic, presentation = theme_bw),
+  themeIncludeVerticalGrid = TRUE,
+  ggExtra = NULL,
+  legendPosition = ifelse(!is.null(tableText), "none", "bottom"),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Data.frame with summary statistics to represent in the plot,
+e.g. a <code>summaryTable</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xVar</code></td>
+<td>
+<p>String, variable of <code>data</code> with variable for the x-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xLab</code></td>
+<td>
+<p>String with label for the <code>xVar</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xAxisExpand</code></td>
+<td>
+<p>Object passed to the 'expand' parameter of:
+<code>scale_x_continuous</code>,
+(<code>waiver</code> by default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xGap</code></td>
+<td>
+<p>(optional) Numeric vector of length 2 for which
+a gap should be created in the x-axis.
+Only available if <code>xVar</code> is specified and a numeric variable.
+Records with <code>xVar</code> within <code>xGap</code> are filtered from the plot,
+vertical lines are included at the min/max of the gap,
+and the gap is represented as '//' in the x-axis of the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xGapDiffNew</code></td>
+<td>
+<p>Numeric vector of length 2 with new range
+of the <code>xGap</code>. If not specified, the minimum difference between
+consecutive x elements in the data is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meanVar</code></td>
+<td>
+<p>String, variable of <code>data</code> with the mean variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seVar</code></td>
+<td>
+<p>String, variable of <code>data</code> with the standard error.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minVar, maxVar</code></td>
+<td>
+<p>String, variables of <code>data</code> with minimum and
+maximum value for error bar. 
+If both are specified, <code>seVar</code> is ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yLab</code></td>
+<td>
+<p>String with label for the y-axis.
+If different labels should be used for different elements of
+<code>byVar</code> variable, the vector should be named
+with each corresponding element (collapsed with '.' if multiple).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>facetVar</code></td>
+<td>
+<p>Character vector, variable(s) of <code>data</code> for facetting.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>facetScale</code></td>
+<td>
+<p>String with type of scale used for facetting, 'free_y' by default
+(fixed scale in the x-axis and free in the y-axis).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colorVar</code></td>
+<td>
+<p>String, variable of <code>data</code> for coloring.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colorLab</code></td>
+<td>
+<p>String, label for <code>colorVar</code>, used in the legend.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colorPalette</code></td>
+<td>
+<p>(named) Vector with color palette.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>labelVars</code></td>
+<td>
+<p>Named string with variable labels (names are the variable code).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>useLinetype</code></td>
+<td>
+<p>Logical, if TRUE (FALSE by default) use also linetype
+to differenciate the variable specified via <code>colorVar</code> in the mean line.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>linetypePalette</code></td>
+<td>
+<p>Vector with linetype(s), in case <code>useLinetype</code> is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>useShape</code></td>
+<td>
+<p>Logical, if TRUE (by default) <code>colorVar</code> is also used for the shape.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shapePalette</code></td>
+<td>
+<p>Named vector with shape palette for <code>colorVar</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>jitter</code></td>
+<td>
+<p>Numeric with jitter for the x-axis, only used if <code>colorVar</code> specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>title</code></td>
+<td>
+<p>String with title for the plot.
+If different labels should be used for different elements of
+<code>byVar</code> variable, the vector should be named
+with each corresponding element (collapsed with '.' if multiple).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>caption</code></td>
+<td>
+<p>String with caption for the plot,
+NULL by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yTrans</code></td>
+<td>
+<p>(optional) String with transformation for the y-axis.
+Currently only 'log10' (or NULL, default) is available.
+In case error bars go in the negative, their values are set to a 'small enough' value for plotting:
+<code>min(data)/10</code> or <code>yLim[1]</code> if <code>yLim</code> is specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yLim</code></td>
+<td>
+<p>Vector of the length 2 with limits for the y-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xLim</code></td>
+<td>
+<p>Vector of the length 2 with limits for the x-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yAxisExpand</code></td>
+<td>
+<p>Expansion constants for the limits for the y-axis.
+See the documentation of the <code>expand</code> parameter of the 
+<code>scale_y_continuous</code> function
+for the available values for this parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yLimExpand</code></td>
+<td>
+<p>This parameter is deprecated, use <code>yAxisExpand</code>
+instead.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xAxisLabs</code></td>
+<td>
+<p>(optional) Named character vector with labels for the x-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sizePoint</code></td>
+<td>
+<p>Size for the point.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sizeLine</code></td>
+<td>
+<p>Size for the line linking means and error bars.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sizeLabel</code></td>
+<td>
+<p>Size for the label, only used if <code>label</code> is not NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>widthErrorBar</code></td>
+<td>
+<p>Numeric vector of length 1 with width of error bar.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tableText</code></td>
+<td>
+<p>(optional) Character vector with colname of <code>data</code>
+or expression from colnames of <code>data</code> to be represented in
+the table below the plot.
+By default, no table is displayed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tableTextFontface</code></td>
+<td>
+<p>Font face for the text included
+in the table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tableHeight</code></td>
+<td>
+<p>Numeric of length 1 with height for the table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tableYAxisLabs</code></td>
+<td>
+<p>Logical, if TRUE (by default)
+the labels of the <code>colorVar</code> are included
+in the y-axis of the table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tablePlotMargin</code></td>
+<td>
+<p>Margin between the plot and the table,
+expressed as <code>unit</code>, 0 by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label</code></td>
+<td>
+<p>Logical or expression or list of expression.
+Points are labelled with <code>meanVar</code> if set to TRUE,
+or with the specified expression if <code>label</code> is an expression.
+If a list is specified, 'textLabel' (required) 
+should contain expression to extract label, 
+and 'textHjust' and 'textVjust' (optional) may contain expression 
+specifying horizontal and vertical adjustment of the label.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>labelPadding</code></td>
+<td>
+<p>Amount of padding (space) between each point
+and its <code>label</code>, 1.5 lines by default.
+See parameter <code>point.padding</code> of the
+<code>geom_text_repel</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>byVar</code></td>
+<td>
+<p>Variable(s) of <code>data</code> for which separated plot(s)
+should be created.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hLine</code></td>
+<td>
+<p>(optional) numeric with y-intercept of line(s) to be added.
+If different thresholds should be used for different elements of the 
+<code>byVar</code> or <code>facetVar</code> variables, the vector should be named
+with each corresponding element (collapsed with '.' if multiple).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hLineColor</code></td>
+<td>
+<p>String with color for <code>hLine</code>, 'black' by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hLineLty</code></td>
+<td>
+<p>String with linetype for <code>hLine</code>, 'solid' by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vLine</code></td>
+<td>
+<p>(optional) numeric with x-intercept of line(s) to be added.
+If different thresholds should be used for different elements of the 
+<code>byVar</code> or <code>facetVar</code> variables, the vector should be named
+with each corresponding element (collapsed with '.' if multiple).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vLineColor</code></td>
+<td>
+<p>String with color for <code>vLine</code>, 'black' by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vLineLty</code></td>
+<td>
+<p>String with linetype for <code>vLine</code>, 'solid' by defaul</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>style</code></td>
+<td>
+<p>String with subject profile style.
+This affects the parameters: <code>fontname</code>, <code>fontsize</code>
+and <code>themeFct</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fontname</code></td>
+<td>
+<p>String with font name,
+by default 'Times' if <code>style</code> is 'report' and
+'Tahoma' if <code>style</code> is 'presentation'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fontsize</code></td>
+<td>
+<p>Numeric vector of length 1 with font size,
+by default 8 if <code>style</code> is 'report' and
+10 if <code>style</code> is 'presentation'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>themeFct</code></td>
+<td>
+<p>Function with ggplot2 theme,
+by default <code>theme_classic</code> if <code>style</code> is 'report' and
+<code>theme_bw</code> if <code>style</code> is 'presentation'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>themeIncludeVerticalGrid</code></td>
+<td>
+<p>Logical, if TRUE (by default)
+include theme vertical grid lines (if present in <code>themeFct</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ggExtra</code></td>
+<td>
+<p>Extra <code>ggplot</code> call of function generating such call(s)
+to be added in main plot.<br>
+Multiple calls are set via a function, e.g. 
+<code>ggExtra = function(gg){gg + geom_vline(...) + geom_hline(...)}</code>.<br>
+If different calls should be used for different elements of the 
+<code>byVar</code> variable, the vector should be named
+with each corresponding element (collapsed with '.' if multiple).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>legendPosition</code></td>
+<td>
+<p>String with legend position.
+By default, 'bottom' of <code>tableText</code> is not specified,
+'none' otherwise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional parameters for <code>geom_text_repel</code> or
+<code>geom_text</code>
+used for the <code>label</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>ggplot</code> object or list of such
+objects of <code>byVar</code> is specified.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Laure Cougnaud
+</p>
+
+
+</div>

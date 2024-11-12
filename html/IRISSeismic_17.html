@@ -1,0 +1,128 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>eventWindow</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Return a portion of a trace surrounding an event.</h2>
+
+<h3>Description</h3>
+
+<p>The <code>eventWindow</code> method of <code>Trace</code> uses the picker returned by the <code>STALTA()</code> method
+to center a window around the the event detected by the picker.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">eventWindow(x, picker, threshold, windowSecs)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>a <code>Trace</code> object
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>picker</code></td>
+<td>
+
+<p>a picker as returned by the <code>STALTA()</code> method applied to this <code>Trace</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+
+<p>the threshold at which the picker is 'triggered'
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>windowSecs</code></td>
+<td>
+
+<p>the size of the window in secs
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This utility function uses the trace method <code>triggerOnset()</code> to determine
+p-wave onset followed by the <code>slice()</code> method to return a new <code>Trace</code> object of
+the desired size centered <em>near</em> the event onset.
+</p>
+<p>When no threshold value is supplied, the default value is calculated as:
+</p>
+<p><code>threshold=quantile(picker,0.999,na.rm=TRUE)</code>
+</p>
+
+
+<h3>Value</h3>
+
+<p>A new <code>Trace</code> object is returned.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>See Also</h3>
+
+
+<p><code>STALTA</code>, 
+<code>triggerOnset</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+starttime &lt;- as.POSIXct("2002-04-20", tz="GMT")
+endtime &lt;- as.POSIXct("2002-04-21", tz="GMT")
+
+# Get the waveform
+st &lt;- getDataselect(iris,"US","OXF","","BHZ",starttime,endtime)
+
+# Seismic signal in third trace
+tr &lt;- st@traces[[3]]
+
+# Create a picker
+picker &lt;- STALTA(tr,3,30)
+threshold &lt;- quantile(picker,0.99999,na.rm=TRUE)
+
+# 3 rows
+layout(matrix(seq(3)))
+
+# Plot trace and p-wave closeups
+closeup1 &lt;- eventWindow(tr,picker,threshold,3600)
+closeup2 &lt;- eventWindow(tr,picker,threshold,600)
+plot(tr)
+plot(closeup1,subsampling=1)
+abline(v=length(closeup1)/2, col='red')
+plot(closeup2,subsampling=1)
+abline(v=length(closeup2)/2, col='red')
+
+# Restore default layout
+layout(1)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

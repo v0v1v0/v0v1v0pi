@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>methodParameters</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> generate string for generation of method parameters </h2>
+
+<h3>Description</h3>
+
+<p>function that generates a parsable string of identified method parameters 
+for an intamap interpolation object</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## Default S3 method:
+methodParameters(object)
+## S3 method for class 'copula'
+methodParameters(object)
+## S3 method for class 'idw'
+methodParameters(object)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>  a list object. Most arguments necessary for interpolation
+are passed through this object. See <code>intamap-package</code> for further 
+description of the necessary content of this variable</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>The function creates a text-string that makes it possible to add the 
+the method parameters (anisotropy and idw-parameter, variogram model or 
+copula parameters) to the <code>object</code> in a later call to 
+<code>createIntamapObject</code> or <code>interpolate</code> 
+without having to re-estimate the parameters.
+This function is particularly useful when <code>interpolate</code> is
+called from a Web Processing Service, and the user wants to reuse the 
+method parameters. The function is mainly assumed to be called from 
+within <code>interpolate</code>.
+</p>
+<p>The default method assumes a variogram model of <em>gstat</em> type, e.g. a variogram
+similar to what can be created with a call to <code>vgm</code>.
+Also <em>psgp</em> uses this variogram model.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A string that, when parsed, will recreate the methodParameters
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Jon Olav Skoien</p>
+
+
+<h3>References</h3>
+
+ 
+<p>Pebesma, E., Cornford, D., Dubois, G., Heuvelink, G.B.M., Hristopulos, D., Pilz, J., Stohlker, U., Morin, G., Skoien, J.O. INTAMAP: The design and implementation f an interoperable automated interpolation Web Service. Computers and Geosciences 37 (3), 2011. 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">sessionInfo()
+data(meuse)
+coordinates(meuse) = ~x+y
+meuse$value = log(meuse$zinc)
+# set up intamap object:
+krigingObject = createIntamapObject(
+		observations = meuse,
+		formulaString = as.formula('value~1'),class = "automap")
+# do estimation steps:
+krigingObject = estimateParameters(krigingObject)
+krigingObject = methodParameters(krigingObject)
+
+# Create a new object
+krigingObject2 = createIntamapObject(observations = meuse,
+		formulaString = as.formula('value~1'),
+    params = list(methodParameters = krigingObject$methodParameters))
+
+krigingObject$variogramModel
+krigingObject2$variogramModel
+
+</code></pre>
+
+
+</div>

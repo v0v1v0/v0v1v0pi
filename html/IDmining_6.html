@@ -1,0 +1,165 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>MBFR_parallel</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Morisita-Based Filter for Regression Problems (Parallel)</h2>
+
+<h3>Description</h3>
+
+<p>Executes the MBFR algorithm on a chosen number of workers (CPU parallel computing).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">MBFR_parallel(XY, scaleQ, m=2, C=NULL, ncores=4)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>XY</code></td>
+<td>
+<p>A <code class="reqn">N \times E</code> <code>matrix</code>, <code>data.frame</code> or <code>data.table</code>
+where <code class="reqn">N</code> is the number of data points, <code class="reqn">E</code> is the number of variables (i.e. the input
+variables also called "features" + the output variable). The last column contains the
+values of the output variable. And each variable (input + output) is rescaled to the
+<code class="reqn">[0,1]</code> interval by the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scaleQ</code></td>
+<td>
+<p>A vector containing the values of <code class="reqn">\ell^{-1}</code>
+chosen by the user (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>The value of the parameter m (by default: <code>m=2</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C</code></td>
+<td>
+<p>The number of steps of the SFS procedure (by default: <code>C = E-1</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncores</code></td>
+<td>
+<p>Number of workers (by default: <code>ncores = 4</code>)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<ol>
+<li> <p><code class="reqn">\ell</code> is the edge length of the grid cells (or quadrats). Since the data
+(and consenquently the grid) are rescaled to the <code class="reqn">[0,1]</code> interval, <code class="reqn">\ell</code> is equal
+to <code class="reqn">1</code> for a grid consisting of only one cell.
+</p>
+</li>
+<li> <p><code class="reqn">\ell^{-1}</code> is the number of grid cells (or quadrats) along each axis of the
+Euclidean space in which the data points are embedded.
+</p>
+</li>
+<li> <p><code class="reqn">\ell^{-1}</code> is equal to <code class="reqn">Q^{(1/E)}</code> where <code class="reqn">Q</code> is the number
+of grid cells and <code class="reqn">E</code> is the number of variables (or features).
+</p>
+</li>
+<li> <p><code class="reqn">\ell^{-1}</code> is directly related to <code class="reqn">\delta</code> (see References).
+</p>
+</li>
+<li> <p><code class="reqn">\delta</code> is the diagonal length of the grid cells.
+</p>
+</li>
+<li>
+<p> The values of <code class="reqn">\ell^{-1}</code> in <code>scaleQ</code> must be chosen according to the linear
+part of the <code class="reqn">\log</code>-<code class="reqn">\log</code> plot relating the <code class="reqn">\log</code> values of the
+multipoint Morisita index to the <code class="reqn">\log</code> values of <code class="reqn">\delta</code> (or,
+equivalently, to the <code class="reqn">\log</code> values of <code class="reqn">\ell^{-1}</code>) (see <code>logMINDEX</code>).
+</p>
+</li>
+</ol>
+<h3>Value</h3>
+
+<p>A list of five elements:
+</p>
+
+<ol>
+<li>
+<p> a vector containing the identifier numbers of the original features in the order
+they are selected through the Sequential Forward Selection (SFS) search procedure.
+</p>
+</li>
+<li>
+<p> the names of the corresponding features.
+</p>
+</li>
+<li>
+<p> the corresponding values of <code class="reqn">Diss</code>.
+</p>
+</li>
+<li>
+<p> the ID estimate of the output variable.
+</p>
+</li>
+<li>
+<p> a <code class="reqn">C \times 3</code> matrix containing: (column 1) the ID estimates of the subsets retained by the SFS
+procedure with the target variable; (column 2)  the ID estimates of the subsets retained by the
+SFS procedure without the output variable; (column 3) the values of <code class="reqn">Diss</code> of the subsets
+retained by the SFS procedure.
+</p>
+</li>
+</ol>
+<h3>Author(s)</h3>
+
+<p>Jean Golay <a href="mailto:jeangolay@gmail.com">jeangolay@gmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>J. Golay, M. Leuenberger and M. Kanevski (2017). Feature selection for regression problems based
+on the Morisita estimator of intrinsic dimension,
+<a href="https://www.sciencedirect.com/science/article/pii/S0031320317301905">Pattern Recognition 70:126–138</a>.
+</p>
+<p>J. Golay, M. Leuenberger and M. Kanevski (2015).
+<a href="https://www.elen.ucl.ac.be/Proceedings/esann/esannpdf/es2015-41.pdf">Morisita-based feature selection for
+regression problems</a>.Proceedings of the 23rd European Symposium on Artificial Neural Networks, Computational
+Intelligence and Machine Learning (ESANN), Bruges (Belgium).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+bf &lt;- Butterfly(10000)
+
+fly_select &lt;- MBFR_parallel(bf, 5:25, ncores=2)
+var_order  &lt;- fly_select[[2]]
+var_perf   &lt;- fly_select[[3]]
+
+dev.new(width=5, height=4)
+plot(var_perf,type="b",pch=16,lwd=2,xaxt="n",xlab="",ylab="",
+     ylim=c(0,1),col="red",panel.first={grid(lwd=1.5)})
+axis(1,1:length(var_order),labels=var_order)
+mtext(1,text = "Added Features (from left to right)",line = 2.5,cex=1)
+mtext(2,text = "Estimated Dissimilarity",line = 2.5,cex=1)
+
+bf_large &lt;- Butterfly(10^5)
+system.time(MBFR(bf_large, 5:25))
+system.time(MBFR_parallel(bf_large, 5:25))
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,111 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>boot.ratio.test</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Performs bootstrap ratio test.
+</h2>
+
+<h3>Description</h3>
+
+<p>Performs bootstrap ratio test which is analogous to a <em>t</em>- or <em>z</em>-score.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">boot.ratio.test(boot.cube, critical.value = 2)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>boot.cube</code></td>
+<td>
+
+<p>an <code>array</code>. This is the bootstrap resampled data. dim 1 (rows) are the items to be tested (e.g., <code>fj</code>, see <code>boot.compute.fj</code>). dim 2 (columns) are the components from the supplemental projection. dim 3 (depth) are each bootstrap sample.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>critical.value</code></td>
+<td>
+
+<p>numeric. This is the value that would be used as a cutoff in a <em>t</em>- or <em>z</em>-test. Default is 2 (i.e., 1.96 rounded up). The higher the number, the more difficult to reject the null. 
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with the following items:<br>
+return(list(sig.boot.ratios=significant.boot.ratios,boot.ratios=boot.ratios,critical.value=critical.value))
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>sig.boot.ratios</code></td>
+<td>
+<p>This is a matrix with the same number of rows and columns as <code>boot.cube</code>. If TRUE, the bootstrap ratio was larger than <code>critical.value</code>. If FALSE, it was smaller.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.ratios</code></td>
+<td>
+<p>This is a matrix with bootstrap ratio values that has the same number of rows and columns as <code>boot.cube</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>critical.value</code></td>
+<td>
+<p>the critical value input is also returned.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Derek Beaton and Hervé Abdi
+</p>
+
+
+<h3>References</h3>
+
+<p>The name bootstrap ratio comes from the Partial Least Squares in Neuroimaging literature. See:<br>
+McIntosh, A. R., &amp; Lobaugh, N. J. (2004). Partial least squares analysis of neuroimaging data: applications and advances. <em>Neuroimage</em>, <em>23</em>, S250–S263.<br><br>
+The bootstrap ratio is related to other tests of values with respect to the bootstrap distribution, such as the Interval-<em>t</em>. See:<br>
+Chernick, M. R. (2008). <em>Bootstrap methods: A guide for practitioners and researchers</em> (Vol. 619). Wiley-Interscience.<br>
+Hesterberg, T. (2011). Bootstrap. <em>Wiley Interdisciplinary Reviews: Computational Statistics</em>, <em>3</em>, 497–526. <br></p>
+
+
+<h3>See Also</h3>
+
+<p><code>boot.compute.fj</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">	##the following code generates 100 bootstrap resampled 
+	##projections of the measures from the Iris data set.
+	data(ep.iris)
+	data &lt;- ep.iris$data
+	design &lt;- ep.iris$design
+	iris.pca &lt;- epGPCA(data,scale="SS1",DESIGN=design,make_design_nominal=FALSE)
+	boot.fjs.unconstrained &lt;- array(0,dim=c(dim(iris.pca$ExPosition.Data$fj),100))
+	boot.fjs.constrained &lt;- array(0,dim=c(dim(iris.pca$ExPosition.Data$fj),100))
+	for(i in 1:100){
+		#unconstrained means we resample any of the 150 flowers
+		boot.fjs.unconstrained[,,i] &lt;- boot.compute.fj(ep.iris$data,iris.pca)
+		#constrained resamples within each of the 3 groups
+		boot.fjs.constrained[,,i] &lt;- boot.compute.fj(data,iris.pca,design,TRUE)		
+	}
+	#now compute the bootstrap ratios:
+	ratios.unconstrained &lt;- boot.ratio.test(boot.fjs.unconstrained)
+	ratios.constrained &lt;- boot.ratio.test(boot.fjs.constrained)
+</code></pre>
+
+
+</div>

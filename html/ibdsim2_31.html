@@ -1,0 +1,132 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>profileSimIBD</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate markers conditional on a given IBD pattern</h2>
+
+<h3>Description</h3>
+
+<p>This function simulates genotypes for a set of markers conditional on a
+specific underlying IBD pattern (typically produced with <code>ibdsim()</code>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">profileSimIBD(
+  x,
+  ibdpattern,
+  ids = NULL,
+  markers = NULL,
+  seed = NULL,
+  verbose = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A <code>ped</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ibdpattern</code></td>
+<td>
+<p>A <code>genomeSim()</code> object, typically created by <code>ibdsim()</code>.
+(See Examples).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ids</code></td>
+<td>
+<p>A vector of ID labels. If NULL, extracted from <code>ibdpattern</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>markers</code></td>
+<td>
+<p>A vector with names or indices of markers attached to <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>An integer seed for the random number generator.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>A logical, by default TRUE.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>It should be noted that the only <em>random</em> part of this function is the
+sampling of founder alleles for each marker. Given those, all other genotypes
+in the pedigree are determined by the underlying IBD pattern.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A copy of <code>x</code> where marker genotypes have been simulated conditional
+on <code>ibdpattern</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ibdsim()</code>, <code>forrel::profileSim()</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Brother-sister pedigree
+ped = nuclearPed(2, sex = 1:2)
+
+# Alleles
+als = letters[1:10]
+
+
+### Autosomal simulation
+
+x = ped |&gt; 
+  addMarker(alleles = als, chrom = 1, posMb = 20) |&gt; 
+  addMarker(alleles = als, chrom = 1, posMb = 50) |&gt; 
+  addMarker(alleles = als, chrom = 1, posMb = 70)
+  
+# Simulate the underlying IBD pattern in the pedigree
+sim = ibdsim(x, map = uniformMap(M = 1, chrom = 1), seed = 123)
+
+# Simulate genotypes for the sibs conditional on the given IBD pattern
+profileSimIBD(x, sim, ids = 3:4, seed = 123)
+
+# With a different seed
+profileSimIBD(x, sim, ids = 3:4, seed = 124)
+
+
+### X chromosomal simulation
+
+y = ped |&gt; 
+  addMarker(alleles = als, chrom = "X", posMb = 1) |&gt; 
+  addMarker(alleles = als, chrom = "X", posMb = 50) |&gt; 
+  addMarker(alleles = als, chrom = "X", posMb = 100)
+
+simy = ibdsim(y, map = loadMap("decode19", chrom = 23), seed = 11)
+
+profileSimIBD(y, simy, seed = 12)
+
+</code></pre>
+
+
+</div>

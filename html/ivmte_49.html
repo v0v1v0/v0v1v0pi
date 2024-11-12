@@ -1,0 +1,958 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ivmte</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Instrumental Variables: Extrapolation by Marginal Treatment Effects</h2>
+
+<h3>Description</h3>
+
+<p>This function provides a general framework for using the marginal
+treatment effect (MTE) to extrapolate. The model is the same binary
+treatment instrumental variable (IV) model considered by Imbens and
+Angrist (1994) (doi: <a href="https://doi.org/10.2307/2951620">10.2307/2951620</a>) and Heckman and Vytlacil
+(2005) (doi: <a href="https://doi.org/10.1111/j.1468-0262.2005.00594.x">10.1111/j.1468-0262.2005.00594.x</a>). The framework on
+which this function is based was developed by Mogstad, Santos and
+Torgovitsky (2018) (doi: <a href="https://doi.org/10.3982/ECTA15463">10.3982/ECTA15463</a>). See also the recent
+survey paper on extrapolation in IV models by Mogstad and
+Torgovitsky (2018)
+(doi: <a href="https://doi.org/10.1146/annurev-economics-101617-041813">10.1146/annurev-economics-101617-041813</a>). A detailed
+description of the module and its features can be found in
+<a href="https://a-torgovitsky.github.io/shea-torgovitsky.pdf">Shea
+and Torgovitsky (2021)</a>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ivmte(
+  data,
+  target,
+  late.from,
+  late.to,
+  late.X,
+  genlate.lb,
+  genlate.ub,
+  target.weight0 = NULL,
+  target.weight1 = NULL,
+  target.knots0 = NULL,
+  target.knots1 = NULL,
+  m0,
+  m1,
+  uname = u,
+  m1.ub,
+  m0.ub,
+  m1.lb,
+  m0.lb,
+  mte.ub,
+  mte.lb,
+  m0.dec,
+  m0.inc,
+  m1.dec,
+  m1.inc,
+  mte.dec,
+  mte.inc,
+  equal.coef,
+  ivlike,
+  components,
+  subset,
+  propensity,
+  link = "logit",
+  treat,
+  outcome,
+  solver,
+  solver.options,
+  solver.presolve,
+  solver.options.criterion,
+  solver.options.bounds,
+  lpsolver,
+  lpsolver.options,
+  lpsolver.presolve,
+  lpsolver.options.criterion,
+  lpsolver.options.bounds,
+  criterion.tol = 1e-04,
+  initgrid.nx = 20,
+  initgrid.nu = 20,
+  audit.nx = 2500,
+  audit.nu = 25,
+  audit.add = 100,
+  audit.max = 25,
+  audit.tol,
+  rescale,
+  point,
+  point.eyeweight = FALSE,
+  bootstraps = 0,
+  bootstraps.m,
+  bootstraps.replace = TRUE,
+  levels = c(0.99, 0.95, 0.9),
+  ci.type = "backward",
+  specification.test = TRUE,
+  noisy = FALSE,
+  smallreturnlist = FALSE,
+  debug = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p><code>data.frame</code> or <code>data.table</code> used to estimate
+the treatment effects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target</code></td>
+<td>
+<p>character, target parameter to be estimated. The
+function allows for ATE (<code>'ate'</code>), ATT (<code>'att'</code>), ATU
+(<code>'atu'</code>), LATE (<code>'late'</code>), and generalized LATE
+(<code>'genlate'</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>late.from</code></td>
+<td>
+<p>a named vector or a list declaring the baseline
+values of Z used to define the LATE. The name associated with
+each value should be the name of the corresponding variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>late.to</code></td>
+<td>
+<p>a named vector or a list declaring the comparison
+set of values of Z used to define the LATE. The name associated
+with each value should be the name of the corresponding
+variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>late.X</code></td>
+<td>
+<p>a named vector or a list declaring the values to
+condition on. The name associated with each value should be the
+name of the corresponding variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>genlate.lb</code></td>
+<td>
+<p>lower bound value of unobservable <code>u</code> for
+estimating the generalized LATE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>genlate.ub</code></td>
+<td>
+<p>upper bound value of unobservable <code>u</code> for
+estimating the generalized LATE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target.weight0</code></td>
+<td>
+<p>user-defined weight function for the control
+group defining the target parameter. A list of functions can be
+submitted if the weighting function is in fact a spline. The
+arguments of the function should be variable names in
+<code>data</code>. If the weight is constant across all observations,
+then the user can instead submit the value of the weight
+instead of a function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target.weight1</code></td>
+<td>
+<p>user-defined weight function for the treated
+group defining the target parameter. See <code>target.weight0</code>
+for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target.knots0</code></td>
+<td>
+<p>user-defined set of functions defining the
+knots associated with spline weights for the control group. The
+arguments of the function should consist only of variable names
+in <code>data</code>. If the knots are constant across all
+observations, then the user can instead submit the vector of
+knots instead of a function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target.knots1</code></td>
+<td>
+<p>user-defined set of functions defining the
+knots associated with spline weights for the treated group. See
+<code>target.knots0</code> for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m0</code></td>
+<td>
+<p>one-sided formula for the marginal treatment response
+function for the control group. Splines may also be
+incorporated using the expression <code>uSpline</code>, e.g.
+<code>uSpline(degree = 2, knots = c(0.4, 0.8), intercept =
+TRUE)</code>. The <code>intercept</code> argument may be omitted, and is
+set to <code>TRUE</code> by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m1</code></td>
+<td>
+<p>one-sided formula for the marginal treatment response
+function for the treated group. See <code>m0</code> for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>uname</code></td>
+<td>
+<p>variable name for the unobservable used in declaring
+the MTRs. The name can be provided with or without quotation
+marks.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m1.ub</code></td>
+<td>
+<p>numeric value for upper bound on MTR for the treated
+group. By default, this will be set to the largest value of the
+observed outcome in the estimation sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m0.ub</code></td>
+<td>
+<p>numeric value for upper bound on MTR for the control
+group. By default, this will be set to the largest value of the
+observed outcome in the estimation sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m1.lb</code></td>
+<td>
+<p>numeric value for lower bound on MTR for the treated
+group. By default, this will be set to the smallest value of
+the observed outcome in the estimation sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m0.lb</code></td>
+<td>
+<p>numeric value for lower bound on MTR for the control
+group. By default, this will be set to the smallest value of
+the observed outcome in the estimation sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mte.ub</code></td>
+<td>
+<p>numeric value for upper bound on treatment effect
+parameter of interest.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mte.lb</code></td>
+<td>
+<p>numeric value for lower bound on treatment effect
+parameter of interest.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m0.dec</code></td>
+<td>
+<p>logical, set to <code>FALSE</code> by default. Set equal to
+<code>TRUE</code> if the MTR for the control group should be weakly
+monotone decreasing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m0.inc</code></td>
+<td>
+<p>logical, set to <code>FALSE</code> by default. Set equal to
+<code>TRUE</code> if the MTR for the control group should be weakly
+monotone increasing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m1.dec</code></td>
+<td>
+<p>logical, set to <code>FALSE</code> by default. Set equal to
+<code>TRUE</code> if the MTR for the treated group should be weakly
+monotone decreasing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m1.inc</code></td>
+<td>
+<p>logical, set to <code>FALSE</code> by default. Set equal to
+<code>TRUE</code> if the MTR for the treated group should be weakly
+monotone increasing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mte.dec</code></td>
+<td>
+<p>logical, set to <code>FALSE</code> by default. Set equal
+to <code>TRUE</code> if the MTE should be weakly monotone decreasing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mte.inc</code></td>
+<td>
+<p>logical, set to <code>FALSE</code> by default. Set equal
+to <code>TRUE</code> if the MTE should be weakly monotone increasing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>equal.coef</code></td>
+<td>
+<p>one-sided formula to indicate which terms in
+<code>m0</code> and <code>m1</code> should be constrained to have the same
+coefficients. These terms therefore have no effect on the MTE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ivlike</code></td>
+<td>
+<p>formula or vector of formulas specifying the
+regressions for the IV-like estimands. Which coefficients to
+use to define the constraints determining the treatment effect
+bounds (alternatively, the moments determining the treatment
+effect point estimate) can be selected in the argument
+<code>components</code>. If no argument is passed, then a linear
+regression will be performed to estimate the MTR coefficients.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>components</code></td>
+<td>
+<p>a list of vectors of the terms in the regression
+specifications to include in the set of IV-like estimands. No
+terms should be in quotes. To select the intercept term,
+include the name <code>intercept</code>. If the factorized
+counterpart of a variable is included in the IV-like
+specifications, e.g. <code>factor(x)</code> where <code>x = 1, 2, 3</code>,
+the user can select the coefficients for specific factors by
+declaring the components <code>factor(x)-1, factor(x)-2,
+factor(x)-3</code>. See <code>l</code> on how to input the
+argument. If no components for a IV specification are given,
+then all coefficients from that IV specification will be used
+to define constraints in the partially identified case, or to
+define moments in the point identified case.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+<p>a single subset condition or list of subset
+conditions corresponding to each regression specified in
+<code>ivlike</code>. The input must be logical. See <code>l</code>
+on how to input the argument. If the user wishes to select
+specific rows, construct a binary variable in the data set, and
+set the condition to use only those observations for which the
+binary variable is 1, e.g. the binary variable is <code>use</code>,
+and the subset condition is <code>use == 1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>propensity</code></td>
+<td>
+<p>formula or variable name corresponding to
+propensity to take up treatment. If a formula is declared, then
+the function estimates the propensity score according to the
+formula and link specified in <code>link</code>. If a variable name
+is declared, then the corresponding column in the data is taken
+as the vector of propensity scores. A variable name can be
+passed either as a string (e.g <code>propensity = 'p'</code>), a
+variable (e.g. <code>propensity = p</code>), or a one-sided formula
+(e.g. <code>propensity = ~p</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>link</code></td>
+<td>
+<p>character, name of link function to estimate propensity
+score. Can be chosen from <code>'linear'</code>, <code>'probit'</code>, or
+<code>'logit'</code>. Default is set to <code>'logit'</code>. The link
+should be provided with quoation marks.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treat</code></td>
+<td>
+<p>variable name for treatment indicator. The name can be
+provided with or without quotation marks.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outcome</code></td>
+<td>
+<p>variable name for outcome variable. The name can be
+provided with or without quotation marks.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>solver</code></td>
+<td>
+<p>character, name of the programming package in R used
+to obtain the bounds on the treatment effect. The function
+supports <code>'gurobi'</code>, <code>'cplexapi'</code>, <code>rmosek</code>,
+<code>'lpsolveapi'</code>. The name of the solver should be provided
+with quotation marks.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>solver.options</code></td>
+<td>
+<p>list, each item of the list should correspond
+to an option specific to the solver selected.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>solver.presolve</code></td>
+<td>
+<p>boolean, default set to <code>TRUE</code>. Set
+this parameter to <code>FALSE</code> if presolve should be turned off
+for the LP/QCQP problems.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>solver.options.criterion</code></td>
+<td>
+<p>list, each item of the list should
+correspond to an option specific to the solver selected. These
+options are specific for finding the minimum criterion.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>solver.options.bounds</code></td>
+<td>
+<p>list, each item of the list should
+correspond to an option specific to the solver selected. These
+options are specific for finding the bounds.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lpsolver</code></td>
+<td>
+<p>character, deprecated argument for <code>lpsolver</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lpsolver.options</code></td>
+<td>
+<p>list, deprecated argument for
+<code>solver.options</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lpsolver.presolve</code></td>
+<td>
+<p>boolean, deprecated argument for
+<code>solver.presolve</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lpsolver.options.criterion</code></td>
+<td>
+<p>list, deprecated argument for
+<code>solver.options.criterion</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lpsolver.options.bounds</code></td>
+<td>
+<p>list, deprecated argument for
+<code>solver.options.bounds</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>criterion.tol</code></td>
+<td>
+<p>tolerance for the criterion function, and is
+set to 1e-4 by default. The criterion measures how well the
+IV-like moments/conditional means are matched using the
+l1-norm. Statistical noise may prohibit the theoretical LP/QCQP
+problem from being feasible. That is, there may not exist a set
+of MTR coefficients that are able to match all the specified
+moments. The function thus first estimates the minimum
+criterion, which is reported in the output under the name
+'minimum criterion', with a criterion of 0 meaning that all
+moments were able to be matched. The function then relaxes the
+constraints by tolerating a criterion up to <code>minimum
+criterion * (1 + criterion.tol)</code>. Set <code>criterion.tol</code> to a
+value greater than 0 to allow for more conservative bounds.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initgrid.nx</code></td>
+<td>
+<p>integer determining the number of points of the
+covariates used to form the initial constraint grid for
+imposing shape restrictions on the MTRs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initgrid.nu</code></td>
+<td>
+<p>integer determining the number of points in the
+open interval (0, 1) drawn from a Halton sequence. The end
+points 0 and 1 are additionally included. These points are
+always a subset of the points defining the audit grid (see
+<code>audit.nu</code>). These points are used to form the initial
+constraint grid for imposing shape restrictions on the <code>u</code>
+components of the MTRs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>audit.nx</code></td>
+<td>
+<p>integer determining the number of points on the
+covariates space to audit in each iteration of the audit
+procedure.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>audit.nu</code></td>
+<td>
+<p>integer determining the number of points in the
+open interval (0, 1) drawn from a Halton sequence. The end
+points 0 and 1 are additionally included. These points are used
+to audit whether the shape restrictions on the <code>u</code>
+components of the MTRs are satisfied. The initial grid used to
+impose the shape constraints in the LP/QCQP problem are
+constructed from a subset of these points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>audit.add</code></td>
+<td>
+<p>maximum number of points to add to the initial
+constraint grid for imposing each kind of shape constraint. For
+example, if there are 5 different kinds of shape constraints,
+there can be at most <code>audit.add * 5</code> additional points
+added to the constraint grid.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>audit.max</code></td>
+<td>
+<p>maximum number of iterations in the audit
+procedure.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>audit.tol</code></td>
+<td>
+<p>feasibility tolerance when performing the
+audit. By default to set to be 1e-06, which is equal to the
+default feasibility tolerances of Gurobi (<code>solver =
+"gurobi"</code>), CPLEX (<code>solver = "cplexapi"</code>), and Rmosek
+(<code>solver = "rmosek"</code>). This parameter should only be
+changed if the feasibility tolerance of the solver is changed,
+or if numerical issues result in discrepancies between the
+solver's feasibility check and the audit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rescale</code></td>
+<td>
+<p>boolean, set to <code>TRUE</code> by default. This
+rescalels the MTR components to improve stability in the
+LP/QCQP optimization.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>point</code></td>
+<td>
+<p>boolean. Set to <code>TRUE</code> if it is believed that the
+treatment effects are point identified. If set to <code>TRUE</code>
+and IV-like formulas are passed, then a two-step GMM procedure
+is implemented to estimate the treatment effects. Shape
+constraints on the MTRs will be ignored under point
+identification. If set to <code>TRUE</code> and the regression-based
+criteria is used instead, then OLS will be used to estimate the
+MTR coefficients used to estimate the treatment effect. If not
+declared, then the function will determine whether or not the
+target parameter is point identified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>point.eyeweight</code></td>
+<td>
+<p>boolean, default set to <code>FALSE</code>. Set to
+<code>TRUE</code> if the GMM point estimate should use the identity
+weighting matrix (i.e. one-step GMM).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bootstraps</code></td>
+<td>
+<p>integer, default set to 0. This determines the
+number of bootstraps used to perform statistical inference.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bootstraps.m</code></td>
+<td>
+<p>integer, default set to size of data
+set. Determines the size of the subsample drawn from the
+original data set when performing inference via the
+bootstrap. This option applies only to the case of constructing
+confidence intervals for treatment effect bounds, i.e. it does
+not apply when <code>point = TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bootstraps.replace</code></td>
+<td>
+<p>boolean, default set to <code>TRUE</code>. This
+determines whether the resampling procedure used for inference
+will sample with replacement.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>levels</code></td>
+<td>
+<p>vector of real numbers between 0 and 1. Values
+correspond to the level of the confidence intervals constructed
+via bootstrap.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci.type</code></td>
+<td>
+<p>character, default set to <code>'both'</code>. Set to
+<code>'forward'</code> to construct the forward confidence interval
+for the treatment effect bound. Set to <code>'backward'</code> to
+construct the backward confidence interval for the treatment
+effect bound. Set to <code>'both'</code> to construct both types of
+confidence intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>specification.test</code></td>
+<td>
+<p>boolean, default set to
+<code>TRUE</code>. Function performs a specification test for the
+partially identified case when <code>bootstraps &gt; 0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>noisy</code></td>
+<td>
+<p>boolean, default set to <code>TRUE</code>. If <code>TRUE</code>,
+then messages are provided throughout the estimation
+procedure. Set to <code>FALSE</code> to suppress all messages,
+e.g. when performing the bootstrap.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smallreturnlist</code></td>
+<td>
+<p>boolean, default set to <code>FALSE</code>. Set to
+<code>TRUE</code> to exclude large intermediary components
+(i.e. propensity score model, LP/QCQP model, bootstrap
+iterations) from being included in the return list.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>debug</code></td>
+<td>
+<p>boolean, indicates whether or not the function should
+provide output when obtaining bounds. The option is only
+applied when <code>solver = 'gurobi'</code> or <code>solver =
+'rmosek'</code>. The output provided is the same as what the Gurobi
+API would send to the console.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>When the function is used to estimate bounds, and
+statistical inference is not performed, the function returns
+the following objects.
+</p>
+
+<dl>
+<dt>audit.count</dt>
+<dd>
+<p>the number of audits required until there were
+no more violations; or the number of audits performed before the audit
+procedure was terminated.</p>
+</dd>
+<dt>audit.criterion</dt>
+<dd>
+<p>the minimum criterion.</p>
+</dd>
+<dt>audit.grid</dt>
+<dd>
+<p>a list containing the points used to define the audit
+grid, as well as a table of points where the shape constraints were
+violated.</p>
+</dd>
+<dt>bounds</dt>
+<dd>
+<p>a vector with the estimated lower and upper bounds of
+the target treatment effect.</p>
+</dd>
+<dt>call.options</dt>
+<dd>
+<p>a list containing all the model specifications and
+call options generating the results.</p>
+</dd>
+<dt>gstar</dt>
+<dd>
+<p>a list containing the estimate of the weighted means
+for each component in the MTRs. The weights are determined by the
+target parameter declared in <code>target</code>, or the weights defined
+by <code>target.weight1</code>, <code>target.knots1</code>,
+<code>target.weight0</code>, <code>target.knots0</code>.</p>
+</dd>
+<dt>gstar.coef</dt>
+<dd>
+<p>a list containing the coefficients on the treated
+and control group MTRs.</p>
+</dd>
+<dt>gstar.weights</dt>
+<dd>
+<p>a list containing the target weights used to
+estimate <code>gstar</code>.</p>
+</dd>
+<dt>result</dt>
+<dd>
+<p>a list containing the LP/QCQP model, and the full output
+from solving the problem.</p>
+</dd>
+<dt>solver</dt>
+<dd>
+<p>the solver used in estimation.</p>
+</dd>
+<dt>moments</dt>
+<dd>
+<p>the number of elements in the S-set used to generate
+achieve (partial) identification.</p>
+</dd>
+<dt>propensity</dt>
+<dd>
+<p>the propensity score model. If a variable is fed
+to the <code>propensity</code> argument when calling <code>ivmte</code>, then
+the returned object is a list containing the name of variable given
+by the user, and the values of that variable used in estimation.</p>
+</dd>
+<dt>s.set</dt>
+<dd>
+<p>a list of all the coefficient estimates and weights
+corresponding to each element in the S-set.</p>
+</dd>
+<dt>splines.dict</dt>
+<dd>
+<p>a list including the specifications of each
+spline declared in each MTR.</p>
+</dd>
+<dt>messages</dt>
+<dd>
+<p>a vector of character strings logging the output of
+the estimation procedure.</p>
+</dd>
+</dl>
+<p>If <code>bootstraps</code> is greater than 0, then statistical inference
+will be performed and the output will additionally contain the
+following objects.
+</p>
+
+<dl>
+<dt>bootstraps</dt>
+<dd>
+<p>the number of bootstraps.</p>
+</dd>
+<dt>bootstraps.failed</dt>
+<dd>
+<p>the number of bootstraps that failed (e.g.
+due to collinearity) and had to be repeated.</p>
+</dd>
+<dt>bounds.bootstraps</dt>
+<dd>
+<p>the estimates of the bounds from every
+bootstrap draw.</p>
+</dd>
+<dt>bounds.ci</dt>
+<dd>
+<p>forward and/or backward confidence intervals for
+the bound estimates at the levels specified in <code>levels</code>.</p>
+</dd>
+<dt>bounds.se</dt>
+<dd>
+<p>bootstrap standard errors on the lower and upper
+bound estimates.</p>
+</dd>
+<dt>p.value</dt>
+<dd>
+<p>p-value for the estimated bounds. p-values are
+constructed by finding the level at which the confidence interval
+no longer contains 0.</p>
+</dd>
+<dt>propensity.ci</dt>
+<dd>
+<p>confidence interval for coefficient estimates
+of the propensity score model.</p>
+</dd>
+<dt>propensity.se</dt>
+<dd>
+<p>standard errors for the coefficient estimates
+of the propensity score model.</p>
+</dd>
+<dt>specification.p.value</dt>
+<dd>
+<p>p-value from a specification test.
+The specification test is only performed if the minimum criterion
+is not 0.</p>
+</dd>
+</dl>
+<p>If <code>point = TRUE</code> and <code>bootstraps = 0</code>, then point
+estimation is performed using two-step GMM. The output will contain
+the following objects.
+</p>
+
+<dl>
+<dt>j.test</dt>
+<dd>
+<p>test statistic and results from the asymptotic J-test.</p>
+</dd>
+<dt>moments</dt>
+<dd>
+<p>a vector. Each element is the GMM criterion for each
+moment condition used in estimation.</p>
+</dd>
+<dt>mtr.coef</dt>
+<dd>
+<p>coefficient estimates for the MTRs.</p>
+</dd>
+<dt>point.estimate</dt>
+<dd>
+<p>point estimate of the treatment effect.</p>
+</dd>
+<dt>redundant</dt>
+<dd>
+<p>indexes for the moment conditions (i.e. elements
+in the S set) that were linearly independent and could be dropped.</p>
+</dd>
+</dl>
+<p>If <code>point = TRUE</code> and <code>bootstraps</code> is not 0, then
+point estimation is performed using two-step GMM, and additional
+statistical inference is performed using the bootstrap samples.
+The output will contain the following additional objects.
+</p>
+
+<dl>
+<dt>bootstraps</dt>
+<dd>
+<p>the number of bootstraps.</p>
+</dd>
+<dt>bootstraps.failed</dt>
+<dd>
+<p>the number of bootstraps that failed (e.g.
+due to collinearity) and had to be repeated.</p>
+</dd>
+<dt>j.test</dt>
+<dd>
+<p>test statistic and result from the J-test performed
+using the bootstrap samples.</p>
+</dd>
+<dt>j.test.bootstraps</dt>
+<dd>
+<p>J-test statistic from each bootstrap.</p>
+</dd>
+<dt>mtr.bootstraps</dt>
+<dd>
+<p>coefficient estimates for the MTRs from
+each bootstrap sample. These are used to construct the confidence
+intervals and standard errors for the MTR coefficients.</p>
+</dd>
+<dt>mtr.ci</dt>
+<dd>
+<p>confidence intervals for each MTR coefficient.</p>
+</dd>
+<dt>mtr.se</dt>
+<dd>
+<p>standard errors for each MTR coefficient estimate.</p>
+</dd>
+<dt>p.value</dt>
+<dd>
+<p>p-value for the treatment effect point estimate
+estimated using the bootstrap.</p>
+</dd>
+<dt>point.estimate.bootstraps</dt>
+<dd>
+<p>treatment effect point estimate
+from each bootstrap sample. These are used to construct the
+confidence interval, standard error, and p-value for the treatment
+effect.</p>
+</dd>
+<dt>point.estimate.ci</dt>
+<dd>
+<p>confidence interval for the treatment
+effect.</p>
+</dd>
+<dt>point.estimate.se</dt>
+<dd>
+<p>standard error for the treatment effect
+estimate.</p>
+</dd>
+<dt>propensity.ci</dt>
+<dd>
+<p>confidence interval for the coefficients in
+the propensity score model, constructed using the bootstrap.</p>
+</dd>
+<dt>propensity.se</dt>
+<dd>
+<p>standard errors for the coefficient estimates
+of the propensity score model.</p>
+</dd>
+</dl>
+<h3>Value</h3>
+
+<p>Returns a list of results from throughout the estimation
+procedure. This includes all IV-like estimands; the propensity
+score model; bounds on the treatment effect; the estimated
+expectations of each term in the MTRs; the components and
+results of the LP/QCQP problem.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">dtm &lt;- ivmte:::gendistMosquito()
+
+ivlikespecs &lt;- c(ey ~ d | z,
+                 ey ~ d | factor(z),
+                 ey ~ d,
+                 ey ~ d | factor(z))
+jvec &lt;- l(d, d, d, d)
+svec &lt;- l(, , , z %in% c(2, 4))
+
+ivmte(ivlike = ivlikespecs,
+      data = dtm,
+      components = jvec,
+      propensity = d ~ z,
+      subset = svec,
+      m0 = ~  u + I(u ^ 2),
+      m1 = ~  u + I(u ^ 2),
+      uname = u,
+      target = "att",
+      m0.dec = TRUE,
+      m1.dec = TRUE,
+      bootstraps = 0,
+      solver = "lpSolveAPI")
+
+</code></pre>
+
+
+</div>

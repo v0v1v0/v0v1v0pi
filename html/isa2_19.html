@@ -1,0 +1,160 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plotModules</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Image plots of biclusters</h2>
+
+<h3>Description</h3>
+
+<p>Make several image plots, one for each bicluster, and
+optionally one for the original data as well.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">images(matrices, names=NULL, ...)
+## S4 method for signature 'list'
+ plotModules(modules, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>matrices</code></td>
+<td>
+<p>A list of matrices to plot. Please note that this
+argument is <em>always</em> interpreted as a list, even if want to
+plot a single matrix, put it into a list.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>names</code></td>
+<td>
+<p>Character vector, the labels to show above the image
+plots. If you give the <code>data</code> argument to <code>plotModules</code>,
+then the first label corresponds to that.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments, for <code>images</code> these are passed
+to <code>levelplot</code>, for <code>plotModules</code> see the
+details below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modules</code></td>
+<td>
+<p>The object with the ISA modules, as returned by the
+<code>isa</code> function or other such functions.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>images</code> creates image plots for a series of matrices, using
+<code>levelplot</code> from the <code>lattice</code> package.
+</p>
+<p><code>plotModules</code> calls <code>images</code> from the
+to create image plots for a set of modules. It can be called as
+</p>
+<pre>
+    plotModules(modules, to.plot=seq_len(ncol(modules$rows)),
+                data, binary=TRUE, names=NULL, xlab="", ylab="",
+		\dots)
+	      </pre>
+<p>where the arguments are:
+</p>
+
+<dl>
+<dt>modules</dt>
+<dd>
+<p>The object with the ISA modules, as returned by the
+<code>isa</code> function or other such functions.</p>
+</dd>
+<dt>to.plot</dt>
+<dd>
+<p>Numeric vector, the modules to plot, the numbers
+correspond to the columns in <code>modules$rows</code> and
+<code>modules$columns</code>. By default all modules will be plot.</p>
+</dd>
+<dt>data</dt>
+<dd>
+<p>An optional data matrix to plot. Most often this is the
+original data. If given, its dimension must much the dimensions in
+the <code>modules</code> object. If given, then this matrix is plotted
+first, before the modules.</p>
+</dd>
+<dt>binary</dt>
+<dd>
+<p>Logical scalar, whether to binarize the biclusters
+before plotting or use the actual ISA scores. By default the
+biclusters are binarized.</p>
+</dd>
+<dt>names</dt>
+<dd>
+<p>Character vector, the labels to show above the image
+plots. If you give the <code>data</code> argument to <code>plotModules</code>,
+then the first label corresponds to that.</p>
+</dd>
+<dt>xlab</dt>
+<dd>
+<p>Character scalar, the label to put on the horizontal
+axis.</p>
+</dd>
+<dt>ylab</dt>
+<dd>
+<p>Character scalar, the label to put on the vertical axis.</p>
+</dd>
+<dt>...</dt>
+<dd>
+<p>Further arguments are passed to
+<code>levelplot</code>.</p>
+</dd>
+</dl>
+<p>Note, that if you want to export these plots to a file, then a
+bitmap-based format might be more appropriate. For larger matrices
+vector formats tend to generate huge file because of the many dots.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Since these function use the <code>lattice</code> package, they return an
+object of class <code>trellis</code>. You will need to <code>print</code> this
+object to create the actual plots.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Gabor Csardi <a href="mailto:Gabor.Csardi@unil.ch">Gabor.Csardi@unil.ch</a></p>
+
+
+<h3>See Also</h3>
+
+<p><code>image</code> and the other version: <code>image</code>
+from the <code>Matrix</code> package, for alternatives to create image
+plots.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## The following should plot the input matrix and the four modules
+## found by ISA
+set.seed(1)   # to get same plot every time
+data &lt;- isa.in.silico(100, 100, num.fact=4)
+modules &lt;- isa(data[[1]], thr.row=2, thr.col=2)
+plotModules(modules, data=data[[1]], binary=FALSE,
+            names=c("Input matrix",
+                    paste("Module", seq_len(ncol(modules$rows)))))
+</code></pre>
+
+
+</div>

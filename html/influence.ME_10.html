@@ -1,0 +1,186 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>influence.mer</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>influence returns mixed model estimates, iteratively excluding the influence of data nested within single grouping factors.</h2>
+
+<h3>Description</h3>
+
+<p>influence() is the workhorse function of the influence.ME package. Based on a priorly estimated mixed effects regression model (estimated using lme4), the influence() function iteratively modifies the mixed effects model to neutralize the effect a grouped set of data has on the parameters, and which returns returns the fixed parameters of these iteratively modified models. These are used to compute measures of influential data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">influence(model, group=NULL, select=NULL, obs=FALSE, 
+	gf="single", count = FALSE, delete=TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>Mixed effects model of class 'mer'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group</code></td>
+<td>
+<p>Grouping factor in model of which iteratively levels are neutralized</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>select</code></td>
+<td>
+<p>Defines the selection of grouping factors that should be omitted. Defaults to 0, resulting in each level of the grouping factor being omitted iteratively. When a selection is defined, model parameters for the full model, and the altered model are returned. The selection can be a vector of multiple levels of the grouping factor.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>obs</code></td>
+<td>
+<p>If obs=TRUE, single observations - rather than groups - are deleted from the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gf</code></td>
+<td>
+<p>Indicates from which of the model's grouping factors the influence of the specified grouping factor is to be neutralized. If <code>gf="single"</code> (default), the levels of the specified grouping factor are only neutralized regarding the grouping factor specified in <code>group</code>. In its present form, <code>gf="single"</code> only works on mixed models with a maximum of 2 grouping factors. If <code>gf="all"</code>, the influence from the levels of <code>group</code> is neutralized regarding all grouping factors in the model. This option only applies to models with more than a single grouping factor.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>count</code></td>
+<td>
+<p>If count=TRUE, the remaining number of grouping factors that still need to be omitted are printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delete</code></td>
+<td>
+<p>If delete=TRUE (default), the influence is excluded by simply deleting the observations nested within the higher level group. If delete=FALSE, the influence of higher level groups is excluded from the model by setting the intercept-vector for the observations nested within these groups to 0, and by adding a dummy-variable indicating these observations (Langford and Lewis, 1998). This latter option currently does not work with models that include factor variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Optional arguments that are passed on to the lmer/glmer function</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The basic rationale behind measuring influential cases is that when iteratively single units are omitted from the data, models based on these data should not produce substantially different estimates. To apply this logic to mixed effects models one has to measure the influence of a particular higher level unit on the estimates of a higher level predictor. This means that the mixed effects model has to be adjusted to neutralize the unit's influence on that estimate, while at the same time allowing the unit's lower-level cases to help estimate the effects of the lower-level predictors in the model. This procedure is based on a modification of the intercept and the addition of a dummy variable for the cases that might be influential.
+</p>
+<p>influence() is the workhorse function of this likewise called package. Based on a priorly estimated mixed effects regression model (of the 'mer' class), the influence() function iteratively modifies the mixed effects model by neutralizing the effect a grouped set of data has on the parameters, and which returns returns the fixed parameters of these iteratively modified models. 
+</p>
+<p>The returned object (see 'value') contains information which is required for functions computing various measures of influential data.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The object returned by influence() of class "estex" contains the estimates (excluding the influence of specific (groups of) observations) required by several other functions to calculate measures of influential data. A list containing six elements is returned:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>or.fixed</code></td>
+<td>
+<p>Fixed estimates of the original model (based on the full data)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>or.se</code></td>
+<td>
+<p>Standard Error of the estimates of the original model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>or.vcov</code></td>
+<td>
+<p>Variance / Covariance matrix of the original model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alt.fixed</code></td>
+<td>
+<p>Matrix of the fixed parameters estimate, after iteratively subsets of data are removed. Altered estimates associated with the deletion of data nested within each grouping factor are provided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alt.se</code></td>
+<td>
+<p>Matrix of the standard errors of the fixed parameter estimates, after iteratively subsets of data are removed. Altered estimates associated with the deletion of data nested within each grouping factor are provided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alt.vcov</code></td>
+<td>
+<p>Variance / Covariance matrix of the altered models, after iteratively subsets of data are removed. Altered estimates associated with the deletion of data nested within each grouping factor are provided.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Please note that in its present form, the <code>influence</code> function only works on mixed effects regression models that have been estimated using the functions in the <code>lme4</code> package. 
+</p>
+<p>Also, it is required that the <code>mer</code> model was estimated using a factor variable to indicate group levels. When using something similar to <code>+ (1 | as.factor(variable))</code>, the function is not able of identifying the correct grouping factors, and returns an error.
+</p>
+<p>Since influence() entails the re-estimation of the provided mixed effects model for each level of the specified grouping factor (after alteration of the data), executing this procedure can be computationally highly demanding. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Rense Nieuwenhuis, Ben Pelzer, Manfred te Grotenhuis</p>
+
+
+<h3>References</h3>
+
+<p>Nieuwenhuis, R., Te Grotenhuis, M., &amp; Pelzer, B. (2012). Influence.ME: tools for detecting influential data in mixed effects models. <em>R Journal</em>, 4(2), 38???47.
+</p>
+<p>Belsley, D.A., Kuh, E. &amp; Welsch, R.E. (1980). <em>Regression Diagnostics. Identifying Influential Data and Source of Collinearity</em>. Wiley. 
+</p>
+<p>Langford, I. H. and Lewis, T. (1998). Outliers in multilevel data. Journal of the 
+Royal Statistical Society: Series A (Statistics in Society), 161:121-160.
+</p>
+<p>Snijders, T.A. &amp; Bosker, R.J. (1999). <em>Multilevel Analysis, an introduction to basic and advanced multilevel modeling</em>. Sage. 
+</p>
+<p>Van der Meer, T., Te Grotenhuis, M., &amp; Pelzer, B. (2010). <em>Influential Cases in Multilevel Modeling: A Methodological Comment</em>. American Sociological Review, 75(1), 173-178.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>cooks.distance.estex</code>, <code>dfbetas.estex</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+data(school23)
+model.a &lt;- lmer(math ~ structure + SES  + (1 | school.ID), data=school23)
+alt.est.a &lt;- influence(model=model.a, group="school.ID")
+alt.est.b &lt;- influence(model=model.a, group="school.ID", select="7472")
+alt.est.c &lt;- influence(model=model.a, group="school.ID", select=c("7472", "62821"))
+
+#Note: does not work on models produced by exclude.influence()
+model.b &lt;- lmer(math ~ structure + scale(SES)  + (1 | school.ID), data=school23)
+alt.est.d &lt;- influence(model=model.b, group="school.ID", select=c("7472", "62821"))
+
+data(Penicillin, package="lme4")
+model.c &lt;- lmer(diameter ~ (1|plate) + (1|sample), Penicillin)
+alt.est.e &lt;- influence(model=model.c, group="plate")
+alt.est.f &lt;- influence(model=model.c, group="sample")
+alt.est.g &lt;- influence(model=model.c, group="sample", gf="all")
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

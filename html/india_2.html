@@ -1,0 +1,112 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cooks.distance</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Cook's distances</h2>
+
+<h3>Description</h3>
+
+<p>Cook's distance is a measure to assess the influence of the <em>i</em>th observation on the 
+model parameter estimates. This function computes the Cook's distance based on leave-one-out 
+cases deletion for ordinary least squares, lad and ridge regression.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  ## S3 method for class 'lad'
+cooks.distance(model, ...)
+  ## S3 method for class 'ols'
+cooks.distance(model, ...)
+  ## S3 method for class 'ridge'
+cooks.distance(model, type = "cov", ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p> an <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> object, returned by <code>ols</code>, <code>lad</code> or <code>ridge</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p> only required for <code>'ridge'</code> objects, options available are <code>"1st"</code>, 
+<code>"cov"</code> and <code>"both"</code> to obtain the Cook's distance based on Equation (2.5), (2.6) or 
+both by Walker and Birch (1988), respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> further arguments passed to or from other methods.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A vector whose <em>i</em>th element contains the Cook's distance,
+</p>
+<p style="text-align: center;"><code class="reqn">D_i(\bold{M},c) = \frac{(\hat{\bold{\beta}}_{(i)} - \hat{\bold{\beta}})^T\bold{M}
+  (\hat{\bold{\beta}}_{(i)} - \hat{\bold{\beta}})}{c},</code>
+</p>
+
+<p>for <code class="reqn">i = 1,\dots,n</code>, with <code class="reqn">\bold{M}</code> a positive definite matrix and <code class="reqn">c &gt; 0</code>. Specific 
+choices of <code class="reqn">\bold{M}</code> and <code class="reqn">c</code> are done for objects of class <code>ols</code>, <code>lad</code> and 
+<code>ridge</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Cook, R.D., Weisberg, S. (1980).
+Characterizations of an empirical influence function for detecting influential cases in regression.
+<em>Technometrics</em> <b>22</b>, 495-508.
+<a href="https://doi.org/10.1080/00401706.1980.10486199">doi:10.1080/00401706.1980.10486199</a>
+</p>
+<p>Cook, R.D., Weisberg, S. (1982).
+<em>Residuals and Influence in Regression</em>.
+Chapman and Hall, London.
+</p>
+<p>Sun, R.B., Wei, B.C. (2004).
+On influence assessment for LAD regression.
+<em>Statistics &amp; Probability Letters</em> <b>67</b>, 97-110.
+<a href="https://doi.org/10.1016/j.spl.2003.08.018">doi:10.1016/j.spl.2003.08.018</a>.
+</p>
+<p>Walker, E., Birch, J.B. (1988).
+Influence measures in ridge regression.
+<em>Technometrics</em> <b>30</b>, 221-227.
+<a href="https://doi.org/10.1080/00401706.1988.10488370">doi:10.1080/00401706.1988.10488370</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Cook's distances for linear regression
+fm &lt;- ols(stack.loss ~ ., data = stackloss)
+CD &lt;- cooks.distance(fm)
+plot(CD, ylab = "Cook's distances", ylim = c(0,0.8))
+text(21, CD[21], label = as.character(21), pos = 3)
+
+# Cook's distances for LAD regression
+fm &lt;- lad(stack.loss ~ ., data = stackloss)
+CD &lt;- cooks.distance(fm)
+plot(CD, ylab = "Cook's distances", ylim = c(0,0.4))
+text(17, CD[17], label = as.character(17), pos = 3)
+
+# Cook's distances for ridge regression
+data(portland)
+fm &lt;- ridge(y ~ ., data = portland)
+CD &lt;- cooks.distance(fm)
+plot(CD, ylab = "Cook's distances", ylim = c(0,0.5))
+text(8, CD[8], label = as.character(8), pos = 3)
+</code></pre>
+
+
+</div>

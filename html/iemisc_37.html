@@ -1,0 +1,138 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dyn_visc_water</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Absolute or Dynamic Viscosity for Liquid Water</h2>
+
+<h3>Description</h3>
+
+<p>This function solves for the absolute or dynamic viscosity of water using
+only the temperature of the water in either units of degrees Celsius,
+degrees Fahrenheit, or Kelvin.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dyn_visc_water(
+  Temp,
+  units = c("SI", "Eng", "Absolute"),
+  Eng_units = c("slug/ft/s", "lbf*s/ft^2")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Temp</code></td>
+<td>
+<p>numeric vector that contains the temperature (degrees Celsius,
+degrees Fahrenheit, or Kelvin)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>units</code></td>
+<td>
+<p>character vector that contains the system of units [options are
+<code>SI</code> for International System of Units, <code>Eng</code> for English units
+(United States Customary System in the United States and Imperial Units in
+the United Kingdom), or <code>Absolute</code> for Absolute Units]</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Eng_units</code></td>
+<td>
+<p>character vector that contains the unit for the dynamic
+viscosity of water in the English system [options are slug/ft/s or
+lbf*s/ft^2]</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The simplified equation is expressed as
+</p>
+<p style="text-align: center;"><code class="reqn">\\mu_s = \frac{1}{a + bT + cT^2 + dT^3}</code>
+</p>
+
+<p>with
+</p>
+<p style="text-align: center;"><code class="reqn">a = 557.82468</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">b = 19.408782</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">c = 0.1360459</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">d = -3.1160832 * 10 ^ -4</code>
+</p>
+
+
+<dl>
+<dt><em>\mu_s</em></dt>
+<dd>
+<p>Water Absolute or Dynamic Viscosity (kg/m*s, slug/ft/s, or lbf*s/ft^2)</p>
+</dd>
+<dt><em>T</em></dt>
+<dd>
+<p>the water temperature, degrees Celsius</p>
+</dd>
+</dl>
+<h3>Value</h3>
+
+<p>the absolute or dynamic viscosity as a numeric vector. The units are
+not returned.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Irucka Embry
+</p>
+
+
+<h3>References</h3>
+
+<p>C. O. Popiel &amp; J. Wojtkowiak (1998). "Simple Formulas for Thermophysical Properties of Liquid Water for Heat Transfer Calculations (from 0C to 150C)". <em>Heat Transfer Engineering</em>, 19:3, 87-101, article from ResearchGate: <a href="https://www.researchgate.net/publication/239243539_Simple_Formulas_for_Thermophysical_Properties_of_Liquid_Water_for_Heat_Transfer_Calculations_from_0C_to_150C">https://www.researchgate.net/publication/239243539_Simple_Formulas_for_Thermophysical_Properties_of_Liquid_Water_for_Heat_Transfer_Calculations_from_0C_to_150C</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example 1 (Compare to the tabulated values in the Reference paper)
+
+install.load::load_package("iemisc", "data.table", "round")
+
+Temp &lt;- c(0, 0.01, 3.86, seq(5, 95, by = 5), 99.974, seq(100, 150, by = 5))
+
+dynamic_viscosity &lt;- data.table("Temperature (degrees C)" = Temp,
+"mu (* 10 ^ 6, kg / m*s)" = round_r3(dyn_visc_water(Temp, units = "SI")
+* 10^6, d = 1))
+dynamic_viscosity
+
+
+
+
+
+# Example 2 - Example from the hydraulics package
+
+library(iemisc)
+
+mu &lt;- hydraulics::dvisc(T = 55, units = "Eng"); mu
+
+mu2 &lt;- dyn_visc_water(Temp = 55, units = "Eng", Eng_units = "lbf*s/ft^2"); mu2
+
+
+
+
+
+</code></pre>
+
+
+</div>

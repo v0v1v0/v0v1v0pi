@@ -1,0 +1,183 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>clean_iat</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Prepare and clean IAT data.</h2>
+
+<h3>Description</h3>
+
+<p>Select IAT blocks for the <em>D-score</em> computation and eventually save demographic data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">clean_iat(
+  data,
+  sbj_id = "participant",
+  block_id = "blockcode",
+  mapA_practice = "practice_MappingA",
+  mapA_test = "test_MappingA",
+  mapB_practice = "practice_MappingB",
+  mapB_test = "test_MappingB",
+  latency_id = "latency",
+  accuracy_id = "correct",
+  trial_id = NULL,
+  trial_eliminate = NULL,
+  demo_id = NULL,
+  trial_demo = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Dataframe containing IAT data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sbj_id</code></td>
+<td>
+<p>Column identifying participants' IDs. This variable can be a <code>character</code>,
+<code>numeric</code>, or <code>factor</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>block_id</code></td>
+<td>
+<p>String. Column identifying
+IAT blocks. The <code>block_id</code> variable should be a
+<code>factor</code> with each level identifying an IAT block.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mapA_practice</code></td>
+<td>
+<p>String. Label for the practice blocks of Mapping A (as
+it appears in the <code>block_id</code> variable).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mapA_test</code></td>
+<td>
+<p>String. Label for the test blocks of Mapping A (as
+it appears in the <code>block_id</code> variable).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mapB_practice</code></td>
+<td>
+<p>String. Label for the practice blocks of Mapping B (as
+it appears in the <code>block_id</code> variable).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mapB_test</code></td>
+<td>
+<p>String. Label for the test blocks of Mapping B (as
+it appears in the <code>block_id</code> variable).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>latency_id</code></td>
+<td>
+<p>String. Column identifying
+response times (in millisecond). If the IAT had a
+built-in correction, latencies of the incorrect responses
+should be those inflated with the built-in correction.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>accuracy_id</code></td>
+<td>
+<p>String. Column identifying the
+IAT accuracy responses. The <code>accuracy_id</code> variable
+should be a numeric variable identifying the correct
+responses (with 1) and the incorrect responses (with 0).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trial_id</code></td>
+<td>
+<p>Character. Column identifying the trials. Specify this only
+if you want to delete some specific trials.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trial_eliminate</code></td>
+<td>
+<p>Character or character vector. Label(s) identifying the trials
+in <code>trial_id</code> to eliminate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>demo_id</code></td>
+<td>
+<p>Character. Column identifying demographic blocks. It can be the same as <code>block_id</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trial_demo</code></td>
+<td>
+<p>Character or character vector identifying the name of the
+blocks in <code>demo_id</code> containing the demographic information.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>List of dataframe.
+</p>
+
+<dl>
+<dt><code>data_keep</code></dt>
+<dd>
+<p>Dataframe with class <code>iat_clean</code>. The
+dataframe contains the data of the blocks specified in
+<code>mapA_practice</code>, <code>mapA_test</code>, <code>mapB_practice</code>,
+<code>mapB_test</code>. If you have specified the trials to eliminate through
+<code>trial_eliminate</code>, <code>data_keep</code> will contain the already
+cleaned dataset. This dataset should be passed to the <code>computeD</code> function.</p>
+</dd>
+<dt><code>data_eliminate</code></dt>
+<dd>
+<p>Dataframe containing all the discarded
+blocks and trials.</p>
+</dd>
+<dt><code>data_demo</code></dt>
+<dd>
+<p>Dataframe containing demographic variables.
+It will be present only if you specified the <code>demo_id</code> and
+<code>trial_demo</code> arguments.</p>
+</dd>
+</dl>
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("raw_data") # load data
+iat_cleandata &lt;- clean_iat(raw_data, sbj_id = "Participant",
+                          block_id = "blockcode",
+                          mapA_practice = "practice.iat.Milkbad",
+                          mapA_test = "test.iat.Milkbad",
+                          mapB_practice = "practice.iat.Milkgood",
+                          mapB_test = "test.iat.Milkgood",
+                          latency_id = "latency",
+                          accuracy_id = "correct",
+                          trial_id = "trialcode",
+                          trial_eliminate = c("reminder", "reminder1"),
+                          demo_id = "blockcode",
+                          trial_demo = "demo")
+iat_data &lt;- iat_cleandata[[1]] # select the first element of the list (IAT data)
+head(iat_data)
+demo_data &lt;- iat_cleandata[[3]] # select the third element of the list
+                            # (demographic data)
+head(demo_data)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,146 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>llike_score</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Loglikelihood of Ability Parameters</h2>
+
+<h3>Description</h3>
+
+<p>This function computes the loglikelihood of ability parameters
+given the item parameters and response data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">llike_score(
+  x,
+  data,
+  theta,
+  D = 1,
+  method = "ML",
+  norm.prior = c(0, 1),
+  fence.a = 3,
+  fence.b = NULL,
+  missing = NA
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A data frame containing the item metadata (e.g., item parameters, number
+of score categories, models). This can be created easily using the <code>shape_df</code>
+function. See <code>est_irt</code>, <code>irtfit</code>, <code>info</code>,
+or <code>simdat</code> for more details about the item metadata.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A matrix representing examinees' response data for the items in <code>x</code>.
+Each row and column corresponds to an examinee and an item, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta</code></td>
+<td>
+<p>A numeric vector of ability parameters for which the loglikelihood
+values will be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>A scaling factor in IRT models that adjusts the logistic function to
+approximate the normal ogive function (set to 1.7). The default is 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>A character string specifying the scoring method. Options include
+"ML" for maximum likelihood estimation,  "MLF" for maximum likelihood estimation
+with fences, and "MAP" for maximum a posteriori estimation. The default method is "MLE".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>norm.prior</code></td>
+<td>
+<p>A numeric vector of two elements indicating the mean and standard
+deviation of the normal prior distribution. These parameters are used to obtain
+the Gaussian quadrature points and corresponding weights from the normal distribution.
+Default is c(0,1). This parameter is ignored if <code>method</code> is "ML" or "MLF".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fence.a</code></td>
+<td>
+<p>A numeric value defining the item slope parameter (a-parameter) for
+the two imaginary items in the MLF method. Default is 3.0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fence.b</code></td>
+<td>
+<p>A numeric vector of two elements specifying the lower and upper fences
+of item difficulty parameters (b-parameters) for the two imaginary items in the MLF method.
+If <code>fence.b = NULL</code>, the <code>range</code> values are used to set the fences.
+The default is NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>missing</code></td>
+<td>
+<p>A value used to denote missing values in the response data set. Default is NA.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function computes the loglikelihood value of the ability parameter given
+the item parameters and response data for each item. As an example, to assess the loglikelihoods
+of abilities for two examinees who have taken the same test items specified in <code>x</code>, supply
+their item response data matrix with two rows in <code>data</code> and a vector of ability values
+for which loglikelihood needs to be computed in <code>theta</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame of loglikelihood values. Each row indicates the ability parameter
+for which the loglikelihood was computed, and each column represents a response pattern.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Import the "-prm.txt" output file from flexMIRT
+flex_sam &lt;- system.file("extdata", "flexmirt_sample-prm.txt", package = "irtQ")
+
+# Read item parameters and transform them into item metadata
+x &lt;- bring.flexmirt(file=flex_sam, "par")$Group1$full_df
+
+# Generate examinees' abilities from N(0, 1)
+set.seed(10)
+score &lt;- rnorm(5, mean=0, sd=1)
+
+# Simulate the response data
+data &lt;- simdat(x=x, theta=score, D=1)
+
+# Specify the ability values for which the loglikelihood values will be computed
+theta &lt;- seq(-3, 3, 0.5)
+
+# Compute the loglikelihood values (using the MLE method)
+llike_score(x=x, data=data, theta=theta, D=1, method="ML")
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,319 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ivmodelFormula</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fitting Instrumental Variables (IV) Models</h2>
+
+<h3>Description</h3>
+
+<p><code>ivmodelFormula</code> fits an instrumental variables (IV) model with one endogenous variable and a continuous outcome. It carries out several IV regressions, diagnostics, and tests associated this IV model. It is robust to most data formats, including factor and character data, and can handle very large IV models efficiently.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ivmodelFormula(formula, data, subset,
+        beta0=0,alpha=0.05,k=c(0,1), 
+        manyweakSE = FALSE,
+        heteroSE = FALSE, clusterID = NULL, 
+        deltarange=NULL, na.action = na.omit)
+ </code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>a formula describing the model to be fitted. For example, the formula <code>Y ~ D + X1 + X2 | Z1 + Z2 + X1 + X2</code> describes the mode where
+</p>
+<p style="text-align: center;"><code class="reqn"> Y = \alpha_0 + D \beta +  X_{1} \alpha_1 + X_{2} \alpha_2 + \epsilon</code>
+</p>
+
+<p>and 
+</p>
+<p style="text-align: center;"><code class="reqn"> D = \gamma_0 + Z_{1} \gamma_1 + Z_{2} \gamma2 + X_{1} \kappa_1 + X_{2} \kappa_2 + \xi</code>
+</p>
+
+<p>The outcome is <code>Y</code>, the endogenous variable is <code>D</code>. The exogenous covariates are <code>X1</code> and <code>X2</code>.
+The instruments are <code>Z1</code> and <code>Z2</code>. The formula environment follows the formula environment 
+in the <code>ivreg</code> function in the AER package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>an optional data frame containing the variables in the model.
+By default the variables are taken from the environment which <code>ivmodel</code> is called from</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+<p>an index vector indicating which rows should be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta0</code></td>
+<td>
+<p>Null value <code class="reqn">\beta_0</code> for testing null hypothesis <code class="reqn">H_0: \beta = \beta_0</code> in <code>ivmodel</code>. Default is $0$.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>The significance level for hypothesis testing. Default is 0.05.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>A numeric vector of k values for k-class estimation. Default is 0 (OLS) and 1 (TSLS).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>manyweakSE</code></td>
+<td>
+<p>Should many weak instrument (and
+heteroscedastic-robust) asymptotics in Hansen, Hausman and Newey
+(2008) be used to compute standard errors? (Not supported for k ==0)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>heteroSE</code></td>
+<td>
+<p>Should heteroscedastic-robust standard errors be used? Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clusterID</code></td>
+<td>
+<p>If cluster-robust standard errors are desired, provide a vector of 
+length that's identical to the sample size. For example, if n = 6 and clusterID = c(1,1,1,2,2,2), 
+there would be two clusters where the first cluster is formed by the first three observations and 
+the second cluster is formed by the last three observations. clusterID can be numeric, character, or factor.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>deltarange</code></td>
+<td>
+<p>Range of <code class="reqn">\delta</code> for sensitivity analysis with the Anderson-Rubin (1949) test.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+<p>NA handling. There are <code>na.fail</code>, <code>na.omit</code>, <code>na.exclude</code>, <code>na.pass</code> available. Default is na.omit.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Let <code class="reqn">Y</code>, <code class="reqn">D</code>, <code class="reqn">X</code>, and <code class="reqn">Z</code> represent the outcome, endogenous variable, <em>p</em> dimensional exogenous covariates, and <em>L</em> dimensional instruments, respectively. <code>ivmodel</code> assumes the following IV model
+</p>
+<p style="text-align: center;"><code class="reqn"> Y = X \alpha + D \beta + \epsilon, E(\epsilon | X, Z) = 0</code>
+</p>
+
+<p>and produces statistics for <code class="reqn">\beta</code>. In particular, <code>ivmodel</code> computes the OLS, TSLS, k-class, limited information maximum likelihood (LIML), and Fuller-k  (Fuller 1977) estimates of <code class="reqn">\beta</code> using <code>KClass</code>, <code>LIML</code>, and codeFuller. Also, <code>ivmodel</code> computes confidence intervals and hypothesis tests of the type <code class="reqn">H_0: \beta = \beta_0</code> versus <code class="reqn">H_0: \beta \neq \beta_0</code> for the said estimators as well as two weak-IV confidence intervals, Anderson and Rubin (Anderson and Rubin 1949) confidence interval (Anderson and Rubin 1949) and the conditional likelihood ratio confidence interval (Moreira 2003). Finally, the code also conducts a sensitivity analysis if <code class="reqn">Z</code> is one-dimensional (i.e. there is only one instrument) using the method in Jiang et al. (2015).
+</p>
+<p>Some procedures (e.g. conditional likelihood ratio test, sensitivity analysis with Anderson-Rubin) assume an additional linear model
+</p>
+<p style="text-align: center;"><code class="reqn">D = Z \gamma + X \kappa + \xi, E(\xi | X, Z) = 0</code>
+</p>
+
+
+
+<h3>Value</h3>
+
+<p><code>ivmodel</code> returns an object of class "ivmodel".
+</p>
+<p>An object class "ivmodel" is a list containing the following components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Sample size.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L</code></td>
+<td>
+<p>Number of instruments.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>Number of exogenous covariates (including intercept).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>Outcome, cleaned for use in future methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>Treatment, cleaned for use in future methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Z</code></td>
+<td>
+<p>Instrument(s), cleaned for use in future methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>Exogenous covariates (if provided), cleaned for use in future methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Yadj</code></td>
+<td>
+<p>Adjusted outcome, projecting out X.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Dadj</code></td>
+<td>
+<p>Adjusted treatment, projecting out X.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Zadj</code></td>
+<td>
+<p>Adjusted instrument(s), projecting out X.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ZadjQR</code></td>
+<td>
+<p>QR decomposition for adjusted instrument(s).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ZXQR</code></td>
+<td>
+<p>QR decomposition for concatenated matrix of Z and X.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>Significance level for the hypothesis tests.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta0</code></td>
+<td>
+<p>Null value of the hypothesis tests.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kClass</code></td>
+<td>
+<p>A list from <code>KClass</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LIML</code></td>
+<td>
+<p>A list from <code>LIML</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Fuller</code></td>
+<td>
+<p>A list from <code>Fuller</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>AR</code></td>
+<td>
+<p>A list from <code>AR.test</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CLR</code></td>
+<td>
+<p>A list from <code>CLR</code>.</p>
+</td>
+</tr>
+</table>
+<p>In addition, if there is only one instrument, <code>ivreg</code> will generate an "ARsens" list within "ivmodel" object.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Yang Jiang, Hyunseung Kang, and Dylan Small</p>
+
+
+<h3>References</h3>
+
+<p>Anderson, T. W. and Rubin, H. (1949). Estimation of the parameters of a single equation in a complete system of stochastic equations. <em>Annals of Mathematical Statistics</em> 20, 46-63.<br></p>
+<p>Freeman G., Cowling B. J., Schooling C. M. (2013). Power and Sample Size Calculations for Mendelian Randomization Studies Using One Genetic Instrument. <em>International Journal of Epidemiology</em> 42(4), 1157-1163. <br></p>
+<p>Fuller, W. (1977). Some properties of a modification of the limited information estimator. <em>Econometrica</em>, 45, 939-953.  <br></p>
+<p>Hansen, C., Hausman, J., and Newey, W. (2008) Estimation with many instrumental variables. <em>Journal of Business and Economic Statistics</em> 26(4), 398-422. <br></p>
+<p>Moreira, M. J. (2003). A conditional likelihood ratio test for structural models. <em>Econometrica</em> 71, 1027-1048. <br></p>
+<p>Sargan, J. D. (1958). The estimation of economic relationships using instrumental variables. Econometrica , 393-415. <br></p>
+<p>Wang, X., Jiang, Y., Small, D. and Zhang, N. (2017), Sensitivity analysis and power for instrumental variable studies. <em>Biometrics</em> 74(4), 1150-1160.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See also <code>KClass</code>, <code>LIML</code>, <code>Fuller</code>, <code>AR.test</code>, and <code>CLR</code> for individual methods associated with <code>ivmodel</code>. For extracting the estimated effect of the exogenous covariates on the outcome, see <code>coefOther</code>. For sensitivity analysis with the AR test,
+see <code>ARsens.test</code>. <code>ivmodel</code> has <code>vcov.ivmodel</code>,<code>model.matrix.ivmodel</code>,<code>summary.ivmodel</code>, <code>confint.ivmodel</code>, <code>fitted.ivmodel</code>,
+<code>residuals.ivmodel</code> and <code>coef.ivmodel</code> methods associated with it.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(card.data)
+# One instrument #
+Y=card.data[,"lwage"]
+D=card.data[,"educ"]
+Z=card.data[,"nearc4"]
+Xname=c("exper", "expersq", "black", "south", "smsa", "reg661", 
+        "reg662", "reg663", "reg664", "reg665", "reg666", "reg667", 
+		"reg668", "smsa66")
+X=card.data[,Xname]
+card.model1IV = ivmodelFormula(lwage ~ educ + exper + expersq + black + 
+                                south + smsa + reg661 + 
+                                reg662 + reg663 + reg664 + 
+                                reg665 + reg666 + reg667 + 
+                                reg668 + smsa66 | nearc4 + 
+                                exper + expersq + black + 
+                                south + smsa + reg661 + 
+                                reg662 + reg663 + reg664 + 
+                                reg665 + reg666 + reg667 + 
+                                reg668 + smsa66,data=card.data)
+card.model1IV
+
+# Multiple instruments
+Z = card.data[,c("nearc4","nearc2")]
+card.model2IV = ivmodelFormula(lwage ~ educ + exper + expersq + black + 
+                                south + smsa + reg661 + 
+                                reg662 + reg663 + reg664 + 
+                                reg665 + reg666 + reg667 + 
+                                reg668 + smsa66 | nearc4 + nearc2 +
+                                exper + expersq + black + 
+                                south + smsa + reg661 + 
+                                reg662 + reg663 + reg664 + 
+                                reg665 + reg666 + reg667 + 
+                                reg668 + smsa66,data=card.data)
+card.model2IV
+</code></pre>
+
+
+</div>

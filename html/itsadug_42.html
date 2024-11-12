@@ -1,0 +1,343 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pvisgam</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Visualization of partial nonlinear interactions.</h2>
+
+<h3>Description</h3>
+
+<p>Produces perspective or contour plot views of gam model 
+predictions of the partial effects interactions. Combines the function 
+<code>plot.gam</code> for interaction surfaces with the function 
+<code>vis.gam</code>. Similar to <code>plot.gam</code>, 
+<code>pvisgam</code> plots the partial interaction surface, without including 
+values for other predictors that are not being shown. Similar to 
+<code>vis.gam</code> the user can set the two predictors to be 
+viewed, and colors are added behind the contours to facilitate 
+interpretation. In contrast to <code>plot.gam</code>, this function 
+allows to plotting of interactions with three of more continuous predictors 
+by breaking it down in two-dimensional surfaces.
+The code is derivated from the script for <code>vis.gam</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pvisgam(
+  x,
+  view = NULL,
+  select = NULL,
+  cond = list(),
+  n.grid = 30,
+  too.far = 0,
+  col = NA,
+  color = "terrain",
+  contour.col = NULL,
+  add.color.legend = TRUE,
+  se = 0,
+  plot.type = "contour",
+  zlim = NULL,
+  xlim = NULL,
+  ylim = NULL,
+  nCol = 50,
+  labcex = 0.6,
+  hide.label = FALSE,
+  print.summary = getOption("itsadug_print"),
+  show.diff = FALSE,
+  col.diff = 1,
+  alpha.diff = 0.5,
+  dec = NULL,
+  f = 1.96,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A gam object, produced by <code>gam</code> or 
+<code>bam</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>view</code></td>
+<td>
+<p>A two-value vector containing the names of the two main effect 
+terms to be displayed on the x and y dimensions of the plot. Note that 
+variables coerced to factors in the model formula won't work as view 
+variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>select</code></td>
+<td>
+<p>A number, selecting a single model term for printing. e.g. 
+if you want the plot for the second smooth term set select=2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cond</code></td>
+<td>
+<p>A named list of the values to use for the other predictor terms 
+(not in view). Used for choosing between smooths that share the same view 
+predictors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.grid</code></td>
+<td>
+<p>The number of grid nodes in each direction used for 
+calculating the plotted surface.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>too.far</code></td>
+<td>
+<p>Plot grid nodes that are too far from the points defined by 
+the variables given in view can be excluded from the plot. too.far 
+determines what is too far. The grid is scaled into the unit square along 
+with the view variables and then grid nodes more than too.far from the 
+predictor variables are excluded.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p>The colors for the facets of the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>color</code></td>
+<td>
+<p>The color scheme to use for plots. One of 'topo', 'heat', 
+'cm', 'terrain', 'gray' or 'bw'. Alternatively a vector with some colors 
+can be provided for a custom color palette (see examples).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>contour.col</code></td>
+<td>
+<p>sets the color of contours when using plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add.color.legend</code></td>
+<td>
+<p>Logical: whether or not to add a color legend. 
+Default is TRUE. If FALSE (omitted), one could use the function
+<code>gradientLegend</code> to add a legend manually at any position.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se</code></td>
+<td>
+<p>If less than or equal to zero then only the predicted surface is 
+plotted, but if greater than zero, then 3 surfaces are plotted, one at the 
+predicted values minus se standard errors, one at the predicted values and 
+one at the predicted values plus se standard errors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.type</code></td>
+<td>
+<p>one of 'contour' or 'persp' (default is 'contour').</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zlim</code></td>
+<td>
+<p>A two item array giving the lower and upper limits for the z-
+axis scale. NULL to choose automatically.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlim</code></td>
+<td>
+<p>A two item array giving the lower and upper limits for the x-
+axis scale. NULL to choose automatically.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylim</code></td>
+<td>
+<p>A two item array giving the lower and upper limits for the y-
+axis scale. NULL to choose automatically.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nCol</code></td>
+<td>
+<p>The number of colors to use in color schemes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>labcex</code></td>
+<td>
+<p>Size of the contour labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hide.label</code></td>
+<td>
+<p>Logical: whether or not to hide the label 
+(i.e., 'partial effect'). Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print.summary</code></td>
+<td>
+<p>Logical: whether or not to print summary.
+Default set to the print info messages option 
+(see <code>infoMessages</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>show.diff</code></td>
+<td>
+<p>Logical: whether or not to indicate the regions that 
+are significantly different from zero. Note that these regions are just 
+an indication and dependent on the value of <code>n.grid</code>. 
+Defaults to FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.diff</code></td>
+<td>
+<p>Color to shade the nonsignificant areas.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha.diff</code></td>
+<td>
+<p>Level of transparency to mark the nonsignificant areas.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dec</code></td>
+<td>
+<p>Numeric: number of decimals for rounding the color legend. 
+When NULL (default), no rounding. If -1 the values are automatically determined. 
+Note: if value = -1 (default), rounding will be applied also when 
+<code>zlim</code> is provided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>f</code></td>
+<td>
+<p>Scaling factor to determine the CI from the se, for marking the 
+difference with 0. Only applies when <code>se</code> is smaller or equal to zero 
+and <code>show.diff</code> is set to TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other options to pass on to persp, image or contour. In 
+particular ticktype='detailed' will add proper axes labeling to the plots.</p>
+</td>
+</tr>
+</table>
+<h3>Warnings</h3>
+
+
+<ul>
+<li>
+<p> In contrast to vis.gam, do not specify other predictors in <code>cond</code> that 
+are not to be plotted.
+</p>
+</li>
+<li>
+<p> When the argument <code>show.diff</code> is set to TRUE a shading area indicates 
+where the confidence intervals include zero. Or, in other words, the areas 
+that are not significantly different from zero. Be careful with the 
+interpretation, however, as the precise shape of the surface is dependent 
+on model constraints such as the value of <code>choose.k</code> and the 
+smooth function used, and the size of the confidence intervals are 
+dependent on the model fit and model characteristics 
+(see <code>vignette('acf', package='itsadug')</code>). In addition, the value of 
+<code>n.grid</code> determines the precision of the plot.
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Jacolien van Rij. Modification of <code>vis.gam</code> from 
+package <code>mgcv</code> of Simon N. Wood.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>vis.gam</code>, <code>plot.gam</code>
+</p>
+<p>Other Functions for model inspection: 
+<code>dispersion()</code>,
+<code>fvisgam()</code>,
+<code>gamtabs()</code>,
+<code>inspect_random()</code>,
+<code>plot_data()</code>,
+<code>plot_parametric()</code>,
+<code>plot_smooth()</code>,
+<code>plot_topo()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(simdat)
+
+## Not run: 
+# Model with random effect and interactions:
+m1 &lt;- bam(Y ~ te(Time, Trial)+s(Time, Subject, bs='fs', m=1),
+    data=simdat, discrete=TRUE)
+
+# Plot summed effects:
+vis.gam(m1, view=c('Time', 'Trial'), plot.type='contour', color='topo')
+# Partial effect of interaction:
+pvisgam(m1, view=c('Time', 'Trial'), select=1)
+# Same:
+plot(m1, select=1, scheme=2)
+plot(m1, select=1)
+# Alternatives:
+pvisgam(m1, view=c('Trial', 'Time'), select=1)
+pvisgam(m1, view=c('Trial', 'Time'), select=1, zlim=c(-20,20))
+pvisgam(m1, view=c('Trial', 'Time'), select=1, zlim=c(-20,20), 
+    color='terrain')
+pvisgam(m1, view=c('Trial', 'Time'), select=1, zlim=c(-20,20), 
+    color=c('blue', 'white', 'red'))
+
+# Notes on the color legend:
+# Labels can easily fall off the plot, therefore the numbers are 
+# automatically rounded.
+# To undo the rounding, set dec=NULL:
+pvisgam(m1, view=c('Time', 'Trial'), dec=NULL)
+# For custom rounding, set dec to a value:
+pvisgam(m1, view=c('Time', 'Trial'), dec=1)
+# To increase the left marging of the plot (so that the numbers fit):
+oldmar &lt;- par()$mar
+par(mar=oldmar + c(0,0,0,1) ) # add one line to the right
+pvisgam(m1, view=c('Time', 'Trial'), dec=3)
+par(mar=oldmar) # restore to default settings
+
+# too.far: 
+n &lt;- which(simdat$Time &gt; 1500 &amp; simdat$Trial &gt; 5)
+simdat[n,]$Y &lt;- NA
+simdat[simdat$Trial == -3,]$Y &lt;- NA
+m1 &lt;- bam(Y ~ te(Time, Trial)+s(Time, Subject, bs='fs', m=1),
+    data=simdat, discrete=TRUE)
+pvisgam(m1, view=c('Time', 'Trial'), select=1, too.far=0.03)
+
+
+## End(Not run)
+# see the vignette for examples:
+vignette('overview', package='itsadug')
+</code></pre>
+
+
+</div>

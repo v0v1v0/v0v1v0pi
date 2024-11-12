@@ -1,0 +1,247 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>activeSet</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Active Set Methods for Isotone Optimization</h2>
+
+<h3>Description</h3>
+
+<p>Isotone optimization can be formulated as a convex programming problem with simple linear constraints.
+This functions offers active set strategies for a collection of isotone optimization problems pre-specified in the 
+package. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">activeSet(isomat, mySolver = "LS", x0 = NULL, ups = 1e-12, check = TRUE, 
+maxiter = 100, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>isomat</code></td>
+<td>
+<p>Matrix with 2 columns that contains isotonicity conditions, i.e. for row i it holds that fitted value i column 1 &lt;= fitted value i column 2 (see examples)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mySolver</code></td>
+<td>
+<p>Various functions are pre-defined (see details). Either to funtction name or the corresponding string equivalent can be used. For user-specified functions <code>fSolver</code> with additional 
+arguments can be used (see details as well).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x0</code></td>
+<td>
+<p>Feasible starting solution. If <code>NULL</code> the null-vector is used internally.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ups</code></td>
+<td>
+<p>Upper boundary</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>check</code></td>
+<td>
+<p>If TRUE, KKT feasibility checks for isotonicity of the solution are performed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+<p>Iteration limit</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments for the various solvers (see details)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The following solvers are specified. Note that <code>y</code> as the vector of observed values and <code>weights</code> as the vector of weights need to provided through <code>...</code> for each solver (except for <code>fSolver()</code> and <code>sSolver()</code>). Some solvers need additional arguments as described in the corresponding solver help files. More technical details can be found in the package vignette.    
+</p>
+<p>The pre-specified solvers are the following (we always give the corresponding string equivalent in brackets): 
+<code>lsSolver()</code> (<code>"LS"</code>) for least squares with diagonal weights, <code>aSolver()</code> (<code>"asyLS"</code>) for asymmetric least squares, <code>dSolver()</code> (<code>"L1"</code>) for the least absolute value, <code>eSolver()</code> (<code>"L1eps"</code>) minimizes l1-approximation. <code>hSolver()</code> (<code>"huber"</code>) for Huber loss function, <code>iSolver()</code> (<code>"SILF"</code>) for SILF loss (support vector regression), <code>lfSolver()</code> (<code>"GLS"</code>) for general least squares with non-diagonal weights, <code>mSolver()</code> (<code>"chebyshev"</code>) for Chebyshev L-inf norm, <code>oSolver()</code> (<code>"Lp"</code>) for L-p power norm, <code>pSolver()</code> (<code>"quantile"</code>) for quantile loss function, and finally <code>sSolver()</code> (<code>"poisson"</code>) for Poisson likelihood. 
+</p>
+<p><code>fSolver()</code> for user-specified arbitrary differentiable functions. The arguments <code>fobj</code> (target function ) and <code>gobj</code> (first derivative) must be provided plus any additional arguments used in the definition of <code>fobj</code>. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>Generates an object of class <code>activeset</code>.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Vector containing the fitted values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Vector containing the observed values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>Vector with Lagrange multipliers</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fval</code></td>
+<td>
+<p>Value of the target function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constr.vals</code></td>
+<td>
+<p>Vector with the values of isotonicity constraints</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Alambda</code></td>
+<td>
+<p>Constraint matrix multiplied by lambda (should be equal to gradient)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gradient</code></td>
+<td>
+<p>Gradient</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>isocheck</code></td>
+<td>
+<p>List containing the KKT checks for stationarity, primal feasibility, dual feasibility, and complementary slackness (&gt;= 0 means feasible)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>niter</code></td>
+<td>
+<p>Number of iterations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>Matched call</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Jan de Leeuw, Kurt Hornik, Patrick Mair</p>
+
+
+<h3>References</h3>
+
+<p>de Leeuw, J., Hornik, K., Mair, P. (2009). Isotone optimization in R: Active Set methods and pool-adjacent-violators algorithm. 
+Journal of Statistical Software, 32(5), 1-24.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>gpava</code>, <code>lsSolver</code>, <code>dSolver</code>, <code>mSolver</code>, <code>fSolver</code>,
+<code>pSolver</code>, <code>lfSolver</code>, <code>oSolver</code>, <code>aSolver</code>, <code>eSolver</code>,
+<code>sSolver</code>, <code>hSolver</code>, <code>iSolver</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Data specification
+set.seed(12345)
+y &lt;- rnorm(9)               ##normal distributed response values
+w1 &lt;- rep(1,9)              ##unit weights
+Atot &lt;- cbind(1:8, 2:9)     ##Matrix defining isotonicity (total order)
+Atot
+
+
+## Least squares solver (pre-specified and user-specified)
+fit.ls1 &lt;- activeSet(Atot, "LS", y = y, weights = w1)
+fit.ls1
+summary(fit.ls1)
+fit.ls2 &lt;- activeSet(Atot, fSolver, fobj = function(x) sum(w1*(x-y)^2), 
+gobj = function(x) 2*drop(w1*(x-y)), y = y, weights = w1)
+
+## LS vs. GLS solver (needs weight matrix)
+set.seed(12345)
+wvec &lt;- 1:9
+wmat &lt;- crossprod(matrix(rnorm(81),9,9))/9  
+fit.wls &lt;- activeSet(Atot, "LS", y = y, weights = wvec)
+fit.gls &lt;- activeSet(Atot, "GLS", y = y, weights = wmat)
+
+
+## Quantile regression
+fit.qua &lt;- activeSet(Atot, "quantile", y = y, weights = wvec, aw = 0.3, bw = 0.7)
+
+
+## Mean absolute value norm
+fit.abs &lt;- activeSet(Atot, "L1", y = y, weights = w1)
+
+## Lp norm
+fit.pow &lt;- activeSet(Atot, "Lp", y = y, weights = w1, p = 1.2)
+
+## Chebyshev norm
+fit.che &lt;- activeSet(Atot, "chebyshev", y = y, weights = w1)
+
+## Efron's asymmetric LS
+fit.asy &lt;- activeSet(Atot, "asyLS", y = y, weights = w1, aw = 2, bw = 1)
+
+## Huber and SILF loss
+fit.hub &lt;- activeSet(Atot, "huber", y = y, weights = w1, eps = 1)
+fit.svm &lt;- activeSet(Atot, "SILF", y = y, weights = w1, beta = 0.8, eps = 0.2)
+
+
+## Negative Poisson log-likelihood
+set.seed(12345)
+yp &lt;- rpois(9,5)
+x0 &lt;- 1:9
+fit.poi &lt;- activeSet(Atot, "poisson", x0 = x0, y = yp)
+
+## LS on tree ordering
+Atree &lt;- matrix(c(1,1,2,2,2,3,3,8,2,3,4,5,6,7,8,9),8,2)
+Atree
+fit.tree &lt;- activeSet(Atree, "LS", y = y, weights = w1)
+
+
+## LS on loop ordering
+Aloop &lt;- matrix(c(1,2,3,3,4,5,6,6,7,8,3,3,4,5,6,6,7,8,9,9),10,2)
+Aloop
+fit.loop &lt;- activeSet(Aloop, "LS", y = y, weights = w1)
+
+
+## LS on block ordering
+Ablock &lt;- cbind(c(rep(1,3),rep(2,3),rep(3,3),rep(4,3),rep(5,3),rep(6,3)),c(rep(c(4,5,6),3),
+rep(c(7,8,9),3)))
+Ablock
+fit.block &lt;- activeSet(Ablock, "LS", y = y, weights = w1)
+
+## Isotone LS regression using gpava and active set (same results)
+pava.fitted &lt;- gpava(y = y)$x
+aset.fitted &lt;- activeSet(Atot, "LS", weights = w1, y = y)$x
+mse &lt;- mean((pava.fitted - aset.fitted)^2)
+mse
+</code></pre>
+
+
+</div>

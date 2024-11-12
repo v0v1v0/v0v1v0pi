@@ -1,0 +1,94 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>io_read_h5</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Lazy Load 'HDF5' File via <code>hdf5r-package</code>
+</h2>
+
+<h3>Description</h3>
+
+<p>Wrapper for class <code>LazyH5</code>, which load data with
+"lazy" mode - only read part of dataset when needed.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">io_read_h5(file, name, read_only = TRUE, ram = FALSE, quiet = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>'HDF5' file</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name</code></td>
+<td>
+<p><code>group/data_name</code> path to dataset (<code>H5D</code> data)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>read_only</code></td>
+<td>
+<p>only used if <code>ram=FALSE</code>, whether the returned
+<code>LazyH5</code> instance should be read only</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ram</code></td>
+<td>
+<p>load data to memory immediately, default is false</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>whether to suppress messages</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>If <code>ram</code> is true, then return data as arrays, otherwise return
+a <code>LazyH5</code> instance.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>io_write_h5</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">file &lt;- tempfile()
+x &lt;- array(1:120, dim = c(4,5,6))
+
+# save x to file with name /group/dataset/1
+io_write_h5(x, file, '/group/dataset/1', quiet = TRUE)
+
+# read data
+y &lt;- io_read_h5(file, '/group/dataset/1', ram = TRUE)
+class(y)   # array
+
+z &lt;- io_read_h5(file, '/group/dataset/1', ram = FALSE)
+class(z)   # LazyH5
+
+dim(z)
+
+# clean up
+unlink(file)
+
+</code></pre>
+
+
+</div>

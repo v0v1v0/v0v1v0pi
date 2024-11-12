@@ -1,0 +1,103 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Poisson2_1D</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>1-Dimensional NonHomogeneous Poisson example.</h2>
+
+<h3>Description</h3>
+
+<p>Point data and count data, together with intensity function and expected counts for
+a unimodal nonhomogeneous 1-dimensional Poisson process example.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">data(Poisson2_1D)
+</code></pre>
+
+
+<h3>Format</h3>
+
+<p>The data contain the following <code>R</code> objects:
+</p>
+
+<dl>
+<dt>
+<code>lambda2_1D</code>:</dt>
+<dd>
+<p> A function defining the intensity function of a
+nonhomogeneous Poisson process. Note that this function is only defined on
+the interval (0,55).</p>
+</dd>
+<dt>
+<code>cov2_1D</code>:</dt>
+<dd>
+<p> A function that gives what we will call a
+'habitat suitability' covariate in 1D space.</p>
+</dd>
+<dt><code>E_nc2</code></dt>
+<dd>
+<p> The expected counts of the gridded data.</p>
+</dd>
+<dt><code>pts2</code></dt>
+<dd>
+<p> The locations of the observed points (a data frame with one column, named <code>x</code>).</p>
+</dd>
+<dt><code>countdata2</code></dt>
+<dd>
+<p> A data frame with three columns, containing the count data:</p>
+</dd>
+</dl>
+<dl>
+<dt><code>x</code></dt>
+<dd>
+<p> The grid cell midpoint.</p>
+</dd>
+<dt><code>count</code></dt>
+<dd>
+<p> The number of detections in the cell.</p>
+</dd>
+<dt><code>exposure</code></dt>
+<dd>
+<p> The width of the cell.</p>
+</dd>
+</dl>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+if (require("ggplot2", quietly = TRUE)) {
+  data(Poisson2_1D)
+  p1 &lt;- ggplot(countdata2) +
+    geom_point(data = countdata2, aes(x = x, y = count), col = "blue") +
+    ylim(0, max(countdata2$count, E_nc2)) +
+    geom_point(
+      data = countdata2, aes(x = x), y = 0, shape = "+",
+      col = "blue", cex = 4
+    ) +
+    geom_point(
+      data = data.frame(x = countdata2$x, y = E_nc2), aes(x = x),
+      y = E_nc2, shape = "_", cex = 5
+    ) +
+    xlab(expression(bold(s))) +
+    ylab("count")
+  ss &lt;- seq(0, 55, length.out = 200)
+  lambda &lt;- lambda2_1D(ss)
+  p2 &lt;- ggplot() +
+    geom_line(
+      data = data.frame(x = ss, y = lambda),
+      aes(x = x, y = y), col = "blue"
+    ) +
+    ylim(0, max(lambda)) +
+    geom_point(data = pts2, aes(x = x), y = 0.2, shape = "|", cex = 4) +
+    xlab(expression(bold(s))) +
+    ylab(expression(lambda(bold(s))))
+  multiplot(p1, p2, cols = 1)
+}
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,121 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>irc_regression</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Irrepresentable Condition: Regression</h2>
+
+<h3>Description</h3>
+
+<p>Check the IRC in multiple regression, following Equation (2)
+in (Zhao and Yu 2006).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">irc_regression(X, which_nonzero)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>A matrix of dimensions <em>n</em> (observations) by <em>p</em> (variables).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>which_nonzero</code></td>
+<td>
+<p>Numeric vector with the location of the nonzero relations
+(a.k.a., the active set).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>infinity norm (greater than 1 the IRC is violated)
+</p>
+
+
+<h3>Note</h3>
+
+<p>It is common to take 1 - the infinity norm, thereby indicating the IRC
+is violated when the value is negative.
+</p>
+
+
+<h3>References</h3>
+
+<p>Zhao P, Yu B (2006).
+“On Model Selection Consistency of Lasso.”
+<em>The Journal of Machine Learning Research</em>, <b>7</b>, 2541–2563.
+ISSN 15324435, doi: <a href="https://doi.org/10.1109/TIT.2006.883611">10.1109/TIT.2006.883611</a>, 1305.7477, <a href="https://doi.org/10.1109/TIT.2006.883611">https://doi.org/10.1109/TIT.2006.883611</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# data
+# note: irc_met (block diagonal; 1st 10 active)
+cors  &lt;- rbind(
+cbind(matrix(.7, 10,10), matrix(0, 10,10)),
+cbind(matrix(0, 10,10), matrix(0.7, 10,10))
+)
+diag(cors) &lt;- 1
+
+
+X &lt;- MASS::mvrnorm(2500, rep(0, 20), Sigma = cors, empirical = TRUE)
+ 
+# check IRC
+irc_regression(X, which_nonzero = 1:10)  
+
+# generate data
+y &lt;- X %*% c(rep(1,10), rep(0, 10)) + rnorm(2500)
+
+fit &lt;- glmnet::glmnet(X, y, lambda = seq(10, 0.01, length.out = 400))
+
+# plot
+plot(fit, xvar = "lambda")
+
+
+# Example (more or less) from Zhao and Yu (2006)
+# section 3.3
+
+# number of predictors
+p &lt;- 2^4
+
+# number active (q in Zhao and Yu 2006)
+n_beta &lt;- 4/8 * p
+
+# betas
+beta &lt;- c(rep(1, n_beta), rep(0, p - n_beta))
+
+check &lt;- NA
+for(i in 1:100){
+  cors &lt;- cov2cor(
+    solve(
+      rWishart(1, p , diag(p))[,,1]
+    ))
+  
+  # predictors
+  X &lt;- MASS::mvrnorm(500, rep(0, p), Sigma = cors, empirical = TRUE)
+  
+  check[i] &lt;- irc_regression(X, which_nonzero = which(beta != 0))
+}
+
+# less than 1
+mean(check  &lt; 1)
+
+# or greater than 0
+mean(1 - check &gt; 0)
+
+</code></pre>
+
+
+</div>

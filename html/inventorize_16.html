@@ -1,0 +1,194 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>hybrid_policy_dynamic</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>hybrid_policy_dynamic</h2>
+
+<h3>Description</h3>
+
+<p>Simulating a Min Max periodic policy, diffirent from R,s,S because here order is made in case the Inventory position reaches min or the
+ordering period comes 
+the Max is dynamically calculated based on a forecast vector. .
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">hybrid_policy_dynamic(
+  demand,
+  forecast,
+  leadtime,
+  Review_period,
+  service_level,
+  initial_inventory_level = FALSE,
+  Min_to_max = 0.6,
+  min = FALSE,
+  one_step_forecast = TRUE,
+  shortage_cost = FALSE,
+  inventory_cost = FALSE,
+  ordering_cost = FALSE,
+  distribution = "normal",
+  error_metric = "mse",
+  smoothing_error = 0.2,
+  metric_windows = FALSE,
+  plot = FALSE,
+  Backlogs = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>demand</code></td>
+<td>
+<p>A vector of demand in N time periods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>forecast</code></td>
+<td>
+<p>the forecast vector of equal n periods to demand.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>leadtime</code></td>
+<td>
+<p>lead time from order to arrival (order to delivery time)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Review_period</code></td>
+<td>
+<p>Integer, the number of periods where every order is allowed to be made.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>service_level</code></td>
+<td>
+<p>cycle service level requested</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial_inventory_level</code></td>
+<td>
+<p>integer,Default is False and simulation starts with min as inventory level</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Min_to_max</code></td>
+<td>
+<p>numeric, the ratio of min to max calculation , default 0.6 but can be changed manually.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min</code></td>
+<td>
+<p>integer,Default is False and min is calculated based on Min_to_max but can be set manually.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>one_step_forecast</code></td>
+<td>
+<p>logical, Default is true where demand lead time is calcluated as(forecast at period t * leadtime)
+while if False, demand
+leadtime is calculated as (forecast of period t to forecast of period t+leadtime-1)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shortage_cost</code></td>
+<td>
+<p>numeric,Default is FALSE shortage cost per unit of sales lost</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inventory_cost</code></td>
+<td>
+<p>numeric,Default is FALSE inventory cost per unit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ordering_cost</code></td>
+<td>
+<p>numeric,Default is FALSE ordering cost for every time an order is made.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distribution</code></td>
+<td>
+<p>distribution  to calculate safety stock based on demand distribution, current choices are 'normal'
+'poisson','gamma' and negative binomial 'nbinom'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>error_metric</code></td>
+<td>
+<p>metric is currently 'rmse' and 'mae', this calculates the error from period 1 to period t unless metric_windows is set.
+this contributes to the calculation of saftey stock. default is 'rmse'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smoothing_error</code></td>
+<td>
+<p>number between 0 and 1 to smooth the error as alpha x error[t] + (1-alpha)xerror t-1, if metric_windows is used, smoothing 
+error has to be FALSE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>metric_windows</code></td>
+<td>
+<p>integer, for exammple if it is set to 4 rmse for t is calculated from t-1 to t-4,default is FALSE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>Logical, Default is False, if true a plot is generated</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Backlogs</code></td>
+<td>
+<p>Logical, Default is False, if true inventory level accounts for previous lost orders</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The Function takes a demand vector, mean of demand ,sd,lead time and requested service level to simulate an inventory system, 
+orders are lost if inventory level is less than requested demand, also ordering is made at
+day t+1, metrics like item fill rate and cycle service level are calculated. 
+the min is calculated based on a normal distribution or a poisson distribution, also min can be set manually.
+Max - inventory position is ordered whenever inventory position reaches min or at the period of review
+</p>
+
+
+<h3>Value</h3>
+
+<p>a list of two date frames, the simulation and the metrics. the metrics are (1) shortage cost, (2) inventory cost which
+is the cost of one unit of inventory in one period,(3) which is the average inventory level per period, (4) total orders made in the 
+simulation, (5) ordering cost if any, (6) total lost sales if any,(7) average ordering quantity across all orders,(8) ordering
+interval which is the average time between each order,(9) item fill rate,(10) cycle service level, (11) average saftey stock in each
+period,(12) the average sales in every order,(13) overall root mean square error, (14) overall mean absolute error, 
+(14) overall mean  error,(15) overall mean absolute percentage error,(16) the average flowttime which is the average time 
+a unit spends on inventory and (17) the demand classification.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>"haytham omar  email: &lt;haytham@rescaleanalytics.com&gt;"
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">hybrid_policy_dynamic(demand = rpois(90,9),forecast = rpois(90,9),service_level = 0.9,
+leadtime = 10,Review_period = 10,min = 50)
+</code></pre>
+
+
+</div>

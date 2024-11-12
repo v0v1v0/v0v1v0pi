@@ -1,0 +1,175 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>isurvfit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create survival curves based on the IDP model</h2>
+
+<h3>Description</h3>
+
+<p>This function creates survival curves from right censored data 
+using the prior near-ignorance Dirichlet Process (IDP).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">isurvfit(formula, data, s=0.5, weights, subset, display=TRUE,
+         conf.type=c('exact',  'approx', 'none'), nsamples=10000,
+         conf.int= .95)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+
+<p>a formula object, which must have a 
+<code>Surv</code> object as the  
+response on the left of the <code>~</code> operator and, if desired, terms  
+separated by + operators on the right. 
+For a single survival curve the right hand side should be <code>~ 1</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>a data frame in which to interpret the variables named in the <code>formula</code>, 
+<code>subset</code> and <code>weights</code> arguments. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s</code></td>
+<td>
+
+<p>sets the value of the prior strength s of the Dirichlet Process.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+
+<p>the weights must be finite and nonnegative; it is strongly recommended that  
+they be strictly positive, since zero weights are ambiguous, compared 
+to use of the <code>subset</code> argument.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+
+<p>expression saying that only a subset of the rows of the data 
+should be used in the fit. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>display</code></td>
+<td>
+
+<p>determines whether the survival curves have to 
+be plotted (TRUE) or not (FALSE).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf.type</code></td>
+<td>
+
+<p>a variable saying how the credible interval shold be computed: 
+'exact': Monte-Carlo smapling from the exact distribution,
+'approx': Gaussian approximation,
+'none': no credible interval is computed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsamples</code></td>
+<td>
+
+<p>number pf samples used to approximate the credible intervals 
+if <code>conf.type='exact'</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf.int</code></td>
+<td>
+
+<p>confidence level of the credible interval.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The estimates are obtained using the IDP estimator by Mangili and others (2014)
+based on the prior near-ignorance Dirichlet Process model 
+by Benavoli and others (2014).
+</p>
+
+
+<h3>Value</h3>
+
+<p>an object of class <code>"isurvfit"</code>.  
+</p>
+<p>See <code>isurvfit.object</code> for 
+details. Methods defined for survfit objects are  
+<code>print</code> and <code>plot</code>. 
+</p>
+
+
+<h3>References</h3>
+
+<p>Benavoli, A., Mangili, F., Zaffalon, M. and Ruggeri, F. (2014). Imprecise Dirichlet process with application to the hypothesis test on the probability that X &lt; Y.  <em>ArXiv e-prints</em>, <a href="http://adsabs.harvard.edu/abs/2014arXiv1402.2755B">http://adsabs.harvard.edu/abs/2014arXiv1402.2755B</a>.
+</p>
+<p>Mangili, F., Benavoli, A., Zaffalon, M. and de Campos, C. (2014). Imprecise Dirichlet Process for the estimate and comparison of survival functions with censored data. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>isurvfit.object</code>,
+<code>plot.isurvfit</code>, 
+<code>Surv</code>.  
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(aml)
+fit &lt;- isurvfit(Surv(time, cens) ~ 1, data=aml, display=TRUE, nsamples=1000) 
+legend('topright', c("Lower expectation", 
+          "Upper expectation","confidence intervals"), lty=c(1,1,2),lwd=c(1,2,1)) 
+title("IDP survival curve (s=0.5) \nAcute Myelogenous Leukemia dataset")
+
+data(Aids2)
+dataset &lt;- Aids2
+dataset["time"]&lt;-dataset[4]-dataset[3]
+dataset[5]&lt;-as.numeric(unlist(dataset[5]))
+fit &lt;- isurvfit(Surv(time, status) ~ T.categ, dataset,s=1,
+	            subset=(!is.na(match(T.categ, c('blood','haem','het')))),
+                nsamples=1000,conf.type='none')
+legend('topright',c("Heterosexual contact","Hemophilia","Blood"),
+            title="Transmission category:",lty=c(1,1,1),col=c(1,2,3),pch=c(1,2,3))
+title("IDP survival curve (s=1) \nAids dataset")
+print(fit)
+
+leukemia.surv &lt;- isurvfit(Surv(time, cens) ~ group, data = aml, display=FALSE) 
+plot(leukemia.surv) 
+legend(100, .9, c("Maintenance", "No Maintenance"), lty=c(1,1),lwd=c(2,1),
+       col=c('black','red'),pch=c(1,2)) 
+title("IDP Curves\nfor AML Maintenance Study") 
+</code></pre>
+
+
+</div>

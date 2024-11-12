@@ -1,0 +1,183 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pava</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Linear order isotonic regression.
+</h2>
+
+<h3>Description</h3>
+
+<p>The “pool adjacent violators algorithm” (PAVA) is applied to
+calculate the isotonic regression of a set of data, with respect
+to the usual increasing (or decreasing) linear ordering on the indices.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pava(y, w, decreasing=FALSE, long.out=FALSE, stepfun=FALSE)
+pava.sa(y, w, decreasing=FALSE, long.out=FALSE, stepfun=FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+
+<p>Vector of data whose isotonic regression is to be calculated.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+
+<p>Optional vector of weights to be used for calculating a
+weighted isotonic regression; if w is not given, all weights
+are taken to equal 1.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>decreasing</code></td>
+<td>
+<p>Logical scalar; should the isotonic regression
+be calculated with respect to <em>decreasing</em> (rather than
+increasing) order?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>long.out</code></td>
+<td>
+
+<p>Logical argument controlling the nature of the value returned.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stepfun</code></td>
+<td>
+
+<p>Logical scalar; if <code>TRUE</code> a step function representation
+of the isotonic regression is returned.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function <code>pava()</code> uses dynamically loading of a fortran
+subroutine "pava" to effect the computations.  The function <code>pava.sa()</code>
+("sa" for "stand-alone") does all of the computations in raw R.  Thus
+<code>pava.sa()</code> could be considerably slower for large data sets.
+</p>
+<p>The <code>x</code> values for the step function returned by these functions
+(if <code>stepfun</code> is <code>TRUE</code>) are thought of as being 1, 2,
+..., <code>n=length(y)</code>.  The knots of the step function are the
+<code>x</code> values (indices) <em>following</em> changes in the <code>y</code>
+values (i.e. the starting indices of the level sets, except for the
+first level set).  The <code>y</code> value corresponding to the first level
+set is the “left hand” value of <code>y</code> or <code>yleft</code>.
+The step function is formed using the default arguments of <code>stepfun()</code>.
+In particular it is <em>right</em> continuous.
+</p>
+
+
+<h3>Value</h3>
+
+<p>If long.out is TRUE then the result returned consists of a list whose
+components are:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+
+<p>the fitted values
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+
+<p>the final weights
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tr</code></td>
+<td>
+
+<p>a set of indices made up of the smallest index in each level set,
+which thus "keeps track" of the level sets.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+
+<p>a step function which represents the results of the isotonic
+regression.  This component is present <em>only if</em> 
+<code>stepfun</code> is <code>TRUE</code>.
+</p>
+</td>
+</tr>
+</table>
+<p>If <code>long.out</code> is <code>FALSE</code> and <code>stepfun</code> is <code>TRUE</code>
+then only the step function is returned.
+</p>
+<p>If <code>long.out</code> and <code>stepfun</code> are both <code>FALSE</code> then only
+the vector of fitted values is returned.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Rolf Turner
+<a href="mailto:rolfturner@posteo.net">rolfturner@posteo.net</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Robertson, T., Wright, F. T. and Dykstra, R.  L.  (1988).
+Order Restricted Statistical Inference.  Wiley, New York.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ufit()</code> <code>stepfun()</code> <code>biviso()</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Increasing order:
+y &lt;- (1:20) + rnorm(20)
+ystar &lt;- pava(y)
+plot(y)
+lines(ystar,type='s')
+# Decreasing order:
+z &lt;- NULL
+for(i in 4:8) {
+	z &lt;- c(z,rep(8-i+1,i)+0.05*(0:(i-1)))
+}
+zstar &lt;- pava(z,decreasing=TRUE)
+plot(z)
+lines(zstar,type='s')
+# Using the stepfunction:
+zstar &lt;- pava(z,decreasing=TRUE,stepfun=TRUE)
+plot(z)
+plot(zstar,add=TRUE,verticals=FALSE,pch=20,col.points="red")
+</code></pre>
+
+
+</div>

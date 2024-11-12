@@ -1,0 +1,189 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ntest.means</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Normality Check for Interval-Censored Data with Repeated Measurements - Means
+</h2>
+
+<h3>Description</h3>
+
+<p>The function checks whether interval-censored data with two repeated measurements meet the normality assumption for subjects' means. This is a prerequisite for the random effects model used in ICC calculation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ntest.means(r1, r2, predefined.classes=FALSE, classes, c.limits, optim.method=1, bins=10)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>r1</code></td>
+<td>
+
+<p>argument passed to <code>intervalICC</code>; see documentation for that function.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r2</code></td>
+<td>
+
+<p>argument passed to <code>intervalICC</code>; see documentation for that function.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predefined.classes</code></td>
+<td>
+
+<p>argument passed to <code>intervalICC</code>; see documentation for that function.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>classes</code></td>
+<td>
+
+<p>argument passed to <code>intervalICC</code>; see documentation for that function.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c.limits</code></td>
+<td>
+
+<p>argument passed to <code>intervalICC</code>; see documentation for that function.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optim.method</code></td>
+<td>
+
+<p>argument passed to <code>intervalICC</code>; see documentation for that function.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bins</code></td>
+<td>
+
+<p>number of categories in chi-square test; see details below (default is 10).
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For ICC estimation the random effects data model
+</p>
+<p style="text-align: center;"><code class="reqn">Y_{ij} = \mu + b_i + e_{ij},</code>
+</p>
+ 
+<p>is used, where <code class="reqn">b_i</code> and <code class="reqn">e_{ij}</code> are normally distributed with means 0 and variances <code class="reqn">\sigma^2_b</code> and <code class="reqn">\sigma^2</code>, respectively. 
+This function assesses the assumption that the subjects' means <code class="reqn">0.5 (Y_{i1}+Y_{i2})</code> are normally distributed with mean <code class="reqn">\mu</code> and variance <code class="reqn">\sigma^2_b + 0.5 \sigma^2</code>, as is expected under the specified model.
+</p>
+<p>To test normality, chi-square goodness-of-fit test with <code>bins</code> subsequent data categories is used (call to <code>chisq.test</code> from package <code>stats</code>). 
+The categories (bins) are determined using the equidistant quantiles of expected normal distribution, with corresponding maximum likelihood 
+parameters. Maximum likelihood estimates for parameters <code class="reqn">\mu</code>, <code class="reqn">\sigma^2_b</code> and <code class="reqn">\sigma^2</code> are obtained by calling the function <code>intervalICC</code>.
+The probability corresponding to each bin is <code>1/bins</code> (expected relative frequencies; this corresponds to <code>p = rep(1/bins,bins)</code> in <code>chisq.test</code> function). 
+Since means are interval-censored and censoring intervals overlap, the observed relative frequencies are calculated in the following way. If one of the original intervals representing subjects mean
+spans multiple bins, each bin receives a share of votes from the original interval. This share is calculated using the
+expected normal density function and it is proportional to the probability of data falling within the intersection of the
+original interval and bin.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class "ntestMeans". The object is a list with the components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>statistic </code></td>
+<td>
+<p>value of chi-squared statistic; <code>statistic</code> in the output of <code>chisq.test</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parameter </code></td>
+<td>
+<p>number of degrees of freedom for chi-squared distribution; <code>parameter</code> in the output of <code>chisq.test</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.value </code></td>
+<td>
+<p>p-value of test; <code>p.value</code> in the output of <code>chisq.test</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data </code></td>
+<td>
+<p>character string with value "means"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu </code></td>
+<td>
+<p>mean of the expected normal distribution for subjects' means; equal to maximum likelihood estimate for <code class="reqn">\mu</code> from <code>intervalICC</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var </code></td>
+<td>
+<p>variance of the expected normal distribution for subjects' means; equal to maximum likelihood estimate for <code class="reqn">\sigma^2_b + 0.5 \sigma^2</code> from <code>intervalICC</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bins </code></td>
+<td>
+<p>number of categories in chi-square test</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>This function was designed as a help in assessing goodness of model fit. However, it has not been tested in simulations nor in any other way.
+It is the responsibility of the user to provide appropriate number of bins; the function checks only if <code>bins</code> is a positive integer.
+Testing normality with low number of bins is unreliable. On the other hand, if the number of bins is too large, <code>chisq.test</code> will complain since the expected frequencies will be too low.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jelena Kovacic <a href="mailto:jkovacic@imi.hr">jkovacic@imi.hr</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Kovacic J, Varnai VM. Intraclass correlation coefficient for grouped data. <em>Epidemiology</em> 2014;25(5):769–770.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>summary.ntestMeans</code>, <code>intervalICC</code>, <code>chisq.test</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example with 6 predefined classes (grouped data)
+classes &lt;- 1:6
+class.limits &lt;- cbind(classes-0.5,classes+0.5)
+r1 &lt;- sample(classes,30,replace=TRUE)
+r2 &lt;- sample(classes,30,replace=TRUE)
+ntest.means(r1,r2,predefined.classes=TRUE,classes,class.limits,bins=10)
+</code></pre>
+
+
+</div>

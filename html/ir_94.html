@@ -1,0 +1,137 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>subsetting</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Subsetting <code>ir</code> objects</h2>
+
+<h3>Description</h3>
+
+<p>Subsetting <code>ir</code> objects
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'ir'
+x[i, j, ..., exact = TRUE]
+
+## S3 method for class 'ir'
+x$i
+
+## S3 method for class 'ir'
+x[[i, j, ..., exact = TRUE]]
+
+## S3 replacement method for class 'ir'
+x$i, j, ... &lt;- value
+
+## S3 replacement method for class 'ir'
+i[j, ..., exact = TRUE] &lt;- value
+
+## S3 replacement method for class 'ir'
+i[[j, ..., exact = TRUE]] &lt;- value
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>ir</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>i, j</code></td>
+<td>
+<p>Row and column indices. If <code>j</code> is omitted, <code>i</code> is used as column index.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exact</code></td>
+<td>
+<p>Ignored, with a warning.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>A value to store in a row, column, range or cell.
+Tibbles are stricter than data frames in what is accepted here.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>If the subsetting operation preserves a valid <code>spectra</code> column
+(see <code>ir()</code>), an object of class <code>ir</code> with
+accordingly subsetted rows or columns. Else a <code>tibble::tbl_df()</code> or
+vector.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># subsetting rows
+ir_sample_data[1, ]
+ir_sample_data[10:15, ]
+ir_sample_data[ir_sample_data$sample_type == "office paper", ]
+
+# subsetting columns
+ir_sample_data[, "spectra"]
+ir_sample_data[["spectra"]]
+ir_sample_data$spectra
+
+# not explicitly selecting the spectra column drops the ir class
+class(ir_sample_data[, 1])
+class(ir_sample_data[, "spectra"])
+
+# subsetting values
+ir_sample_data[, 1] # drops the ir class
+ir_sample_data[, c("id_sample", "spectra")]
+ir_sample_data$id_sample
+ir_sample_data[[1, 1]]
+
+# setting and replacing columns
+x &lt;- ir::ir_sample_data
+x$a &lt;- 3
+x[, "a"] &lt;- 4
+x$sample_type &lt;- "a"
+x[[1]] &lt;- rev(x[[1]])
+
+# deleting the spectra column drops the ir class
+x$spectra &lt;- NULL
+class(x)
+
+# setting and replacing rows
+x &lt;- ir::ir_sample_data
+x[1, ] &lt;- x[2, ]
+class(x)
+
+# setting invalid values in the spectra column drops the ir class
+x_replacement &lt;- x[1, ]
+x_replacement$spectra &lt;- list(1)
+x[1, ] &lt;- x_replacement
+class(x)
+
+# setting and replacing values
+x &lt;- ir::ir_sample_data
+x[[1, 1]] &lt;- 100
+
+# replacing an element in the spectra column by an invalid element drops the
+# ir class attribute
+x[[3, "spectra"]] &lt;- list(1)
+class(x)
+
+</code></pre>
+
+
+</div>

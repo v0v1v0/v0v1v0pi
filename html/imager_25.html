@@ -1,0 +1,84 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>as.igraph.pixset</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Form an adjacency graph from a pixset</h2>
+
+<h3>Description</h3>
+
+<p>Return a graph where nodes are pixels, and two nodes are connected if and only if both nodes are in the pixset, and the pixels are adjacent. Optionnally, add weights corresponding to distance (either 1 or sqrt(2), depending on the orientation of the edge).
+The graph is represented as an igraph "graph" object
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'pixset'
+as.igraph(x, weighted = TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a pixset</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weighted</code></td>
+<td>
+<p>add weight for distance (default TRUE)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>ignored</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>an igraph "graph" object
+</p>
+
+
+<h3>See Also</h3>
+
+<p>as.igraph.cimg
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(igraph)
+#Simple 3x3 lattice
+px &lt;- px.all(imfill(3,3))
+as.igraph(px) %&gt;% plot
+#Disconnect central pixel
+px[5] &lt;- FALSE
+as.igraph(px) %&gt;% plot
+#Form graph from thresholded image
+im &lt;- load.example("coins")
+px &lt;- threshold(im) %&gt;% fill(5)
+G &lt;- as.igraph(px)
+#Label connected components
+v &lt;- (igraph::clusters(G)$membership)
+as.cimg(v,dim=dim(px)) %&gt;% plot
+#Find a path across the image that avoids all
+#the coins
+G &lt;- as.igraph(!px)
+start &lt;- index.coord(im,data.frame(x=1,y=100))
+end &lt;- index.coord(im,data.frame(x=384,y=300))
+sp &lt;- igraph::shortest_paths(G,start,end,output="vpath")
+path &lt;- sp$vpath[[1]] %&gt;% as.integer %&gt;% coord.index(im,.)
+</code></pre>
+
+
+</div>

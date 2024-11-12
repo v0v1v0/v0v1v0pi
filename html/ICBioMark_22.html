@@ -1,0 +1,87 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_p</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Construct Optimisation Parameters.</h2>
+
+<h3>Description</h3>
+
+<p>An internal function. From the learned generative model and training data, produces a vector of weights p to be used in
+the subsequent group lasso optimisation, alongside a biomarker-dependent normalisation quantity p_norm.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_p(gen_model, training_matrix, marker_mut_types, gene_lengths)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>gen_model</code></td>
+<td>
+<p>(list)
+A generative mutation model, fitted by fit_gen_model().</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>training_matrix</code></td>
+<td>
+<p>(sparse matrix)
+A sparse matrix of mutations in the training dataset, produced by get_mutation_tables().</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>marker_mut_types</code></td>
+<td>
+<p>(character)
+A character vector listing which mutation types (of the set specified in the generative model
+attribute 'names') constitute the biomarker in question.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gene_lengths</code></td>
+<td>
+<p>(dataframe)
+A table with two columns: Hugo_Symbol and max_cds, providing the lengths of the genes to be modelled.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with three entries:
+</p>
+
+<ul>
+<li>
+<p> A vector p, with an entry corresponding to each combination of gene and mutation type specified
+in the generative model fitted. Each component is a non-negative value corresponding to a weighting
+p to be supplied to a group lasso optimisation.
+</p>
+</li>
+<li>
+<p> A numeric p_norm, giving the factor between p_gs and phi_0gs (see paper for details).
+</p>
+</li>
+<li>
+<p> A vector biomarker_columns, detailing which of the elements of p correspond to gene/mutation type
+combinations contributing to the biomarker in question.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">p &lt;- get_p(example_gen_model, example_tables$train$matrix,
+           marker_mut_types = c("I"), gene_lengths = example_maf_data$gene_lengths)
+print(p$p[1:5])
+print(p$p_norm)
+print(p$bc[1:5])
+</code></pre>
+
+
+</div>

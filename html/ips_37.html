@@ -1,0 +1,206 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mafft</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Sequence Alignment with MAFFT</h2>
+
+<h3>Description</h3>
+
+<p>This function is a wrapper for MAFFT and can be used for 
+(profile) aligning of DNA and amino acid sequences.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mafft(
+  x,
+  y,
+  add,
+  method = "auto",
+  maxiterate = 0,
+  op = 1.53,
+  ep = 0,
+  gt = NULL,
+  options,
+  thread = -1,
+  exec,
+  quiet,
+  file
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>DNAbin</code> or <code>AAbin</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>An object of class <code>DNAbin</code> or <code>AAbin</code>, if given both
+<code>x</code> and <code>y</code> are preserved and aligned to each other ("profile
+alignment").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add</code></td>
+<td>
+<p>A character string giving the method used for adding <code>y</code> to 
+<code>x</code>: <code>"add"</code>, <code>"addprofile"</code> (default), or any unambiguous 
+abbreviation of these.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>A character string giving the alignment method. Available 
+accuracy-oriented methods for less than 200 sequences are 
+<code>"localpair"</code>, <code>"globalpair"</code>, and <code>"genafpair"</code>; 
+<code>"retree 1"</code> and <code>"retree 2"</code> are for speed-oriented alignment. 
+The default is <code>"auto"</code>, which lets MAFFT choose an appropriate 
+alignment method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiterate</code></td>
+<td>
+<p>An integer giving the number of cycles of iterative 
+refinement to perform. Possible choices are <code>0</code>: progressive method, 
+no iterative refinement (default); <code>2</code>: two cycles of iterative 
+refinement; <code>1000</code>: at most 1000 cycles of iterative refinement.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>op</code></td>
+<td>
+<p>A numeric giving the <code>gap opening penalty</code> at group-to-group 
+alignment; default 1.53.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ep</code></td>
+<td>
+<p>A numeric giving the offset value, which works like <code>gap 
+extension penalty</code>, for group-to-group alignment; default 0.0, but 0.123 is
+recommended if no long indels are expected.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gt</code></td>
+<td>
+<p>An object of class <code>phylo</code> that is to be used as a
+guide tree during alignment. The default is to let MAFFT use its own
+internal guide tree</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>options</code></td>
+<td>
+<p>A vector of mode character specifying additional arguments to 
+MAFFT, that are not included in <code>mafft</code> such as, e.g., 
+<code>--adjustdirection</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thread</code></td>
+<td>
+<p>Integer giving the number of physical cores MAFFT should use; 
+with <code>thread = -1</code> the number of cores is determined automatically.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exec</code></td>
+<td>
+<p>A character string giving the path to the MAFFT executable 
+including its name, e.g. something like <code>/user/local/bin/mafft</code> under 
+UNIX-alikes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>Logical, if set to <code>TRUE</code>, mafft progress is printed out on
+the screen.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>A character string indicating the filename of the output FASTA
+file; if this is missing the the alignment will be returned as  matrix of
+class <code>DNAbin</code> or <code>AAbin</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>"localpair"</code> selects the <b>L-INS-i</b> algorithm, probably 
+most accurate; recommended for &lt;200 sequences; iterative refinement method 
+incorporating local pairwise alignment information.
+</p>
+<p><code>"globalpair"</code> selects the <b>G-INS-i</b> algorithm suitable for 
+sequences of similar lengths; recommended for &lt;200 sequences; iterative 
+refinement method incorporating global pairwise alignment information.
+</p>
+<p><code>"genafpair"</code> selects the <b>E-INS-i</b> algorithm suitable for 
+sequences containing large unalignable regions; recommended for &lt;200 
+sequences.
+</p>
+<p><code>"retree 1"</code> selects the <b>FFT-NS-1</b> algorithm, the simplest 
+progressive option in MAFFT; recommended for &gt;200 sequences.
+</p>
+<p><code>"retree 2"</code> selects the <b>FFT-NS-2</b> algorithm that uses a second 
+iteration of alignment based on a guide tree computed from an FFT-NS-1 
+alignment; this is the default in MAFFT; recommended for &gt;200 sequences.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>matrix</code> of class <code>"DNAbin"</code> or <code>"AAbin"</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p><code>mafft</code> was last updated and tested to work with MAFFT 7.205. If 
+you have problems getting the function to work with a newer version of 
+MAFFT, please contact the package maintainer.
+</p>
+
+
+<h3>References</h3>
+
+<p>Katoh, K. and H. Toh. 2008. Recent developments in the MAFFT 
+multiple sequence alignment program. <em>Briefings in Bioinformatics</em> 
+<b>9</b>: 286-298.
+</p>
+<p>Katoh, K., K.-i. Kuma, H. Toh, and T. Miyata. 2005. Mafft version 5: 
+improvement in accuracy of multiple sequence alignment. <em>Nucleic Acids
+Research</em> <b>33</b>: 511–518.
+</p>
+<p>Katoh, K., K. Misawa, K.-i. Kuma, and T. Miyata. 2002. Mafft: a novel 
+method for rapid multiple sequence alignment based on fast Fourier 
+transform. <em>Nucleid Acids Research</em> <b>30</b>: 3059–3066.
+</p>
+<p><a href="https://mafft.cbrc.jp/alignment/software/index.html">https://mafft.cbrc.jp/alignment/software/index.html</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>read.fas</code> to import DNA sequences; <code>prank</code> 
+for another alignment algorithm; <code>gblocks</code> and 
+<code>aliscore</code> for alignment cleaning.
+</p>
+
+
+</div>

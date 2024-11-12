@@ -1,0 +1,118 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mloglik0</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Minus loglikelihood of an IHSEP model
+</h2>
+
+<h3>Description</h3>
+
+<p>Calculates the minus loglikelihood of an IHSEP model with given
+baseline inensity function <code class="reqn">\nu</code> and excitation function <code class="reqn">g</code>
+for event times <code>jtms</code> on interval <code class="reqn">[0,TT]</code>.  
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mloglik0(jtms, TT = max(jtms), nu, g,
+         Ig=function(x)sapply(x,function(y)integrate(g,0,y)$value))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>jtms</code></td>
+<td>
+
+<p>A numeric vector, with values sorted in ascending order. Jump times
+to fit the inhomogeneous self-exciting point process model on. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TT</code></td>
+<td>
+
+<p>A scalar. The censoring time, or the terminal time for
+observation. Should be (slightly) greater than the maximum of <code>jtms</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nu</code></td>
+<td>
+
+<p>A (vectorized) function. The baseline intensity function. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>g</code></td>
+<td>
+
+<p>A (vectorized) function. The excitation function. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Ig</code></td>
+<td>
+
+<p>A (vectorized) function. Its value at <code>t</code> gives the integral of
+the excitation function from 0 to <code>t</code>. 
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The value of the negative log-liklihood. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Feng Chen &lt;feng.chen@unsw.edu.au&gt;
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## simulated data of an IHSEP on [0,1] with baseline intensity function
+## nu(t)=200*(2+cos(2*pi*t)) and excitation function
+## g(t)=8*exp(-16*t)
+data(asep)
+
+## get the birth times of all generations and sort in ascending order 
+tms &lt;- sort(unlist(asep))
+## calculate the minus loglikelihood of an SEPP with the true parameters 
+mloglik0(tms,TT=1,nu=function(x)200*(2+cos(2*pi*x)),
+          g=function(x)8*exp(-16*x),Ig=function(x)8/16*(1-exp(-16*x)))
+## calculate the MLE for the parameter assuming known parametric forms
+## of the baseline intensity and excitation functions  
+## Not run: 
+system.time(est &lt;- optim(c(400,200,2*pi,8,16),
+                         function(p){
+                           mloglik0(jtms=tms,TT=1,
+                                     nu=function(x)p[1]+p[2]*cos(p[3]*x),
+                                     g=function(x)p[4]*exp(-p[5]*x),
+                                     Ig=function(x)p[4]/p[5]*(1-exp(-p[5]*x)))
+                         },
+                         hessian=TRUE,control=list(maxit=5000,trace=TRUE))
+            )
+## point estimate by MLE
+est$par
+## standard error estimates:
+diag(solve(est$hessian))^0.5
+
+## End(Not run)
+</code></pre>
+
+
+</div>

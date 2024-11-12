@@ -1,0 +1,146 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>MSL</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Maximum likelihood from an inferred likelihood surface
+</h2>
+
+<h3>Description</h3>
+
+<p>This computes the maximum of an object of class <code>SLik</code> representing an inferred (summary) likelihood surface</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">MSL(object, CIs = prod(dim(object$logLs)) &lt; 12000L, level = 0.95, 
+    verbose = interactive(),
+    RMSE_n=Infusion.getOption("RMSE_nsim"), 
+    eval_RMSEs=(RMSE_n&gt;1L) * prod(dim(object$logLs))&lt;12000L, 
+    cluster_args=list(), nb_cores=NULL,
+    init=NULL, prior_logL=NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>an object of class <code>SLik_j</code> as produced by <code>infer_SLik_joint</code> (or, in the primitive workflow,  of class <code>SLik</code> as produced by <code>infer_surface.logLs</code>).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CIs</code></td>
+<td>
+
+<p>If <code>TRUE</code>, construct one-dimensional confidence intervals for all parameters. See <code>confint.SLik_j</code> to obtain bootstrap confidence intervals. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+
+<p>Intended coverage probability of the confidence intervals.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>Whether to display some information about progress and results. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RMSE_n</code></td>
+<td>
+
+<p>Integer: number of simulation replicates for evaluation of prediction uncertainty for 
+likelihoods/ likelihood ratios/ parameters. The default value (10) provides quick but inaccurate estimates.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eval_RMSEs</code></td>
+<td>
+
+<p>Logical: whether to evaluate prediction uncertainty for likelihoods/ likelihood ratios/ parameters. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster_args</code></td>
+<td>
+<p>A list of arguments, passed to <code>makeCluster</code>, to control parallel computation of RMSEs. Beware that parallel computation of RMSEs tends to be memory-intensive. The list may contain a non-null <code>spec</code> element, in which case the <code>nb_cores</code> global <span class="pkg">Infusion</span> option is ignored. Do <b>*not*</b> use a structured list with an <code>RMSE</code> element as is possible for <code>refine</code> (see Details of <code>refine</code> documentation).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nb_cores</code></td>
+<td>
+<p>Integer: shortcut for specifying <code>cluster_args$spec</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init</code></td>
+<td>
+<p>Initial value for the optimiser. Better ignored.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior_logL</code></td>
+<td>
+<p>(effective only for up-to-date workflow using gaussian mixture modelling of a joint distribution of parameters and statistics) a function that returns a vector of prior log-likelihood values, which is then added to the likelihood deduced from the summary likelihood analysis. The function's single argument must handle a matrix similar to the <code>newdata</code> argument of <code>predict.SLik_j</code>. 
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If Kriging has been used to construct the likelihood surface, <code>RMSEs</code> are computed using approximate formulas for prediction (co-)variances in linear mixed midels (see Details in <code>predict</code>). Otherwise, a more computer-intensive bootstrap method is used.   
+<code>par_RMSEs</code> are computed from <code>RMSEs</code> and from the numerical gradient of profile log-likelihood at each CI bound. Only <code>RMSEs</code>, not <code>par_RMSEs</code>, are compared to <code>precision</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The <code>object</code> is returned invisibly, with the following (possibly) added members, each of which being (as from version 1.5.0) an environment:
+</p>
+
+<dl>
+<dt><code>MSL</code></dt>
+<dd>
+<p>containing variables <code>MSLE</code> and <code>maxlogL</code> that match the <code>par</code> and <code>value</code> returned by an <code>optim</code> call. Also contains the <code>hessian</code> of summary likelihood at its maximum.</p>
+</dd>
+<dt><code>CIobject</code></dt>
+<dd>
+<p>The return value of calling <code>allCIs</code>, converted to an environment.</p>
+</dd>
+<dt><code>RMSEs</code></dt>
+<dd>
+<p>containing, as variable <code>RMSEs</code>, the root mean square errors of the log-likelihood at its inferred maximum and of the log-likelihood ratios at the CI bounds.</p>
+</dd>
+<dt><code>par_RMSEs</code></dt>
+<dd>
+<p>containing, as variable <code>par_RMSEs</code>, root mean square errors of the CI bounds.</p>
+</dd>
+</dl>
+<p>To ensure backward-compatibility of code to possible future changes in the structure of the objects, the extractor function <code>get_from</code> should be used to extract the <code>RMSEs</code> and <code>par_RMSEs</code> variables from their respective environments, and more generally to extract any element from the objects.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## see main documentation page for the package
+</code></pre>
+
+
+</div>

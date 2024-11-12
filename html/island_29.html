@@ -1,0 +1,254 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sss_cedp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>MacKenzie etal (2003) likelihood approach for estimating colonization/extinction
+parameters (with imperfect detectability)</h2>
+
+<h3>Description</h3>
+
+<p><code>sss_cedp</code> conducts a maximum likelihood estimation of model parameters
+(Colonization, Extinction, Detectability, and Phi_Time_0) of MacKenzie et al
+(2003) colonization-extinction model. This function is an alternative to
+<code>mss_cedp</code> that takes a different input (a 2D array), and requires the same
+sampling structure for all input data matrix rows, this is, no missing data
+defining a heterogeneous sampling structure across rows are allowed. As an advantage,
+it may run faster than <code>mss_cedp</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sss_cedp(
+  Data,
+  Time,
+  Transects,
+  Colonization = 0.1,
+  Extinction = 0.1,
+  Detectability = 0.99,
+  Phi_Time_0 = 0.5,
+  Tol = 1e-06,
+  MIT = 100,
+  C_MAX = 2,
+  C_min = 0,
+  E_MAX = 2,
+  E_min = 0,
+  D_MAX = 0.999,
+  D_min = 0.001,
+  P_MAX = 0.999,
+  P_min = 0.001,
+  I_0 = 0,
+  I_1 = 1,
+  I_2 = 2,
+  I_3 = 3,
+  z = 4,
+  Verbose = 0,
+  Minimization = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Data</code></td>
+<td>
+<p>S x N matrix containing presence data per transect (in cols):</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Time</code></td>
+<td>
+<p>an array of length n containing increasing sampling times (without repetitions)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Transects</code></td>
+<td>
+<p>an integer array of length n containing the number of transects per sampling time</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Colonization</code></td>
+<td>
+<p>guess value to initiate search / parameter value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Extinction</code></td>
+<td>
+<p>guess value to initiate search / parameter value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Detectability</code></td>
+<td>
+<p>guess value to initiate search / param
+eter value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Phi_Time_0</code></td>
+<td>
+<p>guess value to initiate search / parameter value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Tol</code></td>
+<td>
+<p>Stopping criteria of the search algorithm</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MIT</code></td>
+<td>
+<p>max number of iterations of the search algorithm</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C_MAX</code></td>
+<td>
+<p>max value of colonization values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C_min</code></td>
+<td>
+<p>min value of colonization values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>E_MAX</code></td>
+<td>
+<p>max value of extinction values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>E_min</code></td>
+<td>
+<p>min value of extinction values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D_MAX</code></td>
+<td>
+<p>max value of detectability values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D_min</code></td>
+<td>
+<p>min value of detectability values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>P_MAX</code></td>
+<td>
+<p>max value for the initial presence probability on the site</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>P_min</code></td>
+<td>
+<p>min value for the initial presence probability on the site</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>I_0</code></td>
+<td>
+<p>parameter index of 1st parameter</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>I_1</code></td>
+<td>
+<p>parameter index of 2nd parameter</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>I_2</code></td>
+<td>
+<p>parameter index of 3rd parameter</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>I_3</code></td>
+<td>
+<p>parameter index of 4th parameter</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+<p>dimension of the parameter subspace</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Verbose</code></td>
+<td>
+<p>more/less (1/0) output information</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Minimization</code></td>
+<td>
+<p>TRUE/FALSE.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Maximum likelihood parameter estimation is conducted through bounded searches.
+This is the reason why the minimum and maximum values for each axis should be given
+as input arguments. The optimization procedure is the simplex method. A bounded
+parameter space implies that in case a neg loglikelihood (NLL) evaluation is
+required outside from these boundaries, the returned value for this NLL evaluation
+is artifically given as the maximum number the machine can hold.
+The array Parameters (I_0, I_1, I_2, I_3) has to be a permutation of (0, 1, 3, 4).
+This parameter indeces along with the imput parameter 'z' are used to define a
+subparameter space where the search will be conducted. If z = 2, then the search
+will take place on the plane defined by model parameters (I_0, I_1). These indeces
+are model parameter keys: colonization (0), extinction (1), detectability (2), and
+Phi_Time_0 (3). For instance, if (I_0, I_1, I_2, I_3) is (2, 3, 1, 0), and z = 2,
+then the search will take place whithin the subparemeter space defined by the
+detection probability (Detectability) and the probability of presence at time 0
+(Phi_Time_0). If Minimization is TRUE (default value), then the whole mle is
+conducted. If FALSE, the function only return the NLL value at the input model
+parameter values. Likelihood evaluations are exact provided the number of 'absences'
+corresponding to either true absences or undetected presences in the input data
+matrix is not to high.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with five components (Colonization, Extinction, Detectability,
+P_0, and Negative Log-Likelihood).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">Data1 &lt;- lakshadweep[[1]]
+Name_of_Factors &lt;- c("Species","Atoll","Guild")
+Factors &lt;- Filter(is.factor, Data1)
+No_of_Factors &lt;- length(Factors[1,])
+n &lt;- No_of_Factors + 1
+D1 &lt;- as.matrix(Data1[1:nrow(Data1),n:ncol(Data1)])
+Time &lt;- as.double(D1[1,])
+P1 &lt;- as.matrix(D1[2:nrow(D1),1:ncol(D1)])
+# Dealing with time.
+Time_Vector &lt;- as.numeric(names(table(Time)))
+Transects   &lt;- as.numeric((table(Time)))
+R1 &lt;- sss_cedp(P1, Time_Vector, Transects,
+                       Colonization=0.5, Extinction=0.5, Detectability=0.5,
+                       Phi_Time_0=0.5,
+                       Tol=1.0e-8, Verbose = 1)
+
+</code></pre>
+
+
+</div>

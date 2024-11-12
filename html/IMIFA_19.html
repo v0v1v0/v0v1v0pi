@@ -1,0 +1,127 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mat2cols</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Convert a numeric matrix to colours</h2>
+
+<h3>Description</h3>
+
+<p>Converts a matrix to a hex colour code representation for plotting using <code>plot_cols</code>. Used internally by <code>plot.Results_IMIFA</code> for plotting posterior mean loadings heatmaps.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mat2cols(mat,
+         cols = NULL,
+         compare = FALSE,
+         byrank = FALSE,
+         breaks = NULL,
+         na.col = "#808080FF",
+         transparency = 1,
+         ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>mat</code></td>
+<td>
+<p>Either a matrix or, when <code>compare</code> is <code>TRUE</code>, a list of matrices.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cols</code></td>
+<td>
+<p>The colour palette to be used. The default palette uses <code>viridis</code>. Will be checked for validity by <code>is.cols</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>compare</code></td>
+<td>
+<p>Logical switch used when desiring comparable colour representations (usually for comparable heat maps) across multiple matrices. Ensures plots will be calibrated to a common colour scale so that, for instance, the colour on the heat map of an entry valued at 0.7 in Matrix A corresponds exactly to the colour of a similar value in Matrix B. When <code>TRUE</code>, <code>mat</code> must be supplied as a list of matrices, which must have either the same number of rows, or the same number of columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>byrank</code></td>
+<td>
+<p>Logical indicating whether to convert the matrix itself or the sample ranks of the values therein. Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>breaks</code></td>
+<td>
+<p>Number of gradations in colour to use. Defaults to <code>length(cols)</code>. Alternatively, a vector of breakpoints for use with <code>cut</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.col</code></td>
+<td>
+<p>Colour to be used to represent missing data. Will be checked for validity by <code>is.cols</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>transparency</code></td>
+<td>
+<p>A factor in [0, 1] modifying the opacity for overplotted lines. Defaults to 1 (i.e. no transparency). Only relevant when <code>cols</code> is not supplied, otherwise the supplied <code>cols</code> must already be adjusted for transparency.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Catches unused arguments.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A matrix of hex colour code representations, or a list of such matrices when <code>compare</code> is <code>TRUE</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot_cols</code>, <code>heat_legend</code>, <code>is.cols</code>, <code>cut</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Generate a colour matrix using mat2cols()
+mat      &lt;- matrix(rnorm(100), nrow=10, ncol=10)
+mat[2,3] &lt;- NA
+cols     &lt;- heat.colors(12)[12:1]
+(matcol  &lt;- mat2cols(mat, cols=cols))
+
+# Use plot_cols() to visualise the colours matrix
+par(mar=c(5.1, 4.1, 4.1, 3.1))
+plot_cols(matcol)
+
+# Add a legend using heat_legend()
+heat_legend(mat, cols=cols); box(lwd=2)
+
+# Try comparing heat maps of multiple matrices
+mat1     &lt;- cbind(matrix(rnorm(100, sd=c(4,2)),   nr=50, nc=2, byrow=TRUE), 0.1)
+mat2     &lt;- cbind(matrix(rnorm(150, sd=c(7,5,3)), nr=50, nc=3, byrow=TRUE), 0.1)
+mat3     &lt;- cbind(matrix(rnorm(50,  sd=1),        nr=50, nc=1, byrow=TRUE), 0.1)
+mats     &lt;- list(mat1, mat2, mat3)
+colmats  &lt;- mat2cols(mats, cols=cols, compare=TRUE)
+par(mfrow=c(2, 3), mar=c(1, 2, 1, 2))
+
+# Use common palettes (top row)
+plot_cols(colmats[[1]]); heat_legend(range(mats), cols=cols); box(lwd=2)
+plot_cols(colmats[[2]]); heat_legend(range(mats), cols=cols); box(lwd=2)
+plot_cols(colmats[[3]]); heat_legend(range(mats), cols=cols); box(lwd=2)
+
+# Use uncommon palettes (bottom row)
+plot_cols(mat2cols(mat1, cols=cols)); heat_legend(range(mat1), cols=cols); box(lwd=2)
+plot_cols(mat2cols(mat2, cols=cols)); heat_legend(range(mat2), cols=cols); box(lwd=2)
+plot_cols(mat2cols(mat3, cols=cols)); heat_legend(range(mat3), cols=cols); box(lwd=2)
+</code></pre>
+
+
+</div>

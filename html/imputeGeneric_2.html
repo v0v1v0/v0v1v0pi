@@ -1,0 +1,159 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>impute_supervised</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Supervised imputation</h2>
+
+<h3>Description</h3>
+
+<p>Impute a data set with a supervised inner method. This function is one main
+function which can be used inside of <code>impute_iterative()</code>. If you need
+pre-imputation or iterations, directly use <code>impute_iterative()</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">impute_supervised(
+  ds,
+  model_spec_parsnip = linear_reg(),
+  cols_used_for_imputation = "only_complete",
+  cols_order = seq_len(ncol(ds)),
+  rows_used_for_imputation = "only_complete",
+  rows_order = seq_len(nrow(ds)),
+  update_model = "each_column",
+  update_ds_model = "each_column",
+  M = is.na(ds),
+  warn_incomplete_imputation = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ds</code></td>
+<td>
+<p>The data set to be imputed. Must be a data frame with column names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model_spec_parsnip</code></td>
+<td>
+<p>The model type used for imputation. It is defined
+via the <code>parsnip</code> package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cols_used_for_imputation</code></td>
+<td>
+<p>Which columns should be used to impute other
+columns? Possible choices: "only_complete", "already_imputed", "all"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cols_order</code></td>
+<td>
+<p>Ordering of the columns for imputation. This can be a
+vector with indices or an <code>order_option</code> from <code>order_cols()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rows_used_for_imputation</code></td>
+<td>
+<p>Which rows should be used to impute other
+rows? Possible choices: "only_complete", "partly_complete",
+"complete_in_k", "already_imputed", "all_except_i", "all"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rows_order</code></td>
+<td>
+<p>Ordering of the rows for imputation. This can be a vector
+with indices or an <code>order_option</code> from <code>order_rows()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>update_model</code></td>
+<td>
+<p>How often should the model for imputation be updated?
+Possible choices are: "everytime" (after every imputed value),
+"each_column" (only one update per column) and "every_iteration" (an alias
+for "each_column").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>update_ds_model</code></td>
+<td>
+<p>How often should the data set for the inner model be
+updated? Possible choices are: "everytime" (after every imputed value),
+"each_column" (only one update per column) and "every_iteration".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>M</code></td>
+<td>
+<p>Missing data indicator matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn_incomplete_imputation</code></td>
+<td>
+<p>Should a warning be given, if the
+returned data set still contains <code>NA</code>?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arguments passed on to <code>stats::predict()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function imputes the columns of the data set <code>ds</code> column by column. The
+imputation order of the columns can be specified by <code>cols_order</code>.
+Furthermore, <code>cols_used_for_imputation</code> controls which columns are used for
+the imputation. The same options are available for the rows of <code>ds</code> via
+<code>rows_order</code> and <code>rows_used_for_imputation</code>. If <code>ds</code> is pre-imputed, the
+missing data indicator matrix can be supplied via <code>M</code>.
+</p>
+<p>The inner method can be specified via <code>model_spec_parsnip</code> which should be a
+parsnip model type like <code>parsnip::linear_reg()</code>, <code>parsnip::rand_forest()</code>
+(for a complete list see <a href="https://www.tidymodels.org/find/parsnip">https://www.tidymodels.org/find/parsnip</a>, you can
+also build a new parsnip model and use it inside of <code>impute_supervised()</code>,
+see <a href="https://www.tidymodels.org/learn/develop/models">https://www.tidymodels.org/learn/develop/models</a> for more information
+on building a parsnip model).
+</p>
+<p>The options "all" for <code>cols_used_for_imputation</code> and
+"all_except_i", "all"  for <code>rows_used_for_imputation</code> should only be used,
+if <code>ds</code> is complete or the model (<code>model_spec_parsnip</code>) can handle missing
+data.
+</p>
+<p>The choice <code>update_model = "each_column"</code> can be much faster than
+<code>update_model = "everytime"</code>, especially, if the data set has many
+missing values in some columns.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The imputed data set.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">ds_mis &lt;- missMethods::delete_MCAR(
+  data.frame(X = rnorm(20), Y = rnorm(20)), 0.2, 1
+)
+impute_supervised(ds_mis)
+</code></pre>
+
+
+</div>

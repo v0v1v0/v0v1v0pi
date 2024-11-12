@@ -1,0 +1,114 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>qfilter</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Quality filtering for amplicon sequences.</h2>
+
+<h3>Description</h3>
+
+<p>This function performs several quality checks for FASTQ input files,
+removing any sequences that do not conform to the specified
+quality standards.
+This includes an average quality score assessment, size selection,
+singleton removal (or an alternative minimum count) and ambiguous
+base-call filtering.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">qfilter(
+  x,
+  minqual = 30,
+  maxambigs = 0,
+  mincount = 2,
+  minlength = 50,
+  maxlength = 500
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a vector of concatenated strings representing DNA sequences
+(in upper case) or a DNAbin list object with quality attributes.
+This argument will usually be produced by <code>readFASTQ</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minqual</code></td>
+<td>
+<p>integer, the minimum average quality score for a
+sequence to pass the filter. Defaults to 30.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxambigs</code></td>
+<td>
+<p>integer, the maximum number of ambiguities for a sequence
+to pass the filter. Defaults to 0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mincount</code></td>
+<td>
+<p>integer, the minimum acceptable number of occurrences of a
+sequence for it to pass the filter. Defaults to 2 (removes singletons).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minlength</code></td>
+<td>
+<p>integer, the minimum acceptable sequence length.
+Defaults to 50.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxlength</code></td>
+<td>
+<p>integer, the maximum acceptable sequence length.
+Defaults to 500.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>an object of the same type as the primary input argument
+(i.e. a "DNAbin" object if x is a "DNAbin" object, or a vector
+of concatenated character strings otherwise).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Shaun Wilkinson
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+  ## download and extract example FASTQ file to temporary directory
+  td &lt;- tempdir()
+  URL &lt;- "https://www.dropbox.com/s/71ixehy8e51etdd/insect_tutorial1_files.zip?dl=1"
+  dest &lt;- paste0(td, "/insect_tutorial1_files.zip")
+  download.file(URL, destfile = dest, mode = "wb")
+  unzip(dest, exdir = td)
+  x &lt;- readFASTQ(paste0(td, "/COI_sample2.fastq"))
+  ## trim primers from sequences
+  mlCOIintF &lt;- "GGWACWGGWTGAACWGTWTAYCCYCC"
+  jgHCO2198 &lt;- "TAIACYTCIGGRTGICCRAARAAYCA"
+  x &lt;- trim(x, up = mlCOIintF, down = jgHCO2198)
+  ## filter sequences to remove singletons, low quality &amp; short/long reads
+  x &lt;- qfilter(x, minlength = 250, maxlength = 350)
+ 
+</code></pre>
+
+
+</div>

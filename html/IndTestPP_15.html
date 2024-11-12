@@ -1,0 +1,145 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>DepNHCPSP</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generating a Common Poisson Shock Process</h2>
+
+<h3>Description</h3>
+
+<p>This function  generates  the <code class="reqn">d</code> marginal processes of a Common Poisson Shock Process,  
+which are <code class="reqn">d</code> dependent Poisson processes. 
+Both homogeneous  and nonhomogeneous processes can be generated.  In the case <code class="reqn">d=2</code>, 
+the processes can be optionally plotted.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">DepNHCPSP(lambdaiM, d,dplot=TRUE, pmfrow=c(2,1), fixed.seed = NULL, ...)  </code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>lambdaiM</code></td>
+<td>
+<p>Matrix. Each column contains the intensity values  of a indicator process .</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p>Numeric value.  Dimension (number of marginal processes) of the CPSP.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dplot</code></td>
+<td>
+<p>Optional. A logical flag. If it is TRUE and d=2,  the  marginal and indicator processes  are plotted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pmfrow</code></td>
+<td>
+<p>Optional.  A vector of  the form (nr, nc) to be supplied as argument <code>mfrow</code> in  <code>par</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed.seed</code></td>
+<td>
+<p>Optional. An integer or NULL. Value used to set the seed 
+in random generation processes; if it is NULL, a random seed is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments to  be passed to  the function <code>plot</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A   CPSP <code class="reqn">N</code>   is usually specified by its  marginal,  and possibly dependent, processes
+<code class="reqn">N_1</code>,  <code class="reqn">N_2</code>...,  <code class="reqn">N_d</code>, which are the  observed processes. However,  <code class="reqn">N</code> can be  decomposed into 
+m independent indicator processes: <code class="reqn">N_{(1)}</code>, <code class="reqn">N_{(2)}</code>, ..., <code class="reqn">N_{(12)}</code>, ..., <code class="reqn">N_{(1...d)}</code>,
+which are the processes of the points  occurring
+only in the first  marginal process, only in the second,...,  simultaneously in  the two first marginal processes, ...
+and  in all the marginal processes simultaneously.  The number of indicator processes is m, the sum of 
+n choose i for <code class="reqn">i=1, ..., d</code>. The value m must also be the number of columns of the matrix in argument <code>lambdaiM</code>.
+The marginal process <code class="reqn">N_{i}</code>  is obtained as the union of all the indicator processes where the index i appears, 
+<code class="reqn">N_{.i.}</code>. The intensity of  <code class="reqn">N_{i}</code> is the sum of the intensities of all the indicator processes <code class="reqn">N_{.i.}</code>.
+</p>
+<p>The decomposition into indicator processes can be readily applied  for the generation of a CPSP: it reduces
+to the generation of m independet PPs, see Cebrian et al. (2020) for details.  
+Points are generated in continuous time.
+</p>
+<p>In order to  generate d independent Poisson processes, the function  <code>IndNHPP</code> has be used. 
+</p>
+<p>In the bivariate case <code class="reqn">d=2</code>, the  points in the  marginal  <code class="reqn">N_{1}</code>, <code class="reqn">N_{2}</code>  and indicator  
+<code class="reqn">N_{(1)}</code>, <code class="reqn">N_{(2)}</code>  and <code class="reqn">N_{(12)}</code>  processes can be optionally plotted. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with elements
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>posNH</code></td>
+<td>
+<p>A list of d vectors containing the occurrence points of the d marginal processes. 
+The name of the elements of the list are N1, N2...,Nd.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>posNHG</code></td>
+<td>
+<p>A list of m vectors containing the occurrence points of the m indicator processes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambdaM</code></td>
+<td>
+<p>Matrix. Each column is the intensity vector  of  a marginal process.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Abaurrea, J. Asin, J. and Cebrian, A.C. (2015). Modeling and projecting the occurrence of bivariate extreme heat events using a nonhomogeneous
+common Poisson shock process. Stochastic and Environmental Research and risk assessment, 29(1), 309-322.
+</p>
+<p>Cebrian, A.C., Abaurrea, J.  and Asin, J. (2020).   Testing  independence between two  point processes in time.
+<em>Journal of Simulation and Computational Statistics</em>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>DepNHNeyScot</code>, <code>DepNHPPqueue</code>, <code>DepNHPPMarked</code>, <code>IndNHPP</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+set.seed(123)
+lambdai1&lt;-runif(200,0,0.1)
+set.seed(124)
+lambdai2&lt;-runif(200,0,0.07)
+set.seed(125)
+lambdai12&lt;-runif(200,0,0.05)
+set.seed(126)
+lambdai123&lt;-runif(200,0,0.01)
+lambdaiM&lt;-cbind(lambdai1, lambdai2,lambdai1, lambdai12, lambdai12, lambdai12, lambdai123)
+aux&lt;-DepNHCPSP(lambdaiM=lambdaiM, d=3, fixed.seed=123)
+
+#lambdaiM&lt;-cbind(lambdai1, lambdai2, lambdai12)
+#aux&lt;-DepNHCPSP(lambdaiM=lambdaiM, d=2,fixed.seed=123, dplot=TRUE)
+</code></pre>
+
+
+</div>

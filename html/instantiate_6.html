@@ -1,0 +1,188 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>stan_package_compile</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compile the Stan models in an R package.</h2>
+
+<h3>Description</h3>
+
+<p>Compile all Stan models in a directory, usually in a package.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">stan_package_compile(
+  models = instantiate::stan_package_model_files(),
+  cmdstan_install = Sys.getenv("CMDSTAN_INSTALL", unset = ""),
+  verbose = TRUE,
+  quiet = FALSE,
+  pedantic = FALSE,
+  include_paths = NULL,
+  user_header = NULL,
+  cpp_options = list(),
+  stanc_options = list(),
+  force_recompile = getOption("cmdstanr_force_recompile", default = FALSE),
+  threads = FALSE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>models</code></td>
+<td>
+<p>Character vector of file paths to Stan model source code
+files. Defaults to the Stan files in <code style="white-space: pre;">⁠./src/stan/⁠</code>
+because all the Stan model files must live in the <code style="white-space: pre;">⁠src/stan/⁠</code> folder
+for an R package built with <code>instantiate</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cmdstan_install</code></td>
+<td>
+<p>Character of length 1, how to look for an installed
+copy of CmdStan. See <a href="https://wlandau.github.io/instantiate/">https://wlandau.github.io/instantiate/</a> for details.
+Choices:
+</p>
+
+<ol>
+<li> <p><code>""</code> (default): look at the original value that the <code>CMDSTAN_INSTALL</code>
+environment variable contained when <code>instantiate</code> at the time
+when it was installed.
+If it was <code>"implicit"</code> or <code>"fixed"</code>, then choose
+the corresponding option below. Otherwise, default to <code>"implicit"</code>.
+</p>
+</li>
+<li> <p><code>"implicit"</code>: Let the <code>cmdstanr::cmdstan_path()</code> decide where
+to look for CmdStan. As explained in the <code>cmdstanr</code> documentation,
+the output of <code>cmdstanr::cmdstan_path()</code> depends
+on the current value of the <code>CMDSTAN</code> environment variable.
+The <code>cmdstanr</code> package must be installed. If it
+is not installed, then <code>stan_cmdstan_path()</code>
+returns the empty string <code>""</code>.
+</p>
+</li>
+<li> <p><code>"fixed"</code>: Use the path to CmdStan that was originally
+contained in <code>Sys.getenv("CMDSTAN")</code> at the time when <code>instantiate</code>
+was installed.
+</p>
+</li>
+</ol>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Logical of length 1, whether to set the
+<code>cmdstanr_verbose</code> global option to print more compiler messages
+than usual.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>Argument to <code>cmdstanr::cmdstan_model()</code> to control compilation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pedantic</code></td>
+<td>
+<p>Logical of length 1, whether to activate pedantic
+mode when compiling the Stan models. See the <code>cmdstanr</code> documentation
+for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include_paths</code></td>
+<td>
+<p>Argument to <code>cmdstanr::cmdstan_model()</code>
+to control model compilation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>user_header</code></td>
+<td>
+<p>Argument to <code>cmdstanr::cmdstan_model()</code>
+to control model compilation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cpp_options</code></td>
+<td>
+<p>Argument to <code>cmdstanr::cmdstan_model()</code>
+to control model compilation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stanc_options</code></td>
+<td>
+<p>Argument to <code>cmdstanr::cmdstan_model()</code>
+to model control compilation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>force_recompile</code></td>
+<td>
+<p>Argument to <code>cmdstanr::cmdstan_model()</code>
+to model control compilation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threads</code></td>
+<td>
+<p>Argument to <code>cmdstanr::cmdstan_model()</code>
+to model control compilation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other named arguments to <code>cmdstanr::cmdstan_model()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If building a package using <code>instantiate</code>, all Stan model files
+must live in a folder called <code style="white-space: pre;">⁠src/stan/⁠</code> in the package source
+directory.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>NULL</code> (invisibly). Called for its side effects.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other packages: 
+<code>stan_cmdstan_path()</code>,
+<code>stan_package_clean()</code>,
+<code>stan_package_configure()</code>,
+<code>stan_package_model_files()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">if (identical(Sys.getenv("INSTANTIATE_EXAMPLES"), "true")) {
+path &lt;- tempfile()
+stan_package_create(path = path)
+stan_package_configure(path = path)
+models &lt;- stan_package_model_files(path)
+list.files(file.path(path, "inst", "stan"))
+stan_package_compile(models)
+list.files(file.path(path, "inst", "stan"))
+}
+</code></pre>
+
+
+</div>

@@ -1,0 +1,672 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>computeSummaryStatisticsTable</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compute summary statistics for a specific dataset and variables of interest</h2>
+
+<h3>Description</h3>
+
+<p>Compute summary statistics for a specific dataset and variables of interest
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">computeSummaryStatisticsTable(
+  data,
+  var = NULL,
+  varFlag = NULL,
+  varInclude0 = FALSE,
+  varLab = NULL,
+  varLabInclude = length(var) &gt; 1,
+  varGeneralLab = "Variable",
+  varSubgroupLab = "Variable group",
+  varIgnore = NULL,
+  varIncludeTotal = FALSE,
+  varTotalInclude = FALSE,
+  varTotalInSepRow = FALSE,
+  colVar = NULL,
+  colVarDataLevels = NULL,
+  colVarTotal = colVar,
+  colVarTotalPerc = colVarTotal,
+  colTotalInclude = FALSE,
+  colTotalLab = "Total",
+  colInclude0 = FALSE,
+  rowVar = NULL,
+  rowVarDataLevels = NULL,
+  rowVarLab = NULL,
+  rowOrder = "auto",
+  rowOrderTotalFilterFct = NULL,
+  rowOrderCatLast = NULL,
+  rowVarTotalInclude = NULL,
+  rowVarTotalInSepRow = NULL,
+  rowVarTotalByVar = NULL,
+  rowVarTotalPerc = NULL,
+  rowInclude0 = FALSE,
+  type = "auto",
+  subjectVar = "USUBJID",
+  dataTotal = NULL,
+  dataTotalPerc = dataTotal,
+  dataTotalRow = NULL,
+  dataTotalCol = NULL,
+  stats = NULL,
+  statsVarBy = NULL,
+  statsExtra = NULL,
+  statsGeneralLab = "Statistic",
+  statsPerc = c("statN", "statm"),
+  filterFct = NULL,
+  labelVars = NULL,
+  byVar = NULL,
+  byVarLab = NULL,
+  checkVarDiffBySubj = "error"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Data.frame with dataset to consider for the summary table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var</code></td>
+<td>
+<p>Character vector with variable(s) of <code>data</code>, 
+to compute statistics on.<br>
+If NULL (by default), counts by row/column variable(s) are computed.<br>
+To also return counts of the <code>rowVar</code> in case other <code>var</code>
+are specified, you can include: 'all' in the <code>var</code>.<br>
+Missing values, if present, are filtered 
+(also for the report of number of subjects/records).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>varFlag</code></td>
+<td>
+<p>Character vector, subset of <code>var</code> with variable(s) 
+of type 'flag' (with 'Y', 'N' or ” for empty/non specified value).
+Only the counts for records flagged (with 'Y') are retained.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>varInclude0</code></td>
+<td>
+<p>Logical, should rows with no counts 
+for the count <code>var</code> or <code>varFlag</code> variable(s)
+be included in the table?
+Either:
+</p>
+
+<ul>
+<li>
+<p>logical of length 1, if TRUE (FALSE by default) 
+rows with no count are included for all <code>var</code>
+
+</p>
+</li>
+<li>
+<p>a character vector containing categorical <code>var</code> 
+for which zero counts rows should be included
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>varLab</code></td>
+<td>
+<p>Named character vector with label for each variable 
+specified in <code>var</code>.
+By default, extracted from the <code>labelVars</code>.
+if not available, <code>var</code> is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>varLabInclude</code></td>
+<td>
+<p>Logical, if TRUE
+the name of the summary statistic variable(s) (<code>var</code>)
+are included in the table.
+This is automatically set to TRUE if more than one variable(s) 
+and is specified, and FALSE if only one variable is specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>varGeneralLab</code></td>
+<td>
+<p>String with general label for variable specified in <code>var</code>.
+In case of multiple variable in <code>var</code>, this will be included in the table header
+(see 'rowVarLab' attribute of the output).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>varSubgroupLab</code></td>
+<td>
+<p>String with general label for sub-group of
+categorical variable(s) for count table, 'Variable group' by default.
+This will be included in the final table header (see 'rowVarLab' attribute of the output).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>varIgnore</code></td>
+<td>
+<p>Vector with elements to ignore in the <code>var</code> variable(s).
+The <code>data</code> records with such elements in <code>var</code> are <strong>filtered</strong> from the data 
+at the start of the workflow.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>varIncludeTotal</code></td>
+<td>
+<p>This argument is deprecated, please use: 'varTotalInclude' instead.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>varTotalInclude</code></td>
+<td>
+<p>Should the total across all categories of <code>var</code> 
+be included for the count table?
+Only used for categorical variables (and <code>var</code> not 'all').
+Either:
+</p>
+
+<ul>
+<li>
+<p>logical of length 1, if TRUE (FALSE by default) include the total for all categorical <code>var</code>
+</p>
+</li>
+<li>
+<p>a character vector containing categorical <code>var</code> for which the total should be included
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>varTotalInSepRow</code></td>
+<td>
+<p>Logical, should the total per variable be included in
+a separated row (by default) or in the row containing the header of the variable?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colVar</code></td>
+<td>
+<p>Character vector with variable(s) to be included in columns.
+If multiple variables are specified, the variables should 
+be sorted in hierarchical order,
+and are included in multi-columns layout.<br>
+Use: 'variable' to include the variables to summarize: <code>var</code>
+(if multiple) in different columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colVarDataLevels</code></td>
+<td>
+<p>Data.frame with unique combinations of <code>colVar</code>
+to be included in columns.
+Each column should correspond to <code>colVar</code> and as factor
+if the elements should be ordered in the final table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colVarTotal</code></td>
+<td>
+<p>String with column(s) considered to compute the total by,
+reported in the header of the table, by default same as <code>colVar</code>.
+Use: 'variable' to compute total by <code>var</code> (if multiple).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colVarTotalPerc</code></td>
+<td>
+<p>String with column(s) considered to compute the total by,
+used as denominator for the percentage computation, by default same as <code>colVarTotal</code>.
+Use: 'variable' to compute total by <code>var</code> (if multiple).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colTotalInclude</code></td>
+<td>
+<p>Logical, if TRUE (FALSE by default) include the summary 
+statistics across columns in a separated column.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colTotalLab</code></td>
+<td>
+<p>String, label for the total column  'Total' by default.<br></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colInclude0</code></td>
+<td>
+<p>Logical, if TRUE (FALSE by default),
+include columns with no records, based on all combinations 
+of the <code>columnVar</code> (assuming nested variable(s)).
+If variable(s) are not nested, possible combinations
+can be specified via <code>colVarDataLevels</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowVar</code></td>
+<td>
+<p>Character vector with variable(s)
+to be included in the rows.
+If multiple variables are specified, the variables should 
+be sorted in hierarchical order
+(e.g. body system class before adverse event term)
+and are nested in the table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowVarDataLevels</code></td>
+<td>
+<p>Data.frame with unique combinations of <code>rowVar</code>
+to be included in columns.
+Each column should correspond to <code>colVar</code> and as factor
+if the elements should be ordered in the final table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowVarLab</code></td>
+<td>
+<p>Named character vector with 
+label for the <code>rowVar</code> variable(s).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowOrder</code></td>
+<td>
+<p>Specify how the rows should be ordered in the final table, either a:
+</p>
+
+<ul>
+<li>
+<p>String among:
+</p>
+
+<ul>
+<li>
+<p>'auto' (by default): if the variable is a factor, keep its order, otherwise order alphabetically
+</p>
+</li>
+<li>
+<p>'alphabetical': order alphabetically
+</p>
+</li>
+<li>
+<p>'total': order rows in decreasing order of the total number of subjects
+across all columns for this specific category.
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Function with input the summary table and output the ordered elements of the <code>rowVar</code>
+</p>
+</li>
+</ul>
+<p>To specify different ordering methods for different <code>rowVar</code>, specify a list
+of such elements, named with the <code>rowVar</code> variable.
+For the table output of <code>computeSummaryStatisticsTable</code> (long format),
+this order is also reflected in the <strong><code>levels</code></strong> of the row factor variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowOrderTotalFilterFct</code></td>
+<td>
+<p>Function used to filter the data used to order the rows
+based on total counts (in case <code>rowOrder</code> is 'total'),
+To order rows based on one specific column category,
+e.g. to order based on the counts in the treatment column:
+function(x) subset(x, TRTP == "treatmentX")</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowOrderCatLast</code></td>
+<td>
+<p>String with category to be printed in the last 
+row of each <code>rowVar</code> (if any, set to NULL if none).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowVarTotalInclude</code></td>
+<td>
+<p>Character vector with <code>rowVar</code>
+for which the total should be reported.<br>
+If the higher row variable is specified, the total across all rows
+is reported. <br>
+For the export, these variable(s) are formatted as factor with 
+<strong>'Total' as the first level</strong>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowVarTotalInSepRow</code></td>
+<td>
+<p>Character vector with <code>rowVarTotalInclude</code>
+(not in <code>rowVarInSepCol</code>) for which the total should be included in a separated row labelled 'Total'.
+Otherwise (by default) the total is included in the header row of each category.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowVarTotalByVar</code></td>
+<td>
+<p>Character vector with a row variable
+used to categorize the row total.<br>
+Note that this is only used if row total(s) is/are requested via <code>rowVarTotalInclude</code>,
+and this variable should also be included in <code>rowVar</code>.
+This can be specified also for a specific row variable if the vector is named.<br>
+For example: <code>c(ADECOD = "AESEV")</code> to compute total by severity 
+for row adverse event term in a typical adverse event count table 
+(by System Organ Class and Adverse Event Term).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowVarTotalPerc</code></td>
+<td>
+<p>Character vector with row variables by which the total
+should be computed for the denominator for the percentage computation.
+By default the total is only computed only by column (NULL by default).
+If the total should be based on the total number of records per variable,
+<code>rowVarTotalPerc</code> should be set to 'variable'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowInclude0</code></td>
+<td>
+<p>Logical, if TRUE (FALSE by default),
+include rows with no records, based on all combinations 
+of the <code>rowVar</code> (assuming nested variable(s)).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>String with type of table: 
+</p>
+
+<ul>
+<li>
+<p>'summaryTable': summary table with statistics for numeric variable
+</p>
+</li>
+<li>
+<p>'countTable': count table
+</p>
+</li>
+<li>
+<p>'auto' (by default): 'summaryTable' if the variable is numeric,
+'countTable' otherwise
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subjectVar</code></td>
+<td>
+<p>String, variable of <code>data</code> with subject ID,
+'USUBJID' by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dataTotal</code></td>
+<td>
+<p>Data.frame used to extract the Total number of subject
+per column in column header ('N = [X]').
+It should contain the variables specified by <code>colVarTotal</code>.
+If not specified, the total number of subjects is extracted from the <code>data</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dataTotalPerc</code></td>
+<td>
+<p>Data.frame used to extract the total counts per column 
+for the computation of the percentage.<br>
+By default, <code>dataTotal</code> is used.<br>
+It should contain the variables specified by <code>colVarTotalPerc</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dataTotalRow</code></td>
+<td>
+<p>Data.frame used to extract the total count across all
+elements of the row
+variable, list of such data.frame for each <code>rowVar</code> variable.<br>
+If the dataset is specified by row variable, the list should be named with:
+variable X if the total across elements of variable X should be included.
+By default, <code>data</code> is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dataTotalCol</code></td>
+<td>
+<p>Data.frame from which the total across columns is 
+extracted (in case <code>colTotalInclude</code> is TRUE)
+or list of such data.frame for each <code>rowVar</code> variable.<br>
+If the dataset is specified by row variable, the list should be named with:
+with:
+</p>
+
+<ul>
+<li>
+<p>last row variable: for the dataset used in the total column for 
+the most nested row variable
+</p>
+</li>
+<li>
+<p>higher row variable (X+1): for the dataset used for the total column
+and row total of X
+</p>
+</li>
+<li>
+<p>'total': for the dataset used for the total column and general row total
+</p>
+</li>
+</ul>
+<p>If only a subset of the variables is specified in this list, 
+<code>data</code> is used for the remaining variable(s) (or 'total') if needed.<br>
+This dataset (the one for 'total' if a list) is also used for:
+</p>
+
+<ul>
+<li>
+<p>the header of the total column in case <code>dataTotal</code> is
+not specified
+</p>
+</li>
+<li>
+<p>the denominator of the percentages in the total column
+in case <code>dataTotalPerc</code> is not specified
+</p>
+</li>
+</ul>
+<p>By default, <code>data</code> is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stats</code></td>
+<td>
+<p>(optional) Statistic(s) of interest to compute, either:
+</p>
+
+<ul>
+<li>
+<p>string with the name of a default set of statistics
+available in the package, 
+see section 'Formatted statistics' in
+<code>in-text table statistics</code>.<br>
+See the corresponding <code>type</code> parameter of the
+<code>getStatsData</code> for more information
+on how the statistic is internally extracted.
+</p>
+</li>
+<li>
+<p>(expert mode) named list of language object (see <code>is.language</code>) 
+of base summary statistics of interest, see section:
+'Base statistics' in
+<code>in-text table statistics</code>.<br>
+The names are reported in the header.<br>
+If <code>stats</code> if of length 1, the name of the summary statistic is not included
+in the table.<br>
+The statistics can be specified separately:
+</p>
+
+<ul>
+<li>
+<p>for each <code>var</code> (if multiple), 
+by naming each element of the list:
+<code>list(varName1 = list(...), varName2 = list())</code>
+
+</p>
+</li>
+<li>
+<p>and/or for each element in:
+<code>statsVarBy</code>, by naming each sublist.
+</p>
+</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statsVarBy</code></td>
+<td>
+<p>String with variable in <code>rowVar</code>/<code>colVar</code>
+which the statistics should be computed by.<br>
+In this case, <code>stats</code> (nested list or not) should be additionally nested
+to specify the statistics for each element in <code>statsVarBy</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statsExtra</code></td>
+<td>
+<p>(optional) Named list with functions for additional custom
+statistics to be computed.<br>
+Each function:
+</p>
+
+<ul>
+<li>
+<p>has as parameter, either: 'x': the variable (<code>var</code>) to compute
+the summary statistic on or 'data': the entire dataset
+</p>
+</li>
+<li>
+<p>returns the corresponding summary statistic as a numeric vector
+</p>
+</li>
+</ul>
+<p>For example, to additionally compute the coefficient of variation, this can be set to:
+<code>list(statCVPerc = function(x) sd(x)/mean(x)*100)</code> (or <code>cv</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statsGeneralLab</code></td>
+<td>
+<p>String with general label for statistics, 'Statistic' by default.
+Only included if no <code>statsVar</code> if longer than 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statsPerc</code></td>
+<td>
+<p>String with 'base statistical variable' used to compute the 
+percentage, either: 
+</p>
+
+<ul>
+<li>
+<p>'statN' (by default): the number of subjects
+</p>
+</li>
+<li>
+<p>'statm': the number of records
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filterFct</code></td>
+<td>
+<p>(optional) Function taking as input
+the summary table with computed statistics and returning a subset 
+of the summary table.<br>
+Note: The filtering function should also handle records with :
+</p>
+
+<ul>
+<li>
+<p>total for the column header: <code>isTotal</code> set to TRUE,
+and <code>colVar</code>/<code>rowVar</code> is NA.<br>
+For example: <code>filterFct = function(data) subset(data, isTotal &amp; myColVar == "group 1")</code>
+
+</p>
+</li>
+<li>
+<p><code>rowVar</code>/<code>colVar</code> set to 'Total'/<code>colTotalLab</code> 
+if <code>rowVarTotalInclude</code>/<code>colTotalInclude</code> is specified
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>labelVars</code></td>
+<td>
+<p>(optional) Named character vector with label for
+the row, column variable(s) or variable(s) to summarize. <br>
+Labels specified via dedicated parameter: e.g. 
+<code>rowVarLab</code>, <code>colVarLab</code>, <code>varLab</code>
+have priority on this parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>byVar</code></td>
+<td>
+<p>Variable(s) of <code>data</code> for which separated table(s)
+should be created.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>byVarLab</code></td>
+<td>
+<p>String with label for <code>byVar</code>, used to set the names
+of the output list of table(s).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>checkVarDiffBySubj</code></td>
+<td>
+<p>String, 'error' (default), 'warning',
+or 'none'.  
+Should an error, a warning, or nothing be produced
+if a continuous variable (<code>var</code>) contains
+different values for the same subject (by row/column)?</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object <code>summaryTable</code>
+or list of such objects if
+<code>byVar</code> is specified.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Laure Cougnaud
+</p>
+
+
+</div>

@@ -1,0 +1,107 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>importance.icrf</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>'Extract variable importance measure'</h2>
+
+<h3>Description</h3>
+
+<p>'This is the extractor function for variable importance measures as produced by' <code>icrf</code>.
+(Quoted statements are from
+<code>randomForest</code> by Liaw and Wiener unless otherwise mentioned.)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">importance(x, ...)
+
+## Default S3 method:
+importance(x, ...)
+
+## S3 method for class 'icrf'
+importance(x, type = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>'an object of class' <code>icrf</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>'not used'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>either 1, 2, 3, or any combination of them, 'specifying the type of importance measure'
+(1 = mean increase in IMSE1, 2 = mean increase in IMSE2, 3 = mean decrease in node impurity).
+If not specified, all available types of importances are returned.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>'Here are the definitions of the variable importance measures. The first two measures are
+computed from permuting OOB data: For each tree, the prediction error
+on the out-of-bag portion of the data is recorded' (IMSE1 and IMSE2).
+'Then the same is done after permuting each predictor variable.'
+'The difference between the two are then averaged over all trees'
+The normalization by the standard deviation of the differences is not supported in this version.
+The third measure 'is the total decrease in node impurities from splitting on the variable,
+averaged over all trees.'
+'For regression, it is measured by residual sum of squares.'
+</p>
+
+
+<h3>Value</h3>
+
+<p>An array of importance measure matrices, one row for each predictor variable.' Each column
+corresponds to the forest iteration. Each matrix corresponds to the type of the measure.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Hunyong Cho, Nicholas P. Jewell, and Michael R. Kosorok.
+</p>
+<p><a href="https://arxiv.org/abs/1912.09983">Cho H., Jewell N. J., and Kosorok M. R. (2020+). "Interval censored
+recursive forests"</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>icrf</code>, <code>varImpPlot</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># rats data example.
+# Note that this is a toy example. Use a larger ntree and nfold in practice.
+data(rat2)
+
+set.seed(1)
+rats.icrf &lt;-
+  icrf(~ dose.lvl + weight + male + cage.no, data = rat2,
+       data.type = "currentstatus", currentstatus.label = c("survtime", "tumor"),
+       returnBest = TRUE, ntree=10, nfold=3)
+importance(rats.icrf)
+
+
+
+</code></pre>
+
+
+</div>

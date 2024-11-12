@@ -1,0 +1,425 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ic.test</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Function for testing inequality-related hypotheses for multivariate 
+normal random variables </h2>
+
+<h3>Description</h3>
+
+<p><code>ic.test</code> tests linear inequality hypotheses for multivariate normal 
+means by likelihood ratio tests. <code>print</code> and <code>summary</code> functions 
+display results in different degrees of detail.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ic.test(obj, TP = 1, s2 = 1, df.error = Inf, 
+             ui0.11 = diag(rep(1, length(obj$b.restr))), 
+             ci0.11 = NULL, meq.alt = 0,
+             df = NULL, wt = NULL, tol=sqrt(.Machine$double.eps), ...)
+## S3 method for class 'ict'
+print(x, digits = max(3, getOption("digits") - 3), scientific = FALSE, ...)
+## S3 method for class 'ict'
+summary(object, brief = TRUE, digits = max(3, getOption("digits") - 3), 
+             scientific = FALSE, tol=sqrt(.Machine$double.eps), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+<p> Object of class <code>orest</code> that contains unrestricted and 
+restricted estimate, covariance structure, and restriction;
+</p>
+<p>for objects of class <code>orlm</code> (that inherit from class <code>orest</code>) 
+information on <code>s2</code> and <code>df.error</code> is taken from <code>obj</code> 
+(i.e. specifications of <code>s2</code> and <code>df.error</code> in the call 
+to <code>ic.test</code> are ignored) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TP</code></td>
+<td>
+<p> type of test problem, cf. details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s2</code></td>
+<td>
+<p> multiplier that modifies the matrix <code>obj$Sigma</code> into 
+the (estimated) covariance matrix of the unrestricted estimate;
+<code>obj$Sigma</code> may be a covariance matrix (<code>s2</code>=1, default), 
+a correlation matrix or an otherwise rescaled 
+covariance matrix (e.g. <code>cov.unscaled</code> from a linear model) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.error</code></td>
+<td>
+<p> error degrees of freedom connected with estimation of s2
+(e.g. residual df from linear model);
+if <code>df.error</code> &lt; Inf, the test is based on a mixture of 
+beta-distributions with parameters <code>df</code>/2 and <code>df.error</code>/2,
+otherwise the test is based on a mixture of chi-square distributions 
+with degrees of freedom in <code>df</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ui0.11</code></td>
+<td>
+<p> matrix (or vector in case of one restriction only) 
+for defining (additional) equality restrictions for TP 11
+(in addition to restrictions in obj); 
+</p>
+<p>note that there must be as many columns as there are elements of 
+vector b.restr (no extra index vector taken);
+</p>
+<p>if there is overlap between restrictions in ui0.11 and restrictions 
+already present in obj, restrictions already present in obj are 
+projected out for ui0.11: 
+for example, the default choice for <code>ui0.11</code> means that all elements 
+of the expectation are 0; some of these restrictions may already be 
+present in <code>obj</code> and are projected out of <code>ui0.11</code> 
+by <code>ic.test</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci0.11</code></td>
+<td>
+<p> right-hand-side vector for equality restrictions defined by 
+<code>ui0.11</code>; so far, these should be 0!</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meq.alt</code></td>
+<td>
+<p> number of equality restrictions (from beginning) that are 
+maintained under the alternative hypothesis (for TP21) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p> optional vector of degrees of freedom for mixed chibar- or beta-
+distributions; if omitted, degrees of freedom and weights are calculated;
+if given, must be accompanied by corresponding <code>wt</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wt</code></td>
+<td>
+<p> optional vector of weights for mixed chibar- or beta-
+distributions; if omitted, weights are calculated using function 
+<code>ic.weights</code>; if given, must be accompanied by corresponding 
+<code>df</code> (can be obtained from call to <code>ic.weights</code> or 
+from previous runs of <code>ic.test</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p> output object from <code>ict.test</code> (of class <code>ict</code>)   </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>numerical tolerance value; 
+estimates closer to 0 than <code>tol</code> are set to exactly 0</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> Further options, e.g. algorithm for <code>ic.weights</code>  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p> number of digits to display </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scientific</code></td>
+<td>
+<p> if FALSE, suppresses scientific format; 
+default: FALSE </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>  output object from <code>ict.test</code> (of class <code>ict</code>)   </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>brief</code></td>
+<td>
+<p>  if TRUE, requests brief output without restrictions (default), 
+otherwise restrictions are shown with indication, which are active    </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p> The following test problems are implemented:
+</p>
+<p><code>TP=1</code>: H0: restrictions valid with equality  vs.  H1: at least one inequality
+</p>
+<p><code>TP=2</code>: H0: all restrictions true  vs.  H1: at least one restriction false
+</p>
+<p><code>TP=3</code>: H0: restrictions false  vs.  H1: restrictions true (with inequality)
+</p>
+<p><code>TP=11</code>: H0: restriction valid with equality and further linear equalities
+vs.  H1: at least one equality from H0 violated, restriction valid
+</p>
+<p><code>TP=21</code>: H0: restrictions valid (including some equality restrictions)
+vs.  H1: at least one restriction from H0 violated, some equality restrictions
+are maintained
+</p>
+<p>Note that TPs 1 and 11 can reject H0 even if H1 is violated by the data. 
+Rejection of H0 does not provide evidence for H1 (but only against H0) in  
+these TPs because H1 is not the opposite of H0. The tests concentrate their 
+power in H1, but are only guaranteed to observe their level for the stated H0.
+</p>
+<p>Also note that TP 3 does not make sense if <code>obj</code> involves equality 
+restrictions (<code>obj$meq</code>&gt;0). 
+</p>
+<p>Under TPs 1, 2, 11, and 21, the distributions of test statistics are mixtures 
+of chi-square distributions (<code>df.error=Inf</code>) or beta-distributions (<code>df.error</code> finite) 
+with different degrees of freedom (chi-square) or parameter combinations (beta). 
+Shapiro (1988) gives detailed information on the mixing weights for the 
+different scenarios. Basically, there are two different situations: 
+</p>
+<p>If <code>meq=0</code>, 
+the weights are probabilities that a random variable with covariance matrix 
+<code>ui%*%cov%*%t(ui)</code> is realized in the positive orthant or its 
+lower-dimensional faces, respectively (if <code>ui</code> has too few 
+columns, blow up by columns of 0s in appropriate positions) (Shapiro, formulae 
+(5.5) or (5.10), respectively). 
+</p>
+<p>If <code>meq &gt; 0</code> (but not all restrictions are equality restrictions), 
+the weights are probabilities that a random variable with covariance matrix the 
+inverse of the lower right corner of <code>solve(ui%*%cov%*%t(ui))</code> is realized
+in the positive orthant or its lower-dimensional faces, respectively 
+(Shapiro, formula (5.9)).
+</p>
+<p>These weights must then be combined with the appropriate degrees of freedom - 
+these can be worked out by realizing that either the null hypothesis or the 
+alternative hypothesis has fixed dimension and the respective mixing degrees 
+of freedom are obtained by taking the difference to the dimension of the 
+respective other hypothesis, which is correct because - given a certain 
+dimension of the inequality-restricted estimate, the inequality-restricted 
+estimate is a projection onto a linear space of that dimension.
+</p>
+<p>The test for TP 3 (cf. e.g. Sasabuchi 1980) is based on the intersection-union 
+principle and simply obtains its p-value as the maximum p-value from testing 
+the individual restrictions.
+</p>
+
+
+<h3>Value</h3>
+
+<p>object of class <code>ict</code>, which is a list containing elements
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>TP </code></td>
+<td>
+<p>test problem identifier (cf. argument <code>TP</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b.unrestr </code></td>
+<td>
+<p>unrestricted estimate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b.restr </code></td>
+<td>
+<p>restricted estimate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ui </code></td>
+<td>
+<p>restriction matrix, LHS</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci </code></td>
+<td>
+<p>restriction vector, RHS</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>restr.index </code></td>
+<td>
+<p>elements of mean referred to by <code>ui</code> and <code>ci</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meq </code></td>
+<td>
+<p>number of equality restrictions (first <code>meq</code> rows of <code>ui</code>),
+<code>meq</code> must not exceed <code>nrow(ui)-1</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iact </code></td>
+<td>
+<p>row numbers of active restrictions (all equality restrictions
+plus inequality restrictions that are met with equality 
+by the solution b.restr)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ui.extra </code></td>
+<td>
+<p>additional restrictions for <code>TP=11</code>, 
+calculated from input parameter <code>ui0.11</code> by projecting out
+restrictions present in <code>ui</code> and - if necessary - omitting 
+linearly dependent rows</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b.eqrestr </code></td>
+<td>
+<p>equality-restrected estimate for <code>TP=1</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b.extra.restr </code></td>
+<td>
+<p>estimate for null hypothesis of <code>TP=11</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>T </code></td>
+<td>
+<p>test statistic</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.value </code></td>
+<td>
+<p>p-value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s2 </code></td>
+<td>
+<p>input parameter</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cov </code></td>
+<td>
+<p>matrix with <code>s2*cov</code> equal to covariance matrix of unrestricted estimate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.error </code></td>
+<td>
+<p>input parameter</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.bar </code></td>
+<td>
+<p>vector of degrees of freedom for test statistic distribution, 
+cf. also input parameter <code>df</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wt.bar </code></td>
+<td>
+<p>vector of weights for test statistic distribution, 
+cf. also input parameter <code>wt</code></p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Package versions up to 1.1-4 had a bug that caused p-values for TP=11 
+to be too large.</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Ulrike Groemping, BHT Berlin </p>
+
+
+<h3>References</h3>
+
+ 
+<p>Sasabuchi, S. (1980) A test of a multivariate normal mean with composite 
+hypotheses determined by linear inequalities. <em>Biometrika</em> 
+<b>67</b>, 429–429
+</p>
+<p>Shapiro, A. (1988) Towards a unified theory of inequality-constrained 
+testing in multivariate analysis. <em>International Statistical Review</em> 
+<b>56</b>, 49–62</p>
+
+
+<h3>See Also</h3>
+
+<p> See also <code>ic.est</code>, <code>ic.weights</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">corr.plus &lt;- matrix(c(1,0.5,0.5,1),2,2)
+corr.null &lt;- matrix(c(1,0,0,1),2,2)
+corr.minus &lt;- matrix(c(1,-0.5,-0.5,1),2,2)
+## unrestricted vectors
+x1 &lt;- c(1, 1)
+x2 &lt;- c(-1, 1)
+ict1 &lt;- ic.test(ic.est(x1, corr.plus, ui=diag(c(1,1)), ci=c(0,0)))
+ict1
+summary(ict1)
+ic.test(ic.est(x1, corr.plus, ui=diag(c(1,1)), ci=c(0,0)), s2=1, df.error=10)
+ic.test(ic.est(x1, corr.minus, ui=diag(c(1,1)), ci=c(0,0)))
+ic.test(ic.est(x1, corr.minus, ui=diag(c(1,1)), ci=c(0,0)), s2=1, df.error=10)
+ic.test(ic.est(x2, corr.plus, ui=diag(c(1,1)), ci=c(0,0)))
+ic.test(ic.est(x2, corr.plus, ui=diag(c(1,1)), ci=c(0,0)), s2=1, df.error=10)
+ic.test(ic.est(x2, corr.minus, ui=diag(c(1,1)), ci=c(0,0)))
+ic.test(ic.est(x2, corr.minus, ui=diag(c(1,1)), ci=c(0,0)), s2=1, df.error=10)
+
+ict2 &lt;- ic.test(ic.est(x2, corr.plus, ui=diag(c(1,1)), ci=c(0,0)),TP=2)
+summary(ict2)
+ict3 &lt;- ic.test(ic.est(x1, corr.plus, ui=diag(c(1,1)), ci=c(0,0)),TP=3)
+summary(ict3)
+
+ict11 &lt;- ic.test(ic.est(x1, corr.plus, ui=c(1,1), ci=0),TP=11, ui0.11 =c(1,0))
+summary(ict11)
+
+## larger example
+corr.plus &lt;- diag(1,8)
+for (i in 1:7)
+   for (j in (i+1):8)
+     corr.plus[i,j] &lt;- corr.plus[j,i] &lt;- 0.5
+u &lt;- rbind(rep(1,6), c(-1,-1,-1,1,1,1), c(-1,0,1,0,0,0), c(0,0,0,-1,0,1))
+ice &lt;- ic.est(c(rep(1,4),rep(4,4)), corr.plus, ui=u, ci=rep(0,4), index=2:7, meq = 1)
+ict1 &lt;- ic.test(ice,TP=1)
+summary(ict1)
+ict2 &lt;- ic.test(ice,TP=2)
+summary(ict2)
+ict11 &lt;- ic.test(ice,TP=11)
+summary(ict11,digits=3)
+ice &lt;- ic.est(c(rep(1,4),rep(4,4)), corr.plus, ui=u, ci=rep(0,4), index=2:7)
+ict3 &lt;- ic.test(ice, TP=3)
+summary(ict3)
+</code></pre>
+
+
+</div>

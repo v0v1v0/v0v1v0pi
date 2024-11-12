@@ -1,0 +1,146 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getStats</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get default set of statistics for one particular variable.</h2>
+
+<h3>Description</h3>
+
+<p>This set of statistics can be passed directly to the <code>stats</code> parameter
+of the of the package functions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getStats(
+  type = "summary",
+  includeName = TRUE,
+  x = NULL,
+  nDecCont = getMaxNDecimals,
+  nDecN = 0,
+  nDecm = nDecN,
+  formatPercentage = inTextSummaryTable::formatPercentage
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Character vector with type of statistics (multiple are possible).
+Available statistics are specified in the section 'Formatted statistics' and
+formatting in 'Statistics formatting' in
+<code>in-text table statistics</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>includeName</code></td>
+<td>
+<p>Logical, should the statistics name be included (TRUE by default)?
+This is applied for the statistic names used in each for the set defined in <code>type</code>;
+and for the label of the list if <code>type</code> is of length 2.
+If there are multiple <code>type</code> or statistics within a set, the names are retained (to avoid confusion).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>(optional, recommended for continuous variable) Numeric vector 
+for which the statistics should be computed on.<br>
+This is used to derive the number of decimals to include
+for a continuous variable.<br>
+If not specified, the values are rounded with <code>formatC</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nDecCont</code></td>
+<td>
+<p>Integer with base number of decimals 
+for continuous variable, or function returning this number based on <code>x</code> 
+(<code>getNDecimals</code> by default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nDecN, nDecm</code></td>
+<td>
+<p>Integer with number of decimals 
+for number of subjects/records (0 by default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formatPercentage</code></td>
+<td>
+<p>Function used to format the percentages
+(see <code>formatPercentage</code> for default behaviour).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Expression (or call object) containing
+function to extract requested summary statistics.
+If multiple <code>type</code> are specified, they are combined to a list.
+Names of the list will be typically used to name the statistic
+in the summary table.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Laure Cougnaud
+</p>
+
+
+<h3>See Also</h3>
+
+<p>getStatsData
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## default set of statistics are available for:
+
+# for count table:
+getStats("count")
+getStats("n (%)")
+getStats("n")
+getStats("%")
+getStats("m")
+getStats("%m")
+getStats("m (%)")
+# for continuous variable:
+getStats("summary")
+getStats("mean (se)")
+getStats("mean (sd)")
+getStats("median (range)")
+getStats("median\n(range)")
+getStats(c("Mean", "SE"))
+
+## to not include statistic name in the table
+getStats("median\n(range)", includeName = FALSE)
+getStats(c("summary", "median\n(range)"), includeName = FALSE)
+
+## to extract the number of decimals based on a continuous variable (see ?getMaxNDecimals) 
+exampleData &lt;- data.frame(
+  USUBJID = 1 : 4, 
+  WEIGHT = c(67, 78, 83, 61), 
+  SEX = c("F", "M", "M", "F"), 
+  stringsAsFactors = FALSE
+)
+getStats(type = c('median (range)', 'mean (se)'), x = exampleData$WEIGHT)
+# compare with when 'x' is not specified:
+getStats(type = c('median (range)', 'mean (se)'))
+
+## custom function to format the percentages:
+getStats(type = "count", formatPercentage = function(x) round(x, 2))
+</code></pre>
+
+
+</div>

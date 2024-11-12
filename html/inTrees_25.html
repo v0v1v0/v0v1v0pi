@@ -1,0 +1,109 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>voteAllRules</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+internal
+</h2>
+
+<h3>Description</h3>
+
+<p>Predictions from a rule set
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">voteAllRules(ruleMetric, X, type = "r", method = "median")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ruleMetric</code></td>
+<td>
+
+<p>rules and metrics
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+
+<p>predictor variable matrix
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+
+<p>regression or classification
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>for regression, use median or average
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>predictions from the rule set
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##---- Should be DIRECTLY executable !! ----
+##-- ==&gt;  Define data, use random,
+##--	or do  help(data=index)  for the standard data sets.
+
+## The function is currently defined as
+function (ruleMetric, X, type = "r", method = "median") 
+{
+    xVoteList = vector("list", nrow(X))
+    predY &lt;- rep("", nrow(X))
+    for (i in 1:nrow(ruleMetric)) {
+        ixMatch &lt;- eval(parse(text = paste("which(", ruleMetric[i, 
+            "condition"], ")")))
+        if (length(ixMatch) == 0) 
+            next
+        for (ii in ixMatch) {
+            xVoteList[[ii]] = c(xVoteList[[ii]], ruleMetric[i, 
+                "pred"])
+        }
+    }
+    for (i in 1:length(xVoteList)) {
+        thisV &lt;- xVoteList[[i]]
+        if (length(thisV) == 0) 
+            next
+        if (type == "c") 
+            predY[i] &lt;- names(table(thisV)[which.max(table(thisV))])
+        if (type == "r") {
+            thisV = as.numeric(thisV)
+            if (method == "median") {
+                predY[i] &lt;- median(thisV)
+            }
+            else {
+                predY[i] &lt;- mean(thisV)
+            }
+        }
+    }
+    if (type == "r") 
+        predY &lt;- as.numeric(predY)
+    return(predY)
+  }
+</code></pre>
+
+
+</div>

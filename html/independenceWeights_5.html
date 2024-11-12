@@ -1,0 +1,162 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>weighted_energy_stats</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculation of weighted energy statistics for weighted dependence</h2>
+
+<h3>Description</h3>
+
+<p>Calculates weighted energy statistics used to quantify weighted dependence
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">weighted_energy_stats(A, X, weights, dimension_adj = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>treatment vector indicating values of the treatment/exposure variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>matrix of covariates with number of rows equal to the length of <code>weights</code> and each column is a
+covariate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>a vector of sample weights</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dimension_adj</code></td>
+<td>
+<p>logical scalar. Whether or not to add adjustment to energy distance terms that account for
+the dimensionality of <code>x</code>. Defaults to <code>TRUE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a list with the following components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>D_w</code></td>
+<td>
+<p>The value of the weighted dependence distance of Huling, et al. (2021) using the optimal estimated weights.
+This is the weighted dependence statistic without the ridge penalty on the weights.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distcov_unweighted</code></td>
+<td>
+<p>The unweighted distance covariance term. This is the standard distance covariance of Szekely et al (2007). This term
+is always equal to <code>D_unweighted</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distcov_weighted</code></td>
+<td>
+<p>The weighted distance covariance term. This term itself does not directly measure weighted dependence but is a critical component of it.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>energy_A</code></td>
+<td>
+<p>The weighted energy distance between <code>A</code> and its weighted version</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>energy_X</code></td>
+<td>
+<p>The weighted energy distance between <code>X</code> and its weighted version</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ess</code></td>
+<td>
+<p>The estimated effective sample size of the weights using Kish's effective sample size formula.</p>
+</td>
+</tr>
+</table>
+<p>An object of class <code>"weighted_energy_terms"</code>.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>D_w</code></td>
+<td>
+<p>the value of the DCOW measure</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distcov_unweighted</code></td>
+<td>
+<p>the unweighted distance covariance between treatment and covariates</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distcov_weighted</code></td>
+<td>
+<p>the weighted distance covariance between treatment and covariates</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>energy_A</code></td>
+<td>
+<p>the (energy) distance between the treatment distribution and the weighted treatment distribution. Smaller values mean the marginal distribution of the treatment is preserved after weighting</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>energy_x</code></td>
+<td>
+<p>the (energy) distance between the covariate distribution and the weighted covariate distribution. Smaller values mean the marginal distribution of the covariates is preserved after weighting</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ess</code></td>
+<td>
+<p>the expected sample size after weighting. Kish's approximation is used</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Szekely, G. J., Rizzo, M. L., &amp; Bakirov, N. K. (2007). Measuring and testing dependence by correlation of distances.
+Annals of Statistics 35(6) 2769-2794 doi: <a href="https://doi.org/10.1214/009053607000000505">10.1214/009053607000000505</a>
+</p>
+<p>Huling, J. D., Greifer, N., &amp; Chen, G. (2021). Independence weights for causal inference with continuous exposures.
+arXiv preprint arXiv:2107.07086. <a href="https://arxiv.org/abs/2107.07086">https://arxiv.org/abs/2107.07086</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+simdat &lt;- simulate_confounded_data(seed = 999, nobs = 100)
+
+str(simdat$data)
+
+A &lt;- simdat$data$A
+X &lt;- as.matrix(simdat$data[c("Z1", "Z2", "Z3", "Z4", "Z5")])
+
+wts &lt;- runif(length(A))
+
+weighted_energy_stats(A, X, wts)
+
+</code></pre>
+
+
+</div>

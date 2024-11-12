@@ -1,0 +1,101 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Arithmetic</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Methods for IP arithmetic </h2>
+
+<h3>Description</h3>
+
+<p>Methods for unary and binary IP arithmetic 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  -e1
+  e1 + e2
+  e1 - e2
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>e1</code></td>
+<td>
+<p>an object of either an 'IPv4', 'IPv6' or 'IP' class</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>e2</code></td>
+<td>
+<p>either a corresponding object of class 'IPv4', 'IPv6', 'IP' or an integer or a numerical vector </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<p>Both IPv4 and v6 sets are represented as unsigned integers and are closed under addition and subtraction. An operation resulting in a negative number (or an overflow) is marked as NA. 
+
+
+Operations are currently not always commutative. IP*-IP* are but those involving integers or floats are not. 
+Thus, adding (or subtracting) an integer or a float to an IP* object will work but the reverse (adding (or subtracting) an IP* to an integer or a float) will raise an error (see example below and the caveat section in the package description). 
+In addition multiplication and division are not implemented and will raise an error. 
+
+
+Arithmetic operations involving IP* are better done using methods provided.
+Both IPv4 and IPv6 addresses are represented as unsigned integers but <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> only works with 32 bits signed integers.
+In addition, double precision numbers cannot represent all integers in the 0-(2^128-1) range. Therefore, converting an IPv6 object to numeric may cause a loss of precision and the same applies to arithmetic operations on IPv6 represented as floating point numbers.
+</p>
+
+
+
+<h3>Value</h3>
+
+<p>an object of either an 'IPv4', 'IPv6' or 'IP' class
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##
+ipv4("192.0.0.1") + 1
+ipv6("fd00::1") + 1
+ip(c("192.0.0.1", "fd00::1")) + 1
+
+##
+## Prohibited Arith operations
+##
+## this raises an error 
+tryCatch(1L - ipv4("192.0.0.1"), error=function(e) e )
+## and so will 
+tryCatch(1 + ipv6("fd00::1"), error=function(e) e )
+## as well as
+tryCatch(ipv4("192.0.0.1") * 2, error=function(e) e )
+
+##
+## Loss of precision in arithmetical operations
+##
+(2^52 +1)- 2^52
+(2^53 +1)- 2^53
+##
+identical((2^64 +1)- 2^64  , 0 )
+## ...and so on
+( (2^64 + 2^11 ) - (2^64))
+## next representable number with IEEE 754 double precision floats; mind the gap
+( (2^64 + 2^12 ) - (2^64))
+
+
+## OTH,
+((ipv6('::1') %&lt;&lt;% 53L) + ipv6('::1')) - (ipv6('::1') %&lt;&lt;% 53L)
+##
+(x &lt;- ( ( ipv6('::1') %&lt;&lt;% 64L ) + ( ipv6('::1') %&lt;&lt;% 11L ) ) - ( ipv6('::1') %&lt;&lt;% 64L ) )
+log2(as.numeric(x))
+</code></pre>
+
+
+</div>

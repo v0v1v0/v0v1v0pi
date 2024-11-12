@@ -1,0 +1,119 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>noiseMatrix2PdfMatrix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Convert matrix of PSDs to matrix of Probability Density Functions</h2>
+
+<h3>Description</h3>
+
+<p>This function converts a <code>noiseMatrix</code> returned by either <code>psdList2NoiseMatrix</code> or <code>psdDF2NoiseMatrix</code>
+into a matrix of Probability Density values as defined by McNamara and Boaz 2005.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">noiseMatrix2PdfMatrix(noiseMatrix, lo, hi, binSize)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>noiseMatrix</code></td>
+<td>
+<p>a <code>noiseMatrx</code> returned from either <code>psdList2NoiseMatrix</code> or <code>psdDF2NoiseMatrix</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lo</code></td>
+<td>
+<p>lowest frequency bin (power level in dB) for the PDF y-axis (default=-200)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hi</code></td>
+<td>
+<p>highest frequency bin (power level in dB) for the PDF y-axis (default=-50)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>binSize</code></td>
+<td>
+<p>size in dB of each bin (default=1)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The McNamara and Boaz paper describes creating histograms of the discretized power levels at each frequency
+bin associated with a set of PSDs. The value in each cell of the PDF matrix is the fraction of the corrected PSDs that
+have that power level at that frequency bin.
+</p>
+<p>To return a PDF matrix that matches those in the McNamara paper, use the default settings.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>matrix</code> is returned with one row for each power level (-250:-50 dB) and one column for each frequency bin.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="http://pubs.usgs.gov/of/2005/1438/pdf/OFR-1438.pdf">Seismic Noise Analysis System Using Power Spectral Density Probability Density Functions</a> (McNamara and Boaz 2005)
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>McNamaraPSD</code>,
+<code>psdDF2NoiseMatrix</code>,
+<code>psdList</code>,
+<code>psdPlot</code>,
+<code>psdStatistics</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Create a new IrisClient
+iris &lt;- new("IrisClient", debug=TRUE)
+
+# Get seismic data
+starttime &lt;- as.POSIXct("2011-05-05", tz="GMT") # 2011.125
+endtime &lt;- starttime + 1*24*3600
+st &lt;- getDataselect(iris,"IU","GRFO","--","BHE",starttime,endtime)
+
+# Generate power spectral density for each hour long segment
+psdList &lt;- psdList(st)
+
+# Convert into corrected "noiseMatrix"
+noiseMatrix &lt;- psdList2NoiseMatrix(psdList)
+
+# Convert into McNamara "pdfMatrix"
+pdfMatrix &lt;- noiseMatrix2PdfMatrix(noiseMatrix)
+
+# NOTE:  Data need to be flipped and tranposed for the XY axes in the
+# NOTE:  image() function to match rows and columns in our pdfMatrix
+# Plot pdfMatrix
+image(t(pdfMatrix[,ncol(pdfMatrix):1]),
+      col=c('gray90',rainbow(9)),
+      axes=FALSE)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

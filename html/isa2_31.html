@@ -1,0 +1,165 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ppa.unique</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Filter co-modules that are very similar to each other</h2>
+
+<h3>Description</h3>
+
+<p>From a potentially non-unique set of PPA co-modules, create a unique
+set by removing all co-modules that are similar to others.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S4 method for signature 'list,list'
+ ppa.unique(normed.data, pparesult, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>normed.data</code></td>
+<td>
+<p>The normalized input data, a list of four matrices,
+usually the output of the <code>ppa.normalize</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pparesult</code></td>
+<td>
+<p>The result of a PPA run, a set of co-modules.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments, see details below.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function can be called as
+</p>
+<pre>
+    ppa.unique(normed.data, pparesult, method = c("cor"),
+               ignore.div = TRUE, cor.limit = 0.9,
+	       neg.cor = TRUE, drop.zero = TRUE)
+  </pre>
+<p>where the arguments are:
+</p>
+
+<dl>
+<dt>normed.data</dt>
+<dd>
+<p>The normalized input data, a list of four
+matrices, usually the output of <code>ppa.normalize</code>.</p>
+</dd>
+<dt>pparesult</dt>
+<dd>
+<p>The results of a PPA run, a set of co-modules.</p>
+</dd>
+<dt>method</dt>
+<dd>
+<p>Character scalar giving the method to be used to
+determine if two co-modules are similar. Right now only
+‘<code>cor</code>’ is implemented, this keeps both co-modules if
+their Pearson correlation is less than <code>cor.limit</code>, for
+their row1, row2 and column scores. See also the <code>neg.cor</code>
+argument.</p>
+</dd>
+<dt>ignore.div</dt>
+<dd>
+<p>Logical scalar, if <code>TRUE</code>, then the divergent
+co-modules will be removed.</p>
+</dd>
+<dt>cor.limit</dt>
+<dd>
+<p>Numeric scalar, giving the correlation limit for the
+‘<code>cor</code>’ method.</p>
+</dd>
+<dt>neg.cor</dt>
+<dd>
+<p>Logical scalar, if <code>TRUE</code>, then the
+‘<code>cor</code>’ method considers the absolute value of the
+correlation.</p>
+</dd>
+<dt>drop.zero</dt>
+<dd>
+<p>Logical scalar, whether to drop co-modules that have
+all zero scores.</p>
+</dd>
+</dl>
+<h3>Value</h3>
+
+<p>A named list, the filtered <code>pparesult</code>. See the return value of
+<code>ppa.iterate</code> for the details.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Gabor Csardi <a href="mailto:Gabor.Csardi@unil.ch">Gabor.Csardi@unil.ch</a> </p>
+
+
+<h3>References</h3>
+
+<p>Kutalik Z, Bergmann S, Beckmann, J: A modular approach for integrative
+analysis of large-scale gene-expression and drug-response data
+<em>Nat Biotechnol</em> 2008 May; 26(5) 531-9.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See <code>ppa</code> for an easy way of running the PPA
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Create an PPA module set
+set.seed(1)
+insili &lt;- ppa.in.silico(noise=0.01)
+
+## Random seeds
+seeds &lt;- generate.seeds(length=nrow(insili[[1]]), count=20)
+
+## Normalize input matrix
+nm &lt;- ppa.normalize(insili[1:2])
+
+## Do PPA
+ppares &lt;- ppa.iterate(nm, row1.seeds=seeds,
+                      thr.row1=2, thr.row2=2, thr.col=1)
+
+## Check correlation among modules
+cc &lt;- cor(ppares$rows1)
+if (interactive()) { hist(cc[lower.tri(cc)],10) }
+
+## Some of them are quite high, how many?
+undiag &lt;- function(x) { diag(x) &lt;- 0; x }
+sum(undiag(cc) &gt; 0.99, na.rm=TRUE)
+
+## Eliminate duplicated modules
+ppares.unique &lt;- ppa.unique(nm, ppares)
+
+## How many modules left?
+ncol(ppares.unique$rows1)
+
+## Double check
+cc2 &lt;- cor(ppares.unique$rows1)
+if (interactive()) { hist(cc2[lower.tri(cc2)],10) }
+
+## High correlation?
+sum(undiag(cc2) &gt; 0.99, na.rm=TRUE)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,103 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getUpDownTimes</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Determine times when a channel starts/stops collecting data</h2>
+
+<h3>Description</h3>
+
+<p>The <code>getUpDownTimes</code> method determines the on/off times for data collection within a <code>Stream</code>
+and returns a list containing these times, ignoring <code>Trace</code>s with a duration less than <code>min_signal</code> as well as data dropouts that are less than <code>min_gap</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getUpDownTimes(x, min_signal, min_gap)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+ <p><code>Stream</code> object </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_signal</code></td>
+<td>
+<p> minimum <code>Trace</code> duration in seconds (default=30)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_gap</code></td>
+<td>
+<p> minimum gap in seconds (default=60)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A <code>Stream</code> object returned by <code>getDataselect</code> contains a list of individual
+<code>Trace</code> objects, each of which is guaranteed to contain a continuous array of 
+data in the <code>Trace@data</code> slot. Each <code>Trace</code> also contains a <code>starttime</code> and an <code>endtime</code> representing
+a period of uninterrupted data collection. Data dropouts are determined by first rejecting any <code>Trace</code>s of duration less than <code>min_signal</code>.
+The temporal spacing between <code>Trace</code>s is then analyzed, ignoring spaces shorter than <code>min_gap</code>.
+</p>
+<p>This method first checks the SNCL id of each <code>Trace</code> to make sure they are identical
+and throws an error if they are not.
+</p>
+<p>The first element returned is always the <code>starttime</code> associated the first <code>Trace</code>.  The last element is always the
+<code>endtime</code> associated with the last trace.  Thus, when the first element is identical to the <code>starttime</code> of the web services data request this does not necessarily mean that the channel was down before this.
+</p>
+<p><b>NOTE: </b> Even when data are complete for the duration of the requested timespan, the last element returned may be earlier than the <code>endtime</code> of the web services data request by up to a second.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A vector of <code>POSIXct</code> datetimes associated with on/off transitions.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>See Also</h3>
+
+
+<p><code>plotUpDownTimes</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+starttime &lt;- as.POSIXct("2012-01-24", tz="GMT")
+endtime &lt;- as.POSIXct("2012-01-25", tz="GMT")
+
+# Get the waveform
+st &lt;- getDataselect(iris,"AK","PIN","","BHZ",starttime,endtime)
+
+# Determine up/down transitions, ignoring Traces &lt; 3 min and gaps &lt; 5 min
+upDownTimes &lt;- getUpDownTimes(st, min_signal=180, min_gap=300)
+
+# Or just plot them directly
+plotUpDownTimes(st, min_signal=180, min_gap=300)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,230 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>inzightts</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Coerce data to an inzightts (time-series) object</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>inzightts</code> creates temporal data frames for use in iNZight.
+Unlike <code>ts</code> objects, these are tsibble objects that enable temporal data
+wrangling, adapting to tidy data principles, which are both data- and
+model-oriented.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">inzightts(x, ...)
+
+## S3 method for class 'character'
+inzightts(x, stringsAsFactors = TRUE, as.is = TRUE, ...)
+
+## S3 method for class 'data.frame'
+inzightts(
+  x,
+  var = NULL,
+  index = NULL,
+  key = NULL,
+  start = NULL,
+  end = NULL,
+  freq = NULL,
+  ...
+)
+
+## S3 method for class 'ts'
+inzightts(x, var_name = NULL, pivot_longer = FALSE, ...)
+
+## S3 method for class 'tbl_ts'
+inzightts(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A <code>data.frame</code>, <code>ts</code>, tsibble, or path.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments to be passed to or from methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stringsAsFactors</code></td>
+<td>
+<p>See <code>read.csv</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>as.is</code></td>
+<td>
+<p>See <code>read.csv</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var</code></td>
+<td>
+<p>The column number or name in <code>data</code> representing the observations
+used in the actual time series.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>index</code></td>
+<td>
+<p>The column number or name in <code>data</code> containing the time
+variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>key</code></td>
+<td>
+<p>The variable(s) that uniquely determine time indices.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start</code></td>
+<td>
+<p>The time of the first observation. It can be a single number or
+a vector of two integers representing a natural time unit and
+a (1-based) number of samples into the time unit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>end</code></td>
+<td>
+<p>The time of the last observation, specified in the same way as
+<code>start</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>freq</code></td>
+<td>
+<p>The number of observations per unit of time.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var_name</code></td>
+<td>
+<p>The new name for the variable column of the univariate time
+series, applicable only if <code>x</code> is not an <code>mts</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pivot_longer</code></td>
+<td>
+<p>Logical; set to <code>TRUE</code> to transform data to a "longer"
+form, otherwise keep the current form. Applicable only if <code>x</code> is an
+<code>mts</code> object.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If a <code>ts</code> object is used to create the inzightts object, all the domain
+information is extracted from that object.
+</p>
+<p>The <code>index</code> parameter should be a <code>character</code>, <code>Date</code>,
+<code>yearweek</code>, <code>yearmonth</code>, or <code>yearquarter</code> object.
+</p>
+<p>If <code>index</code> is a <code>character</code>, the function recognizes the following
+time variable formats without case sensitivity:
+</p>
+
+<ul>
+<li>
+<p> "(Y)yyyy": annually data, e.g., "(Y)1991"
+</p>
+</li>
+<li>
+<p> "(Y)yyyyMmm": monthly data, e.g., "(Y)1991M01"
+</p>
+</li>
+<li>
+<p> "(Y)yyyyQqq": quarterly data, e.g., "(Y)1991Q01"
+</p>
+</li>
+<li>
+<p> "(Y)yyyyWww": weekly data with yearly seasonality, e.g., "(Y)1991W01"
+</p>
+</li>
+<li>
+<p> "(Y)yyyyDdd": daily data with yearly seasonality, e.g., "(Y)1991D01"
+</p>
+</li>
+<li>
+<p> "WwwDdd": daily data with weekly seasonality, e.g., "W01D01"
+</p>
+</li>
+<li>
+<p> "DddHhh": hourly data with daily seasonality, e.g., "D01H01"
+</p>
+</li>
+</ul>
+<p>The length of digits of each time unit could be flexible, and spaces between
+the time unit are allowed.
+</p>
+<p>In case <code>data</code> is a data.frame or path to a <code>.csv</code> file, and
+<code>start</code> is omitted, the starting date and the <code>freq</code> are extracted
+from the column that includes the time information. This column is either
+named <code>"Time"</code> or is the first column. If <code>end</code> is omitted, all of
+the data will be used for the time-series.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An <code>inzightts</code> (<code>inz_ts</code>) object, a sub-class of tsibble,
+which includes the index variable, temporal variable, and, if
+applicable, relevant keys.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>tsibble</code>, <code>as_tsibble</code>
+and <code>new_tsibble</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># create from a ts object
+z &lt;- inzightts(UKgas)
+## Not run: 
+plot(z)
+
+## End(Not run)
+
+# create from a data.frame
+x &lt;- inzightts(
+    data.frame(Return = rnorm(100), Time = 1900:1999),
+    var = "Return"
+)
+# or specify a time column
+x &lt;- inzightts(
+    data.frame(Return = rnorm(100), Year = 1900:1999),
+    var = "Return", index = "Year"
+)
+
+# create from a data.frame with modified time frame
+y &lt;- inzightts(
+    data.frame(Return = rnorm(100)),
+    start = c(1990, 1), end = c(1993, 5), freq = 12, var = 1
+)
+## Not run: 
+plot(y)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

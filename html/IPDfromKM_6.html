@@ -1,0 +1,68 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Radiationdata</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Two-column coordinates(X,Y) extracted from published Kaplan Meier curves by ScanIt software</h2>
+
+<h3>Description</h3>
+
+<p>The datasets are extracted from a published Kaplan Meier image by ScanIt. Locoreginal control events
+were studied in 424 head and neck cancer patients: 213 in Radiotherapy treatment group and 211 in the Radiotherapy plus cetuximab group.
+There are 145 pairs of coordinates extracted from the radiation treatment arm, and 136 pairs of coordinates are extracted from the radiation
+plus arm. For both datasets, the first columns are the times, and the second columns are the survival probabilities in percentage.
+For each group, numbers of patients at risk were reported at the months of 0, 10, 20, 30, 40, and 50. Three vectors (i.e., trisk, nrisk.radio and
+nrisk.radioplus) record these numbers. <br></p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Radiationdata
+</code></pre>
+
+
+<h3>Format</h3>
+
+<p>List of two dataframes (radio and radioplus) and three vectors (i.e., trisk, nrisk.radio and nrisk.radioplus)
+</p>
+
+
+<h3>References</h3>
+
+<p>Bonner JA, Harari PM, Giralt J, Azarnia N, Shin DM, Cohen RB, Jones CU, Sur R,
+Raben D, Jassem J, Ove R, Kies MS, Baselga J, Youssoufian H, Amellal N, Rowinsky EK, Ang KK:
+Radiotherapy plus Cetuximab for Squamous-Cell Carcinoma of the Head and Neck. N Engl J Med.
+2006, 354: 567-78. 10.1056/NEJMoa053422.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## the sample datasets
+radio &lt;- Radiationdata$radio
+radioplus &lt;- Radiationdata$radioplus
+trisk &lt;- Radiationdata$trisk
+nrisk_radio &lt;- Radiationdata$nrisk.radio
+nrisk_radioplus &lt;- Radiationdata$nrisk.radioplus
+plot(radio,xlab="time",ylab="survival rates",type="l",
+    lty=2,col="cyan4",xlim=c(1,70),main="Curves extracted by ScanIt software")
+lines(radioplus,type="l",col="red4",lty=1)
+legend("topright", c("Radiotherapy", "Radiotherapy plus cetuximab"),
+      col = c("cyan4","red4"),lty=c(2,1),text.col = "green4",bty = "n")
+text(40,80,"Reported Hazard Ratio with 95% CI:")
+text(40,75,"0.68 (0.52,0.89)")
+## reconstruct the IPD from the sample dataset
+pre_radio &lt;- preprocess(dat=radio, trisk=trisk,nrisk=nrisk_radio,maxy=100)
+est_radio &lt;- getIPD(prep=pre_radio,armID=0,tot.events=NULL)
+pre_radio_plus &lt;- preprocess(dat=radioplus, trisk=trisk,nrisk=nrisk_radioplus,maxy=100)
+est_radio_plus &lt;- getIPD(prep=pre_radio_plus,armID=1,tot.events=NULL)
+surv2 &lt;- survreport(ipd1=est_radio$IPD,ipd2=est_radio_plus$IPD,arms=2,
+                    interval=8,s=c(0.75,0.5,0.25),showplots=TRUE)
+print(surv2)
+
+</code></pre>
+
+
+</div>

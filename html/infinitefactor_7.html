@@ -1,0 +1,162 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>infinitefactor-package</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Bayesian Infinite Factor Models
+</h2>
+
+<h3>Description</h3>
+
+<p>Sampler and post-processing functions for semi-parametric Bayesian infinite factor models, motivated by the Multiplicative Gamma Shrinkage Prior of Bhattacharya and Dunson (2011) &lt;https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3419391/&gt;. Contains component C++ functions for building samplers for linear and 2-way interaction factor models using the multiplicative gamma and Dirichlet-Laplace shrinkage priors. The package also contains post processing functions to return matrices that display rotational ambiguity to identifiability through successive application of orthogonalization procedures and resolution of column label and sign switching. This package was developed with the support of the National Institute of Environmental Health Sciences grant 1R01ES028804-01.
+</p>
+
+
+<h3>Details</h3>
+
+<p>The DESCRIPTION file:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+Package: </td>
+<td style="text-align: left;"> infinitefactor</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+Type: </td>
+<td style="text-align: left;"> Package</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+Title: </td>
+<td style="text-align: left;"> Bayesian Infinite Factor Models</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+Version: </td>
+<td style="text-align: left;"> 1.0</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+Date: </td>
+<td style="text-align: left;"> 2020-03-30</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+Author: </td>
+<td style="text-align: left;"> Evan Poworoznek</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+Maintainer: </td>
+<td style="text-align: left;"> Evan Poworoznek &lt;infinitefactorpackage@gmail.com&gt;</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+Description: </td>
+<td style="text-align: left;"> Sampler and post-processing functions for semi-parametric Bayesian infinite factor models, motivated by the Multiplicative Gamma Shrinkage Prior of Bhattacharya and Dunson (2011) &lt;https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3419391/&gt;. Contains component C++ functions for building samplers for linear and 2-way interaction factor models using the multiplicative gamma and Dirichlet-Laplace shrinkage priors. The package also contains post processing functions to return matrices that display rotational ambiguity to identifiability through successive application of orthogonalization procedures and resolution of column label and sign switching. This package was developed with the support of the National Institute of Environmental Health Sciences grant 1R01ES028804-01.</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+License: </td>
+<td style="text-align: left;"> GPL-2</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+Imports: </td>
+<td style="text-align: left;"> Rcpp (&gt;= 1.0.2)</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+Depends: </td>
+<td style="text-align: left;"> reshape2,
+ggplot2,
+stats,
+utils</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+LinkingTo: </td>
+<td style="text-align: left;"> Rcpp, RcppArmadillo</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+</td>
+</tr>
+</table>
+<p>Index of help topics:
+</p>
+<pre>
+amean                   Average over the third index of an array
+del_mg                  Sampler Components
+infinitefactor-package
+                        Bayesian Infinite Factor Models
+interactionDL           Factor regression model with interactions using
+                        the Dirichlet-Laplace shrinkage prior
+interactionMGSP         Factor regression model with interactions using
+                        the Multiplicative Gamma Shrinkage Prior
+jointRot                Resolve rotational ambiguity in samples of
+                        factor loadings and factors jointly
+linearDL                Sample Bayesian linear infinite factor models
+                        with the Dirichlet-Laplace prior
+linearMGSP              Sample Bayesian linear infinite factor models
+                        with the Multiplicative Gamma Shrinkage Prior
+lmean                   Average elements of a list
+msf                     Resolve label and sign switching in random
+                        matrix samples
+plotmat                 Plot a matrix
+summat                  Summarise a matrix from posterior samples
+</pre>
+<p>Perform sampling with the linearMGSP() and linearDL() functions for linear factor models, or interactionMGSP() and interactionDL() functions for factor regression models including 2-way interactions. See jointRot() or msf() for postprocessing.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Evan Poworoznek
+</p>
+<p>Maintainer: Evan Poworoznek &lt;infinitefactorpackage@gmail.com&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Bhattacharya, Anirban, and David B. Dunson. "Sparse Bayesian infinite factor models." Biometrika (2011): 291-306.
+</p>
+<p>Bhattacharya, Anirban, et al. "Dirichlet-Laplace priors for optimal shrinkage." Journal of the American Statistical Association 110.512 (2015): 1479-1490.
+</p>
+<p>Ferrari, Federico, and David B. Dunson. "Bayesian Factor Analysis for Inference on Interactions." arXiv preprint arXiv:1904.11603 (2019).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">k0 = 5
+p = 20
+n = 100
+
+lambda = matrix(rnorm(p*k0, 0, 0.01), ncol = k0)
+lambda[sample.int(p, 40, replace = TRUE) +
+         p*(sample.int(k0, 40, replace = TRUE)-1)] = rnorm(40, 0, 1)
+lambda[1:7, 1] = rnorm(7, 2, 0.5)
+lambda[8:14, 2] = rnorm(7, -2, 0.5)
+lambda[15:20, 3] = rnorm(6, 2, 0.5)
+lambda[,4] = rnorm(p, 0, 0.5)
+lambda[,5] = rnorm(p, 0, 0.5)
+plotmat(varimax(lambda)[[1]])
+
+X = matrix(rnorm(n*k0),n,k0)%*%t(lambda) + matrix(rnorm(n*p), n, p)
+
+out = linearMGSP(X = X, nrun = 1000, burn = 500, adapt = FALSE)
+
+aligned = jointRot(out$lambdaSamps, out$etaSamps)
+
+plotmat(lmean(aligned$lambda))
+</code></pre>
+
+
+</div>

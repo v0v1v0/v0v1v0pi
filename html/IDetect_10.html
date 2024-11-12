@@ -1,0 +1,148 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ID_pcm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Multiple change-point detection in the mean of a vector using the
+Isolate-Detect methodology</h2>
+
+<h3>Description</h3>
+
+<p>This function estimates the number and locations of multiple change-points in the mean
+of the noisy piecewise-constant input vector <code>x</code>, using the Isolate-Detect methodology. The noise
+is Gaussian. The estimated signal, as well as the solution path defined in <code>sol_path_pcm</code> are
+also given. The function is a hybrid between the thresholding approach of <code>win_pcm_th</code> and the
+information criterion approach of <code>pcm_ic</code> and estimates the change-points taking into
+account both these approaches (see Details for more information and the relevant literature reference).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ID_pcm(x, thr_id = 1, th_ic_id = 0.9, pointsth = 3, pointsic = 10)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A numeric vector containing the data in which you would like to find
+change-points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thr_id</code></td>
+<td>
+<p>A positive real number with default value equal to 1. It is
+used to define the threshold, if the thresholding approach is to be followed; see <code>pcm_th</code>
+for more details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>th_ic_id</code></td>
+<td>
+<p>A positive real number with default value equal to 0.9. It is
+useful only if the model selection based Isolate-Detect method is to be followed.
+It is used to define the threshold value that will be used at the first step
+(change-point overestimation) of the model selection approach described in <code>pcm_ic</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pointsth</code></td>
+<td>
+<p>A positive integer with default value equal to 3. It is used only
+when the threshold based approach is to be followed and it defines the distance
+between two consecutive end- or start-points of the right- or left-expanding intervals,
+respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pointsic</code></td>
+<td>
+<p>A positive integer with default value equal to 10. It is used only
+when the information criterion based approach is to be followed and it defines
+the distance between two consecutive end- or start-points of the right- or
+left-expanding intervals, respectively.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Firstly, this function detects the change-points using <code>win_pcm_th</code>.
+If the estimated number of change-points is larger than 100, then the
+result is returned and we stop. Otherwise, <code>ID_pcm</code> proceeds to detect the
+change-points using <code>pcm_ic</code> and this is what is returned. To sum up,
+<code>ID_pcm</code> returns a result based on <code>pcm_ic</code> if the estimated number
+of change-points is less than 100. Otherwise, the result comes from thresholding.
+More details can be found in “Detecting multiple generalized change-points by
+isolating single ones”, Anastasiou and Fryzlewicz (2018), preprint.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with the following components:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+   </td>
+</tr>
+<tr>
+<td style="text-align: left;"> <code>cpt</code> </td>
+<td style="text-align: left;"> A vector with the detected change-points.
+   </td>
+</tr>
+<tr>
+<td style="text-align: left;"> <code>no_cpt</code>    </td>
+<td style="text-align: left;"> The number of change-points detected.
+   </td>
+</tr>
+<tr>
+<td style="text-align: left;"> <code>fit</code> </td>
+<td style="text-align: left;"> A numeric vector with the estimated piecewise-constant signal.
+   </td>
+</tr>
+<tr>
+<td style="text-align: left;"> <code>solution_path</code> </td>
+<td style="text-align: left;"> A vector containing the solution path.
+  </td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Andreas Anastasiou, <a href="mailto:a.anastasiou@lse.ac.uk">a.anastasiou@lse.ac.uk</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>win_pcm_th</code> and <code>pcm_ic</code> which are the functions that <code>ID_pcm</code>
+is based on. In addition, see <code>ID_cplm</code> for the case of detecting changes
+in a continuous, piecewise-linear signal. The main function <code>ID</code>
+of the package employs <code>ID_pcm</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">single.cpt &lt;- c(rep(4,1000),rep(0,1000))
+single.cpt.noise &lt;- single.cpt + rnorm(2000)
+cpts_detect &lt;- ID_pcm(single.cpt.noise)
+
+three.cpt &lt;- c(rep(4,500),rep(0,500),rep(-4,500),rep(1,500))
+three.cpt.noise &lt;- three.cpt + rnorm(2000)
+cpts_detect_three &lt;- ID_pcm(three.cpt.noise)
+
+multi.cpt &lt;- rep(c(rep(0,50),rep(3,50)),20)
+multi.cpt.noise &lt;- multi.cpt + rnorm(2000)
+cpts_detect_multi &lt;- ID_pcm(multi.cpt.noise)
+</code></pre>
+
+
+</div>

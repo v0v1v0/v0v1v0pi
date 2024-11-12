@@ -1,0 +1,112 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>survCIs</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Confidence/Credible intervals for survival curves</h2>
+
+<h3>Description</h3>
+
+<p>Confidence/Credible intervals for survival curves
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">survCIs(
+  fit,
+  newdata = NULL,
+  p = NULL,
+  q = NULL,
+  ci_level = 0.95,
+  MC_samps = 4000
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fit</code></td>
+<td>
+<p>Fitted model from <code>ic_par</code> or <code>ic_bayes</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p><code>data.frame</code> containing covariates for survival curves</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>Percentiles of distribution to sample</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>Times of disitribution to sample. Only p OR q should be specified, not p AND q</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci_level</code></td>
+<td>
+<p>Confidence/credible level</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MC_samps</code></td>
+<td>
+<p>Number of Monte Carlo samples taken</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Creates a set of confidence intervals for the survival curves conditional
+on the covariates provided in <code>newdata</code>. Several rows can be provided in newdata;
+this will lead to several sets of confidence/credible intervals. 
+</p>
+<p>For Bayesian models, these are draws directly from the posterior; a set of parameters drawn 
+from those saved in <code>fit$samples</code> repeatedly and then for each set of parameters, 
+the given set of quantiles is calculated. For parametric models, the procedure is virtually the 
+same, but rather than randomly drawing rows from saved samples, random samples are drawn using
+the asymptotic normal approximation of the estimator. 
+</p>
+<p>This function is not compatible with <code>ic_np</code> or <code>ic_sp</code> objects, as the distribution 
+of the baseline distribution of these estimators is still an open question.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Clifford Anderson-Bergman
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("IR_diabetes")
+fit &lt;- ic_par(cbind(left, right) ~ gender, 
+                data = IR_diabetes)
+
+# Getting confidence intervals for survival curves
+# for males and females
+newdata &lt;- data.frame(gender = c("male", "female"))
+rownames(newdata) &lt;- c("Males", "Females")
+diab_cis &lt;- survCIs(fit, newdata)
+diab_cis
+
+# Can add this to any plot
+plot(fit, newdata = newdata, 
+     cis = FALSE)
+# Would have been included by default
+lines(diab_cis, col = c("black", "red"))
+</code></pre>
+
+
+</div>

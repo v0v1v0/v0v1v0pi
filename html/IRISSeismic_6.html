@@ -1,0 +1,138 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>butterworth</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Apply Butterworth filter</h2>
+
+<h3>Description</h3>
+
+<p>The <code>butterworth</code> method of <code>Trace</code> objects returns a new <code>Trace</code>
+where data in the <code>@data</code> slot have been modified by applying a Butterworth filter.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">butterworth(x, n, low, high, type)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a <code>Trace</code> object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>filter order</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>low</code></td>
+<td>
+<p>frequency used in low- or stop/band-pass filters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>high</code></td>
+<td>
+<p>frequency used in high or stop/band-pass filters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>type of filter – <code>'low', 'high', 'pass'</code> or <code>'stop'</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This method creates a Butterworth filter with the specified characteristics and applies
+it to the Trace data.
+</p>
+<p>When only <code>n</code> and <code>low</code> are specified, a high pass filter is applied.
+When only <code>n</code> and <code>high</code> are specified, a low pass filter is applied.
+When <code>n</code> and both <code>low</code> and <code>high</code> are specified, a band pass filter is applied.
+To apply a band stop filter you must specify <code>n</code>, <code>low</code>, <code>high</code> and <code>type='stop'</code>
+</p>
+
+
+<h3>Value</h3>
+
+<p>A new <code>Trace</code> object is returned.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p>signal::butter, signal::filter
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+# Compare to the results in figure 2a of
+#
+# "Determination of New Zealand Ocean Bottom Seismometer Orientation
+#  via Rayleigh-Wave Polarization", Stachnik et al. 
+#
+# http://srl.geoscienceworld.org/content/83/4/704
+#
+# (note: since publication, ZU.NZ19..BH1 has been renamed BH2 and ZU.NZ19..BH2 has been renamed BH1)
+
+starttime &lt;- as.POSIXct("2009-02-18 22:01:07",tz="GMT")
+endtime &lt;- starttime + 630
+verticalLines &lt;- starttime + seq(30,630,100)
+
+# Get data
+stZ &lt;- getSNCL(iris,"ZU.NZ19..BHZ",starttime,endtime)
+st2 &lt;- getSNCL(iris,"ZU.NZ19..BH2",starttime,endtime)
+st1 &lt;- getSNCL(iris,"ZU.NZ19..BH1",starttime,endtime)
+
+# Demean, Detrend, Taper
+trZ &lt;- DDT(stZ@traces[[1]],TRUE,TRUE,0.05)
+tr2 &lt;- DDT(st2@traces[[1]],TRUE,TRUE,0.05)
+tr1 &lt;- DDT(st1@traces[[1]],TRUE,TRUE,0.05)
+
+# Bandpass filter
+trZ_f &lt;- butterworth(trZ,2,0.02,0.04,type='pass')
+tr2_f &lt;- butterworth(tr2,2,0.02,0.04,type='pass')
+tr1_f &lt;- butterworth(tr1,2,0.02,0.04,type='pass')
+
+# 3 rows
+layout(matrix(seq(3)))
+
+# Plot
+plot(trZ_f)
+abline(v=verticalLines,col='gray50',lty=2)
+plot(tr2_f)
+abline(v=verticalLines,col='gray50',lty=2)
+plot(tr1_f)
+abline(v=verticalLines,col='gray50',lty=2)
+
+# Restore default layout
+layout(1)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

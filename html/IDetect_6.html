@@ -1,0 +1,160 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ht_ID_pcm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Apply the Isolate-Detect methodology for multiple change-point detection in the
+mean of a vector with non Gaussian noise</h2>
+
+<h3>Description</h3>
+
+<p>Using the Isolate-Detect methodology, this function estimates the number and locations
+of multiple change-points in the mean of the noisy, piecewise-constant input vector <code>x</code>,
+with noise that is not normally distributed. It also gives the estimated signal, as well as
+the solution path defined in <code>sol_path_pcm</code>. See Details for the relevant literature reference.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ht_ID_pcm(x, s.ht = 3, q_ht = 300, ht_thr_id = 1, ht_th_ic_id = 0.9,
+  p_thr = 1, p_ic = 3)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A numeric vector containing the data in which you would like to find
+change-points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s.ht</code></td>
+<td>
+<p>A positive integer number with default value equal to 3. It is
+used to define the way we pre-average the given data sequence (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q_ht</code></td>
+<td>
+<p>A positive integer number with default value equal to 300. If the
+length of <code>x</code> is less than or equal to <code>q_ht</code>, then no pre-averaging
+will take place.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ht_thr_id</code></td>
+<td>
+<p>A positive real number with default value equal to 1. It is
+used to define the threshold, if the thresholding approach is to be followed; see
+<code>pcm_th</code> for more details on the thresholding approach.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ht_th_ic_id</code></td>
+<td>
+<p>A positive real number with default value equal to 0.9. It is
+useful only if the model selection based Isolate-Detect method is to be followed
+and it is used to define the threshold value that will be used at the first step
+(change-point overestimation) of the model selection approach described in
+<code>pcm_ic</code>. It is applied to the new data, which are obtained after
+we pre-average <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p_thr</code></td>
+<td>
+<p>A positive integer with default value equal to 1. It is used only
+when the threshold based approach (as described in <code>pcm_th</code>) is to be followed
+and it defines the distance between two consecutive end- or start-points of the right- or
+left-expanding intervals, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p_ic</code></td>
+<td>
+<p>A positive integer with default value equal to 3. It is used only
+when the information criterion based approach (described in <code>pcm_ic</code>)
+is to be followed and it defines the distance between two consecutive end- or start-points
+of the right- or left-expanding intervals, respectively.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Firstly, in this function we call <code>normalise</code>, in order to
+create a new data sequence, <code class="reqn">\tilde{x}</code>, by taking averages of observations in
+<code>x</code>. Then, we employ <code>ID_pcm</code> on <code class="reqn">\tilde{x}_q</code> to obtain the
+change-points, namely <code class="reqn">\tilde{r}_1, \tilde{r}_2, ..., \tilde{r}_{\hat{N}}</code> in
+increasing order. To obtain the original location of the change-points with,
+on average, the highest accuracy we define
+<code class="reqn">\hat{r}_k = (\tilde{r}_{k}-1)*\code{s.ht} + \lfloor \code{s.ht}/2 + 0.5 \rfloor, k=1, 2,..., \hat{N}.</code>
+More details can be found in “Detecting multiple generalized change-points by
+isolating single ones”, Anastasiou and Fryzlewicz (2018), preprint.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with the following components:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+   </td>
+</tr>
+<tr>
+<td style="text-align: left;"> <code>cpt</code> </td>
+<td style="text-align: left;"> A vector with the detected change-points.
+   </td>
+</tr>
+<tr>
+<td style="text-align: left;"> <code>no_cpt</code> </td>
+<td style="text-align: left;"> The number of change-points detected.
+   </td>
+</tr>
+<tr>
+<td style="text-align: left;"> <code>fit</code> </td>
+<td style="text-align: left;"> A numeric vector with the estimated piecewise-constant signal.
+   </td>
+</tr>
+<tr>
+<td style="text-align: left;"> <code>solution_path</code> </td>
+<td style="text-align: left;"> A vector containing the solution path.
+ </td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Andreas Anastasiou, <a href="mailto:a.anastasiou@lse.ac.uk">a.anastasiou@lse.ac.uk</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ID_pcm</code> and <code>normalise</code>, which are functions that are
+used in <code>ht_ID_pcm</code>. In addition, see <code>ht_ID_cplm</code> for the case
+of continuous and piecewise-linear signals.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">single.cpt &lt;- c(rep(4,3000),rep(0,3000))
+single.cpt.student &lt;- single.cpt + rt(6000, df = 5)
+cpts_detect &lt;- ht_ID_pcm(single.cpt.student)
+
+three.cpt &lt;- c(rep(4,2000),rep(0,2000),rep(-4,2000),rep(0,2000))
+three.cpt.student &lt;- three.cpt + rt(8000, df = 5)
+cpts_detect_three &lt;- ht_ID_pcm(three.cpt.student)
+</code></pre>
+
+
+</div>

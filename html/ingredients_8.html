@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>calculate_oscillations</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate Oscillations for Ceteris Paribus Explainer</h2>
+
+<h3>Description</h3>
+
+<p>Oscillations are proxies for local feature importance at the instance level.
+Find more details in <a href="https://ema.drwhy.ai/ceterisParibusOscillations.html">Ceteris Paribus Oscillations Chapter</a>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">calculate_oscillations(x, sort = TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a ceteris paribus explainer produced with the <code>ceteris_paribus()</code> function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sort</code></td>
+<td>
+<p>a logical value. If <code>TRUE</code> then rows are sorted along the oscillations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>an object of the class <code>ceteris_paribus_oscillations</code>
+</p>
+
+
+<h3>References</h3>
+
+<p>Explanatory Model Analysis. Explore, Explain, and Examine Predictive Models. <a href="https://ema.drwhy.ai/">https://ema.drwhy.ai/</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library("DALEX")
+library("ingredients")
+
+titanic_small &lt;- select_sample(titanic_imputed, n = 500, seed = 1313)
+
+# build a model
+model_titanic_glm &lt;- glm(survived ~ gender + age + fare,
+                         data = titanic_small, family = "binomial")
+
+explain_titanic_glm &lt;- explain(model_titanic_glm,
+                               data = titanic_small[,-8],
+                               y = titanic_small[,8])
+
+cp_rf &lt;- ceteris_paribus(explain_titanic_glm, titanic_small[1,])
+
+calculate_oscillations(cp_rf)
+
+
+library("ranger")
+
+apartments_rf_model &lt;- ranger(m2.price ~ construction.year + surface + floor +
+                                    no.rooms + district, data = apartments)
+
+explainer_rf &lt;- explain(apartments_rf_model,
+                        data = apartments_test[,-1],
+                        y = apartments_test$m2.price,
+                        label = "ranger forest",
+                        verbose = FALSE)
+
+apartment &lt;- apartments_test[1,]
+
+cp_rf &lt;- ceteris_paribus(explainer_rf, apartment)
+
+calculate_oscillations(cp_rf)
+
+
+</code></pre>
+
+
+</div>

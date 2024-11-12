@@ -1,0 +1,140 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>IAUC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Influence Functions On AUC</h2>
+
+<h3>Description</h3>
+
+<p>Provide two sample versions (DEIF and SIF) of influence function on the AUC.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">IAUC(
+  score,
+  binary,
+  threshold = 0.5,
+  hypothesis = FALSE,
+  testdiff = 0.5,
+  alpha = 0.05,
+  name = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>score</code></td>
+<td>
+<p>A vector containing the predictions (continuous scores) assigned by classifiers; Must be numeric.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>binary</code></td>
+<td>
+<p>A vector containing the true class labels 1: positive and 0: negative. Must have the same dimensions as 'score.'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>A numeric value determining the threshold to distinguish influential observations from normal ones; Must lie between 0 and 1; Defaults to 0.5.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hypothesis</code></td>
+<td>
+<p>Logical which controls the evaluation of SIF under asymptotic distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>testdiff</code></td>
+<td>
+<p>A numeric value determining the difference in the hypothesis testing; Must lie between 0 and 1; Defaults to 0.5.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>A numeric value determining the significance level in the hypothesis testing; Must lie between 0 and 1; Defaults to 0.05.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name</code></td>
+<td>
+<p>A vector comprising the appellations for observations; Must have the same dimensions as 'score'.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Apply two sample versions of influence functions on AUC:
+</p>
+
+<ul>
+<li>
+<p> deleted empirical influence function (DEIF)
+</p>
+</li>
+<li>
+<p> sample influence function (SIF)
+</p>
+</li>
+</ul>
+<p>The concept of influence function focuses on the deletion diagnostics; nevertheless, such techniques may face masking effect due to multiple influential observations.
+To thoroughly investigate the potential cases in binary classification, we suggest end-users to apply <code>ICLC</code> and <code>LAUC</code> as well. For a complete discussion of these functions, please see the reference.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of objects including (1) 'output': a list of results with 'AUC' (numeric), 'SIF' (a list of dataframes) and 'DEIF' (a list of dataframes)); (2) 'rdata': a dataframe of essential results for visualization
+(3) 'threshold': a used numeric value to distinguish influential observations from normal ones; (4) 'test_output': a list of dataframes for hypothesis testing result; (5) 'test_data': a dataframe of essential results in hypothesis testing for visualization
+(6) 'testdiff': a used numeric value to determine the difference in the hypothesis testing; (7) 'alpha': a used nuermic value to determine the significance level.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Bo-Shiang Ke and Yuan-chin Ivan Chang
+</p>
+
+
+<h3>References</h3>
+
+<p>Ke, B. S., Chiang, A. J., &amp; Chang, Y. C. I. (2018). Influence Analysis for the Area Under the Receiver Operating Characteristic Curve. Journal of biopharmaceutical statistics, 28(4), 722-734.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ICLC</code>, <code>LAUC</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(ROCR)
+data("ROCR.simple")
+# print out IAUC results directly
+IAUC(ROCR.simple$predictions,ROCR.simple$labels,hypothesis = "True")
+
+data(mtcars)
+glmfit &lt;- glm(vs ~ wt + disp, family = binomial, data = mtcars)
+prob &lt;- as.vector( predict(glmfit, newdata = mtcars,type = "response"))
+output &lt;- IAUC(prob, mtcars$vs, threshold = 0.3, testdiff = 0.3,
+               hypothesis = TRUE, name = rownames(mtcars))
+# Show results
+print(output)
+# Visualize results
+plot(output)
+</code></pre>
+
+
+</div>

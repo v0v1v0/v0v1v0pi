@@ -1,0 +1,172 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ic_sp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Semi-Parametric models for Interval Censored Data</h2>
+
+<h3>Description</h3>
+
+<p>Fits a semi-parametric model for interval censored data. 
+Can fit either a Cox-PH model or a proportional odds model.  
+</p>
+<p>The covariance matrix for the regression coefficients is estimated via bootstrapping. 
+For large datasets, this can become slow so parallel processing can be used to take advantage of multiple cores via the <code>foreach</code> package.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ic_sp(
+  formula,
+  data,
+  model = "ph",
+  weights = NULL,
+  bs_samples = 0,
+  useMCores = F,
+  B = c(0, 1),
+  controls = makeCtrls_icsp()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>regression formula. Response must be a <code>Surv</code> object of type <code>'interval2'</code>or <code>cbind</code>. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>dataset</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>What type of model to fit. Current choices are "<code>ph</code>" (Cox PH) or "<code>po</code>" (proportional odds)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>Vector of case weights. Not standardized; see details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bs_samples</code></td>
+<td>
+<p>Number of bootstrap samples used for estimation of standard errors</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>useMCores</code></td>
+<td>
+<p>Should multiple cores be used for bootstrap sample? Does not register cluster (see example)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>Should intervals be open or closed? See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>controls</code></td>
+<td>
+<p>Advanced control options</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Response variable should either be of the form <code>cbind(l, u)</code> or 
+<code>Surv(l, u, type = 'interval2')</code>, where <code>l</code> and <code>u</code> are the lower 
+and upper ends of the interval known to contain the event of interest. 
+Uncensored data can be included by setting <code>l == u</code>, right censored data 
+can be included by setting <code>u == Inf</code> or <code>u == NA</code> and left censored 
+data can be included by setting <code>l == 0</code>.
+</p>
+<p>The argument <code>B</code> determines whether the intervals should be open or closed, 
+i.e. <code>B = c(0,1)</code> implies that the event occurs within the interval <code>(l,u]</code>.
+The exception is that if <code>l == u</code>, it is assumed that the event is uncensored, 
+regardless of <code>B</code>. 
+</p>
+<p>In regards to weights, they are not standardized. 
+This means that if weight[i] = 2, this is the equivalent to having two 
+observations with the same values as subject i. 
+</p>
+<p>The algorithm used is inspired by the extended ICM algorithm from Wei Pan 1999.
+However, it uses a conditional Newton Raphson step (for the regression parameters) 
+and an ICM step (for the baseline survival parameters), rather than one single
+ICM step (for both sets). In addition, a gradient ascent can also be used
+to update the baseline parameters. This step is necessary if the
+data contains many uncensored observations, very similar to how 
+the EM algorithm greatly accelerates the ICM algorithm for the NPMLE 
+(gradient ascent is used rather than the EM, as the M step is not 
+in closed form for semi-parametric models). 
+</p>
+<p>Earlier versions of icenReg used an active set algorithm, which was not
+as fast for large datasets.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Clifford Anderson-Bergman
+</p>
+
+
+<h3>References</h3>
+
+<p>Pan, W., (1999), Extending the iterative convex minorant algorithm to the Cox model for interval-censored data, <em>Journal of Computational and Graphical Statistics</em>, Vol 8(1), pp109-120
+</p>
+<p>Wellner, J. A., and Zhan, Y. (1997) A hybrid algorithm for computation of the maximum likelihood estimator from censored data, <em>Journal of the  American Statistical Association</em>, Vol 92, pp945-959
+</p>
+<p>Anderson-Bergman, C. (preprint) Revisiting the iterative convex minorant algorithm for interval censored survival regression models
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(1)
+
+sim_data &lt;- simIC_weib(n = 100, inspections = 5, inspectLength = 1)
+ph_fit &lt;- ic_sp(Surv(l, u, type = 'interval2') ~ x1 + x2, 
+                data = sim_data)	
+# Default fits a Cox-PH model
+
+summary(ph_fit)		
+# Regression estimates close to true 0.5 and -0.5 values
+
+
+new_data &lt;- data.frame(x1 = c(0,1), x2 = c(1, 1) )
+rownames(new_data) &lt;- c('group 1', 'group 2')
+plot(ph_fit, new_data)
+# plotting the estimated survival curves
+
+po_fit &lt;- ic_sp(Surv(l, u, type = 'interval2') ~ x1 + x2, 
+                data = sim_data, model = 'po')
+# fits a proportional odds model
+
+summary(po_fit)
+
+# Not run: how to set up multiple cores
+# library(doParallel)
+# myCluster &lt;- makeCluster(2) 
+# registerDoParallel(myCluster)
+# fit &lt;- ic_sp(Surv(l, u, type = 'interval2') ~ x1 + x2,
+#              data = sim_data, useMCores = TRUE
+#              bs_samples = 500)
+# stopCluster(myCluster)
+
+
+</code></pre>
+
+
+</div>

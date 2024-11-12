@@ -1,0 +1,212 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fn_case</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Case statements applying a function to all inputs</h2>
+
+<h3>Description</h3>
+
+<p>Case statements applying a function to all inputs
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fn_case(x, fn, ..., preserve = FALSE, default = NA)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fn</code></td>
+<td>
+<p>A function to apply to the left-hand side of each formula in <code>...</code>
+</p>
+<p>Either a quoted or unquoted function name, an anonymous <code>function</code>, or
+a purrr-style formula.
+</p>
+<p>The function should take two inputs, the first being <code>x</code> and the second
+being the left-hand side of the formula.
+The function should return a logical vector, either of length 1 or the same
+length as <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>&lt;<code>dynamic-dots</code>&gt; A sequence of two-sided
+formulas or named arguments.
+</p>
+
+<ul>
+<li> <p><strong>Formulas</strong>: Elements of <code>x</code> that return <code>TRUE</code> when passed to <code>fn</code> with
+the left hand side (LHS) of each formula will be replaced with the value in
+the right hand side (RHS).
+The LHS must evaluate to a logical vector when passed to <code>fn</code> with <code>x</code>.
+The RHS must be of length 1 or the same length as all other RHS.
+</p>
+</li>
+<li> <p><strong>Named arguments</strong>: named arguments are passed as additional arguments
+to the function <code>fn</code>.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>preserve</code></td>
+<td>
+<p>If <code>TRUE</code>, unmatched elements of <code>x</code> will be returned
+unmodified.
+(The elements may have their type coerced to be compatible with
+replacement values.)
+If <code>FALSE</code>, unmatched elements of <code>x</code> will be replaced with <code>default</code>.
+Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>default</code></td>
+<td>
+<p>If <code>preserve</code> is <code>FALSE</code>, a value to replace unmatched
+elements of <code>x</code>.
+Defaults to <code>NA</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A vector of length 1 or n, matching the length of the logical input
+or output vectors.
+Inconsistent lengths will generate an error.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>fn_case_fct()</code> to return a factor and
+<code>fn_case_list()</code> to return a list
+</p>
+<p><code>fn_switch_case()</code>, which applies a function to each formula's LHS,
+but not <code>x</code>
+</p>
+<p><code>switch_case()</code>, a simpler alternative for exact matching
+</p>
+<p><code>grep_case()</code>, a simpler alternative for regex pattern matching
+</p>
+<p><code>in_case()</code>, a pipeable alternative to <code>dplyr::case_when()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Replicate switch_case()
+parties &lt;- sample(c("d", "r", "i", "g", "l"), 20, replace = TRUE)
+
+fn_case(
+  parties,
+  fn = `%in%`,
+  "d" ~ "Democrat",
+  "r" ~ "Republican",
+  "i" ~ "Independent",
+  "g" ~ "Green",
+  "l" ~ "Libertarian"
+)
+
+# Replicate grep_case()
+countries &lt;- c(
+  "France", "Ostdeutschland", "Westdeutschland", "Nederland",
+  "Belgie (Vlaanderen)", "Belgique (Wallonie)", "Luxembourg", "Italia"
+)
+
+fn_case(
+  countries,
+  fn = function(x, pattern, ...) {grepl(pattern, x, ...)},
+  "Deutschland" ~ "Germany",
+  "Belgi(qu)?e" ~ "Belgium",
+  "Nederland"   ~ "Netherlands",
+  "Italia"      ~ "Italy",
+  preserve      = TRUE,
+  ignore.case   = TRUE
+)
+
+fn_case(
+  countries,
+  fn = ~ grepl(.y, .x),
+  "Deutschland" ~ "Germany",
+  "Belgi(qu)?e" ~ "Belgium",
+  "Nederland"   ~ "Netherlands",
+  "Italia"      ~ "Italy",
+  preserve      = TRUE,
+  ignore.case   = TRUE
+)
+
+# Recode values in a range
+time    &lt;- runif(10, 1, 12)
+hours   &lt;- time %/% 1
+minutes &lt;- time %% 1 * 60
+
+hours &lt;- hours %&gt;%
+  if_case(minutes &gt; 32.5, (. + 1) %% 12, .) %&gt;%
+  switch_case(0 ~ 12, preserve = TRUE)
+
+minutes %&gt;%
+  fn_case(
+    fn = ~ abs(.x - .y) &lt;= 2.5,
+    0  ~ "o'clock",
+    60 ~ "o'clock",
+    30 ~ "half past",
+    15 ~ "quarter past",
+    45 ~ "quarter to",
+    5  ~ "five past",
+    10 ~ "ten past",
+    20 ~ "twenty past",
+    25 ~ "twenty-five past",
+    55 ~ "five to",
+    50 ~ "ten to",
+    40 ~ "twenty to",
+    35 ~ "twenty-five to"
+  ) %&gt;%
+  switch_case(
+    "o'clock" ~ paste(hours, .),
+    default   = paste(., hours)
+  )
+
+# Replicate vctrs::vec_ptype_abbr() (used for tibble column labels)
+# Based on a contribution by Patrice Kiener
+in_herits &lt;- function(x) {
+  fn_case(
+    x,
+    fn = inherits,
+    "factor"     ~ "fct",
+    "character"  ~ "chr",
+    "numeric"    ~ "dbl",
+    "integer"    ~ "int",
+    "logical"    ~ "lgl",
+    "complex"    ~ "cpl",
+    "raw"        ~ "raw",
+    "matrix"     ~ "mat",
+    "array"      ~ "arr",
+    "data.frame" ~ "df",
+    "list"       ~ "lst",
+    "function"   ~ "fn",
+    default      = class(x)[[1]]
+  )
+}
+
+in_herits(1:3)
+in_herits(letters[1:3])
+in_herits(fn_case)
+</code></pre>
+
+
+</div>

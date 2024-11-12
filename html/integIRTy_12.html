@@ -1,0 +1,168 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>intIRTeasyRun</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+The easyrun function for integrating multiple modalities of high throughput assays using binary input matrix. 
+</h2>
+
+<h3>Description</h3>
+
+<p>It fits IRT models on each
+of the specified platform and calculate integrated latent trait. If required, permuted latent trait by gene sampling
+will also be calculated. An option for parallel computing is implemented to speed up the computation. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">intIRTeasyRun(platforms, model = 3, guessing = FALSE,
+    addPermutedScore = FALSE, fold = 1, echo = TRUE, parallel = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>platforms</code></td>
+<td>
+
+<p>A list of response matrices representing different platforms. It assumes that the number of rows (genes ) must be equal whiel the number of columns (samples)
+can be different.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+
+<p>The model type as described in fitOnSinglePlat.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>guessing</code></td>
+<td>
+
+<p>A logical variable indicating whether to include guessing parameter in the model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>addPermutedScore</code></td>
+<td>
+
+<p>A logical variable indicating whether to also calculate permuted latent trait by gene sampling.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fold</code></td>
+<td>
+
+<p>The fold of sampling to calculate permuted score as used in calculatePermutedScoreByGeneSampling(). Only relevant when addPermutedScore=TRUE is used.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>echo</code></td>
+<td>
+
+<p>A logical variable indicating whether to print out the progress information.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+
+<p>Logical indicating whether to use parallel computing with foreach package as backend.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Parallel computing uses foreach and related packages for backend. The parallelism assumes computation on each 
+platform individually takes similar time; the latent trait computation of the integrated data is assumed to be
+comparable to computation on individual platform. By default, all parallel options are set to be FALSE. 
+Parallelism happens on the individual assay and combined data level;
+No parallelism happens on genes since it would only slow donw the computation due to data transfering!
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>fits </code></td>
+<td>
+<p>Model fits for each platform as returned by fitOnSinglePlat function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>estimatedScoreMat</code></td>
+<td>
+<p>A matrix of estimated latent traits. The first several columns correspond to the
+individual assays; the last column represents the integrated latent trait with all data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>permutedScoreMat </code></td>
+<td>
+<p>A matrix of latent trait estimates after permuting the binary matrix within columns. This is only available
+if addPermutedScore is set to TRUE. The first several columns correspond to the
+individual assays; the last column represents the integrated data.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dscrmnList </code></td>
+<td>
+<p>A list of discrimination parameters. Each element contains all of the discrimination parameters as a vector for each
+assay. The last element contains the discrimination parameters for the integrated data which is formed by combining discrimination
+parameters from each assay sequentially.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dffcltList </code></td>
+<td>
+<p> Same format as dscrmnList except it contains difficulty parameter.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gussngList </code></td>
+<td>
+<p> Same format as dscrmnList except it contains guessing parameter. Be default, this is just all 0's.
+</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Pan Tong (nickytong@gmail.com), Kevin R Coombes (krc@silicovore.com)
+</p>
+
+
+<h3>References</h3>
+
+<p>Tong P, Coombes KR. <em>integIRTy: a method to identify altered
+genes in cancer accounting for multiple mechanisms of regulation
+using item response theory</em>. Bioinformatics, 2012 Nov 15;
+28(22):2861–9.  
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>intIRTeasyRunFromRaw, fitOnSinglePlat, calculatePermutedScoreByGeneSampling</code>
+</p>
+
+
+</div>

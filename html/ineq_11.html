@@ -1,0 +1,144 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Lc</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Lorenz Curve</h2>
+
+<h3>Description</h3>
+
+<p>Computes the (empirical) ordinary and generalized Lorenz curve of a vector x</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Lc(x, n = rep(1,length(x)), plot = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a vector containing non-negative elements.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>a vector of frequencies, must be same length as <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>logical. If TRUE the empirical Lorenz curve will be plotted.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>Lc(x)</code> computes the empirical ordinary Lorenz curve of <code>x</code>
+as well as the generalized Lorenz curve (= ordinary Lorenz curve *
+mean(x)). The result can be interpreted like this: <code>p</code>*100 percent
+have <code>L(p)</code>*100 percent of <code>x</code>.
+</p>
+<p>If <code>n</code> is changed to anything but the default <code>x</code> is
+interpreted as a vector of class means and <code>n</code> as a vector of
+class frequencies: in this case <code>Lc</code> will compute the minimal
+Lorenz curve (= no inequality within each group). A maximal curve can be
+computed with <code>Lc.mehran</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of class <code>"Lc"</code> with the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>vector of percentages</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L</code></td>
+<td>
+<p>vector with values of the ordinary Lorenz curve</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L.general</code></td>
+<td>
+<p>vector with values of the generalized Lorenz curve</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>B C Arnold: Majorization and the Lorenz Order: A Brief Introduction, 1987, Springer,
+</p>
+<p>F A Cowell: Measurement of Inequality, 2000, in A B Atkinson / F Bourguignon (Eds): Handbook of Income Distribution, Amsterdam,
+</p>
+<p>F A Cowell: Measuring Inequality, 1995 Prentice Hall/Harvester Wheatshef.</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot.Lc</code>, <code>Lc.mehran</code>,
+<code>plot.theorLc</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Load and attach income (and metadata) set from Ilocos, Philippines
+data(Ilocos)
+attach(Ilocos)
+## extract and rescale income for the provinces "Pangasinan" und "La Union"
+income.p &lt;- income[province=="Pangasinan"]/10000
+income.u &lt;- income[province=="La Union"]/10000
+
+## compute the Lorenz curves
+Lc.p &lt;- Lc(income.p)
+Lc.u &lt;- Lc(income.u)
+## it can be seen the the inequality in La Union is higher than in
+## Pangasinan because the respective Lorenz curve takes smaller values.
+plot(Lc.p)
+lines(Lc.u, col=2)
+## the picture becomes even clearer with generalized Lorenz curves
+plot(Lc.p, general=TRUE)
+lines(Lc.u, general=TRUE, col=2)
+## inequality measures emphasize these results, e.g. Atkinson's measure
+ineq(income.p, type="Atkinson")
+ineq(income.u, type="Atkinson")
+## or Theil's entropy measure
+ineq(income.p, type="Theil", parameter=0)
+ineq(income.u, type="Theil", parameter=0)
+
+
+
+# income distribution of the USA in 1968 (in 10 classes)
+# x vector of class means, n vector of class frequencies
+x &lt;- c(541, 1463, 2445, 3438, 4437, 5401, 6392, 8304, 11904, 22261)
+n &lt;- c(482, 825, 722, 690, 661, 760, 745, 2140, 1911, 1024)
+
+# compute minimal Lorenz curve (= no inequality in each group)
+Lc.min &lt;- Lc(x, n=n)
+# compute maximal Lorenz curve (limits of Mehran)
+Lc.max &lt;- Lc.mehran(x,n)
+# plot both Lorenz curves in one plot
+plot(Lc.min)
+lines(Lc.max, col=4)
+
+# add the theoretic Lorenz curve of a Lognormal-distribution with variance 0.78
+lines(Lc.lognorm, parameter=0.78)
+# add the theoretic Lorenz curve of a Dagum-distribution
+lines(Lc.dagum, parameter=c(3.4,2.6))
+</code></pre>
+
+
+</div>

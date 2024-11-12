@@ -1,0 +1,200 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_workflow_design</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Workflow design
+</h2>
+
+<h3>Description</h3>
+
+<p><code>get_workflow_design</code> provides default control values for the simulation plan, ideally chosen for good performance. The default design is ilustrated in the examples.  
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_workflow_design(npar, n_proj_stats=npar, n_latent=0L,
+                    final_reft_size=NULL,
+                    refine_blocksize=NULL, subblock_nbr=NULL,
+                    version=packageVersion("Infusion"),
+                    cumn_over_maxit = NULL,
+                    test_fac=NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>npar</code></td>
+<td>
+
+<p>Number of fitted parameters of the statistical model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_proj_stats</code></td>
+<td>
+<p>number of projected summary statistics.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_latent</code></td>
+<td>
+<p>Number of latent variables to be predicted.</p>
+</td>
+</tr>
+</table>
+<p><code>npar</code>, <code>n_proj_stats</code> and <code>n_latent</code> are here distinguished for clarity, but only their sum is currently used to define the sampling design.  
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>final_reft_size</code></td>
+<td>
+
+<p>NULL, or integer specifying a non-default value of the final reference table size.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>refine_blocksize</code></td>
+<td>
+
+<p>NULL, or integer specifying a non-default value of the number of points added per refine() call (except perhaps the first refine call in a workflow).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subblock_nbr</code></td>
+<td>
+
+<p>NULL, or integer specifying a non-default value of the target number of iterations per refine() call (actual number of iterations may differ).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>version</code></td>
+<td>
+
+<p>A version number for <span class="pkg">Infusion</span>. This is intended to allow reproducibility of results of some past versions, as return values have changed over versions.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cumn_over_maxit</code></td>
+<td>
+
+<p>logical; Whether to stop iteration when the target cumulative number of points is added to the reference table, or when the target number of iterations is first reached.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test_fac</code></td>
+<td>
+
+<p>optional numeric value; for testing a workflow, it may be useful to run it with smaller reference table sizes. <code>test_fac</code> specifies a reduction factor for these sizes, relative to the default design.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>get_workflow_design</code> returns a list of control values, with elements <code>final_reft_size</code>, <code>init_reft_size</code>, <code>refine_blocksize</code>, <code>reftable_sizes</code>, and <code>subblock_nbr</code>, which can be used as shown in the Examples; as well as <code>cumn_over_maxit</code>, <code>first_refine_ntot</code>, and possibly other elements.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## This shows how the get_workflow_design() may be used, 
+## but in most cases one does not need to manipulate it.
+
+## Not run: 
+  blurred &lt;- function(mu,s2,sample.size) {
+    s &lt;- rnorm(n=sample.size,mean=mu,sd=sqrt(s2))
+    s &lt;- exp(s/4)
+    return(c(mean=mean(s),var=var(s)))
+  }
+  
+  ## Simulated data:
+  set.seed(123)
+  dSobs &lt;- blurred(mu=4,s2=1,sample.size=40)
+  
+  workflow_design &lt;- get_workflow_design(npar=2L)
+
+  ## Construct initial reference table:
+  
+  # Sample its parameters:
+  if (IMPLICIT &lt;- TRUE) { # use implicit control by get_workflow_design()
+    parsp_j &lt;- init_reftable(lower=c(mu=2.5,s2=0.25,sample.size=40),
+                           upper=c(mu=5.2,s2=2.4,sample.size=40))
+    # =&gt; get_workflow_design() has been called internally with default values 
+    #    to provide the dimension of the initial reference table.  
+    #    The following syntax provides a more explicit control:
+  } else {
+    parsp_j &lt;- init_reftable(lower=c(mu=2.5,s2=0.25,sample.size=40),
+                             upper=c(mu=5.2,s2=2.4,sample.size=4,
+                             nUnique=workflow_design$init_reft_size))
+  }
+  # and yet another way to the same result could be
+  #
+  # parsp_j &lt;- data.frame(mu=runif(init_reft_size,min=2.5,max=5.2),
+  #                       s2=runif(init_reft_size,min=0.25,max=2.4),
+  #                       sample.size=40)
+  
+  # Generate the initial simulations:
+  dsimuls &lt;- add_reftable(, Simulate="blurred", parsTable=parsp_j, verbose=FALSE)
+  
+  ## Construct projections
+  mufit &lt;- project("mu",stats=c("mean","var"),data=dsimuls,verbose=FALSE)
+  s2fit &lt;- project("s2",stats=c("mean","var"),data=dsimuls,verbose=FALSE)
+  dprojectors &lt;- list(MEAN=mufit,VAR=s2fit)
+  
+  ## Apply projections on simulated statistics and 'data':
+  dprojSimuls &lt;- project(dsimuls,projectors=dprojectors,verbose=FALSE)
+  dprojSobs &lt;- project(dSobs,projectors=dprojectors)
+  
+  ## Summary-likelihood inference:
+  # Initial Inference of log-likelihood surface
+  slik_j &lt;- infer_SLik_joint(dprojSimuls, stat.obs=dprojSobs, verbose=TRUE)
+  # Find maximum, confidence intervals...
+  slik_j &lt;- MSL(slik_j, eval_RMSEs=FALSE, CIs=FALSE)
+  
+  ## Refinements over iterations
+  # Here, with only two estimated parameters, workflow_design$final_reft_size
+  # suggests a final reference table of 5000 simulations, attained through
+  # 6 refine() calls with intermediate sizes given by 
+  (workflow_design$reftable_sizes)
+  # here 500, 1000, 2000, 3000, 4000, 5000.
+  # 
+  if (IMPLICIT) { # Again using implicit control by get_workflow_design()
+    # Essentially, it suffices to call 
+    for (it in seq(6)) slik_j &lt;- 
+      refine(slik_j, eval_RMSEs= it==6L, CIs= it==6L)
+    # to run the default workflow. Again, the following syntax, 
+    # showing how successive table sizes are controlled internally, 
+    # provides a more explicit control:
+  } else {
+    reftable_sizes &lt;- workflow_design$reftable_sizes
+    init_reft_size &lt;- workflow_design$init_reft_size
+    refine_sizes &lt;- diff(c(init_reft_size, reftable_sizes))
+    maxit &lt;- workflow_design$subblock_nbr
+    for(it in seq_len(length(refine_sizes)-1L)) {
+      add_it &lt;- refine_sizes[it]
+      slik_j &lt;- refine(slik_j, ntot=add_it, maxit=maxit, 
+                       eval_RMSEs=FALSE, CIs=FALSE)
+    }
+    add_it &lt;- tail(refine_sizes,1L)
+    slik_j &lt;- refine(slik_j, ntot=add_it, maxit=maxit, 
+                     CIs=add_it, eval_RMSEs=add_it)
+  }
+
+## End(Not run)
+  
+</code></pre>
+
+
+</div>

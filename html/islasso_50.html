@@ -1,0 +1,101 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.islasso.path</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Prediction method for islasso.path fitted objects</h2>
+
+<h3>Description</h3>
+
+<p>Prediction method for islasso fitted objects
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'islasso.path'
+predict(object, newdata, type = c("link", "response",
+  "coefficients", "class"), lambda, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>a fitted object of class <code>"islasso.path"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p>optionally, a data frame in which to look for variables with which to predict. If omitted, the fitted linear predictors are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>the type of prediction required. The default is on the scale of the linear predictors; the alternative "response" is on the scale of the response variable.
+Thus for a default binomial model the default predictions are of log-odds (probabilities on logit scale) and type = "response" gives the predicted probabilities. The <code>coefficients</code> option returns coefficients. Type "class" applies only to "binomial" models, and produces the class label.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>Value(s) of the penalty parameter lambda at which predictions are required. Default is the entire sequence used to create the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments passed to or from other methods.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object depending on the type argument
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Maintainer: Gianluca Sottile &lt;gianluca.sottile@unipa.it&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>islasso.path</code>, <code>islasso.path.fit</code>, <code>coef.islasso.path</code>, <code>residuals.islasso.path</code>, <code>GoF.islasso.path</code>, <code>logLik.islasso.path</code>, <code>fitted.islasso.path</code>, <code>summary.islasso.path</code> and <code>deviance.islasso.path</code> methods.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+ set.seed(1)
+ n &lt;- 100
+ p &lt;- 30
+ p1 &lt;- 10  #number of nonzero coefficients
+ coef.veri &lt;- sort(round(c(seq(.5, 3, l=p1/2), seq(-1, -2, l=p1/2)), 2))
+ sigma &lt;- 1
+
+ coef &lt;- c(coef.veri, rep(0, p-p1))
+
+ X &lt;- matrix(rnorm(n*p), n, p)
+ mu &lt;- drop(X%*%coef)
+ y &lt;- mu + rnorm(n, 0,sigma)
+
+ o &lt;- islasso.path(y ~ ., data = data.frame(y = y, X), 
+                   family = gaussian())
+ temp &lt;- GoF.islasso.path(o)
+ predict(o, type = "response", lambda = temp$lambda.min)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,90 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iCARH.getBeta</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Return model parameters</h2>
+
+<h3>Description</h3>
+
+<p>Group of functions to return model parameters of interest
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iCARH.getBeta(fit)
+
+iCARH.getARCoeff(fit)
+
+iCARH.getTreatmentEffect(fit)
+
+iCARH.getPathwaysCoeff(fit, path.names = NULL)
+
+iCARH.getDataImputation(fit)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fit</code></td>
+<td>
+<p>Object returned by iCARH.model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>path.names</code></td>
+<td>
+<p>pathway names</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>the <code>iCARH.get[*]</code> functions return a an array with corresponding model parameters MCMC draws.
+</p>
+
+
+<h3>Functions</h3>
+
+
+<ul>
+<li> <p><code>iCARH.getBeta</code>: Get beta parameter draws from all chains combined
+</p>
+</li>
+<li> <p><code>iCARH.getARCoeff</code>: return theta coefficients
+</p>
+</li>
+<li> <p><code>iCARH.getTreatmentEffect</code>: return alpha coefficients
+</p>
+</li>
+<li> <p><code>iCARH.getPathwaysCoeff</code>: return phi coefficients
+</p>
+</li>
+<li> <p><code>iCARH.getDataImputation</code>: return complete data (including imputed data)
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">data.sim = iCARH.simulate(4, 10, 14, 8, 2, path.probs=0.3, Zgroupeff=c(0,4),
+beta.val=c(1,-1,0.5, -0.5))
+XX = data.sim$XX
+Y = data.sim$Y
+Z = data.sim$Z
+pathways = data.sim$pathways
+
+rstan_options(auto_write = TRUE)
+options(mc.cores = 2)
+fit = iCARH.model(XX, Y, Z,groups=rep(c(0,1), each=5), pathways, 
+control = list(adapt_delta = 0.99, max_treedepth=10), iter = 2, chains = 2)
+if(!is.null(fit$icarh))
+iCARH.getBeta(fit)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,350 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>BEMM.1PLAG</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Calibrating 1PLAG model via Bayesian Expectation-Maximization-Maximization (BEMM) algorithm.
+</h2>
+
+<h3>Description</h3>
+
+<p>This function can estimate the item parameters of the 1PLAG model via Bayesian Expectation-Maximization-Maximization (BEMM) algorithm proposed by Guo, Wu, Zheng, &amp; Wang (2018, April). Both Bayesan modal estimates and maximum likelihood estimates are available. In addition, the examinees' ability and a few model fits information can be also obtained through this function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">BEMM.1PLAG(data, PriorAlpha = c(-1.9, 1), PriorBeta = c(0, 4), 
+	PriorGamma = c(-1.39, 0.25), InitialAlpha = NA, 
+	InitialBeta = NA, InitialGamma = NA, Tol = 0.0001, 
+	max.ECycle = 2000L, max.MCycle = 100L, n.decimal = 3L, 
+	n.Quadpts = 31L, Theta.lim = c(-6, 6), Missing = -9, 
+	ParConstraint = FALSE, BiasSE=FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>A <code>matrix</code> or <code>data.frame</code> consists of dichotomous data (1 for correct and 0 for wrong response), with missing data coded as in Missing (by default, Missing=-9). Each row of data represents a examinne' responses, and each column represents an item.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PriorAlpha</code></td>
+<td>
+
+<p>The user specified <strong>normal distribution</strong> prior for the logarithmic weight of the ability in the guessing component (<em>ln(alpha</em>)) parameter in the 1PLAG model. Can be:
+</p>
+	
+<ul>
+<li>
+<p> A <code>numeric</code> with two hyperparameters normal distribution for all <em>log(alpha)</em> parameters. By default, PriorAlpha=c(-1.9,1), which means a Normal prior of mean=-1.9 and variance=1 will be used for the logarithmic weight of the ability.
+</p>
+</li>
+<li>
+<p> A <code>NA</code>, refers to no priors will be used, so maximum likelihood estimates for the weight of the ability will be obtained.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PriorBeta</code></td>
+<td>
+
+<p>The user specified <strong>normal distribution</strong> prior for item difficulty (<em>beta</em>) parameters in the 1PLAG and 1PLG model. Can be:
+</p>
+	
+<ul>
+<li>
+<p> A <code>numeric</code> with two hyperparameters mean and variance of normal distribution for all <em>beta</em> parameters. By default, PriorBeta=c(0,4), which means a normal prior of mean=0 and variance=4 will be used for all item difficulty parameters.
+</p>
+</li>
+<li>
+<p> A <code>NA</code>, refers to no priors will be used, so maximum likelihood estimates for item difficulty parameter will be obtained.
+</p>
+</li>
+<li>
+<p> A <code>matrix</code> with two columns, and each row of matrix consists of two hyperparameters of normal prior (mean and variance) for single item <em>beta</em> parameter.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PriorGamma</code></td>
+<td>
+
+<p>The user specified <strong>normal distribution</strong> prior for item guessing (<em>gamma</em>) parameters in the 1PLAG and 1PLG model. Can be:
+</p>
+	
+<ul>
+<li>
+<p> A <code>numeric</code> with two hyperparameters mean and variance of normal distribution for all <em>gamma</em> parameters. By default, PriorGamma=c(-1.39,0.25), which means a normal prior of mean=-1.39 and variance=0.25 will be used for all item guessing parameters.
+</p>
+</li>
+<li>
+<p> A <code>NA</code>, refers to no priors will be used, so maximum likelihood estimates for item guessing parameter will be obtained.
+</p>
+</li>
+<li>
+<p> A <code>matrix</code> with two columns, and each row of matrix consists of two hyperparameters of normal prior (mean and variance) for single item <em>gamma</em> parameter.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>InitialAlpha</code></td>
+<td>
+
+<p>The user specified starting value for the weight of the ability in the guessing component (<em>alpha</em>) parameters in the 1PLAG model. Can be:
+</p>
+	
+<ul>
+<li>
+<p> A <code>NA</code> (default), refers to no specified starting values for <em>alpha</em> parameter.
+</p>
+</li>
+<li>
+<p> A single number (<code>numeric</code>), refers to set this number to be the starting value of <em>alpha</em>.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>InitialBeta</code></td>
+<td>
+
+<p>The user specified starting values for item difficulty (<em>beta</em>) parameters in the 1PLAG and 1PLG models. Can be:
+</p>
+	
+<ul>
+<li>
+<p> A <code>NA</code> (default), refers to no specified starting values for <em>beta</em> parameter.
+</p>
+</li>
+<li>
+<p> A single number (<code>numeric</code>), refers to set this number to be the starting values of <em>beta</em> for all items.
+</p>
+</li>
+<li>
+<p> A <code>numeric</code> consists of starting values for each <em>beta</em> parameter.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>InitialGamma</code></td>
+<td>
+
+<p>The user specified starting values for item guessing (<em>gamma</em>) parameters in the 1PLAG and 1PLG models. Can be:
+</p>
+	
+<ul>
+<li>
+<p> A <code>NA</code> (default), refers to no specified starting values for <em>gamma</em> parameter.
+</p>
+</li>
+<li>
+<p> A single number (<code>numeric</code>), refers to set this number to be the starting values of <em>gamma</em> for all items.
+</p>
+</li>
+<li>
+<p> A <code>numeric</code> consists of starting values for each <em>gamma</em> parameter.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Tol</code></td>
+<td>
+
+<p>A single number (<code>numeric</code>), refers to convergence threshold for E-step cycles; defaults are 0.0001.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.ECycle</code></td>
+<td>
+
+<p>A single <code>integer</code>, refers to maximum number of E-step cycles; defaults are 2000L.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.MCycle</code></td>
+<td>
+
+<p>A single <code>integer</code>, refers to maximum number of M-step cycles; defaults are 100L.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.Quadpts</code></td>
+<td>
+
+<p>A single <code>integer</code>, refers to number of quadrature points per dimension (must be larger than 5); defaults are 31L.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.decimal</code></td>
+<td>
+
+<p>A single <code>integer</code>, refers to number of decimal places when outputs results.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Theta.lim</code></td>
+<td>
+
+<p>A <code>numeric</code> with two number, refers to the range of integration grid for each dimension; default is c(-6, 6).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Missing</code></td>
+<td>
+
+<p>A single number (<code>numeric</code>) to indicate which elements are missing; default is -9. The Missing cannot be 0 or 1.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ParConstraint</code></td>
+<td>
+
+<p>A logical value to indicate whether estimates parametes in a reasonable range; default is FALSE. If ParConstraint=TRUE: <em>alpha</em> in [0, 0.707], <em>beta</em> in [-6, 6], <em>gamma</em> in [-7, 0].
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>BiasSE</code></td>
+<td>
+
+<p>A logical value to determine whether directly estimating SEs from inversed Hession matrix rather than USEM method, default is FALSE.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>One parameter logsitc ability-based guessing (1PLAG) model proposed by San Martín et al.(2006). Let <em>invlogit(x)=1 / (1 + exp(-x))</em>:
+</p>
+<p style="text-align: center;"><code class="reqn">P(x = 1|\theta, \alpha, \beta, \gamma) = invlogit(\theta - \beta) + (1 - invlogit(\theta - \beta)) * invlogit(\alpha * \theta + \gamma)</code>
+</p>
+
+<p>where x=1 is the correct response, <em>theta</em> is examinne's ability; <em>alpha</em> is the weight of the ability in the guessing component; <em>beta</em> and <em>gamma</em> are the item difficulty and guessing parameter, respectively.
+These parameter labels are <strong>capitalized</strong> in program for emphasis.  
+</p>
+
+
+<h3>Value</h3>
+
+<p>This function will return a list includes following:
+</p>
+
+<dl>
+<dt>Est.ItemPars</dt>
+<dd>
+<p>A <code>dataframe</code> consists of the estimates of <em>alpha</em>, <em>beta</em> and <em>gamma</em> parameters and corresponding estimated standard errors.</p>
+</dd>
+<dt>Est.Theta</dt>
+<dd>
+<p>A <code>dataframe</code> consists of the estimates of <em>theta</em> and corresponding estimated standard errors (EAP method).</p>
+</dd>
+<dt>Loglikelihood</dt>
+<dd>
+<p>The loglikelihood.</p>
+</dd>
+<dt>Iteration</dt>
+<dd>
+<p>The number of iterations.</p>
+</dd>
+<dt>EM.Map</dt>
+<dd>
+<p>The parameter estimation history of iterations.</p>
+</dd>
+<dt>fits.test</dt>
+<dd>
+<p>The model fits information includes G2 test, AIC, BIC and RMSEA.</p>
+</dd>
+<dt>Elapsed.time</dt>
+<dd>
+<p>The running time of the program.</p>
+</dd>
+<dt>InitialValues</dt>
+<dd>
+<p>The initial values of item parameters.</p>
+</dd>
+</dl>
+<h3>References</h3>
+
+<p>Guo, S., Wu, T., Zheng, C., &amp; Wang, W.-C. (2018, April). <em>Bayesian Expectation-Maximization-Maximization for 1PL-AG Model</em>. Paper presented at the 80th NCME Annual Meeting, New York, NY. 
+</p>
+<p>San Martín, E., Del Pino, G., &amp; De Boeck, P. (2006). IRT models for ability-based guessing. <em>Applied Psychological Measurement</em>, <em>30</em>(3), 183-203. <a href="https://doi.org/10.1177/0146621605282773">doi:10.1177/0146621605282773</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">###Example: A brief simulation study###
+
+#generate true values and response matrix
+set.seed(10)
+library(IRTBEMM)
+I=500    #set the number of examinees is 500
+J=10      #set the number of items is 10
+true.alpha=0.2 #simulate true weight parameters
+true.beta=rnorm(J,0,1)     #simulate true difficulty parameters
+true.gamma=rnorm(J,-1.39,0.5)    #simulate true guessing parameters
+true.th=rnorm(I,0,1)       #simulate true theta parameters
+true.par=list(Alpha=true.alpha, Beta=true.beta, Gamma=true.gamma)   #make a list
+response=matrix(NA,I,J)       #Create a array to save response data
+for (i in 1:I){
+  #calucate the probability of 1PLAG
+  P=Prob.model(X=true.th[i], Model='1PLAG', Par.est0=true.par)  
+  response[i,]=rbinom(J,1,P)   #simulate the response
+}
+
+#To save example running time, we set the Tol to 0.1
+#Obtain the Bayesian modal estimation (BME) using default priors
+
+#Estimate model via BEMM algorithm
+bme.res=BEMM.1PLAG(response, Tol=0.1) 
+
+bme.res$Est.ItemPars         #show item estimates
+bme.res$Est.Theta            #show ability estimates
+bme.res$Loglikelihood        #show log-likelihood
+bme.res$EM.Map               #show EM iteration history
+bme.res$fits.test 		     #show model fits information
+
+
+#Obtain the maximum likelihood estimation (MLE) by setting Prior=NA
+
+#Estimate model via EMM algorithm
+mle.res=BEMM.1PLAG(response, PriorAlpha=NA, PriorBeta=NA, PriorGamma=NA, Tol=0.1) 
+
+mle.res$Est.ItemPars       #show item estimates
+mle.res$Est.Theta          #show ability estimates
+mle.res$Loglikelihood      #show log-likelihood
+mle.res$EM.Map             #show EM iteration history
+mle.res$fits.test 		   #show model fits information
+
+
+</code></pre>
+
+
+</div>

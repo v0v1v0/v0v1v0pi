@@ -1,0 +1,125 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>storeControl</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Set storage values for use with the IMIFA family of models</h2>
+
+<h3>Description</h3>
+
+<p>Supplies a list of values for logical switches indicating whether parameters of interest (means, scores, loadings, uniquenesses, and mixing proportions) should be stored when running models from the IMIFA family via <code>mcmc_IMIFA</code>. It may be useful not to store certain parameters if memory is an issue.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">storeControl(mu.switch = TRUE,
+             score.switch = TRUE,
+             load.switch = TRUE,
+             psi.switch = TRUE,
+             pi.switch = TRUE,
+             update.mu = mu.switch,
+             ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>mu.switch</code></td>
+<td>
+<p>Logical indicating whether the means are to be stored (defaults to <code>TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>score.switch</code></td>
+<td>
+<p>Logical indicating whether the factor scores are to be stored.
+</p>
+<p>As the array containing each sampled scores matrix tends to be amongst the largest objects to be stored, this defaults to <code>FALSE</code> inside <code>mcmc_IMIFA</code> when <code>length(range.G) * length(range.Q) &gt; 10</code>, otherwise the default is <code>TRUE</code>. For the <code>"MIFA"</code>, <code>"OMIFA"</code>, and <code>"IMIFA"</code> methods, setting this switch to <code>FALSE</code> also offers a slight speed-up.
+</p>
+<p>Unlike other parameters, the scores need not be stored for posterior predictive checking (see Note below).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>load.switch</code></td>
+<td>
+<p>Logical indicating whether the factor loadings are to be stored (defaults to <code>TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>psi.switch</code></td>
+<td>
+<p>Logical indicating whether the uniquenesses are to be stored (defaults to <code>TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pi.switch</code></td>
+<td>
+<p>Logical indicating whether the mixing proportions are to be stored (defaults to <code>TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>update.mu</code></td>
+<td>
+<p>Logical indicating whether the means should be updated. Only relevant for the <code>"FA"</code> and <code>"IFA"</code> methods when <code>centering=TRUE</code> in <code>mixfaControl</code>, otherwise means are always updated. Setting <code>update.mu=FALSE</code> forces <code>mu.switch</code> to <code>FALSE</code>, but <code>mu.switch=FALSE</code> can still be used in conjunction with <code>update.mu=TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Catches unused arguments.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>storeControl</code> is provided for assigning values for IMIFA models within <code>mcmc_IMIFA</code>. It may be useful not to store certain parameters if memory is an issue (e.g. for large data sets or for a large number of MCMC iterations after burnin and thinning).
+</p>
+
+
+<h3>Value</h3>
+
+<p>A named vector in which the names are the names of the storage switches and the values are logicals indicating whether that parameter is to be stored. The list also contains as an attribute a logical for each switch indicating whether it was actually supplied (<code>TRUE</code>) or the default was accepted (<code>FALSE</code>).
+</p>
+
+
+<h3>Note</h3>
+
+<p>Posterior inference and plotting won't be possible for parameters not stored.
+</p>
+<p>Non-storage of parameters will almost surely prohibit the computation of posterior predictive checking error metrics within <code>get_IMIFA_results</code> also. In particular, if such error metrics are desired, <code>psi.switch</code> must be <code>TRUE</code> for all but the <code>"FA"</code> and <code>"IFA"</code> models, <code>mu.switch</code> must be <code>TRUE</code> except in situations where <code>update.mu=FALSE</code> is allowed, <code>load.switch</code> must be <code>TRUE</code> for all but the entirely zero-factor models, and <code>pi.switch</code> must be <code>TRUE</code> for models with clustering structure and unequal mixing proportions for all but the PPRE metric. <code>score.switch=TRUE</code> is not required for any posterior predictive checking.
+</p>
+<p>If post-hoc adaptation is invoked in <code>get_IMIFA_results</code> on a model fitted without adaptation, <code>store.switch=TRUE</code> is not required unless <code>active.crit="SC"</code> (for <code>"IFA"</code> models only); <code>load.switch=TRUE</code> is required for both <code>active.crit="BD"</code> and <code>active.crit="SC"</code>.
+</p>
+<p>Finally, if loadings are not stored but scores are, caution is advised when examining posterior scores as Procrustes rotation will not occur within <code>get_IMIFA_results</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Keefe Murphy - &lt;<a href="mailto:keefe.murphy@mu.ie">keefe.murphy@mu.ie</a>&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>mcmc_IMIFA</code>, <code>get_IMIFA_results</code>, <code>mixfaControl</code>, <code>mgpControl</code>, <code>bnpControl</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">stctrl &lt;- storeControl(score.switch=FALSE)
+
+# data(olive)
+# sim  &lt;- mcmc_IMIFA(olive, "IMIFA", n.iters=5000, storage=stctrl)
+
+# Alternatively specify these arguments directly
+# sim  &lt;- mcmc_IMIFA(olive, "IMIFA", n.iters=5000, score.switch=FALSE)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,146 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>repClonality</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Clonality analysis of immune repertoires</h2>
+
+<h3>Description</h3>
+
+<p><code>repClonality</code> function encompasses several methods to measure
+clonal proportions in a given repertoire.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">repClonality(
+  .data,
+  .method = c("clonal.prop", "homeo", "top", "rare"),
+  .perc = 10,
+  .clone.types = c(Rare = 1e-05, Small = 1e-04, Medium = 0.001, Large = 0.01,
+    Hyperexpanded = 1),
+  .head = c(10, 100, 1000, 3000, 10000, 30000, 1e+05),
+  .bound = c(1, 3, 10, 30, 100)
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>.data</code></td>
+<td>
+<p>The data to be processed. Can be data.frame,
+data.table, or a list of these objects.
+</p>
+<p>Every object must have columns in the immunarch compatible format.
+immunarch_data_format
+</p>
+<p>Competent users may provide advanced data representations:
+DBI database connections, Apache Spark DataFrame from copy_to or a list
+of these objects. They are supported with the same limitations as basic objects.
+</p>
+<p>Note: each connection must represent a separate repertoire.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.method</code></td>
+<td>
+<p>A String with one of the following options: <code>"clonal.prop"</code>,
+<code>"homeo"</code>, <code>"top"</code> or <code>"rare"</code>.
+</p>
+<p>Set <code>"clonal.prop"</code> to compute clonal proportions or in other words
+percentage of clonotypes required to occupy specified by <code>.perc</code> percent
+of the total immune repertoire.
+</p>
+<p>Set <code>"homeo"</code> to analyse relative abundance (also known as clonal space homeostasis), which is defined as the
+proportion of repertoire occupied by clonal groups with specific abundances..
+</p>
+<p>Set <code>"top"</code> to estimate relative abundance for the groups of top clonotypes in
+repertoire, e.g., ten most abundant clonotypes. Use <code>".head"</code> to define index intervals,
+such as 10, 100 and so on.
+</p>
+<p>Set <code>"rare"</code> to estimate relative abundance for the groups of rare clonotypes
+with low counts. Use <code>".bound"</code> to define the threshold of clonotype groups.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.perc</code></td>
+<td>
+<p>A single numerical value ranging from 0 to 100.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.clone.types</code></td>
+<td>
+<p>A named numerical vector with the threshold of the half-closed
+intervals that mark off clonal groups.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.head</code></td>
+<td>
+<p>A numerical vector with ranges of the top clonotypes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.bound</code></td>
+<td>
+<p>A numerical vector with ranges of abundance for the rare clonotypes in
+the dataset.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Clonal proportion assessment is a different approach to estimate
+repertoire diversity. When visualised, it allows for thorough examination of
+immune repertoire structure and composition.
+</p>
+<p>In its core this type of analysis is similar to the relative species abundance
+concept in ecology. Relative abundance is the percent composition of an organism
+of a particular kind relative to the total number of organisms in the area.
+</p>
+<p>A stacked barplot of relative clonotype abundances can be therefore viewed as
+a non-parametric approach to comparing their underlying distributions.
+</p>
+
+
+<h3>Value</h3>
+
+<p>If input data is a single immune repertoire, then the function returns a numeric vector
+with clonality statistics.
+</p>
+<p>Otherwise, it returns a numeric matrix with clonality statistics for all input repertoires.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>repDiversity
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Load the data
+data(immdata)
+
+imm_pr &lt;- repClonality(immdata$data, .method = "clonal.prop")
+vis(imm_pr)
+
+imm_top &lt;- repClonality(immdata$data, .method = "top", .head = c(10, 100, 1000, 3000, 10000))
+vis(imm_top)
+
+imm_rare &lt;- repClonality(immdata$data, .method = "rare")
+vis(imm_rare)
+
+imm_hom &lt;- repClonality(immdata$data, .method = "homeo")
+vis(imm_hom)
+</code></pre>
+
+
+</div>

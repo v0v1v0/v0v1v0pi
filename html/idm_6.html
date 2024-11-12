@@ -1,0 +1,257 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>i_mca</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Incremental Multiple Correspondence Analysis (MCA)
+</h2>
+
+<h3>Description</h3>
+
+<p>This function computes the Multiple Correspondence Analysis (MCA) solution on the indicator matrix using two incremental methods described in Iodice D'Enza &amp; Markos (2015)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">i_mca(data1, data2, method=c("exact","live"), current_rank, nchunk = 2, 
+ ff = 0, disk = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data1</code></td>
+<td>
+<p>Matrix or data frame of starting data or full data if data2 = NULL</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data2</code></td>
+<td>
+<p>Matrix or data frame of incoming data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>String specifying the type of implementation: <code>"exact"</code> or <code>"live"</code>. <code>"exact"</code> refers to the case when all the data is available from the start and dimension reduction is based on the method of Hall et al. (2002). <code>"live"</code> refers to the case when new data comes in as data flows and dimension reduction is based on the method of Ross et al. (2008). The main difference between the two approaches lies in the calculation of the column margins of the input matrix. For the <code>"exact"</code> approach, the analysis is based on the "global" margins, that is, the margins of the whole indicator matrix, which is available in advance. For the <code>"live"</code> approach, the whole matrix is unknown and the global margins are approximated by  the "local" margins, that is, the average margins of the data analysed insofar. A detailed description of the two implementations is provided in Iodice D' Enza &amp; Markos (2015).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>current_rank</code></td>
+<td>
+<p>Rank of approximation or number of components to compute; if empty, the full rank is used</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nchunk</code></td>
+<td>
+<p>Number of incoming data chunks (equal splits of 'data2', <code>default = 2</code>) or a Vector with the row size of each incoming data chunk</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ff</code></td>
+<td>
+<p>Number between 0 and 1 indicating the "forgetting factor" used to down-weight the contribution of earlier data blocks to the current solution. When <code>ff = 0</code> (default) no forgetting occurs; applicable only when <code>method ="live"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>disk</code></td>
+<td>
+<p>Logical indicating whether then output is saved to hard disk</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>rowpcoord</code></td>
+<td>
+<p>Row principal coordinates</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colpcoord</code></td>
+<td>
+<p>Column principal coordinates</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowcoord</code></td>
+<td>
+<p>Row standard coordinates</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colcoord</code></td>
+<td>
+<p>Column standard coordinates</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sv</code></td>
+<td>
+<p>Singular values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inertia.e</code></td>
+<td>
+<p>Percentages of explained inertia</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>levelnames</code></td>
+<td>
+<p>Column labels</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowctr</code></td>
+<td>
+<p>Row contributions</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colctr</code></td>
+<td>
+<p>Column contributions</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowcor</code></td>
+<td>
+<p>Row squared correlations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colcor</code></td>
+<td>
+<p>Column squared correlations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowmass</code></td>
+<td>
+<p>Row masses</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colmass</code></td>
+<td>
+<p>Column masses</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nchunk</code></td>
+<td>
+<p>A copy of <code>nchunk</code> in the return object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>disk</code></td>
+<td>
+<p>A copy of <code>disk</code> in the return object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ff</code></td>
+<td>
+<p>A copy of <code>ff</code> in the return object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allrowcoord</code></td>
+<td>
+<p>A list containing the row principal coordinates  produced after each data chunk is analyzed; returned only when <code>disk = FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allcolcoord</code></td>
+<td>
+<p>A list containing the column principal coordinates  on the principal components produced after each data chunk is analyzed; returned only when <code>disk = FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allrowctr</code></td>
+<td>
+<p>A list containing the row contributions after each data chunk is analyzed; returned only when <code>disk = FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allcolctr</code></td>
+<td>
+<p>A list containing the column contributions after each data chunk is analyzed; returned only when <code>disk = FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allrowcor</code></td>
+<td>
+<p>A list containing the row squared correlations produced after each data chunk is analyzed; returned only when <code>disk = FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allcolcor</code></td>
+<td>
+<p>A list containing the column squared correlations produced after each data chunk is analyzed; returned only when <code>disk = FALSE</code></p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Hall, P., Marshall, D., &amp; Martin, R. (2002). Adding and subtracting eigenspaces with eigenvalue decomposition and singular value decomposition. <em>Image and Vision Computing</em>, <em>20</em>(13), 1009-1016.<br><br>
+Iodice D' Enza, A., &amp; Markos, A. (2015). Low-dimensional tracking of association structures in categorical data, <em>Statistics and Computing</em>, <em>25</em>(5), 1009–1022. <br><br>
+Iodice D'Enza, A., Markos, A., &amp; Buttarazzi, D. (2018). The idm Package: Incremental Decomposition Methods in R. <em>Journal of Statistical Software, Code Snippets</em>, <em>86</em>(4), 1–24. DOI: 10.18637/jss.v086.c04. <br><br>
+Ross, D. A., Lim, J., Lin, R. S., &amp; Yang, M. H. (2008). Incremental learning for robust visual tracking. <em>International Journal of Computer Vision</em>, <em>77</em>(1-3), 125–141.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>update.i_mca</code>, <code>i_pca</code>, <code>update.i_pca</code>, <code>add_es</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##Example 1 - Exact case
+data("women", package = "idm")
+nc = 5 # number of chunks
+res_iMCAh = i_mca(data1 = women[1:300,1:7], data2 = women[301:2107,1:7]
+,method = "exact", nchunk = nc)
+#static MCA plot of attributes on axes 2 and 3
+plot(x = res_iMCAh, dim = c(2,3), what = c(FALSE,TRUE), animation = FALSE)
+
+#\donttest is used here because the code calls the saveLatex function of the animation package 
+#which requires ImageMagick or GraphicsMagick and 
+#Adobe Acrobat Reader to be installed in your system 
+#Creates animated plot in PDF for objects and variables
+plot(res_iMCAh, animation = TRUE, frames = 10, movie_format = 'pdf')
+
+
+##Example 2 - Live case
+data("tweet", package = "idm")
+nc = 5
+#provide attributes with custom labels
+labels = c("HLTN", "ICN", "MRT","BWN","SWD","HYT","CH", "-", "-/+", "+", "++", "Low", "Med","High")
+#mimics the 'live' MCA implementation 
+res_iMCAl = i_mca(data1 = tweet[1:100,], data2 = tweet[101:1000,],
+method="live", nchunk = nc, current_rank = 2)
+
+
+#\donttest is used here because the code calls the saveLatex function of the animation package 
+#which requires ImageMagick or GraphicsMagick and 
+#Adobe Acrobat Reader to be installed in your system 
+#See help(im.convert) for details on the configuration of ImageMagick or GraphicsMagick.
+#Creates animated plot in PDF for observations and variables
+plot(res_iMCAl, labels = labels, animation = TRUE, frames = 10, movie_format = 'pdf')
+
+</code></pre>
+
+
+</div>

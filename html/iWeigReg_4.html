@@ -1,0 +1,130 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ate.HT</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Horvitz-Thompson estimator for the causal-inference setup</h2>
+
+<h3>Description</h3>
+
+<p>This function implements the Horvitz-Thompson estimator of the mean outcome of the average treatment effect in causal inference.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ate.HT(y, tr, p, X=NULL, bal=FALSE)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>A vector or a matrix of observed outcomes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tr</code></td>
+<td>
+<p>A vector of treatment indicators (=1 if treated or 0 if untreated).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>A vector of known or fitted propensity scores.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>The model matrix for the propensity score model, assumed to be logistic (set <code>X=NULL</code> if <code>p</code> is known or treated to be so).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bal</code></td>
+<td>
+<p>Logical; if <code>TRUE</code>, the function is used for checking balance (see the details).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Variance estimation is based on asymptotic expansions, allowing for misspecification of the propensity score model.
+</p>
+<p>For balance checking with <code>bal=TRUE</code>, the input <code>y</code> should correpond to the covariates for which balance is to be checked, and the output <code>mu</code> gives the differences between the Horvitz-Thompson estimates and the overall sample means for these covariates.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>mu</code></td>
+<td>
+<p>The estimated means for treatments 1 and 0 or, if <code>bal=TRUE</code>, their differences from the overall sample means.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diff</code></td>
+<td>
+<p>The estimated average treatment effect.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v</code></td>
+<td>
+<p>The estimated variances of <code>mu</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v.diff</code></td>
+<td>
+<p>The estimated variance of <code>diff</code>.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Tan, Z. (2006) "A distributional approach for causal inference using propensity scores," <em>Journal of the American Statistical Association</em>, 101, 1619-1637.
+</p>
+<p>Tan, Z. (2010) "Bounded, efficient and doubly robust estimation with inverse weighting,"
+<em>Biometrika</em>, 97, 661-682.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(KS.data)
+attach(KS.data)
+z=cbind(z1,z2,z3,z4)
+x=cbind(x1,x2,x3,x4)
+
+#logistic propensity score model, correct
+ppi.glm &lt;- glm(tr~z, family=binomial(link=logit))
+
+X &lt;- model.matrix(ppi.glm)
+ppi.hat &lt;- ppi.glm$fitted
+
+#ppi.hat treated as known
+out.HT &lt;- ate.HT(y, tr, ppi.hat)
+out.HT$diff
+out.HT$v.diff
+
+#ppi.hat treated as estimated
+out.HT &lt;- ate.HT(y, tr, ppi.hat, X)
+out.HT$diff
+out.HT$v.diff
+
+#balance checking 
+out.HT &lt;- ate.HT(x, tr, ppi.hat, X, bal=TRUE)
+out.HT$mu
+out.HT$v
+
+out.HT$mu/ sqrt(out.HT$v)   #t-statistic
+</code></pre>
+
+
+</div>

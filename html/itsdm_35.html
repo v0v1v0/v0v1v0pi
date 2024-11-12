@@ -1,0 +1,108 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>probability</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimate suitability on <code>stars</code> object using trained <code>isolation.forest</code> model.</h2>
+
+<h3>Description</h3>
+
+<p>Apply an <code>isolation.forest</code> model on a stars object to calculate
+environmental suitability and do quantile stretch to <code style="white-space: pre;">⁠[0, 1]⁠</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">probability(x, vars, offset = 0)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>(<code>isolation_forest</code>). It could
+be the item <code>model</code> of <code>POIsotree</code> made by function <code>isotree_po</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vars</code></td>
+<td>
+<p>(<code>stars</code>) The stack of environmental variables. More specifically,
+make sure it has x and y dimensions only, and distribute variables to
+attributes of this <code>stars</code>. Otherwise, the function would stop.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+<p>(<code>numeric</code>) The offset to adjust fitted suitability. The default
+is zero. Highly recommend to leave it as default.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a <code>stars</code> of predicted habitat suitability
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>isotree_po</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Using a pseudo presence-only occurrence dataset of
+# virtual species provided in this package
+library(dplyr)
+library(sf)
+library(stars)
+library(itsdm)
+
+# Prepare data
+data("occ_virtual_species")
+obs_df &lt;- occ_virtual_species %&gt;% filter(usage == "train")
+eval_df &lt;- occ_virtual_species %&gt;% filter(usage == "eval")
+x_col &lt;- "x"
+y_col &lt;- "y"
+obs_col &lt;- "observation"
+
+# Format the observations
+obs_train_eval &lt;- format_observation(
+  obs_df = obs_df, eval_df = eval_df,
+  x_col = x_col, y_col = y_col, obs_col = obs_col,
+  obs_type = "presence_only")
+
+env_vars &lt;- system.file(
+  'extdata/bioclim_tanzania_10min.tif',
+  package = 'itsdm') %&gt;% read_stars() %&gt;%
+  slice('band', c(1, 5, 16))
+
+# With imperfect_presence mode,
+mod &lt;- isotree_po(
+  obs_mode = "imperfect_presence",
+  obs = obs_train_eval$obs,
+  obs_ind_eval = obs_train_eval$eval,
+  variables = env_vars, ntrees = 10,
+  sample_size = 0.8, ndim = 2L,
+  seed = 123L, nthreads = 1,
+  response = FALSE,
+  spatial_response = FALSE,
+  check_variable = FALSE)
+
+suit &lt;- probability(mod$model, mod$variables)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

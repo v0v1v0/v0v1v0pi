@@ -1,0 +1,578 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>read.data</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Read geochronological data</h2>
+
+<h3>Description</h3>
+
+<p>Cast a <code>.csv</code> file or a matrix into one of <code>IsoplotR</code>'s
+data classes
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">read.data(x, ...)
+
+## Default S3 method:
+read.data(
+  x,
+  method = "U-Pb",
+  format = 1,
+  ierr = 1,
+  d = diseq(),
+  Th02i = c(0, 0),
+  Th02U48 = c(0, 0, 1e+06, 0, 0, 0, 0, 0, 0),
+  U8Th2 = 0,
+  ...
+)
+
+## S3 method for class 'data.frame'
+read.data(
+  x,
+  method = "U-Pb",
+  format = 1,
+  ierr = 1,
+  d = diseq(),
+  Th02i = c(0, 0),
+  Th02U48 = c(0, 0, 1e+06, 0, 0, 0, 0, 0, 0),
+  U8Th2 = 0,
+  ...
+)
+
+## S3 method for class 'matrix'
+read.data(
+  x,
+  method = "U-Pb",
+  format = 1,
+  ierr = 1,
+  d = diseq(),
+  Th02i = c(0, 0),
+  Th02U48 = c(0, 0, 1e+06, 0, 0, 0, 0, 0, 0),
+  U8Th2 = 0,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>either a file name (<code>.csv</code> format) OR a matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>optional arguments to the <code>read.csv</code> function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>one of <code>'U-Pb'</code>, <code>'Pb-Pb'</code>, <code>'Th-Pb'</code>,
+<code>'Ar-Ar'</code>, <code>'K-Ca'</code>, <code>'detritals'</code>,
+<code>'Rb-Sr'</code>, <code>'Sm-Nd'</code>, <code>'Re-Os'</code>, <code>'Th-U'</code>,
+<code>'U-Th-He'</code>, <code>'fissiontracks'</code> or <code>'other'</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>format</code></td>
+<td>
+<p>formatting option, depends on the value of
+<code>method</code>.
+</p>
+<p>if <code>method='U-Pb'</code>, then <code>format</code> is one of either:
+</p>
+
+<ol>
+<li>
+<p><code>X=07/35, err[X],</code> <code>Y=06/38, err[Y], rho[X,Y]</code> 
+</p>
+</li>
+<li>
+<p><code>X=38/06, err[X],</code><code>Y=07/06, err[Y] (, rho[X,Y])</code>
+</p>
+</li>
+<li>
+<p><code>X=07/35, err[X],</code> <code>Y=06/38, err[Y],</code>
+<code>Z=07/06, err[Z]</code> <code>(, rho[X,Y]) (, rho[Y,Z])</code> 
+</p>
+</li>
+<li>
+<p><code>X=07/35, err[X], Y=06/38, err[Y], Z=04/38, </code>
+<code>rho[X,Y], rho[X,Z], rho[Y,Z]</code> 
+</p>
+</li>
+<li>
+<p><code>X=38/06, err[X]</code>, <code>Y=07/06, err[Y]</code>,
+<code>Z=04/06, err[Z] (</code>, <code>rho[X,Y], rho[X,Z], rho[Y,Z])</code>
+</p>
+</li>
+<li>
+<p><code>07/35, err[07/35]</code>, <code>06/38, err[06/38]</code>,
+<code>04/38, err[04/38]</code>, <code>07/06, err[07/06]</code>,
+<code>04/07, err[04/07]</code>, <code>04/06, err[04/06]</code>
+</p>
+</li>
+<li>
+<p><code>W=07/35, err[W]</code>, <code>X=06/38, err[X]</code>,
+<code>Y=08/32, err[Y]</code>, <code>Z=32/38, err[Z]</code>,
+(<code>rho[W,X], rho[W,Y]</code>, <code>rho[W,Z], rho[X,Y]</code>,
+<code>rho[X,Z], rho[Y,Z]</code>)
+</p>
+</li>
+<li>
+<p><code>W=38/06, err[W]</code>, <code>X=07/06, err[X]</code>,
+<code>Y=08/06, err[Y]</code>, (<code>Z=32/38, err[Z]</code>,
+<code>rho[W,X], rho[W,Y]</code>, <code>rho[W,Z], rho[X,Y]</code>,
+<code>rho[X,Z], rho[Y,Z])</code>
+</p>
+</li>
+<li>
+<p><code>X=38/06, err[X]</code>, <code>Y=04/06, err[Y]</code>, (<code>rho[X,Y]</code>)
+</p>
+</li>
+<li>
+<p><code>X=35/07, err[X]</code>, <code>Y=04/07, err[Y]</code>, (<code>rho[X,Y]</code>)
+</p>
+</li>
+<li>
+<p><code>X=38/06, err[X]</code>, <code>Y=08/06, err[Y]</code>,
+(<code>Z=32/38, err[Z]</code>, <code>rho[X,Y], rho[X,Z], rho[Y,Z]</code>)
+</p>
+</li>
+<li>
+<p><code>X=35/07, err[X]</code>, <code>Y=08/07, err[Y]</code>,
+(<code>Z=32/38, err[Z]</code>, <code>rho[X,Y], rho[X,Z], rho[Y,Z]</code>)
+</p>
+</li>
+</ol>
+<p>where optional columns are marked in round brackets
+</p>
+<p>if <code>method='Pb-Pb'</code>, then <code>format</code> is one of either:
+</p>
+
+<ol>
+<li>
+<p><code>6/4, err[6/4], 7/4, err[7/4], rho</code>
+</p>
+</li>
+<li>
+<p><code>4/6, err[4/6], 7/6, err[7/6], rho</code>
+</p>
+</li>
+<li>
+<p><code>6/4, err[6/4], 7/4, err[7/4], 6/7, err[6/7]</code>
+</p>
+</li>
+</ol>
+<p>if <code>method='Th-Pb'</code>, then <code>format</code> is one of either:
+</p>
+
+<ol>
+<li>
+<p><code>32/04, err[32/04], 08/04, err[08/04], rho</code>
+</p>
+</li>
+<li>
+<p><code>32/08, err[32/08], 04/08, err[08/04], rho</code>
+</p>
+</li>
+<li>
+<p><code>32/04, err[32/04], 08/04, </code>
+<code>err[08/04], 32/08, err[32/08]</code>
+</p>
+</li>
+</ol>
+<p>if <code>method='Ar-Ar'</code>, then <code>format</code> is one of either:
+</p>
+
+<ol>
+<li>
+<p><code>9/6, err[9/6], 0/6, err[0/6], rho (, 39)</code>
+</p>
+</li>
+<li>
+<p><code>6/0, err[6/0], 9/0, err[9/0] (, rho) (, 39)</code>
+</p>
+</li>
+<li>
+<p><code>9/0, err[9/0], 6/0, err[6/0], 9/6, err[9/6] (, 39)</code>
+</p>
+</li>
+</ol>
+<p>if <code>method='K-Ca'</code>, then <code>format</code> is one of either:
+</p>
+
+<ol>
+<li>
+<p><code>K40/Ca44, err[K40/Ca44], Ca40/Ca44, err[Ca40/Ca44], rho</code>
+</p>
+</li>
+<li>
+<p><code>K40/Ca40, err[K40/Ca40], Ca44/Ca40, err[Ca44/Ca40], rho</code>
+</p>
+</li>
+<li>
+<p><code>K40/Ca44, err[K40/Ca44], Ca40/Ca44, </code>
+<code>err[Ca40/Ca44], K40/Ca40, err[K40/Ca40]</code>
+</p>
+</li>
+</ol>
+<p>if <code>method='Rb-Sr'</code>, then <code>format</code> is one of either:
+</p>
+
+<ol>
+<li>
+<p><code>Rb87/Sr86, err[Rb87/Sr86], Sr87/Sr86, err[Sr87/Sr86] (, rho)</code>
+</p>
+</li>
+<li>
+<p><code>Rb87/Sr87, err[Rb87/Sr87], Sr86/Sr87, err[Sr86/Sr87] (, rho)</code>
+</p>
+</li>
+<li>
+<p><code>Rb, err[Rb], Sr, err[Sr], Sr87/Sr86, err[Sr87/Sr86]</code>
+</p>
+</li>
+</ol>
+<p>where <code>Rb</code> and <code>Sr</code> are in ppm
+</p>
+<p>if <code>method='Sm-Nd'</code>, then <code>format</code> is one of either:
+</p>
+
+<ol>
+<li>
+<p><code>Sm147/Nd144, err[Sm147/Nd144], Nd143/Nd144, err[Nd143/Nd144] (, rho)</code>
+</p>
+</li>
+<li>
+<p><code>Sm147/Nd143, err[Sm147/Nd143], Nd144/Nd143, err[Nd144/Nd143] (, rho)</code>
+</p>
+</li>
+<li>
+<p><code>Sm, err[Sm], Nd, err[Nd], Nd143/Nd144, err[Nd143/Nd144]</code>
+</p>
+</li>
+</ol>
+<p>where <code>Sm</code> and <code>Nd</code> are in ppm
+</p>
+<p>if <code>method='Re-Os'</code>, then <code>format</code> is one of either:
+</p>
+
+<ol>
+<li>
+<p><code>Re187/Os188, err[Re187/Os188], Os187/Os188, err[Os187/Os188] (, rho)</code>
+</p>
+</li>
+<li>
+<p><code>Re187/Os187, err[Re187/Os187], Os188/Os187, err[Os188/Os187] (, rho)</code>
+</p>
+</li>
+<li>
+<p><code>Re, err[Re], Os, err[Os], Os187/Os188, err[Os187/Os188]</code>
+</p>
+</li>
+</ol>
+<p>where <code>Re</code> and <code>Os</code> are in ppm
+</p>
+<p>if <code>method='Lu-Hf'</code>, then <code>format</code> is one of either:
+</p>
+
+<ol>
+<li>
+<p><code>Lu176/Hf177, err[Lu176/Hf177], Hf176/Hf177, err[Hf176/Hf177] (, rho)</code>
+</p>
+</li>
+<li>
+<p><code>Lu176/Hf176, err[Lu176/Hf176], Hf177/Hf176, err[Hf177/Hf176] (, rho)</code>
+</p>
+</li>
+<li>
+<p><code>Lu, err[Lu], Hf, err[Hf], Hf176/Hf177, err[Hf176/Hf177]</code>
+</p>
+</li>
+</ol>
+<p>where <code>Lu</code> and <code>Hf</code> are in ppm
+</p>
+<p>if <code>method='Th-U'</code>, then <code>format</code> is one of either:
+</p>
+
+<ol>
+<li>
+<p><code>X=8/2, err[X], Y=4/2, err[Y], Z=0/2, err[Z],</code><br><code>rho[X,Y], rho[X,Z], rho[Y,Z]</code>
+</p>
+</li>
+<li>
+<p><code>X=2/8, err[X], Y=4/8, err[Y], Z=0/8, err[Z],</code><br><code> rho[X,Y], rho[X,Z], rho[Y,Z]</code>
+</p>
+</li>
+<li>
+<p><code>X=8/2, err[X], Y=0/2, err[Y], rho[X,Y]</code>
+</p>
+</li>
+<li>
+<p><code>X=2/8, err[X], Y=0/8, err[Y], rho[X,Y]</code>
+</p>
+</li>
+</ol>
+<p>where all values are activity ratios
+</p>
+<p>if <code>method='fissiontracks'</code>, then <code>format</code> is one of
+either:
+</p>
+
+<ol>
+<li>
+<p>the External Detector Method (EDM), which requires a
+<code class="reqn">\zeta</code>-calibration constant and its uncertainty, the induced
+track density in a dosimeter glass, and a table with the
+spontaneous and induced track densities.
+</p>
+</li>
+<li>
+<p>LA-ICP-MS-based fission track data using the
+<code class="reqn">\zeta</code>-calibration method, which requires a 'session
+<code class="reqn">\zeta</code>' and its uncertainty and a table with the number of
+spontaneous tracks, the area over which these were counted and one
+or more U/Ca- or U-concentration measurements and their analytical
+uncertainties.
+</p>
+</li>
+<li>
+<p>LA-ICP-MS-based fission track data using the 'absolute
+dating' method, which only requires a table with the the number of
+spontaneous tracks, the area over which these were counted and one
+or more U/Ca-ratios or U-concentration measurements (in ppm) and
+their analytical uncertainties.  </p>
+</li>
+</ol>
+<p>if <code>method='other'</code>, then <code>format</code> is one of either:
+</p>
+
+<dl>
+<dt>
+<code>1</code>:</dt>
+<dd>
+<p><code>X</code></p>
+</dd>
+<dt>
+<code>2</code>:</dt>
+<dd>
+<p><code>X, err[X]</code></p>
+</dd>
+<dt>
+<code>3</code>:</dt>
+<dd>
+<p><code>f, X, err[X]</code></p>
+</dd> 
+<dt>
+<code>4</code>:</dt>
+<dd>
+<p><code>X, err[X], Y, err[Y], rho</code></p>
+</dd>
+<dt>
+<code>5</code>:</dt>
+<dd>
+<p><code>X/Z, err[X/Z], Y/Z, err[Y/Z], X/Y, err[X/Y]</code></p>
+</dd>
+<dt>
+<code>6</code>:</dt>
+<dd>
+<p>a <code>n x (n+1)</code> matrix obtained by prepending a
+vector of alternating <code>X,Y</code>-values to its covariance matrix</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ierr</code></td>
+<td>
+<p>indicates whether the analytical uncertainties of the
+input are provided as:
+</p>
+<p><code>1</code>: 1<code class="reqn">\sigma</code> absolute uncertainties.
+</p>
+<p><code>2</code>: 2<code class="reqn">\sigma</code> absolute uncertainties.
+</p>
+<p><code>3</code>: 1<code class="reqn">\sigma</code> relative uncertainties (<code class="reqn">\%</code>).
+</p>
+<p><code>4</code>: 2<code class="reqn">\sigma</code> relative uncertainties (<code class="reqn">\%</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p>an object of class <code>diseq</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Th02i</code></td>
+<td>
+<p>2-element vector with the assumed initial
+<code class="reqn">^{230}</code>Th/<code class="reqn">^{232}</code>Th-ratio of the detritus (for
+Th-U formats 1 and 2) and its standard error.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Th02U48</code></td>
+<td>
+<p>9-element vector with the measured composition of
+the detritus, containing <code>X=0/8</code>, <code>sX</code>, <code>Y=2/8</code>,
+<code>sY</code>, <code>Z=4/8</code>, <code>sZ</code>, <code>rXY</code>, <code>rXZ</code>,
+<code>rYZ</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>U8Th2</code></td>
+<td>
+<p><code class="reqn">^{238}</code>U/<code class="reqn">^{232}</code>Th activity-ratio of the
+whole rock. Used to estimate the initial
+<code class="reqn">^{230}</code>Th/<code class="reqn">^{238}</code>U disequilibrium (for Th-U formats 3
+and 4).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>IsoplotR provides the following example input files:
+</p>
+
+<ul>
+<li>
+<p>U-Pb: <code>UPb1.csv</code>, <code>UPb2.csv</code>, <code>UPb3.csv</code>,
+<code>UPb4.csv</code>, <code>UPb5.csv</code>, <code>UPb6.csv</code>,
+<code>UPb7.csv</code>, <code>UPb8.csv</code>
+</p>
+</li>
+<li>
+<p>Pb-Pb: <code>PbPb1.csv</code>, <code>PbPb2.csv</code>, <code>PbPb3.csv</code>
+</p>
+</li>
+<li>
+<p>Th-Pb: <code>ThPb1.csv</code>, <code>ThPb2.csv</code>, <code>ThPb3.csv</code>
+</p>
+</li>
+<li>
+<p>Ar-Ar: <code>ArAr1.csv</code>, <code>ArAr2.csv</code>, <code>ArAr3.csv</code>
+</p>
+</li>
+<li>
+<p>K-Ca: <code>KCa1.csv</code>, <code>KCa2.csv</code>, <code>KCa3.csv</code>
+</p>
+</li>
+<li>
+<p>Re-Os: <code>ReOs1.csv</code>, <code>ReOs2.csv</code>, <code>ReOs3.csv</code>
+</p>
+</li>
+<li>
+<p>Sm-Nd: <code>SmNd1.csv</code>, <code>SmNd2.csv</code>, <code>SmNd3.csv</code>
+</p>
+</li>
+<li>
+<p>Rb-Sr: <code>RbSr1.csv</code>, <code>RbSr2.csv</code>, <code>RbSr3.csv</code>
+</p>
+</li>
+<li>
+<p>Lu-Hf: <code>LuHf1.csv</code>, <code>LuHf2.csv</code>, <code>LuHf3.csv</code>
+</p>
+</li>
+<li>
+<p>Th-U: <code>ThU1.csv</code>, <code>ThU2.csv</code>, <code>ThU3.csv</code>
+<code>ThU4.csv</code>
+</p>
+</li>
+<li>
+<p>fissiontracks: <code>FT1.csv</code>, <code>FT2.csv</code>,
+<code>FT3.csv</code>
+</p>
+</li>
+<li>
+<p>U-Th-He: <code>UThHe.csv</code>, <code>UThSmHe.csv</code>
+</p>
+</li>
+<li>
+<p>detritals: <code>DZ.csv</code>
+</p>
+</li>
+<li>
+<p>other: <code>LudwigMixture.csv</code>, <code>LudwigMean.csv</code>,
+<code>LudwigKDE.csv</code>, <code>LudwigSpectrum.csv</code>
+</p>
+</li>
+</ul>
+<p>The contents of these files can be viewed using the
+<code>system.file(...)</code> function. For example, to read the
+<code>ArAr1.csv</code> file:
+</p>
+<p><code>fname &lt;- system.file('ArAr1.csv',package='IsoplotR')</code>
+</p>
+<p><code>ArAr &lt;- read.data(fname,method='Ar-Ar',format=1)</code>
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>UPb</code>, <code>PbPb</code>, <code>ThPb</code>,
+<code>KCa</code>, <code>RbSr</code>, <code>SmNd</code>, <code>LuHf</code>, <code>ReOs</code>,
+<code>UThHe</code>, <code>fissiontracks</code>, <code>detritals</code> or
+<code>PD</code>. See <code>classes</code> for further details.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>examples</code>, <code>settings</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+f1 &lt;- system.file("UPb1.csv",package="IsoplotR")
+file.show(f1) # inspect the contents of 'UPb1.csv'
+d1 &lt;- read.data(f1,method="U-Pb",format=1)
+concordia(d1)
+
+f2 &lt;- system.file("ArAr1.csv",package="IsoplotR")
+d2 &lt;- read.data(f2,method="Ar-Ar",format=1)
+agespectrum(d2)
+
+f3 &lt;- system.file("ReOs1.csv",package="IsoplotR")
+d3 &lt;- read.data(f3,method="Re-Os",format=1)
+isochron(d2)
+
+f4 &lt;- system.file("FT1.csv",package="IsoplotR")
+d4 &lt;- read.data(f4,method="fissiontracks",format=1)
+radialplot(d4)
+
+f5 &lt;- system.file("UThSmHe.csv",package="IsoplotR")
+d5 &lt;- read.data(f5,method="U-Th-He")
+helioplot(d5)
+
+f6 &lt;- system.file("ThU2.csv",package="IsoplotR")
+d6 &lt;- read.data(f6,method="Th-U",format=2)
+evolution(d6)
+
+#  one detrital zircon U-Pb file (detritals.csv)
+f7 &lt;- system.file("DZ.csv",package="IsoplotR")
+d7 &lt;- read.data(f7,method="detritals")
+kde(d7)
+
+#  four 'other' files (LudwigMixture.csv, LudwigSpectrum.csv,
+#  LudwigMean.csv, LudwigKDE.csv)
+f8 &lt;- system.file("LudwigMixture.csv",package="IsoplotR")
+d8 &lt;- read.data(f8,method="other",format=2)
+radialplot(d8)
+
+</code></pre>
+
+
+</div>

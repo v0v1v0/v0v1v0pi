@@ -1,0 +1,183 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>unbiasedKrige</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Unbiased kriging</h2>
+
+<h3>Description</h3>
+
+<p><code>unbiasedKrige</code> is a function for modifying a kriging prediction
+to a prediction that can be assumed to be unbiased for a certain threshold.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">unbiasedKrige(object, formulaString, observations, predictionLocations,
+              model, outputWhat, yamamoto, iwqmaxit = 500,
+              iwqCpAddLim = 0.0001, debug.level, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>either an object of the intamap type (see <code>intamap-package</code> 
+for further 
+description of the necessary content of this variable) or the output from the function
+<code>krige</code> in <code>gstat</code>. If the object is a result
+from the intamap procedure spatialPredict, the remaining arguments are not necessary.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formulaString</code></td>
+<td>
+<p>formula that defines the dependent variable as a linear model of independent variables; 
+suppose the dependent variable has name z, for ordinary and simple kriging use the formula z~1; 
+for universal kriging, suppose z is linearly dependent on x and y, use the formula z~x+y</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>observations</code></td>
+<td>
+<p>a <code>Spatial</code>*DataFrame with observations; 
+should contain the dependent variable, independent variables, and coordinates</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predictionLocations</code></td>
+<td>
+<p>the predictionLocations, only necessary if the 
+method is "IWQSEL" and formulaString contains independent variables.
+Should preferentally be a grid if the method is "IWQSEL"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>variogram model of dependent variable (or its residuals), defined 
+by a call to <code>vgm</code> or <code>autofitVariogram</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outputWhat</code></td>
+<td>
+<p>Argument with type of unbiasedness method ("MOK" or "IWQSEL") and the thresholds.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yamamoto</code></td>
+<td>
+<p>logical describing if the yamamoto approach )is to be used in simulations.
+Defaults to yamamoto = FALSE when object is a <code>Spatial</code>*DataFrame.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iwqmaxit</code></td>
+<td>
+<p>maximum number of iterations in iwqsel</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iwqCpAddLim</code></td>
+<td>
+<p>convergence criteria in iwqsel</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>debug.level</code></td>
+<td>
+<p>debug level, passed to subfunctions</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> other arguments that will be passed to subfunctions. These include 
+</p>
+
+<dl>
+<dt><code>nsim</code></dt>
+<dd>
+<p>number of simulations necessary if the method is "IWQSEL".
+Defaults to nsim = 100 when object is a <code>Spatial</code>*DataFrame.</p>
+</dd>
+<dt><code>maxdist</code></dt>
+<dd>
+<p>maximum number of neighbours to use in local kriging, defaults to Inf</p>
+</dd>
+<dt><code>nmax</code></dt>
+<dd>
+<p>for local kriging: the number of nearest observations that 
+should be used in simulations for the "IWQSEL" method in terms of the space of the spatial locations. 
+Defaults to nmax = 10 when object is a Spatial*DataFrame.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>It is a fact that predictions from kriging tend to be biased towards the mean of
+the process. The function <code>unbiasedKrige</code> is a function that adds one or more predictions
+to the original output, which are assumed to be unbiased relative to a certain 
+threshold. The two methods supported are the IWQSEL-method (Craigmile, 2006) and
+MOK (Skoien et al, 2008). 
+</p>
+
+
+<h3>Value</h3>
+
+ 
+<p>an object of type intamap, as described in <code>intamap-package</code>, or a 
+<code>Spatial</code>*DataFrame with one or more new prediction columns, representing different
+methods and thresholds.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Jon Olav Skoien</p>
+
+
+<h3>References</h3>
+
+ 
+<p>Craigmile, P. F., N. Cressie, T. J. Santner, and Y. Rao. 2006. 
+A loss function approach to identifying environmental exceedances. Extremes, 8, 143-159.
+</p>
+<p>Skoien, J. O., G. B. M. Heuvelink, and E. J. Pebesma. 2008. 
+Unbiased block predictions and exceedance probabilities for environmental thresholds. 
+In: J. Ortiz C. and X. Emery (eds). Proceedings of the eight international geostatistics congress. 
+Gecamin, Santiago, Chile,  pp. 831-840.
+</p>
+<p>Pebesma, E., Cornford, D., Dubois, G., Heuvelink, G.B.M., Hristopulos, D., Pilz, J., Stohlker, U., Morin, G., Skoien, J.O. INTAMAP: The design and implementation f an interoperable automated interpolation Web Service. Computers and Geosciences 37 (3), 2011. 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(automap)
+library(gstat)
+data(meuse)
+data(meuse.grid)
+coordinates(meuse) = ~x+y
+gridded(meuse.grid) = ~x+y
+
+predictionLocations = meuse.grid[sample(1:length(meuse.grid),50),]
+vmod = autofitVariogram(log(zinc)~1,meuse)$var_model
+prediction = krige(log(zinc)~1,meuse,predictionLocations,vmod)
+summary(prediction)
+
+prediction &lt;- unbiasedKrige(prediction,log(zinc)~1,
+  meuse,  model = vmod, outputWhat = list(MOK = 6.0, MOK = 7.0, IWQSEL=7.0), 
+  iwqmaxit = 100, iwqCpAddLim = 0.01)
+summary(prediction)
+</code></pre>
+
+
+</div>

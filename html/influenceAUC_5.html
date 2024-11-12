@@ -1,0 +1,109 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ICLC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Cumulative Lift Charts</h2>
+
+<h3>Description</h3>
+
+<p>Show the existence and approximate locations of influential observations
+in binary classification through modified cumulative lift charts.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ICLC(score, binary, prop = 0.2)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>score</code></td>
+<td>
+<p>A vector containing the predictions (continuous scores) assigned by classifiers; Must be numeric.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>binary</code></td>
+<td>
+<p>A vector containing the true class labels 1: positive and 0: negative. Must have the same dimensions as 'score.'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prop</code></td>
+<td>
+<p>A numeric value determining the proportion; Must lie between 0 and 1; Defaults to 0.2.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>There are two types of influential cases in binary classification:
+</p>
+
+<ul>
+<li>
+<p> positive cases with relatively lower scores - negative cumulative lift chart (NCLC)
+</p>
+</li>
+<li>
+<p> negative cases with relatively higher scores - positive cumulative lift chart  (PCLC)
+</p>
+</li>
+</ul>
+<p>Each cumulative lift chart (PCLC or NCLC) identifies one type of influential observations and mark with red dotted lines. Based on the characteristics
+of two types of influential cases, identifying them require to search the highest and lowest proportions of 'score.'
+</p>
+<p>Graphical approaches only reveal the existence and approximate locations of influential observations; it would be better to include some quantities to measure their impacts
+to the interested parameter. To fully investigate the potential observation in binary classification, we suggest end-users to apply two quantification
+methods <code>IAUC</code> and  <code>LAUC</code> as well. For a complete discussion of these functions, please see the reference.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of ggplot2 objects
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Bo-Shiang Ke and Yuan-chin Ivan Chang
+</p>
+
+
+<h3>References</h3>
+
+<p>Ke, B. S., Chiang, A. J., &amp; Chang, Y. C. I. (2018). Influence Analysis for the Area Under the Receiver Operating Characteristic Curve. Journal of biopharmaceutical statistics, 28(4), 722-734.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>IAUC</code>, <code>LAUC</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(ROCR)
+data("ROCR.simple")
+output &lt;- ICLC(ROCR.simple$predictions,ROCR.simple$labels)
+plot(output)
+# Customize a text size for NCLC
+library(ggplot2)
+output$NCLC + theme(text = element_text(size = 20))
+
+data(mtcars)
+glmfit &lt;- glm(vs ~ wt + disp, family = binomial, data = mtcars)
+prob &lt;- as.vector(predict(glmfit, newdata = mtcars, type = "response"))
+plot(ICLC(prob, mtcars$vs, 0.5))
+</code></pre>
+
+
+</div>

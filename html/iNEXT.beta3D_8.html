@@ -1,0 +1,346 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iNEXTbeta3D</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>iNterpolation and EXTrapolation with beta diversity for TD, PD and FD</h2>
+
+<h3>Description</h3>
+
+<p><code>iNEXTbeta3D</code> computes standardized 3D estimates with a common sample size
+(for alpha and gamma diversity) or sample coverage (for alpha, beta, gamma diversity as well as
+dissimilarity indices) for default sizes or coverage values. This function also computes standardized 3D estimates
+with a particular vector of user-specified sample sizes or coverage values. See Chao et al. (2023) for the theory.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iNEXTbeta3D(
+  data,
+  diversity = "TD",
+  q = c(0, 1, 2),
+  datatype = "abundance",
+  base = "coverage",
+  level = NULL,
+  nboot = 10,
+  conf = 0.95,
+  PDtree = NULL,
+  PDreftime = NULL,
+  PDtype = "meanPD",
+  FDdistM = NULL,
+  FDtype = "AUC",
+  FDtau = NULL,
+  FDcut_number = 30
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>(a) For <code>datatype = "abundance"</code>, species abundance data for a single dataset can be input as a <code>matrix/data.frame</code> (species-by-assemblage); data for multiple datasets can be input as a <code>list</code> of <code>matrices/data.frames</code>, with each matrix representing a species-by-assemblage abundance matrix for one of the datasets.<br>
+(b) For <code>datatype = "incidence_raw"</code>, data for a single dataset with N assemblages can be input as a <code>list</code> of <code>matrices/data.frames</code>, with each matrix representing a species-by-sampling-unit incidence matrix for one of the assemblages; data for multiple datasets can be input as multiple lists.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diversity</code></td>
+<td>
+<p>selection of diversity type: <code>'TD'</code> = Taxonomic diversity, <code>'PD'</code> = Phylogenetic diversity, and <code>'FD'</code> = Functional diversity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>a numerical vector specifying the diversity orders. Default is <code>c(0, 1, 2)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>datatype</code></td>
+<td>
+<p>data type of input data: individual-based abundance data (<code>datatype = "abundance"</code>) or species by sampling-units incidence/occurrence matrix (<code>datatype = "incidence_raw"</code>) with all entries being 0 (non-detection) or 1 (detection).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>base</code></td>
+<td>
+<p>standardization base: coverage-based rarefaction and extrapolation for gamma, alpha, beta diversity, and four classes of dissimilarity indices (<code>base = "coverage"</code>), or sized-based rarefaction and extrapolation for gamma and alpha diversity (<code>base = "size"</code>). Default is <code>base = "coverage"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+<p>a numerical vector specifying the particular values of sample coverage (between 0 and 1 when 
+<code>base = "coverage"</code>) or sample sizes (<code>base = "size"</code>) that will be used to compute standardized
+diversity/dissimilarity. Asymptotic diversity estimator can be obtained by setting <code>level = 1</code>
+( i.e., complete coverage for <code>base = "coverage"</code>). <br>
+By default (with <code>base = "coverage"</code>), 
+this function computes the standardized 3D gamma, alpha, beta diversity, and four dissimilarity indices 
+for coverage up to one (for <code>q = 1, 2</code>) or up to the coverage of double the reference sample size 
+(for <code>q = 0</code>), in increments of 0.025. The extrapolation limit for beta diversity is defined as that
+for alpha diversity. <br>
+If users set <code>base = "size"</code>, this function computes the size-based standardized
+3D gamma and alpha diversity estimates based on 40 equally-spaced sample sizes/knots from sample size 1 
+up to double the reference sample size.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nboot</code></td>
+<td>
+<p>a positive integer specifying the number of bootstrap replications when assessing sampling uncertainty and constructing confidence intervals. Bootstrap replications are generally time consuming. Set <code>nboot = 0</code> to skip the bootstrap procedures. Default is <code>nboot = 10</code>. If more accurate results are required, set <code>nboot = 100</code> (or <code>nboot = 200</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf</code></td>
+<td>
+<p>a positive number &lt; 1 specifying the level of confidence interval. Default is 0.95.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PDtree</code></td>
+<td>
+<p>(required argument for <code>diversity = "PD"</code>), a phylogenetic tree in Newick format for all observed species in the pooled assemblage.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PDreftime</code></td>
+<td>
+<p>(argument only for <code>diversity = "PD"</code>), a numerical value specifying reference time for PD. Default is <code>PDreftime = NULL</code> (i.e., the age of the root of <code>PDtree</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PDtype</code></td>
+<td>
+<p>(argument only for <code>diversity = "PD"</code>), select PD type: <code>PDtype = "PD"</code> (effective total branch length) or <code>PDtype = "meanPD"</code> (effective number of equally divergent lineages). Default is <code>PDtype = "meanPD"</code>, where <code>meanPD = PD/tree depth</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FDdistM</code></td>
+<td>
+<p>(required argument for <code>diversity = "FD"</code>), a species pairwise distance matrix for all species in the pooled dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FDtype</code></td>
+<td>
+<p>(argument only for <code>diversity = "FD"</code>), select FD type: <code>FDtype = "tau_value"</code> for FD under a specified threshold value, or <code>FDtype = "AUC"</code> (area under the curve of tau-profile) for an overall FD which integrates all threshold values between zero and one. Default is <code>FDtype = "AUC"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FDtau</code></td>
+<td>
+<p>(argument only for <code>diversity = "FD"</code> and <code>FDtype = "tau_value"</code>), a numerical value between 0 and
+1 specifying the tau value (threshold level) that will be used to compute FD. If <code>FDtype = NULL</code> (default), 
+then threshold level is set to be the mean distance between any two individuals randomly selected from the pooled 
+dataset (i.e., quadratic entropy).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FDcut_number</code></td>
+<td>
+<p>(argument only for <code>diversity = "FD"</code> and <code>FDtype = "AUC"</code>), a numeric number to cut [0, 1] interval into equal-spaced sub-intervals to obtain the AUC value by integrating the tau-profile. Equivalently, the number of tau values that will be considered to compute the integrated AUC value. Default is <code>FDcut_number = 30</code>. A larger value can be set to obtain more accurate AUC value.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>For <code>base = "coverage"</code>, return a list of seven data frames with three diversity (gamma, alpha, and beta
+diversity) and four dissimilarity measures. For <code>base = "size"</code>, return a list of two matrices with two diversity
+(gamma and alpha diversity).<br></p>
+<p>For <code>base = "coverage"</code>, the output in each data frame includes: 
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Dataset</code></td>
+<td>
+<p>the name of dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Order.q</code></td>
+<td>
+<p>the diversity order of q.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SC</code></td>
+<td>
+<p>the target standardized coverage value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Size/mT</code></td>
+<td>
+<p>the corresponding sample size.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Alpha/Beta/Gamma/Dissimilarity</code></td>
+<td>
+<p>the estimated diversity/dissimilarity estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Method</code></td>
+<td>
+<p>Rarefaction, Observed, or Extrapolation, depending on whether the target coverage is less than, equal to, or greater than the coverage of the reference sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s.e.</code></td>
+<td>
+<p>standard error of standardized estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LCL, UCL</code></td>
+<td>
+<p>the bootstrap lower and upper confidence limits for the diversity/dissimilarity with a default significance level of 0.95.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Diversity</code></td>
+<td>
+<p><code>'TD'</code> = 'Taxonomic diversity', <code>'PD'</code> = 'Phylogenetic diversity', <code>'meanPD'</code> = 'Mean phylogenetic diversity', <code>'FD_tau'</code> = 'Functional diversity (given tau)', <code>'FD_AUC'</code> = 'Functional diversity (AUC)'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Reftime</code></td>
+<td>
+<p>the reference time for PD.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Tau</code></td>
+<td>
+<p>the threshold of functional distinctiveness between any two species for FD (under <code>FDtype = "tau_value"</code>).</p>
+</td>
+</tr>
+</table>
+<p>Similar output is obtained for <code>base = "size"</code>.<br></p>
+
+
+<h3>References</h3>
+
+<p>Chao, A., Thorn, S., Chiu, C.-H., Moyes, F., Hu, K.-H., Chazdon, R. L., Wu, J., Magnago, 
+L. F. S., Dornelas, M., Zeleny, D., Colwell, R. K., and Magurran, A. E. (2023). 
+Rarefaction and extrapolation with beta diversity under a framework of Hill numbers: 
+the iNEXT.beta3D standardization. Ecological Monographs e1588.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## (R/E Analysis) Taxonomic diversity for abundance data
+# Coverage-based standardized TD estimates and related statistics
+data(Brazil_rainforests)
+output_TDc_abun = iNEXTbeta3D(data = Brazil_rainforests, diversity = 'TD', 
+                              datatype = 'abundance', base = "coverage", nboot = 10)
+output_TDc_abun
+
+
+# Coverage-based standardized TD estimates and related statistics by 
+# user-specified coverage values
+data(Brazil_rainforests)
+output_TDc_abun_byuser = iNEXTbeta3D(data = Brazil_rainforests, diversity = 'TD', 
+                                     datatype = 'abundance', base = "coverage", nboot = 10,
+                                     level = c(0.85, 0.9))
+output_TDc_abun_byuser
+
+
+# Size-based standardized TD estimates and related statistics
+data(Brazil_rainforests)
+output_TDs_abun = iNEXTbeta3D(data = Brazil_rainforests, diversity = 'TD', 
+                              datatype = 'abundance', base = "size", nboot = 10)
+output_TDs_abun
+
+
+# Size-based standardized TD estimates and related statistics by user-specified sample sizes
+data(Brazil_rainforests)
+output_TDs_abun_byuser = iNEXTbeta3D(data = Brazil_rainforests, diversity = 'TD', 
+                                     datatype = 'abundance', base = "size", nboot = 10,
+                                     level = c(300, 500))
+output_TDs_abun_byuser
+
+
+## (R/E Analysis) Taxonomic diversity for incidence data
+# Coverage-based standardized TD estimates and related statistics
+data(Second_growth_forests)
+output_TDc_inci = iNEXTbeta3D(data = Second_growth_forests, diversity = 'TD', 
+                              datatype = 'incidence_raw', base = "coverage", nboot = 10)
+output_TDc_inci
+
+
+# Coverage-based standardized TD estimates and related statistics by 
+# user-specified coverage values
+data(Second_growth_forests)
+output_TDc_inci_byuser = iNEXTbeta3D(data = Second_growth_forests, diversity = 'TD', 
+                                     datatype = 'incidence_raw', base = "coverage", 
+                                     nboot = 10, level = c(0.9, 0.95))
+output_TDc_inci_byuser
+
+
+# Size-based standardized TD estimates and related statistics
+data(Second_growth_forests)
+output_TDs_inci = iNEXTbeta3D(data = Second_growth_forests, diversity = 'TD', 
+                              datatype = 'incidence_raw', base = "size", nboot = 10)
+output_TDs_inci
+
+
+# Size-based standardized TD estimates and related statistics by user-specified sample sizes
+data(Second_growth_forests)
+output_TDs_inci_byuser = iNEXTbeta3D(data = Second_growth_forests, diversity = 'TD', 
+                                     datatype = 'incidence_raw', base = "size", 
+                                     nboot = 10, level = c(100, 200))
+output_TDs_inci_byuser
+
+
+## (R/E Analysis) Phylogenetic diversity for abundance data
+# Coverage-based standardized PD estimates and related statistics
+data(Brazil_rainforests)
+data(Brazil_tree)
+output_PDc_abun = iNEXTbeta3D(data = Brazil_rainforests, diversity = 'PD', 
+                              datatype = 'abundance', base = "coverage", nboot = 10, 
+                              PDtree = Brazil_tree, PDreftime = NULL, PDtype = 'meanPD')
+output_PDc_abun
+
+
+# Size-based standardized PD estimates and related statistics
+data(Brazil_rainforests)
+data(Brazil_tree)
+output_PDs_abun = iNEXTbeta3D(data = Brazil_rainforests, diversity = 'PD', 
+                              datatype = 'abundance', base = "size", nboot = 10, 
+                              PDtree = Brazil_tree, PDreftime = NULL, PDtype = 'meanPD')
+output_PDs_abun
+
+
+## (R/E Analysis) Functional diversity for abundance data when all thresholds from 0 to 1 
+## are considered
+# Coverage-based standardized FD estimates and related statistics
+data(Brazil_rainforests)
+data(Brazil_distM)
+output_FDc_abun = iNEXTbeta3D(data = Brazil_rainforests, diversity = 'FD', 
+                              datatype = 'abundance', base = "coverage", nboot = 10, 
+                              FDdistM = Brazil_distM, FDtype = 'AUC', FDcut_number = 30)
+output_FDc_abun
+
+
+# Size-based standardized FD estimates and related statistics
+data(Brazil_rainforests)
+data(Brazil_distM)
+output_FDs_abun = iNEXTbeta3D(data = Brazil_rainforests, diversity = 'FD', 
+                              datatype = 'abundance', base = "size", nboot = 10, 
+                              FDdistM = Brazil_distM, FDtype = 'AUC', FDcut_number = 30)
+output_FDs_abun
+
+
+
+</code></pre>
+
+
+</div>

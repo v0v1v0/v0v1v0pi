@@ -1,0 +1,115 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>src_impala</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Connect to Impala and create a remote dplyr data source</h2>
+
+<h3>Description</h3>
+
+<p><code>src_impala</code> creates a SQL backend to dplyr for
+<a href="https://impala.apache.org/">Apache Impala</a>, the massively parallel
+processing query engine for Apache Hadoop.
+</p>
+<p><code>src_impala</code> can work with any DBI-compatible interface that provides
+connectivity to Impala. Currently, two packages that can provide this
+connectivity are odbc and RJDBC.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">src_impala(drv, ..., auto_disconnect = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>drv</code></td>
+<td>
+<p>an object that inherits from <code>DBIDriver-class</code>.
+For example, an object returned by <code>odbc</code> or
+<code>JDBC</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>arguments passed to the underlying Impala database connection
+method <code>dbConnect</code>. See
+<code>dbConnect,OdbcDriver-method</code> or
+<code>dbConnect,JDBCDriver-method</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>auto_disconnect</code></td>
+<td>
+<p>Should the connection to Impala be automatically
+closed when the object returned by this function is deleted? Pass <code>NA</code>
+to auto-disconnect but print a message when this happens.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object with class <code>src_impala</code>, <code>src_sql</code>, <code>src</code>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><a href="https://www.cloudera.com/downloads/connectors/impala/odbc.html">Impala
+ODBC driver</a>,
+<a href="https://www.cloudera.com/downloads/connectors/impala/jdbc.html">Impala
+JDBC driver</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Using ODBC connectivity:
+
+## Not run: 
+library(odbc)
+drv &lt;- odbc::odbc()
+impala &lt;- src_impala(
+  drv = drv,
+  driver = "Cloudera ODBC Driver for Impala",
+  host = "host",
+  port = 21050,
+  database = "default",
+  uid = "username",
+  pwd = "password"
+)
+## End(Not run)
+
+# Using JDBC connectivity:
+
+## Not run: 
+library(RJDBC)
+Sys.setenv(JAVA_HOME = "/path/to/java/home/")
+impala_classpath &lt;- list.files(
+  path = "/path/to/jdbc/driver",
+  pattern = "\\.jar$",
+  full.names = TRUE
+)
+.jinit(classpath = impala_classpath)
+drv &lt;- JDBC(
+  driverClass = "com.cloudera.impala.jdbc41.Driver",
+  classPath = impala_classpath,
+  identifier.quote = "`"
+)
+impala &lt;- src_impala(
+  drv,
+  "jdbc:impala://host:21050",
+  "username",
+  "password"
+)
+## End(Not run)
+</code></pre>
+
+
+</div>

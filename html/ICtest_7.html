@@ -1,0 +1,155 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>FOBIladle</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Ladle Estimate to Estimate the Number of Gaussian Components in ICA or NGCA
+</h2>
+
+<h3>Description</h3>
+
+<p>The ladle estimator uses the eigenvalues and eigenvectors of FOBI to estimate the number of Gaussian components in ICA or NGCA.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">FOBIladle(X, n.boot = 200, 
+          ncomp = ifelse(ncol(X) &gt; 10, floor(ncol(X)/log(ncol(X))), ncol(X) - 1))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>numeric data matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.boot</code></td>
+<td>
+<p>number of bootstrapping samples to be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncomp</code></td>
+<td>
+<p>The number of components among which the ladle estimator is to be searched. The default here follows
+the recommendation of Luo and Li 2016.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The model here assumes that in ICA or NGCA there are k non-gaussian components and p-k gaussian components.
+The idea is then to decide which eigenvalues differ from p+2. The ladle estimate for this purpose combines the values of the 
+scaled eigenvalues and the variation of the eigenvectors based on bootstrapping. The idea there is that for distinct eigenvales the variation of the eigenvectors
+is small and for equal eigenvalues the corresponding eigenvectors have large variation.
+</p>
+<p>This measure is then computed assuming k=0,..., <code>ncomp</code> and the ladle estimate for k is the value where the measure takes its minimum. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of class ladle containing:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>the string FOBI.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>the estimated number of non-gaussian components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fn</code></td>
+<td>
+<p>vector giving the measures of variation of the eigenvectors using the bootstrapped eigenvectors for the different number of components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phin</code></td>
+<td>
+<p>normalized eigenvalues of the FOBI matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gn</code></td>
+<td>
+<p>the main criterion for the ladle estimate - the sum of fn and phin. k is the value where gn takes its minimum</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>the eigenvalues of the FOBI matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>W</code></td>
+<td>
+<p>the transformation matrix to the independent components. Also known as unmixing matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>S</code></td>
+<td>
+<p>data matrix with the centered independent components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MU</code></td>
+<td>
+<p>the location of the data which was substracted before calculating the independent components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.name</code></td>
+<td>
+<p>the name of the data for which the ladle estimate was computed.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Klaus Nordhausen
+</p>
+
+
+<h3>References</h3>
+
+<p><cite>Luo, W. and Li, B. (2016), Combining Eigenvalues and Variation of Eigenvectors for Order Determination, Biometrika, 103. 875–887. &lt;doi:10.1093/biomet/asw051&gt;</cite>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ladleplot</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">n &lt;- 1000
+X &lt;- cbind(rexp(n), rt(n,5), rnorm(n), rnorm(n), rnorm(n), rnorm(n))
+
+test &lt;- FOBIladle(X)
+test
+summary(test)
+plot(test)
+ladleplot(test)
+</code></pre>
+
+
+</div>

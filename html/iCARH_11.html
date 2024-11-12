@@ -1,0 +1,109 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iCARH.params</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Summarize and return model parameters</h2>
+
+<h3>Description</h3>
+
+<p>Group of functions to summarize and return model parameters of interest
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iCARH.params(
+  fit,
+  pars = c("theta", "alpha", "beta", "phi"),
+  path.names = NULL,
+  prob = 0.95,
+  use_cache = TRUE,
+  digits = 2,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fit</code></td>
+<td>
+<p>Object returned by iCARH.model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pars</code></td>
+<td>
+<p>Parameters of interest ("theta","alpha","beta","phi"). All parameters by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>path.names</code></td>
+<td>
+<p>Specify pathway names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob</code></td>
+<td>
+<p>Confidence level. Defaults to 0.95.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>use_cache</code></td>
+<td>
+<p>passed to stan summary method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>The number of significant digits for printing out the summary; 
+defaults to 2. The effective sample size is always rounded to integers.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>not used currently</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>contain summaries for all chains. Included in the summaries are means, standard deviations (Est.Error), effective sample sizes (Eff.Sample), and split Rhats. 
+Monte Carlo standard errors (MC.Error) are also reported.
+</p>
+
+
+<h3>Functions</h3>
+
+
+<ul><li> <p><code>iCARH.params</code>: Summary of model parameters
+</p>
+</li></ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">data.sim = iCARH.simulate(4, 10, 14, 8, 2, path.probs=0.3, Zgroupeff=c(0,4),
+beta.val=c(1,-1,0.5, -0.5))
+XX = data.sim$XX
+Y = data.sim$Y
+Z = data.sim$Z
+pathways = data.sim$pathways
+
+rstan_options(auto_write = TRUE)
+options(mc.cores = 2)
+fit = iCARH.model(XX, Y, Z, groups=rep(c(0,1), each=5), pathways, 
+control = list(adapt_delta = 0.99, max_treedepth=10), iter = 2, chains = 2)
+if(!is.null(fit$icarh))
+iCARH.params(fit)
+
+
+</code></pre>
+
+
+</div>

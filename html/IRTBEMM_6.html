@@ -1,0 +1,163 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Prob.model</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Calculate the probabilites based on a given model and parameters.
+</h2>
+
+<h3>Description</h3>
+
+<p>Based on the given model, return the correct probabilities of a single examinne with ability X answering each item.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Prob.model(X, Model, Par.est0, D=1.702)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>A <code>numeric</code> with length=1 consists of an examinee's ability theta.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Model</code></td>
+<td>
+<p>A <code>character</code> to declare the type of items to be modeled. The parameter labels follow conventional uses, can be:
+</p>
+
+<ul>
+<li>
+<p>  '3PL' - Three parameter logistic (3PL) model proposed by Birnbaum(1968):
+</p>
+<p style="text-align: center;"><code class="reqn">P(x = 1|\theta, a, b, c) = c + (1 - c) / (1 + exp(-D * a * (\theta - b)))</code>
+</p>
+
+<p>where x=1 is the correct response, <em>theta</em> is examinne's ability; <em>a</em>, <em>b</em> and <em>c</em> are the item discrimination, difficulty and guessing parameter, respectively; D is the scaling constant 1.702.
+</p>
+</li>
+<li>
+<p>  '4PL' - Four parameter logistic (4PL) model proposed by Barton &amp; Lord's(1981). Transfer the unslipping (upper asymptote) parameter <em>d</em> to slipping parameter <em>s</em> by set <em>s=1-d</em>:
+</p>
+<p style="text-align: center;"><code class="reqn">P(x = 1|\theta, a, b, c, s) = c + (1 - s - c) / (1 + exp(-D * a * (\theta - b)))</code>
+</p>
+
+<p>where x=1 is the correct response; <em>theta</em> is examinne's ability. <em>a</em>, <em>b</em>, <em>c</em> and <em>s</em> are the item discrimination, difficulty guessing and slipping parameter, respectively; D is the scaling constant 1.702.
+</p>
+</li>
+<li>
+<p>  '1PLG' - One parameter logsitc guessing (1PLG) model proposed by San Martín et al.(2006). Let <em>invlogit(x)=1 / (1 + exp(-x))</em>: 
+</p>
+<p style="text-align: center;"><code class="reqn">P(x = 1|\theta, \beta, \gamma) = invlogit(\theta - \beta) + (1 - invlogit(\theta - \beta)) * invlogit(\gamma)</code>
+</p>
+
+<p>where x=1 is the correct response, <em>theta</em> is examinne's ability; <em>beta</em> and <em>gamma</em> are the item difficulty and guessing parameter, respectively.
+</p>
+</li>
+<li>
+<p>  '1PLAG' - One parameter logsitc ability-based guessing (1PLAG) model proposed by San Martín et al.(2006). Let <em>invlogit(x)=1 / (1 + exp(-x))</em>:
+</p>
+<p style="text-align: center;"><code class="reqn">P(x = 1|\theta, \alpha, \beta, \gamma) = invlogit(\theta - \beta) + (1 - invlogit(\theta - \beta)) * invlogit(\alpha * \theta + \gamma)</code>
+</p>
+
+<p>where x=1 is the correct response, <em>theta</em> is examinne's ability; <em>alpha</em> is the weight of the ability in the guessing component; <em>beta</em> and <em>gamma</em> are the item difficulty and guessing parameter, respectively.
+</p>
+</li>
+</ul>
+<p>These parameter labels are <strong>capitalized</strong> in program for emphasis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Par.est0</code></td>
+<td>
+<p>A <code>list</code> that consists of item parameters for each item based on the given model. Can be:
+</p>
+
+<ul>
+<li>
+<p> For 3PL model, <strong>list(A, B, C)</strong> - A, B, C are <code>numeric</code> refer to item discrimination, difficulty and pseudo guessing parameters for each item, respectively.
+</p>
+</li>
+<li>
+<p> For 4PL model, <strong>list(A, B, C, S)</strong> - A, B, C, S are <code>numeric</code> refer to item discrimination, difficulty, pseudo guessing and slipping parameters for each item, respectively.
+</p>
+</li>
+<li>
+<p> For 1PLG model, <strong>list(Beta, Gamma)</strong> - Beta, Gamma are <code>numeric</code> refer to item difficulty and guessing (on the logistic scales) parameters for each item, respectively.
+</p>
+</li>
+<li>
+<p> For 1PLAG model, <strong>list(Alpha, Beta, Gamma)</strong> - Alpha refers to the weight of the ability in the guessing component, and Beta and Gamma are <code>numeric</code> refer to item difficulty and guessing (on the logistic scales) parameters for each item, respectively.
+</p>
+</li>
+</ul>
+<p>Please note these <strong>capitalized</strong> parameter lables are transformed from the Model section.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>A single <code>numeric</code> refers to the scaling constant only used in the 3PL and 4PL model. By default, D=1.702.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A <code>numeric</code> consists of the correct probabilities of a single examinne with ability X answering each item.
+</p>
+
+
+<h3>References</h3>
+
+<p>Barton, M. A., &amp; Lord, F. M. (1981). An upper asymptote for the three-parameter logistic item response model. <em>ETS Research Report Series</em>, <em>1981</em>(1), 1-8. <a href="https://doi.org/10.1002/j.2333-8504.1981.tb01255.x">doi:10.1002/j.2333-8504.1981.tb01255.x</a>
+</p>
+<p>Birnbaum, A. (1968). <em>Some latent trait models and their use in inferring an examinee's ability</em>. In F. M. Lord &amp; M. R. Novick (Eds.), Statistical theories of mental test scores (pp. 395-479). MA: Adison-Wesley.
+</p>
+<p>San Martín, E., Del Pino, G., &amp; De Boeck, P. (2006). IRT models for ability-based guessing. <em>Applied Psychological Measurement</em>, <em>30</em>(3), 183-203. <a href="https://doi.org/10.1177/0146621605282773">doi:10.1177/0146621605282773</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#Obtain the correct probabilities of five 3PL model items when theta=1.2 and D=1.702. 
+library(IRTBEMM)
+th=1.2                           #Examinee's ability parameter theta
+A=c(1.5, 2, 0.5, 1.2, 0.4)       #item discrimination parameters
+B=c(-0.5, 0, 1.5, 0.3, 2.8)      #item difficulty parameters
+C=c(0.1, 0.2, 0.3, 0.15, 0.25)   #item pseudo guessing parameters
+Par3PL=list(A=A, B=B, C=C)       #Create a list for 3PL
+P.3pl=Prob.model(X=th, Model='3PL', Par.est0=Par3PL)   #Obtain the 3PL probabilities
+
+#Obtain the correct probabilities of five 4PL model items when theta=1.2 and D=1. 
+S=c(0.3, 0.1, 0.13, 0.09, 0.05)  #item pseudo slipping parameters
+Par4PL=list(A=A, B=B, C=C, S=S)  #Create a list for 4PL
+P.4pl=Prob.model(X=th, Model='4PL', Par.est0=Par4PL, D=1)   #Obtain the 4PL probabilities
+
+#Obtain the correct probabilities of three 1PLG model items when theta=0.3.
+th=0.3
+Beta=c(0.8, -1.9, 2.4)
+Gamma=c(-1.31, -0.89, -0.18)
+Par1PLG=list(Beta=Beta, Gamma=Gamma)                 #Create a list for 1PLG
+P.1plg=Prob.model(X=th, Model='1PLG', Par.est0=Par1PLG)   #Obtain the 1PLG probabilities
+
+#Obtain the correct probabilities of three 1PLAG model items when theta=0.3.
+Alpha=0.2
+Par1PLAG=list(Alpha=Alpha, Beta=Beta, Gamma=Gamma)     #Create a list for 1PLAG
+P.1plag=Prob.model(X=th, Model='1PLAG', Par.est0=Par1PLAG)   #Obtain the 1PLAG probabilities
+
+
+</code></pre>
+
+
+</div>

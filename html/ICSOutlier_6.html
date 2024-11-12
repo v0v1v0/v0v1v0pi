@@ -1,0 +1,185 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dist.simu.test</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Cut-Off Values Using Simulations for the Detection of Extreme ICS Distances
+</h2>
+
+<h3>Description</h3>
+
+<p>Computes the cut-off values for the identification of the outliers based on the squared ICS distances.
+It uses simulations under a multivariate standard normal model for a specific data setup and scatters combination.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dist.simu.test(object, index, m = 10000, level = 0.025, ncores = NULL, 
+               iseed = NULL, pkg = "ICSOutlier", qtype = 7, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>object of class <code>ics2</code> where both <code>S1</code> and <code>S2</code> are specified as functions. The sample size and the dimension of interest
+are also obtained from the object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>index</code></td>
+<td>
+<p>integer vector specifiying which components are used to compute the 
+<code>ics.distances</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>number of simulations. Note that extreme quantiles are of interest and hence <code>m</code> should be large. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+<p>the (1-<code>level</code>(s))th quantile(s) used to choose the cut-off value(s). Usually just one number between 0 and 1. However a vector is
+also possible.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncores</code></td>
+<td>
+<p>number of cores to be used. If <code>NULL</code> or 1, no parallel computing is used. Otherwise makeCluster with <code>type = "PSOCK"</code> is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iseed</code></td>
+<td>
+<p>If parallel computation is used the seed passed on to <code>clusterSetRNGStream</code>. Default is NULL which means no fixed seed is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pkg</code></td>
+<td>
+<p>When using parallel computing, a character vector listing all the packages which need to be loaded on the different cores via <code>require</code>. Must be at least "ICSOutlier"
+and must contain the packages needed to compute the scatter matrices.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qtype</code></td>
+<td>
+<p>specifies the quantile algorithm used in <code>quantile</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments passed on to the function <code>quantile</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function extracts basically the dimension of the data from the <code>ics2</code> object and simulates <code>m</code> times, from a multivariate standard normal distribution,
+the squared ICS distances with the components specified in <code>index</code>. The resulting value is then the mean of the <code>m</code> correponding quantiles of these distances 
+at level 1-<code>level</code>.
+</p>
+<p>Note that depending on the data size and scatters used this can take a while and so it is more efficient to parallelize computations.
+</p>
+<p>Note that the function is seldomly called directly by the user but internally by <code>ics.outlier</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A vector with the values of the (1-<code>level</code>)th quantile.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Function <code>dist.simu.test</code> reached the end of its lifecycle, please use <code>dist_simu_test</code> instead. In future versions, <code>dist.simu.test</code> will be deprecated and eventually removed.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Aurore Archimbaud and Klaus Nordhausen
+</p>
+
+
+<h3>References</h3>
+
+<p><cite>Archimbaud, A., Nordhausen, K. and Ruiz-Gazen, A. (2018), ICS for multivariate outlier detection with application to quality control. Computational Statistics &amp; Data Analysis, 128:184-199. ISSN 0167-9473.  &lt;https://doi.org/10.1016/j.csda.2018.06.011&gt;.</cite>   
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ics2</code>, <code>ics.distances</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># For a real analysis use larger values for m and more cores if available
+
+Z &lt;- rmvnorm(1000, rep(0, 6))
+Z[1:20, 1] &lt;- Z[1:20, 1] + 10
+A &lt;- matrix(rnorm(36), ncol = 6)
+X &lt;- tcrossprod(Z, A)
+
+pairs(X)
+icsX &lt;- ics2(X)
+
+icsX.dist.1 &lt;- ics.distances(icsX, index = 1)
+CutOff &lt;- dist.simu.test(icsX, 1, m = 500, ncores = 1)
+
+# check if outliers are above the cut-off value
+plot(icsX.dist.1, col = rep(2:1, c(20, 980)))
+abline(h = CutOff)
+
+
+library(REPPlab)
+data(ReliabilityData)
+# The observations 414 and 512 are suspected to be outliers
+icsReliability &lt;- ics2(ReliabilityData, S1 = MeanCov, S2 = Mean3Cov4)
+# Choice of the number of components with the screeplot: 2
+screeplot(icsReliability)
+# Computation of the distances with the first 2 components
+ics.dist.scree &lt;- ics.distances(icsReliability, index = 1:2)
+# Computation of the cut-off of the distances 
+CutOff &lt;- dist.simu.test(icsReliability, 1:2, m = 50, level = 0.02, ncores = 1)
+# Identification of the outliers based on the cut-off value
+plot(ics.dist.scree)
+abline(h = CutOff)
+outliers &lt;- which(ics.dist.scree &gt;= CutOff)
+text(outliers, ics.dist.scree[outliers], outliers, pos = 2, cex = 0.9)
+
+## Not run: 
+# For using three cores
+# For demo purpose only small m value, should select the first component
+dist.simu.test(icsReliability, 1:2, m = 500, level = 0.02, ncores = 3, iseed = 123)
+  
+# For using several cores and for using a scatter function from a different package
+# Using the parallel package to detect automatically the number of cores
+library(parallel)
+# ICS with Multivariate Median and Tyler's Shape Matrix and the usual estimates
+library(ICSNP)
+icsReliabilityHRMest &lt;- ics2(ReliabilityData, S1 = HR.Mest, S2 = MeanCov, 
+                             S1args = list(maxiter = 1000))
+# Computation of the cut-off of the distances. For demo purpose only small m value.
+dist.simu.test(icsReliabilityHRMest,  1:2, m = 500, level = 0.02, ncores = detectCores()-1, 
+               pkg = c("ICSOutlier","ICSNP"), iseed = 123)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

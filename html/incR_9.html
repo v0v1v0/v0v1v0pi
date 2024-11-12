@@ -1,0 +1,166 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>incRscan</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Automated scoring of incubation</h2>
+
+<h3>Description</h3>
+
+<p>This is the core algorithm of <code>incR</code> and classifies time points as 1's or 0's depending on
+whether or not the incubating individual is considered to be on the eggs. 
+The algorithm
+uses night variation to daily calibrate itself to temperature variation when the incubating
+individual is assumed to be on the eggs. 
+A major assumption of this algorithm is that
+there is a period of time in which temperature can be assumed to be constant or
+representative of time windows of constant incubation. This time window is defined by
+two arguments: <code>lower.time</code> and <code>upper.time</code>. The function is optimised to work using
+a data frame produced by <code>incRprep</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">incRscan(
+  data,
+  temp.name,
+  lower.time,
+  upper.time,
+  sensitivity,
+  temp.diff,
+  temp.diff.threshold,
+  maxNightVariation,
+  env.temp
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>data frame for analysis. It must contained four columns named as follow:
+<code>date</code>, <code>temp1</code>, <code>dec_time</code> and <code>index</code>, where <code>temp1</code> is the difference between
+the <em>ith</em> and  <em>i-1th</em> temperature recordings; <code>dec_time</code> is time in
+decimal hours; and <code>index</code> is a running number from 1 to <em>N</em>, <em>N</em> being the 
+total number of observations. <code>incRprep</code> returns a data frame with
+these variables and the correct names, ready to be passed through <code>incRscan</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>temp.name</code></td>
+<td>
+<p>(character object) name of the column containing temperature data 
+in <code>data</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower.time</code></td>
+<td>
+<p>lower limit of time window for calibration (numeric).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper.time</code></td>
+<td>
+<p>upper limit of time window for calibration (numeric).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sensitivity</code></td>
+<td>
+<p>ratio of reduction in temperature threshold. When nest temperature
+does not drop close to environmental temperatures, this value can be kept to 1. If 
+nest temperature follows environmental temperature at any point, 
+then adjustment of this value may
+be required to detect short on/off-bouts at lower nest temperatures (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>temp.diff</code></td>
+<td>
+<p>deprecated. Use temp.diff.threshold.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>temp.diff.threshold</code></td>
+<td>
+<p>threshold for temperature difference between <code>env.temp</code> and an observation which
+triggers the sensitivity parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxNightVariation</code></td>
+<td>
+<p>maximum temperature variation between two consecutive points
+within the calibrating window that is considered normal of this period. 
+If this variation value is surpassed, the
+calibrating window is discarded and a previous night is used for calibration.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>env.temp</code></td>
+<td>
+<p>name of a column containing environmental temperatures.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The function returns a list with two objects. The first object, named <code>incRscan_data</code>, is the original
+data frame with an extra column named 'incR_score'. This variable is formed by 1's and 0's,
+representing whether the incubating individual is inside (1) or outside the nest (0).
+</p>
+<p>The second object, named <code>incRscan_threshold</code>, is a data frame with one day per row. Four columns tell the user
+the thresholds employed to calculate the 'incR_score' column. A fifth column accounts
+for the ratio between temperature variation in the calibrating window and the variation in temperature 
+between 11am and 3pm for each day morning. The lower this value the more clear the pattern between night 
+and day variation and, therefore, stronger the signal in the data. 
+This value may serve the user as an indication of the signal / noise ratio in the analysed
+data set.
+</p>
+
+
+<h3>Details</h3>
+
+<p>For further details about the calculation performed by <code>incRscan</code>, consult the package vignettes and
+the associated publications.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Pablo Capilla-Lasheras
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>incRprep</code> <code>incRenv</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># incR_procdata is a dataframe processed by incRprep and incRenv.
+# it contains suitable information to run incRscan
+data(incR_procdata)
+
+incubation.analysis &lt;- incRscan (data=incR_procdata, 
+                                  temp.name="temperature",
+                                  lower.time=22,
+                                  upper.time=3,
+                                  sensitivity=0.15,
+                                  temp.diff.threshold=5,
+                                  maxNightVariation=2,
+                                  env.temp="env_temp")
+inc.data &lt;- incubation.analysis[[1]]
+inc.thresholds &lt;- incubation.analysis[[2]]
+</code></pre>
+
+
+</div>

@@ -1,0 +1,283 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>VCFsToCatalogs</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create SBS, DBS and Indel catalogs from VCFs</h2>
+
+<h3>Description</h3>
+
+<p>Create 3 SBS catalogs (96, 192, 1536), 3 DBS catalogs (78, 136, 144) and
+Indel catalog from the Mutect VCFs specified by <code>files</code>
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">VCFsToCatalogs(
+  files,
+  ref.genome,
+  variant.caller = "unknown",
+  num.of.cores = 1,
+  trans.ranges = NULL,
+  region = "unknown",
+  names.of.VCFs = NULL,
+  tumor.col.names = NA,
+  filter.status = NULL,
+  get.vaf.function = NULL,
+  ...,
+  max.vaf.diff = 0.02,
+  return.annotated.vcfs = FALSE,
+  suppress.discarded.variants.warnings = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>files</code></td>
+<td>
+<p>Character vector of file paths to the VCF files.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ref.genome</code></td>
+<td>
+<p>A <code>ref.genome</code> argument as described in
+<code>ICAMS</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variant.caller</code></td>
+<td>
+<p>Name of the variant caller that produces the VCF, can
+be either <code>"strelka"</code>, <code>"mutect"</code>, <code>"freebayes"</code> or
+<code>"unknown"</code>. This information is needed to calculate the VAFs (variant
+allele frequencies). If variant caller is <code>"unknown"</code>(default) and
+<code>get.vaf.function</code> is NULL, then VAF and read depth will be NAs. If
+variant caller is <code>"mutect"</code>, do <strong>not</strong> merge SBSs into DBS.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.of.cores</code></td>
+<td>
+<p>The number of cores to use. Not available on Windows
+unless <code>num.of.cores = 1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trans.ranges</code></td>
+<td>
+<p>Optional. If <code>ref.genome</code> specifies one of the
+<code>BSgenome</code> object
+</p>
+
+<ol>
+<li> <p><code>BSgenome.Hsapiens.1000genomes.hs37d5</code>
+</p>
+</li>
+<li> <p><code>BSgenome.Hsapiens.UCSC.hg38</code>
+</p>
+</li>
+<li> <p><code>BSgenome.Mmusculus.UCSC.mm10</code>
+</p>
+</li>
+</ol>
+<p>then the function will infer <code>trans.ranges</code> automatically. Otherwise,
+user will need to provide the necessary <code>trans.ranges</code>. Please refer to
+<code>TranscriptRanges</code> for more details.
+If <code>is.null(trans.ranges)</code> do not add transcript range
+information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>region</code></td>
+<td>
+<p>A character string designating a genomic region;
+see <code>as.catalog</code> and <code>ICAMS</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>names.of.VCFs</code></td>
+<td>
+<p>Optional. Character vector of names of the VCF files.
+The order of names in <code>names.of.VCFs</code> should match the order of VCF
+file paths in <code>files</code>. If <code>NULL</code>(default), this function will
+remove all of the path up to and including the last path separator (if any)
+in <code>files</code> and file paths without extensions (and the leading dot)
+will be used as the names of the VCF files.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tumor.col.names</code></td>
+<td>
+<p>Optional. Only applicable to <strong>Mutect</strong> VCFs.
+Character vector of column names in <strong>Mutect</strong> VCFs which contain the
+tumor sample information. The order of names in <code>tumor.col.names</code>
+should match the order of <strong>Mutect</strong> VCFs specified in <code>files</code>.
+If <code>tumor.col.names</code> is equal to <code>NA</code>(default), this function
+will use the 10th column in all the <strong>Mutect</strong> VCFs to calculate VAFs.
+See <code>GetMutectVAF</code> for more details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filter.status</code></td>
+<td>
+<p>The status indicating a variant has passed all filters.
+An example would be <code>"PASS"</code>. Variants which don't have the specified
+<code>filter.status</code> in the <code>FILTER</code> column in VCF will be removed. If
+<code>NULL</code>(default), no variants will be removed from the original VCF.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>get.vaf.function</code></td>
+<td>
+<p>Optional. Only applicable when <code>variant.caller</code> is
+<strong>"unknown"</strong>. Function to calculate VAF(variant allele frequency) and read
+depth information from original VCF. See <code>GetMutectVAF</code> as an example.
+If <code>NULL</code>(default) and <code>variant.caller</code> is "unknown", then VAF
+and read depth will be NAs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Optional arguments to <code>get.vaf.function</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.vaf.diff</code></td>
+<td>
+<p><strong>Not</strong> applicable if <code>variant.caller =
+  "mutect"</code>. The maximum difference of VAF, default value is 0.02. If the
+absolute difference of VAFs for adjacent SBSs is bigger than <code>max.vaf.diff</code>,
+then these adjacent SBSs are likely to be "merely" asynchronous single base
+mutations, opposed to a simultaneous doublet mutation or variants involving
+more than two consecutive bases.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return.annotated.vcfs</code></td>
+<td>
+<p>Logical. Whether to return the annotated VCFs
+with additional columns showing mutation class for each variant. Default is
+FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>suppress.discarded.variants.warnings</code></td>
+<td>
+<p>Logical. Whether to suppress
+warning messages showing information about the discarded variants. Default
+is TRUE.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function calls <code>VCFsToSBSCatalogs</code>,
+<code>VCFsToDBSCatalogs</code> and <code>VCFsToIDCatalogs</code>
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list containing the following objects:
+</p>
+
+<ul>
+<li> <p><code>catSBS96</code>, <code>catSBS192</code>, <code>catSBS1536</code>: Matrix of
+3 SBS catalogs (one each for 96, 192, and 1536).
+</p>
+</li>
+<li> <p><code>catDBS78</code>, <code>catDBS136</code>, <code>catDBS144</code>: Matrix of
+3 DBS catalogs (one each for 78, 136, and 144).
+</p>
+</li>
+<li> <p><code>catID</code>: Matrix of ID (small insertion and deletion) catalog.
+</p>
+</li>
+<li> <p><code>discarded.variants</code>: <strong>Non-NULL only if</strong> there are variants
+that were excluded from the analysis. See the added extra column
+<code>discarded.reason</code> for more details.
+</p>
+</li>
+<li> <p><code>annotated.vcfs</code>:
+<strong>Non-NULL only if</strong> <code>return.annotated.vcfs</code> = TRUE.
+A list of elements:
+</p>
+
+<ul>
+<li> <p><code>SBS</code>: SBS VCF annotated by <code>AnnotateSBSVCF</code> with
+three new columns <code>SBS96.class</code>, <code>SBS192.class</code> and
+<code>SBS1536.class</code> showing the mutation class for each SBS variant.
+</p>
+</li>
+<li> <p><code>DBS</code>: DBS VCF annotated by <code>AnnotateDBSVCF</code> with
+three new columns <code>DBS78.class</code>, <code>DBS136.class</code> and
+<code>DBS144.class</code> showing the mutation class for each DBS variant.
+</p>
+</li>
+<li> <p><code>ID</code>: ID VCF annotated by <code>AnnotateIDVCF</code> with one
+new column <code>ID.class</code> showing the mutation class for each
+ID variant.
+</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>If <code>trans.ranges</code> is not provided by user and cannot be inferred by
+ICAMS, SBS 192 and DBS 144 catalog will not be generated. Each catalog has
+attributes added. See <code>as.catalog</code> for more details.
+</p>
+
+
+<h3>ID classification</h3>
+
+<p>See <a href="https://github.com/steverozen/ICAMS/blob/master/data-raw/PCAWG7_indel_classification_2021_09_03.xlsx">https://github.com/steverozen/ICAMS/blob/master/data-raw/PCAWG7_indel_classification_2021_09_03.xlsx</a>
+for additional information on ID (small insertion and deletion) mutation
+classification.
+</p>
+<p>See the documentation for <code>Canonicalize1Del</code> which first handles
+deletions in homopolymers, then handles deletions in simple repeats with
+longer repeat units, (e.g. <code>CACACACA</code>, see
+<code>FindMaxRepeatDel</code>), and if the deletion is not in a simple
+repeat, looks for microhomology (see <code>FindDelMH</code>).
+</p>
+<p>See the code for unexported function <code>CanonicalizeID</code>
+and the functions it calls for handling of insertions.
+</p>
+
+
+<h3>Note</h3>
+
+<p>SBS 192 and DBS 144 catalogs include only mutations in transcribed regions.
+In ID (small insertion and deletion) catalogs, deletion repeat sizes range
+from 0 to 5+, but for plotting and end-user documentation deletion repeat
+sizes range from 1 to 6+.
+</p>
+
+
+<h3>Comments</h3>
+
+<p>To add or change attributes of the catalog, you can use function
+<code>attr</code>. <br> For example, <code>attr(catalog, "abundance")
+&lt;- custom.abundance</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">file &lt;- c(system.file("extdata/Mutect-vcf",
+                      "Mutect.GRCh37.s1.vcf",
+                      package = "ICAMS"))
+if (requireNamespace("BSgenome.Hsapiens.1000genomes.hs37d5", quietly = TRUE)) {
+  catalogs &lt;- VCFsToCatalogs(file, ref.genome = "hg19",
+                             variant.caller = "mutect", region = "genome")}
+</code></pre>
+
+
+</div>

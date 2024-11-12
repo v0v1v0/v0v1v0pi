@@ -1,0 +1,174 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iv-groups</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Group overlapping intervals</h2>
+
+<h3>Description</h3>
+
+<p>This family of functions revolves around grouping overlapping intervals
+within a single iv. When multiple overlapping intervals are grouped together
+they result in a wider interval containing the smallest <code>iv_start()</code> and the
+largest <code>iv_end()</code> of the overlaps.
+</p>
+
+<ul>
+<li> <p><code>iv_groups()</code> merges all overlapping intervals found within <code>x</code>. The
+resulting intervals are known as the "groups" of <code>x</code>.
+</p>
+</li>
+<li> <p><code>iv_identify_group()</code> identifies the group that the current interval of <code>x</code>
+falls in. This is particularly useful alongside <code>dplyr::group_by()</code>.
+</p>
+</li>
+<li> <p><code>iv_locate_groups()</code> returns a two column data frame with a <code>key</code> column
+containing the result of <code>iv_groups()</code> and a <code>loc</code> list-column containing
+integer vectors that map each interval in <code>x</code> to the group that it falls in.
+</p>
+</li>
+</ul>
+<p>Optionally, you can choose <em>not</em> to group abutting intervals together with
+<code>abutting = FALSE</code>, which can be useful if you'd like to retain those
+boundaries.
+</p>
+
+
+<h4>Minimal interval vectors</h4>
+
+<p><code>iv_groups()</code> is particularly useful because it can generate a <em>minimal</em>
+interval vector, which covers the range of an interval vector in the most
+compact form possible. In particular, a minimal interval vector:
+</p>
+
+<ul>
+<li>
+<p> Has no overlapping intervals
+</p>
+</li>
+<li>
+<p> Has no abutting intervals
+</p>
+</li>
+<li>
+<p> Is ordered on both <code>start</code> and <code>end</code>
+</p>
+</li>
+</ul>
+<p>A minimal interval vector is allowed to have a single missing interval,
+which is located at the end of the vector.
+</p>
+
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iv_groups(x, ..., abutting = TRUE)
+
+iv_identify_group(x, ..., abutting = TRUE)
+
+iv_locate_groups(x, ..., abutting = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[iv]⁠</code>
+</p>
+<p>An interval vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>These dots are for future extensions and must be empty.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>abutting</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[TRUE / FALSE]⁠</code>
+</p>
+<p>Should abutting intervals be grouped together?
+</p>
+<p>If <code>TRUE</code>, <code style="white-space: pre;">⁠[a, b)⁠</code> and <code style="white-space: pre;">⁠[b, c)⁠</code> will merge as <code style="white-space: pre;">⁠[a, c)⁠</code>. If <code>FALSE</code>, they
+will be kept separate. To be a minimal interval vector, all abutting
+intervals must be grouped together.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+
+<ul>
+<li>
+<p> For <code>iv_groups()</code>, an iv with the same type as <code>x</code>.
+</p>
+</li>
+<li>
+<p> For <code>iv_identify_group()</code>, an iv with the same type and size as <code>x</code>.
+</p>
+</li>
+<li>
+<p> For <code>iv_locate_groups()</code>, a two column data frame with a <code>key</code> column
+containing the result of <code>iv_groups()</code> and a <code>loc</code> list-column containing
+integer vectors.
+</p>
+</li>
+</ul>
+<h3>Graphical Representation</h3>
+
+<p>Graphically, generating groups looks like:
+</p>
+<p><img src="../help/figures/groups.png" alt="groups.png"></p>
+<p>With <code>abutting = FALSE</code>, intervals that touch aren't grouped:
+</p>
+<p><img src="../help/figures/groups-abutting-keep.png" alt="groups-abutting-keep.png"></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(dplyr, warn.conflicts = FALSE)
+
+x &lt;- iv_pairs(
+  c(1, 5),
+  c(2, 3),
+  c(NA, NA),
+  c(5, 6),
+  c(NA, NA),
+  c(9, 12),
+  c(11, 14)
+)
+x
+
+# Grouping removes all redundancy while still covering the full range
+# of values that were originally represented. If any missing intervals
+# are present, a single one is retained.
+iv_groups(x)
+
+# Abutting intervals are typically grouped together, but you can choose not
+# to group them if you want to retain those boundaries
+iv_groups(x, abutting = FALSE)
+
+# `iv_identify_group()` is useful alongside `group_by()` and `summarize()`
+df &lt;- tibble(x = x)
+df &lt;- mutate(df, u = iv_identify_group(x))
+df
+
+df %&gt;%
+  group_by(u) %&gt;%
+  summarize(n = n())
+
+# The real workhorse here is `iv_locate_groups()`, which returns
+# the groups and information on which observations in `x` fall in which
+# group
+iv_locate_groups(x)
+</code></pre>
+
+
+</div>

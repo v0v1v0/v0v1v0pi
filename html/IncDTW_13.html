@@ -1,0 +1,117 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dtw2vec</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Fast vector-based Dynamic Time Warping
+</h2>
+
+<h3>Description</h3>
+
+<p>Calculates the Dynamic Time Warping distance by hand of a vector-based implementation and is much faster than the traditional method <code>dtw()</code>. Also allows early abandoning and sakoe chiba warping window, both for univariate and multivariate time series.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dtw2vec(Q, C, dist_method = c("norm1", "norm2", "norm2_square"),
+         step_pattern = c("symmetric2", "symmetric1"),
+         ws = NULL, threshold = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Q</code></td>
+<td>
+<p>Either Q is (a) a time series (vector or matrix for multivariate time series) or (b) Q is a cost matrix, so a matrix storing the local distances of the time series Q and C. If Q and C are matrices, they need to have the same number of columns. If Q is a cost matrix, C needs to be equal the character string "cm".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C</code></td>
+<td>
+<p>time series as vector or matrix, or for case (b) C equals "cm"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist_method</code></td>
+<td>
+<p>character, describes the method of distance measure. See also <code>dtw</code>.  If Q is a cost matrix, the dist_method parameter is not necessary.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>step_pattern</code></td>
+<td>
+<p>character, describes the step pattern. See also <code>dtw</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ws</code></td>
+<td>
+
+<p>integer, describes the window size for the sakoe chiba window. If NULL, then no window is applied. (default = NULL)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>numeric, the threshold for early abandoning. In the calculation of the global cost matrix a possible path stops as soon as the threshold is reached. Facilitates faster calculations in case of low threshold. The threshold relates to the non-normalized distance measure. (default = NULL, no early abandoning)
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>no matrices are allocated, no matrices are returned
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>distance</code></td>
+<td>
+<p>the DTW distance</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>normalized_distance</code></td>
+<td>
+<p>the normalized DTW distance, see also <code>dtw</code></p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+
+<ul>
+<li>
+<p> Leodolter, M.; Pland, C.; Brändle, N; <em>IncDTW: An R Package for Incremental Calculation of Dynamic Time Warping</em>. Journal of Statistical Software, 99(9), 1-23. doi: <a href="https://doi.org/10.18637/jss.v099.i09">10.18637/jss.v099.i09</a>
+</p>
+</li>
+<li>
+<p> Sakoe, H.; Chiba, S., <em>Dynamic programming algorithm optimization for spoken word recognition, Acoustics, Speech, and Signal Processing</em> [see also IEEE Transactions on Signal Processing], IEEE Transactions on , vol.26, no.1, pp. 43-49, Feb 1978. http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1163055
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">Q &lt;- cumsum(rnorm(100))
+C &lt;- Q[11:100] + rnorm(90, 0, 0.5)
+dtw2vec(Q = Q, C = C)
+dtw2vec(Q = Q, C = C, ws = 30)
+dtw2vec(Q = Q, C = C, threshold = 100)
+dtw2vec(Q = Q, C = C, ws = 30, threshold = 100)
+
+cm0 &lt;- cm(Q, C)
+dtw2vec(Q = cm0, C = "cm", ws = 30, threshold = 100)
+</code></pre>
+
+
+</div>

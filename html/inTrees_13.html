@@ -1,0 +1,110 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>measureRule</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+internal
+</h2>
+
+<h3>Description</h3>
+
+<p>internal
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">measureRule(ruleExec, X, target, pred = NULL, regMethod = "mean")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ruleExec</code></td>
+<td>
+
+
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+
+
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target</code></td>
+<td>
+
+
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pred</code></td>
+<td>
+
+
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>regMethod</code></td>
+<td>
+
+
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>data frame including rule's length, frequency, error, rule condition and prediction
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##---- Should be DIRECTLY executable !! ----
+##-- ==&gt;  Define data, use random,
+##--	or do  help(data=index)  for the standard data sets.
+
+## The function is currently defined as
+function (ruleExec, X, target, pred = NULL) 
+{
+    len &lt;- length(unlist(strsplit(ruleExec, split = " &amp; ")))
+    origRule &lt;- ruleExec
+    ruleExec &lt;- paste("which(", ruleExec, ")")
+    ixMatch &lt;- eval(parse(text = ruleExec))
+    if (length(ixMatch) == 0) {
+        v &lt;- c("-1", "-1", "-1", "", "")
+        names(v) &lt;- c("len", "freq", "err", "condition", "pred")
+        return(v)
+    }
+    ys &lt;- target[ixMatch]
+    freq &lt;- round(length(ys)/nrow(X), digits = 3)
+    if (is.numeric(target)) {
+        ysMost &lt;- mean(ys)
+        err &lt;- sum((ysMost - ys)^2)/length(ys)
+    }
+    else {
+        if (length(pred) &gt; 0) {
+            ysMost = pred
+        }
+        else {
+            ysMost &lt;- names(which.max(table(ys)))
+        }
+        conf &lt;- round(table(ys)[ysMost]/sum(table(ys)), digits = 3)
+        err &lt;- 1 - conf
+    }
+    rule &lt;- origRule
+    v &lt;- c(len, freq, err, rule, ysMost)
+    names(v) &lt;- c("len", "freq", "err", "condition", "pred")
+    return(v)
+  }
+</code></pre>
+
+
+</div>

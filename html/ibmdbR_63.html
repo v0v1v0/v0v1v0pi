@@ -1,0 +1,166 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>idaTApply</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Apply R-function to subsets of IDA data frame</h2>
+
+<h3>Description</h3>
+
+<p>This function applies a R function to each subset (group of rows) of
+a given IDA data frame (<code>ida.data.frame</code>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">idaTApply(X, INDEX, FUN = NULL, output.name=NULL, output.signature=NULL,
+          clear.existing=FALSE, debugger.mode=FALSE,
+          num.tasks = 0, working.dir=NULL, apply.function="default", ...)
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>A IDA data frame that contains the input data for the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>INDEX</code></td>
+<td>
+<p>The name or the position of the column of the input IDA data frame X used to partition
+the input data into subsets.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FUN</code></td>
+<td>
+<p>The R function to be applied to the subsets of the input data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output.name</code></td>
+<td>
+<p>The name of the output table where the results are written to.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output.signature</code></td>
+<td>
+<p>The Db2 data types of the output table.
+It is a named list with the column names as the names and the data types as the values.
+Supported data types are CHAR, VARCHAR, SMALLINT, INTEGER, BIGINT, FLOAT, REAL, DOUBLE,
+DECFLOAT, DECIMAL, NUMERIC, DATE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clear.existing</code></td>
+<td>
+<p>If TRUE the ouput table is dropped before recreating it.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>debugger.mode</code></td>
+<td>
+<p>If TRUE intermediate results written into the working directory will not be removed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.tasks</code></td>
+<td>
+<p>The number of parallel tasks, i.e. R processes, which execute the R function on the subsets
+of the input data.
+If not specified or if the value is less than 1 it is calculated based on the number of available CPUs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>working.dir</code></td>
+<td>
+<p>The name of the directory where the directory is created into which intermediate results
+are written to. This directory is removed if debugger.mode is FALSE. The default value for
+working.directory is the value of the
+extbl_location Db2 database configuration variable or, if this variable has not been set, the home directory.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>apply.function</code></td>
+<td>
+<p>The name of the R function to be used for parallelizing the execution of the
+calls of the function FUN.
+Possible values are "default", "spark.lapply" and "mclapply". If the value is "default" "spark-lapply" is used in a
+multi-node and "mclapply" in a single node environment.
+Please note that using the "spark.lapply" function requires Db2 Warehouse with integrated Spark.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional parameters that can be passed to the function FUN to be called by idaTApply.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>idaTApply</code> applies a user-provided R function to each subset (group of rows) of a given ida.data.frame.
+The subsets are determined by a specified index column. The results of applying the function are written into a Db2 table
+which is referenced by the returned ida.data.frame.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The <code>idaTApply</code> function returns a <code>ida.data.frame</code>     .
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+#Create an ida data frame from the iris data
+idf &lt;- as.ida.data.frame(iris)
+
+#Define a function that computes the mean value for every column of a data frame x
+#except the index column.
+#It returns a data frame with the value of the index column and the mean values.
+columnMeans&lt;- function(x, index) {
+       cbind(index=x[1,match(index, names(x))],
+              as.data.frame(as.list(apply(x[,names(x) != index],2,mean))))}
+
+
+#Apply the columnMeans function to the subsets of the iris data identified by the Species column
+resSig &lt;- list(Species="VARCHAR(12)", MSepalLength="DOUBLE", MSepalWidth="DOUBLE",
+                                       MPetalLength="DOUBLE", MPetalWidth="DOUBLE")
+resDf &lt;-
+  idaTApply(idf, "Species", FUN=columnMeans, output.name="IRIS_MEANS", output.signature=resSig)
+
+#It is possible as well to apply an anonymous function.
+#The value "5" of the second parameter designates the position of the "Species" column
+#in the idf ida.data.frame.
+#The output table of the previous call is recreated because of the "clear.existing=T" parameter.
+resDf &lt;- idaTApply(idf, 5,
+                   FUN=function(x, index) {
+                              cbind(index=x[1,match(index, names(x))],
+                                     as.data.frame(as.list(apply(x[,names(x) != index],2,mean))))},
+                   output.name="IRIS_MEANS", output.signature=resSig, clear.existing=T)
+
+#Apply the columnMeans2 function which has an additional parameter "columns"
+#to specify the columns for which the mean values are computed
+columnMeans2 &lt;- function(x, index, columns) {
+       cbind(index=x[1,match(index, names(x))],
+              as.data.frame(as.list(apply(x[,names(x) != index &amp; names(x) %in% columns],2,mean))))}
+petalColumns &lt;- c("PetalLength", "PetalWidth")
+resSig2 &lt;- list(Species="VARCHAR(12)", MPetalLength="DOUBLE", MPetalWidth="DOUBLE")
+resDf2 &lt;- idaTApply(idf, "Species", FUN=columnMeans2, output.name="IRIS_MEANS2",
+                    output.signature=resSig2, clear.existing=T, columns=petalColumns)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

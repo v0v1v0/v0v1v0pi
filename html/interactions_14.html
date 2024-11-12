@@ -1,0 +1,410 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sim_slopes</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Perform a simple slopes analysis.</h2>
+
+<h3>Description</h3>
+
+<p><code>sim_slopes</code> conducts a simple slopes analysis for the purposes of
+understanding two- and three-way interaction effects in linear regression.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sim_slopes(
+  model,
+  pred,
+  modx,
+  mod2 = NULL,
+  modx.values = NULL,
+  mod2.values = NULL,
+  centered = "all",
+  at = NULL,
+  data = NULL,
+  cond.int = FALSE,
+  johnson_neyman = TRUE,
+  jnplot = FALSE,
+  jnalpha = 0.05,
+  robust = FALSE,
+  digits = getOption("jtools-digits", default = 2),
+  pvals = TRUE,
+  confint = FALSE,
+  ci.width = 0.95,
+  cluster = NULL,
+  modx.labels = NULL,
+  mod2.labels = NULL,
+  v.cov = NULL,
+  v.cov.args = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A regression model. The function is tested with <code>lm</code>,
+<code>glm</code>, <code>svyglm</code>, <code>merMod</code>,
+<code>rq</code>, <code>brmsfit</code>,
+<code>stanreg</code> models.
+Models from other classes may work as well but are not officially
+supported. The model should include the interaction of interest.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pred</code></td>
+<td>
+<p>The name of the predictor variable involved
+in the interaction. This can be a bare name or string. Note that it
+is evaluated using <code>rlang</code>, so programmers can use the <code style="white-space: pre;">⁠!!⁠</code> syntax
+to pass variables instead of the verbatim names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modx</code></td>
+<td>
+<p>The name of the moderator variable involved
+in the interaction. This can be a bare name or string. The same
+<code>rlang</code> proviso applies as with <code>pred</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mod2</code></td>
+<td>
+<p>Optional. The name of the second moderator
+variable involved in the interaction. This can be a bare name or string.
+The same <code>rlang</code> proviso applies as with <code>pred</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modx.values</code></td>
+<td>
+<p>For which values of the moderator should lines be
+plotted? There are two basic options:
+</p>
+
+<ul>
+<li>
+<p> A vector of values (e.g., <code>c(1, 2, 3)</code>)
+</p>
+</li>
+<li>
+<p> A single argument asking to calculate a set of values. See details
+below.
+</p>
+</li>
+</ul>
+<p>Default is <code>NULL</code>. If <code>NULL</code> (or <code>mean-plus-minus</code>),
+then the customary +/- 1 standard
+deviation from the mean as well as the mean itself are used for continuous
+moderators. If <code>"plus-minus"</code>, plots lines when the moderator is at
++/- 1 standard deviation without the mean. You may also choose <code>"terciles"</code>
+to split the data into equally-sized groups and choose the point at the
+mean of each of those groups.
+</p>
+<p>If the moderator is a factor variable and <code>modx.values</code> is
+<code>NULL</code>, each level of the factor is included. You may specify
+any subset of the factor levels (e.g., <code>c("Level 1", "Level 3")</code>) as long
+as there is more than 1. The levels will be plotted in the order you
+provide them, so this can be used to reorder levels as well.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mod2.values</code></td>
+<td>
+<p>For which values of the second moderator should the plot
+be
+facetted by? That is, there will be a separate plot for each level of this
+moderator. Defaults are the same as <code>modx.values</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>centered</code></td>
+<td>
+<p>A vector of quoted variable names that are to be
+mean-centered. If <code>"all"</code>, all non-focal predictors as well as
+the <code>pred</code> variable are centered. You
+may instead pass a character vector of variables to center. User can
+also use "none" to base all predictions on variables set at 0.
+The response variable, <code>modx</code>, and <code>mod2</code> variables are never
+centered.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>at</code></td>
+<td>
+<p>If you want to manually set the values of other variables in the
+model, do so by providing a named list where the names are the variables and
+the list values are vectors of the values. Note that you cannot alter the
+values of the <code>pred</code>, <code>modx</code>, or <code>mod2</code> variables and this will take
+precedence over the <code>centered</code> argument (but any variables unmentioned by
+<code>at</code> will be centered as specified by <code>centered</code>). For linear models,
+this will only change the output of the conditional intercepts.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Optional, default is NULL. You may provide the data used to
+fit the model. This can be a better way to get mean values for centering
+and can be crucial for models with variable transformations in the formula
+(e.g., <code>log(x)</code>) or polynomial terms (e.g., <code>poly(x, 2)</code>). You will
+see a warning if the function detects problems that would likely be
+solved by providing the data with this argument and the function will
+attempt to retrieve the original data from the global environment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cond.int</code></td>
+<td>
+<p>Should conditional intercepts be printed in addition to the
+slopes? Default is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>johnson_neyman</code></td>
+<td>
+<p>Should the Johnson-Neyman interval be calculated?
+Default is <code>TRUE</code>. This can be performed separately with
+<code>johnson_neyman</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>jnplot</code></td>
+<td>
+<p>Should the Johnson-Neyman interval be plotted as well? Default
+is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>jnalpha</code></td>
+<td>
+<p>What should the alpha level be for the Johnson-Neyman
+interval? Default is .05, which corresponds to a 95% confidence interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>robust</code></td>
+<td>
+<p>Should robust standard errors be used to find confidence
+intervals for supported models? Default is FALSE, but you should specify
+the type of sandwich standard errors if you'd like to use them (i.e.,
+<code>"HC0"</code>, <code>"HC1"</code>, and so on). If <code>TRUE</code>, defaults to <code>"HC3"</code> standard
+errors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>An integer specifying the number of digits past the decimal to
+report in the output. Default is 2. You can change the default number of
+digits for all jtools functions with
+<code>options("jtools-digits" = digits)</code> where digits is the desired
+number.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pvals</code></td>
+<td>
+<p>Show p values? If <code>FALSE</code>, these
+are not printed. Default is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>confint</code></td>
+<td>
+<p>Show confidence intervals instead of standard errors? Default
+is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci.width</code></td>
+<td>
+<p>A number between 0 and 1 that signifies the width of the
+desired confidence interval. Default is <code>.95</code>, which corresponds
+to a 95% confidence interval. Ignored if <code>confint = FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster</code></td>
+<td>
+<p>For clustered standard errors, provide the column name of
+the cluster variable in the input data frame (as a string). Alternately,
+provide a vector of clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modx.labels</code></td>
+<td>
+<p>A character vector of labels for each level of the
+moderator values, provided in the same order as the <code>modx.values</code>
+argument. If <code>NULL</code>, the values themselves are used as labels unless
+<code>modx,values</code> is also <code>NULL</code>. In that case, "+1 SD" and "-1 SD"
+are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mod2.labels</code></td>
+<td>
+<p>A character vector of labels for each level of the 2nd
+moderator values, provided in the same order as the <code>mod2.values</code>
+argument. If <code>NULL</code>, the values themselves are used as labels unless
+<code>mod2.values</code> is also <code>NULL</code>. In that case, "+1 SD" and "-1 SD"
+are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v.cov</code></td>
+<td>
+<p>A function to calculate variances for the model. Examples
+could be <code>sandwich::vcovPC()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v.cov.args</code></td>
+<td>
+<p>A list of arguments for the <code>v.cov</code> function. For
+whichever argument should be the fitted model, put <code>"model"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arguments passed to <code>johnson_neyman</code> and
+<code>summ</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This allows the user to perform a simple slopes analysis for the
+purpose of probing interaction effects in a linear regression. Two- and
+three-way interactions are supported, though one should be warned that
+three-way interactions are not easy to interpret in this way.
+</p>
+<p>For more about Johnson-Neyman intervals, see <code>johnson_neyman</code>.
+</p>
+<p>The function is tested with <code>lm</code>, <code>glm</code>, <code>svyglm</code>, and <code>merMod</code> inputs.
+Others may work as well, but are not tested. In all but the linear model
+case, be aware that not all the assumptions applied to simple slopes
+analysis apply.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list object with the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>slopes</code></td>
+<td>
+<p>A table of coefficients for the focal predictor at each
+value of the moderator</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ints</code></td>
+<td>
+<p>A table of coefficients for the intercept at each value of the
+moderator</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modx.values</code></td>
+<td>
+<p>The values of the moderator used in the analysis</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mods</code></td>
+<td>
+<p>A list containing each regression model created to estimate
+the conditional coefficients.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>jn</code></td>
+<td>
+<p>If <code>johnson_neyman = TRUE</code>, a list of <code>johnson_neyman</code>
+objects from <code>johnson_neyman</code>. These contain the values of the
+interval and the plots. If a 2-way interaction, the list will be of length
+</p>
+
+<ol><li>
+<p> Otherwise, there will be 1 <code>johnson_neyman</code> object for each value of
+the
+2nd moderator for 3-way interactions.</p>
+</li></ol>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Jacob Long <a href="mailto:jacob.long@sc.edu">jacob.long@sc.edu</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Bauer, D. J., &amp; Curran, P. J. (2005). Probing interactions in fixed and
+multilevel regression: Inferential and graphical techniques.
+<em>Multivariate Behavioral Research</em>, <em>40</em>(3), 373-400.
+<a href="https://doi.org/10.1207/s15327906mbr4003_5">doi:10.1207/s15327906mbr4003_5</a>
+</p>
+<p>Cohen, J., Cohen, P., West, S. G., &amp; Aiken, L. S. (2003). <em>Applied
+multiple regression/correlation analyses for the behavioral sciences</em> (3rd
+ed.). Mahwah, NJ: Lawrence Erlbaum Associates, Inc.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>interact_plot</code> accepts similar syntax and will plot the
+results with <code>ggplot</code>.
+</p>
+<p><code>testSlopes()</code> from <code>rockchalk</code> performs a hypothesis test of
+differences and provides Johnson-Neyman intervals.
+</p>
+<p><code>simpleSlope()</code> from <code>pequod</code> performs a similar analysis.
+</p>
+<p>Other interaction tools: 
+<code>johnson_neyman()</code>,
+<code>probe_interaction()</code>,
+<code>sim_margins()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Using a fitted model as formula input
+fiti &lt;- lm(Income ~ Frost + Murder * Illiteracy,
+  data = as.data.frame(state.x77))
+sim_slopes(model = fiti, pred = Murder, modx = Illiteracy)
+
+# With svyglm
+if (requireNamespace("survey")) {
+library(survey)
+data(api)
+dstrat &lt;- svydesign(id = ~1, strata = ~stype, weights = ~pw,
+                    data = apistrat, fpc = ~fpc)
+regmodel &lt;- svyglm(api00 ~ ell * meals, design = dstrat)
+sim_slopes(regmodel, pred = ell, modx = meals)
+
+# 3-way with survey and factor input
+regmodel &lt;- svyglm(api00 ~ ell * meals * sch.wide, design = dstrat)
+sim_slopes(regmodel, pred = ell, modx = meals, mod2 = sch.wide)
+}
+
+</code></pre>
+
+
+</div>

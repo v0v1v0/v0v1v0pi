@@ -1,0 +1,306 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>define_extract_micro</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Define an extract request for an IPUMS microdata collection</h2>
+
+<h3>Description</h3>
+
+<p>Define the parameters of an IPUMS microdata extract request to be submitted
+via the IPUMS API.
+</p>
+<p>The IPUMS API currently supports the following microdata collections:
+</p>
+
+<ul>
+<li>
+<p> IPUMS USA
+</p>
+</li>
+<li>
+<p> IPUMS CPS
+</p>
+</li>
+<li>
+<p> IPUMS International
+</p>
+</li>
+<li>
+<p> IPUMS Time Use (ATUS, AHTUS, MTUS)
+</p>
+</li>
+<li>
+<p> IPUMS Health Surveys (NHIS, MEPS)
+</p>
+</li>
+</ul>
+<p>Note that not all extract request parameters and options apply to all
+collections. For a summary of supported features by collection, see the
+<a href="https://developer.ipums.org/docs/v2/apiprogram/apis/microdata/">IPUMS API documentation</a>.
+</p>
+<p>Learn more about the IPUMS API in <code>vignette("ipums-api")</code> and
+microdata extract definitions in <code>vignette("ipums-api-micro")</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">define_extract_micro(
+  collection,
+  description,
+  samples,
+  variables = NULL,
+  time_use_variables = NULL,
+  sample_members = NULL,
+  data_format = "fixed_width",
+  data_structure = "rectangular",
+  rectangular_on = NULL,
+  case_select_who = "individuals",
+  data_quality_flags = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>collection</code></td>
+<td>
+<p>Code for the IPUMS collection represented by this
+extract request. See <code>ipums_data_collections()</code> for supported microdata
+collection codes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>description</code></td>
+<td>
+<p>Description of the extract.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>samples</code></td>
+<td>
+<p>Vector of samples to include in the extract
+request. Use <code>get_sample_info()</code> to identify
+sample IDs for a given collection.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variables</code></td>
+<td>
+<p>Vector of variable names or a list of detailed
+variable specifications to include in the extract
+request. Use <code>var_spec()</code> to create a <code>var_spec</code> object containing a
+detailed variable specification. See examples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time_use_variables</code></td>
+<td>
+<p>Vector of names of IPUMS-defined time use variables
+or a list of specifications for user-defined time use variables
+to include in the extract request. Use <code>tu_var_spec()</code> to create a
+<code>tu_var_spec</code> object containing a time use variable specification. See
+examples.
+</p>
+<p>Time use variables are only available for IPUMS Time Use collections
+(<code>"atus"</code>, <code>"ahtus"</code>, and <code>"mtus"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sample_members</code></td>
+<td>
+<p>Indication of whether to include additional sample
+members in the extract request. If provided, must be one of
+<code>"include_non_respondents"</code>, <code>"include_household_members"</code>, or both.
+</p>
+<p>Sample member selection is only available for the IPUMS ATUS collection
+(<code>"atus"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_format</code></td>
+<td>
+<p>Format for the output extract data file. Either
+<code>"fixed_width"</code> or <code>"csv"</code>.
+</p>
+<p>Note that while <code>"stata"</code>, <code>"spss"</code>, and <code>"sas9"</code> are also accepted, these
+file formats are not supported by ipumsr data-reading functions.
+</p>
+<p>Defaults to <code>"fixed_width"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_structure</code></td>
+<td>
+<p>Data structure for the output extract data.
+</p>
+
+<ul>
+<li> <p><code>"rectangular"</code> provides data in which every row has the same record type
+(determined by <code>"rectangular_on"</code>), with variables from other record types
+written onto associated records of the chosen type (e.g. household
+variables written onto person records).
+</p>
+</li>
+<li> <p><code>"hierarchical"</code> provides data that include rows of differing record
+types, with records ordered according to their hierarchical structure (e.g.
+each person record is followed by the activity records for that person).
+</p>
+</li>
+<li> <p><code>"household_only"</code> provides household records only. This data structure
+is only available for the IPUMS USA collection (<code>"usa"</code>).
+</p>
+</li>
+</ul>
+<p>Defaults to <code>"rectangular"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rectangular_on</code></td>
+<td>
+<p>If <code>data_structure</code> is <code>"rectangular"</code>,
+records on which to rectangularize. One of <code>"P"</code> (person), <code>"A"</code>
+(activity), <code>"I"</code> (injury) or <code>"R"</code> (round).
+</p>
+<p>Defaults to <code>"P"</code> if <code>data_structure</code> is <code>"rectangular"</code> and <code>NULL</code>
+otherwise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>case_select_who</code></td>
+<td>
+<p>Indication of how to interpret any case selections
+included for variables in the extract definition.
+</p>
+
+<ul>
+<li> <p><code>"individuals"</code> includes records for all individuals who match the
+specified case selections.
+</p>
+</li>
+<li> <p><code>"households"</code> includes records for all members of each household that
+contains an individual who matches the specified case selections.
+</p>
+</li>
+</ul>
+<p>Defaults to <code>"individuals"</code>. Use <code>var_spec()</code> to add case selections for
+specific variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_quality_flags</code></td>
+<td>
+<p>Set to <code>TRUE</code> to include data quality
+flags for all applicable variables in the extract definition. This will
+override the <code>data_quality_flags</code> specification for individual variables
+in the definition.
+</p>
+<p>Use <code>var_spec()</code> to add data quality flags for specific variables.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class <code>micro_extract</code> containing
+the extract definition.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>submit_extract()</code> to submit an extract request for processing.
+</p>
+<p><code>save_extract_as_json()</code> and <code>define_extract_from_json()</code> to share an
+extract definition.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">usa_extract &lt;- define_extract_micro(
+  collection = "usa",
+  description = "2013-2014 ACS Data",
+  samples = c("us2013a", "us2014a"),
+  variables = c("SEX", "AGE", "YEAR")
+)
+
+usa_extract
+
+# Use `var_spec()` to created detailed variable specifications:
+usa_extract &lt;- define_extract_micro(
+  collection = "usa",
+  description = "Example USA extract definition",
+  samples = c("us2013a", "us2014a"),
+  variables = var_spec(
+    "SEX",
+    case_selections = "2",
+    attached_characteristics = c("mother", "father")
+  )
+)
+
+# For multiple variables, provide a list of `var_spec` objects and/or
+# variable names.
+cps_extract &lt;- define_extract_micro(
+  collection = "cps",
+  description = "Example CPS extract definition",
+  samples = c("cps2020_02s", "cps2020_03s"),
+  variables = list(
+    var_spec("AGE", data_quality_flags = TRUE),
+    var_spec("SEX", case_selections = "2"),
+    "RACE"
+  )
+)
+
+cps_extract
+
+# To recycle specifications to many variables, it may be useful to
+# create variables prior to defining the extract:
+var_names &lt;- c("AGE", "SEX")
+
+my_vars &lt;- purrr::map(
+  var_names,
+  ~ var_spec(.x, attached_characteristics = "mother")
+)
+
+ipumsi_extract &lt;- define_extract_micro(
+  collection = "ipumsi",
+  description = "Extract definition with predefined variables",
+  samples = c("br2010a", "cl2017a"),
+  variables = my_vars
+)
+
+# Extract specifications can be indexed by name
+names(ipumsi_extract$samples)
+
+names(ipumsi_extract$variables)
+
+ipumsi_extract$variables$AGE
+
+# IPUMS Time Use collections allow selection of IPUMS-defined and
+# user-defined time use variables:
+define_extract_micro(
+  collection = "atus",
+  description = "ATUS extract with time use variables",
+  samples = "at2007",
+  time_use_variables = list(
+    "ACT_PCARE",
+    tu_var_spec(
+      "MYTIMEUSEVAR",
+      owner = "example@example.com"
+    )
+  )
+)
+
+## Not run: 
+# Use the extract definition to submit an extract request to the API
+submit_extract(usa_extract)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

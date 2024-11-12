@@ -1,0 +1,145 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>calculatePermutedScoreByGeneSampling</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Calculate the permuted latent trait by gene sampling
+</h2>
+
+<h3>Description</h3>
+
+<p>Given the original binary matrix and item parameters, calculate the permuted latent trait by
+gene sampling. Basically this function permutes within columns and recompute the latent trait
+using pre-specified item parameters and the permuted binary matrix. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">calculatePermutedScoreByGeneSampling(originalMat, dscrmn = dscrmn,
+      dffclt = dffclt, c = rep(0, length(dffclt)), fold = 1, parallel=FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>originalMat</code></td>
+<td>
+
+<p>The original response matrix
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dscrmn</code></td>
+<td>
+
+<p>The estimated item discrimination parameter
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dffclt</code></td>
+<td>
+
+<p>The estimated item difficulty parameter
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c</code></td>
+<td>
+
+<p>The estimated item guessing parameter if available
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fold</code></td>
+<td>
+
+<p>The fold relative to the number of genes present should gene sampling achieve. Default is 1, meaning equal number
+of genes are sampled. Increasing fold would increase the precesion in estimating empirical P value
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+
+<p>Logical indicating whether to use parallel computing with foreach package as backend.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Both gene sampling and sample label permutation can be used to infer the null distribution of altent
+traits. For sample label permutation, one can simply first construct the binary matrix
+after permuting the sample labels and feed it to computeAbility() function together with item parameters
+</p>
+
+
+<h3>Value</h3>
+
+<p>A vector of null latent traits by gene sampling
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Pan Tong (nickytong@gmail.com), Kevin R Coombes (krc@silicovore.com)
+</p>
+
+
+<h3>References</h3>
+
+<p>David Magis, Gilles Raiche (2012). Random Generation of Response Patterns under Computerized Adaptive Testing with the 
+R Package catR. Journal of Statistical Software, 48(8), 1-31.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>fitOnSinglePlat, intIRTeasyRun, computeAbility</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># number of items and number of genes
+nSample &lt;- 10
+nGene &lt;- 2000
+set.seed(1000)
+a &lt;- rgamma(nSample, shape=1, scale=1)
+b &lt;- rgamma(nSample, shape=1, scale=1)
+# true latent traits
+theta &lt;- rnorm(nGene, mean=0)
+
+# probability of correct response (P_ij) for gene i in sample j
+P &lt;- matrix(NA, nrow=nGene, ncol=nSample)
+for(i in 1:nSample){
+	P[, i] &lt;- exp(a[i]*(theta-b[i]))/(1+exp(a[i]*(theta-b[i])))
+}
+# binary matrix
+X &lt;- matrix(NA, nrow=nGene, ncol=nSample)
+for(i in 1:nSample){
+	X[, i] &lt;- rbinom(nGene, size=1, prob=P[, i])
+}
+# IRT fitting
+fit2PL &lt;- fitOnSinglePlat(X, model=3)
+dffclt &lt;- coef(fit2PL$fit)[, 'Dffclt']
+dscrmn &lt;- coef(fit2PL$fit)[, 'Dscrmn']
+# estimated null latent trait by gene sampling
+scoreNull &lt;- calculatePermutedScoreByGeneSampling(X, dffclt=dffclt,
+	  dscrmn=dscrmn, fold=1)
+
+
+</code></pre>
+
+
+</div>

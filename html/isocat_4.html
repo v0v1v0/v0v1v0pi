@@ -1,0 +1,103 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>clusterSimmatrix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Hierarchical clustering analysis of similarity matrix</h2>
+
+<h3>Description</h3>
+
+<p>Function applies hierarchical clustering analysis to similarity matrix, such as one output by 'simmatrixMaker' function. Just a wrapper for pvclust. Output is a pvclust object.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">clusterSimmatrix(
+  simmatrix,
+  dist_mthd = "correlation",
+  hclust_mthd = "average",
+  nBoot = 1000,
+  nClusters = FALSE,
+  r = seq(0.7, 1.4, by = 0.1)
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>simmatrix</code></td>
+<td>
+<p>symmetric similarity matrix object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist_mthd</code></td>
+<td>
+<p>Distance measure to be used. Defaults to "correlation". See help(pvclust).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hclust_mthd</code></td>
+<td>
+<p>Method of clustering. Defaults to "average". See help(pvclust).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nBoot</code></td>
+<td>
+<p>number of bootstrap replications. Defaults to 1000. See help(pvclust).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nClusters</code></td>
+<td>
+<p>number of clusters to run in parallel using 'doParallel'. Defaults to FALSE (non-parallel).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>Relative size of bootstrap replications.</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Create probability-of-origin maps to compare.
+myiso &lt;- rasterFromXYZ(isoscape)
+raster::plot(myiso)
+myiso_sd &lt;- rasterFromXYZ(isoscape_sd)
+n &lt;- 5
+set.seed(42)
+df &lt;- data.frame(
+         ID = LETTERS[1:n],
+         isotopeValue = sample(-120:-40, n),
+         SD_indv = rep(5, n)
+         )
+assignmentModels &lt;- isotopeAssignmentModel(
+                        ID = df$ID,
+                        isotopeValue = df$isotopeValue,
+                        SD_indv = df$SD_indv,
+                        precip_raster = myiso,
+                        precip_SD_raster = myiso_sd,
+                        nClusters = FALSE
+                        )
+raster::plot(assignmentModels)
+# Compare maps with simmatrixMaker.
+mymatrix &lt;- simmatrixMaker(assignmentModels, nClusters = FALSE, csvSavePath = FALSE)
+# Cluster similarity matrix.
+clust_results &lt;- clusterSimmatrix(mymatrix, dist_mthd = "correlation",
+    hclust_mthd = "average", nBoot = 1000,  nClusters = FALSE,
+    r = seq(.7,1.4,by=.1) )
+clust_results
+
+
+</code></pre>
+
+
+</div>

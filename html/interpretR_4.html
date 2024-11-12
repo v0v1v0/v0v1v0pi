@@ -1,0 +1,195 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>parDepPlot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Model interpretation functions: Partial Dependence Plots</h2>
+
+<h3>Description</h3>
+
+<p><code>parDepPlot</code> creates partial dependence plots for binary (cross-validated) classification models and regression models. Currently only binary classification models estimated with the packages <code>randomForest</code> and <code>ada</code> are supported.  In addition <code>randomForest</code> regression models are supported.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">parDepPlot(
+  x.name,
+  object,
+  data,
+  rm.outliers = TRUE,
+  fact = 1.5,
+  n.pt = 50,
+  robust = FALSE,
+  ci = FALSE,
+  u.quant = 0.75,
+  l.quant = 0.25,
+  xlab = substr(x.name, 1, 50),
+  ylab = NULL,
+  main = if (any(class(object) %in% c("randomForest", "ada")))
+    paste("Partial Dependence on", substr(x.name, 1, 20)) else
+    paste("Cross-Validated Partial Dependence on", substr(x.name, 1, 10)),
+  logit = TRUE,
+  ylim = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x.name</code></td>
+<td>
+<p>the name of the predictor as a character string for which a partial dependence plot has to be created.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>can be a model or a list of cross- validated models. Currently only binary classification models built using the packages <code>randomForest</code> and <code>ada</code> are supported.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a data frame containing the predictors for the model or a list of data frames for cross-validation with length equal to the number of models.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rm.outliers</code></td>
+<td>
+<p>boolean, remove the outliers in x.name. Outliers are values that are smaller than max(Q1-fact*IQR,min) or greater than min(Q3+fact*IQR,max). Overridden if xlim is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fact</code></td>
+<td>
+<p>factor to use in rm.outliers. The default is 1.5.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.pt</code></td>
+<td>
+<p>if x.name is a continuous predictor, the number of points that will be used to plot the curve.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>robust</code></td>
+<td>
+<p>if TRUE then the median is used to plot the central tendency (recommended when logit=FALSE). If FALSE the mean is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci</code></td>
+<td>
+<p>boolean. Should a confidence interval based on quantiles be plotted? This only works if robust=TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>u.quant</code></td>
+<td>
+<p>Upper quantile for ci. This only works if ci=TRUE and robust=TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>l.quant</code></td>
+<td>
+<p>Lower quantile for ci. This only works if ci=TRUE and robust=TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>label for the x-axis. Is determined automatically if NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>label for the y-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p>main title for the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>logit</code></td>
+<td>
+<p>boolean. Should the y-axis be on a logit scale or not? If FALSE, it is recommended to set robust=TRUE. Only applicable for classifcation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylim</code></td>
+<td>
+<p>The y limits of the plot</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other graphical parameters for <code>plot</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For classification, the response variable in the model is always assumed to take on the values {0,1}. Resulting partial dependence plots always refer to class 1. Whenever strange results are obtained the user has three options. First set rm.outliers=TRUE. Second, if that doesn't help, set robust=TRUE. Finally, if that doesn't help, the user can also try setting ci=TRUE. Areas with larger confidence intervals typically indicate problem areas. These options help the user tease out the root of strange results and converge to better parameter values.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Authors: Michel Ballings, and Dirk Van den Poel, Maintainer: <a href="mailto:Michel.Ballings@GMail.com">Michel.Ballings@GMail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>The code in this function uses part of the code from the <code>partialPlot</code> function in <code>randomForest</code>. It is expanded and generalized to support cross-validation and other packages.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>variableImportance</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(randomForest)
+#Prepare data
+data(iris)
+iris &lt;- iris[1:100,]
+iris$Species &lt;- as.factor(ifelse(factor(iris$Species)=="setosa",0,1))
+
+#Cross-validated models
+#Estimate 10 models and create 10 test sets
+data &lt;- list()
+rf &lt;- list()
+for (i in 1:10) {
+  ind &lt;- sample(nrow(iris),50)
+  rf[[i]] &lt;- randomForest(Species~., iris[ind,])
+  data[[i]] &lt;- iris[-ind,]
+}
+
+
+parDepPlot(x.name="Petal.Width", object=rf, data=data)
+
+#Single model
+#Estimate a single model
+ind &lt;- sample(nrow(iris),50)
+rf &lt;- randomForest(Species~., iris[ind,])
+parDepPlot(x.name="Petal.Width", object=rf, data=iris[-ind,])
+
+</code></pre>
+
+
+</div>

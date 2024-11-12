@@ -1,0 +1,87 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getVMat.onePhase</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get the Variance Matrices for Single-Phase experiment</h2>
+
+<h3>Description</h3>
+
+<p>Construct the matrix for each variance components for the single-phase or
+two-phase experiment.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getVMat.onePhase(Z.Phase1, design.df, var.comp = NA)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Z.Phase1</code></td>
+<td>
+<p>a list of block design matrix from <code>makeBlkDesMat</code>
+function from Phase 1 block structure.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>design.df</code></td>
+<td>
+<p>a data frame containing the experimental design. Requires
+every column be a <code>factor</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var.comp</code></td>
+<td>
+<p>a vector of characters containing the variance components
+of interest this allows the user to specify the variance components to be
+shown on the ANOVA table. This also allows the user to specify artificial
+stratum to facilitate decomposition. Default is <code>NA</code>, which uses every
+random factor as the variance components with the first phase's variance
+components in appear before the second phase's variance components.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list of matrices.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Kevin Chang
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+ design1 &lt;- local({ 
+    Ani = as.factor(LETTERS[c(1,2,3,4,
+                              5,6,7,8)])
+    Trt = as.factor(letters[c(1,1,1,1,
+                              2,2,2,2)])
+    data.frame(Ani, Trt, stringsAsFactors = TRUE )
+  })
+
+    blk.str = "Ani"
+    
+		rT = terms(as.formula(paste("~", blk.str, sep = "")), keep.order = TRUE) 
+
+    blkTerm = attr(rT,"term.labels")
+		Z = makeBlkDesMat(design1, rev(attr(rT,"term.labels")))
+
+    V = getVMat.onePhase(Z, design1)
+    
+
+</code></pre>
+
+
+</div>

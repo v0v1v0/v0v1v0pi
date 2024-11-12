@@ -1,0 +1,142 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>eff.stg1</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generates efficacy outcomes for stage 1 when using binary toxicity</h2>
+
+<h3>Description</h3>
+
+<p>Function <code>eff.stg1()</code> uses a beta-binomial distribution to generate 
+outcomes (Ys) corresponding to acceptable dose assignments from stage 1.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">eff.stg1(dose, dose.tox, p1, p2, K, coh.size, m, v, nbb = 100)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dose</code></td>
+<td>
+<p>number of doses to be tested (scalar)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dose.tox</code></td>
+<td>
+<p>vector of true toxicities for each dose. Values range from 0 - 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p1</code></td>
+<td>
+<p>toxicity under null (unsafe DLT rate). Values range from 0 - 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p2</code></td>
+<td>
+<p>toxicity under alternative (safe DLT rate). Values range from 0 - 1; p1 &gt; p2</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>threshold for LR. Takes integer values: 1,2,...(recommended K=2)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coh.size</code></td>
+<td>
+<p>cohort size (number of patients) per dose (Stage 1)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>vector of mean efficacies per dose. Values range from 0 - 100. 
+(e.g, T cell persistence - values b/w 5 and 80 per cent)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v</code></td>
+<td>
+<p>vector of efficacy variances per dose. Values range from 0 - 1. (e.g., 0.01)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nbb</code></td>
+<td>
+<p>binomial parameter (default = 100 cells per patient)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>List of efficacy outcomes for subjects enrolled during stage 1 (dose-escalation)
+</p>
+
+<ul>
+<li>
+<p> Y.safe - vector of efficacy outcomes for each subject assigned to an acceptable safe dose
+</p>
+</li>
+<li>
+<p> d.safe - vector of dose allocation for each subject assigned to an acceptable safe dose
+</p>
+</li>
+<li>
+<p> tox.safe - number of dose-limiting toxicities for each safe dose level
+</p>
+</li>
+<li>
+<p> Y.alloc - vector of efficacy outcomes for all subjects from stage 1 (acceptable and unsafe doses)
+</p>
+</li>
+<li>
+<p> d.alloc - vector of dose allocation for all subjects from stage 1 (acceptable and unsafe doses)
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Number of pre-specified dose levels
+dose &lt;- 5
+# Vector of true toxicities associated with each dose
+dose.tox &lt;- c(0.05, 0.10, 0.20, 0.35, 0.45)       
+# Acceptable (p2) and unacceptable (p1) DLT rates used for establishing safety
+p1 &lt;- 0.40                                     
+p2 &lt;- 0.15   
+
+# Likelihood-ratio (LR) threshold
+K &lt;- 2                                          
+
+# Cohort size used in stage 1
+coh.size &lt;- 3 
+
+# Vector of true mean efficacies per dose (here mean percent persistence per dose)
+m &lt;- c(5, 15, 40, 65, 80)   # MUST BE THE SAME LENGTH AS dose.tox                  
+
+# Efficacy (equal) variance per dose
+v &lt;- rep(0.01, 5) 
+
+# Total sample size (stages 1&amp;2)                            
+N &lt;- 25                                        
+
+# Stopping rule: if dose 1 is the only safe dose, allocate up to 9 pts.
+stop.rule &lt;- 9 
+
+eff.stg1(dose = dose, dose.tox = dose.tox, p1 = p1, p2 = p2, K = K, 
+coh.size = coh.size, m, v, nbb = 100)
+
+</code></pre>
+
+
+</div>

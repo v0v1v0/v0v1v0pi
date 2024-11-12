@@ -1,0 +1,146 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ISRaD.extra.norm14c_year</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>ISRaD.extra.norm14c_year</h2>
+
+<h3>Description</h3>
+
+<p>Normalizes delta 14c values to a given year (norm_year)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ISRaD.extra.norm14c_year(
+  obs_d14c,
+  obs_year,
+  atm_zone,
+  norm_year,
+  df,
+  slow = TRUE,
+  tau = TRUE,
+  verbose = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obs_d14c</code></td>
+<td>
+<p>column name in df with observed delta 14c values to be normalized OR numeric value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>obs_year</code></td>
+<td>
+<p>column name in df with year in which obs_d14c was observed (sample collection year) OR numeric value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>atm_zone</code></td>
+<td>
+<p>column name in df with atmospheric zone for obs_d14c OR character string. Notes: column values/character string must be one of c("NH14C", "SH14C"). "NH14C" &gt; 0 degrees latitude N; "SHC14" &gt; 0 latitude S.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>norm_year</code></td>
+<td>
+<p>desired normalization year (numeric)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>data frame with columns for observed d14c (obs_d14c), observation year (obs_year), and atmospheric zone (atm_zone)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>slow</code></td>
+<td>
+<p>if TRUE (default) normalized 14c value will be fit using the slower solution for tau</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau</code></td>
+<td>
+<p>if TRUE (default) the solution for tau will be returned along with the normalized 14c value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Show progress bar? TRUE/FALSE (default = TRUE)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function can be run on a data frame or with single value input. For the data frame method, the inputs 'obs_d14c', 'obs_year', and 'atm_zone' correspond to column names in the supplied data frame (see Example 1). For the single value method, the inputs for 'obs_d14c', 'obs_year', and 'atm_zone' are single values (Example 2).<br><br>
+The function works by creating a one pool steady-state model using atmospheric 14c over the period 1850 to 2021. Turnover time (tau^-1) is determined by fitting the model to the observed delta 14c (obs_d14c) in the given observation year (obs_year), and the normalized 14c value is calculated by running the model forwards or backwards to the desired normalization year (norm_year). Note that highly negative values of delta 14c (e.g. &lt; -100) are unaffected by normalization and are thus returned unchanged by the function.<br><br>
+The curvature of the bomb peak can lead to two viable solutions for tau in a one pool model. Determining which value is more appropriate depends on the carbon dynamics of the system and thus cannot be determined a priori (Trumbore 2000). The 'slow' parameter can be used to select which tau is used for calculating the normalized 14c value. If 'slow' = TRUE, and the algorithm is able to find two solutions for tau, the function will return normalized 14c values calculated with the slower of the two turnover time solutions. If "slow" = FALSE, the faster turnover time is used.<br><br>
+In certain cases the algorithm used to determine tau fails to converge. This situation arises when observed radiocarbon values are too high relative to the year of observation. This problem is well documented (Gaudinski et al. 2000), and can be solved by introducing a time-lag for the carbon inputs to the system. However, this functionality is beyond the scope of this function. If the algorithm fails to converge, the function will select the tau value giving the closest match for observed 14c in the given observation year and return norm_error = "TRUE".<br><br>
+Example 1 shows how to run the function when the 'df' argument corresponds to a table from an ISRaD object, e.g. "flux", "layer", etc.<br>
+Example 2 shows how to run the function when single values are supplied and 'df' is absent.<br><br>
+Note: There is no guarantee that normalized 14c values will be meaningful as the model assumes a well-mixed homogenous system, and this is rarely the case in soils.
+</p>
+
+
+<h3>Value</h3>
+
+<p>data frame with new columns: "norm_14c", "norm_error", and optionally "norm_tau"; OR list with length = 3: "norm_14c", "norm_tau", "norm_error". Note that if is parameter df is not NULL and obs_d14c contains an underscore, e.g. "lyr_14c", supplied names will take the form "lyr_norm_14c", "lyr_norm_error", etc.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>J. Beem-Miller and J. Randerson
+</p>
+
+
+<h3>References</h3>
+
+<p>Gaudinski et al. 2000. Soil carbon cycling in a temperate forest: radiocarbon-based estimates of residence times, sequestration rates and partitioning of fluxes. Biogeochemistry 51: 33-69 <a href="https://doi.org/10.1023/A%3A1006301010014">doi:10.1023/A:1006301010014</a><br><br>
+Trumbore, S. 2000. Age of Soil Organic Matter and Soil Respiration: Radiocarbon Constraints on Belowground C Dynamics. Ecological Applications, 10(2): 399–411 <a href="https://doi.org/10.2307/2641102">doi:10.2307/2641102</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Load example dataset Gaudinski_2001
+database &lt;- ISRaD::Gaudinski_2001
+# Fill profile coordinates
+database.x &lt;- ISRaD.extra.fill_coords(database)
+# Fill dates
+database.x &lt;- ISRaD.extra.fill_dates(database.x)
+# Fill delta 14C from fraction modern
+database.x &lt;- ISRaD.extra.fill_rc(database.x)
+# Fill atmospheric 14c
+database.x &lt;- ISRaD.extra.calc_atm14c(database.x)
+# Run normalization function for the year 2010 with layer data
+# Example 1
+database.x$layer &lt;- ISRaD.extra.norm14c_year(
+  obs_d14c = "lyr_14c",
+  obs_year = "lyr_obs_date_y",
+  atm_zone = "pro_atm_zone",
+  norm_year = 2010,
+  tau = TRUE,
+  df = database.x$layer,
+  verbose = TRUE
+)
+# Example 2
+ISRaD.extra.norm14c_year(
+  obs_d14c = 182.8958,
+  obs_year = 1996,
+  atm_zone = "NH14C",
+  norm_year = 2010
+)
+</code></pre>
+
+
+</div>

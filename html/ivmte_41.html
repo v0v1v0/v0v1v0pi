@@ -1,0 +1,232 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>genSSet</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generating moments/data for IV-like estimands</h2>
+
+<h3>Description</h3>
+
+<p>This function takes in the IV estimate and its IV-like
+specification, and generates a list containing the corresponding
+IV-like point estimate, and the corresponding moments (gammas) that
+will enter into the constraint matrix of the LP problem. If the
+option <code>means = FALSE</code>, then the data are not averaged to
+generate the gamma moments and may be used for GMM. The function
+requires the user to provide a list (i.e. the list the point
+estimates and moments corresponding to other IV-like
+specifications; or an empty list) to append these point estimates
+and moments to.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">genSSet(
+  data,
+  sset,
+  sest,
+  splinesobj,
+  pmodobj,
+  pm0,
+  pm1,
+  ncomponents,
+  scount,
+  subset_index,
+  means = TRUE,
+  yvar,
+  dvar,
+  noisy = TRUE,
+  ivn = NULL,
+  redundant = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p><code>data.frame</code> used to estimate the treatment
+effects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sset</code></td>
+<td>
+<p>list, which is modified and returned as the
+output. This object will contain all the information from the
+IV-like specifications that can be used for estimating the
+treatment effect.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sest</code></td>
+<td>
+<p>list containing the point estimates and S-weights
+corresponding to a particular IV-like estimand.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>splinesobj</code></td>
+<td>
+<p>list of spline components in the MTRs for treated
+and control groups. Spline terms are extracted using
+<code>removeSplines</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pmodobj</code></td>
+<td>
+<p>vector of propensity scores.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pm0</code></td>
+<td>
+<p>list of the monomials in the MTR for the control group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pm1</code></td>
+<td>
+<p>list of the monomials in the MTR for the treated group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncomponents</code></td>
+<td>
+<p>The number of components from the IV regression
+to include in the S-set.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scount</code></td>
+<td>
+<p>integer, an index for the elements in the S-set.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset_index</code></td>
+<td>
+<p>vector of integers, a row index for the subset of
+the data the IV regression is restricted to.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>means</code></td>
+<td>
+<p>boolean, set to <code>TRUE</code> by default. If set to
+<code>TRUE</code>, then the gamma moments are returned, i.e. sample
+averages are taken. If set to <code>FALSE</code>, then no sample
+averages are taken, and a matrix is returned. The sample
+average of each column of the matrix corresponds to a
+particular gamma moment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yvar</code></td>
+<td>
+<p>name of outcome variable. This is only used if
+<code>means = FALSE</code>, which occurs when the user believes the
+treatment effect is point identified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dvar</code></td>
+<td>
+<p>name of treatment indicator. This is only used if
+<code>means = FALSE</code>, which occurs when the user believes the
+treatment effect is point identified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>noisy</code></td>
+<td>
+<p>boolean, default set to <code>TRUE</code>. If <code>TRUE</code>,
+then messages are provided throughout the estimation
+procedure. Set to <code>FALSE</code> to suppress all messages,
+e.g. when performing the bootstrap.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ivn</code></td>
+<td>
+<p>integer, the number indicating which IV specification
+the component corresponds to.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>redundant</code></td>
+<td>
+<p>vector of integers indicating which components in
+the S-set are redundant.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list containing the point estimate for the IV regression,
+and the expectation of each monomial term in the MTR.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">dtm &lt;- ivmte:::gendistMosquito()
+
+## Declare empty list to be updated (in the event multiple IV like
+## specifications are provided)
+sSet &lt;- list()
+
+## Declare MTR formulas
+formula1 = ~ 1 + u
+formula0 = ~ 1 + u
+
+## Construct object that separates out non-spline components of MTR
+## formulas from the spline components. The MTR functions are
+## obtained from this object by the function 'genSSet'.
+splinesList = list(removeSplines(formula0), removeSplines(formula1))
+
+## Construct MTR polynomials
+polynomials0 &lt;- polyparse(formula = formula0,
+                 data = dtm,
+                 uname = u,
+                 as.function = FALSE)
+
+polynomials1 &lt;- polyparse(formula = formula0,
+                 data = dtm,
+                 uname = u,
+                 as.function = FALSE)
+
+## Generate propensity score model
+propensityObj &lt;- propensity(formula = d ~ z,
+                            data = dtm,
+                            link = "linear")
+
+## Generate IV estimates
+ivEstimates &lt;- ivEstimate(formula = ey ~ d | z,
+                          data = dtm,
+                          components = l(d),
+                          treat = d,
+                          list = FALSE)
+
+## Construct S-set, which contains the coefficients and weights
+## corresponding to various IV-like estimands
+genSSet(data = dtm,
+        sset = sSet,
+        sest = ivEstimates,
+        splinesobj = splinesList,
+        pmodobj = propensityObj$phat,
+        pm0 = polynomials0,
+        pm1 = polynomials1,
+        ncomponents = 1,
+        scount = 1)
+
+</code></pre>
+
+
+</div>

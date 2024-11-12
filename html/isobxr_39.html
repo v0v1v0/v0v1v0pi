@@ -1,0 +1,206 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sim.scenario</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate a scenario</h2>
+
+<h3>Description</h3>
+
+<p>A function to compose an isotope box model scenario,
+defined by a series of successive runs, <br>
+each run inheriting from the final state conditions of the previous run. <br>
+It is possible to force parameters at each run, namely:
+</p>
+
+<ol>
+<li> <p><strong>fluxes</strong> <br>
+(overwriting all or a subset of fluxes defined in <em>0_ISOBXR_MASTER.xlsx</em> master file)
+</p>
+</li>
+<li> <p><strong>isotope fractionation coefficients</strong> <br>
+(overwriting all or a subset of coefficients defined in <em>0_ISOBXR_MASTER.xlsx</em> master file)
+</p>
+</li>
+<li> <p><strong>box sizes</strong> <br>
+(overwriting all or a subset of box sizes defined in <em>0_ISOBXR_MASTER.xlsx</em> master file)
+</p>
+</li>
+<li> <p><strong>rayleigh isotope distillation</strong>
+</p>
+</li>
+<li> <p><strong>isotope composition of a source box at initial state</strong>
+</p>
+</li>
+</ol>
+<h3>Usage</h3>
+
+<pre><code class="language-R">sim.scenario(
+  workdir,
+  SERIES_ID,
+  scenario_master_file,
+  isobxr_master_file = "0_ISOBXR_MASTER",
+  plot.hidden_boxes = NULL,
+  plot.time_unit = NULL,
+  export.single_run_digests = FALSE,
+  export.data_as_csv_xlsx = FALSE,
+  show.delta_plot = TRUE,
+  save_outputs = FALSE,
+  inspect_inputs = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>workdir</code></td>
+<td>
+<p>Working directory of <strong><em>isobxr excel master file</em></strong>
+and where output files will be stored if exported by user.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SERIES_ID</code></td>
+<td>
+<p>Name of the series the scenario run belongs to.
+It determines the folder in which the output files will be stored inside workdir.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scenario_master_file</code></td>
+<td>
+<p>Name of <strong><em>scenario excel master file</em></strong>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>isobxr_master_file</code></td>
+<td>
+<p>Name of <strong><em>isobxr excel master file</em></strong>. <br>
+Default is "0_ISOBXR_MASTER".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.hidden_boxes</code></td>
+<td>
+<p>list of box names (BOX_ID) to hide in scenario plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.time_unit</code></td>
+<td>
+<p>Time unit to use on plot if different from native time unit. <br>
+Character string, to be selected among the following:<br><em>micros, ms, s, min, h, d, wk, mo, yr, kyr, Myr, Gyr</em><br>
+Default is NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>export.single_run_digests</code></td>
+<td>
+<p>If TRUE, exports full digest of each single run
+of the scenario.
+Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>export.data_as_csv_xlsx</code></td>
+<td>
+<p>If TRUE, exports full scenario result data as csv and xlsx fo full
+to scenario digest directory. <br>
+Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>show.delta_plot</code></td>
+<td>
+<p>If TRUE, prints delta and size time evolution plots in R. <br>
+Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>save_outputs</code></td>
+<td>
+<p>If TRUE, saves all run outputs to local working directory (workdir). <br>
+By default, run outputs are stored in a temporary directory and erased if not saved. <br>
+Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inspect_inputs</code></td>
+<td>
+<p>If TRUE, inspects and proof checks format of input taken from
+<strong><em>isobxr excel master file</em></strong>. <br>
+(Inspection run by <code>read.isobxr_master</code> function.) <br>
+Default is TRUE.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Delta values and box sizes as a function of time. <br>
+sim.scenario outputs are saved to workdir if save_outputs = TRUE.
+</p>
+
+
+<h3>sim.scenario outputs consist of</h3>
+
+
+<ol>
+<li> <p><strong>single run results</strong> in SERIES directory: all single runs results as rds files
+</p>
+</li>
+<li> <p><strong>scenario digest</strong> in scenario DIGEST directory (SERIES/DIGEST):
+</p>
+
+<ol>
+<li> <p><strong>isobxr master file archive</strong> as xlsx
+</p>
+</li>
+<li> <p><strong>scenario master file archive</strong> as xlsx
+</p>
+</li>
+<li> <p><strong>plot of delta and size vs. time</strong> as pdf
+</p>
+</li>
+<li> <p><strong>scenario results data set</strong> as rds, containing:
+</p>
+
+<ol>
+<li> <p><strong>delta_vs_t</strong> data frame of delta as a function of time
+</p>
+</li>
+<li> <p><strong>size_vs_t</strong> data frame of box sizes as a function of time
+</p>
+</li>
+<li> <p><strong>scenario_master</strong> list containing all inputs from scenario master file
+</p>
+</li>
+<li> <p><strong>scenario_log</strong> data frame of scenario specific LOG excerpt
+</p>
+</li>
+<li> <p><strong>isobxr_master</strong> list containing all inputs from isobxr master file
+</p>
+</li>
+<li> <p><strong>paths</strong> list of scenario specific paths
+</p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+sim.scenario(workdir = "/Users/username/Documents/1_ABC_tutorial",
+             SERIES_ID =  "1_source_change",
+             scenario_master_file = "0_SCENARIO_source_change",
+             isobxr_master_file = "0_ISOBXR_MASTER")
+
+## End(Not run)
+</code></pre>
+
+
+</div>

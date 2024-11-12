@@ -1,0 +1,117 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>all_metrics</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate all metrics in iglu</h2>
+
+<h3>Description</h3>
+
+<p>The function all_metrics runs all of the iglu metrics, and returns the results with
+one column per metric.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">all_metrics(
+  data,
+  dt0 = NULL,
+  inter_gap = 45,
+  tz = "",
+  timelag = 15,
+  lag = 1,
+  metrics_to_include = c("all", "consensus_only")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>DataFrame object with column names "id", "time", and "gl".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dt0</code></td>
+<td>
+<p>The time frequency for interpolation in minutes, the default will match the CGM meter's frequency (e.g. 5 min for Dexcom).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inter_gap</code></td>
+<td>
+<p>The maximum allowable gap (in minutes) for interpolation. The values will not be interpolated between the glucose measurements that are more than inter_gap minutes apart. The default value is 45 min.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tz</code></td>
+<td>
+<p>A character string specifying the time zone to be used. System-specific (see <code>as.POSIXct</code>), but " " is the current time zone, and "GMT" is UTC (Universal Time, Coordinated). Invalid values are most commonly treated as UTC, on some platforms with a warning.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timelag</code></td>
+<td>
+<p>Integer indicating the time period (# minutes) over which rate
+of change is calculated. Default is 15, e.g. rate of change is the change in
+glucose over the past 15 minutes divided by 15.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lag</code></td>
+<td>
+<p>Integer indicating which lag (# days) to use. Default is 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>metrics_to_include</code></td>
+<td>
+<p>Returns all metrics computed by iglu or all on the consensus list (Battelino 2023)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>All iglu functions are calculated within the all_metrics function, and the resulting tibble
+is returned with one row per subject and a column for each metric. Time dependent functions are
+calculated together using the function optimized_iglu_functions with two exceptions:
+PGS and episodes are calculated within all_metrics because their structure does not
+align with optimized_iglu_functions. Note that episodes related outputs included in all_metrics are only
+average episodes per day. To get the average duration and glucose, please use the standalone
+episodes function
+</p>
+<p>For metric specific information, please see the corresponding function documentation.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A tibble object with 1 row per subject and one column per metric is returned.
+</p>
+
+
+<h3>References</h3>
+
+<p>Battelino T, Alexander CM, Amiel SA, et al. Continuous glucose monitoring and metrics for clinical trials: an international consensus statement.
+<em>Lancet Diabetes Endocrinol.</em>  <strong>2023;11(1):</strong>42-57.
+<a href="https://doi.org/10.1016/S2213-8587%2822%2900319-9">doi:10.1016/S2213-8587(22)00319-9</a>.
+</p>
+<p># Specify the meter frequency and change the interpolation gap to 30 min
+all_metrics(example_data_1_subject, dt0 = 5, inter_gap = 30)
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(example_data_1_subject)
+all_metrics(example_data_1_subject)
+
+</code></pre>
+
+
+</div>

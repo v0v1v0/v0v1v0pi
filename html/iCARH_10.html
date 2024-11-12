@@ -1,0 +1,118 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iCARH.model</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Runs the integrative CAR Horseshoe model</h2>
+
+<h3>Description</h3>
+
+<p>Infers treatment effects, association with heterogeneous omic variables, pathway perturbation
+among other parameters (e.g. time dependence). Regression coefficients (beta parameter) are initialized
+using a univariate regression ignoring time and metabolite dependence.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iCARH.model(
+  X,
+  Y = NULL,
+  drug,
+  groups = NULL,
+  pathways,
+  tau = 1.2,
+  NA_value = -99999,
+  init = T,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>the metabolomics time-course data with dimensions timepoints x observations x variables</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>the additional omic time-course data with dimensions timepoints x observations x variables</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>drug</code></td>
+<td>
+<p>treatment effect. Could be either continuous (an administered drug or other external factor) or
+binary (cases vs controls). In the binary case the <code>groups</code> argument can be safely removed.
+NA values not allowed in <code>drug</code>. Dimensions are timepoints x observations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groups</code></td>
+<td>
+<p>grouping vector (binary). Use when <code>drug</code> is continuous.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pathways</code></td>
+<td>
+<p>pathway adjacency matrices as returned by iCARH.getPathwaysMat</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau</code></td>
+<td>
+<p>global sparsity parameter <code class="reqn">\tau</code> as in Jendoubi, T., &amp; Ebbels, T. (2018)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>NA_value</code></td>
+<td>
+<p>NA values are incompatible with stan. This is a wrapper to encode missing values in <code>X</code> and <code>Y</code>. 
+NAs will be replaced by NA_value and will be inferred (only for X and Y data).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init</code></td>
+<td>
+<p>If <code>TRUE</code> use iCARH provided initialization function. Passed to Stan otherwise. Please see Stan manual 
+on <code>init</code> possible values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional stan parameters</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>stan object
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data.sim = iCARH.simulate(4, 8, 10, 2, 2, path.probs=0.3, Zgroupeff=c(0,4),
+beta.val=c(1,-1,0.5, -0.5))
+XX = data.sim$XX
+Y = data.sim$Y
+Z = data.sim$Z
+pathways = data.sim$pathways
+
+rstan_options(auto_write = TRUE)
+options(mc.cores = 2)
+fit = iCARH.model(XX, Y, Z,groups=rep(c(0,1), each=4), pathways,
+ control = list(adapt_delta = 0.99, max_treedepth=10), iter = 2, chains = 2)
+
+</code></pre>
+
+
+</div>

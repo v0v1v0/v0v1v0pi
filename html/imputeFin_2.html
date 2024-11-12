@@ -1,0 +1,248 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fit_AR1_Gaussian</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit Gaussian AR(1) model to time series with missing values and/or outliers</h2>
+
+<h3>Description</h3>
+
+<p>Estimate the parameters of a univariate Gaussian AR(1) model 
+to fit the given time series with missing values and/or outliers. 
+For multivariate time series, the function will perform a 
+number of individual univariate fittings without attempting 
+to model the correlations among the time series.
+If the time series does not contain missing values, the 
+maximum likelihood (ML) estimation is done in one shot.
+With missing values, the iterative EM algorithm is employed 
+for the estimation until converge is achieved.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fit_AR1_Gaussian(
+  y,
+  random_walk = FALSE,
+  zero_mean = FALSE,
+  remove_outliers = FALSE,
+  outlier_prob_th = 0.001,
+  verbose = TRUE,
+  return_iterates = FALSE,
+  return_condMeanCov = FALSE,
+  tol = 1e-08,
+  maxiter = 100
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Time series object coercible to either a numeric vector or numeric matrix 
+(e.g., <code>zoo</code> or <code>xts</code>) with missing values denoted by <code>NA</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random_walk</code></td>
+<td>
+<p>Logical value indicating if the time series is assumed to be a random walk so that <code>phi1 = 1</code> 
+(default is <code>FALSE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zero_mean</code></td>
+<td>
+<p>Logical value indicating if the time series is assumed zero-mean so that <code>phi0 = 0</code> 
+(default is <code>FALSE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>remove_outliers</code></td>
+<td>
+<p>Logical value indicating whether to detect and remove outliers.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outlier_prob_th</code></td>
+<td>
+<p>Threshold of probability of observation to declare an outlier (default is <code>1e-3</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Logical value indicating whether to output messages (default is <code>TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return_iterates</code></td>
+<td>
+<p>Logical value indicating if the iterates are to be returned (default is <code>FALSE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return_condMeanCov</code></td>
+<td>
+<p>Logical value indicating if the conditional mean and covariance matrix of the 
+time series (excluding the leading and trailing missing values) given the observed data are to be returned (default is <code>FALSE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>Positive number denoting the relative tolerance used as stopping criterion (default is <code>1e-8</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+<p>Positive integer indicating the maximum number of iterations allowed (default is <code>100</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>If the argument <code>y</code> is a univariate time series (i.e., coercible to a numeric vector), then this 
+function will return a list with the following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>phi0</code></td>
+<td>
+<p>The estimate for <code>phi0</code> (real number).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phi1</code></td>
+<td>
+<p>The estimate for <code>phi1</code> (real number).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma2</code></td>
+<td>
+<p>The estimate for <code>sigma^2</code> (positive number).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phi0_iterates</code></td>
+<td>
+<p>Numeric vector with the estimates for <code>phi0</code> at each iteration
+(returned only when <code>return_iterates = TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phi1_iterates</code></td>
+<td>
+<p>Numeric vector with the estimates for <code>phi1</code> at each iteration
+(returned only when <code>return_iterates = TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma2_iterates</code></td>
+<td>
+<p>Numeric vector with the estimates for <code>sigma^2</code> at each iteration
+(returned only when <code>return_iterates = TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>f_iterates</code></td>
+<td>
+<p>Numeric vector with the objective values at each iteration
+(returned only when <code>return_iterates = TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cond_mean_y</code></td>
+<td>
+<p>Numeric vector (of same length as argument <code>y</code>) with the conditional mean of the time series 
+(excluding the leading and trailing missing values)
+given the observed data (returned only when <code>return_condMeanCov = TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cond_cov_y</code></td>
+<td>
+<p>Numeric matrix (with number of columns/rows equal to the length of the argument <code>y</code>)
+with the conditional covariance matrix of the time series (excluding the leading and trailing missing values) 
+given the observed data (returned only when <code>return_condMeanCov = TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>index_miss</code></td>
+<td>
+<p>Indices of missing values imputed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>index_outliers</code></td>
+<td>
+<p>Indices of outliers detected/corrected.</p>
+</td>
+</tr>
+</table>
+<p>If the argument <code>y</code> is a multivariate time series (i.e., with multiple columns and coercible to a numeric matrix), 
+then this function will return a list with each element as in the case of univariate <code>y</code> corresponding to each
+of the columns (i.e., one list element per column of <code>y</code>), with the following additional elements that combine the 
+estimated values in a convenient vector form:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>phi0_vct</code></td>
+<td>
+<p>Numeric vector (with length equal to the number of columns of <code>y</code>)
+with the estimates for <code>phi0</code> for each of the univariate time series.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phi1_vct</code></td>
+<td>
+<p>Numeric vector (with length equal to the number of columns of <code>y</code>)
+with the estimates for <code>phi1</code> for each of the univariate time series.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma2_vct</code></td>
+<td>
+<p>Numeric vector (with length equal to the number of columns of <code>y</code>)
+with the estimates for <code>sigma2</code> for each of the univariate time series.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Junyan Liu and Daniel P. Palomar
+</p>
+
+
+<h3>References</h3>
+
+<p>R. J. Little and D. B. Rubin, Statistical Analysis with Missing Data, 2nd ed. Hoboken, N.J.: John Wiley &amp; Sons, 2002.
+</p>
+<p>J. Liu, S. Kumar, and D. P. Palomar, "Parameter estimation of heavy-tailed AR model with missing 
+data via stochastic EM," IEEE Trans. on Signal Processing, vol. 67, no. 8, pp. 2159-2172, 15 April, 2019.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>impute_AR1_Gaussian</code>, <code>fit_AR1_t</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(imputeFin)
+data(ts_AR1_Gaussian)
+y_missing &lt;- ts_AR1_Gaussian$y_missing
+fitted &lt;- fit_AR1_Gaussian(y_missing)
+
+</code></pre>
+
+
+</div>

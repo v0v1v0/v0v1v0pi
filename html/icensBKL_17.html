@@ -1,0 +1,146 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NPbayesSurv</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Bayesian non-parametric estimation of a survival curve
+with right-censored data
+</h2>
+
+<h3>Description</h3>
+
+<p>Bayesian non-parametric estimation of a survival curve for
+right-censored data as proposed by Susarla and Van Ryzin (1976, 1978)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">NPbayesSurv(time, censor,
+  choice = c("exp", "weibull", "lnorm"), c = 1, parm,
+  xlab = "Time", ylab = "Survival Probability", maintitle = "",
+  cex.lab = 1.2, cex.axis = 1.0, cex.main = 1.5, cex.text = 1.2, lwd = 2)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>time, censor</code></td>
+<td>
+<p>numeric vectors with (right-censored) survival
+times and 0/1 censoring indicators (1 for event, 0 for censored)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>choice</code></td>
+<td>
+<p>a character string indicating the initial guess
+(<code class="reqn">S^*</code>) of the survival distribution
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c</code></td>
+<td>
+<p>parameter of the Dirichlet process prior
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parm</code></td>
+<td>
+<p>a numeric vector of parameters for the initial guess:
+<code>rate</code> parameter for exponential (see also
+<code>Exponential</code>), a two-element vector with <code>shape</code>
+and <code>scale</code> parameters for weibull (see also
+<code>Weibull</code>), a two-element vector with
+<code>meanlog</code> and <code>sdlog</code> parameters for log-normal (see also
+<code>Lognormal</code>). If not given, parameters for the
+initial guess are taken from the ML fit</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab, ylab</code></td>
+<td>
+<p>labels for axes of the plot
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maintitle</code></td>
+<td>
+<p>text for the main title
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex.lab, cex.axis, cex.main, cex.text, lwd</code></td>
+<td>
+<p>graphical parameters
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A vector corresponding to the <code>parm</code> argument
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Emmanuel Lesaffre <a href="mailto:emmanuel.lesaffre@kuleuven.be">emmanuel.lesaffre@kuleuven.be</a>,
+Arnošt Komárek <a href="mailto:arnost.komarek@mff.cuni.cz">arnost.komarek@mff.cuni.cz</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Susarla, V. and Van Ryzin, J. (1976).
+Nonparametric Bayesian estimation of survival curves from incomplete
+observations. 
+<em>Journal of the American Statistical Association</em>, <b>71</b>(356), 897-902.
+</p>
+<p>Susarla, V. and Van Ryzin, J. (1978).
+Large sample theory for a Bayesian nonparametric survival curve
+estimator based on censored samples. 
+<em>The Annals of Statistics</em>, <b>6</b>(4), 755-768.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Nonparametric Bayesian estimation of a survival curve
+## Homograft study, aortic homograft patients
+data("graft", package = "icensBKL")
+
+graft.AH &lt;- subset(graft, Hgraft == "AH") # aortic homograft patients
+time &lt;- graft$timeFU[graft$Hgraft == "AH"]
+censor &lt;- graft$homo.failure[graft$Hgraft == "AH"]
+
+  ## Initial guess: Weibull, c = 0.1 and 100
+oldpar &lt;- par(mfrow = c(1, 2))
+NPbayesSurv(time, censor, "weibull", c = 100,
+   xlab = "Follow-up time since the operation (years)", maintitle = "c = 100")
+NPbayesSurv(time, censor, "weibull", c = 100,
+   xlab = "Follow-up time since the operation (years)", maintitle = "c = 100")
+par(oldpar)
+
+  ## Initial guess: Exponential, c = 100
+oldpar &lt;- par(mfrow = c(1, 1))
+NPbayesSurv(time, censor, "exp", c = 100,
+   xlab = "Follow-up time since the operation (years)", maintitle = "Exp: c = 100")
+
+  ## Initial guess: Log-normal, c = 100
+NPbayesSurv(time, censor, "lnorm", c = 100,
+   xlab = "Follow-up time since the operation (years)", maintitle = "Log-Normal: c = 100")
+par(oldpar)
+</code></pre>
+
+
+</div>

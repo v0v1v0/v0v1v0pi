@@ -1,0 +1,452 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>catsib</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>CATSIB DIF detection procedure</h2>
+
+<h3>Description</h3>
+
+<p>This function analyzes DIF on an item using CATSIB procedure (Nandakumar &amp; Roussos, 2004), which is a modified
+version of SIBTEST (Shealy &amp; Stout, 1993). The CATSIB procedure can be applied to a computerized adaptive testing (CAT)
+environment for differential item functioning (DIF) detection. In CATSIB, examinees are matched on IRT-based ability
+estimates adjusted by employing a regression correction method (Shealy &amp; Stout, 1993) to reduce a statistical bias of
+the CATSIB statistic due to impact.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">catsib(
+  x = NULL,
+  data,
+  score = NULL,
+  se = NULL,
+  group,
+  focal.name,
+  D = 1,
+  n.bin = c(80, 10),
+  min.binsize = 3,
+  max.del = 0.075,
+  weight.group = c("comb", "foc", "ref"),
+  alpha = 0.05,
+  missing = NA,
+  purify = FALSE,
+  max.iter = 10,
+  min.resp = NULL,
+  method = "ML",
+  range = c(-5, 5),
+  norm.prior = c(0, 1),
+  nquad = 41,
+  weights = NULL,
+  ncore = 1,
+  verbose = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A data frame containing the item metadata (e.g., item parameters, number of categories, models ...).
+<code>x</code> should to be provided to estimate latent ability parameters when <code>score = NULL</code> or <code>purify = TRUE</code>. Default is NULL.
+See <code>est_irt</code>, <code>irtfit</code>, <code>info</code> or <code>simdat</code> for more detail about the item metadata.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A matrix containing examinees' response data of the items in the argument <code>x</code>. A row and column indicate
+the examinees and items, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>score</code></td>
+<td>
+<p>A vector of examinees' ability estimates. If the abilities are not provided (i.e., <code>score  = NULL</code>),
+<code>catsib</code> computes the ability estimates before computing the CATSIB statistics. See <code>est_score</code>
+for more detail about scoring methods. Default is NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se</code></td>
+<td>
+<p>A vector of the standard errors of the ability estimates. The standard errors should be ordered in accordance with the order of
+the ability estimates specified in the <code>score</code> argument. Default is NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group</code></td>
+<td>
+<p>A numeric or character vector indicating group membership of examinees. The length of vector should be the same with the number of rows
+in the response data matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>focal.name</code></td>
+<td>
+<p>A single numeric or character scalar representing the level associated with the focal group. For instance,
+given <code>group = c(0, 1, 0, 1, 1)</code> and '1' indicating the focal group, set <code>focal.name = 1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>A scaling factor in IRT models to make the logistic function as close as possible to the normal ogive function (if set to 1.7).
+Default is 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.bin</code></td>
+<td>
+<p>A vector of two positive integers to set the maximum and minimum numbers of bins (or intervals) on the ability scale.
+The first and second values indicate the maximum and minimum numbers of the bins, respectively. See below for more detail.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.binsize</code></td>
+<td>
+<p>A positive integer value to set the minimum size of each bin. To ensure stable statistical estimation, each bin is required
+to have a certain number of examinees (e.g, 3), at least, from both reference and focal groups if it was to be included in calculation of <code class="reqn">\hat{\beta}</code>.
+All bins with fewer than the minimum number are not used for the computation. Default is 3. See below for more detail.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.del</code></td>
+<td>
+<p>A numerical value to set the maximum permissible proportion of examinees to be deleted from either reference group or focal group
+when automatically determining the number of bins on the ability scale. Default is 0.075. See below for more detail.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weight.group</code></td>
+<td>
+<p>A single character string to specify a target ability distribution over which the expectation of DIF measure, called <code class="reqn">\hat{\beta}</code>,
+and the corresponding standard error are computed. Available options are "comb" for the combined ability distribution from both the reference and focal groups,
+"foc" for the ability distribution of the focal group, and "ref" for the ability distribution of the reference group. Defulat is "comb". See below for more detail.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>A numeric value to specify significance <code class="reqn">\alpha</code>-level of the hypothesis test using the CATSIB statistics.
+Default is .05.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>missing</code></td>
+<td>
+<p>A value indicating missing values in the response data set. Default is NA.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>purify</code></td>
+<td>
+<p>A logical value indicating whether a purification process will be implemented or not. Default is FALSE. See below for more detail.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.iter</code></td>
+<td>
+<p>A positive integer value specifying the maximum number of iterations for
+the purification process. Default is 10.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.resp</code></td>
+<td>
+<p>A positive integer value specifying the minimum number of item responses for an examinee
+required to compute the ability estimate. Default is NULL. See details below for more information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>A character string indicating a scoring method. Available methods are "ML" for the maximum likelihood estimation,
+"WL" for the weighted likelihood estimation, "MAP" for the maximum a posteriori estimation, and "EAP" for the expected a posteriori
+estimation. Default method is "ML".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>range</code></td>
+<td>
+<p>A numeric vector of two components to restrict the range of ability scale for the ML, WL, MLF, and MAP scoring methods. Default is c(-5, 5).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>norm.prior</code></td>
+<td>
+<p>A numeric vector of two components specifying a mean and standard deviation of the normal prior distribution.
+These two parameters are used to obtain the gaussian quadrature points and the corresponding weights from the normal distribution. Default is
+c(0,1). Ignored if <code>method</code> is "ML" or "WL".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nquad</code></td>
+<td>
+<p>An integer value specifying the number of gaussian quadrature points from the normal prior distribution. Default is 41.
+Ignored if <code>method</code> is "ML", "WL", or "MAP".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>A two-column matrix or data frame containing the quadrature points (in the first column) and the corresponding weights
+(in the second column) of the latent variable prior distribution. The weights and quadrature points can be easily obtained
+using the function <code>gen.weight</code>. If NULL and <code>method</code> is "EAP", default values are used (see the arguments
+of <code>norm.prior</code> and <code>nquad</code>). Ignored if <code>method</code> is "ML", "WL", or "MAP".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncore</code></td>
+<td>
+<p>The number of logical CPU cores to use. Default is 1. See <code>est_score</code> for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>A logical value. If TRUE, the progress messages of purification procedure are suppressed. Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments that will be forwarded to the <code>est_score</code> function.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>In CATSIB procedure (Nandakumar &amp; Roussos, 2004), because <code class="reqn">\hat{\beta}^{\ast}</code>, which is the expected <code class="reqn">\theta</code> regressed on <code class="reqn">\hat{\beta}</code>,
+is a continuous variable, the range of <code class="reqn">\hat{\beta}^{\ast}</code> is divided into K equal intervals and examinees are classified into one of K intervals
+on the basis of their <code class="reqn">\hat{\beta}^{\ast}</code>.Then, any intervals that contain less than three examinees in either reference or focal groups were
+excluded from the computation of <code class="reqn">\hat{\beta}</code>, which is a measure of the amount of DIF, to ensure stable statistical estimation. According to
+Nandakumar and Roussos (2004), a default minimum size of each bin is set to 3 in <code>min.binsize</code>.
+</p>
+<p>To carefully choose the number of intervals (K), the <code>catsib</code> automatically determines it by gradually decreasing K from a larger to
+smaller numbers based the rule used in Nandakumar and Roussos (2004). Specifically, beginning with an arbitrary large number (e.g., 80),
+if more than a certain permissible percentage, let's say 7.5%, of examinees in either the reference or focal groups were removed, the <code>catsib</code>
+automatically decreases the number of bins by one unit until a total number of examinees in each group reaches to more than or equal to 92.5%.
+However, Nandakumar and Roussos (2004) recommended setting the minimum K to 10 to avoid a situation that extremely a few intervals are left,
+even if the number of remaining examinees in each group is less than 92.5%. Thus, the maximum and minimum number of bins are set to 80 and 10, respectively,
+as default in <code>n.bin</code>. Also, a default maximum permissible proportion of examinees to be deleted from either reference group or focal group is
+set to 0.075 in <code>max.del</code>.
+</p>
+<p>When it comes to the target ability distribution used to compute <code class="reqn">\hat{\beta}</code>, Li and Stout (1996) and Nandakumar and Roussos (2004) used the combined-group
+target ability distribution, which is a default option in <code>weight.group</code>. See Nandakumar and Roussos (2004) for more detail about the CATSIB method.
+</p>
+<p>Although Nandakumar and Roussos (2004) did not propose a purification procedure for DIF analysis using CATSIB, the <code>catsib</code> can implement an iterative
+purification process in a similar way as in Lim, Choe, and Han (2022). Simply, at each iterative purification, examinees' latent abilities are computed using
+purified items and scoring method specified in the <code>method</code> argument. The iterative purification process stops when no further DIF items are found or
+the process reaches a predetermined limit of iteration, which can be specified in the <code>max.iter</code> argument. See Lim et al. (2022)
+for more details about the purification procedure.
+</p>
+<p>Scoring with a limited number of items can result in large standard errors, which may impact the effectiveness of DIF detection within
+the CATSIB procedure. The <code>min.resp</code> argument can be employed to avoid using scores with significant standard errors when calculating
+the CATSIB statistic, particularly during the purification process. For instance, if <code>min.resp</code> is not NULL (e.g., <code>min.resp=5</code>),
+item responses from examinees whose total item responses fall below the specified minimum number are treated as missing values (i.e., NA).
+Consequently, their ability estimates become missing values and are not utilized in computing the CATSIB statistic. If <code>min.resp=NULL</code>,
+an examinee's score will be computed as long as there is at least one item response for the examinee.
+</p>
+
+
+<h3>Value</h3>
+
+<p>This function returns a list of four internal objects. The four objects are:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>no_purify</code></td>
+<td>
+<p>A list of several sub-objects containing the results of DIF analysis without a purification procedure. The sub-objects are:
+</p>
+
+<dl>
+<dt>dif_stat</dt>
+<dd>
+<p>A data frame containing the results of CATSIB statistics across all evaluated items. From the first column, each column
+indicates item's ID, CATSIB (<em>beta</em>) statistic, standard error of the <em>beta</em>, standardized <em>beta</em>, p-value of the <em>beta</em>,
+sample size of the reference group, sample size of the focal group, and total sample size, respectively.</p>
+</dd>
+<dt>dif_item</dt>
+<dd>
+<p>A numeric vector showing potential DIF items flagged by CATSIB statistic.</p>
+</dd>
+<dt>contingency</dt>
+<dd>
+<p>A contingency table of each item used to compute CATSIB statistic.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>purify</code></td>
+<td>
+<p>A logical value indicating whether the purification process was used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>with_purify</code></td>
+<td>
+<p>A list of several sub-objects containing the results of DIF analysis with a purification procedure. The sub-objects are:
+</p>
+
+<dl>
+<dt>dif_stat</dt>
+<dd>
+<p>A data frame containing the results of CATSIB statistics across all evaluated items. From the first column, each column
+indicates item's ID, CATSIB (<em>beta</em>) statistic, standard error of the <em>beta</em>, standardized <em>beta</em>, p-value of the <em>beta</em>,
+sample size of the reference group, sample size of the focal group, and total sample size, and <em>n</em>th iteration where the CATSIB statistic
+was computed, respectively.</p>
+</dd>
+<dt>dif_item</dt>
+<dd>
+<p>A numeric vector showing potential DIF items flagged by CATSIB statistic.</p>
+</dd>
+<dt>n.iter</dt>
+<dd>
+<p>A total number of iterations implemented for the purification.</p>
+</dd>
+<dt>complete</dt>
+<dd>
+<p>A logical value indicating whether the purification process was completed. If FALSE, it means that the purification process
+reached the maximum iteration number but it was not complete.</p>
+</dd>
+<dt>contingency</dt>
+<dd>
+<p>A contingency table of each item used to compute CATSIB statistic.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>A significance <code class="reqn">\alpha</code>-level used to compute the p-values of RDIF statistics.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Hwanggyu Lim <a href="mailto:hglim83@gmail.com">hglim83@gmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Li, H. H., &amp; Stout, W. (1996). A new procedure for detection of crossing DIF. <em>Psychometrika, 61</em>(4), 647-677.
+</p>
+<p>Lim, H., Choe, E. M., &amp; Han, K. T. (2022). A residual-based differential item functioning detection framework in
+item response theory. <em>Journal of Educational Measurement</em>.
+</p>
+<p>Nandakumar, R., &amp; Roussos, L. (2004). Evaluation of the CATSIB DIF procedure in a pretest setting.
+<em>Journal of Educational and Behavioral Statistics, 29</em>(2), 177-199.
+</p>
+<p>Shealy, R. T., &amp; Stout, W. F. (1993). A model-based standardization approach that separates true bias/DIF
+from group ability differences and detects test bias/DIF as well as item bias/DIF. <em>Psychometrika, 58</em>, 159–194.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>rdif</code>, <code>est_item</code>, <code>info</code>, <code>simdat</code>,
+<code>shape_df</code>, <code>gen.weight</code>, <code>est_score</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# call library
+library("dplyr")
+
+## Uniform DIF detection
+###############################################
+# (1) manipulate true uniform DIF data
+###############################################
+# import the "-prm.txt" output file from flexMIRT
+flex_sam &lt;- system.file("extdata", "flexmirt_sample-prm.txt", package = "irtQ")
+
+# select 36 of 3PLM items which are non-DIF items
+par_nstd &lt;-
+  bring.flexmirt(file = flex_sam, "par")$Group1$full_df %&gt;%
+  dplyr::filter(.data$model == "3PLM") %&gt;%
+  dplyr::filter(dplyr::row_number() %in% 1:36) %&gt;%
+  dplyr::select(1:6)
+par_nstd$id &lt;- paste0("nondif", 1:36)
+
+# generate four new items to inject uniform DIF
+difpar_ref &lt;-
+  shape_df(
+    par.drm = list(a = c(0.8, 1.5, 0.8, 1.5), b = c(0.0, 0.0, -0.5, -0.5), g = 0.15),
+    item.id = paste0("dif", 1:4), cats = 2, model = "3PLM"
+  )
+
+# manipulate uniform DIF on the four new items by adding constants to b-parameters
+# for the focal group
+difpar_foc &lt;-
+  difpar_ref %&gt;%
+  dplyr::mutate_at(.vars = "par.2", .funs = function(x) x + rep(0.7, 4))
+
+# combine the 4 DIF and 36 non-DIF items for both reference and focal groups
+# thus, the first four items have uniform DIF
+par_ref &lt;- rbind(difpar_ref, par_nstd)
+par_foc &lt;- rbind(difpar_foc, par_nstd)
+
+# generate the true thetas
+set.seed(123)
+theta_ref &lt;- rnorm(500, 0.0, 1.0)
+theta_foc &lt;- rnorm(500, 0.0, 1.0)
+
+# generate the response data
+resp_ref &lt;- simdat(par_ref, theta = theta_ref, D = 1)
+resp_foc &lt;- simdat(par_foc, theta = theta_foc, D = 1)
+data &lt;- rbind(resp_ref, resp_foc)
+
+###############################################
+# (2) estimate the item and ability parameters
+#     using the aggregate data
+###############################################
+# estimate the item parameters
+est_mod &lt;- est_irt(data = data, D = 1, model = "3PLM")
+est_par &lt;- est_mod$par.est
+
+# estimate the ability parameters using ML
+theta_est &lt;- est_score(x = est_par, data = data, method = "ML")
+score &lt;- theta_est$est.theta
+se &lt;- theta_est$se.theta
+
+###############################################
+# (3) conduct DIF analysis
+###############################################
+# create a vector of group membership indicators
+# where '1' indicates the focal group
+group &lt;- c(rep(0, 500), rep(1, 500))
+
+# (a)-1 compute SIBTEST statistic by providing scores,
+#       and without a purification
+dif_1 &lt;- catsib(
+  x = NULL, data = data, D = 1, score = score, se = se, group = group, focal.name = 1,
+  weight.group = "comb", alpha = 0.05, missing = NA, purify = FALSE
+)
+print(dif_1)
+
+# (a)-2 compute SIBTEST statistic by providing scores,
+#       and with a purification
+dif_2 &lt;- catsib(
+  x = est_par, data = data, D = 1, score = score, se = se, group = group, focal.name = 1,
+  weight.group = "comb", alpha = 0.05, missing = NA, purify = TRUE
+)
+print(dif_2)
+
+
+</code></pre>
+
+
+</div>

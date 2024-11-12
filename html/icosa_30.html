@@ -1,0 +1,94 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>gridensity</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Icosahedral grid-based density estimation</h2>
+
+<h3>Description</h3>
+
+<p>Spatial density estimation algorithm based on rotation of icosahedral grids.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">gridensity(x, y, out, trials = 100, FUN = mean)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Matrix of longitude, latitude data, <code>sf</code> class, or <code>SpatialPoints</code> Point cloud.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p><code>trigrid</code> or <code>hexagrid</code> An icosahedral grid.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>out</code></td>
+<td>
+<p><code>trigrid</code>, <code>hexagrid</code> or <code>SpatRaster</code>output structure.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trials</code></td>
+<td>
+<p><code>numeric</code> value, the number of iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FUN</code></td>
+<td>
+<p><code>function</code> The function to be applied on the iteration results.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Any points set can be binned to an icosahedral grid (i.e. number of incidences can be counted), which will be dependent on the exact positions of grid cells. Rotating the grid in 3d space will result in a different distribution of counts. This distribution can be resampled to a standard orientation structure. The size of the icosahedral grid cells act as a bandwidth parameter.
+</p>
+<p>The implemented algorithm 1) takes a point cloud (<code>x</code>)) and an icosahedral grid <code>y</code> 2) randomly rotates the icosahedral grid, 3) looks up the points falling on grid cells, 4) resamples the grid to a constant orientation object (either <code>trigrid</code>, <code>hexagrid</code> or <code>SpatRaster</code>). Steps 2-4 are repeated <code>trial</code> times, and then <code>FUN</code> is applied to every vector of values that have same spatial position.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Either named numeric vector, or a <code>SpatRaster</code> object. If FUN is set to <code>NULL</code>, the output will be either a <code>matrix</code> or <code>SpatRaster</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># example to be run if terra is present
+if(requireNamespace("terra", quietly=TRUE)){
+
+ # randomly generated points
+ x &lt;- rpsphere(100, output="polar")
+
+ # bandwidth grid
+ y &lt;- hexagrid(deg=13)
+
+ # output structure
+ out &lt;- terra::rast(res=5)
+
+ # the function
+ o &lt;- gridensity(x, y, out, trials=7)
+
+ # visualize results
+ terra::plot(o)
+ points(x, pch=3)
+}
+
+</code></pre>
+
+
+</div>

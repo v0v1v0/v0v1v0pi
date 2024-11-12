@@ -1,0 +1,69 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>irecord</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Record and replay iterators</h2>
+
+<h3>Description</h3>
+
+<p>The <code>irecord</code> function records the values issued by a specified
+iterator to a file or connection object.  The <code>ireplay</code> function
+returns an iterator that will replay those values.  This is useful
+for iterating concurrently over multiple, large matrices or data frames
+that you can't keep in memory at the same time.  These large objects
+can be recorded to files one at a time, and then be replayed
+concurrently using minimal memory.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">irecord(con, iterable)
+ireplay(con)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>con</code></td>
+<td>
+<p>A file path or open connection.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterable</code></td>
+<td>
+<p>The iterable to record to the file.</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">suppressMessages(library(foreach))
+
+m1 &lt;- matrix(rnorm(70), 7, 10)
+f1 &lt;- tempfile()
+irecord(f1, iter(m1, by='row', chunksize=3))
+
+m2 &lt;- matrix(1:50, 10, 5)
+f2 &lt;- tempfile()
+irecord(f2, iter(m2, by='column', chunksize=3))
+
+# Perform a simple out-of-core matrix multiply
+p &lt;- foreach(col=ireplay(f2), .combine='cbind') %:%
+       foreach(row=ireplay(f1), .combine='rbind') %do% {
+         row %*% col
+       }
+
+dimnames(p) &lt;- NULL
+print(p)
+all.equal(p, m1 %*% m2)
+unlink(c(f1, f2))
+</code></pre>
+
+
+</div>

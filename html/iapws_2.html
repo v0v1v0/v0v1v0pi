@@ -1,0 +1,216 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>heavy17</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+IAPWS-17 Formulation in Single Phase Regions
+</h2>
+
+<h3>Description</h3>
+
+<p>Compute thermodynamic and transport properties of heavy water and
+steam using the IAPWS formulation 2017.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">heavy17(what, p, t, rho, state = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>what</code></td>
+<td>
+
+<p>a character vector listing the output properties.
+See Details for available properties.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+
+<p>a numeric vector giving the pressure values in MPa.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t</code></td>
+<td>
+
+<p>a numeric vector giving the temperature values in K.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+
+<p>a numeric vector giving the density values in kg/m<code class="reqn">^3</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>state</code></td>
+<td>
+
+<p><code>NULL</code> or a character vector giving the physical state.
+One of <code>"liquid"</code>, <code>"gas"</code> or <code>"supercritical"</code>.
+In case of <code>NULL</code>, the state is determined by the function
+<code>heavy17_state()</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The available properties for <code>what</code> are:
+</p>
+
+<ul>
+<li> <p><code>"f"</code>: the specific free energy in kJ/kg.
+</p>
+</li>
+<li> <p><code>"g"</code>: the specific Gibbs enthalpy in kJ/kg.
+</p>
+</li>
+<li> <p><code>"u"</code>: the specific internal energy in kJ/kg.
+</p>
+</li>
+<li> <p><code>"h"</code>: the specific enthalpy in kJ/kg.
+</p>
+</li>
+<li> <p><code>"s"</code>: the specific entropy in kJ/K/kg.
+</p>
+</li>
+<li> <p><code>"t"</code>: the temperature in K.
+</p>
+</li>
+<li> <p><code>"p"</code>: the pressure in MPa.
+</p>
+</li>
+<li> <p><code>"v"</code>: the specific volume in m<code class="reqn">^3</code>/kg.
+</p>
+</li>
+<li> <p><code>"rho"</code>: the mass density in kg/m<code class="reqn">^3</code>.
+</p>
+</li>
+<li> <p><code>"cv"</code>: the specific isochoric heat capacity in kJ/K/kg.
+</p>
+</li>
+<li> <p><code>"cp"</code>: the specific isobaric heat capacity in kJ/K/kg.
+</p>
+</li>
+<li> <p><code>"alpha"</code>: the expansion coefficient in 1/K
+</p>
+</li>
+<li> <p><code>"beta"</code>: the pressure coefficient in MPa/K.
+</p>
+</li>
+<li> <p><code>"kappat"</code>: the isothermal compressibility in 1/MPa.
+</p>
+</li>
+<li> <p><code>"w"</code>: the speed of sound in m/s.
+</p>
+</li>
+<li> <p><code>"eta"</code>: the dynamic viscosity in <code class="reqn">\mu</code>Pa.s.
+</p>
+</li>
+<li> <p><code>"lambda"</code>: the thermal conductivity in mW/K/m.
+
+
+</p>
+</li>
+</ul>
+<p>A valid pair of <code>p</code>, <code>rho</code> and <code>t</code> is needed:
+either <code>(p, t)</code> or <code>(rho, t)</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A numeric matrix of dimension <code>c(n, length(what))</code> with <code>n</code>
+the maximum length of either <code>rho</code>, <code>p</code>, <code>t</code>
+or <code>state</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Computing several properties in a single call may be more efficient
+than separately because most of the computation time is shared.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Debove
+</p>
+
+
+<h3>References</h3>
+
+<p>International Association for the Properties of Water and Steam,
+IAPWS R16-17(2018), <em>Revised Release on the IAPWS Formulation 2017
+for the Thermodynamic Properties of Heavy Water.</em>
+</p>
+<p>International Association for the Properties of Water and Steam,
+IAPWS R17-20, <em>Release on the IAPWS Formulation 2020
+for the Viscosity of Heavy Water.</em>
+</p>
+<p>International Association for the Properties of Water and Steam,
+IAPWS R18-21, <em>Release on the IAPWS Formulation 2021
+for the Thermal Conductivity of Heavy Water.</em>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># IAPWS-17 Tab. 7
+M &lt;- 20.027508  # g/mol
+tab &lt;- heavy17(c("p", "cv", "w", "s"),
+               t = c(300, 300, 300,
+                     500, 500, 500, 500, 500,
+                     643.8,
+                     800, 800),
+               rho = c(0.55126e2, 0.6e2, 0.65e2,
+                       0.5e-1, 0.5, 0.4626e2, 0.5e2, 0.6e2,
+                       0.2e2,
+                       0.1e-1, 0.25) * M)
+tab[, c("cv", "s")] &lt;- tab[, c("cv", "s")] / M
+format(tab, scientific = TRUE, digits = 9)
+
+
+# Viscosity Tab. 3
+tab &lt;- heavy17("eta", t = c(298.15, 298.15, 298.15, 373.15,
+                            775.0, 775.0, 775.0),
+               rho = c(0, 1105, 1130, 1064, 1, 100, 400))
+format(tab, digits = 8)
+
+# Viscosity Tab. 4
+tab &lt;- heavy17("eta", t = 644.101, rho = c(145, 245, 295, 345, 395, 445))
+format(tab, digits = 8)
+
+
+# Thermal conductivity Tab. 3
+tab &lt;- heavy17("lambda", t = c(298.15, 298.15, 298.15, 825),
+	       rho = c(0, 1104.5, 1200, 0))
+format(tab, digits = 6)
+
+
+# Thermal conductivity Tab. 4
+tab &lt;- heavy17("lambda", t = 644.10,
+	       rho = c(1, 106, 256, 306, 356, 406, 456, 750))
+format(tab, digits = 6)
+
+</code></pre>
+
+
+</div>

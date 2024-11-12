@@ -1,0 +1,122 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>is_conv_to_asymptotic</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Check for model convergence to asymptotic dynamics</h2>
+
+<h3>Description</h3>
+
+<p>Checks for convergence to asymptotic dynamics numerically and
+visually. <code>is_conv_to_asymptotic</code> checks whether
+<code>lambda[iterations - 1]</code> equals <code>lambda[iterations]</code> within the
+specified tolerance, <code>tolerance</code>. <code>conv_plot</code> plots the time series of
+<code>lambda</code> (or <code>log(lambda)</code>). For stochastic models, a cumulative mean of
+log(lambda) is used to check for convergence.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">is_conv_to_asymptotic(ipm, tolerance, burn_in)
+
+## S3 method for class 'ipmr_ipm'
+is_conv_to_asymptotic(ipm, tolerance = 1e-06, burn_in = 0.1)
+
+conv_plot(ipm, iterations, log, show_stable, burn_in, ...)
+
+## S3 method for class 'ipmr_ipm'
+conv_plot(
+  ipm,
+  iterations = NULL,
+  log = NULL,
+  show_stable = TRUE,
+  burn_in = 0.1,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ipm</code></td>
+<td>
+<p>An object returned by <code>make_ipm()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tolerance</code></td>
+<td>
+<p>The tolerance for convergence in lambda or, in the case of stochastic models, the cumulative mean of log(lambda).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>burn_in</code></td>
+<td>
+<p>The proportion of iterations to discard. Default is 0.1 (i.e.
+first 10% of iterations in the simulation). Ignored for deterministic
+models.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterations</code></td>
+<td>
+<p>The range of iterations to plot <code>lambda</code> for. The default
+is every iteration.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>A logical indicating whether to log transform <code>lambda</code>. This
+defaults to TRUE for stochastic models and FALSE for deterministic models.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>show_stable</code></td>
+<td>
+<p>A logical indicating whether or not to draw a line indicating
+population stability at <code>lambda = 1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments to <code>plot</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Plotting can be controlled by passing additional graphing parameters
+to <code>...</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>is_conv_to_asymptotic</code>: Either <code>TRUE</code> or <code>FALSE</code>.
+<code>conv_plot</code>: codeipm invisibly.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(gen_di_det_ex)
+
+proto &lt;- gen_di_det_ex$proto_ipm %&gt;%
+  define_pop_state(n_ht = runif(200),
+                   n_b  = 200000)
+
+ipm &lt;- make_ipm(proto)
+
+is_conv_to_asymptotic(ipm, tolerance = 1e-5)
+conv_plot(ipm)
+
+</code></pre>
+
+
+</div>

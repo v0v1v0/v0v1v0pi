@@ -1,0 +1,122 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>immer_opcat</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Estimation of Integer Item Discriminations
+</h2>
+
+<h3>Description</h3>
+
+<p>Estimates integer item discriminations like in the one-parameter
+logistic model (OPLM; Verhelst &amp; Glas, 1995).
+See Verhelst, Verstralen and Eggen (1991) for computational
+details.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">immer_opcat(a, hmean, min=1, max=10, maxiter=200)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+
+<p>Vector of estimated item discriminations
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hmean</code></td>
+<td>
+
+<p>Prespecified harmonic mean
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min</code></td>
+<td>
+
+<p>Minimum integer item discrimination
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max</code></td>
+<td>
+
+<p>Maximum integer item discrimination
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+
+<p>Maximum number of iterations
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Vector containing integer item discriminations
+</p>
+
+
+<h3>References</h3>
+
+<p>Verhelst, N. D. &amp;, Glas, C. A. W. (1995). The one-parameter logistic model.
+In G. H. Fischer &amp; I. W. Molenaar (Eds.). <em>Rasch Models</em> (pp. 215–238).
+New York: Springer.
+</p>
+<p>Verhelst, N. D., Verstralen, H. H. F. M., &amp; Eggen, T. H. J. M. (1991).
+<em>Finding starting values for the item parameters and suitable discrimination
+indices in the one-parameter logistic model</em>.
+CITO Measurement and Research Department Reports, 91-10.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See <code>immer_cml</code> for using <code>immer_opcat</code> to estimate
+the one-parameter logistic model.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#############################################################################
+# EXAMPLE 1: Estimating integer item discriminations for dichotomous data
+#############################################################################
+
+library(sirt)
+data(data.read, package="sirt")
+dat &lt;- data.read
+I &lt;- ncol(dat)
+
+#--- estimate 2PL model
+mod &lt;- sirt::rasch.mml2( dat, est.a=1:I, mmliter=30)
+summary(mod)
+a &lt;- mod$item$a        # extract (non-integer) item discriminations
+
+#--- estimate integer item discriminations under different conditions
+a1 &lt;- immer::immer_opcat( a, hmean=3, min=1, max=6 )
+table(a1)
+a2 &lt;- immer::immer_opcat( a, hmean=2, min=1, max=3 )
+a3 &lt;- immer::immer_opcat( a, hmean=1.5, min=1, max=2 )
+#--- compare results
+cbind( a, a1, a2, a3)
+</code></pre>
+
+
+</div>

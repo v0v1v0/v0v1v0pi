@@ -1,0 +1,114 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>preprocess</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Preprocess the read-in coordinates</h2>
+
+<h3>Description</h3>
+
+<p>Preprocess the raw coordinates into an appropriate format for reconstruct IPD. Returns include the clean dataset and a table displaying the index of read-in points within each time interval.<br><br></p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">preprocess(dat,trisk=NULL,nrisk=NULL,totalpts=NULL,maxy=100)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dat</code></td>
+<td>
+<p>a two-column dataset with the first column being times, and the second the survival probabilities extracted from a published K-M curve using <code>getpoints</code> function, or software such as ScanIt or DigitizeIt.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trisk</code></td>
+<td>
+<p>a vector containing risk time points (i.e., times points at which the number of patients at risk are reported). This often can be found under the x-axis of a K-M curve. The default value is NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nrisk</code></td>
+<td>
+<p>a vector containing the numbers of patients at risk reported at the risk time points. This often can be found under the x-axis of a K-M curve. The default value is NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>totalpts</code></td>
+<td>
+<p>the initial number of patients, with a default value of NULL. However, when both trisk and nrisk are NULL, this number is required for the estimation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxy</code></td>
+<td>
+<p>the scale of survival probability. Set maxy=100 when the probabilities are reported in percentages (e.g., 70%). Set maxy=1 when the probabilities are reported using decimal numbers (e.g, 0.7).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>preprocess()</code> function process the coordinates dataset extrated from a  published K-M curve using <code>getpoints</code> function, or software such as <a href="https://www.digitizeit.de">DigitizeIt</a> or <a href="https://www.amsterchem.com/scanit.html">ScanIt</a>.  <br>
+In most of published Kaplan-Meier curves, we can also find several numbers of patients at risk under the x-axis. These numbers at risk, and the time
+reported them, should be manually input in the form of vectors (nrisk and trisk). However, when these information is not available, we can leave the "trisk" and
+"nrisk" parameter as "NULL". In this case, the initial number of patients "totalpts" should be input.  <br><br>
+Sample dataset can be found in <code>Radiationdata</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>preprocess()</code> returns a list object, including four items as follows. <br></p>
+<p>preprocessdat: the two-column(i.e.,time, survival) table after preprocessing <br><br>
+intervalIndex: a table displaying the index of read-in points within each time interval.<br><br>
+endpts: the number of patients remaining at the end of the trial.<br><br>
+inputdat: the read-in dataset.<br><br></p>
+
+
+<h3>References</h3>
+
+<p>Guyot P, Ades AE, Ouwens MJ, Welton NJ. Enhanced secondary analysis of survival data:
+reconstructing the data from published Kaplan-Meier survival curves. BMC Med Res Methodol.2012; 1:9.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+# Radiationdata$radio is a dataset exported from ScanIt software ================
+radio &lt;- Radiationdata$radio
+
+# Load time points when the patients number =======
+# at risk reported (i.e. trisk in month) ======
+trisk &lt;- Radiationdata$trisk
+
+# Load the numbers of patients at risk reported (i.e. nrisk) =======
+# at the time points (trisk) ======
+nrisk.radio &lt;- Radiationdata$nrisk.radio
+
+# Use the trisk and nrisk as input for preprocess and reconstruction ============
+pre_radio_1 &lt;- preprocess(dat=Radiationdata$radio, trisk=trisk,
+             nrisk=nrisk.radio,totalpts=NULL,maxy=100)
+est_radio_1 &lt;- getIPD(prep=pre_radio_1,armID=0,tot.events=NULL)
+
+# Output include reconstructed individual patients data =========================
+head(est_radio_1$IPD)
+
+# When trisk and nrisk were not available, then we must input ====================
+# the initial number of patients   ===============================================
+pre_radio_2 &lt;- preprocess(dat=Radiationdata$radio, totalpts=213,maxy=100)
+est_radio_2 &lt;- getIPD(prep=pre_radio_2,armID=0,tot.events=NULL)
+
+# Output include reconstructed individual patients data ==========================
+head(est_radio_2$IPD)
+
+</code></pre>
+
+
+</div>

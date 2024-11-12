@@ -1,0 +1,323 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>evolution</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Th-U evolution diagram</h2>
+
+<h3>Description</h3>
+
+<p>Plots Th-U data on a
+<code class="reqn">^{234}</code>U/<code class="reqn">^{238}</code>U-<code class="reqn">^{230}</code>Th/<code class="reqn">^{238}</code>U evolution
+diagram, a <code class="reqn">^{234}</code>U/<code class="reqn">^{238}</code>U-age diagram, or (if
+<code class="reqn">^{234}</code>U/<code class="reqn">^{238}</code>U is assumed to be in secular
+equilibrium), a
+<code class="reqn">^{230}</code>Th/<code class="reqn">^{232}</code>Th-<code class="reqn">^{238}</code>U/<code class="reqn">^{232}</code>Th diagram;
+calculates isochron ages.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">evolution(
+  x,
+  xlim = NULL,
+  ylim = NULL,
+  oerr = 3,
+  transform = FALSE,
+  Th0i = 0,
+  show.numbers = FALSE,
+  levels = NA,
+  clabel = "",
+  ellipse.fill = c("#00FF0080", "#FF000080"),
+  ellipse.stroke = "black",
+  line.col = "darksalmon",
+  isochron = FALSE,
+  model = 1,
+  exterr = FALSE,
+  sigdig = 2,
+  hide = NULL,
+  omit = NULL,
+  omit.fill = NA,
+  omit.stroke = "grey",
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an object of class <code>ThU</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlim</code></td>
+<td>
+<p>x-axis limits</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylim</code></td>
+<td>
+<p>y-axis limits</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>oerr</code></td>
+<td>
+<p>indicates whether the analytical uncertainties of the
+output are reported in the plot title as:
+</p>
+<p><code>1</code>: 1<code class="reqn">\sigma</code> absolute uncertainties.
+</p>
+<p><code>2</code>: 2<code class="reqn">\sigma</code> absolute uncertainties.
+</p>
+<p><code>3</code>: absolute (1-<code class="reqn">\alpha</code>)% confidence intervals, where
+<code class="reqn">\alpha</code> equales the value that is stored in
+<code>settings('alpha')</code>.
+</p>
+<p><code>4</code>: 1<code class="reqn">\sigma</code> relative uncertainties (<code class="reqn">\%</code>).
+</p>
+<p><code>5</code>: 2<code class="reqn">\sigma</code> relative uncertainties (<code class="reqn">\%</code>).
+</p>
+<p><code>6</code>: relative (1-<code class="reqn">\alpha</code>)% confidence intervals, where
+<code class="reqn">\alpha</code> equales the value that is stored in
+<code>settings('alpha')</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>transform</code></td>
+<td>
+<p>if <code>TRUE</code>, plots <code class="reqn">^{234}</code>U/<code class="reqn">^{238}</code>U
+vs. Th-U age.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Th0i</code></td>
+<td>
+<p>initial <code class="reqn">^{230}</code>Th correction.
+</p>
+<p><code>0</code>: no correction
+</p>
+<p><code>1</code>: if <code>x$format</code> is <code>1</code> or <code>2</code>, project the
+data along an isochron fit. If <code>x$format</code> is <code>3</code> or
+<code>4</code>, infer the initial <code class="reqn">^{230}</code>Th/<code class="reqn">^{238}</code>U activity
+ratio from the isochron.
+</p>
+<p><code>2</code>: if <code>x$format</code> is <code>1</code> or <code>2</code>, correct the
+data using the measured present day <code class="reqn">^{230}</code>Th/<code class="reqn">^{238}</code>U,
+<code class="reqn">^{232}</code>Th/<code class="reqn">^{238}</code>U and <code class="reqn">^{234}</code>U/<code class="reqn">^{238}</code>U
+activity ratios in the detritus. If <code>x$format</code> is <code>3</code> or
+<code>4</code>, anchor the isochrons to the equiline, based on the
+measured <code class="reqn">^{238}</code>U/<code class="reqn">^{232}</code>Th activity ratio of the whole
+rock, as stored in <code>x</code> by the <code>read.data()</code> function.
+</p>
+<p><code>3</code>: correct the data using an assumed initial
+<code class="reqn">^{230}</code>Th/<code class="reqn">^{232}</code>Th-ratio for the detritus (only relevant
+if <code>x$format</code> is <code>1</code> or <code>2</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>show.numbers</code></td>
+<td>
+<p>label the error ellipses with the grain
+numbers?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>levels</code></td>
+<td>
+<p>a vector with additional values to be displayed as
+different background colours within the error ellipses.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clabel</code></td>
+<td>
+<p>label of the colour legend.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ellipse.fill</code></td>
+<td>
+<p>fill colour for the error ellipses. This can
+either be a single colour or multiple colours to form a colour
+ramp. Examples:
+</p>
+<p>a single colour: <code>rgb(0,1,0,0.5)</code>, <code>'#FF000080'</code>,
+<code>'white'</code>, etc.;
+</p>
+<p>multiple colours: <code>c(rbg(1,0,0,0.5)</code>,
+<code>rgb(0,1,0,0.5))</code>, <code>c('#FF000080','#00FF0080')</code>,
+<code>c('blue','red')</code>, <code>c('blue','yellow','red')</code>, etc.;
+</p>
+<p>a colour palette: <code>rainbow(n=100)</code>,
+<code>topo.colors(n=100,alpha=0.5)</code>, etc.; or
+</p>
+<p>a reversed palette: <code>rev(topo.colors(n=100,alpha=0.5))</code>,
+etc.
+</p>
+<p>For empty ellipses, set <code>ellipse.fill=NA</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ellipse.stroke</code></td>
+<td>
+<p>the stroke colour for the error
+ellipses. Follows the same formatting guidelines as
+<code>ellipse.fill</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>line.col</code></td>
+<td>
+<p>colour of the age grid</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>isochron</code></td>
+<td>
+<p>fit an isochron to the data?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>if <code>isochron=TRUE</code>, choose one of three
+regression models:
+</p>
+<p><code>1</code>: maximum likelihood regression, using either the modified
+error weighted least squares algorithm of York et al. (2004) for
+2-dimensional data, or the Maximum Likelihood formulation of Ludwig
+and Titterington (1994) for 3-dimensional data. These algorithms
+take into account the analytical uncertainties and error
+correlations, under the assumption that the scatter between the
+data points is solely caused by the analytical uncertainty. If this
+assumption is correct, then the MSWD value should be approximately
+equal to one. There are three strategies to deal with the case
+where MSWD&gt;1. The first of these is to assume that the analytical
+uncertainties have been underestipmated by a factor
+<code class="reqn">\sqrt{MSWD}</code>.
+</p>
+<p><code>2</code>: total least squares regression: a second way to deal
+with over- or underdispersed datasets is to simply ignore the
+analytical uncertainties.
+</p>
+<p><code>3</code>: maximum likelihood regression with overdispersion:
+instead of attributing any overdispersion (MSWD &gt; 1) to
+underestimated analytical uncertainties (model 1), one can also
+attribute it to the presence of geological uncertainty, which
+manifests itself as an added (co)variance term.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exterr</code></td>
+<td>
+<p>propagate the decay constant uncertainty in the
+isochron age?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigdig</code></td>
+<td>
+<p>number of significant digits for the isochron age</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hide</code></td>
+<td>
+<p>vector with indices of aliquots that should be removed
+from the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>omit</code></td>
+<td>
+<p>vector with indices of aliquots that should be plotted
+but omitted from the isochron age calculation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>omit.fill</code></td>
+<td>
+<p>fill colour that should be used for the omitted
+aliquots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>omit.stroke</code></td>
+<td>
+<p>stroke colour that should be used for the omitted
+aliquots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>optional arguments to the generic <code>plot</code> function</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Similar to the <code>concordia</code> diagram (for U-Pb data) and
+the <code>helioplot</code> diagram (for U-Th-He data), the
+evolution diagram simultaneously displays the isotopic composition
+and age of U-series data. For carbonate data (Th-U formats 1 and
+2), the Th-U evolution diagram consists of a scatter plot that sets
+out the <code class="reqn">^{234}</code>U/<code class="reqn">^{238}</code>U-activity ratios against the
+<code class="reqn">^{230}</code>Th/<code class="reqn">^{238}</code>U-activity ratios as error ellipses, and
+displays the initial <code class="reqn">^{234}</code>U/<code class="reqn">^{238}</code>U-activity ratios
+and ages as a set of intersecting lines.  Alternatively, the
+<code class="reqn">^{234}</code>U/<code class="reqn">^{238}</code>U-ratios can also be set out against the
+<code class="reqn">^{230}</code>Th-<code class="reqn">^{234}</code>U-<code class="reqn">^{238}</code>U-ages.  In both types of
+evolution diagrams, <code>IsoplotR</code> provides the option to project
+the raw measurements along the best fitting isochron line and
+thereby remove the detrital <code class="reqn">^{230}</code>Th-component. This
+procedure allows a visual assessment of the degree of homogeneity
+within a dataset, as is quantified by the MSWD.
+</p>
+<p>Neither the U-series evolution diagram, nor the
+<code class="reqn">^{234}</code>U/<code class="reqn">^{238}</code>U vs. age plot is applicable to igneous
+datasets (Th-U formats 3 and 4), in which <code class="reqn">^{234}</code>U and
+<code class="reqn">^{238}</code>U are in secular equilibrium.  For such datasets,
+<code>IsoplotR</code> produces an Osmond-style regression plot that is
+decorated with a fanning set of <code>isochron</code> lines.
+</p>
+
+
+<h3>References</h3>
+
+<p>Ludwig, K.R. and Titterington, D.M., 1994. Calculation
+of <code class="reqn">^{230}</code>Th/U isochrons, ages, and errors. Geochimica et
+Cosmochimica Acta, 58(22), pp.5031-5042.
+</p>
+<p>Ludwig, K.R., 2003. Mathematical-statistical treatment of data and
+errors for <code class="reqn">^{230}</code>Th/U geochronology. Reviews in Mineralogy and
+Geochemistry, 52(1), pp.631-656.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>isochron</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">attach(examples)
+evolution(ThU)
+
+dev.new()
+evolution(ThU,transform=TRUE,isochron=TRUE,model=1)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,165 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>details</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Detail Specification for ipsecr.fit </h2>
+
+<h3>Description</h3>
+
+<p>The function <code>ipsecr.fit</code> allows many options. Some of these are used
+infrequently and have been bundled as a single argument <code>details</code>
+to simplify the documentation. They are described here in two groups: 
+tuning parameters are listed in the following table, and more exotic options 
+follow, listed alphabetically.
+</p>
+
+
+<h3>Tuning parameters</h3>
+
+
+<table>
+<tr>
+<td style="text-align: left;">
+Parameter </td>
+<td style="text-align: left;"> Default </td>
+<td style="text-align: left;"> Description </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+boxsize1 </td>
+<td style="text-align: left;"> 0.2 </td>
+<td style="text-align: left;">  scalar or vector of length np for size of design </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+boxsize2 </td>
+<td style="text-align: left;"> 0.05 </td>
+<td style="text-align: left;">  as for <code>boxsize1</code>; used from second box onwards </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+centre </td>
+<td style="text-align: left;"> 3 </td>
+<td style="text-align: left;">    number of centre points in simulation design </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+min.nsim </td>
+<td style="text-align: left;"> 20 </td>
+<td style="text-align: left;">  minimum number of simulations per point  </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+max.nsim </td>
+<td style="text-align: left;"> 200 </td>
+<td style="text-align: left;">  maximum number of simulations per point  </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+dev.max </td>
+<td style="text-align: left;"> 0.002 </td>
+<td style="text-align: left;">   tolerance for precision of points in proxy space  (see below) </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+var.nsim </td>
+<td style="text-align: left;"> 2000 </td>
+<td style="text-align: left;">  number of additional simulations to estimate variance-covariance matrix  </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+min.nbox </td>
+<td style="text-align: left;"> 2 </td>
+<td style="text-align: left;">  minimum number of attempts to `frame' solution  </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+max.nbox </td>
+<td style="text-align: left;"> 5 </td>
+<td style="text-align: left;">  maximum number of attempts to `frame' solution  </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+max.ntries </td>
+<td style="text-align: left;"> 2 </td>
+<td style="text-align: left;">  maximum number of attempts at each simulation  </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+</td>
+</tr>
+</table>
+<p><code>dev.max</code> defines a stopping rule: simulations are added in blocks of 
+details$min.nsim until a measure of precision is less than dev.max for all proxies. 
+If a vector of length 2, the first element applies to the first box and the second to all later boxes. The measure of precision may be the standard error on the link scale (details$boxtype = "absolute") or the coefficient of variation (details$boxtype = "relative").
+</p>
+
+
+<h3>Other ‘details’ components</h3>
+
+<p><code>binomN</code> (default 0 = Poisson) integer code for distribution of counts.
+</p>
+<p><code>boxtype</code> (default "absolute") switches between specifying box size as additive on the transformed parameter scale ("absolute") and relative on the transformed parameter scale ("relative").
+</p>
+<p><code>CHmethod</code> (default "internal") chooses between internal C++ code, the <span class="pkg">secr</span> function <code>sim.capthist</code>, and a user-provided R function with arguments "traps", "popn", "detectfn", "detectpar", and "noccasions". See also popmethod.
+</p>
+<p><code>contrasts</code> (default NULL) bmay be used to specify the coding of factor predictors. The value should be suitable for the 'contrasts.arg' argument of <code>model.matrix</code>. See ‘Trend across sessions’ in <a href="https://www.otago.ac.nz/density/pdfs/secr-multisession.pdf">secr-multisession.pdf</a> for an example.
+</p>
+<p><code>debug</code> (default FALSE) is used only for debugging. In ordinary use it should not be 
+changed from the default.
+</p>
+<p><code>distribution</code> (default "poisson") specifies the distribution of the number of
+individuals detected <code class="reqn">n</code>; this may be conditional on the number in the
+masked area ("binomial") or unconditional ("poisson").
+<code>distribution</code> affects the sampling variance of the estimated
+density. The component ‘distribution’ may also
+take a numeric value larger than nrow(capthist), rather than "binomial"
+or "poisson". 
+</p>
+<p><code>extraparam</code> is a list of starting values for extra 'real' parameters that may be needed for some user-specified models. See the vignette for explanation and an example.
+</p>
+<p><code>factorial</code> (default "full") chooses between "full" or "fractional" design. Fractional requires the package **FrF2** (Groemping 2014).
+</p>
+<p><code>forkonunix</code> (default TRUE) switches the cluster type generated by <code>makeCluster</code> between FORK and PSOCK.
+</p>
+<p><code>FrF2args</code> (default NULL) provides a list of arguments defining a fractional design.
+</p>
+<p><code>ignorenontarget</code> (default FALSE) may be used to ignore
+non-target information (the capthist attribute 'nontarget'). The default is to model non-target information if it is present.
+</p>
+<p><code>ignoreusage</code> (default FALSE) may be used to ignore usage (varying effort)
+information in the traps component. The default is to include usage in the model.
+</p>
+<p><code>keep.sim</code> (default FALSE) when TRUE causes <code>ipsecr.fit</code> to save additional output, specifically lists (one component per box) of the simulations and parameters for each box, and the final variance simulations.
+</p>
+<p><code>newdetector</code> (default NULL) may be used to override the detector type of 
+the traps object embedded in the capthist passed to <code>ipsecr.fit</code>.
+</p>
+<p><code>Nmax</code> (default 1e4) maximum allowed population size for simulations.
+</p>
+<p><code>nontargettype</code> (default "exclusive") chooses among options "exclusive", "truncated", "erased, "independent", and "dependent". See vignette.
+</p>
+<p><code>popmethod</code> (default "internal") chooses between internal C++ code, the <span class="pkg">secr</span> function <code>sim.popn</code>, and a user-provided R function with arguments 'mask', 'D' (density per cell of mask) and 'N' (number of individuals to simulate). See also CHmethod.
+</p>
+<p><code>savecall</code> (default TRUE) determines whether the function call is included in the output.
+</p>
+<p><code>YonX</code> (default TRUE) switches between regression of simulated proxy values Y on controlled parameter values X, or the reverse (which is not fully implemented). 
+</p>
+
+
+<h3>References</h3>
+
+<p>Groemping, U. (2014). R Package FrF2 for Creating and Analyzing Fractional Factorial 2-Level Designs. <em>Journal of Statistical Software</em>, <b>56</b>, 1–56. 
+https://www.jstatsoft.org/article/view/v056i01.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ipsecr.fit </code>
+</p>
+
+
+</div>

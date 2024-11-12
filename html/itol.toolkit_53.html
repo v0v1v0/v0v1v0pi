@@ -1,0 +1,165 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>learn_theme_label</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Learn label</h2>
+
+<h3>Description</h3>
+
+<p>learn label paramters as list
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">learn_theme_label(lines, sep)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>lines</code></td>
+<td>
+<p>a vector of character strings from template file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep</code></td>
+<td>
+<p>a character specifying the separator.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a list of label parameters containing
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>display</code></td>
+<td>
+<p>1/0 specifying display or hide the text labels above
+each field column</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size</code></td>
+<td>
+<p>a number specifying the size factor for the text labels</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>top</code></td>
+<td>
+<p>1/0 specifying the labels position. If 0, label text which
+does not fit into the shape will be hidden</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>below</code></td>
+<td>
+<p>1/0 specifying the labels position. By default, internal
+labels will be placed above the branches. If 1, labels will be below the
+branches</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rotation</code></td>
+<td>
+<p>a number specifying text label rotation angle</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>straight</code></td>
+<td>
+<p>1/0 specifying tree rotation. If set to 1, tree
+rotation will not influence the individual label rotation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vertical</code></td>
+<td>
+<p>a number specifying the label vertical shift. Shift
+internal labels vertically by this amount of pixels (positive or negative)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shift</code></td>
+<td>
+<p>a number specifying the label shift. text label shift in
+pixels (positive or negative)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>external_shift</code></td>
+<td>
+<p>1/0 specifying label external shift that add
+extra horizontal shift to the external labels. Useful in unrooted display
+mode to shift text labels further away from the node labels.</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(dplyr)
+  tree &lt;- system.file("extdata",
+                      "tree_of_itol_templates.tree",
+                      package = "itol.toolkit")
+  tab_tmp &lt;- data.table::fread(system.file("extdata",
+                                           "parameter_groups.txt",
+                                           package = "itol.toolkit"))
+  tab_id_group &lt;- tab_tmp[,c(1,2)]
+  tab_tmp &lt;- tab_tmp[,-c(1,2)]
+  tab_tmp_01 &lt;- convert_01(object = tab_tmp)
+  tab_tmp_01 &lt;- cbind(tab_id_group,tab_tmp_01)
+  order &lt;- c("type","separator","profile","field","common themes",
+    "specific themes","data")
+  tab_tmp_01_long &lt;- tab_tmp_01 %&gt;%
+                       tidyr::gather(key = "variable",
+                                     value = "value",
+                                     c(-parameter,-group))
+  template_start_group &lt;- tab_tmp_01_long %&gt;%
+                            group_by(group,variable) %&gt;%
+                            summarise(sublen = sum(value)) %&gt;%
+                            tidyr::spread(key=variable,
+                                          value=sublen)
+  template_start_group$group &lt;- factor(template_start_group$group,
+                                       levels = order)
+  template_start_group &lt;- template_start_group %&gt;% arrange(group)
+  start_group &lt;- data.frame(Var1 = template_start_group$group,
+                            Freq = apply(template_start_group[,-1], 1, max))
+  start_group$start &lt;- 0
+  for (i in 2:nrow(start_group)) {
+    start_group$start[i] &lt;- sum(start_group$Freq[1:(i-1)])
+  }
+  template_start_group[template_start_group == 0] &lt;- NA
+  template_end_group &lt;- template_start_group[,2:(ncol(template_start_group)-1)] + start_group$start
+  template_end_group &lt;- data.frame(group = order,template_end_group)
+  template_end_group_long &lt;- template_end_group %&gt;%
+                               tidyr::gather(key = "variable",
+                                             value = "value",
+                                             -group)
+  names(template_end_group_long)[3] &lt;- "end"
+  template_end_group_long$start &lt;- rep(start_group$start,
+                                       length(unique(template_end_group_long$variable)))
+  template_end_group_long &lt;- template_end_group_long %&gt;% na.omit()
+  template_end_group_long$length &lt;- sum(start_group$Freq)
+  template_end_group_long &lt;- template_end_group_long[,c(2,5,4,3,1)]
+  template_end_group_long$group &lt;- factor(template_end_group_long$group,levels = order)
+  unit &lt;- create_unit(data = template_end_group_long,
+                      key = "Quickstart",
+                      type = "DATASET_DOMAINS",
+                      tree = tree)
+  file &lt;- tempfile()
+  write_unit(unit,file)
+  lines &lt;- line_clean(file=file)
+  sep = learn_separator(file = file)
+  learn_theme_label(lines,sep)
+</code></pre>
+
+
+</div>

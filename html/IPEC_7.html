@@ -1,0 +1,133 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>crops</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Whole-plant biomass Data of 12 Species of Crops
+</h2>
+
+<h3>Description</h3>
+
+<p>The whole-plant biomass data of 12 species of crops growing in northern China in 2011.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">data(crops)
+</code></pre>
+
+
+<h3>Details</h3>
+
+<p>In the data set, there are six columns: <code>Code</code>, <code>CommonName</code>, <code>Date</code>,  
+<code>Time</code>, <code>FM</code>, and <code>DM</code>. 
+<code>Code</code> is used to save the codes of crops; 
+<code>CommonName</code> is used to save the common names of crops; 
+<code>Date</code> is used to save the investigation date; 
+<code>Time </code> is used to save the ages of crops from the sowing date (27 June, 2011) in days; 
+<code>FM</code> is used to save the whole-plant fresh mass of crops in g; 
+<code>DM</code> is used to save the whole-plant dry mass of crops in g. 
+</p>
+<p><code>Code = 1</code> represents sunflowers; 
+</p>
+<p><code>Code = 2</code> represents peanuts; 
+</p>
+<p><code>Code = 3</code> represents black soybeans; 
+</p>
+<p><code>Code = 4</code> represents soybeans; 
+</p>
+<p><code>Code = 5</code> represents kidney beans; 
+</p>
+<p><code>Code = 6</code> represents garden peas; 
+</p>
+<p><code>Code = 7</code> represents adzuki beans; 
+</p>
+<p><code>Code = 8</code> represents mungbeans; 
+</p>
+<p><code>Code = 9</code> represents cottons; 
+</p>
+<p><code>Code = 10</code> represents sweet sorghums; 
+</p>
+<p><code>Code = 11</code> represents corns; 
+</p>
+<p><code>Code = 12</code> represents Mexican corns. 
+</p>
+
+
+<h3>References</h3>
+
+<p>Shi, P., Fan, M., Ratkowsky, D.A., Huang, J., Wu, H., Chen, L., Fang, S. and 
+Zhang, C. (2017) Comparison of two ontogenetic growth equations for animals and plants. 
+<em>Ecol. Model.</em> 349, 1<code class="reqn">-</code>10. <a href="https://doi.org/10.1016/j.ecolmodel.2017.01.012">doi:10.1016/j.ecolmodel.2017.01.012</a>
+</p>
+<p>Shi, P., Men, X., Sandhu, H.S., Chakraborty, A., Li, B., Ouyang, F., Sun, Y., Ge, F. 
+(2013) The "general" ontogenetic growth model is inapplicable to crop growth. 
+<em>Ecol. Model.</em> 266, 1<code class="reqn">-</code>9. <a href="https://doi.org/10.1016/j.ecolmodel.2013.06.025">doi:10.1016/j.ecolmodel.2013.06.025</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(crops)
+ind   &lt;- 6
+xv    &lt;- crops$Time[crops$Code == ind]
+yv    &lt;- crops$DM[crops$Code == ind] 
+xlab0 &lt;- "Time (d)"
+ylab0 &lt;- "Dry mass (g)"
+
+dev.new()
+plot(xv, yv, cex=1.5, cex.lab=1.5, cex.axis=1.5, xlab=xlab0, ylab=ylab0)
+
+# Define the beta sigmoid model (bsm)
+bsm &lt;- function(P, x){
+  P  &lt;- cbind(P)
+  if(length(P) !=4 ) {stop("The number of parameters should be 4!")}
+  ropt &lt;- P[1]
+  topt &lt;- P[2]
+  tmin &lt;- P[3]
+  tmax &lt;- P[4]
+  tailor.fun &lt;- function(x){
+    x[x &lt; tmin] &lt;- tmin
+    x[x &gt; tmax] &lt;- tmax
+    return(x)
+  }
+  x &lt;- tailor.fun(x)   
+  ropt*(x-tmin)*(x-2*tmax+topt)/(topt+tmin-2*tmax)*(
+       (x-tmin)/(topt-tmin) )^((topt-tmin)/(tmax-topt))   
+}
+
+# For the original beta sigmoid model
+ini.val0  &lt;- c(60, 30, seq(0, 10, 20), 100)
+fit1 &lt;- fitIPEC( bsm, x=xv, y=yv, ini.val=ini.val0, xlim=NULL, ylim=NULL, 
+                 xlab=xlab0, ylab=ylab0, fig.opt=TRUE, 
+                 control=list(trace=FALSE, reltol=1e-20, maxit=50000) )
+fit1$par
+
+w    &lt;- rep(1/as.numeric(tapply(yv, xv, var)), tapply(yv, xv, length))
+fit2 &lt;- fitIPEC( bsm, x=xv, y=yv, ini.val=ini.val0, weights=w, xlim=NULL,  
+                 ylim=NULL, xlab=xlab0, ylab=ylab0, fig.opt=TRUE, 
+                 control=list(trace=FALSE, reltol=1e-20, maxit=50000) )
+fit2$par
+
+dev.new()
+xp  &lt;- seq(0, 120, len=2000)
+yp  &lt;- bsm(P=fit2$par, x=xp)
+xv2 &lt;- as.numeric(tapply(xv, xv, mean))
+yv2 &lt;- as.numeric(tapply(yv, xv, mean))
+sd2 &lt;- as.numeric(tapply(yv, xv, sd))
+Up  &lt;- yv2+sd2
+Low &lt;- yv2-sd2
+plot( xv2, yv2, xlab=xlab0, ylab=ylab0, cex.lab=1.5, 
+      cex.axis=1.5, xlim=c(0,120), ylim=c(-5, 100), type="n" )
+lines( xp, yp, col=4 )
+points( xv2, yv2, pch=1, cex=1.5, col=2 )
+for(i in 1:length(Up)){
+  lines(c(xv2[i], xv2[i]), c(Low[i], Up[i]), col=6)
+}  
+</code></pre>
+
+
+</div>

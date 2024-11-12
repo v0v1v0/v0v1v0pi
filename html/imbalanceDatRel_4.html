@@ -1,0 +1,176 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>oversampleDatRel</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Oversampling and Data Relocation for Resampled Data</h2>
+
+<h3>Description</h3>
+
+<p><code>oversampleDatRel</code> first oversamples using selected method
+then relocates resampled data using Pure and Proper Class Cover Catch Digraph.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">oversampleDatRel(
+  x,
+  y,
+  method = "SMOTE",
+  proportion = 1,
+  p_of = 0,
+  class_pos = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>feature matrix or dataframe.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>class factor variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>oversampling method. Default is "SMOTE". Available methods are: <br>
+"ADASYN": Adaptive Synthetic Sampling <br>
+"ROS": Random Oversampling <br>
+"ROSE": Randomly Over Sampling Examples <br>
+"RSLSMOTE": Relocating safe-level SMOTE with minority outcast handling <br>
+"RUS": Random Undersampling <br>
+"SLSSMOTE": Safe-level Synthetic Minority Oversampling Technique <br>
+"SMOTE": Synthetic Minority Oversampling Technique <br>
+"SMOTEWB": SMOTE with boosting</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>proportion</code></td>
+<td>
+<p>proportion of covered samples. A real number between <code class="reqn">(0,1]</code>.
+1 by default. Smaller numbers results in less dominant samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p_of</code></td>
+<td>
+<p>proportion to increase cover radius. A real number between
+<code class="reqn">(0,\infty)</code>. Default is 0. Higher values tolerate other classes more.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>class_pos</code></td>
+<td>
+<p>Class name of synthetic data. Default is NULL. If NULL,
+positive class is minority class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>arguments to be used in specified method.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Oversampling using <code>DatRel</code>. Available oversampling methods are from
+<code>SMOTEWB</code> package. "ROSE" generates samples from all classes. DatRel
+relocates all class samples.
+</p>
+
+
+<h3>Value</h3>
+
+<p>an list which includes:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>x_new</code></td>
+<td>
+<p>dominant sample indexes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y_new</code></td>
+<td>
+<p>dominant samples from feature matrix, x</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x_syn</code></td>
+<td>
+<p>Radiuses of the circle for dominant samples</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>i_dominant</code></td>
+<td>
+<p>class names</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x_pos_dominant</code></td>
+<td>
+<p>number of classes</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>radii_pos_dominant</code></td>
+<td>
+<p>proportions each class covered</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Fatih Saglam, saglamf89@gmail.com
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(SMOTEWB)
+library(rcccd)
+
+set.seed(10)
+# adding data
+x &lt;- rbind(matrix(rnorm(2000, 3, 1), ncol = 2, nrow = 1000),
+           matrix(rnorm(60, 6, 1), ncol = 2, nrow = 30))
+y &lt;- as.factor(c(rep("negative", 1000), rep("positive", 30)))
+
+# adding noise
+x[1001,] &lt;- c(3,3)
+x[1002,] &lt;- c(2,2)
+x[1003,] &lt;- c(4,4)
+
+# resampling
+m_SMOTE &lt;- SMOTE(x = x, y = y, k = 3)
+
+# resampled data
+plot(x, col = y, main = "SMOTE")
+points(m_SMOTE$x_syn, col = "green")
+
+m_DatRel &lt;- oversampleDatRel(x = x, y = y, method = "SMOTE")
+
+# resampled data after relocation
+plot(x, col = y, main = "SMOTE + DatRel")
+points(m_DatRel$x_syn, col = "green")
+
+</code></pre>
+
+
+</div>

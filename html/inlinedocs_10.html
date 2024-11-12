@@ -1,0 +1,85 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>do.not.generate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>do not generate</h2>
+
+<h3>Description</h3>
+
+<p>Make a Parser Function used to indicate that certain Rd files
+should not be generated.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">do.not.generate(...)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Character strings indicating Rd files without the .Rd suffix.</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p>A Parser Function that will delete items from the outer
+Documentation List.</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Toby Dylan Hocking &lt;toby.hocking@r-project.org&gt; [aut, cre], Keith Ponting [aut], Thomas Wutzler [aut], Philippe Grosjean [aut], Markus Müller [aut], R Core Team [ctb, cph]</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+silly.pkg &lt;- system.file("silly",package="inlinedocs")
+owd &lt;- setwd(tempdir())
+file.copy(silly.pkg,".",recursive=TRUE)
+
+## define a custom Parser Function that will not generate some Rd
+## files
+custom &lt;- do.not.generate("SillyTest-class")
+parsers &lt;- c(default.parsers,list(exclude=custom))
+
+## At first, no Rd files in the man subdirectory.
+man.dir &lt;- file.path("silly","man")
+dir(man.dir)
+
+## Running package.skeleton.dx will generate bare-bones files for
+## those specified in do.not.generate, if they do not exist.
+package.skeleton.dx("silly",parsers)
+Rd.files &lt;- c("SillyTest-class.Rd","silly.example.Rd")
+Rd.paths &lt;- file.path(man.dir,Rd.files)
+stopifnot(all(file.exists(Rd.paths)))
+
+## Save the modification times of the Rd files
+old &lt;- file.info(Rd.paths)$mtime
+
+## make sure there is at least 2 seconds elapsed, which is the
+## resolution for recording times on windows file systems.
+Sys.sleep(4)
+
+## However, it will NOT generate Rd for files specified in
+## do.not.generate, if they DO exist already.
+package.skeleton.dx("silly",parsers)
+mtimes &lt;- data.frame(old,new=file.info(Rd.paths)$mtime)
+rownames(mtimes) &lt;- Rd.files
+mtimes$changed &lt;- mtimes$old != mtimes$new
+print(mtimes)
+stopifnot(mtimes["SillyTest-class.Rd","changed"]==FALSE)
+stopifnot(mtimes["silly.example.Rd","changed"]==TRUE)
+
+unlink("silly",recursive=TRUE)
+setwd(owd)
+
+</code></pre>
+
+
+</div>

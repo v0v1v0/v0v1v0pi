@@ -1,0 +1,304 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Hidalgo</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit the <code>Hidalgo</code> model</h2>
+
+<h3>Description</h3>
+
+<p>The function fits the Heterogeneous intrinsic dimension algorithm, developed
+in Allegra et al., 2020. The model is a Bayesian mixture of Pareto
+distribution with modified likelihood to induce homogeneity across
+neighboring observations. The model can segment the observations into
+multiple clusters characterized by different
+intrinsic dimensions. This permits to capture hidden patterns in the data.
+For more details on the algorithm, refer to
+<a href="https://www.nature.com/articles/s41598-020-72222-0">Allegra et al., 2020</a>.
+For an example of application to basketball data, see
+<a href="https://imstat.org/journals-and-publications/annals-of-applied-statistics/annals-of-applied-statistics-next-issues/">Santos-Fernandez et al., 2021</a>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Hidalgo(
+  X = NULL,
+  dist_mat = NULL,
+  K = 10,
+  nsim = 5000,
+  burn_in = 5000,
+  thinning = 1,
+  verbose = TRUE,
+  q = 3,
+  xi = 0.75,
+  alpha_Dirichlet = 0.05,
+  a0_d = 1,
+  b0_d = 1,
+  prior_type = c("Conjugate", "Truncated", "Truncated_PointMass"),
+  D = NULL,
+  pi_mass = 0.5
+)
+
+## S3 method for class 'Hidalgo'
+print(x, ...)
+
+## S3 method for class 'Hidalgo'
+plot(x, type = c("A", "B", "C"), class = NULL, ...)
+
+## S3 method for class 'Hidalgo'
+summary(object, ...)
+
+## S3 method for class 'summary.Hidalgo'
+print(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>data matrix with <code>n</code> observations and <code>D</code> variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist_mat</code></td>
+<td>
+<p>distance matrix computed between the <code>n</code> observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>integer, number of mixture components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>number of MCMC iterations to run.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>burn_in</code></td>
+<td>
+<p>number of MCMC iterations to discard as burn-in period.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thinning</code></td>
+<td>
+<p>integer indicating the thinning interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>logical, should the progress of the sampler be printed?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>integer, first local homogeneity parameter. Default is 3.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xi</code></td>
+<td>
+<p>real number between 0 and 1, second local homogeneity parameter.
+Default is 0.75.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha_Dirichlet</code></td>
+<td>
+<p>parameter of the symmetric Dirichlet prior
+on the mixture weights. Default is 0.05, inducing a sparse mixture.
+Values that are too small (i.e., lower than 0.005) may cause underflow.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a0_d</code></td>
+<td>
+<p>shape parameter of the Gamma prior on <code>d</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b0_d</code></td>
+<td>
+<p>rate parameter of the Gamma prior on <code>d</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior_type</code></td>
+<td>
+<p>character, type of Gamma prior on <code>d</code>, can be
+</p>
+
+<dl>
+<dt><code>"Conjugate"</code></dt>
+<dd>
+<p>a conjugate Gamma distribution is elicited;</p>
+</dd>
+<dt><code>"Truncated"</code></dt>
+<dd>
+<p>the conjugate Gamma prior is truncated over the
+interval <code>(0,D)</code>;</p>
+</dd>
+<dt><code>"Truncated_PointMass"</code></dt>
+<dd>
+<p>same as <code>"Truncated"</code>, but a
+point mass is placed on <code>D</code>, to allow the <code>id</code> to be
+identically equal to the nominal dimension.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>integer, the maximal dimension of the dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pi_mass</code></td>
+<td>
+<p>probability placed a priori on <code>D</code> when
+<code>Truncated_PointMass</code> is chosen.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>object of class <code>Hidalgo</code>, the output of the
+<code>Hidalgo()</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments passed to specific methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>character that indicates the type of plot that is requested.
+It can be:
+</p>
+
+<dl>
+<dt><code>"A"</code></dt>
+<dd>
+<p>plot the MCMC and the ergodic means NOT corrected
+for label switching;</p>
+</dd>
+<dt><code>"B"</code></dt>
+<dd>
+<p>plot the posterior mean and median of the id
+for each observation, after the chains are processed for label switching;</p>
+</dd>
+<dt><code>"C"</code></dt>
+<dd>
+<p>plot the estimated id distributions stratified by
+the groups specified in the class vector;</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>class</code></td>
+<td>
+<p>factor variable used to stratify observations according to
+their the <code>id</code> estimates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>object of class <code>Hidalgo</code>, the output of the
+<code>Hidalgo()</code> function.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>object of class <code>Hidalgo</code>, which is a list containing
+</p>
+
+<dl>
+<dt><code>cluster_prob</code></dt>
+<dd>
+<p>chains of the posterior mixture weights;</p>
+</dd>
+<dt><code>membership_labels</code></dt>
+<dd>
+<p>chains of the membership labels for all
+the observations;</p>
+</dd>
+<dt><code>id_raw</code></dt>
+<dd>
+<p>chains of the <code>K</code> intrinsic dimensions
+parameters, one per mixture component;</p>
+</dd>
+<dt><code>id_postpr</code></dt>
+<dd>
+<p>a chain for each observation, corrected for
+label switching;</p>
+</dd>
+<dt><code>id_summary</code></dt>
+<dd>
+<p>a matrix containing, for each observation, the
+value of posterior mean and the 5%, 25%, 50%, 75%, 95% quantiles;</p>
+</dd>
+<dt><code>recap</code></dt>
+<dd>
+<p>a list with the objects and specifications passed to
+the function used in the estimation.</p>
+</dd>
+</dl>
+<h3>References</h3>
+
+<p>Allegra M, Facco E, Denti F, Laio A, Mira A (2020).
+“Data segmentation based on the local intrinsic dimension.”
+Scientific Reports, 10(1), 1–27. ISSN 20452322,
+<a href="https://doi.org/10.1038/s41598-020-72222-0">doi:10.1038/s41598-020-72222-0</a>,
+</p>
+<p>Santos-Fernandez E, Denti F, Mengersen K, Mira A (2021).
+“The role of intrinsic dimension in high-resolution player tracking data –
+Insights in basketball.” Annals of Applied Statistics - Forthcoming, –
+ISSN 2331-8422, 2002.04148, <a href="https://doi.org/10.1038/s41598-022-20991-1">doi:10.1038/s41598-022-20991-1</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>id_by_class</code> and <code>clustering</code>
+to understand how to further postprocess the results.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+set.seed(1234)
+X            &lt;- replicate(5,rnorm(500))
+X[1:250,1:2] &lt;- 0
+X[1:250,]    &lt;- X[1:250,] + 4
+oracle       &lt;- rep(1:2,rep(250,2))
+# this is just a short example
+# increase the number of iterations to improve mixing and convergence
+h_out        &lt;- Hidalgo(X, nsim = 500, burn_in = 500)
+plot(h_out, type =  "B")
+id_by_class(h_out, oracle)
+
+
+
+</code></pre>
+
+
+</div>

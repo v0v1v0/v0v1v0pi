@@ -1,0 +1,68 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>orbi_flag_outliers</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Flag outlier scans</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>orbi_flag_outliers()</code> flags outliers using one of the different methods provided by the parameters (to use multiple, please call this function several times sequentially). Note that this function evaluates outliers within each "filename", "block", "segment" and "injection" (if these columns exist), in addition to any groupings already defined before calling this function using dplyr's <code>group_by()</code>. It restores the original groupings in the returned data frame.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">orbi_flag_outliers(dataset, agc_fold_cutoff = NA_real_, agc_window = c())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dataset</code></td>
+<td>
+<p>Simplified IsoX dataset to have outliers flagged</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>agc_fold_cutoff</code></td>
+<td>
+<p>flags scans with a fold cutoff based on the average number of ions in the Orbitrap analyzer. For example, <code>agc_fold_cutoff = 2</code> flags scans that have more than 2 times, or less than 1/2 times the average. TIC multiplied by injection time serves as an estimate for the number of ions in the Orbitrap.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>agc_window</code></td>
+<td>
+<p>flags scans with a critically low or high number of ions in the Orbitrap analyzer. Provide a vector with 2 numbers <code>c(x,y)</code> flagging the lowest x percent and highest y percent. TIC multiplied by injection time serves as an estimate for the number of ions in the Orbitrap.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Function is intended to flag scans that are outliers.
+</p>
+<p>The input <code>dataset</code> is expected to have at least these 8 columns: <code>filename</code>, <code>scan.no</code>, <code>time.min</code>, <code>compound</code>, <code>isotopocule</code>, <code>ions.incremental</code>, <code>tic</code>, <code>it.ms</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame with new columns <code>is_outlier</code> and <code>outlier_type</code> (if they don't already exist) that flags outliers identified by the method and provides the type of outlier (e.g. "2 fold agc cutoff"), respectively.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">fpath &lt;- system.file("extdata", "testfile_flow.isox", package = "isoorbi")
+df &lt;-
+  orbi_read_isox(file = fpath) |&gt;
+  orbi_simplify_isox() |&gt;
+  orbi_flag_outliers(agc_window = c(1,99))
+
+</code></pre>
+
+
+</div>

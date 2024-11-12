@@ -1,0 +1,129 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bootstrap_rmse</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Bootstrapped RMSE</h2>
+
+<h3>Description</h3>
+
+<p>Generate <code>n</code> bootstrap replicates to compute <code>n</code> root mean
+squared errors.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">bootstrap_rmse(
+  model,
+  data,
+  n = 50,
+  frac = 1,
+  show_progress = TRUE,
+  rmse_model = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>a model object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>data used to fit model object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>number of bootstrap replicates (defaults to 50)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>frac</code></td>
+<td>
+<p>fraction used in training set if cross-validation is applied
+(defaults to 1)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>show_progress</code></td>
+<td>
+<p>show progress bar (defaults to TRUE)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rmse_model</code></td>
+<td>
+<p>numeric RMSE to show as vertical dashed line in autoplot()
+(defaults to NULL)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>To test the predictive ability of the fitted model it might be
+helpful to determine the variation in the computed RMSE. The variation is
+calculated by computing the root mean squared errors from <code>n</code> generated
+bootstrap replicates. More precisely, for each iteration a sample with
+replacement is taken from the data set and the model is refitted using
+this sample. Then, the root mean squared error is calculated.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>rmse_bs</code></td>
+<td>
+<p>numerical vector with <code>n</code> root mean squared errors</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rmse_mod</code></td>
+<td>
+<p>root mean squared error for fitted (i.e. original) model</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Martin Haringa
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+mod1 &lt;- glm(nclaims ~ age_policyholder, data = MTPL,
+    offset = log(exposure), family = poisson())
+
+# Use all records in MTPL
+x &lt;- bootstrap_rmse(mod1, MTPL, n = 80, show_progress = FALSE)
+print(x)
+autoplot(x)
+
+# Use 80% of records to test whether predictive ability depends on which 80%
+# is used. This might for example be useful in case portfolio contains large
+# claim sizes
+x_frac &lt;- bootstrap_rmse(mod1, MTPL, n = 50, frac = .8,
+ show_progress = FALSE)
+autoplot(x_frac) # Variation is quite small for Poisson GLM
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

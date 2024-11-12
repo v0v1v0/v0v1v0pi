@@ -1,0 +1,147 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mn.creg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calibrated regression estimator for the missing-data setup</h2>
+
+<h3>Description</h3>
+
+<p>This function implements the calibrated (or doubly robust) likelihood estimator of the mean outcome in the presence of missing data in Tan (2006), JASA.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mn.creg(y, tr, p, g, X=NULL, evar=TRUE, inv="solve")</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>A vector of outcomes with missing data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tr</code></td>
+<td>
+<p>A vector of non-missing indicators (=1 if <code>y</code> is observed or 0 if <code>y</code> is missing).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>A vector of known or fitted propensity scores.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>g</code></td>
+<td>
+<p>A matrix of calibration variables (see the details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>The model matrix for the propensity score model, assumed to be logistic (set <code>X=NULL</code> if <code>p</code> is known or treated to be so).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>evar</code></td>
+<td>
+<p>Logical; if <code>FALSE</code>, no variance estimation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inv</code></td>
+<td>
+<p>Type of matrix inversion, set to "solve" (default) or "ginv" (which can be used in the case of computational singularity).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The columns of <code>g</code> correspond to calibration variables, which can be specified to include a constant and the fitted outcome regression function. See the examples below. In general, a calibration variable is a function of measured covariates selected to exploit the fact that its weighted mean among "responders" should equal to its unweighted population mean.
+</p>
+<p>To estimate the propensity scores, a logistic regression model is assumed.
+The model matrix <code>X</code> does not need to be provided and can be set to <code>NULL</code>, in which case the estimated propensity scores are treated as known in the estimation.
+If the model matrix <code>X</code> is provided, then the "score," <code>(tr-p)X</code>, from the logistic regression is used to generate additional calibration constraints in the estimation. This may sometimes lead to unreliable estimates due to multicollinearity, as discussed in Tan (2006). Therefore, this option should be used with caution.
+</p>
+<p>Variance estimation is based on asymptotic expansions in Tan (2013). Alternatively, resampling methods (e.g., bootstrap) can be used.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>mu</code></td>
+<td>
+<p>The estimated mean.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v</code></td>
+<td>
+<p>The estimated variance of <code>mu</code>, if <code>evar=TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>The vector of regression coefficients.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Tan, Z. (2006) "A distributional approach for causal inference using propensity scores," <em>Journal of the American Statistical Association</em>, 101, 1619-1637.
+</p>
+<p>Tan, Z. (2010) "Bounded, efficient and doubly robust estimation with inverse weighting,"
+<em>Biometrika</em>, 97, 661-682.
+</p>
+<p>Tan, Z. (2013) "Variance estimation under misspecified models,"
+unpublished manuscript, <a href="http://www.stat.rutgers.edu/~ztan">http://www.stat.rutgers.edu/~ztan</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(KS.data)
+attach(KS.data)
+z=cbind(z1,z2,z3,z4)
+x=cbind(x1,x2,x3,x4)
+
+#missing data
+y[tr==0] &lt;- 0
+
+#logistic propensity score model, correct
+ppi.glm &lt;- glm(tr~z, family=binomial(link=logit))
+
+X &lt;- model.matrix(ppi.glm)
+ppi.hat &lt;- ppi.glm$fitted
+
+#outcome regression model, misspecified
+y.fam &lt;- gaussian(link=identity)
+
+eta1.glm &lt;- glm(y ~ x, subset=tr==1, 
+               family=y.fam, control=glm.control(maxit=1000))
+eta1.hat &lt;- predict.glm(eta1.glm, 
+               newdata=data.frame(x=x), type="response")
+
+#ppi.hat treated as known
+out.reg &lt;- mn.creg(y, tr, ppi.hat, g=cbind(1,eta1.hat))
+out.reg$mu
+out.reg$v
+
+#ppi.hat treated as estimated
+out.reg &lt;- mn.creg(y, tr, ppi.hat, g=cbind(1,eta1.hat), X)
+out.reg$mu
+out.reg$v
+</code></pre>
+
+
+</div>

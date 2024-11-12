@@ -1,0 +1,103 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mag</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate the Mean Absolute Glucose (MAG)</h2>
+
+<h3>Description</h3>
+
+<p>The function mag calculates the mean absolute glucose or MAG.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mag(data, n = 60, dt0 = NULL, inter_gap = 45, tz = "")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>DataFrame object with column names "id", "time", and "gl".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Integer giving the desired interval in minutes over which to calculate
+the change in glucose. Default is 60 to have hourly (60 minutes) intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dt0</code></td>
+<td>
+<p>The time frequency for interpolation in minutes, the default will match the CGM meter's frequency (e.g. 5 min for Dexcom).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inter_gap</code></td>
+<td>
+<p>The maximum allowable gap (in minutes) for interpolation. The values will not be interpolated between the glucose measurements that are more than inter_gap minutes apart. The default value is 45 min.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tz</code></td>
+<td>
+<p>A character string specifying the time zone to be used. System-specific (see <code>as.POSIXct</code>), but " " is the current time zone, and "GMT" is UTC (Universal Time, Coordinated). Invalid values are most commonly treated as UTC, on some platforms with a warning.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A tibble object with a column for subject id and a column for MAG values is
+returned.
+</p>
+<p>The glucose values are linearly interpolated over a time grid starting at the
+beginning of the first day of data and ending on the last day of data. Then, MAG
+is calculated as <code class="reqn">\frac{|\Delta G|}{\Delta t}</code> where <code class="reqn">|\Delta G|</code> is
+the sum of the absolute change in glucose calculated for each interval as specified
+by n, default n = 60 for hourly change in glucose. The sum is then divided by
+<code class="reqn">\Delta t</code> which is the total time in hours.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A tibble object with two columns: subject id and MAG value
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Elizabeth Chun
+</p>
+
+
+<h3>References</h3>
+
+<p>Hermanides et al. (2010) Glucose Variability is Associated with Intensive Care Unit
+Mortaility,
+<em>Critical Care Medicine</em> <strong>38(3)</strong> 838-842,
+<a href="https://doi.org/10.1097/CCM.0b013e3181cc4be9">doi:10.1097/CCM.0b013e3181cc4be9</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(example_data_1_subject)
+mag(example_data_1_subject)
+
+data(example_data_5_subject)
+mag(example_data_5_subject)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,111 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Est2Replicates</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimation of ATE with Two Replicates</h2>
+
+<h3>Description</h3>
+
+<p>Estimation of average treatment effect when misclassification probabilities are unknown but two independent replicates of the outcome are available
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Est2Replicates(data, indA, indYerror, indX,
+  constraint = c("sensitivity equals specificity", "known sensitivity",
+  "known specificity", "known prevalence"), sensitivity = NULL,
+  specificity = NULL, prevalence = NULL, confidence = 0.95)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>The dataset to be analyzed in the form of R data frame without missing data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indA</code></td>
+<td>
+<p>A column name indicating the binary treatment variable</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indYerror</code></td>
+<td>
+<p>A vector of two column names indicating replicates of the binary outcome variable</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indX</code></td>
+<td>
+<p>A vector of column names indicating the covariates included in the treatment model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constraint</code></td>
+<td>
+<p>The constraint to be used; the default assumes sensitivity equals specificity</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sensitivity</code></td>
+<td>
+<p>The specified sensitivity between 0 and 1 when imposing the constraint that sensitivity is known, and the default is set to be NULL</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>specificity</code></td>
+<td>
+<p>The specified specificity between 0 and 1 when imposing the constraint that specificity is known, and the default is set to be NULL</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prevalence</code></td>
+<td>
+<p>The specified prevalence between 0 and 1 when imposing the constraint that prevalence is known, and the default is set to be NULL</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>confidence</code></td>
+<td>
+<p>The confidence level between 0 and 1; the default is 0.95 corresponding to a 95 per cent confidence interval</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list of the estimate of average treatment effect, sandwich-variance-based standard error, confidence interval, imposed constraint, and the information on sensitivity and specificity
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#create a dataset with sensitivity=0.95 and specificity=0.85
+set.seed(100)
+X1=rnorm(2000)   
+A=rbinom(2000,1,1/(1+exp(-0.2-X1)))
+Y=rbinom(2000,1,1/(1+exp(-0.2-A-X1)))
+y1=which(Y==1)
+y0=which(Y==0) 
+Yast1=Y
+Yast1[y1]=rbinom(length(y1),1,0.95)
+Yast1[y0]=rbinom(length(y0),1,0.15)
+Yast2=Y
+Yast2[y1]=rbinom(length(y1),1,0.95)  
+Yast2[y0]=rbinom(length(y0),1,0.15)
+da=data.frame(A=A,X1=X1,Yast1=Yast1,Yast2=Yast2)
+head(da)
+#apply the correction method assuming specificity=0.85
+Est2Replicates(da,"A",c("Yast1","Yast2"),"X1","known specificity",NULL,0.85,NULL,0.95)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,144 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pred_first_fit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>First-Fit Predicitve Model with Group Lasso</h2>
+
+<h3>Description</h3>
+
+<p>This function implements the first-fit procedure described in Bradley and Cannings, 2021. It requires at least a generative model and a dataframe containing gene lengths as input.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pred_first_fit(
+  gen_model,
+  lambda = exp(seq(-16, -24, length.out = 100)),
+  biomarker = "TMB",
+  marker_mut_types = c("NS", "I"),
+  training_matrix,
+  gene_lengths,
+  marker_training_values = NULL,
+  K_method = max,
+  free_genes = c()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>gen_model</code></td>
+<td>
+<p>(list)
+A generative mutation model, fitted by fit_gen_model().</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>(numeric)
+A vector of penalisation weights for input to the group lasso optimiser gglasso.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>biomarker</code></td>
+<td>
+<p>(character)
+The biomarker in question. If "TMB" or "TIB", then automatically defines the subsequent
+variable marker_mut_types.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>marker_mut_types</code></td>
+<td>
+<p>(character)
+The set of mutation type groupings constituting the biomarker being estimated. Should be
+a vector comprising of elements of the mut_types_list vector in the 'names' attribute of
+gen_model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>training_matrix</code></td>
+<td>
+<p>(sparse matrix)
+A sparse matrix of mutations in the training dataset, produced by get_mutation_tables().</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gene_lengths</code></td>
+<td>
+<p>(dataframe)
+A table with two columns: Hugo_Symbol and max_cds, providing the lengths of the genes to be modelled.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>marker_training_values</code></td>
+<td>
+<p>(dataframe)
+A dataframe containing two columns: 'Tumor_Sample_Barcode', containing the sample IDs for the training
+dataset, and a second column containing training values for the biomarker in question.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K_method</code></td>
+<td>
+<p>(function)
+How to select a representative biomarker value from the training dataset. Defaults to max().</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>free_genes</code></td>
+<td>
+<p>(character)
+Which genes should escape penalisation (for example when augmenting a pre-existing panel).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list of six elements:
+</p>
+
+<ul>
+<li>
+<p> fit: Output of call to gglasso.
+</p>
+</li>
+<li>
+<p> panel_genes: A matrix where each row corresponds to a gene, each column to an iteration of the group
+lasso with a different penalty factor, and the elements booleans specifying whether that gene was selected
+to be included in that iteration.
+</p>
+</li>
+<li>
+<p> panel_lengths: A vector giving total panel length for each gglasso iteration.
+</p>
+</li>
+<li>
+<p> p: The vector of weights used in the optimisation procedure.
+</p>
+</li>
+<li>
+<p> K: The bias penalty factor used in the optimisation procedure.
+</p>
+</li>
+<li>
+<p> names: Gene and mutation type information as used when fitting the generative model.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">example_first_fit &lt;- pred_first_fit(example_gen_model, lambda = exp(seq(-9, -14, length.out = 100)),
+                                    training_matrix = example_tables$train$matrix,
+                                    gene_lengths = example_maf_data$gene_lengths)
+
+</code></pre>
+
+
+</div>

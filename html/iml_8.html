@@ -1,0 +1,296 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>FeatureEffects</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Effect of a feature on predictions</h2>
+
+<h3>Description</h3>
+
+<p><code>FeatureEffects</code> computes and plots feature effects
+of multiple features at once.
+</p>
+
+
+<h3>Details</h3>
+
+<p>FeatureEffects computes the effects for all given features on the model
+prediction. FeatureEffects is a convenience class that calls FeatureEffect
+multiple times. See <code>?FeatureEffect</code> for details what's actually computed.
+</p>
+<p>Only first-order effects can be computed with the FeatureEffects interface.
+If you are interested in the visualization of interactions between two
+features, directly use FeatureEffect.
+</p>
+
+
+<h3>Parallelization</h3>
+
+<p>Parallelization is supported via package <a href="https://CRAN.R-project.org/package=future"><span class="pkg">future</span></a>.
+To initialize future-based parallelization, select an appropriate backend and
+specify the amount of workers.
+For example, to use a PSOCK based cluster backend do:
+</p>
+<div class="sourceCode r"><pre>future::plan(multisession, workers = 2)
+&lt;iml function here&gt;
+</pre></div>
+<p>Consult the resources of the <a href="https://CRAN.R-project.org/package=future"><span class="pkg">future</span></a> package for more parallel
+backend options.
+</p>
+
+
+<h3>Super class</h3>
+
+<p><code>iml::InterpretationMethod</code> -&gt; <code>FeatureEffects</code>
+</p>
+
+
+<h3>Public fields</h3>
+
+<div class="r6-fields">
+
+<dl>
+<dt><code>grid.size</code></dt>
+<dd>
+<p>(<code>numeric(1)</code> | <code>numeric(2)</code>)<br>
+The size of the grid.</p>
+</dd>
+<dt><code>method</code></dt>
+<dd>
+<p>(<code>character(1)</code>)<br></p>
+
+<ul>
+<li>
+<p> "ale" for accumulated local effects,
+</p>
+</li>
+<li>
+<p> "pdp" for partial dependence plot,
+</p>
+</li>
+<li>
+<p> "ice" for individual conditional expectation curves,
+</p>
+</li>
+<li>
+<p> "pdp+ ice" for partial dependence plot and ice curves within the same
+plot.
+</p>
+</li>
+</ul>
+</dd>
+<dt><code>effects</code></dt>
+<dd>
+<p>(list)<br>
+Named list of FeatureEffects.</p>
+</dd>
+<dt><code>features</code></dt>
+<dd>
+<p>(<code>character()</code>)<br>
+The names of the features for which the effects were computed.</p>
+</dd>
+<dt><code>center.at</code></dt>
+<dd>
+<p>numeric<br>
+Value at which the plot was centered. Ignored in the case of two
+features.</p>
+</dd>
+</dl>
+</div>
+
+
+<h3>Methods</h3>
+
+
+
+<h4>Public methods</h4>
+
+
+<ul>
+<li> <p><a href="#method-FeatureEffects-new"><code>FeatureEffects$new()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-FeatureEffects-clone"><code>FeatureEffects$clone()</code></a>
+</p>
+</li>
+</ul>
+<details open><summary>Inherited methods</summary><ul>
+<li><span class="pkg-link" data-pkg="iml" data-topic="InterpretationMethod" data-id="plot"><a href="../../iml/html/InterpretationMethod.html#method-InterpretationMethod-plot"><code>iml::InterpretationMethod$plot()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="iml" data-topic="InterpretationMethod" data-id="print"><a href="../../iml/html/InterpretationMethod.html#method-InterpretationMethod-print"><code>iml::InterpretationMethod$print()</code></a></span></li>
+</ul></details><hr>
+<a id="method-FeatureEffects-new"></a>
+
+
+
+<h4>Method <code>new()</code>
+</h4>
+
+<p>Create a FeatureEffects object
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>FeatureEffects$new(
+  predictor,
+  features = NULL,
+  method = "ale",
+  center.at = NULL,
+  grid.size = 20
+)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>predictor</code></dt>
+<dd>
+<p>Predictor<br>
+The object (created with <code>Predictor$new()</code>) holding the machine
+learning model and the data.</p>
+</dd>
+<dt><code>features</code></dt>
+<dd>
+<p>(<code>character()</code>)<br>
+The names of the features for which to compute the feature effects.</p>
+</dd>
+<dt><code>method</code></dt>
+<dd>
+<p>(<code>character(1)</code>)<br></p>
+
+<ul>
+<li>
+<p> 'ale' for accumulated local effects,
+</p>
+</li>
+<li>
+<p> 'pdp' for partial dependence plot,
+</p>
+</li>
+<li>
+<p> 'ice' for individual conditional expectation curves,
+</p>
+</li>
+<li>
+<p> 'pdp+ice' for partial dependence plot and ice curves within the same
+plot.
+</p>
+</li>
+</ul>
+</dd>
+<dt><code>center.at</code></dt>
+<dd>
+<p>(<code>numeric(1)</code>)<br>
+Value at which the plot should be centered. Ignored in the case of two
+features.</p>
+</dd>
+<dt><code>grid.size</code></dt>
+<dd>
+<p>(<code>numeric(1)</code> | <code>numeric(2)</code>)<br>
+The size of the grid for evaluating the predictions.</p>
+</dd>
+<dt><code>feature</code></dt>
+<dd>
+<p>(<code>character(1)</code> | <code>character(2)</code> | <code>numeric(1)</code> |
+<code>numeric(2)</code>)<br>
+The feature name or index for which to compute the effects.</p>
+</dd>
+</dl>
+</div>
+
+
+<hr>
+<a id="method-FeatureEffects-clone"></a>
+
+
+
+<h4>Method <code>clone()</code>
+</h4>
+
+<p>The objects of this class are cloneable with this method.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>FeatureEffects$clone(deep = FALSE)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>deep</code></dt>
+<dd>
+<p>Whether to make a deep clone.</p>
+</dd>
+</dl>
+</div>
+
+
+
+
+<h3>References</h3>
+
+<p>Apley, D. W. 2016. "Visualizing the Effects of Predictor Variables in Black
+Box Supervised Learning Models." ArXiv Preprint.
+</p>
+<p>Friedman, J.H. 2001. "Greedy Function Approximation: A Gradient Boosting
+Machine." Annals of Statistics 29: 1189-1232.
+</p>
+<p>Goldstein, A., Kapelner, A., Bleich, J., and Pitkin, E. (2013). Peeking
+Inside the Black Box: Visualizing Statistical Learning with Plots of
+Individual Conditional Expectation, 1-22.
+https://doi.org/10.1080/10618600.2014.907095
+</p>
+
+
+<h3>See Also</h3>
+
+<p>plot.FeatureEffects
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># We train a random forest on the Boston dataset:
+library("rpart")
+data("Boston", package = "MASS")
+rf &lt;- rpart(medv ~ ., data = Boston)
+mod &lt;- Predictor$new(rf, data = Boston)
+
+# Compute the accumulated local effects for all features
+eff &lt;- FeatureEffects$new(mod)
+eff$plot()
+## Not run: 
+# Again, but this time with a partial dependence plot
+eff &lt;- FeatureEffects$new(mod, method = "pdp")
+eff$plot()
+
+# Only a subset of features
+eff &lt;- FeatureEffects$new(mod, features = c("nox", "crim"))
+eff$plot()
+
+# You can access each FeatureEffect individually
+
+eff.nox &lt;- eff$effects[["nox"]]
+eff.nox$plot()
+
+
+# FeatureEffects also works with multiclass classification
+rf &lt;- rpart(Species ~ ., data = iris)
+mod &lt;- Predictor$new(rf, data = iris, type = "prob")
+
+FeatureEffects$new(mod)$plot(ncol = 2)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

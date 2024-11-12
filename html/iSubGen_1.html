@@ -1,0 +1,83 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>apply.scaling</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Apply scaling factors</h2>
+
+<h3>Description</h3>
+
+<p>Apply scaling factors prior to autoencoder</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">apply.scaling(data.matrices, scaling.factors);
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data.matrices</code></td>
+<td>
+<p>list, where each element is a matrix. The list has one matrix for each data type to be scaled</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scaling.factors</code></td>
+<td>
+<p>list with two elements named: \"center\" and \"scale\", and each element is a named numerical vector or a list of named numerical vectors. If scaling.factors$center or scaling.factors$scale are a list then each element needs to correspond to a one of the data matrices. Finally, the named numerical vectors should match the row and rownames from the corresponding data matrix.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The names for the data matrices and the center and scale lists all must match.</p>
+
+
+<h3>Value</h3>
+
+<p>A list of matrices of the same format as the data.matrices</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Natalie Fox</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Load molecular profiles for three data types and calculate scaling for each
+example.molecular.data.dir &lt;- paste0(path.package('iSubGen'),'/exdata/');
+molecular.data &lt;- list();
+scaling.factors &lt;- list();
+for(i in c('cna','snv','methy')) {
+  # Load molecular profiles from example files saved 
+  # in the package as &lt;data type&gt;_profiles.txt
+  molecular.data[[i]] &lt;- load.molecular.aberration.data(
+    paste0(example.molecular.data.dir,i,'_profiles.txt'),
+    patients = c(paste0('EP00',1:9), paste0('EP0',10:30))
+    );
+
+  scaling.factors[[i]] &lt;- list();
+
+  scaling.factors[[i]]$center &lt;- apply(molecular.data[[i]], 1, mean);
+  scaling.factors[[i]]$scale &lt;- apply(molecular.data[[i]], 1, sd);
+  }
+
+# Example 1: Transform the molecular profiles by the scaling factors
+scaled.molecular.data &lt;- apply.scaling(molecular.data, scaling.factors);
+
+# Example 2: Transform one of the data types based on the scaling factors
+scaled.molecular.data2 &lt;- apply.scaling(
+  molecular.data[[1]],
+  scaling.factors[[1]]
+  );
+</code></pre>
+
+
+</div>

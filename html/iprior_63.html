@@ -1,0 +1,284 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>kernL</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Load the kernel matrices for I-prior models</h2>
+
+<h3>Description</h3>
+
+<p>Load the kernel matrices for I-prior models
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">kernL(
+  y,
+  ...,
+  kernel = "linear",
+  interactions = NULL,
+  est.lambda = TRUE,
+  est.hurst = FALSE,
+  est.lengthscale = FALSE,
+  est.offset = FALSE,
+  est.psi = TRUE,
+  fixed.hyp = NULL,
+  lambda = 1,
+  psi = 1,
+  nystrom = FALSE,
+  nys.seed = NULL,
+  model = list(),
+  train.samp,
+  test.samp,
+  intercept
+)
+
+## S3 method for class 'formula'
+kernL(
+  formula,
+  data,
+  kernel = "linear",
+  one.lam = FALSE,
+  est.lambda = TRUE,
+  est.hurst = FALSE,
+  est.lengthscale = FALSE,
+  est.offset = FALSE,
+  est.psi = TRUE,
+  fixed.hyp = NULL,
+  lambda = 1,
+  psi = 1,
+  nystrom = FALSE,
+  nys.seed = NULL,
+  model = list(),
+  train.samp,
+  test.samp,
+  intercept,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Vector of response variables</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Only used when fitting using non-formula, enter the variables
+(vectors or matrices) separated by commas.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kernel</code></td>
+<td>
+<p>Character vector indicating the type of kernel for the
+variables. Available choices are: </p>
+ <ul>
+<li>
+<p><code>"linear"</code> -
+(default) for the linear kernel </p>
+</li>
+<li>
+<p><code>"canonical"</code> - alternative
+name for <code>"linear"</code> </p>
+</li>
+<li>
+<p><code>"fbm"</code>, <code>"fbm,0.5"</code> - for the
+fBm kernel with Hurst coefficient 0.5 (default) </p>
+</li>
+<li>
+<p><code>"se"</code>,
+<code>"se,1"</code> - for the SE kernel with lengthscale 1 (default)
+</p>
+</li>
+<li>
+<p><code>"poly"</code>, <code>"poly2"</code>, <code>"poly2,0"</code> - for the polynomial
+kernel of degree 2 with offset 0 (default) </p>
+</li>
+<li>
+<p><code>"pearson" - for the
+Pearson kernel</code></p>
+</li>
+</ul>
+<p> The <code>kernel</code> argument can also be a vector of length
+equal to the number of variables, therefore it is possible to specify
+different kernels for each variables. Note that factor type variables are
+assigned the Pearson kernel by default, and that non-factor types can be
+forced to use the Pearson kernel (not recommended).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interactions</code></td>
+<td>
+<p>Character vector to specify the interaction terms. When
+using formulas, this is specified automatically, so is not required. Syntax
+is <code>"a:b"</code> to indicate variable <code>a</code> interacts with variable
+<code>b</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>est.lambda</code></td>
+<td>
+<p>Logical. Estimate the scale parameters? Defaults to
+<code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>est.hurst</code></td>
+<td>
+<p>Logical. Estimate the Hurst coefficients for fBm kernels?
+Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>est.lengthscale</code></td>
+<td>
+<p>Logical. Estimate the lengthscales for SE kernels?
+Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>est.offset</code></td>
+<td>
+<p>Logical. Estimate the offsets for polynomial kernels?
+Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>est.psi</code></td>
+<td>
+<p>Logical. Estimate the error precision? Defaults to
+<code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed.hyp</code></td>
+<td>
+<p>Logical. If <code>TRUE</code>, then no hyperparameters are
+estimated, i.e. all of the above <code>est.x</code> are set to <code>FALSE</code>, and
+vice versa. If <code>NULL</code> (default) then all of the <code>est.x</code> defaults
+are respected.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>Initial/Default scale parameters. Relevant especially if
+<code>est.lambda = FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>psi</code></td>
+<td>
+<p>Initial/Default value for error precision. Relevant especially if
+<code>est.psi = FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nystrom</code></td>
+<td>
+<p>Either logical or an integer indicating the number of Nystrom
+samples to take. Defaults to <code>FALSE</code>. If <code>TRUE</code>, then
+approximately 10% of the sample size is used for the Nystrom
+approximation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nys.seed</code></td>
+<td>
+<p>The random seed for the Nystrom sampling. Defaults to
+<code>NULL</code>, which means the random seed is not fixed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>DEPRECATED.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>train.samp</code></td>
+<td>
+<p>(Optional) A vector indicating which of the data points
+should be used for training, and the remaining used for testing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test.samp</code></td>
+<td>
+<p>(Optional) Similar to <code>train.samp</code>, but on test samples
+instead.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intercept</code></td>
+<td>
+<p>(Optional) Intercept for response variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>The formula to fit when using formula interface.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Data frame containing variables when using formula interface.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>one.lam</code></td>
+<td>
+<p>Logical. When using formula input, this is a convenient way of
+letting the function know to treat all variables as a single variable (i.e.
+shared scale parameter). Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An <code>ipriorKernel</code> object which contains the relevant material to
+be passed to the <code>iprior</code> function for model fitting.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>iprior
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+str(ToothGrowth)
+(mod &lt;- kernL(y = ToothGrowth$len,
+               supp = ToothGrowth$supp,
+               dose = ToothGrowth$dose,
+               interactions = "1:2"))
+kernL(len ~ supp * dose, data = ToothGrowth)  # equivalent formula call
+
+# Choosing different kernels
+str(stackloss)
+kernL(stack.loss ~ ., stackloss, kernel = "fbm")  # all fBm kernels
+kernL(stack.loss ~ ., stackloss, kernel = "FBm")  # cApS dOn't MatTeR
+kernL(stack.loss ~ ., stackloss,
+       kernel = c("linear", "se", "poly3"))  # different kernels
+
+# Sometimes the print output is too long, can use str() options here
+print(mod, strict.width = "cut", width = 30)
+
+</code></pre>
+
+
+</div>

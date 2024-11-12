@@ -1,0 +1,236 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>set_hinge</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Set hinge location in color palette</h2>
+
+<h3>Description</h3>
+
+<p>The <em>hinge</em> indicates a dramatic color change in a palette
+that is typically located at the midpoint of the data range.
+An asymmetrical data range can result in an undesired hinge location,
+a location that does not necessarily coincide with the break-point in the user's data.
+This function can be used to specify a hinge location that is appropriate for your data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">set_hinge(
+  x,
+  hinge,
+  scheme = "sunset",
+  alpha = NULL,
+  reverse = FALSE,
+  buffer = 0,
+  stops = c(0, 1),
+  allow_bias = TRUE,
+  nan = NA_character_
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>'numeric' object that can be passed to the <code>range</code>
+function with <code>NA</code>'s removed.
+The user's data range.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hinge</code></td>
+<td>
+<p>'numeric' number.
+Hinge value (such as, at sea-level) in data units.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scheme</code></td>
+<td>
+<p>'character' vector of length 1 or 2, value is recycled as necessary.
+Name of color scheme(s).
+The color palette is derived from one or two color schemes.
+The scheme(s) must be suitable for continuous data types and allow for color interpolation.
+See <code>get_colors</code> function for a list of possible scheme names.
+Argument choices may be abbreviated as long as there is no ambiguity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>'numeric' vector of length 1 or 2, value is recycled as necessary.
+Alpha transparency applied separately on either side of the hinge.
+Values range from 0 (fully transparent) to 1 (fully opaque).
+Specify as <code>NULL</code> to exclude the alpha channel value from colors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reverse</code></td>
+<td>
+<p>'logical' vector of length 1 or 2, value is recycled as necessary.
+Whether to reverse the order of colors in the scheme(s).
+Values applied separately on either side of the hinge.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>buffer</code></td>
+<td>
+<p>'numeric' vector of length 1 or 2, value is recycled as necessary.
+Color buffer around the hinge measured as a fraction of the color range.
+Values applied separately on either side of the hinge.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stops</code></td>
+<td>
+<p>'numeric' vector of length 2.
+Color stops defined by interval endpoints (between 0 and 1)
+and used to select a subset of the color palette(s).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allow_bias</code></td>
+<td>
+<p>'logical' flag.
+Whether to allow bias in the color spacing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nan</code></td>
+<td>
+<p>'character' string.
+Color meant for missing data, in hexadecimal format,
+where <code>NA</code> indicates no color is specified.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A 'function' that takes an 'integer' argument (the required number of colors)
+and returns a vector of colors of class 'inlpal'.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>J.C. Fisher, U.S. Geological Survey, Idaho Water Science Center
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot</code> method for drawing color palettes.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">f &lt;- set_hinge(c(-3, 7), hinge = 0)
+f(n = 19) |&gt; plot()
+
+x &lt;- datasets::volcano
+f &lt;- set_hinge(x, hinge = 140, scheme = c("abyss", "dem1"))
+filled.contour(x, color.palette = f, nlevels = 50, plot.axes = FALSE)
+
+# Data range (x)
+hinge &lt;- 0
+n &lt;- 20
+op &lt;- par(mfrow = c(5, 1), oma = c(0, 0, 0, 0))
+set_hinge(c(-10, 0), hinge)(n) |&gt; plot()
+set_hinge(c(-7, 3), hinge)(n) |&gt; plot()
+set_hinge(c(-5, 5), hinge)(n) |&gt; plot()
+set_hinge(c(-3, 7), hinge)(n) |&gt; plot()
+set_hinge(c(0, 10), hinge)(n) |&gt; plot()
+par(op)
+
+# Hinge value (hinge)
+x &lt;- c(-5, 5)
+n &lt;- 255
+op &lt;- par(mfrow = c(5, 1), oma = c(0, 0, 0, 0))
+set_hinge(x, hinge = -6)(n) |&gt; plot()
+set_hinge(x, hinge = -2)(n) |&gt; plot()
+set_hinge(x, hinge = 0)(n) |&gt; plot()
+set_hinge(x, hinge = 2)(n) |&gt; plot()
+set_hinge(x, hinge = 6)(n) |&gt; plot()
+par(op)
+
+# Color scheme (scheme)
+x &lt;- c(-10, 10)
+hinge &lt;- -3
+n &lt;- 255
+op &lt;- par(mfrow = c(3, 1), oma = c(0, 0, 0, 0))
+set_hinge(x, hinge, scheme = "romaO")(n) |&gt; plot()
+set_hinge(x, hinge, scheme = "BuRd")(n) |&gt; plot()
+set_hinge(x, hinge, scheme = c("ocean", "copper"))(n) |&gt; plot()
+par(op)
+
+# Alpha transparency (alpha)
+x &lt;- c(-5, 5)
+hinge &lt;- 0
+scheme &lt;- c("drywet", "hawaii")
+n &lt;- 255
+op &lt;- par(mfrow = c(4, 1), oma = c(0, 0, 0, 0))
+set_hinge(x, hinge, scheme, alpha = 1.0)(n) |&gt; plot()
+set_hinge(x, hinge, scheme, alpha = 0.5)(n) |&gt; plot()
+set_hinge(x, hinge, scheme, alpha = c(1.0, 0.5))(n) |&gt; plot()
+set_hinge(x, hinge, scheme, alpha = c(0.5, 1.0))(n) |&gt; plot()
+par(op)
+
+# Reverse colors (reverse)
+x &lt;- c(-10, 10)
+hinge &lt;- -3
+n &lt;- 255
+op &lt;- par(mfrow = c(6, 1), oma = c(0, 0, 0, 0))
+set_hinge(x, hinge, "romaO", reverse = FALSE)(n) |&gt; plot()
+set_hinge(x, hinge, "romaO", reverse = TRUE)(n) |&gt; plot()
+set_hinge(x, hinge, c("davos", "hawaii"), reverse = FALSE)(n) |&gt; plot()
+set_hinge(x, hinge, c("davos", "hawaii"), reverse = TRUE)(n) |&gt; plot()
+set_hinge(x, hinge, c("davos", "hawaii"), reverse = c(TRUE, FALSE))(n) |&gt; plot()
+set_hinge(x, hinge, c("davos", "hawaii"), reverse = c(FALSE, TRUE))(n) |&gt; plot()
+par(op)
+
+# Buffer around hinge (buffer)
+x &lt;- c(-5, 5)
+hinge &lt;- -2
+n &lt;- 20
+op &lt;- par(mfrow = c(6, 1), oma = c(0, 0, 0, 0))
+set_hinge(x, hinge, buffer = 0.0)(n) |&gt; plot()
+set_hinge(x, hinge, buffer = 0.2)(n) |&gt; plot()
+set_hinge(x, hinge, buffer = c(0.4, 0.2))(n) |&gt; plot()
+set_hinge(x, hinge, c("gray", "plasma"), buffer = 0.0)(n) |&gt; plot()
+set_hinge(x, hinge, c("gray", "plasma"), buffer = 0.2)(n) |&gt; plot()
+set_hinge(x, hinge, c("gray", "plasma"), buffer = c(0.2, 0.4))(n) |&gt; plot()
+par(op)
+
+# Color stops (stops)
+x &lt;- c(-5, 5)
+hinge &lt;- 1
+n &lt;- 20
+op &lt;- par(mfrow = c(6, 1), oma = c(0, 0, 0, 0))
+set_hinge(x, hinge, stops = c(0.0, 1.0))(n) |&gt; plot()
+set_hinge(x, hinge, stops = c(0.2, 0.8))(n) |&gt; plot()
+set_hinge(x, hinge, stops = c(0.4, 0.6))(n) |&gt; plot()
+set_hinge(x, hinge, c("gray", "plasma"), stops = c(0.0, 1.0))(n) |&gt; plot()
+set_hinge(x, hinge, c("gray", "plasma"), stops = c(0.2, 0.8))(n) |&gt; plot()
+set_hinge(x, hinge, c("gray", "plasma"), stops = c(0.4, 0.6))(n) |&gt; plot()
+par(op)
+
+# Allow bias (allow_bias)
+x &lt;- c(-3, 7)
+n &lt;- 20
+op &lt;- par(mfrow = c(4, 1), oma = c(0, 0, 0, 0))
+set_hinge(x, hinge = 0, allow_bias = TRUE)(n) |&gt; plot()
+set_hinge(x, hinge = 0, allow_bias = FALSE)(n) |&gt; plot()
+set_hinge(x, hinge = 4, allow_bias = TRUE)(n) |&gt; plot()
+set_hinge(x, hinge = 4, allow_bias = FALSE)(n) |&gt; plot()
+par(op)
+</code></pre>
+
+
+</div>

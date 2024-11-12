@@ -1,0 +1,91 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>h.fn</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Mean Intensity Function of the Self-Exciting Point Process</h2>
+
+<h3>Description</h3>
+
+<p><code>h.fn</code> calculate the values of the mean intensity function of the
+self-exciting process with given baseline event rate and excitation
+function at a (fairly large) number of points. Values of the function at
+other points can be obtained by interpolation (e.g. spline
+interpolation).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">h.fn(nu, g, N = 2^12, to = 1, abs.tol = 1e-10, maxit = 100)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>nu</code></td>
+<td>
+<p>a (vectorized) function specifying the baseline invent rate of the SEPP</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>g</code></td>
+<td>
+<p>a (vectorized) function specifying the excitation function of the SEPP</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>an integer giving the number of equal sized intervals to partition the domain into during the calculation The larger this value is, the more accurately the solution approxmates the truth, and the more time requred to evaluate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>to</code></td>
+<td>
+<p>a numeric scalar, the end point of the estimation domain</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>abs.tol</code></td>
+<td>
+<p>a numeric scalar specifying the absolute tolerance of error</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxit</code></td>
+<td>
+<p>an integer specifying the maximal number of iterations allowed</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a list with elelents, <code>x</code>: the vector of the points where <code class="reqn">h</code> is evaluated; <code>y</code>: the vector of the corresponding <code class="reqn">h</code> values; <code>nit</code>: the number of iterations used; <code>G.err</code>: the approximation error in <code class="reqn">G</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>h.fn.exp</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+nu &lt;- function(x)(200+100*cos(pi*x))*(x&gt;=0);
+g &lt;- function(x) 2*exp(-x)
+h.l &lt;- h.fn(nu=nu,g=g,to=5);
+h &lt;- splinefun(h.l$x,h.l$y);
+x &lt;- 1:500/100;
+max(nu(x)+sapply(x,function(x)integrate(function(u)g(x-u)*h(u),0,x)$value) - h(x))
+
+## End(Not run)
+</code></pre>
+
+
+</div>

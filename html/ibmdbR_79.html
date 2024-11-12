@@ -1,0 +1,261 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>idaLm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Linear regression</h2>
+
+<h3>Description</h3>
+
+<p> This function performs linear regression on the contents of an <code>ida.data.frame</code>. </p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">
+idaLm(form, idadf, id = "id", modelname = NULL, dropModel = TRUE, limit = 25)
+
+## S3 method for class 'idaLm'
+print(x, ...)
+## S3 method for class 'idaLm'
+predict(object, newdata, id, outtable = NULL, ...)
+## S3 method for class 'idaLm'
+plot(x, names = TRUE, max_forw = 50, max_plot = 15, order = NULL,
+lmgON = FALSE, backwardON = FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>form</code></td>
+<td>
+<p>A <code>formula</code> object that specifies both the name of the column that contains the continuous  
+target variable and either a list of columns separated by plus symbols or a single period (to specify that all other columns in the ida.data.frame are to be used as predictors).
+The specified columns can contain continuous or categorical values. 
+The specified formula cannot contain transformations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>idadf</code></td>
+<td>
+<p>An ida.data.frame that contains the input data for the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>The name of the column that contains a unique ID for each row of the input data. An id column needs to be specified, if a model contains categorical values, more than 41 columns or when dropModel is set to FALSE. If no valid id column was specified, a temporary id column will be used (not for DB2 for z/OS).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modelname</code></td>
+<td>
+<p>Name of the model that will be created in the database.</p>
+</td>
+</tr>
+</table>
+<table><tr style="vertical-align: top;">
+<td><code>dropModel</code></td>
+<td>
+<p>logical: If TRUE the in database model will be dropped after the calculation.</p>
+</td>
+</tr></table>
+<table>
+<tr style="vertical-align: top;">
+<td><code>limit</code></td>
+<td>
+<p>The maximum number of levels for a categorical column. Its default value is 25.
+This parameter only exists for consistency with older version of idaLm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of the class <code>idaLm</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>An object of the class <code>idaLm</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p>An ida.data.frame that contains data that will be predicted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outtable</code></td>
+<td>
+<p>The name of the table where the results will be written in.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>names</code></td>
+<td>
+<p><code>logical</code>: If set to TRUE then the plot will contain the names of the attributes instead of numbers.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_forw</code></td>
+<td>
+<p><code>integer</code>: The maximum number of iterations the heuristic forward/backward will be calculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_plot</code></td>
+<td>
+<p><code>integer</code>: The maximum number of attributes that will appear in the plot. It must be bigger than 0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>order</code></td>
+<td>
+<p>Vector of attribute names. The method will calculate the value of the models with the attributes in the order of the vector and plot the value for each of it.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lmgON</code></td>
+<td>
+<p><code>logical</code>: If set TRUE the method will calculate the importance metric lmg. This method has exponential runningtime and is not supported for more than 15 attributes</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>backwardON</code></td>
+<td>
+<p><code>logical</code>: If set TRUE the method will calculate the backward heuristic. By default (FALSE) it will do the forward heuristic.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional parameters.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>idaLm</code> function computes a linear regression model by extracting a covariance matrix and 
+computing its inverse. This implementation is optimized for problems that involve a large number of 
+samples and a relatively small number of predictors. The maximum number of columns is 78.
+</p>
+<p>Missing values in the input table are ignored when calculating the covariance matrix. If this 
+leads to undefined entries in the covariance matrix, the function fails. If the inverse of the 
+covariance matrix cannot be computed (for example, due to correlated predictors), the Moore-Penrose 
+generalized inverse is used instead.
+</p>
+<p>The output of the idaLm function has the following attributes:
+</p>
+<p>$coefficients is a vector with two values. The first value is the slope of the line that best 
+fits the input data; the second value is its y-intercept.
+</p>
+<p>$RSS is the root sum square (that is, the square root of the sum of the squares).
+</p>
+<p>$effects is not used and can be ignored.
+</p>
+<p>$rank is the rank.
+</p>
+<p>$df.residuals is the number of degrees of freedom associated with the residuals. 
+</p>
+<p>$coefftab is a is a vector with four values:
+</p>
+
+<ul>
+<li>
+<p> The slope and y-intercept of the line that best fits the input data
+</p>
+</li>
+<li>
+<p> The standard error
+</p>
+</li>
+<li>
+<p> The t-value
+</p>
+</li>
+<li>
+<p> The p-value
+</p>
+</li>
+</ul>
+<p>$Loglike is the log likelihood ratio. 
+</p>
+<p>$AIC is the Akaike information criterion. This is a measure of the relative quality of the model.
+</p>
+<p>$BIC is the Bayesian information criterion. This is used for model selection.
+</p>
+<p>$CovMat the Matrix used in the calculation ("Covariance Matrix"). This matrix is necessary for the Calculation in plot.idaLm and the statistics.
+</p>
+<p>$card the number of dummy variables created for categorical columns and 1 for numericals.
+</p>
+<p>$model the in database modelname of the idaLm object.
+</p>
+<p>$numrow the number of rows of the input table that do not contain NAs.
+</p>
+<p>$sigma the residual standard error.
+</p>
+<p>The <code>plot.idaLm</code> function uses <code class="reqn">R^2</code> as a measure of quality of a linear model.
+<code class="reqn">R^2</code> compares the variance of the predicted values and the variance of the actual values
+of the target variable.
+</p>
+<p>$First:            Returns the <code class="reqn">R^2</code> value of the linear model for each attribute alone.
+</p>
+<p>$Usefulness:       Returns the <code class="reqn">R^2</code> value reduction of the linear model with all
+attributes to the linear model with one attribute taken away.
+</p>
+<p>$Forward_Values:   Is only calculated if backwardON=FALSE. This is a heuristic that adds in         
+each step the attribute which has the most <code class="reqn">R^2</code> increase.
+</p>
+<p>$LMG:              Is only calculated if lmgON=TRUE. It returns the increase of <code class="reqn">R^2</code> of
+each attribute averaged over every possible permutation. By grouping some
+of the permutations we only need to average over every possible subset. 
+For n attributes there are <code class="reqn">2^n</code> subsets. So LMG is an algorithm with
+exponential runningtime and is not recommended for more than 15
+attributes.
+</p>
+<p>$Backward_Values:  Is only calculated if backwardON=TRUE. Similar to the forward heuristic.
+This time we choose in each step of the algorithm that has minimal
+<code class="reqn">R^2</code> reduction when taking it out of the model, starting with all
+attributes.
+</p>
+<p>$Model_Values:     Is only calculated if order is a vector of attributes. In this case the
+function calculates the <code class="reqn">R^2</code> value for the models that we get when
+we add one attribute of order in each step.
+</p>
+<p>RelImpPlot.png:    If lmgON=FALSE. This plot shows a stackplot of the values
+Usefulness,First and the Model_Value of the heuristic. Note that usually                     Usefulness&lt;First&lt;Model_Value and that the bars overlap each other.
+If lmgON=TRUE. This plot shows the LMG values of the
+attributes in the order of the heuristic forward, backward or order.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The procedure returns a linear regression model of class <code>idaLm</code>.</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+#Create a pointer to table IRIS
+idf &lt;- ida.data.frame("IRIS")
+
+#Calculate linear model in-db
+lm1 &lt;- idaLm(SepalLength~., idf)
+
+library(ggplot2)
+plot(lm1)
+
+#Calculating linear models with categorical values requires an id column
+lm1 &lt;- idaLm(SepalLength~., idf, id="ID")
+
+## End(Not run)
+</code></pre>
+
+
+</div>

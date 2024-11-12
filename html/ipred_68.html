@@ -1,0 +1,167 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>slda</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Stabilised Linear Discriminant Analysis </h2>
+
+<h3>Description</h3>
+
+<p>Linear discriminant analysis based on left-spherically 
+distributed linear scores.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'formula'
+slda(formula, data, subset, na.action=na.rpart, ...)
+## S3 method for class 'factor'
+slda(y, X, q=NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>the response variable: a factor vector of class labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>a data frame of predictor variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>the number of positive eigenvalues the scores are derived from,
+see below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>a formula of the form <code>lhs ~ rhs</code> where <code>lhs</code> 
+is the response variable and <code>rhs</code> a set of
+predictors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>optional data frame containing the variables in the
+model formula.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+<p>optional vector specifying a subset of observations
+to be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+<p>function which indicates what should happen when
+the data contain <code>NA</code>s.  Defaults to
+<code>na.rpart</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional parameters passed to <code>lda</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function implements the LDA for <code class="reqn">q</code>-dimensional linear scores of
+the original <code class="reqn">p</code> predictors derived from the <code class="reqn">PC_q</code> rule by Laeuter
+et al. (1998). Based on the product sum matrix 
+</p>
+<p style="text-align: center;"><code class="reqn">W = (X - \bar{X})^\top(X - \bar{X})</code>
+</p>
+
+<p>the eigenvalue problem <code class="reqn">WD = diag(W)DL</code> is solved. The first <code class="reqn">q</code>
+columns <code class="reqn">D_q</code> of <code class="reqn">D</code> are used as a weight matrix for the 
+original <code class="reqn">p</code> predictors: <code class="reqn">XD_q</code>. By default, <code class="reqn">q</code> is the number
+of eigenvalues greater one. The <code class="reqn">q</code>-dimensional linear scores are
+left-spherically distributed and are used as predictors for a classical 
+LDA. 
+</p>
+<p>This form of reduction of the dimensionality was 
+developed for discriminant analysis problems by Laeuter (1992) and was used
+for multivariate tests by Laeuter et al. (1998), Kropf (2000) gives an
+overview. For details on left-spherically distributions see Fang and 
+Zhang (1990).  
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>slda</code>, a list with components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>scores</code></td>
+<td>
+<p>the weight matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mylda</code></td>
+<td>
+<p>an object of class <code>lda</code>.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+ 
+<p>Fang Kai-Tai and Zhang Yao-Ting (1990), <em>Generalized Multivariate
+Analysis</em>, Springer, Berlin.
+</p>
+<p>Siegfried Kropf (2000), <em>Hochdimensionale multivariate Verfahren in der
+medizinischen Statistik</em>, Shaker Verlag, Aachen (in german).
+</p>
+<p>Juergen Laeuter (1992), <em>Stabile multivariate Verfahren</em>,
+Akademie Verlag, Berlin (in german).
+</p>
+<p>Juergen Laeuter, Ekkehard Glimm and Siegfried Kropf (1998), Multivariate
+Tests Based on Left-Spherically Distributed Linear Scores. <em>The Annals
+of Statistics</em>, <b>26</b>(5) 1972–1988. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>predict.slda</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library("mlbench")
+library("MASS")
+learn &lt;- as.data.frame(mlbench.twonorm(100))
+test &lt;- as.data.frame(mlbench.twonorm(1000))
+
+mlda &lt;- lda(classes ~ ., data=learn)
+mslda &lt;- slda(classes ~ ., data=learn)
+
+print(mean(predict(mlda, newdata=test)$class != test$classes))
+print(mean(predict(mslda, newdata=test)$class != test$classes))
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,119 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>set_ipums_default_collection</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Set your default IPUMS collection</h2>
+
+<h3>Description</h3>
+
+<p>Set the default IPUMS collection as the value associated with the
+<code>IPUMS_DEFAULT_COLLECTION</code> environment variable. If this environment variable
+exists, IPUMS API functions that require a collection specification will use
+the value of <code>IPUMS_DEFAULT_COLLECTION</code>, unless another collection is
+indicated.
+</p>
+<p>The default collection can be stored for the duration of your session or
+for future sessions. If saved for future sessions, it is added to the
+<code>.Renviron</code> file in your home directory. If you choose to save your key
+to <code>.Renviron</code>, this function will create a backup copy of the file before
+modifying.
+</p>
+<p>This function is modeled after the <code>census_api_key()</code> function
+from <a href="https://walker-data.com/tidycensus/">tidycensus</a>.
+</p>
+<p>Learn more about the IPUMS API in <code>vignette("ipums-api")</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">set_ipums_default_collection(
+  collection = NULL,
+  save = overwrite,
+  overwrite = FALSE,
+  unset = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>collection</code></td>
+<td>
+<p>Character string of the collection to set as your
+default collection. The collection must currently be supported
+by the IPUMS API.
+</p>
+<p>For a list of codes used to refer to each collection, see
+<code>ipums_data_collections()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>save</code></td>
+<td>
+<p>If <code>TRUE</code>, save the default collection for use in future
+sessions by adding it to the <code>.Renviron</code> file in your home directory.
+Defaults to <code>FALSE</code>, unless <code>overwrite = TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overwrite</code></td>
+<td>
+<p>If <code>TRUE</code>, overwrite any existing value of
+<code>IPUMS_DEFAULT_COLLECTION</code> in the <code>.Renviron</code> file with the provided
+<code>collection</code>. Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unset</code></td>
+<td>
+<p>if <code>TRUE</code>, remove the existing value of
+<code>IPUMS_DEFAULT_COLLECTION</code> from the environment and the <code>.Renviron</code> file in
+your home directory.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The value of <code>collection</code>, invisibly.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>set_ipums_api_key()</code> to set an API key.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set_ipums_default_collection("nhgis")
+
+## Not run: 
+# Extract info will now be retrieved for the default collection:
+get_last_extract_info()
+get_extract_history()
+
+is_extract_ready(1)
+get_extract_info(1)
+
+# Equivalent to:
+get_extract_info("nhgis:1")
+get_extract_info(c("nhgis", 1))
+
+# Other collections can be specified explicitly
+# Doing so does not alter the default collection
+is_extract_ready("usa:2")
+
+## End(Not run)
+
+# Remove the variable from the environment and .Renviron, if saved
+set_ipums_default_collection(unset = TRUE)
+</code></pre>
+
+
+</div>

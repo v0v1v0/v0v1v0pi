@@ -1,0 +1,113 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>d.test</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Dimension Selection Testing Methods for the Central Mean Subspace.</h2>
+
+<h3>Description</h3>
+
+<p>The “<em>d.test()</em>” function provides p-values for the hypothesis tests for the dimension of the subpsace. It employs three test statistics: Cook's test, Scaled test, and Adjusted test, using Fourier transform approach for inverse dimension reduction method.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">d.test(y,x,m)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>The n-dimensional response vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>The design matrix of the predictors with dimension n-by-p.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>An integer specifying the dimension of the central mean reduction subspace to be tested.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The null and alternative hypothesis are
+</p>
+<p style="text-align: center;"><code class="reqn">H_0: d=m</code>
+</p>
+   <p style="text-align: center;"><code class="reqn">H_a: d&gt;m</code>
+</p>
+
+<p>1. Weighted Chi-Square test statistics (Weng and Yin, 2018):
+</p>
+<p style="text-align: center;"><code class="reqn">\hat{\Lambda}=n\sum_{j=m+1}^{p}\hat{\lambda}_j,</code>
+</p>
+
+<p>where <code class="reqn">\lambda_j</code>'s are the eigenvalues of <code class="reqn">\widehat{\textbf{V}}</code>, defined under the “<em>invFM()</em>” function.
+</p>
+<p>2. Scaled test statistic (Bentler and Xie, 2000):
+</p>
+<p style="text-align: center;"><code class="reqn">\overline{T}_m=[trace(\hat{\Omega}_n)/p^{\star}]^{-1}n\sum_{j=m+1}^{p}\hat{\lambda}_j \sim \mathcal{X}^2_{p^{\star}},</code>
+</p>
+
+<p>where <code class="reqn">\hat{\Omega}_n</code> is a covariance matrix, and <code class="reqn">p^{\star} = (p-m)(2t-m)</code>.
+</p>
+<p>3. Adjusted test statistic (Bentler and Xie, 2000):
+</p>
+<p style="text-align: center;"><code class="reqn">\tilde{T}_m=[trace(\hat{\Omega}_n)/d^{\star}]^{-1}n\sum_{j=m+1}^{p}\hat{\lambda}_j \sim \mathcal{X}^2_{d^{\star}},</code>
+</p>
+
+<p>where <code class="reqn">d^{\star} = [trace(\hat{\Omega}_n)]^{2}/trace(\hat{\Omega}_n^2)</code> .
+</p>
+
+
+<h3>Value</h3>
+
+<p>The <em>d.test()</em> function returns a table of p-values for each test.
+</p>
+
+
+<h3>References</h3>
+
+<p>Bentler P. M., and Xie, J. (2000). Corrections to Test Statistics in Principal Hessian Directions.
+<em>Statistics and Probability Letters</em>. 47, 381-389.
+</p>
+<p>Weng J., and Yin X. (2018). Fourier Transform Approach for Inverse Dimension Reduction Method. <em>Journal of Nonparametric Statistics</em>. 30, 4, 1029-0311.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(pdb)
+colnames(pdb) &lt;- NULL
+p &lt;- 15
+df &lt;- pdb[, c(79, 73, 77, 103, 112, 115, 124, 130, 132, 145, 149, 151, 153, 155, 167, 169)]
+dff &lt;- as.matrix(df)
+planingdb &lt;- dff[complete.cases(dff), ]
+y &lt;- planingdb[, 1]
+x &lt;- planingdb[, c(2:(p + 1))]
+x &lt;- x + 0.5
+xt &lt;- cbind(
+  x[, 1]^(.33), x[, 2]^(.33), x[, 3]^(.57), x[, 4]^(.33), x[, 5]^(.4),
+  x[, 6]^(.5), x[, 7]^(.33), x[, 8]^(.16), x[, 9]^(.27), x[, 10]^(.5),
+  x[, 11]^(.5), x[, 12]^(.33), x[, 13]^(.06), x[, 14]^(.15), x[, 15]^(.1)
+)
+m &lt;- 1
+W &lt;- sapply(1, rnorm)
+d.test(y, x, m)
+
+</code></pre>
+
+
+</div>

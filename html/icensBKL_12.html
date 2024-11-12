@@ -1,0 +1,175 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>kSampleIcens</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Non-parametric comparison of k survival curves
+</h2>
+
+<h3>Description</h3>
+
+<p>Weighted log-rank tests for non-parametric comparison of <code class="reqn">k</code>
+survival curves observed as interval-censored data.
+It implements an interval-censored analog to well known
+<code class="reqn">G^{\varrho,\gamma}</code> class of right-censored
+<code class="reqn">k</code>-sample tests of Fleming and Harrington (1991, Chapter 7)
+proposed by Gómez and Oller (2008) and described
+also in Gómez et al. (2009, Sec. 3).
+</p>
+<p>This R implementation considerably exploited the example code
+shown in Gómez et al. (2009, Sec. 3.3).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">kSampleIcens(A, group, icsurv, rho=0, gamma=0)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>two column matrix or <code>data.frame</code> with lower and upper limits of observed intervals in a pooled sample.
+It is passed to function <code>PGM</code>
+from the <code>Icens</code> package which calculates the NPMLE of the
+cdf function based on a pooled sample.
+</p>
+</td>
+</tr></table>
+<table>
+<tr style="vertical-align: top;">
+<td><code>group</code></td>
+<td>
+<p>a vector of group indicators. Its length must be the same
+as number of rows in <code>A</code> or as number of columns in <code>icsurv$clmat</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>icsurv</code></td>
+<td>
+<p>estimated cdf of based on a pooled sample. It must be an
+object of class <code>icsurv</code> obtained by using the function
+<code>PGM</code> with <code>A</code> matrix.
+</p>
+<p>It does not have to be supplied. Nevertheless, if supplied by the
+user, it is not re-calculated inside the function call which spares
+some computational time, especially if the test is to be run
+with different <code class="reqn">\varrho</code> and
+<code class="reqn">\gamma</code> values.
+</p>
+</td>
+</tr>
+</table>
+<table>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+<p>parameter of the weighted log-rank (denoted as
+<code class="reqn">\varrho</code> in Bogaerts, Komárek and Lesaffre (2017)).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma</code></td>
+<td>
+<p>parameter of the weighted log-rank
+(denoted as <code class="reqn">\gamma</code> in Bogaerts, Komárek and Lesaffre (2017))</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class <code>htest</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Arnošt Komárek <a href="mailto:arnost.komarek@mff.cuni.cz">arnost.komarek@mff.cuni.cz</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Fleming, T. R. and Harrington, D. P. (1991).
+<em>Counting Processes and Survival Analysis</em>.
+New York: Wiley.
+</p>
+<p>Gómez, G. and Oller Pique, R. (2008).
+<em>A new class of rank tests for interval-censored data.</em>
+Harvard University Biostatistics Working Paper Series, Working Paper 93.
+<a href="https://biostats.bepress.com/harvardbiostat/paper93/">https://biostats.bepress.com/harvardbiostat/paper93/</a>
+</p>
+<p>Gómez, G., Calle, M. L., Oller, R., Langohr, K. (2009).
+Tutorial on methods for interval-censored data and their
+implementation in R.
+<em>Statistical Modelling</em>, <b>9</b>, 259-297.
+</p>
+<p>Bogaerts, K., Komárek, A. and Lesaffre, E. (2017).
+<em>Survival Analysis with Interval-Censored Data: A Practical
+Approach</em>.
+Boca Raton: Chapman and Hall/CRC.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>PGM</code>, <code>ictest</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">### Comparison of emergence distributions
+##  of tooth 44 on boys and girls
+data("tandmob", package="icensBKL")
+
+  ## take only first 50 children here
+  ## to decrease the CPU time
+  ## of the example
+tandmob50 &lt;- tandmob[1:50,]
+
+  ## only needed variables
+Acompare &lt;- subset(tandmob50, select=c("fGENDER", "L44", "R44"))
+
+  ## left-censored observations:
+  ##  change lower limit denoted by NA to 0
+Acompare$L44[is.na(Acompare$L44)] &lt;- 0
+
+  ## right-censored observations:
+  ##  change upper limit denoted by NA to 20
+  ##  20 = infinity in this case
+Acompare$R44[is.na(Acompare$R44)] &lt;- 20
+
+  ## inputs for kSampleIcens function
+Amat &lt;- Acompare[, c("L44", "R44")]
+Group &lt;- Acompare$fGENDER
+
+  ## two-sample test
+  ## (interval-censored version of classical Mantel's log-rank)
+kSampleIcens(A=Amat, group=Group, rho=0, gamma=0)
+
+  ## some other choices of rho and gamma,
+  ## pooled CDF is supplied to kSampleIcens function
+  ## to speed-up the calculation
+  ## and also to set maxiter to higher value than above
+  ## to ensure convergence
+poolcdf &lt;- PGM(A=Amat, maxiter=10000)
+
+  ## IC version of classical Mantel's log-rank again
+kSampleIcens(A=Amat, group=Group, icsurv=poolcdf, rho=0, gamma=0)
+
+  ## IC version of Peto-Prentice generalization of
+  ## the Wilcoxon test
+kSampleIcens(A=Amat, group=Group, icsurv=poolcdf, rho=1, gamma=0)
+
+kSampleIcens(A=Amat, group=Group, icsurv=poolcdf, rho=0, gamma=1)
+kSampleIcens(A=Amat, group=Group, icsurv=poolcdf, rho=1, gamma=1)
+</code></pre>
+
+
+</div>

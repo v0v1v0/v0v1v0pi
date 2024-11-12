@@ -1,0 +1,131 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>computeAbility</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Calculate latent traits for a given response matrix and item parameters using MLE
+</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates the MLE of latent traits for a given response matrix with rows being examinees and columns being
+items for given item parameters.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">computeAbility(respMat, dscrmn = dscrmn, dffclt = dffclt,
+		c = rep(0, length(dffclt)), parallel=FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>respMat</code></td>
+<td>
+
+<p>The response matrix of 0 and 1 with rows being examinees and columns being items.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dscrmn</code></td>
+<td>
+
+<p>A vector of item discrimination parameter.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dffclt</code></td>
+<td>
+
+<p>A vector of item difficulty parameter.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c</code></td>
+<td>
+
+<p>A vector of guessing parameter. Default is set to all 0 indicating no guessing allowed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+
+<p>Logical indicating whether to use parallel computing with foreach package as backend.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function is a wrapper of the thetaEst() function from catR package (Magis, 2012). 
+</p>
+
+
+<h3>Value</h3>
+
+<p>A vector of latent trait estimates for each examinee.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Pan Tong (nickytong@gmail.com), Kevin R Coombes (krc@silicovore.com)
+</p>
+
+
+<h3>References</h3>
+
+<p>David Magis, Gilles Raiche (2012). Random Generation of Response Patterns under Computerized Adaptive Testing with the 
+R Package catR. Journal of Statistical Software, 48(8), 1-31. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>fitOnSinglePlat, intIRTeasyRun, calculatePermutedScoreByGeneSampling</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># number of items and number of genes
+nSample &lt;- 10
+nGene &lt;- 2000
+set.seed(1000)
+a &lt;- rgamma(nSample, shape=1, scale=1)
+b &lt;- rgamma(nSample, shape=1, scale=1)
+# true latent traits
+theta &lt;- rnorm(nGene, mean=0)
+
+# probability of correct response (P_ij) for gene i in sample j
+P &lt;- matrix(NA, nrow=nGene, ncol=nSample)
+for(i in 1:nSample){
+	P[, i] &lt;- exp(a[i]*(theta-b[i]))/(1+exp(a[i]*(theta-b[i])))
+}
+# binary matrix
+X &lt;- matrix(NA, nrow=nGene, ncol=nSample)
+for(i in 1:nSample){
+	X[, i] &lt;- rbinom(nGene, size=1, prob=P[, i])
+}
+# IRT fitting
+fit2PL &lt;- fitOnSinglePlat(X, model=3)
+dffclt &lt;- coef(fit2PL$fit)[, 'Dffclt']
+dscrmn &lt;- coef(fit2PL$fit)[, 'Dscrmn']
+# estimated latent trait
+score &lt;- computeAbility(X, dffclt=dffclt, dscrmn=dscrmn)
+
+</code></pre>
+
+
+</div>

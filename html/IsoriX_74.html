@@ -1,0 +1,246 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>isofind</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Infer spatial origins</h2>
+
+<h3>Description</h3>
+
+<p>This function performs the assignment of samples of unknown origins.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">isofind(
+  data,
+  isoscape,
+  calibfit = NULL,
+  mask = NA,
+  neglect_covPredCalib = TRUE,
+  verbose = interactive()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A <em>dataframe</em> containing the assignment data (see note below)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>isoscape</code></td>
+<td>
+<p>The output of the function <code>isoscape</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>calibfit</code></td>
+<td>
+<p>The output of the function <code>calibfit</code> (This
+argument is not needed if the isoscape had been fitted using isotopic
+ratios from sedentary animals.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mask</code></td>
+<td>
+<p>A polygon of class <em>SpatVector</em> representing a mask to replace values on all
+rasters by NA inside polygons (see details)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>neglect_covPredCalib</code></td>
+<td>
+<p>A <em>logical</em> indicating whether to neglect the
+covariance between the uncertainty of predictions from the isoscape mean
+fit and the uncertainty in predictions from the calibration fit (default =
+<code>TRUE</code>). See <strong>Details</strong>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>A <em>logical</em> indicating whether information about the
+progress of the procedure should be displayed or not while the function is
+running. By default verbose is <code>TRUE</code> if users use an interactive R
+session and <code>FALSE</code> otherwise.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>An assignment is a comparison, for a given organism, of the predicted
+isotopic source value at its location of origin and the predicted isotopic
+source value at each location of the <code>isoscape</code>. The difference between
+these two values constitute the statistic of the assignment test. Under the
+null hypothesis (the organism is at a location with the same isotopic value
+than its original location), the test statistics follows a normal
+distribution with mean zero and a certain variance that stems from both the
+isoscape model fits and the calibration fit. The function
+<code>isofind</code> computes the map of p-value for such an assignment test
+(i.e. the p-values in all locations of the isoscape) for all samples in the
+dataframe <code>data</code>. The function also performs a single assignment for the
+entire group by combining the p-value maps of all samples using the Fisher's
+method (Fisher 1925). Significant p-values are strong evidence that the
+sample do NOT come from the candidate location (and not the opposite!). For
+statistical details about this procedure as well as a discussion of which
+uncertainties are captured and which are not, please refer to Courtiol et al.
+2019.
+</p>
+<p><strong>Details on parameters:</strong>
+</p>
+
+<ul>
+<li> <p><em>neglect_covPredCalib</em>: as long as the calibration method used in
+<code>calibfit</code> is "wild", a covariance is expected between the
+uncertainty of predictions from the isoscape mean fit and the uncertainty in
+predictions from the calibration fit. This is because both the isoscape and
+the calibration use in part the same data. By default this term is omitted
+(i.e. the value for the argument <code>neglect_covPredCalib</code> is <code>TRUE</code>)
+since in practice it seems to affect the results only negligibly in our
+trials and the computation of this term can be quite computer intensive. We
+nonetheless recommend to set <code>neglect_covPredCalib</code> to <code>FALSE</code> in
+your final analysis. If the calibration method used in <code>calibfit</code>
+is not "wild", this parameter has no effect.
+</p>
+</li>
+<li> <p><em>mask</em>: a mask can be used so to remove all values falling in the mask.
+This can be useful for performing for example assignments on lands only and
+discard anything falling in large bodies of water (see example). By default
+our <code>OceanMask</code> is considered. Setting <code>mask</code> to NULL allows
+to prevent this automatic behaviour.
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>This function returns a <em>list</em> of class <em>ISOFIND</em> containing
+itself three lists (<code>sample</code>, <code>group</code>, and <code>sp_points</code>)
+storing all rasters built during assignment and the spatial points for
+sources, calibration and assignments. The <em>list</em> <code>sample</code> contains
+three set of raster layers: one storing the value of the test statistic
+("stat"), one storing the value of the variance of the test statistic
+("var") and one storing the p-value of the test ("pv"). The <em>list</em>
+<code>group</code> contains one raster storing the p-values of the assignment for
+the group. The <em>list</em> <code>sp_points</code> contains two spatial point
+objects: <code>sources</code> and <code>calibs</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>See <code>AssignDataAlien</code> to know which variables are needed to
+perform the assignment and their names.
+</p>
+
+
+<h3>References</h3>
+
+<p>Courtiol A, Rousset F, Rohwäder M, Soto DX, Lehnert L, Voigt CC, Hobson KA, Wassenaar LI &amp; Kramer-Schadt S (2019). Isoscape
+computation and inference of spatial origins with mixed models using the R package IsoriX. In Hobson KA &amp; Wassenaar LI (eds.),
+Tracking Animal Migration with Stable Isotopes, second edition. Academic Press, London.
+</p>
+<p>Fisher, R.A. (1925). Statistical Methods for Research Workers.
+Oliver and Boyd (Edinburgh). ISBN 0-05-002170-2.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## The examples below will only be run if sufficient time is allowed
+## You can change that by typing e.g. options_IsoriX(example_maxtime = XX)
+## if you want to allow for examples taking up to ca. XX seconds to run
+## (so don't write XX but put a number instead!)
+
+if (getOption_IsoriX("example_maxtime") &gt; 200) {
+  ## We fit the models for Germany
+  GNIPDataDEagg &lt;- prepsources(data = GNIPDataDE)
+
+  GermanFit &lt;- isofit(
+    data = GNIPDataDEagg,
+    mean_model_fix = list(elev = TRUE, lat_abs = TRUE)
+  )
+
+
+  ## We build the isoscape
+  GermanScape &lt;- isoscape(
+    raster = ElevRasterDE,
+    isofit = GermanFit
+  )
+
+
+  ## We fit the calibration model
+  CalibAlien &lt;- calibfit(
+    data = CalibDataAlien,
+    isofit = GermanFit
+  )
+
+  ## We perform the assignment on land only
+  AssignmentDry &lt;- isofind(
+    data = AssignDataAlien,
+    isoscape = GermanScape,
+    calibfit = CalibAlien
+  )
+
+  ## perform the assignment on land and water
+  Assignment &lt;- isofind(
+    data = AssignDataAlien,
+    isoscape = GermanScape,
+    calibfit = CalibAlien,
+    mask = NULL
+  )
+
+  ## We plot the group assignment
+  plot(Assignment, who = "group", mask = list(mask = NULL))
+
+  plot(AssignmentDry, who = "group", mask = list(mask = NULL))
+
+  ## We plot the assignment for the 8 first samples
+  plot(AssignmentDry,
+    who = 1:8,
+    sources = list(draw = FALSE),
+    calibs = list(draw = FALSE)
+  )
+
+  ## We plot the assignment for the sample "Alien_10"
+  plot(AssignmentDry, who = "Alien_10")
+
+
+  ### Other example without calibration:
+  ### We will try to assign a weather station
+  ### in the water isoscape
+
+  ## We create the assignment data taking
+  ## GARMISCH-PARTENKIRCHEN as the station to assign
+  GPIso &lt;- GNIPDataDEagg[GNIPDataDEagg$source_ID == "GARMISCH-PARTENKIRCHEN", "mean_source_value"]
+  AssignDataGP &lt;- data.frame(
+    sample_value = GPIso,
+    sample_ID = "GARMISCH-PARTENKIRCHEN"
+  )
+
+  ## We perform the assignment
+  AssignedGP &lt;- isofind(
+    data = AssignDataGP,
+    isoscape = GermanScape,
+    calibfit = NULL
+  )
+  ## We plot the assignment and
+  ## show where the station really is (using lattice)
+  plot(AssignedGP, plot = FALSE) +
+    xyplot(47.48 ~ 11.06,
+      cex = 5, pch = 13, lwd = 2, col = "black"
+    )
+}
+
+</code></pre>
+
+
+</div>

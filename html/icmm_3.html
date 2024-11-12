@@ -1,0 +1,71 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get.alpha</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Hyperparameter estimation for <code>alpha</code>.</h2>
+
+<h3>Description</h3>
+
+<p>This function estimates a hyperparameter <code>alpha</code>, a scale parameter in Laplace denstiy. This function is for internal use called by the <code>icmm</code> function.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get.alpha(beta, scaledfactor)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p>a (p*1) matrix of regression coefficients.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scaledfactor</code></td>
+<td>
+<p>a scalar value of multiplicative factor.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function estimates a hyperparameter <code>alpha</code>, a scale parameter in Laplace density as the mode of its full conditional distribution function.</p>
+
+
+<h3>Value</h3>
+
+<p>Return a scalar value of <code>alpha</code>.</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Vitara Pungpapong, Min Zhang, Dabao Zhang</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(simGaussian)
+Y&lt;-as.matrix(simGaussian[,1])
+X&lt;-as.matrix(simGaussian[,-1])
+n&lt;-dim(X)[1]
+# Obtain initial values of beta from lasso
+data(initbetaGaussian)
+beta&lt;-as.matrix(initbetaGaussian)
+# Initiate alpha
+alpha&lt;-0.5
+# Estimate sigma
+e&lt;-Y-X%*%beta
+nz&lt;-sum(beta[,1]!=0)
+sigma&lt;-get.sigma(Y=Y, X=X, beta=beta, alpha=alpha)
+# Update alpha as the mode of its full conditional distribution function
+alpha&lt;-get.alpha(beta=beta, scaledfactor=1/(sqrt(n-1)*sum(abs(beta))/sigma))
+</code></pre>
+
+
+</div>

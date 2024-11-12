@@ -1,0 +1,250 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sim.gRoeMetz</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate an MRMC data set of an ROC experiment comparing two modalities</h2>
+
+<h3>Description</h3>
+
+<p>This procedure simulates an MRMC data set of an ROC experiment comparing two modalities.
+It is based on Gallas2014_J-Med-Img_v1p031006, which generalizes of the model in
+Roe1997_Acad-Radiol_v4p298 and Roe1997_Acad-Radiol_v4p587. Specifically, it allows
+the variance components to depend on the truth and the modality. For the simpler
+Roe and Metz model, you can enter the smaller set of parameters into
+sim.gRoeMetz.config and it will return a larger set of parameters that can be used with this function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sim.gRoeMetz(config)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>config</code></td>
+<td>
+<p>[list] of simulation parameters:
+</p>
+
+<ul>
+<li>
+<p> Experiment labels and size
+</p>
+
+<ul>
+<li>
+<p> modalityID.A: [character] label modality A
+</p>
+</li>
+<li>
+<p> modalityID.B: [character] label modality B
+</p>
+</li>
+<li>
+<p> nR: [numeric] number of readers
+</p>
+</li>
+<li>
+<p> nC.neg: [numeric] number of signal-absent cases
+</p>
+</li>
+<li>
+<p> nC.pos: [numeric] number of signal-present cases
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p> There are six fixed effects:
+</p>
+
+<ul>
+<li>
+<p> mu.neg: [numeric] signal-absent (neg, global mean)
+</p>
+</li>
+<li>
+<p> mu.pos: [numeric] signal-present (pos, global mean)
+</p>
+</li>
+<li>
+<p> mu.Aneg: [numeric] modality A signal-absent (Aneg, modality effect)
+</p>
+</li>
+<li>
+<p> mu.Bneg: [numeric] modality B signal-absent (Bneg, modality effect)
+</p>
+</li>
+<li>
+<p> mu.Apos: [numeric] modality A signal-present (Apos, modality effect)
+</p>
+</li>
+<li>
+<p> mu.Bpos: [numeric] modality B signal-present (Bpos, modality effect)
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p> There are six random effects that are independent of modality
+</p>
+
+<ul>
+<li>
+<p> var_r.neg: [numeric] variance of random reader effect
+</p>
+</li>
+<li>
+<p> var_c.neg: [numeric] variance of random case effect
+</p>
+</li>
+<li>
+<p> var_rc.neg: [numeric] variance of random reader by case effect
+</p>
+</li>
+<li>
+<p> var_r.pos: [numeric] variance of random reader effect
+</p>
+</li>
+<li>
+<p> var_c.pos: [numeric] variance of random case effect
+</p>
+</li>
+<li>
+<p> var_rc.pos: [numeric] variance of random reader by case effect
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p> There are six random effects that are specific to modality A
+</p>
+
+<ul>
+<li>
+<p> var_r.Aneg: [numeric] variance of random reader effect
+</p>
+</li>
+<li>
+<p> var_c.Aneg: [numeric] variance of random case effect
+</p>
+</li>
+<li>
+<p> var_rc.Aneg: [numeric] variance of random reader by case effect
+</p>
+</li>
+<li>
+<p> var_r.Apos: [numeric] variance of random reader effect
+</p>
+</li>
+<li>
+<p> var_c.Apos: [numeric] variance of random case effect
+</p>
+</li>
+<li>
+<p> var_rc.Apos: [numeric] variance of randome reader by case effect
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p> There are six random effects that are specific to modality B
+</p>
+
+<ul>
+<li>
+<p> var_r.Bneg: [numeric] variance of random reader effect
+</p>
+</li>
+<li>
+<p> var_c.Bneg: [numeric] variance of random case effect
+</p>
+</li>
+<li>
+<p> var_rc.Bneg: [numeric] variance of random reader by case effect
+</p>
+</li>
+<li>
+<p> var_r.Bpos: [numeric] variance of random reader effect
+</p>
+</li>
+<li>
+<p> var_c.Bpos: [numeric] variance of random case effect
+</p>
+</li>
+<li>
+<p> var_rc.Bpos: [numeric] variance of randome reader by case effect
+</p>
+</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>The simulation is a linear model with six fixed effects related to
+modality and truth and 18 normally distributed independent random effects
+for readers, cases, and the interaction between the two. Here is the linear model:
+</p>
+<p>L.mrct = mu.t + mu.mt <br>
++ reader.rt + case.ct + readerXcase.rct <br>
++ modalityXreader.mrt + modalityXcase.mct + modalityXreaderXcase.mrct <br></p>
+
+<ul>
+<li>
+<p> m=modality (levels: A and b)
+</p>
+</li>
+<li>
+<p> t=truth (levels: neg and Pos)
+</p>
+</li>
+<li>
+<p> mu.t is the global mean for t=neg and t=pos cases
+</p>
+</li>
+<li>
+<p> mu.mt is the modality specific fixed effects for t=neg and t=pos cases
+</p>
+</li>
+<li>
+<p> the remaining terms are the random effects: all independent normal random variables
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>dFrame.imrmc   [data.frame] with (nC.neg + nC.pos)*(nR+1) rows including
+</p>
+
+<ul>
+<li>
+<p> readerID: [factor] w/ nR levels "reader1", "reader2", ...
+</p>
+</li>
+<li>
+<p> caseID: [factor] w/ nC levels "case1", "case2", ...
+</p>
+</li>
+<li>
+<p> modalityID: [factor] w/ 1 level config$modalityID
+</p>
+</li>
+<li>
+<p> score: [numeric] reader score
+</p>
+</li>
+</ul>
+<p>Note that the first nC.neg + nC.pos rows specify the truth labels for each case.
+For these rows, the readerID must be "truth"
+and the score must be 0 for negative cases and 1 for positive cases.
+</p>
+
+
+</div>

@@ -1,0 +1,198 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>intervalpdf</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Probability density function of an observed interval distribution</h2>
+
+<h3>Description</h3>
+
+<p>Observed intervals are assumed to be sampled through observation of continuous
+distinct arrivals in time. Two subsequently observed arrivals mark the start and end
+of an interval. The probability that an arrival is not observed can be nonzero, leading to
+observed intervals at integer multiples of the true interval.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">intervalpdf(
+  data = seq(0, 1000),
+  mu = 200,
+  sigma = 40,
+  p = 0.3,
+  N = 5L,
+  fun = "gamma",
+  trunc = c(0, Inf),
+  fpp = 0,
+  sigma.within = NA
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A list of intervals for which to calculate the probability density</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu</code></td>
+<td>
+<p>The mean of the true interval distribution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>The standard deviation of the true interval distribution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>The probability that an arrival that marks the start or end of an interval is not observed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>The maximum number of consecutive missed arrivals to take into consideration</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fun</code></td>
+<td>
+<p>assumed distribution family of the true interval distribution, one of
+"<code>normal</code>" or "<code>gamma</code>", corresponding
+to the Normal and GammaDist distributions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trunc</code></td>
+<td>
+<p>Use a truncated probability density function with range <code>trunc</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fpp</code></td>
+<td>
+<p>Baseline proportion of intervals distributed as a random poisson process with mean arrival rate <code>mu</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma.within</code></td>
+<td>
+<p>within-subject standard deviation, only available when <code>fun</code> is "normal"</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+
+<h4>General</h4>
+
+<p>intervals x are assumed to follow a standard distribution (either a normal
+or gamma distribution) with probability density function <code class="reqn">\phi(x|\mu,\sigma)</code>
+with <code class="reqn">\mu</code> the mean arrival interval and <code class="reqn">\sigma</code> its associated standard deviation.
+The probability density function <code class="reqn">\phi_{obs}</code> of observed arrival intervals
+in a scenario where the probability to not observe an arrival is nonzero,
+will be a superposition of several standard distributions, at multiples of the fundamental mean
+arrival interval. Standard distribution <code class="reqn">i</code> will correspond to those intervals where <code class="reqn">i</code> arrivals have been
+missed consecutively. If <code class="reqn">p</code> equals this probability of not observing an arrival, then the
+probability <code class="reqn">P(i)</code> to miss <code class="reqn">i</code> consecutive arrivals equals
+</p>
+<p style="text-align: center;"><code class="reqn">P(i)=p^i-p^{i+1}</code>
+</p>
+
+<p>The width of standard distribution i will be broadened relative to the fundamental, according to
+standard uncertainty propagation in the case of addition. Both in the case
+of normal and gamma-distributed intervals (see next subsections) we may write for the observed
+probability density function, <code class="reqn">\phi_{obs}</code>:
+</p>
+<p style="text-align: center;"><code class="reqn">\phi_{obs}(x | \mu, \sigma, p)=\sum_{i=1}^\infty \phi_{obs}(x,i | \mu,\sigma,p)</code>
+</p>
+
+<p>with
+</p>
+<p style="text-align: center;"><code class="reqn">\phi_{obs}(x,i | \mu, \sigma, p)= P(i-1) \phi(x | i \mu,\sqrt i \sigma)</code>
+</p>
+
+<p>In practice, this probability density function is well approximate when the infinite sum is capped at a finite integer N.
+Be default the sum is ran up to N=5.
+</p>
+
+
+
+<h4>Gamma-distributed intervals</h4>
+
+<p>By default intervals x are assumed to follow a Gamma (GammaDist) distribution <code class="reqn">Gamma(\mu,\sigma)</code>~<code>dgamma(shape=</code><code class="reqn">\mu^2/\sigma^2</code><code>, scale=</code><code class="reqn">\sigma^2/\mu)</code>
+with a probability density function <code class="reqn">\phi(x)</code>:
+</p>
+<p style="text-align: center;"><code class="reqn">\phi(x|\mu,\sigma)~Gamma(\mu,\sigma)</code>
+</p>
+
+<p>which has a mean <code class="reqn">\mu</code> and standard deviation <code class="reqn">\sigma</code>.
+</p>
+
+
+
+<h4>Normal-distributed intervals</h4>
+
+<p>intervals x may also be assumed to follow a Normal distribution <code class="reqn">N(\mu,\sigma)</code>~<code>dnorm(mean=</code><code class="reqn">\mu</code><code>,sd=</code><code class="reqn">\sigma)</code>,
+with a probability density function <code class="reqn">\phi(x)</code>:
+</p>
+<p style="text-align: center;"><code class="reqn">\phi(x|\mu,\sigma)~N(\mu,\sigma)</code>
+</p>
+
+<p>which also has a mean <code class="reqn">\mu</code> and standard deviation <code class="reqn">\sigma</code>. Because intervals
+are by definition non-negative, the Normal distribution is always truncated at zero.
+In the limit that <code class="reqn">\mu&gt;\sigma</code> the gamma distribution tends to the normal distribution.
+</p>
+
+
+
+<h4>Within and between-subject variation</h4>
+
+<p>To account for witin-subject and between-subject differences in mean interval length we define
+<code class="reqn">\sigma_w</code> as within-subject standard deviation in interval length,
+and <code class="reqn">\sigma_b</code> as between-subject standard deviation in interval length,
+with <code class="reqn">\sigma^2 = \sigma^2_b + \sigma^2_w</code>.
+In the normal limit (<code class="reqn">\mu&gt;\sigma</code>) the population pdf will be a convolution between <code class="reqn">\phi(x|\mu,\sigma_b)</code>
+and <code class="reqn">\phi(x|\mu,\sigma_w)</code> equal to:
+</p>
+<p style="text-align: center;"><code class="reqn">\phi_{obs}(x | \mu, \sigma,\sigma_w,p)=\sum_{i=1}^\infty P(i-1) \phi(x | i \mu,\sqrt i \sigma)</code>
+</p>
+
+
+
+
+<h3>Value</h3>
+
+<p>This function returns a list of points describing the interval distribution
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># a low probability of not observing an arrival
+# results in an observed PDF with primarily
+# a single peak, with a mean and standard
+# deviation almost identical to the true interval
+# distribution:
+plot(intervalpdf(mu=200,sigma=40,p=0.01),type='l',col='red')
+
+# a higher probability to miss an arrival
+# results in an observed PDF with multiple
+# peaks at integer multiples of the mean of the true
+# interval distribution
+plot(intervalpdf(mu=200,sigma=40,p=0.4),type='l',col='red')
+</code></pre>
+
+
+</div>

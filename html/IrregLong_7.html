@@ -1,0 +1,212 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iiwgee</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit an inverse-intensity weighted GEE.</h2>
+
+<h3>Description</h3>
+
+<p>Implements inverse-intensity weighted GEEs as first described by Lin, Scharfstein and Rosenheck (2004). A Cox proportional hazards model is applied to the visit intensities, and the hazard multipliers are used to compute inverse-intensity weights. Using the approach described by Buzkova and Lumley (2007) avoids the need to compute the baseline hazard.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iiwgee(
+  formulagee,
+  formulaph,
+  formulanull = NULL,
+  data,
+  id,
+  time,
+  event,
+  family = gaussian,
+  lagvars,
+  invariant = NULL,
+  maxfu,
+  lagfirst,
+  first,
+  stabilize.loess = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formulagee</code></td>
+<td>
+<p>the formula for the GEE model to be fit. The syntax used is the same as in glm</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formulaph</code></td>
+<td>
+<p>the formula for the proportional hazards model for the visit intensity that will be used to derive inverse-intensity weights. The formula should usually use the counting process format (i.e. Surv(start,stop,event))</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formulanull</code></td>
+<td>
+<p>if stabilised weights are to be used, the formula for the null model used to stabilise the weights</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>data frame containing the variables in the model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>character string indicating which column of the data identifies subjects</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time</code></td>
+<td>
+<p>character string indicating which column of the data contains the time at which the visit occurred</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event</code></td>
+<td>
+<p>character string indicating which column of the data indicates whether or not a visit occurred. If every row corresponds to a visit, then this column will consist entirely of ones</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>family to be used in the GEE fit. See geeM for documentation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lagvars</code></td>
+<td>
+<p>a vector of variable names corresponding to variables which need to be lagged by one visit to fit the visit intensity model. Typically time will be one of these variables. The function will internally add columns to the data containing the values of the lagged variables from the previous visit. Values of lagged variables for a subject's first visit will be set to NA. To access these variables in specifying the proportional hazards formulae, add ".lag" to the variable you wish to lag. For example, if time is the variable for time, time.lag is the time of the previous visit</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>invariant</code></td>
+<td>
+<p>a vector of variable names corresponding to variables in data that are time-invariant. It is not necessary to list every such variable, just those that are invariant and also included in the proportional hazards model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxfu</code></td>
+<td>
+<p>the maximum follow-up time(s). If everyone is followed for the same length of time, this can be given as a single value. If individuals have different follow-up times, maxfu should have the same number of elements as there are rows of data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lagfirst</code></td>
+<td>
+<p>A vector giving the value of each lagged variable for the first time within each subject. This is helpful if, for example, time is the variable to be lagged and you know that all subjects entered the study at time zero</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>first</code></td>
+<td>
+<p>logical variable. If TRUE, the first observation for each individual is assigned an intensity of 1. This is appropriate if the first visit is a baseline visit at which recruitment to the study occurred; in this case the baseline visit is observed with probability 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stabilize.loess</code></td>
+<td>
+<p>logical variable. If TRUE, additional stabilization is done by fitting a loess of the (stabilized) weights versus time, then dividing the observed weights by the predicted values</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Let the outcome of interest be <code class="reqn">Y</code> and suppose that subject i has <code class="reqn">j^{th}</code> observation at <code class="reqn">T_{ij}</code>. Let <code class="reqn">N_i(t)</code> be a counting process for the number of observations for subject i up to and including time t. Suppose that <code class="reqn">N_i</code> has intensity <code class="reqn">\lambda</code> given by </p>
+<p style="text-align: center;"><code class="reqn">\lambda_i(t)=\lambda0(t)exp(Z_i(t)\gamma).</code>
+</p>
+<p> Then the inverse-intensity weights are </p>
+<p style="text-align: center;"><code class="reqn">exp(-Z_i(t)\gamma).</code>
+</p>
+<p> If <code class="reqn">Y_i</code> is the vector of observations for subject <code class="reqn">i</code>, to be regressed onto <code class="reqn">X_i</code> (i.e. <code class="reqn">E(Y_i|X_i)=\mu(X_i;\beta)</code> with <code class="reqn">g(\mu(X_i;beta)=X_i\beta</code>, then the inverse-intensity weighted GEE equations are </p>
+<p style="text-align: center;"><code class="reqn">\sum_i \frac{\partial\mu_i}{\partial\beta}V_i^{-1}\Delta_i(Y_i X_i\beta)=0</code>
+</p>
+<p>, where <code class="reqn">\Delta_i</code> is a diagonal matrix with <code class="reqn">j^{th}</code> entry equal to <code class="reqn">\exp(-Z_i(T_{ij})\gamma)</code> and $V_i$ is the working variance matrix.
+Warning: Due to the way some gee functions incorporate weights, if using inverse-intensity weighting you should use working independence.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a list, with the following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>geefit</code></td>
+<td>
+<p>the fitted GEE, see documentation for geeM for details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phfit</code></td>
+<td>
+<p>the fitted proportional hazards model, see documentation for coxph for details</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+
+<ul>
+<li>
+<p> Lin H, Scharfstein DO, Rosenheck RA. Analysis of Longitudinal data with Irregular, Informative Follow-up. Journal of the Royal Statistical Society, Series B (2004), 66:791-813
+</p>
+</li>
+<li>
+<p> Buzkova P, Lumley T. Longitudinal data analysis for generalized linear models with follow-up dependent on outcome-related variables. The Canadian Journal of Statistics 2007; 35:485-500.</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p>Other iiw: 
+<code>iiw()</code>,
+<code>iiw.weights()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(nlme)
+data(Phenobarb)
+library(survival)
+library(geeM)
+library(data.table)
+Phenobarb$event &lt;- 1-as.numeric(is.na(Phenobarb$conc))
+data &lt;- Phenobarb
+data &lt;- data[data$event==1,]
+data$id &lt;- as.numeric(data$Subject)
+data &lt;- data[data$time&lt;16*24,]
+miiwgee &lt;- iiwgee(conc ~ I(time^3) + log(time),
+Surv(time.lag,time,event)~I(conc.lag&gt;0 &amp; conc.lag&lt;=20) +
+I(conc.lag&gt;20 &amp; conc.lag&lt;=30) + I(conc.lag&gt;30)+ cluster(id),
+id="id",time="time",event="event",data=data,
+invariant="id",lagvars=c("time","conc"),maxfu=16*24,lagfirst=0,first=TRUE)
+summary(miiwgee$geefit)
+summary(miiwgee$phfit)
+
+# compare to results without weighting
+data$time3 &lt;- (data$time^3)/mean(data$time^3)
+data$logtime &lt;- log(data$time)
+m &lt;- geem(conc ~ time3 + logtime , id=Subject, data=data); print(summary(m))
+time &lt;- (1:200)
+unweighted &lt;- cbind(rep(1,200),time^3/mean(data$time^3),log(time))%*%m$beta
+weighted &lt;- cbind(rep(1,200),time^3/mean(data$time^3),log(time))%*%miiwgee$geefit$beta
+plot(data$time,data$conc,xlim=c(0,200),pch=16)
+lines(time,unweighted,type="l")
+lines(time,weighted,col=2)
+legend (0,60,legend=c("Unweighted","Inverse-intensity weighted"),col=1:2,bty="n",lty=1)
+</code></pre>
+
+
+</div>

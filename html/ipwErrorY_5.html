@@ -1,0 +1,107 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>KnownErrorDR</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Doubly Robust Estimation of ATE with Known Error</h2>
+
+<h3>Description</h3>
+
+<p>Doubly robust estimation of average treatment effect with known outcome misclassification probabilities, i.e., known sensitivity and specificity
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">KnownErrorDR(data, indA, indYerror, indXtrt, indXout, sensitivity, specificity,
+  sharePara = FALSE, confidence = 0.95)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>The dataset to be analyzed in the form of R data frame without missing data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indA</code></td>
+<td>
+<p>A column name indicating the binary treatment variable</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indYerror</code></td>
+<td>
+<p>A column name indicating the misclassified binary outcome variable</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indXtrt</code></td>
+<td>
+<p>A vector of column names indicating the covariates included in the treatment model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indXout</code></td>
+<td>
+<p>A vector of column names indicating the covariates included in the outcome model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sensitivity</code></td>
+<td>
+<p>The specified sensitivity between 0 and 1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>specificity</code></td>
+<td>
+<p>The specified specificity between 0 and 1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sharePara</code></td>
+<td>
+<p>if the treated and untreated groups share parameters for covariates in the logistic outcome model (i.e., assuming Y~ T+X), then set <code>sharePara=TRUE</code>; if not (i.e., modeling Y~ X for the treated and untreated groups separately), then set <code>sharePara=FALSE</code>. By default,  <code>sharePara=FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>confidence</code></td>
+<td>
+<p>The confidence level between 0 and 1; the default is 0.95 corresponding to a 95 per cent confidence interval</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list of the estimate of average treatment effect, sandwich-variance-based standard error and confidence interval
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#create a dataset with sensitivity=0.95 and specificity=0.85
+set.seed(100)
+X=rnorm(2000)   
+xx=X^2
+A=rbinom(2000,1,1/(1+exp(-0.1-X-0.2*xx)))
+Y=rbinom(2000,1,1/(1+exp(1-A-0.5*X-xx)))
+y1=which(Y==1)
+y0=which(Y==0) 
+Y[y1]=rbinom(length(y1),1,0.95)
+Y[y0]=rbinom(length(y0),1,0.15)
+Yast=Y
+da=data.frame(A=A,X=X,xx=xx,Yast=Yast)
+head(da)
+#apply the doubly robust correction method with sensitivity=0.95 and specificity=0.85
+KnownErrorDR(da,"A","Yast",c("X","xx"),c("X","xx"),0.95,0.85,FALSE,0.95)
+
+</code></pre>
+
+
+</div>

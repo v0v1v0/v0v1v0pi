@@ -1,0 +1,119 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>as.cimg.function</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create an image by sampling a function</h2>
+
+<h3>Description</h3>
+
+<p>Similar to as.im.function from the spatstat package, but simpler. Creates a grid of pixel coordinates x=1:width,y=1:height and (optional) z=1:depth, and evaluates the input function at these values.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class ''function''
+as.cimg(
+  obj,
+  width,
+  height,
+  depth = 1,
+  spectrum = 1,
+  standardise = FALSE,
+  dim = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+<p>a function with arguments (x,y), or (x,y,cc), or (x,y,z), etc. Must be vectorised; see examples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>width</code></td>
+<td>
+<p>width of the image (in pixels)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>height</code></td>
+<td>
+<p>height of the image (in pixels)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>depth</code></td>
+<td>
+<p>depth of the image (in pixels). Default 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spectrum</code></td>
+<td>
+<p>number of colour channels. Defaut 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>standardise</code></td>
+<td>
+<p>coordinates are scaled and centered (see doc for pixel.grid)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dim</code></td>
+<td>
+<p>a vector of image dimensions (can be used instead of width, height, etc.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>ignored</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>an object of class cimg
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Simon Barthelme
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+im = as.cimg(function(x,y) cos(sin(x*y/100)),100,100)
+plot(im)
+#The following is just a rectangle at the center of the image 
+im = as.cimg(function(x,y) (abs(x) &lt; .1)*(abs(y) &lt; .1) ,100,100,standardise=TRUE)
+plot(im)
+#Since coordinates are standardised the rectangle scales with the size of the image
+im = as.cimg(function(x,y) (abs(x) &lt; .1)*(abs(y) &lt; .1) ,200,200,standardise=TRUE)
+plot(im)
+#A Gaussian mask around the center
+im = as.cimg(function(x,y) dnorm(x,sd=.1)*dnorm(y,sd=.3) ,dim=dim(boats),standardise=TRUE)
+im = im/max(im)
+
+plot(im*boats)
+#A Gaussian mask for just the red channel
+fun = function(x,y,cc) ifelse(cc==1,dnorm(x,sd=.1)*dnorm(y,sd=.3),0)
+im = as.cimg(fun,dim=dim(boats),standardise=TRUE)
+plot(im*boats)
+
+</code></pre>
+
+
+</div>

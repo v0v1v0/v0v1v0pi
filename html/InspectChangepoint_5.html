@@ -1,0 +1,119 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>inspect</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Informative sparse projection for estimation of changepoints (inspect)</h2>
+
+<h3>Description</h3>
+
+<p>This is the main function of the package InspectChangepoint. The function <code>inspect</code> estimates the locations of multiple changepoints in the mean structure of a multivariate time series. Multiple changepoints are estimated using a (wild) binary segmentation scheme, whereas each segmentation step uses the <code>locate.change</code> function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">inspect(
+  x,
+  lambda,
+  threshold,
+  schatten = c(1, 2),
+  M,
+  missing_data = "auto",
+  show_progress = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>The input data matrix of a high-dimensional time series, with each component time series stored as a row.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>Regularisation parameter used in <code>locate.change</code>.  If no value is supplied, the dafault value is chosen to be log(log(n)*p/2), where p and n are the number of rows and columns of the data matrix x respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>Threshold level for testing whether an identified changepoint is a true changepoint. If no value is supplied, the threshold level is computed via Monte Carlo simulation of 100 repetitions from the null model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>schatten</code></td>
+<td>
+<p>The Schatten norm constraint to use in the <code>locate.change</code> function. Default is schatten = 2, i.e. a Frobenius norm constraint.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>M</code></td>
+<td>
+<p>The Monte Carlo parameter used for wild binary segmentation. Default is M = 0, which means a classical binary segmentation scheme is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>missing_data</code></td>
+<td>
+<p>How missing data in x should be handled. If missing_data='meanImpute', then missing data are imputed with row means; if 'MissInspect', use the MissInspect algorithm of Follain et al. (2022)' if 'auto', the program will make the choice depending on the amount of missingness.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>show_progress</code></td>
+<td>
+<p>whether to display progress of computation</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The input time series is first standardised using the <code>rescale.variance</code> function. Recursive calls of the <code>locate.change</code> function then segments the multivariate time series using (wild) binary segmentation. A changepoint at time z is defined here to mean that the time series has constant mean structure for time up to and including z and constant mean structure for time from z+1 onwards.
+</p>
+<p>More details about model assumption and theoretical guarantees can be found in Wang and Samworth (2016). Note that Monte Carlo computation of the threshold value can be slow, especially for large p. If <code>inspect</code> is to be used multiple times with the same (or similar) data matrix size, it is better to precompute the threshold level via Monte Carlo simulation by calling the <code>compute.threshold</code> function.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The return value is an S3 object of class 'inspect'. It contains a list of two objeccts:
+</p>
+
+<ul>
+<li>
+<p>x The input data matrix
+</p>
+</li>
+<li>
+<p>changepoints A matrix with three columns. The first column contains the locations of estimated changepoints sorted in increasing order; the second column contains the maximum CUSUM statistics of the projected univariate time series associated with each estimated changepoint; the third column contains the depth of binary segmentation for each detected changepoint.
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+<p>Wang, T. and Samworth, R. J. (2018) High dimensional changepoint estimation via sparse projection. <em>J. Roy. Statist. Soc., Ser. B</em>, <strong>80</strong>, 57–83.
+Follain, B., Wang, T. and Samworth R. J. (2022) High-dimensional changepoint estimation with heterogeneous missingness. <em>J. Roy. Statist. Soc., Ser. B</em>, to appear
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">n &lt;- 500; p &lt;- 100; ks &lt;- 30; zs &lt;- c(125,250,375)
+varthetas &lt;- c(0.2,0.4,0.6); overlap &lt;- 0.5
+obj &lt;- multi.change(n, p, ks, zs, varthetas, overlap)
+x &lt;- obj$x
+threshold &lt;- compute.threshold(n,p)
+ret &lt;- inspect(x, threshold = threshold)
+ret
+summary(ret)
+plot(ret)
+</code></pre>
+
+
+</div>

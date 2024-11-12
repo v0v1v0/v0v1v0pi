@@ -1,0 +1,135 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get.theta.bootstrap</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Bootstrap <code>get.theta</code> values.</h2>
+
+<h3>Description</h3>
+
+<p>Runs <code>get.theta</code> on multiple bootstraps of the data. Is formulated
+such that the relationships between
+points and themselves will not be calculated.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get.theta.bootstrap(
+  posmat,
+  fun,
+  r = 1,
+  r.low = rep(0, length(r)),
+  boot.iter = 500,
+  data.frame = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>posmat</code></td>
+<td>
+<p>a matrix with columns type, x and y</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fun</code></td>
+<td>
+<p>the function to decide relationships</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>the series of spatial distances we are interested in</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r.low</code></td>
+<td>
+<p>the low end of each range. 0 by default</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.iter</code></td>
+<td>
+<p>the number of bootstrap iterations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.frame</code></td>
+<td>
+<p>logical indicating whether to return results as a data frame (default = TRUE)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>theta values for all the distances we looked at
+</p>
+
+
+<h3>Note</h3>
+
+<p>In each bootstrap iteration N observations are drawn from the existing data with replacement. To avoid errors in
+inference resulting from the same observatin being compared with itself in the bootstrapped data set, original indices
+are perserved, and pairs of points in the bootstrapped dataset with the same original index are ignored.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Justin Lessler and Henrik Salje
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other get.theta: 
+<code>get.theta()</code>,
+<code>get.theta.ci()</code>,
+<code>get.theta.permute()</code>,
+<code>get.theta.typed()</code>,
+<code>get.theta.typed.bootstrap()</code>,
+<code>get.theta.typed.permute()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+#compare normally distributed with uniform points
+x&lt;-cbind(1,runif(100,-100,100), runif(100,-100,100))
+x&lt;-rbind(x, cbind(2,rnorm(100,0,20), rnorm(100,0,20)))
+colnames(x) &lt;- c("type","x","y")
+
+fun&lt;-function(a,b) {
+    if(a[1]!=2) return(3)
+    if (b[1]==2) return(1)
+    return(2)
+}
+
+r.max&lt;-seq(10,100,10)
+r.min&lt;-seq(0,90,10)
+r.mid &lt;- (r.max+r.min)/2
+
+
+theta&lt;-get.theta(x,fun,r=r.max,r.low=r.min)
+theta.boot&lt;-get.theta.bootstrap(x,fun,r=r.max,r.low=r.min,boot.iter=100)
+
+theta.ci&lt;-apply(theta.boot[,-(1:2)],1,quantile,probs=c(0.25,0.75))
+
+plot(r.mid, theta$theta , type="l")
+lines(r.mid, theta.ci[1,] , lty=2)
+lines(r.mid, theta.ci[2,] , lty=2)
+
+
+</code></pre>
+
+
+</div>

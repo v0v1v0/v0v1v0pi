@@ -1,0 +1,94 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>AnnotateSBSVCF</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Add sequence context and transcript information to an in-memory SBS VCF</h2>
+
+<h3>Description</h3>
+
+<p>Add sequence context and transcript information to an in-memory SBS VCF
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">AnnotateSBSVCF(SBS.vcf, ref.genome, trans.ranges = NULL, name.of.VCF = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>SBS.vcf</code></td>
+<td>
+<p>An in-memory SBS VCF as a <code>data.frame</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ref.genome</code></td>
+<td>
+<p>A <code>ref.genome</code> argument as described in
+<code>ICAMS</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trans.ranges</code></td>
+<td>
+<p>Optional. If <code>ref.genome</code> specifies one of the
+<code>BSgenome</code> object
+</p>
+
+<ol>
+<li> <p><code>BSgenome.Hsapiens.1000genomes.hs37d5</code>
+</p>
+</li>
+<li> <p><code>BSgenome.Hsapiens.UCSC.hg38</code>
+</p>
+</li>
+<li> <p><code>BSgenome.Mmusculus.UCSC.mm10</code>
+</p>
+</li>
+</ol>
+<p>then the function will infer <code>trans.ranges</code> automatically. Otherwise,
+user will need to provide the necessary <code>trans.ranges</code>. Please refer to
+<code>TranscriptRanges</code> for more details.
+If <code>is.null(trans.ranges)</code> do not add transcript range
+information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name.of.VCF</code></td>
+<td>
+<p>Name of the VCF file.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An in-memory SBS VCF as a <code>data.table</code>. This has been annotated
+with the sequence context (column name <code>seq.21bases</code>) and with
+transcript information in the form of a gene symbol (e.g. <code>"TP53"</code>)
+and transcript strand. This information is in the columns
+<code>trans.start.pos</code>, <code>trans.end.pos</code> , <code>trans.strand</code>,
+<code>trans.Ensembl.gene.ID</code> and <code>trans.gene.symbol</code> in the output.
+These columns are not added if <code>is.null(trans.ranges)</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">file &lt;- c(system.file("extdata/Strelka-SBS-vcf",
+                      "Strelka.SBS.GRCh37.s1.vcf",
+                      package = "ICAMS"))
+list.of.vcfs &lt;- ReadAndSplitStrelkaSBSVCFs(file)
+SBS.vcf &lt;- list.of.vcfs$SBS.vcfs[[1]]
+if (requireNamespace("BSgenome.Hsapiens.1000genomes.hs37d5", quietly = TRUE)) {
+  annotated.SBS.vcf &lt;- AnnotateSBSVCF(SBS.vcf, ref.genome = "hg19",
+                                      trans.ranges = trans.ranges.GRCh37)}
+</code></pre>
+
+
+</div>

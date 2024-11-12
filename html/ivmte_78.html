@@ -1,0 +1,103 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>polyparse</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Parsing marginal treatment response formulas</h2>
+
+<h3>Description</h3>
+
+<p>This function takes in an MTR formula, and then parses the formula
+such that it becomes a polynomial in the unobservable <code>u</code>. It
+then breaks these polynomials into monomials, and then integrates
+each of them with respect to <code>u</code>. Each integral corresponds to
+E[md | D, X, Z].
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">polyparse(
+  formula,
+  data,
+  uname = "u",
+  env = parent.frame(),
+  as.function = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>the MTR.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p><code>data.frame</code> for which we obtain E[md | D, X, Z]
+for each observation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>uname</code></td>
+<td>
+<p>variable name for unobservable used in declaring the
+MTR.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>env</code></td>
+<td>
+<p>environment, the original environment in which
+the formula was declared.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>as.function</code></td>
+<td>
+<p>boolean, if <code>FALSE</code> then a list of the
+polynomial terms are returned; if <code>TRUE</code> then a list of
+functions corresponding to the polynomials are returned.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list (of lists) of monomials corresponding to the
+original MTR (for each observation); a list (of lists) of the
+integrated monomials; a vector for the degree of each of the
+original monomials in the MTR; and a vector for the names of
+each variable entering into the MTR (note <code>x^2 + x</code> has
+only one term, <code>x</code>).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">dtm &lt;- ivmte:::gendistMosquito()
+
+## Declare MTR functions
+formula1 = ~ 1 + u
+formula0 = ~ 1 + u
+
+## Construct MTR polynomials
+polynomials0 &lt;- polyparse(formula = formula0,
+                          data = dtm,
+                          uname = u,
+                          as.function = FALSE)
+
+polynomials1 &lt;- polyparse(formula = formula0,
+                          data = dtm,
+                          uname = u,
+                          as.function = FALSE)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,256 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>read_nhgis</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Read tabular data from an NHGIS extract</h2>
+
+<h3>Description</h3>
+
+<p>Read a csv or fixed-width (.dat) file downloaded from the NHGIS extract
+system.
+</p>
+<p>To read spatial data from an NHGIS extract, use <code>read_ipums_sf()</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">read_nhgis(
+  data_file,
+  file_select = NULL,
+  vars = NULL,
+  col_types = NULL,
+  n_max = Inf,
+  guess_max = min(n_max, 1000),
+  do_file = NULL,
+  var_attrs = c("val_labels", "var_label", "var_desc"),
+  remove_extra_header = TRUE,
+  verbose = TRUE,
+  data_layer = deprecated()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data_file</code></td>
+<td>
+<p>Path to a .zip archive containing an NHGIS extract or
+a single file from an NHGIS extract.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>file_select</code></td>
+<td>
+<p>If <code>data_file</code> is a .zip archive that
+contains multiple files, an expression identifying the file to load.
+Accepts a character vector specifying the
+file name, a tidyselect selection, or an index
+position. This must uniquely identify a file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vars</code></td>
+<td>
+<p>Names of variables to include in the output. Accepts a
+vector of names or a tidyselect selection.
+If <code>NULL</code>, includes all variables in the file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col_types</code></td>
+<td>
+<p>One of <code>NULL</code>, a <code>cols()</code>
+specification or a string. If <code>NULL</code>, all column types will be inferred
+from the values in the first <code>guess_max</code> rows of each column.
+Alternatively, you can use a compact string representation to specify
+column types:
+</p>
+
+<ul>
+<li>
+<p> c = character
+</p>
+</li>
+<li>
+<p> i = integer
+</p>
+</li>
+<li>
+<p> n = number
+</p>
+</li>
+<li>
+<p> d = double
+</p>
+</li>
+<li>
+<p> l = logical
+</p>
+</li>
+<li>
+<p> f = factor
+</p>
+</li>
+<li>
+<p> D = date
+</p>
+</li>
+<li>
+<p> T = date time
+</p>
+</li>
+<li>
+<p> t = time
+</p>
+</li>
+<li>
+<p> ? = guess
+</p>
+</li>
+<li>
+<p> _ or - = skip
+</p>
+</li>
+</ul>
+<p>See <code>read_delim()</code> for more details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_max</code></td>
+<td>
+<p>Maximum number of lines to read.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>guess_max</code></td>
+<td>
+<p>For .csv files, maximum number of lines to use for guessing
+column types. Will never use more than the number of lines read.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>do_file</code></td>
+<td>
+<p>For fixed-width files, path to the .do file associated with
+the provided <code>data_file</code>. The .do file contains the parsing instructions
+for the data file.
+</p>
+<p>By default, looks in the same path as <code>data_file</code> for
+a .do file with the same name. See Details section below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var_attrs</code></td>
+<td>
+<p>Variable attributes to add from the codebook (.txt) file
+included in the extract. Defaults to all available attributes.
+</p>
+<p>See <code>set_ipums_var_attributes()</code> for more details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>remove_extra_header</code></td>
+<td>
+<p>If <code>TRUE</code>, remove the additional descriptive
+header row included in some NHGIS .csv files.
+</p>
+<p>This header row is not
+usually needed as it contains similar information to that
+included in the <code>"label"</code> attribute of each data column (if <code>var_attrs</code>
+includes <code>"var_label"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Logical controlling whether to display output when loading
+data. If <code>TRUE</code>, displays IPUMS conditions, a progress bar, and
+column types. Otherwise, all are suppressed.
+</p>
+<p>Will be overridden by <code>readr.show_progress</code> and <code>readr.show_col_types</code>
+options, if they are set.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_layer</code></td>
+<td>
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated"><img src="../help/figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a> Please
+use <code>file_select</code> instead.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The .do file that is included when downloading an NHGIS fixed-width
+extract contains the necessary metadata (e.g. column positions and implicit
+decimals) to correctly parse the data file. <code>read_nhgis()</code> uses this
+information to parse and recode the fixed-width data appropriately.
+</p>
+<p>If you no longer have access to the .do file, consider resubmitting the
+extract that produced the data. You can also change the desired data
+format to produce a .csv file, which does not require additional metadata
+files to be loaded.
+</p>
+<p>For more about resubmitting an existing extract via the IPUMS API, see
+<code>vignette("ipums-api", package = "ipumsr")</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>tibble</code> containing the data found in
+<code>data_file</code>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>read_ipums_sf()</code> to read spatial data from an IPUMS extract.
+</p>
+<p><code>read_nhgis_codebook()</code> to read metadata about an IPUMS NHGIS extract.
+</p>
+<p><code>ipums_list_files()</code> to list files in an IPUMS extract.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example files
+csv_file &lt;- ipums_example("nhgis0972_csv.zip")
+fw_file &lt;- ipums_example("nhgis0730_fixed.zip")
+
+# Provide the .zip archive directly to load the data inside:
+read_nhgis(csv_file)
+
+# For extracts that contain multiple files, use `file_select` to specify
+# a single file to load. This accepts a tidyselect expression:
+read_nhgis(fw_file, file_select = matches("ds239"), verbose = FALSE)
+
+# Or an index position:
+read_nhgis(fw_file, file_select = 2, verbose = FALSE)
+
+# For CSV files, column types are inferred from the data. You can
+# manually specify column types with `col_types`. This may be useful for
+# geographic codes, which should typically be interpreted as character values
+read_nhgis(csv_file, col_types = list(MSA_CMSAA = "c"), verbose = FALSE)
+
+# Fixed-width files are parsed with the correct column positions
+# and column types automatically:
+read_nhgis(fw_file, file_select = contains("ts"), verbose = FALSE)
+
+# You can also read in a subset of the data file:
+read_nhgis(
+  csv_file,
+  n_max = 15,
+  vars = c(GISJOIN, YEAR, D6Z002),
+  verbose = FALSE
+)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,161 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>vector-detect</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Detect relationships between a vector and an iv</h2>
+
+<h3>Description</h3>
+
+<p>This family of functions detects different types of relationships between a
+vector and an iv. It works similar to base::%in%, where <code>needles[i]</code>
+checks for a match in all of <code>haystack</code>.
+</p>
+
+<ul>
+<li> <p><code>iv_between()</code> detects when <code>needles</code>, a vector, falls between the
+bounds in <code>haystack</code>, an iv.
+</p>
+</li>
+<li> <p><code>iv_includes()</code> detects when <code>needles</code>, an iv, includes the values
+of <code>haystack</code>, a vector.
+</p>
+</li>
+</ul>
+<p>This function returns a logical vector the same size as <code>needles</code> containing
+<code>TRUE</code> if the value in <code>needles</code> matches any value in <code>haystack</code> and <code>FALSE</code>
+otherwise.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iv_between(needles, haystack, ..., missing = "equals")
+
+iv_includes(needles, haystack, ..., missing = "equals")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>needles, haystack</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[vector, iv]⁠</code>
+</p>
+<p>For <code style="white-space: pre;">⁠iv_*_between()⁠</code>, <code>needles</code> should be a vector and <code>haystack</code> should be
+an iv.
+</p>
+<p>For <code style="white-space: pre;">⁠iv_*_includes()⁠</code>, <code>needles</code> should be an iv and <code>haystack</code> should be
+a vector.
+</p>
+
+<ul>
+<li>
+<p> Each element of <code>needles</code> represents the value / interval to match.
+</p>
+</li>
+<li> <p><code>haystack</code> represents the values / intervals to match against.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>These dots are for future extensions and must be empty.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>missing</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[logical(1) / "equals" / "error"]⁠</code>
+</p>
+<p>Handling of missing values in <code>needles</code>.
+</p>
+
+<ul>
+<li> <p><code>"equals"</code> considers missing values in <code>needles</code> as exactly equal
+to missing values in <code>haystack</code> when determining if there is a
+matching relationship between them. Matched missing values in
+<code>needles</code> result in a <code>TRUE</code> value in the result, and unmatched missing
+values result in a <code>FALSE</code> value.
+</p>
+</li>
+<li> <p><code>"error"</code> throws an error if any values in <code>needles</code> are missing.
+</p>
+</li>
+<li>
+<p> If a single logical value is provided, this represents the value returned
+in the result for values in <code>needles</code> that are missing. You can force
+missing values to be unmatched by setting this to <code>FALSE</code>, and you
+can force them to be propagated by setting this to <code>NA</code>.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A logical vector the same size as <code>needles</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Locating relationships
+</p>
+<p>Locating relationships between a vector and an iv
+</p>
+<p>Pairwise detect relationships between a vector and an iv
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x &lt;- as.Date(c("2019-01-05", "2019-01-10", "2019-01-07", "2019-01-20"))
+
+y &lt;- iv_pairs(
+  as.Date(c("2019-01-01", "2019-01-03")),
+  as.Date(c("2019-01-04", "2019-01-08")),
+  as.Date(c("2019-01-07", "2019-01-09")),
+  as.Date(c("2019-01-10", "2019-01-20")),
+  as.Date(c("2019-01-15", "2019-01-20"))
+)
+
+x
+y
+
+# Detect if the i-th location in `x` is between any intervals in `y`
+iv_between(x, y)
+
+# Detect if the i-th location in `y` includes any value in `x`
+iv_includes(y, x)
+
+# ---------------------------------------------------------------------------
+
+a &lt;- c(1, NA)
+b &lt;- iv(c(NA, NA), c(NA, NA))
+
+# By default, missing values in `needles` are treated as being exactly
+# equal to missing values in `haystack`, so the missing value in `a` is
+# considered between the missing interval in `b`.
+iv_between(a, b)
+iv_includes(b, a)
+
+# If you'd like to propagate missing values, set `missing = NA`
+iv_between(a, b, missing = NA)
+iv_includes(b, a, missing = NA)
+
+# If you'd like missing values to be treated as unmatched, set
+# `missing = FALSE`
+iv_between(a, b, missing = FALSE)
+iv_includes(b, a, missing = FALSE)
+</code></pre>
+
+
+</div>

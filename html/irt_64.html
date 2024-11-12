@@ -1,0 +1,335 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>est_irtpro</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Item Calibration via IRTPRO</h2>
+
+<h3>Description</h3>
+
+<p><code>est_irtpro</code> runs the IRTPRO in batch mode.
+</p>
+<p>This function requires IRTPRO already installed on your computer. The
+R program is designed to work on IRTPRO 6.0.
+</p>
+<p>NOTE that sometimes IRTPRO requires administrative privileges to run each
+time it is opened. You can reopen R or RStudio with administrator
+privileges (right click R or RStudio icon in start menu and select 'More' &gt;
+'Run as administrator') to prevent IRTPRO to ask administrator permission
+each time it is run.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">est_irtpro(
+  x = NULL,
+  model = "3PL",
+  target_dir = getwd(),
+  D = 1,
+  analysis_name = "irtpro_calibration",
+  items = NULL,
+  examinee_id_var = NULL,
+  group_var = NULL,
+  reference_group = NULL,
+  estimation_method = c("BAEM", "ADQ", "MHRM", "MCMC"),
+  estimation_args = list(`E-Step` = c(500, 1e-05), SE = "S-EM", `M-Step` = c(500, 1e-09),
+    Quadrature = c(49, 6), SEM = 0.001, SS = 1e-05),
+  scoring_method = c("EAP", "MAP"),
+  scoring_args = list(Mean = 0, SD = 1),
+  misc_args = list(Decimal = 4, Processors = 1, `Min Exp` = 1),
+  print_extra = c("StdRes", "CTLD", "M2", "GOF", "Loadings", "P-Nums", "Diagnostic"),
+  constraints = NULL,
+  priors = data.frame(model = c("1PL", "2PL", "2PL", "3PL", "3PL", "3PL"), parameter =
+    c("Intercept[0]", "Slope[0]", "Intercept[0]", "Slope[0]", "Intercept[0]",
+    "Guessing[0]"), prior_dist = c("Normal", "Lognormal", "Normal", "Lognormal",
+    "Normal", "Beta"), prior_par_1 = c(0, 0, 0, 0, 0, 4), prior_par_2 = c(2, 1, 2, 1, 2,
+    16)),
+  overwrite = FALSE,
+  show_output_on_console = TRUE,
+  irtpro_exe_dir = file.path("C:/Program Files/IRTPRO 6.0")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Either a <code>data.frame</code>, <code>matrix</code> or
+<code>Response_set-class</code> object.
+</p>
+<p>It is assumed that item values start from 0 and goes to number of distinct
+categories minus one. So, for example, for a polytomous items with four
+categories, the score values are assumed to be 0, 1, 2, 3. Recode the data
+to follow this pattern.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A string or a vector of strings to specify the psychometric
+model of the items. Either provide a single model for all items or provide
+a vector with the same length as the number of <code>items</code> where each
+value is one of the following: One-parameter logistic model (<code>"1PL"</code>),
+Two-parameter logistic model (<code>"2PL"</code>), three-parameter logistic model
+(<code>"3PL"</code>), Generalized Partial Credit model (<code>"GPCM2"</code>), Graded
+Response Model (<code>"GRM"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target_dir</code></td>
+<td>
+<p>The directory/folder where the IRTPRO analysis and data
+files will be saved. The default value is the current working directory,
+i.e. <code>get_wd()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>Scaling constant. The default value is <code>1</code>. If, for
+<code>"2PL"</code>, <code>"3PL"</code> or <code>"GRM"</code> models, the item parameters
+needs to be converted to the commonly used normal scale where <code>D =
+1.7</code> or <code>D = 1.702</code>, change this value. The item discrimination
+parameters estimated by IRTPRO will be divided to <code>D</code> to get
+parameters on the new scale.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>analysis_name</code></td>
+<td>
+<p>A short file name that will be used for the data files
+created for the analysis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>items</code></td>
+<td>
+<p>A vector of column names of the <code>x</code> that
+represents the responses. Default value is <code>NULL</code> where all items
+in <code>x</code> are assumed to be entering the calibration.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>examinee_id_var</code></td>
+<td>
+<p>The column name or number that contains individual
+subject IDs. If none is provided (i.e. <code>examinee_id_var = NULL</code>), the
+program will check whether the data provided has row names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group_var</code></td>
+<td>
+<p>The column name or number that contains group membership
+information if multi-group calibration is desired. Currently, this function
+cannot read multi-group calibration results. The default value is
+<code>NULL</code>, where no multi-group analysis will be performed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reference_group</code></td>
+<td>
+<p>Represent which group's ability distribution will be
+set to mean = 0 and standard deviation = 1. For example, if the value is 1,
+then the group whose code is 1 will have ability distribution with mean 0
+and standard deviation 1. The default value is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>estimation_method</code></td>
+<td>
+<p>A string that can take one of the following values:
+<code>"BAEM"</code> (Bock-Aitkin), <code>"ADQ"</code> (Adaptive Quadrature).
+The methods <code>"MHRM"</code> (Metropolis-Hastings Robbins-Monro) and
+<code>"MHRM"</code> are not available at this time via this program.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>estimation_args</code></td>
+<td>
+<p>A list with named arguments that will specify the
+estimation. Please use one of the following list templates for each
+estimation method.
+</p>
+
+<dl>
+<dt><code>"BAEM"</code></dt>
+<dd>
+<p><code>list(`E-Step` = c(500, 1e-005),
+                                    SE = "S-EM",
+                                    `M-Step` = c(500, 1e-009),
+                                    Quadrature = c(49, 6),
+                                    SEM = 0.001,
+                                    SS = 1e-005)</code></p>
+</dd>
+<dt><code>"ADQ"</code></dt>
+<dd>
+<p><code>list(`E-Step` = c(100, 0.001),
+                                   SE = "S-EM",
+                                   Quadrature = c(9, "GH"),
+                                   Adaptation = "EAP",
+                                   Trust = "Fast")</code></p>
+</dd>
+</dl>
+<p>For <code>"SE"</code> element, the options are <code>"S-EM"</code>, <code>"M-Step"</code>,
+<code>"Xpd"</code>, and <code>"Sandwich"</code>. See the IRTPRO manual for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scoring_method</code></td>
+<td>
+<p>A string that can take one of the following values:
+<code>"EAP"</code> for Expected-a-Posteriori or <code>"MAP"</code> for
+Maximum-a-Posteriori.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scoring_args</code></td>
+<td>
+<p>A list with named arguments that will specify the
+scoring. The program will automatically add <code>"Score Persons"</code>.
+Following list elements can also be specified (last two elements are
+optional):
+<code>list(Mean = 0, SD = 1, Minimum = &lt;Minimum Score&gt;,
+           Maximum = &lt;Maximum Score&gt;)</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>misc_args</code></td>
+<td>
+<p>A list with named arguments that will specify the
+miscellaneous arguments such as the number of decimals for the estimated
+parameters, the number of processors, etc.
+The following elements can be changed:
+<code>list(Decimal = 4, Processors = 1, `Min Exp` = 1)</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print_extra</code></td>
+<td>
+<p>A string vector specifying additional results to be
+printed:
+'StdRes' (Print table of standardized residuals)
+'CTLD' (Compute Chen-Thissen LD and item fit statistics)
+'M2' (Compute limited-information overall model fit statistics)
+‘GOF' (Print each item’s goodness of fit frequency table)
+'Loadings' (Print factor loadings)
+'P-Nums' (Print parameter numbers)
+'Diagnostic' (Print diagnostic information)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constraints</code></td>
+<td>
+<p>A vector of sting commands for constraints section of the
+syntax. It is usually used to constrain a parameter to a certain value.
+Usually it has the following format:
+<code>"Equal = (G1, Item Name, Parameter), (G2, Item Name, Parameter);"</code>
+Here is an example:
+<code>c(
+  "Equal = (G1, Item_1, Slope[0]), (G2, Item_1, Slope[0]);",
+  "Equal = (G1, Item_1, Intercept[0]), (G2, Item_1, Intercept[0]);",
+  "Equal = (G1, Item_2, Slope[0]), (G2, Item_2, Slope[0]);",
+  "Equal = (G1, Item_2, Intercept[0]), (G2, Item_2, Intercept[0]);")</code>
+or:
+<code>c("(Item_1, Slope[0]) = 1.3;",
+        "(Item_1, Intercept[0]) = 2.1;",
+        "(Item_2, Slope[0]) = 0.7;",
+        "(Item_2, Intercept[0]) = -1.2;")</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>priors</code></td>
+<td>
+<p>A list that specifies the prior parameters. There are three
+possible options.
+</p>
+<p>The value can be <code>NULL</code> where no prior information will be used.
+</p>
+<p>The value can be a data frame with the following format:
+Column names: <code>item_id, parameter, prior_dist, prior_par_1,
+  prior_par_2</code>.
+<code>item_id</code> column should match item IDs.
+<code>parameter</code> should be following one of the <code>"Slope[0]"</code>,
+<code>"Intercept[0]"</code>, or <code>"Guessing[0]"</code>.
+<code>prior_par</code> column should be one of the following values:
+<code>"Lognormal"</code>, <code>"Normal"</code>, <code>"Beta"</code>.
+<code>prior_par_1</code> and <code>prior_par_2</code> should be numeric values for the
+prior parameters. For <code>"Normal"</code> or <code>"Lognormal"</code>,
+<code>prior_par_1</code> can be 0 (mean) and <code>prior_par_2</code> can be 1
+(standard deviation.
+For <code>"Beta"</code>, <code>prior_par_1</code> can be 4 (mean) and
+<code>prior_par_2</code> can be 16.
+</p>
+<p>The value can be a data frame with the following format if all items
+for a model should follow the same priors:
+Column names:<code>model, parameter, prior_dist, prior_par_1, prior_par_2</code>.
+The <code>model</code> column should match the <code>model</code> argument of the
+function. See the <code>model</code> argument's description to see the available
+options.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overwrite</code></td>
+<td>
+<p>If <code>TRUE</code> and there are already an IRTPRO analysis
+files in the target path with the same name, these file will be
+overwritten.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>show_output_on_console</code></td>
+<td>
+<p>logical (not NA), indicates whether to capture
+the output of the command and show it on the R console. The default value
+is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>irtpro_exe_dir</code></td>
+<td>
+<p>The location of the <code>"ASCII2SSIG64.exe"</code> and
+<code>"IRTPROx64.exe"</code>. The default location is
+<code>file.path("C:/Program Files/IRTPRO 6.0")</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Emre Gonulates
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+resp &lt;- sim_resp(generate_ip(n = 15), rnorm(200), prop_missing = .2)
+irtpro_calib &lt;- est_irtpro(x = resp, model = "3PL",
+                           target_dir = file.path("C:/temp/irtpro1"),
+                           overwrite = TRUE)
+
+n_examinee &lt;- 500
+resp &lt;- sim_resp(generate_ip(model = sample(c("3PL", "GPCM2"), 20, T)),
+                 rnorm(n_examinee), prop_missing = .2)
+resp &lt;- cbind.data.frame(examinee_id = paste0("Ex", 1:n_examinee),
+                         group = sample(c("A", "B"), n_examinee, TRUE),
+                         resp)
+irtpro_calib_mixed &lt;- est_irtpro(
+  x = resp,
+  items = NULL,
+  examinee_id_var = "examinee_id",
+  group_var = "group",
+  target_dir = file.path("C:/temp/irtpro2"),
+  overwrite = TRUE)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

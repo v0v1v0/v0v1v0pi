@@ -1,0 +1,104 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dailyDCOffsetMetric</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>DC Offset Detection</h2>
+
+<h3>Description</h3>
+
+<p>The dailyDCOffsetMetric() function identifies days with a jump in the signal mean.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dailyDCOffsetMetric(df, 
+                    offsetDays=5,
+                    outlierWindow=7,
+                    outlierThreshold=3.0,
+                    outputType=1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>a dataframe containing <code>sample_mean</code> values obtained with getSingleValueMetrics()</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offsetDays</code></td>
+<td>
+<p>number of days used in calculating weighting factors</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outlierWindow</code></td>
+<td>
+<p>window size passed to findOutliers() function in the <span class="pkg">seismicRoll</span> package</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outlierThreshold</code></td>
+<td>
+<p>detection threshold passed to findOutliers() function in the <span class="pkg">seismicRoll</span> package</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outputType</code></td>
+<td>
+<p>if 1,  return last day of valid values (index= length(index)-floor(outlierWindow/2)); if 0, return all valid values (indices= max(offsetDays, floor(outlierWindow/2): length(index)-floor(outlierWindow/2)) </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This algorithm calculates lagged differences of the daily mean timeseries over a window of <code>offsetDays</code> days.
+Shifts in the mean that are persistent and  larger than the typical standard deviation of daily means will
+generate higher metric values.
+</p>
+
+<p>Details of the algorithm are as follows
+</p>
+<pre>
+# data0 = download requested daily means (in the 'df' dataframe), must be greater than max(offsetDays,outlierWindow)+floor(outlierWindow/2)
+# data1 = remove outliers using MAD outlier detection with the 'outlier' arguments specified
+# data2 = replace outliers with rolling median values using a default 7 day window, remove last floor(outlierWindow/2) number of samples.
+# weights = calculate absolute lagged differences with 1-N day lags, default N=5
+# metric0 = multiply the lagged differences together and take the N'th root
+# stddev0 = calculate the rolling standard deviation of data2 with a N-day window
+# METRIC = divide metric0 by the median value of stddev0
+</pre>
+
+
+<h3>Value</h3>
+
+<p>A list is returned with a <code>SingleValueMetric</code> object for the last day-floor(outlierWindow/2) (default 3rd from last day) in the incoming dataframe if outputType=1 (one list element), otherwise the first+offsetDays to last day-floor(outlierWindow/2) (multiple list elements, one per day) if outputType=0.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Prefer 60+ days of sample_mean values to get a good estimate of the long term sample_mean standard deviation.
+After initial testing on stations in the IU network, a metric value &gt; 10 appears to be indicative of a DC offset shift (this may vary across stations or networks and larger values may be preferred as indications of a potential station issue).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>getSingleValueMetrics</code>
+</p>
+
+
+</div>

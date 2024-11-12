@@ -1,0 +1,228 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>isotab</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Fidelity and frequency of species in clusters
+</h2>
+
+<h3>Description</h3>
+
+<p>Calculates the fidelity of species to clusters. Returns equalized
+phi coefficients of association, an ordered frequency table and 
+Fisher's exact test for the probability of obtaining the observed 
+frequencies. Isopam objects as well as other combinations of tables 
+and cluster vectors are accepted as input data. An associated plotting 
+method visualises how closely individual species are associated with 
+clusters.   
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">isotab(x, level = NULL, clusters = NULL, phi.min = "isotab", p.max = .05)
+## S3 method for class 'isotab'
+print(x, n = NA, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>Object either of class <code>isopam</code> or a dataframe or matrix with rownames
+(plot names) and column names (species names) that is accompanied by a 
+cluster vector (<code>clusters</code>) with named elements corresponding to the
+sites in <code>x</code>. Tibbles need a column with plot names (&lt;chr&gt;), while the 
+other columns are of class &lt;dbl&gt; or &lt;int&gt;. In method <code>print</code>, <code>x</code> 
+is an object of class <code>isotab</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clusters</code></td>
+<td>
+<p>Vector with assignments of clusters to plots, only
+needed if <code>x</code> is not an isopam object. The names of the elements need
+to be identical to the rownames of <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+
+<p>Level in cluster hierarchy starting with 1 = first division.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phi.min</code></td>
+<td>
+
+<p>Threshold of equalized <em>phi</em> determining which species are listed 
+in the upper part of the table. Applies only to species passing the 
+criterion defined by <code>p.max</code>. If <code>phi.min = "isopam"</code> (the 
+default) isotab suggests a value based on the numbers of observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.max</code></td>
+<td>
+
+<p>Threshold of Fisher's <em>p</em> determining which species are listed in the 
+upper part of the table. Applies only to species passing the criterion 
+defined by <code>phi.min</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>number of lines used by <code>print</code>. If <code>NA</code> (the default), 
+n is oriented on the number of diagnosic species. Use <code>n = Inf</code> to print
+all rows.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments used by <code>print</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>phi.min</code> is based on the 'equalized <em>phi</em>' value according to
+Tichý &amp; Chitrý 2006. The threshold proposed if 
+<code>phi.min</code> is set to "isotab" should be adjusted to local conditions. 
+The significance (Fisher's <em>p</em>) refers to the probability that the 
+observed frequency is reached. The test is two-tailed, which means that 
+exceptionally low frequencies can result as highly significant as well as 
+exceptionally high frequencies. This allows positive and negative 
+characterisation of a cluster by species.   
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>generating call</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>depth</code></td>
+<td>
+<p>Number of levels in the cluster hierarchy from the original
+clustering procedure.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+<p>Level chosen for isotab.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tab</code></td>
+<td>
+<p>Ordered species by cluster table with frequencies and their 
+significance. The latter is derived from Fisher's exact test (see 
+<code>fisher_p</code> and details, <em>p</em> &lt;= 0.05: *, <em>p</em> &lt;= 0.01: **, 
+<em>p</em> &lt;= 0.001: ***).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phi</code></td>
+<td>
+<p>Dataframe with equalized phi values (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fisher_p</code></td>
+<td>
+<p>Numerical results from Fisher's exact test (see details)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Matrix with cluster sizes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thresholds</code></td>
+<td>
+<p><code>phi.min</code> and <code>p.max</code> used for table sorting.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>typical</code></td>
+<td>
+<p>Text with items (often species) typically 
+found in clusters (according to <code>thresholds</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>typical_vector</code></td>
+<td>
+<p><code>typical</code> as a single character vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sorted_table</code></td>
+<td>
+<p>Ordered species by plot table.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Sebastian Schmidtlein
+</p>
+
+
+<h3>References</h3>
+
+<p>Tichý, L., Chytrý, M. (2006): Statistical 
+determination of diagnostic species for site groups of unequal size.
+<em>Journal of Vegetation Science</em> <b>17</b>: 809-–818.
+</p>
+<p>Schmidtlein, S., Tichý, L., Feilhauer, H., Faude, U.
+(2010): A brute force approach to vegetation classification.
+<em>Journal of Vegetation Science</em> <b>21</b>: 1162–1171.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>isopam</code>, <code>plot.isotab</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">   ## load data to the current environment
+   data(andechs)
+     
+   ## call isopam with the standard options
+   ip&lt;-isopam(andechs)
+    
+   ## build table
+   it &lt;- isotab(ip)
+   it
+
+   ## change phi threshold
+   it &lt;- isotab(ip, phi.min = 0.8)
+
+   ## switch cluster level
+   it &lt;- isotab(ip, level = 1)
+   it
+</code></pre>
+
+
+</div>

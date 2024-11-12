@@ -1,0 +1,146 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>inspect_cor</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Tidy correlation coefficients for numeric dataframe columns</h2>
+
+<h3>Description</h3>
+
+<p>Summarise and compare Pearson, Kendall and Spearman correlations for 
+numeric columns in one, two or grouped dataframes.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">inspect_cor(df1, df2 = NULL, method = "pearson", with_col = NULL, alpha = 0.05)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df1</code></td>
+<td>
+<p>A data frame.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df2</code></td>
+<td>
+<p>An optional second data frame for comparing correlation 
+coefficients.  Defaults to <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>a character string indicating which type of correlation coefficient to use, one 
+of <code>"pearson"</code>, <code>"kendall"</code>, or <code>"spearman"</code>, which can be abbreviated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>with_col</code></td>
+<td>
+<p>Character vector of column names to calculate correlations with all other numeric 
+features.  The default <code>with_col = NULL</code> returns all pairs of correlations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>Alpha level for correlation confidence intervals.  Defaults to 0.05.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>When <code>df2 = NULL</code>, a tibble containing correlation coefficients for <code>df1</code> is 
+returned:
+</p>
+
+<ul>
+<li> <p><code>col_1</code>, <code>co1_2</code> character vectors containing names of numeric 
+columns in <code>df1</code>.
+</p>
+</li>
+<li> <p><code>corr</code> the calculated correlation coefficient.
+</p>
+</li>
+<li> <p><code>p_value</code> p-value associated with a test where the null hypothesis is that 
+the numeric pair have 0 correlation. 
+</p>
+</li>
+<li> <p><code>lower</code>, <code>upper</code> lower and upper values of the confidence interval 
+for the correlations.
+</p>
+</li>
+<li> <p><code>pcnt_nna</code> the number of pairs of observations that were non missing for each 
+pair of columns.  The correlation calculation used by <code>inspect_cor()</code> uses only 
+pairwise complete observations.  
+</p>
+</li>
+</ul>
+<p>If <code>df1</code> has class <code>grouped_df</code>, then correlations will be calculated within the grouping levels 
+and the tibble returned will have an additional column corresponding to the group labels.
+</p>
+<p>When both <code>df1</code> and <code>df2</code> are specified, the tibble returned contains
+a comparison of the correlation coefficients across pairs of columns common to both 
+dataframes.
+</p>
+
+<ul>
+<li> <p><code>col_1</code>, <code>co1_2</code> character vectors containing names of numeric columns 
+in either <code>df1</code> or <code>df2</code>.
+</p>
+</li>
+<li> <p><code>corr_1</code>, <code>corr_2</code> numeric columns containing correlation coefficients from
+<code>df1</code> and <code>df2</code>, respectively.
+</p>
+</li>
+<li> <p><code>p_value</code> p-value associated with the null hypothesis that the two correlation 
+coefficients are the same.  Small values indicate that the true correlation coefficients 
+differ between the two dataframes.
+</p>
+</li>
+</ul>
+<p>Note that confidence intervals for <code>kendall</code> and <code>spearman</code> assume a normal sampling
+distribution for the Fisher z-transform of the correlation.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A tibble summarising and comparing the correlations for each numeric column 
+in one or a pair of data frames.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Load dplyr for starwars data &amp; pipe
+library(dplyr)
+
+# Single dataframe summary
+inspect_cor(starwars)
+# Only show correlations with 'mass' column
+inspect_cor(starwars, with_col = "mass")
+
+# Paired dataframe summary
+inspect_cor(starwars, starwars[1:10, ])
+
+# NOT RUN - change in correlation over time
+# library(dplyr)
+# tech_grp &lt;- tech %&gt;% 
+#         group_by(year) %&gt;%
+#         inspect_cor()
+# tech_grp %&gt;% show_plot()     
+
+</code></pre>
+
+
+</div>

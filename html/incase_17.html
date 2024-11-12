@@ -1,0 +1,165 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>switch_case</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Switch-style recoding of values</h2>
+
+<h3>Description</h3>
+
+<p>Switch-style recoding of values
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">switch_case(x, ..., preserve = FALSE, default = NA)
+
+fn_switch_case(x, fn, ..., preserve = FALSE, default = NA)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>&lt;<code>dynamic-dots</code>&gt; A sequence of two-sided
+formulas or named arguments.
+</p>
+
+<ul>
+<li> <p><strong>Formulas</strong>: Elements of <code>x</code> that match the left hand side (LHS) of
+formulas will be replaced with the value in the right hand side (RHS).
+The LHS must evaluate to an atomic vector.
+The RHS must be of length one.
+<code>NULL</code> inputs are ignored.
+</p>
+</li>
+<li> <p><strong>Named arguments</strong>: for <code>fn_switch_case()</code>, named arguments are passed
+to the function <code>fn</code>.
+For <code>switch_case()</code>, named arguments will raise an error.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>preserve</code></td>
+<td>
+<p>If <code>TRUE</code>, unmatched elements of <code>x</code> will be returned
+unmodified.
+(The elements may have their type coerced to be compatible with
+replacement values.)
+If <code>FALSE</code>, unmatched elements of <code>x</code> will be replaced with <code>default</code>.
+Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>default</code></td>
+<td>
+<p>If <code>preserve</code> is <code>FALSE</code>, a value to replace unmatched
+elements of <code>x</code>.
+Defaults to <code>NA</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fn</code></td>
+<td>
+<p>A function to apply to the left-hand side of each formula in <code>...</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A vector of the same length as <code>x</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>switch_case_fct()</code> and <code>fn_switch_case_fct()</code> to return a factor
+and <code>switch_case_list()</code> and <code>fn_switch_case_list()</code> to return a list
+</p>
+<p><code>grep_case()</code> to recode values with string pattern matching
+</p>
+<p><code>fn_case()</code>, which applies a function to both <code>x</code> and each formula's LHS
+</p>
+<p><code>in_case()</code>, a pipeable alternative to <code>dplyr::case_when()</code>
+</p>
+<p><code>switch()</code> and <code>%in%</code>, which inspired this function
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">parties &lt;- sample(c("d", "r", "i", "g", "l"), 20, replace = TRUE)
+
+switch_case(
+  parties,
+  "d" ~ "Democrat",
+  "r" ~ "Republican",
+  "i" ~ "Independent",
+  "g" ~ "Green",
+  "l" ~ "Libertarian"
+)
+
+parties %&gt;%
+  switch_case(
+    "d" ~ "Democrat",
+    "r" ~ "Republican",
+    "i" ~ "Independent",
+    "g" ~ "Green",
+    "l" ~ "Libertarian"
+  )
+
+parties %&gt;%
+  switch_case(
+    "d" ~ "Democrat",
+    "r" ~ "Republican",
+    c("i", "g", "l") ~ "Other"
+  )
+
+parties %&gt;%
+  switch_case(
+    "d" ~ "Democrat",
+    "r" ~ "Republican",
+    default = "Other"
+  )
+
+parties %&gt;%
+  switch_case(
+    "d" ~ "Democrat",
+    "r" ~ "Republican",
+    preserve = FALSE
+  )
+
+parties %&gt;%
+  switch_case(
+    "d" ~ "Democrat",
+    "r" ~ "Republican",
+    preserve = TRUE
+  )
+
+data &lt;- c(1, 4, 8, 12, 999, 6, 2, 888, 4, 6, 777)
+
+fn_switch_case(
+  data,
+  function(x) paste(rep(x, 3), collapse = ""),
+  7 ~ "Not asked",
+  8 ~ "Refused",
+  9 ~ "Missing",
+  preserve = TRUE
+)
+</code></pre>
+
+
+</div>

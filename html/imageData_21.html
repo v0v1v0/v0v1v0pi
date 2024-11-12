@@ -1,0 +1,182 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>intervalValueCalculate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculates a single value that is a function of an individual's values for a response over a specified time interval</h2>
+
+<h3>Description</h3>
+
+<p>Splits the values of a response into subsets corresponding 
+individuals and applies a function that calculates a single 
+value from each individual's observations during a specified 
+time interval. It includes the 
+ability to calculate the observation that corresponds to 
+the calculated value of the function.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">intervalValueCalculate(response, weights=NULL, individuals = "Snapshot.ID.Tag",
+                       FUN = "max", which.obs = FALSE, which.levels = NULL, 
+                       start.time=NULL, end.time=NULL, times.factor = "Days", 
+                       suffix.interval=NULL, data, sep=".", na.rm=TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>response</code></td>
+<td>
+<p>A <code>character</code> giving the name of the column in 
+<code>data</code> from which the values of <code>FUN</code> are to be  calculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>A <code>character</code> giving the name of the column in 
+<code>data</code> containing the weights to be supplied as <code>w</code> 
+to <code>FUN</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>individuals</code></td>
+<td>
+<p>A <code>character</code> giving the name(s) of the 
+<code>factor</code>(s) that define the subsets of the <code>data</code> for 
+which each subset corresponds to the <code>response</code> value for an 
+individual.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FUN</code></td>
+<td>
+<p>A <code>character</code> giving the name of the <code>function</code> 
+that calculates the value for each subset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>which.obs</code></td>
+<td>
+<p>A <code>logical</code> indicating whether or not to determine 
+the observation corresponding to the value of the function, 
+instead of the value of the function itself.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>which.levels</code></td>
+<td>
+<p>A <code>character</code> giving the name of the 
+<code>factor</code> whose levels are to be identified as 
+the level of the observation whose value matches the 
+value of the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start.time</code></td>
+<td>
+<p>A <code>numeric</code> giving the times, 
+in terms of levels of <code>times.factor</code>, that will give a 
+single value for each <code>Snapshot.ID.Tag</code> and that will 
+be taken as the observation at the start of the interval for 
+which the growth rate is to be calculated. If 
+<code>start.time</code> is <code>NULL</code>, the interval will start 
+with the first observation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>end.time</code></td>
+<td>
+<p>A <code>numeric</code> giving the times,
+in terms of levels of <code>times.factor</code>, that will give a 
+single value for each <code>Snapshot.ID.Tag</code> and that will be 
+taken as the observation at the end of the interval for which 
+the growth rate is to be calculated. If <code>end.time</code> is 
+<code>NULL</code>, the interval will end with the last observation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>times.factor</code></td>
+<td>
+<p>A <code>character</code> giving the name of the column in 
+<code>data</code> containing the factor for times at which the data was 
+collected. Its levels should be numeric values stored as 
+characters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>suffix.interval</code></td>
+<td>
+<p>A <code>character</code> giving the suffix to be 
+appended to <code>response</code> to form the 
+name of the column containing the calculated values. If it is
+<code>NULL</code> then nothing will be appended.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A <code>data.frame</code> containing the column from which the 
+function is to be calculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.rm</code></td>
+<td>
+<p>A <code>logical</code>  indicating whether <code>NA</code> values 
+should be stripped before the calculation proceeds.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep</code></td>
+<td>
+<p>A <code>character</code> giving the separator to use when the 
+levels of <code>individuals</code> are combined. This is needed to avoid 
+using a <code>character</code> that occurs in a factor to delimit 
+levels when the levels of <code>individuals</code> are combined to 
+identify subsets.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>... </code></td>
+<td>
+<p>allows for arguments to be passed to <code>FUN</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A <code>data.frame</code>, with the same number of rows as there are 
+<code>individuals</code>, containing a column for the <code>individuals</code>, 
+a column with the values of the function for the <code>individuals</code>,
+and a column with the values of the <code>times.factor</code>. The name of 
+the column with the values of the function will be result of 
+concatenating the <code>response</code>, <code>FUN</code> and, if it is not 
+<code>NULL</code>,  <code>suffix.interval</code>, each separated by a full stop.</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Chris Brien</p>
+
+
+<h3>See Also</h3>
+
+<p><code>intervalGRaverage</code>, <code>intervalGRdiff</code>, <code>intervalWUI</code>, <code>splitValueCalculate</code>, <code>getDates</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(exampleData)
+Area.smooth.max &lt;- intervalValueCalculate("Area.smooth", 
+                                          start.time = 31, end.time = 35, 
+                                          suffix.interval = "31to35",
+                                          data = longi.dat)
+</code></pre>
+
+
+</div>

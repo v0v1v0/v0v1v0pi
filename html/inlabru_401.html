@@ -1,0 +1,154 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>local_testthat</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Unit test helpers</h2>
+
+<h3>Description</h3>
+
+<p>Local helper functions for package unit tests
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">local_bru_testthat_assign(x, values, envir = parent.frame())
+
+local_bru_testthat_tolerances(
+  tolerances = c(0.0001, 0.01, 0.1),
+  envir = parent.frame()
+)
+
+local_bru_options_set(..., .reset = FALSE, envir = parent.frame())
+
+local_basic_intercept_testdata()
+
+local_basic_fixed_effect_testdata()
+
+local_mrsea_convert(x, use_km = FALSE)
+
+local_bru_safe_inla(multicore = FALSE, quietly = TRUE, envir = parent.frame())
+
+local_bru_testthat_setup(envir = parent.frame())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>character; Name of variable to assign to</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>values</code></td>
+<td>
+<p>the object to assign to <code>x</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>envir</code></td>
+<td>
+<p>environment for exit handlers</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tolerances</code></td>
+<td>
+<p>numeric vector of length 3; <code style="white-space: pre;">⁠[lowtol, midtol, hitol]⁠</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.reset</code></td>
+<td>
+<p>For <code>local_bru_options_set</code>, logical indicating if the global
+override options list should be emptied before setting the new option(s).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>multicore</code></td>
+<td>
+<p>logical; if <code>TRUE</code>, multiple cores are allowed, and the
+INLA <code>num.threads</code> option is not checked or altered. Default: <code>FALSE</code>, multicore
+not allowed (used for examples and unit tests).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quietly</code></td>
+<td>
+<p>logical; if <code>TRUE</code>, prints diagnostic messages. A message is
+always printed if the INLA <code>num.threads</code> option is altered, regardless of the
+<code>quietly</code> argument. Default: TRUE.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>local_bru_options_set()</code> is used to set global package options.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>local_bru_options_set()</code> returns a copy of the global override
+options (not including the defaults), invisibly.
+</p>
+
+
+<h3>Functions</h3>
+
+
+<ul>
+<li> <p><code>local_bru_testthat_assign()</code>: Assign local variable. Useful for easy cleanup
+of global workspace with <code>withr::deferred_run()</code> when running tests
+interactively.
+</p>
+</li>
+<li> <p><code>local_bru_testthat_tolerances()</code>: Assign test tolerances
+Assign local tolerance variables. Useful for easy cleanup
+of global workspace with <code>withr::deferred_run()</code> when running tests
+interactively.
+</p>
+</li>
+<li> <p><code>local_bru_options_set()</code>: Calls <code>bru_options_set()</code> in a reversible way
+</p>
+</li>
+<li> <p><code>local_bru_safe_inla()</code>: Tests should set num.threads = "1:1" to ensure
+within-system repeatability by calling <code>local_bru_safe_inla()</code>;
+see also <code>bru_safe_inla()</code>
+</p>
+</li>
+<li> <p><code>local_bru_testthat_setup()</code>: Initialise environment for tests.
+Assigns tolerance variables.
+To be called either at the top of a testfile, or inside tests.
+Does <em>not</em> call <code>local_bru_safe_inla()</code>, since that may invoke a skip and
+should be called inside each test that relies on INLA.
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>bru_options_set()</code>, <code>bru_options_default()</code>, <code>bru_options_get()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">my_fun &lt;- function(val) {
+  local_bru_options_set(bru_verbose = val)
+  bru_options_get("bru_verbose")
+}
+# Inside the function, the bru_verbose option is changed.
+# Outside the function, the bru_verbose option is unchanged.
+print(my_fun(TRUE))
+print(bru_options_get("bru_verbose"))
+print(my_fun(FALSE))
+print(bru_options_get("bru_verbose"))
+</code></pre>
+
+
+</div>

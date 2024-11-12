@@ -1,0 +1,146 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>hexagrid-class</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Construct a penta-hexagonal icosahedral grid</h2>
+
+<h3>Description</h3>
+
+<p>The <code>hexagrid</code> function constrcucts a hexa-pentagonal grid based on the inversion of a 
+tessellated icosahedron.
+</p>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>tessellation</code></td>
+<td>
+<p>(<code>numeric</code>) An integer vector with the tessellation values. Each number
+describes the number of new edges replacing one original edge. Multiple series of tessellations
+are possible this way. The total tessellation is the product of the tessellation vector. 
+Higher values result in more uniform cell sizes, but the larger number of tessellation series,
+increases the speed of lookup functions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>deg</code></td>
+<td>
+<p>(<code>numeric</code>) The target edge length of the grid in degrees. If provided, the function will select the appropriate tessellation vector from the <code>hexguide</code>-table, which is closest to the target. Note that these are unlikely to be the exact matches.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sp</code></td>
+<td>
+<p>(<code>logical</code>) Flag indicating whether the <code>SpatialPolygons</code> class representation of the grid
+should be added to the object when the grid is calculated. If set to true the <code>SpPolygons</code> function will be run with with the resolution parameter set to <code>25</code>. The 
+resulting object will be stored in slot <code>@sp</code>. As the calculation of this object can increase the grid creation time substantially
+by default this argument has a value <code>FALSE</code>. This can be added on demand by running the function <code>newsp</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>(<code>logical</code>) Flag indicating whether the <code>igraph</code> class representation of the grid
+should be added to the object when the grid is calculated. This argument defaults to <code>TRUE</code> because this option has only minor performance load on the grid 
+constructor function. For familiarization with the
+object structure, however, setting this parameter to <code>FALSE</code> might help, as invoking <code>str</code> on the 'igraph' class slot of the class might flood the console.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>radius</code></td>
+<td>
+<p>(<code>numeric</code>) The radius of the grid. Defaults to the authalic radius of Earth.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>center</code></td>
+<td>
+<p>(<code>numeric</code>) The origin of the grid in the reference Cartesian coordinate system. Defaults to <code>c(0,0,0)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>(<code>logical</code>) Should messages be printed during grid creation?</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Inherits from the <code>trigrid</code> class.
+</p>
+<p>The grid structure functions as a frame for data graining, plotting and
+calculations. Data can be stored in layers that are linked to the grid object. In the current version only the 
+<code>facelayer</code> class is implemented which allows the user to render data to the cells
+of the grid which are called faces. 
+The grid 'user interface' is made up of four primary tables: the <code>@vertices</code> table for the coordinates of the vertices,
+the <code>faceCenters</code> for the coordinates of the centers of faces,
+the <code>faces</code> and the <code>edges</code> tables that contain which vertices form which faces and edges respectively.
+In these tables, the faces and vertices are sorted to form spirals that go from the north pole in a counter-clockwise
+direction. In case grid subsetting is performed these tables get truncated.
+</p>
+<p>At finer resolutions, the large number of spatial elements render all calculations very resource demanding and slow, 
+therefore the hierarchical structure created during the tessellation procedure is retained for efficient implementations.
+These data are stored in a list in the slot <code>@skeleton</code> and are 0-indexed integer tables for Rccp-based functions. <code>$v</code> 
+stores vertex, <code>$f</code> the edge, and <code>$e</code> contains the edge data for plotting and calculations. In these tables
+the original hierarchy based orderings of the units are retained, during subsetting, additional vectors are used to indicate
+deactivation of these units. Any sort of meddling with the @skeleton object will lead to unexpected behavior.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A hexagonal grid object, with class <code>hexagrid</code>.
+</p>
+
+
+<h3>Slots</h3>
+
+
+<dl>
+<dt><code>vertices</code></dt>
+<dd>
+<p>Matrix of the vertex coordinates.</p>
+</dd>
+<dt><code>faces</code></dt>
+<dd>
+<p>Matrix of the verticies forming the faces</p>
+</dd>
+<dt><code>edges</code></dt>
+<dd>
+<p>Matrix of the vertices forming the edges.</p>
+</dd>
+<dt><code>tessellation</code></dt>
+<dd>
+<p>Contains the tessellation vector.</p>
+</dd>
+<dt><code>orientation</code></dt>
+<dd>
+<p>Contains the grid orientation in xyz 3d space, values in radian.</p>
+</dd>
+<dt><code>center</code></dt>
+<dd>
+<p>The xyz coordinates of the grid's origin/center.</p>
+</dd>
+<dt><code>div</code></dt>
+<dd>
+<p>Contains the number of faces that a single face of the previous tessellation level is decomposed to.</p>
+</dd>
+<dt><code>faceCenters</code></dt>
+<dd>
+<p>Contains the xyz coordinates of the centers of the faces on the surface of the sphere.</p>
+</dd>
+</dl>
+<h3>Examples</h3>
+
+<pre><code class="language-R">g &lt;- hexagrid(c(8), sf=TRUE)
+# based on approximate size (4 degrees edge length)
+g1 &lt;- hexagrid(deg=4) 
+</code></pre>
+
+
+</div>

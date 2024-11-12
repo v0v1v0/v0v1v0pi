@@ -1,0 +1,199 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>idaKMeans</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>k-means clustering</h2>
+
+<h3>Description</h3>
+
+<p>This function generates a k-means clustering model based on the contents of a IDA data frame (<code>ida.data.frame</code>).	
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">idaKMeans(
+	data,
+	id, 
+	k=3,
+	maxiter=5,
+	distance="euclidean",
+	outtable=NULL,
+	randseed=12345,
+	statistics=NULL,
+	modelname=NULL
+)
+
+## S3 method for class 'idaKMeans'
+print(x,...)  
+## S3 method for class 'idaKMeans'
+predict(object, newdata, id,...)  
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>An IDA data frame that contains the input data for the function. The input IDA data frame 
+must include a column that contains a unique ID for each row.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>The name of the column that contains a unique ID for each row of the input data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>The number of clusters to be calculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+<p>The maximum number of iterations to be used to calculate the k-means clusters. A larger 
+number of iterations increases both the precision of the results and the amount of time required to 
+calculate them. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distance</code></td>
+<td>
+<p>The distance function that is to be used. This can be set to <code>"euclidean"</code>, which 
+causes the squared Euclidean distance to be used, or <code>"norm_euclidean"</code>, which causes normalized euclidean distance to be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outtable</code></td>
+<td>
+<p>The name of the output table that is to contain the results of the operation. When NULL 
+is specified, a table name is generated automatically.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>randseed</code></td>
+<td>
+<p>The seed for the random number generator.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistics</code></td>
+<td>
+<p>Denotes which statistics to calculate. Allowed values are <code>"none"</code>,<code>"columns"</code> and <code>"all"</code>. If NULL, the default of the database system will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modelname</code></td>
+<td>
+<p>The name under which the model is stored in the database.
+This is the name that is specified when using functions such as <code>idaRetrieveModel</code> or <code>idaDropModel</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>An object of the class <code>idaKMeans</code> to be used for prediction, i.e. for applying it to new data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of the class <code>idaKMeans</code> to be printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p>A IDA data frame that contains the data to which to apply the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional parameters to pass to the print or predict method.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The idaKMeans function calculates the squared Euclidean distance between rows, and groups them into clusters.  
+Initial clusters are chosen randomly using a random seed, and the results are adjusted iteratively until 
+either the maximum number of iterations is reached or until two iterations return identical results. 
+Variables with missing values are set zero for distance calculation.
+</p>
+<p>Models are stored persistently in database under the name <code>modelname</code>. Model names cannot have more than 64 characters and
+cannot contain white spaces. They need to be quoted like table names, otherwise they will be treated upper case by default. Only one
+model with a given name is allowed in the database at a time. If a model with <code>modelname</code> already exists, you need to drop it with <code>idaDropModel</code>
+first before you can create another one with the same name. The model name can be used to retrieve the model later (<code>idaRetrieveModel</code>).
+</p>
+<p>The output of the print function for a idaKMeans object is:
+</p>
+
+<ul>
+<li>
+<p> A vector containing a list of centers
+</p>
+</li>
+<li>
+<p> A vector containing a list of cluster sizes
+</p>
+</li>
+<li>
+<p> A vector containing a list of the number of elements in each cluster
+</p>
+</li>
+<li>
+<p> A data frame or the name of the table containing the calculated cluster assignments
+</p>
+</li>
+<li>
+<p> The within-cluster sum of squares (which indicates cluster density)
+</p>
+</li>
+<li>
+<p> The names of the slots that are available in the idaKMeans object
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>The idaKMeans function returns an object of class <code>idaKMeans</code> and <code>kmeans</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>idaRetrieveModel</code>, <code>idaDropModel</code>, <code>idaListModels</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+
+#Create ida data frame
+idf &lt;- ida.data.frame("IRIS")
+
+#Create a kmeans model stored in the database as KMEANSMODEL
+km &lt;- idaKMeans(idf, id="ID",modelname="KMEANSMODEL") 
+	
+#Print the model
+print(km)
+
+#Predict the model
+pred &lt;- predict(km,idf,id="ID")
+
+#Inspect the predictions
+head(pred)
+	
+
+## End(Not run)</code></pre>
+
+
+</div>

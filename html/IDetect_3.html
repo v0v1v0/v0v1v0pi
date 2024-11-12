@@ -1,0 +1,143 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cplm_th</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Multiple change-point detection in a continuous, piecewise-linear signal
+via thresholding</h2>
+
+<h3>Description</h3>
+
+<p>This function performs the Isolate-Detect methodology with the thresholding-based
+stopping rule in order to detect multiple change-points in a continuous, piecewise-linear
+noisy data sequence, with noise that is Gaussian. See Details for a brief explanation of the
+Isolate-Detect methodology (with the relevant reference) and of the thresholding-based
+stopping rule.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cplm_th(x, sigma = stats::mad(diff(diff(x)))/sqrt(6), thr_const = 1.4,
+  thr_fin = sigma * thr_const * sqrt(2 * log(length(x))), s = 1,
+  e = length(x), points = 3, k_l = 1, k_r = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A numeric vector containing the data in which you would like to find
+change-points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>A positive real number. It is the estimate of the standard deviation
+of the noise in <code>x</code>. The default value is <code>mad(diff(diff(x)))/sqrt(6)</code>, where
+<code>mad(x)</code> denotes the median absolute deviation of <code>x</code> computed under the
+assumption that the noise is independent and identically distributed from the
+Gaussian distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thr_const</code></td>
+<td>
+<p>A positive real number with default value equal to 1.4. It is
+used to define the threshold; see <code>thr_fin</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thr_fin</code></td>
+<td>
+<p>With <code>T</code> the length of the data sequence, this is a positive real number
+with default value equal to <code>sigma * thr_const * sqrt(2 * log(T))</code>. It is the threshold,
+which is used in the detection process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s, e</code></td>
+<td>
+<p>Positive integers with <code>s</code> less than <code>e</code>, which indicate
+that you want to check for change-points in the data sequence with subscripts
+in <code>[s,e]</code>. The default values are <code>s</code> equal to 1 and
+<code>e</code> equal to <code>T</code>, with <code>T</code> the length of the data sequence.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>points</code></td>
+<td>
+<p>A positive integer with default value equal to 3. It defines
+the distance between two consecutive end- or start-points of the right- or
+left-expanding intervals, respectively; see Details for more information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k_l, k_r</code></td>
+<td>
+<p>Positive integer numbers that get updated whenever the function
+calls itself during the detection process. They are not essential for the
+function to work, and we include them only to reduce the computational time.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The change-point detection algorithm that is used in <code>cplm_th</code> is the
+Isolate-Detect methodology described in “Detecting multiple generalized
+change-points by isolating single ones”, Anastasiou and Fryzlewicz (2018), preprint.
+The concept is simple and is split into two stages; firstly, isolation of each
+of the true change-points in subintervals of the data domain, and secondly their detection.
+ID first creates two ordered sets of <code class="reqn">K = \lceil T/\code{points}\rceil</code> right- and left-expanding
+intervals as follows. The <code class="reqn">j^{th}</code> right-expanding interval is <code class="reqn">R_j = [1, j\times \code{points}]</code>,
+while the <code class="reqn">j^{th}</code> left-expanding interval is <code class="reqn">L_j = [T - j\times \code{points} + 1, T]</code>.
+We collect these intervals in the ordered set <code class="reqn">S_{RL} = \lbrace R_1, L_1, R_2, L_2, ... , R_K, L_K\rbrace</code>.
+For a suitably chosen contrast function, ID first identifies the point with the maximum contrast
+value in <code class="reqn">R_1</code>. If its value exceeds a certain threshold, then it is taken as a change-point.
+If not, then the process tests the next interval in <code class="reqn">S_{RL}</code> and repeats the above process.
+Upon detection, the algorithm makes a new start from estimated location.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A numeric vector with the detected change-points.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Andreas Anastasiou, <a href="mailto:a.anastasiou@lse.ac.uk">a.anastasiou@lse.ac.uk</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>win_cplm_th</code>, <code>ID_cplm</code>, and <code>ID</code>, which employ
+this function. In addition, see <code>pcm_th</code> for the case of detecting changes in
+a piecewise-constant signal via thresholding.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">single.cpt &lt;- c(seq(0, 999, 1), seq(998.5, 499, -0.5))
+single.cpt.noise &lt;- single.cpt + rnorm(2000)
+cpt.single.th &lt;- cplm_th(single.cpt.noise)
+
+three.cpt &lt;- c(seq(0, 499, 1), seq(498.5, 249, -0.5), seq(251,1249,2), seq(1248,749,-1))
+three.cpt.noise &lt;- three.cpt + rnorm(2000)
+cpt.three.th &lt;- cplm_th(three.cpt.noise)
+
+multi.cpt &lt;- rep(c(seq(0,49,1), seq(48,0,-1)),20)
+multi.cpt.noise &lt;- multi.cpt + rnorm(1980)
+cpt.multi.th &lt;- cplm_th(multi.cpt.noise)
+</code></pre>
+
+
+</div>

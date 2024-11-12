@@ -1,0 +1,141 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>icc_counts</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Intraclass correlation coefficient (ICC) for count data</h2>
+
+<h3>Description</h3>
+
+<p>Estimates the intraclass correlation coefficient (ICC) for count data
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">icc_counts(
+  data,
+  y,
+  id,
+  met = NULL,
+  type = c("rep", "con"),
+  fam = c("poisson", "nbinom1", "nbinom2", "zip", "zinb1", "zinb2"),
+  conf = 0.95
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A data frame containing at least two columns: outcome and subject identifier. In case of estimating the ICC for concordance setting, a third column with the method identifier will be needed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Character string indicating the name of the outcome column in the dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>Character string indicating the name of the subjects column in the dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>met</code></td>
+<td>
+<p>Character string indicating the name of the methods column in the dataset. Only needed in the concordance setting.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Character string. It chooses the setting in which the ICC should be estimated. Valid values are: <code>"rep"</code> (default) for repeatability setting; <code>"con"</code> for concordance setting.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fam</code></td>
+<td>
+<p>Character string. The within-subjects pdf to use. Valid options are: <code>"poisson"</code> (default) for Poisson pdf; <code>"nbinom1"</code> for Negative Binomial pdf with variance increasing linearly with the mean; <code>"nbinom2"</code> for Negative Binomial pdf with variance increasing quadratically with the mean; <code>"zip"</code> for zero-inflated Poisson pdf; <code>"zinb1"</code> for zero-inflated Negative Binomial nbinom1 pdf; <code>"zinb2"</code> for zero-inflated Negative Binomial nbinom2 pdf;</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf</code></td>
+<td>
+<p>Confidence level for the confidence interval estimation. Default value is set to 95%.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The intraclass correlation coefficient (ICC) is estimated using the variance components of a generalized linear mixed model (GLMM) (Carrasco, 2010).
+</p>
+<p>The GLMM is estimated using the <em>glmmTMB</em> package (Brooks et al. 2017). The ICC standard error is estimated by applying the delta method (Ver Hoef, 2012) using the variance-covariance matrix of parameters involved in the ICC estimate.
+</p>
+<p>The parameters involved in the estimation of the ICC depends on the within-subjects pdf family chosen: the between-subjects variance, the between-methods variability (in case of concordance analysis), and parameters implicated in the within-subjects family chosen.
+In all cases the output includes the overall expectation identified as <em>mu</em>; the between-subjects variance named as <em>BSVar</em> (log-scale); the between-methods variability (in case of concordance analysis) named as <em>BMVar</em> (log-scale).
+</p>
+<p>In the Negative Binomial pdf with variance linearly increasing with the mean (Hardin and Hilbe, 2007),
+</p>
+<p style="text-align: center;"><code class="reqn">Var(y_i)=\mu_i*(1+r)</code>
+</p>
+
+<p>and Negative Binomial pdf with variance quadratically increasing with the mean (Hardin and Hilbe, 2007)
+</p>
+<p style="text-align: center;"><code class="reqn">Var(y_i)=\mu_i*(1+r*\mu_i)</code>
+</p>
+
+<p>the extra-dispersion parameter <em>r</em> is included in the output.
+</p>
+<p>For zero-inflated models, the probability of observing an extra zero is included in the output as <em>pi</em>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <em>iccc</em>.The output is a list with the following components:
+</p>
+
+<ul>
+<li> <p><em>model</em>. An object of class glmmTMB. The estimated generalized linear mixed model.
+</p>
+</li>
+<li> <p><em>ICC</em>. Estimate of the ICC, its standard error and confidence interval.
+</p>
+</li>
+<li> <p><em>varcomp</em>. Variance components and parameters related to ICC expression.
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+
+<p>Brooks, M. E., Kristensen, K., van Benthem, K. J., Magnusson, A., Berg, C. W., Nielsen, A., Skaug, H. J., Mächler, M. and Bolker, B. M. (2017). glmmTMB balances speed and flexibility among packages for zero-inflated generalized linear mixed modeling. The R Journal, 9(2), 378–400.
+</p>
+<p>Carrasco, J. (2010). A Generalized Concordance Correlation Coefficient Based on the Variance Components Generalized Linear Mixed Models for Overdispersed Count Data. Biometrics, 66(3), 897-904.
+</p>
+<p>W. Hardin and J. Hilbe. (2007). Generalized Linear Models and Extensions. Stata Press.
+</p>
+<p>Ver Hoef, J.M. (2012) Who Invented the Delta Method?, The American Statistician, 66:2, 124-127,
+
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Poisson model. Repeatability setting.
+iccpois&lt;-icc_counts(Grimso,y="Tot",id="TransectID")
+# Negative Binomial with proportional extra-dispersion. Concordance setting
+iccnb2&lt;-icc_counts(AF,y="y",id="id",met="met",type="con",fam="nbinom2")
+# Zero-inflated Poisson model. Repeatability setting
+icczip&lt;-icc_counts(EPP,y="Social",id="id",fam="zip")
+</code></pre>
+
+
+</div>

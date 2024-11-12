@@ -1,0 +1,223 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>idaTwoStep</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>two step clustering</h2>
+
+<h3>Description</h3>
+
+<p>This function generates a two step clustering model based on the contents of an IDA data frame (<code>ida.data.frame</code>).	
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">idaTwoStep( data, id, k = 3, maxleaves = 1000, distance = "euclidean", outtable = NULL,
+            randseed = 12345, statistics = NULL, maxk = 20, nodecapacity = 6,
+            leafcapacity = 8, outlierfraction = 0, modelname = NULL)
+
+## S3 method for class 'idaTwoStep'
+print(x,...)  
+## S3 method for class 'idaTwoStep'
+predict(object, newdata, id,...)  
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A IDA data frame that contains the input data for the function. The input IDA data frame 
+must include a column that contains a unique ID for each row.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>The name of the column that contains a unique ID for each row of the input data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>The number of clusters to be calculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxleaves</code></td>
+<td>
+<p>The maximum number of leaf nodes in the initial clustering tree. When the tree contains maxleaves 
+leaf nodes, the following data records are aggregated into clusters associated with the existing leaf nodes.
+This parameter is available for Db2 for z/OS only and ignored for Db2 Warehouse with integrated Spark.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxk</code></td>
+<td>
+<p>The maximum number of clusters that can be determined automatically.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nodecapacity</code></td>
+<td>
+<p>The branching factor of the internal tree that is used in pass 1.
+Each node can have up to &lt;nodecapacity&gt; subnodes. </p>
+</td>
+</tr>
+</table>
+<p>This parameter is available for Db2 Warehouse with integrated Spark only and ignored for Db2 for z/OS.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>leafcapacity</code></td>
+<td>
+<p>The number of clusters per leaf node in the internal tree that is used in pass 1.
+This parameter is available for Db2 Warehouse with integrated Spark only and ignored for Db2 for z/OS.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outlierfraction</code></td>
+<td>
+<p>The fraction of the records that is to be considered as outlier in the internal tree that is used in pass 1.
+Clusters that contain less than &lt;outlierfraction&gt; times the mean number of data records per cluster are removed.
+This parameter is available for Db2 Warehouse with integrated Spark only and ignored for Db2 for z/OS.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distance</code></td>
+<td>
+<p>The distance function that is to be used. This can be set to <code>"euclidean"</code>, which 
+causes the squared Euclidean distance to be used, or <code>"norm_euclidean"</code>, which causes normalized euclidean distance to be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outtable</code></td>
+<td>
+<p>The name of the output table that is to contain the results of the operation. When NULL 
+is specified, a table name is generated automatically.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>randseed</code></td>
+<td>
+<p>The seed for the random number generator.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistics</code></td>
+<td>
+<p>Denotes which statistics to calculate. Allowed values are <code>"none"</code>,<code>"columns"</code> and <code>"all"</code>.
+If NULL, the default of the database system will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modelname</code></td>
+<td>
+<p>The name under which the model is stored in the database.
+This is the name that is specified when using functions such as <code>idaRetrieveModel</code> or <code>idaDropModel</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>An object of the class <code>idaTwoStep</code> to be used for prediction, i.e. for applying it to new data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of the class <code>idaTwoStep</code> to be printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p>A IDA data frame that contains the data to which to apply the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional parameters to pass to the print or predict method.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The idaTwoStep clustering function distributes first the input data into a hierarchical tree structure 
+according to the distance between the data records where each leaf node corresponds to a (small) cluster.
+Then idaTwoStep reduces the tree by aggregating the leaf nodes according to the distance function until k clusters remain.
+</p>
+<p>Models are stored persistently in database under the name <code>modelname</code>. Model names cannot have more than 64 characters and
+cannot contain white spaces. They need to be quoted like table names, otherwise they will be treated upper case by default. Only one
+model with a given name is allowed in the database at a time. If a model with <code>modelname</code> already exists, you need to drop it with <code>idaDropModel</code>
+first before you can create another one with the same name. The model name can be used to retrieve the model later (<code>idaRetrieveModel</code>).
+</p>
+<p>The output of the print function for a idaTwoStep object is:
+</p>
+
+<ul>
+<li>
+<p> A vector containing a list of centers
+</p>
+</li>
+<li>
+<p> A vector containing a list of cluster sizes
+</p>
+</li>
+<li>
+<p> A vector containing a list of the number of elements in each cluster
+</p>
+</li>
+<li>
+<p> A data frame or the name of the table containing the calculated cluster assignments
+</p>
+</li>
+<li>
+<p> The within-cluster sum of squares (which indicates cluster density)
+</p>
+</li>
+<li>
+<p> The names of the slots that are available in the idaTwoStep object
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>The idaTwoStep function returns an object of class <code>idaTwoStep</code> and <code>TwoStep</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>idaRetrieveModel</code>, <code>idaDropModel</code>, <code>idaListModels</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+
+#Create ida data frame
+idf &lt;- ida.data.frame("IRIS")
+
+#Create a TwoStep model stored in the database as TwoStepMODEL
+tsm &lt;- idaTwoStep(idf, id="ID",modelname="TwoStepMODEL") 
+	
+#Print the model
+print(tsm)
+
+#Predict the model
+pred &lt;- predict(tsm,idf,id="ID")
+
+#Inspect the predictions
+head(pred)
+	
+
+## End(Not run)</code></pre>
+
+
+</div>

@@ -1,0 +1,153 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>post_ds_interaction</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Post-double selection estimator for interactions</h2>
+
+<h3>Description</h3>
+
+<p><code>post_ds_interaction</code> applies post-double selection to the
+estimation of an interaction in a linear model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">post_ds_interaction(
+  data,
+  treat,
+  moderator,
+  outcome,
+  control_vars,
+  panel_vars = NULL,
+  moderator_marg = TRUE,
+  cluster = NULL,
+  method = "double selection"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>data.frame to find the relevant variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treat</code></td>
+<td>
+<p>string with the name of the treatment variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>moderator</code></td>
+<td>
+<p>string with the name of the moderating variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outcome</code></td>
+<td>
+<p>string with the name of the outcome variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control_vars</code></td>
+<td>
+<p>vector of strings with the names of the
+control variables to include.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>panel_vars</code></td>
+<td>
+<p>vector of strings with the names of categorical
+variables to include as fixed effects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>moderator_marg</code></td>
+<td>
+<p>logical indicating if the lower-order term
+of the moderator should be included ()</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster</code></td>
+<td>
+<p>string with the name of the cluster variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>string indicating which method to use. The default
+is <code>"double selection"</code> selects variables based on the
+outcome and treatment/interaction variables and <code>"single
+selection"</code> only selects on the outcome.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>post_ds_interaction</code> implements the post-double
+selection estimator of Belloni et al (2014) as applied to
+interactions, which was proposed by Blackwell and Olson (2019).
+Variables passed to <code>panel_vars</code> are considered factors
+for fixed effects and whose "base effects" are removed by
+demeaning all variables by those factors. Interactions between
+the moderator and all variables (including the factors generated
+by <code>panel_vars</code>) are generated and passed to the
+post-double selection procedure. Base terms for the treatment,
+moderator, and control variables are forced to be included in
+the final post-double selection OLS. The <code>cluster</code> argument
+adjusts the lasso
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns an object of the class <code>lm</code> with an
+additional <code>clustervcv</code> object containing the
+cluster-robust variance matrix estimate when <code>cluster</code> is
+provided.
+</p>
+
+
+<h3>References</h3>
+
+<p>Alexandre Belloni, Victor Chernozhukov, Christian
+Hansen, Inference on Treatment Effects after Selection among
+High-Dimensional Controls, The Review of Economic Studies,
+Volume 81, Issue 2, April 2014, Pages 608-650,
+<a href="https://doi.org/10.1093/restud/rdt044">doi:10.1093/restud/rdt044</a>
+</p>
+<p>Matthew Blackwell and Michael Olson.. "Reducing Model Misspectation
+and Bias in the Estimation of Interactions." Political Analysis,
+2021.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(remit)
+
+controls &lt;- c("l1gdp", "l1pop", "l1nbr5", "l12gr", "l1migr",
+"elec3")
+
+post_ds_out &lt;- post_ds_interaction(
+  data = remit, treat = "remit",
+  moderator = "dict", outcome = "Protest",
+  control_vars = controls,
+  cluster = "caseid"
+)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,197 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pdist.big</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Pairwise phylogenetic distance matrix from big tree
+</h2>
+
+<h3>Description</h3>
+
+<p>Calculates between-species phylogenetic distance matrix from a tree, using bigmemory to deal with too large dataset.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pdist.big(tree, wd = getwd(), tree.asbig = FALSE,
+          output = FALSE, nworker = 4, nworker.pd = nworker,
+          memory.G = 50, time.count = FALSE,
+          treepath.file="path.rda", pd.spname.file="pd.taxon.name.csv",
+          pd.backingfile="pd.bin", pd.desc.file="pd.desc",
+          tree.backingfile="treeinfo.bin", tree.desc.file="treeinfo.desc")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>tree</code></td>
+<td>
+<p>phylogenetic tree, an object of class "phylo".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wd</code></td>
+<td>
+<p>path of a folder to save the big phylogenetic distance matrix, default is current work directory.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tree.asbig</code></td>
+<td>
+<p>logic, whether to treat tree attributes also as big data, default is FALSE, generally no need to set as TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output</code></td>
+<td>
+<p>logic, whether to output the big phylogenetic distance matrix, default is FALSE, generally do not output it, could be too large.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nworker</code></td>
+<td>
+<p>for parallel computing the tree paths. a positive integer (in which case that number of copies is run on localhost). default is 4, means 4 threads will be run.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nworker.pd</code></td>
+<td>
+<p>for parallel computing the phylogenetic distance matrix. default is set the same as nworker. may need to set lower than nworker if the matrix is too large.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>memory.G</code></td>
+<td>
+<p>numeric, to set the memory size as you need, so that calculation of large tree will not be limited by physical memory. unit is Gb. default is 50Gb</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time.count</code></td>
+<td>
+<p>logic, whether to count calculation time, default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treepath.file</code></td>
+<td>
+<p>character, name of the file saving the tree.path, which is a list of all the nodes and edge lengthes from root to every tip and/or node. it should be a .rda filename.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pd.spname.file</code></td>
+<td>
+<p>character, name of the file saving the taxa IDs, which has exactly the same order as the row names (and column names) of the big phylogenetic distance matrix. it should be a .csv filename.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pd.backingfile</code></td>
+<td>
+<p>character, the root name for the file for the cache of the big phylogenetic distance matrix. it should be a .bin filename.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pd.desc.file</code></td>
+<td>
+<p>character, name of the file to hold the backingfile description for the big phylogenetic distance matrix. it should be a .desc filename.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tree.backingfile</code></td>
+<td>
+<p>character, the root name for the file for the cache of the 3-column matrix of the tree information, including edge and edge length. it should be a .bin filename.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tree.desc.file</code></td>
+<td>
+<p>character, name of the file to hold the backingfile description for the tree information matrix. it should be a .desc filename.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The cophenetic distance between each pair of taxa is calculated (Sokal and Rohlf 1962). Modified from the function "cophenetic" in package "ape" (Paradis &amp; Schliep 2018), this function can calculate pairwise distance from large phylogenetic tree quickly by parallel computing. This function uses bigmemory (Kane et al 2013) to deal with large phylogenetic distance matrix, which will not occupy memory but directly be saved at the hard disk.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Output is a list
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>tip.label</code></td>
+<td>
+<p>OTU ids or species names, which is tip.label in tree file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pd.wd</code></td>
+<td>
+<p>the folder saving the big phylogenetic distance matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pd.file</code></td>
+<td>
+<p>the folder saving the big phylogenetic distance matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pd.name.file</code></td>
+<td>
+<p>the file saving the tip.label information.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Version 4: 2020.9.1, remove setwd; add options to specify the file names; change dontrun to donttest and revise save.wd in help doc.
+Version 3: 2020.8.19, add example.
+Version 2: 2017.3.13
+Version 1: 2015.7.24
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Daliang Ning
+</p>
+
+
+<h3>References</h3>
+
+<p>Sokal, R. R. &amp; Rohlf, F. J.. (1962). The comparison of dendrograms by objective methods. Taxon, 11:33-40
+</p>
+<p>Paradis, E. &amp; Schliep, K. (2018). ape 5.0: an environment for modern phylogenetics and evolutionary analyses in R. Bioinformatics 35: 526-528.
+</p>
+<p>Kane, M.J., Emerson, J., &amp; Weston, S. (2013). Scalable Strategies for Computing with Massive Data. Journal of Statistical Software, 55(14), 1-19. URL http://www.jstatsoft.org/v55/i14/.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("example.data")
+tree=example.data$tree
+# since pdist.big need to save output to a certain folder,
+# the following code is set as 'not test'.
+# but you may test the code on your computer
+# after change the folder path for 'save.wd'.
+
+  wd0=getwd()
+  save.wd=paste0(tempdir(),"/pdbig.pdist.big")
+  # please change to the folder you want to save the pd.big output.
+  
+  nworker=2 # parallel computing thread number
+  pd.big=pdist.big(tree = tree, wd=save.wd, nworker = nworker)
+  setwd(wd0)
+
+</code></pre>
+
+
+</div>

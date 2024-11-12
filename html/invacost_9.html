@@ -1,0 +1,205 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>summarizeCosts</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Summarize costs of invasions over periods of time</h2>
+
+<h3>Description</h3>
+
+<p>This function summarizes the cumulative costs and average annual costs of
+invasive alien species and breaks it down into regular periods of time, on 
+the basis
+of cost estimates as they appeared in the provided in the source references
+collected in the 'InvaCost' database
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">summarizeCosts(
+  costdb,
+  cost.column = "Cost_estimate_per_year_2017_USD_exchange_rate",
+  year.column = "Impact_year",
+  in.millions = TRUE,
+  minimum.year = 1960,
+  maximum.year = max(costdb[, year.column]),
+  year.breaks = seq(minimum.year, maximum.year, by = 10),
+  include.last.year = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>costdb</code></td>
+<td>
+<p>The <b>expanded 'InvaCost' database</b> output from 
+<code>expandYearlyCosts</code>,
+where costs occurring over several years are expanded over each year of impact.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cost.column</code></td>
+<td>
+<p>Name of the cost column to use in <code>costdb</code> (usually, 
+choose between the exchange rate (default) or Purchase Power parity cost per
+year)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>year.column</code></td>
+<td>
+<p>Name of the year column to use in <code>costdb</code>( usually, 
+"Impact_year" from <code>expandYearlyCosts</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>in.millions</code></td>
+<td>
+<p>If <code>TRUE</code>, cost values are transformed in 
+millions (to make graphs easier to read), otherwise if <code>FALSE</code>, cost
+values are
+not transformed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minimum.year</code></td>
+<td>
+<p>The starting year of the analysis. By default, 
+1960 was chosen because it marks the period from which world bank data is 
+available for exchange rates and inflation values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maximum.year</code></td>
+<td>
+<p>The ending year for the analysis. By default, the last
+year of <code>costdb</code> is chosen.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>year.breaks</code></td>
+<td>
+<p>A vector of breaks for the year intervals over which
+you want to summarize cost values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include.last.year</code></td>
+<td>
+<p><code>TRUE</code> or <code>FALSE</code>. Defines if the last
+year of the dataset is included in the last interval (<code>TRUE</code>) or is
+considered as an interval of its own (<code>FALSE</code>). Generally only useful
+if the last year is at the limit of an interval.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Missing data are ignored. However, note that the average for each 
+interval is always calculated on the basis of the full temporal range.
+For example, if there is only data for 1968 for the 1960-1969 interval,
+then the total cost for the interval will be equal to the cost of 1968, and the
+average annual cost for 1960-1969 will be the cost of 1968 / 10.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>list</code> with 6 elements:
+</p>
+
+<ul>
+<li>
+<p><code>cost.data</code>: the input data
+</p>
+</li>
+<li>
+<p><code>parameters</code>: parameters used to run the function. The 
+<code>minimum.year</code> and <code>maximum.year</code> are based on the input data
+(i.e., the user may specify <code>minimum.year = 1960</code> but the input data may
+only have data starting from 1970, hence the <code>minimum.year</code> will be
+1970)
+</p>
+</li>
+<li>
+<p><code>year.breaks</code>: the years used to define year intervals over which costs were calculated.
+</p>
+</li>
+<li>
+<p><code>cost.per.year</code>: the costs of invasions expressed per year, 
+as sums of all costs for each year
+</p>
+</li>
+<li>
+<p><code>average.total.cost</code>: the average annual cost of invasive Alien
+species calculated
+over the entire time period
+</p>
+</li>
+<li>
+<p><code>average.cost.per.period</code>: a data.frame containing the average 
+annual cost of invasive alien species calculated over each time interval
+</p>
+</li>
+</ul>
+<p>The structure of this object can be seen using <code>str()</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Boris Leroy <a href="mailto:leroy.boris@gmail.com">leroy.boris@gmail.com</a>, Andrew Kramer, Anne-Charlotte
+Vaissière, Christophe Diagne
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://github.com/Farewe/invacost">https://github.com/Farewe/invacost</a>
+</p>
+<p>Leroy Boris, Kramer Andrew M, Vaissière Anne-Charlotte, Kourantidou Melina,
+Courchamp Franck &amp; Diagne Christophe (2022). Analysing economic costs 
+of invasive alien species with the invacost R package. Methods in Ecology
+and Evolution. <a href="https://doi.org/10.1111/2041-210X.13929">doi:10.1111/2041-210X.13929</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>expandYearlyCosts</code> to get the database in appropriate format.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(invacost)
+
+### Cleaning steps
+# Eliminating data with no information on starting and ending years
+invacost &lt;- invacost[-which(is.na(invacost$Probable_starting_year_adjusted)), ]
+invacost &lt;- invacost[-which(is.na(invacost$Probable_ending_year_adjusted)), ]
+# Keeping only observed and reliable costs
+invacost &lt;- invacost[invacost$Implementation == "Observed", ]
+invacost &lt;- invacost[which(invacost$Method_reliability == "High"), ]
+# Eliminating data with no usable cost value
+invacost &lt;- invacost[-which(is.na(invacost$Cost_estimate_per_year_2017_USD_exchange_rate)), ]
+
+### Expansion
+
+db.over.time &lt;- expandYearlyCosts(invacost,
+                                  startcolumn = "Probable_starting_year_adjusted",
+                                  endcolumn = "Probable_ending_year_adjusted")
+                                  
+### Analysis
+res &lt;- summarizeCosts(db.over.time,
+                      maximum.year = 2020) # Excluding data after 2020 (e.g. planned budgets)
+res
+</code></pre>
+
+
+</div>

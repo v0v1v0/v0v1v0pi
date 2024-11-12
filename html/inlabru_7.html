@@ -1,0 +1,135 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bincount</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>1D LGCP bin count simulation and comparison with data</h2>
+
+<h3>Description</h3>
+
+<p>A common procedure of analyzing the distribution of 1D points is to chose a
+binning and plot the data's histogram with respect to this binning. This
+function compares the counts that the histogram calculates to simulations
+from a 1D log Gaussian Cox process conditioned on the number of data samples.
+For each bin this results in a median number of counts as well as a
+confidence interval. If the LGCP is a plausible model for the observed points
+then most of the histogram counts (number of points within a bin) should be
+within the confidence intervals. Note that a proper comparison  is a multiple
+testing problem which the function does not solve for you.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">bincount(
+  result,
+  predictor,
+  observations,
+  breaks,
+  nint = 20,
+  probs = c(0.025, 0.5, 0.975),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>result</code></td>
+<td>
+<p>A result object from a <code>bru()</code> or <code>lgcp()</code> call</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predictor</code></td>
+<td>
+<p>A formula describing the prediction of a 1D LGCP via
+<code>predict()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>observations</code></td>
+<td>
+<p>A vector of observed values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>breaks</code></td>
+<td>
+<p>A vector of bin boundaries</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nint</code></td>
+<td>
+<p>Number of integration points per bin. Increase this if the bins
+are wide and</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probs</code></td>
+<td>
+<p>numeric vector of probabilities with values in <code style="white-space: pre;">⁠[0,1]⁠</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>arguments passed on to <code>predict.bru()</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An <code>data.frame</code> with a ggplot attribute <code>ggp</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+if (require(ggplot2) &amp;&amp; require(fmesher)) {
+  # Load a point pattern
+  data(Poisson2_1D)
+
+  # Take a look at the point (and frequency) data
+
+  ggplot(pts2) +
+    geom_histogram(
+      aes(x = x),
+      binwidth = 55 / 20,
+      boundary = 0,
+      fill = NA,
+      color = "black"
+    ) +
+    geom_point(aes(x), y = 0, pch = "|", cex = 4) +
+    coord_fixed(ratio = 1)
+
+  # Fit an LGCP model
+  x &lt;- seq(0, 55, length.out = 50)
+  mesh1D &lt;- fm_mesh_1d(x, boundary = "free")
+  mdl &lt;- x ~ spde1D(x, model = inla.spde2.matern(mesh1D)) + Intercept(1)
+  fit.spde &lt;- lgcp(mdl, pts2, domain = list(x = c(0, 55)))
+
+  # Calculate bin statistics
+  bc &lt;- bincount(
+    result = fit.spde,
+    observations = pts2,
+    breaks = seq(0, max(pts2), length.out = 12),
+    predictor = x ~ exp(spde1D + Intercept)
+  )
+
+
+  # Plot them!
+  attributes(bc)$ggp
+}
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

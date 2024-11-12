@@ -1,0 +1,110 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>rating_factors</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Include reference group in regression output</h2>
+
+<h3>Description</h3>
+
+<p>Extract coefficients in terms of the original levels of the
+coefficients rather than the coded variables.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">rating_factors(
+  ...,
+  model_data = NULL,
+  exposure = NULL,
+  exponentiate = TRUE,
+  signif_stars = FALSE,
+  round_exposure = 0
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>glm object(s) produced by <code>glm()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model_data</code></td>
+<td>
+<p>data.frame used to create glm object(s), this should only
+be specified in case the exposure is desired in the output, default value
+is NULL</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exposure</code></td>
+<td>
+<p>column in <code>model_data</code> with exposure, default value is NULL</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exponentiate</code></td>
+<td>
+<p>logical indicating whether or not to exponentiate the
+coefficient estimates. Defaults to TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>signif_stars</code></td>
+<td>
+<p>show significance stars for p-values (defaults to TRUE)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>round_exposure</code></td>
+<td>
+<p>number of digits for exposure (defaults to 0)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A fitted linear model has coefficients for the contrasts of the
+factor terms, usually one less in number than the number of levels. This
+function re-expresses the coefficients in the original coding. This
+function is adopted from dummy.coef(). Our adoption prints a data.frame as
+output. Use rating_factors_() for standard evaluation.
+</p>
+
+
+<h3>Value</h3>
+
+<p>data.frame
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Martin Haringa
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">df &lt;- MTPL2 |&gt;
+dplyr::mutate(dplyr::across(c(area), as.factor)) |&gt;
+dplyr::mutate(dplyr::across(c(area), ~biggest_reference(., exposure)))
+
+mod1 &lt;- glm(nclaims ~ area + premium, offset = log(exposure),
+family = poisson(), data = df)
+mod2 &lt;- glm(nclaims ~ area, offset = log(exposure), family = poisson(),
+data = df)
+
+rating_factors(mod1, mod2, model_data = df, exposure = exposure)
+
+</code></pre>
+
+
+</div>

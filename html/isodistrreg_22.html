@@ -1,0 +1,166 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.idrfit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Predict method for IDR fits</h2>
+
+<h3>Description</h3>
+
+<p>Prediction based on IDR model fit.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'idrfit'
+predict(object, data = NULL, digits = 3, interpolation = "linear", ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>IDR fit (object of class <code>"idrfit"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>optional <code>data.frame</code> containing variables with which to
+predict. In-sample predictions are returned if this is omitted. Ordered 
+factor variables are converted to numeric for computation, so ensure that 
+the factor levels are identical in <code>data</code> and the training data for
+<code>fit</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>number of decimal places for the predictive CDF.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interpolation</code></td>
+<td>
+<p>interpolation method for univariate data. Default is 
+<code>"linear"</code>. Any other argument will select midpoint interpolation (see 
+'Details'). Has no effect for multivariate IDR.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>included for generic function consistency.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If the variables <code>x = data[j,]</code> for which predictions are
+desired are already contained in the training dataset <code>X</code> for the fit,
+<code>predict.idrfit</code> returns the corresponding in-sample prediction.
+Otherwise monotonicity is used to derive upper and lower bounds for the
+predictive CDF, and the predictive CDF is a pointwise average of these
+bounds. For univariate IDR with a numeric covariate, the predictive CDF is
+computed by linear interpolation. Otherwise, or if 
+<code>interpolation != "linear"</code>, midpoint interpolation is used, i.e.
+default weights of <code>0.5</code> for both the lower and the upper bound.
+</p>
+<p>If the lower and the upper bound on the predictive cdf are far apart (or
+trivial, i.e. constant 0 or constant 1), this indicates that the prediction
+based on <code>x</code> is uncertain because either the training dataset is too
+small or only few similar variable combinations as in <code>x</code> have been
+observed in the training data. However, <em>the bounds on the predictive
+CDF are not prediction intervals and should not be interpreted as such. They
+only indicate the uncertainty of out-of-sample predictions for which the
+variables are not contained in the training data.</em>
+</p>
+<p>If the new variables <code>x</code> are greater than all <code>X[i, ]</code> in the
+selected order(s), the lower bound on the cdf is trivial (constant 0) and the
+upper bound is taken as predictive cdf. The upper bound on the cdf is trivial
+(constant 1) if <code>x</code> is smaller than all <code>X[i, ]</code>. If <code>x</code> is
+not comparable to any row of <code>X</code> in the given order, a prediction based
+on the training data is not possible. In that case, the default forecast is
+the empirical distribution of <code>y</code> in the training data.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of predictions. Each prediction is a <code>data.frame</code>
+containing the following variables:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>points</code></td>
+<td>
+<p>the points where the predictive CDF has jumps.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cdf</code></td>
+<td>
+<p>the estimated CDF evaluated at the <code>points</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td>
+<code>lower</code>, <code>upper</code>
+</td>
+<td>
+<p> (only for out-of-sample predictions)
+bounds for the estimated CDF, see 'Details' above.</p>
+</td>
+</tr>
+</table>
+<p>The output has the attribute <code>incomparables</code>, which gives the indices
+of all predictions for which the climatological forecast is returned because
+the forecast variables are not comparable to the training data.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>idr</code> to fit IDR to training data.
+</p>
+<p><code>cdf</code>, <code>qpred</code> to evaluate the CDF or quantile
+function of IDR predictions.
+</p>
+<p><code>bscore</code>, <code>qscore</code>, <code>crps</code>,
+<code>pit</code> to compute Brier scores, quantile scores, the CRPS and the
+PIT of IDR predictions.
+</p>
+<p><code>plot</code> to plot IDR predictive CDFs.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("rain")
+
+## Fit IDR to data of 185 days using componentwise order on HRES and CTR and
+## increasing convex order on perturbed ensemble forecasts (P1, P2, ..., P50)
+
+varNames &lt;- c("HRES", "CTR", paste0("P", 1:50))
+X &lt;- rain[1:185, varNames]
+y &lt;- rain[1:185, "obs"]
+
+## HRES and CTR are group '1', with componentwise order "comp", perturbed
+## forecasts P1, ..., P50 are group '2', with "icx" order
+
+groups &lt;- setNames(c(1, 1, rep(2, 50)), varNames)
+orders &lt;- c("comp" = 1, "icx" = 2)
+
+fit &lt;- idr(y = y, X = X, orders = orders, groups = groups)
+
+## Predict for day 186
+predict(fit, data = rain[186, varNames])
+</code></pre>
+
+
+</div>

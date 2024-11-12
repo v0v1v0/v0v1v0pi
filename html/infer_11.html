@@ -1,0 +1,198 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>generate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generate resamples, permutations, or simulations</h2>
+
+<h3>Description</h3>
+
+<p>Generation creates a simulated distribution from <code>specify()</code>.
+In the context of confidence intervals, this is a bootstrap distribution
+based on the result of <code>specify()</code>. In the context of hypothesis testing,
+this is a null distribution based on the result of <code>specify()</code> and
+<code style="white-space: pre;">⁠hypothesize().⁠</code>
+</p>
+<p>Learn more in <code>vignette("infer")</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">generate(x, reps = 1, type = NULL, variables = !!response_expr(x), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A data frame that can be coerced into a tibble.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reps</code></td>
+<td>
+<p>The number of resamples to generate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>The method used to generate resamples of the observed
+data reflecting the null hypothesis. Currently one of
+<code>"bootstrap"</code>, <code>"permute"</code>, or <code>"draw"</code> (see below).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variables</code></td>
+<td>
+<p>If <code>type = "permute"</code>, a set of unquoted column names in the
+data to permute (independently of each other). Defaults to only the
+response variable. Note that any derived effects that depend on these
+columns (e.g., interaction effects) will also be affected.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Currently ignored.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A tibble containing <code>reps</code> generated datasets, indicated by the
+<code>replicate</code> column.
+</p>
+
+
+<h3>Generation Types</h3>
+
+<p>The <code>type</code> argument determines the method used to create the null
+distribution.
+</p>
+
+<ul>
+<li> <p><code>bootstrap</code>: A bootstrap sample will be drawn for each replicate,
+where a sample of size equal to the input sample size is drawn (with
+replacement) from the input sample data.
+</p>
+</li>
+<li> <p><code>permute</code>: For each replicate, each input value will be randomly
+reassigned (without replacement) to a new output value in the sample.
+</p>
+</li>
+<li> <p><code>draw</code>: A value will be sampled from a theoretical distribution
+with parameter <code>p</code> specified in <code>hypothesize()</code> for each replicate. This
+option is currently only applicable for testing on one proportion. This
+generation type was previously called <code>"simulate"</code>, which has been
+superseded.
+</p>
+</li>
+</ul>
+<h3>Reproducibility</h3>
+
+<p>When using the infer package for research, or in other cases when exact
+reproducibility is a priority, be sure the set the seed for R’s random
+number generator. infer will respect the random seed specified in the
+<code>set.seed()</code> function, returning the same result when <code>generate()</code>ing
+data given an identical seed. For instance, we can calculate the
+difference in mean <code>age</code> by <code>college</code> degree status using the <code>gss</code>
+dataset from 10 versions of the <code>gss</code> resampled with permutation using
+the following code.
+</p>
+<div class="sourceCode r"><pre>set.seed(1)
+
+gss %&gt;%
+  specify(age ~ college) %&gt;%
+  hypothesize(null = "independence") %&gt;%
+  generate(reps = 5, type = "permute") %&gt;%
+  calculate("diff in means", order = c("degree", "no degree"))
+</pre></div>
+<div class="sourceCode"><pre>## Response: age (numeric)
+## Explanatory: college (factor)
+## Null Hypothesis: independence
+## # A tibble: 5 x 2
+##   replicate   stat
+##       &lt;int&gt;  &lt;dbl&gt;
+## 1         1 -0.531
+## 2         2 -2.35 
+## 3         3  0.764
+## 4         4  0.280
+## 5         5  0.350
+</pre></div>
+<p>Setting the seed to the same value again and rerunning the same code
+will produce the same result.
+</p>
+<div class="sourceCode r"><pre># set the seed
+set.seed(1)
+
+gss %&gt;%
+  specify(age ~ college) %&gt;%
+  hypothesize(null = "independence") %&gt;%
+  generate(reps = 5, type = "permute") %&gt;%
+  calculate("diff in means", order = c("degree", "no degree"))
+</pre></div>
+<div class="sourceCode"><pre>## Response: age (numeric)
+## Explanatory: college (factor)
+## Null Hypothesis: independence
+## # A tibble: 5 x 2
+##   replicate   stat
+##       &lt;int&gt;  &lt;dbl&gt;
+## 1         1 -0.531
+## 2         2 -2.35 
+## 3         3  0.764
+## 4         4  0.280
+## 5         5  0.350
+</pre></div>
+<p>Please keep this in mind when writing infer code that utilizes
+resampling with <code>generate()</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other core functions: 
+<code>calculate()</code>,
+<code>hypothesize()</code>,
+<code>specify()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># generate a null distribution by taking 200 bootstrap samples
+gss %&gt;%
+ specify(response = hours) %&gt;%
+ hypothesize(null = "point", mu = 40) %&gt;%
+ generate(reps = 200, type = "bootstrap")
+
+# generate a null distribution for the independence of
+# two variables by permuting their values 200 times
+gss %&gt;%
+ specify(partyid ~ age) %&gt;%
+ hypothesize(null = "independence") %&gt;%
+ generate(reps = 200, type = "permute")
+
+# generate a null distribution via sampling from a
+# binomial distribution 200 times
+gss %&gt;%
+specify(response = sex, success = "female") %&gt;%
+  hypothesize(null = "point", p = .5) %&gt;%
+  generate(reps = 200, type = "draw") %&gt;%
+  calculate(stat = "z")
+
+# more in-depth explanation of how to use the infer package
+## Not run: 
+vignette("infer")
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

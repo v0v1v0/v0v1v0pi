@@ -1,0 +1,112 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>asDF</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Convert network to data frame(s)</h2>
+
+<h3>Description</h3>
+
+<p>Convert a network data object to, possibly two, data frames: a data frame
+with an edge list with edge attributes (if any), and a data frame of vertexes
+with vertex attributes (if any). This is a generic function, see below for
+available methods.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">asDF(object, ...)
+
+## S3 method for class 'network'
+asDF(object, ...)
+
+## S3 method for class 'igraph'
+asDF(object, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>R object representing a network, see below for available
+methods</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments passed to/from other methods</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Currently there are methods for <code>object</code> being in one of the following
+classes: "network", "igraph".
+</p>
+<p>The function first gets the graph edge list using the appropriate function
+depending on the class of <code>object</code> (see below).  Edge attributes, if
+any, are then extracted using <code>dumpAttr</code> and added to it.
+</p>
+<p>The vertex data frame is constructed with a vertex id as a sequence of
+integer numbers. Details are method-specific, see below.  Vertex attributes
+are extracted with <code>dumpAttr</code> and added to this data frame.
+</p>
+<p>Method-specific notes:
+</p>
+<p>For objects of class "network". Objects of this class store the vertex ids
+as integer numbers. There is also an attribute "vertex.names" which is
+always created when using graph constructors provided in the package
+<span class="pkg">network</span>.  <code>asDF</code> adds "vertex.names" to the vertex data frame as
+a normal attribute and does not use it as a vertex id in the edge list.
+</p>
+<p>The edge list is created using <code>as.matrix.network</code>
+function and contains integer vertex ids.
+</p>
+<p>Objects of class "igraph", as provided by the <span class="pkg">igraph</span> package. Vertex
+ids in these objects integers starting from 1 (in <span class="pkg">igraph</span> version prior
+to 0.6-0 vertex ids started from 0). However, it is also possible to provide
+a vertex attribute "name". It is added to the vertex data frame as a normal
+vertex attribute and is not used on the edge list data frame.
+</p>
+<p>The edge list is created using <code>get.edgelist</code> function
+with argument <code>names</code> set to <code>FALSE</code> so that integer vertex ids
+are used.
+</p>
+
+
+<h3>Value</h3>
+
+<p>List with two components:
+</p>
+
+<dl>
+<dt><code>edges</code></dt>
+<dd>
+<p>containing an edge list data frame at first two columns
+and edge attributes on further ones.</p>
+</dd>
+<dt><code>vertexes</code></dt>
+<dd>
+<p>with vertex id in the first column, named <code>id</code>
+and any vertex attributes in the other columns.</p>
+</dd>
+</dl>
+<h3>Examples</h3>
+
+<pre><code class="language-R"># using method for 'network' objects
+d1 &lt;- asDF(exNetwork)
+str(d1)
+
+# using method for 'igraph' objects
+d2 &lt;- asDF(exIgraph)
+str(d2)
+</code></pre>
+
+
+</div>

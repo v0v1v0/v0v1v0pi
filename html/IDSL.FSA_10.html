@@ -1,0 +1,208 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>FSA_msp2Cytoscape</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+FSA Cytoscape Files Generator
+</h2>
+
+<h3>Description</h3>
+
+<p>This function generates necessary files from pairwise MSP blocks analysis to create Cytoscape networks.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">FSA_msp2Cytoscape(path, MSPfile = "", mspVariableVector = NULL,
+mspNodeID = NULL, massError = 0.01, RTtolerance = NA, minEntropySimilarity = 0.75,
+allowedNominalMass = FALSE, allowedWeightedSpectralEntropy = TRUE,
+noiseRemovalRatio = 0.01, number_processing_threads = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>path</code></td>
+<td>
+
+<p>address of .msp file or an FSDB
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MSPfile</code></td>
+<td>
+
+<p>name of .msp file
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mspVariableVector</code></td>
+<td>
+
+<p>a vector of msp variables
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mspNodeID</code></td>
+<td>
+
+<p>msp Node ID which is the ID that is required for the ‘specsim’ ID generation
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>massError</code></td>
+<td>
+
+<p>Mass accuracy in Da
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RTtolerance</code></td>
+<td>
+
+<p>Retention time tolerance (min) to match msp blocks. Select <em>NA</em> to ignore retention time match. This option is so helpful to find co-occurring compounds.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minEntropySimilarity</code></td>
+<td>
+
+<p>Minimum entropy similarity score
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allowedNominalMass</code></td>
+<td>
+
+<p>c(TRUE, FALSE). Select 'TRUE' only for nominal mass analysis.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allowedWeightedSpectralEntropy</code></td>
+<td>
+
+<p>c(TRUE, FALSE). Weighted entropy to measure entropy similarity score.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>noiseRemovalRatio</code></td>
+<td>
+
+<p>noise removal ratio relative to the basepeak to measure entropy similarity score (in percent)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>number_processing_threads</code></td>
+<td>
+
+<p>Number of processing threads for multi-threaded processing
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>node_attributes_dataFrame</code></td>
+<td>
+
+<p>node_attributes dataframe. A string to store using 'writeTable' function of R after a tab separation.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>edge_dataFrame</code></td>
+<td>
+
+<p>edge dataframe. A string to store using the 'writeTable' function of R after a tab separation.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>correlation_network</code></td>
+<td>
+
+<p>correlation_network dataframe. A string to store using the 'writeTable' function of R after a tab separation.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FSDB</code></td>
+<td>
+
+<p>Fragmentation spectra database (FSDB) object
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exclusionMSPnoideid</code></td>
+<td>
+
+<p>A vector of MSP node ids which can be excluded to create a library of unique MSP blocks. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filteredNetworkSIF</code></td>
+<td>
+
+<p>A filtered network in the cytoscape SIF format that does not have redundant MSP blocks within a RT window. 
+</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Shannon, P., Markiel, A., Ozier, O., Baliga, N.S., Wang, J.T., Ramage, D., Amin, N., Schwikowski, B. and Ideker, T., (2003). Cytoscape: a software environment for integrated models of biomolecular interaction networks. <em>Genome research</em>, 13(11), 2498-2504, <a href="https://doi.org/10.1101/gr.1239303">doi:10.1101/gr.1239303</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+path_extdata &lt;- system.file("extdata", package = "IDSL.FSA")
+mspFileName &lt;- "Kynurenine_Kynurenic_acid.msp"
+##
+listCytoscape &lt;- FSA_msp2Cytoscape(path = path_extdata,
+MSPfile = mspFileName, mspVariableVector = c("Name", "Collision_energy"),
+mspNodeID = NULL, massError = 0.01, RTtolerance = NA, minEntropySimilarity = 0,
+noiseRemovalRatio = 0, allowedNominalMass = FALSE,
+allowedWeightedSpectralEntropy = TRUE, number_processing_threads = 1)
+##
+FSDB &lt;- listCytoscape[["FSDB"]]
+##
+temp_wd &lt;- tempdir() # just a temporary folder to save results
+##
+write.table(listCytoscape[["node_attributes_dataFrame"]], paste0(temp_wd,
+"/node_attributes_dataFrame.txt"), quote = FALSE, sep = "\t", row.names = FALSE,
+col.names = FALSE)
+##
+write.table(listCytoscape[["correlation_network"]], paste0(temp_wd,
+"/correlation_network.sif"), quote = FALSE, sep = "\t", row.names = FALSE,
+col.names = FALSE)
+##
+write.table(listCytoscape[["edge_dataFrame"]], paste0(temp_wd,
+"/edge_dataFrame.txt"), quote = FALSE, sep = "\t", row.names = FALSE,
+col.names = FALSE)
+##
+
+</code></pre>
+
+
+</div>

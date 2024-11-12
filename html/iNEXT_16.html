@@ -1,0 +1,137 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iNEXT</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>iNterpolation and EXTrapolation of Hill numbers</h2>
+
+<h3>Description</h3>
+
+<p><code>iNEXT</code>: Interpolation and extrapolation of Hill number with order q
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iNEXT(
+  x,
+  q = 0,
+  datatype = "abundance",
+  size = NULL,
+  endpoint = NULL,
+  knots = 40,
+  se = TRUE,
+  conf = 0.95,
+  nboot = 50
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a <code>matrix</code>, <code>data.frame</code> (species by sites), or <code>list</code> of species abundances or incidence frequencies. If <code>datatype = "incidence_freq"</code>, then the first entry of the input data must be total number of sampling units in each column or list.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>a number or vector specifying the diversity order(s) of Hill numbers.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>datatype</code></td>
+<td>
+<p>data type of input data: individual-based abundance data (<code>datatype = "abundance"</code>),
+sampling-unit-based incidence frequencies data (<code>datatype = "incidence_freq"</code>) or species by sampling-units incidence matrix (<code>datatype = "incidence_raw"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size</code></td>
+<td>
+<p>an integer vector of sample sizes (number of individuals or sampling units) for which diversity estimates will be computed. 
+If NULL, then diversity estimates will be computed for those sample sizes determined by the specified/default <code>endpoint</code> and <code>knots</code> .</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>endpoint</code></td>
+<td>
+<p>an integer specifying the sample size that is the <code>endpoint</code> for rarefaction/extrapolation. 
+If NULL, then <code>endpoint</code> <code>=</code> double the reference sample size.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>knots</code></td>
+<td>
+<p>an integer specifying the number of equally-spaced <code>knots</code> (say K, default is 40) between size 1 and the <code>endpoint</code>;
+each knot represents a particular sample size for which diversity estimate will be calculated.  
+If the <code>endpoint</code> is smaller than the reference sample size, then <code>iNEXT()</code> computes only the rarefaction esimates for approximately K evenly spaced <code>knots</code>. 
+If the <code>endpoint</code> is larger than the reference sample size, then <code>iNEXT()</code> computes rarefaction estimates for approximately K/2 evenly spaced <code>knots</code> between sample size 1 and the reference sample size, and computes extrapolation estimates for approximately K/2 evenly spaced <code>knots</code> between the reference sample size and the <code>endpoint</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se</code></td>
+<td>
+<p>a logical variable to calculate the bootstrap standard error and <code>conf</code> confidence interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf</code></td>
+<td>
+<p>a positive number &lt; 1 specifying the level of confidence interval; default is 0.95.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nboot</code></td>
+<td>
+<p>an integer specifying the number of replications; default is 50.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a list of three objects: <code>$DataInfo</code> for summarizing data information; 
+<code>$iNextEst</code> for showing diversity estimates for rarefied and extrapolated samples along with related statistics;
+and <code>$AsyEst</code> for showing asymptotic diversity estimates along with related statistics.<br></p>
+<p>NOTE: From version 3.0.0, <code>$iNextEst</code> has been expanded to include <code>$size_based</code> and <br><code>$coverage_based</code> to provide two types of confidence intervals.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+## example for abundance based data (list of vector)
+data(spider)
+out1 &lt;- iNEXT(spider, q=c(0,1,2), datatype="abundance")
+out1$DataInfo # showing basic data information.
+out1$AsyEst # showing asymptotic diversity estimates.
+out1$iNextEst$size_based 
+# showing diversity estimates with rarefied and extrapolated samples; 
+# confidence limits are obtained for fixed sample size.
+
+out1$iNextEst$coverage_based 
+# showing diversity estimates with rarefied and extrapolated samples;
+# confidence limits are obtained for fixed sample coverage.
+
+## End(Not run)
+## example for abundance based data (data.frame)
+data(bird)
+out2 &lt;- iNEXT(bird, q=0, datatype="abundance")
+out2
+
+## Not run: 
+## example for incidence frequencies based data (list of data.frame)
+data(ant)
+t &lt;- round(seq(10, 500, length.out=20))
+out3 &lt;- iNEXT(ant$h500m, q=1, datatype="incidence_freq", size=t, se=FALSE)
+out3$iNextEst
+
+## End(Not run)
+</code></pre>
+
+
+</div>

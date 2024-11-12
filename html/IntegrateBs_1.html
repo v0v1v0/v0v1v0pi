@@ -1,0 +1,88 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ibs</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Integration for B-splines</h2>
+
+<h3>Description</h3>
+
+<p>Calculate the integral of a B-spline function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ibs(x, knots = NULL, ord = 4, coef = rep(1, length(knots) - ord))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Numerical value or vector. The value(s) at which to evaluate the integral of the B-spline; must be in the bewteen min(knots) and max(knots).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>knots</code></td>
+<td>
+<p>A numeric vector of knot positions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ord</code></td>
+<td>
+<p>An integer &gt;=1. The order of the B-spline integrand function to be integrated. Equals degree plus 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coef</code></td>
+<td>
+<p>A numerical vector. The coefficients (de Boor points) defining the B-spline integrand function.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function returns the integral(s) of the B-spline function specified by knots knots, order ord, and coefficients coef, from the minimum knot position to each x value. The evaluation is based on a closed form expression of the integral in terms of higher order B-splines, given on page 128 of de Boor (2001).
+</p>
+
+
+<h3>Value</h3>
+
+<p>A numerical equal to the integral(s).
+</p>
+
+
+<h3>References</h3>
+
+<p>de Boor, C (2001)  <em>A Practical Guide to Splines</em>. New York: Springer.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(splines)
+f &lt;- function(x) x + 2 * x^2 - 3 * x^3 
+n &lt;- 200
+set.seed(123)
+x &lt;- runif(n)
+y &lt;- f(x) + rnorm(n, sd = 0.1)
+kns &lt;- c(rep(0, 4), 1:4 * 0.2, rep(1, 4))
+bs.c &lt;- splineDesign(kns, x, 4)
+coeff &lt;- as.matrix(lm(y ~ bs.c-1)$coefficients)
+f.b &lt;- function(x, coeff) splineDesign(kns, x, 4) %*% coeff
+integrate(f.b, 0, 1, coeff)
+ibs(1,kns,4,coeff)
+integrate(f, 0, 1)
+plot(x,y)
+curve(f(x), add = TRUE)
+points(x,fitted(lm(y~bs.c-1)),col="blue",lty=1)
+</code></pre>
+
+
+</div>

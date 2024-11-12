@@ -1,0 +1,134 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_extract_info</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Retrieve the definition and latest status of an extract request</h2>
+
+<h3>Description</h3>
+
+<p>Retrieve the latest status of an extract request.
+</p>
+<p><code>get_last_extract_info()</code> is a convenience function to retrieve the most
+recent extract for a given collection.
+</p>
+<p>To browse definitions of your previously submitted extract requests, see
+<code>get_extract_history()</code>.
+</p>
+<p>Learn more about the IPUMS API in <code>vignette("ipums-api")</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_extract_info(extract, api_key = Sys.getenv("IPUMS_API_KEY"))
+
+get_last_extract_info(collection = NULL, api_key = Sys.getenv("IPUMS_API_KEY"))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>extract</code></td>
+<td>
+<p>One of:
+</p>
+
+<ul>
+<li>
+<p> An <code>ipums_extract</code> object
+</p>
+</li>
+<li>
+<p> The data collection and extract number formatted as a string of the
+form <code>"collection:number"</code> or as a vector of the form
+<code>c("collection", number)</code>
+</p>
+</li>
+<li>
+<p> An extract number to be associated with your default IPUMS
+collection. See <code>set_ipums_default_collection()</code>
+</p>
+</li>
+</ul>
+<p>For a list of codes used to refer to each collection, see
+<code>ipums_data_collections()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>api_key</code></td>
+<td>
+<p>API key associated with your user account. Defaults to the
+value of the <code>IPUMS_API_KEY</code> environment variable. See
+<code>set_ipums_api_key()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>collection</code></td>
+<td>
+<p>Character string of the IPUMS collection for which to
+retrieve extract history. Defaults to the current default
+collection, if it exists. See <code>set_ipums_default_collection()</code>.
+</p>
+<p>For a list of codes used to refer to each collection, see
+<code>ipums_data_collections()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An <code>ipums_extract</code> object.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>get_extract_history()</code> to browse past extract definitions
+</p>
+<p><code>wait_for_extract()</code> to wait for an extract to finish processing.
+</p>
+<p><code>download_extract()</code> to download an extract's data files.
+</p>
+<p><code>save_extract_as_json()</code> and <code>define_extract_from_json()</code> to share an
+extract definition.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">my_extract &lt;- define_extract_micro(
+  collection = "usa",
+  description = "2013-2014 ACS Data",
+  samples = c("us2013a", "us2014a"),
+  variables = c("SEX", "AGE", "YEAR")
+)
+
+## Not run: 
+submitted_extract &lt;- submit_extract(my_extract)
+
+# Get latest info for the request associated with a given `ipums_extract`
+# object:
+updated_extract &lt;- get_extract_info(submitted_extract)
+
+updated_extract$status
+
+# Or specify the extract collection and number:
+get_extract_info("usa:1")
+get_extract_info(c("usa", 1))
+
+# If you have a default collection, you can use the extract number alone:
+set_ipums_default_collection("nhgis")
+get_extract_info(1)
+
+# To get the most recent extract (for instance, if you have forgotten its
+# extract number), use `get_last_extract_info()`
+get_last_extract_info("nhgis")
+
+## End(Not run)
+</code></pre>
+
+
+</div>

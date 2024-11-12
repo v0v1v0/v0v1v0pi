@@ -1,0 +1,200 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Internal</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Internal Functions</h2>
+
+<h3>Description</h3>
+
+ 
+<p>Functions called internally by <span class="pkg">ipsecr</span>. 
+These are exported and may be called separately for testing.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">
+proxy.ms(capthist, model = NULL, trapdesigndata = NULL, ...)
+
+detectionDesignData(capthist, byoccasion = FALSE, ...)
+
+proxyfn1(capthist, N.estimator =  c("n", "null","zippin","jackknife"), ...)
+
+simpop(mask, D, N, details = list(), ...)
+
+simCH(traps, popn, detectfn, detparmat, noccasions, NT = NULL, details = 
+    list(), ...)
+      
+rpsv(capthist)
+rpsvi(capthist)
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>capthist</code></td>
+<td>
+<p>secr capthist object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>named list of model formulae (see <code>ipsecr.fit</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trapdesigndata</code></td>
+<td>
+<p>dataframe with one row for each detector and session</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments, mostly unused</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>byoccasion</code></td>
+<td>
+<p>logical; if TRUE the output rows are repeated for each occasion </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N.estimator</code></td>
+<td>
+<p>character name of closed-population estimator</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mask</code></td>
+<td>
+<p> secr mask object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>numeric density in each mask cell</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>integer number of animals to simulate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>traps</code></td>
+<td>
+<p>detector locations as <span class="pkg">secr</span> traps object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>popn</code></td>
+<td>
+<p>animal locations as <span class="pkg">secr</span> popn object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>detectfn</code></td>
+<td>
+<p>integer code for detection function (see detectfn)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>detparmat</code></td>
+<td>
+<p>numeric matrix of detection parameter values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>noccasions</code></td>
+<td>
+<p>integer number of sampling occasions</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>NT</code></td>
+<td>
+<p>numeric hazard of non-target interference at each detector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>details</code></td>
+<td>
+<p>list with optional additional named arguments</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>proxy.ms</code> is the default proxyfn used by <code>ipsecr.fit</code>. When used internally by <code>ipsecr.fit</code>, ‘model’ and ‘trapdesigndata’ are passed automatically. The ... argument of <code>proxy.ms</code> may be used to pass arguments to <code>addCovariates</code>, especially ‘spatialdata’. Function <code>detectionDesignData</code> is used internally to construct design data for non-constant detection models (lambda0, sigma), used in the glm 'data' argument. The capthist argument for <code>detectionDesignData</code> should always be a list (wrap a single-session capthist in list()).
+</p>
+<p><code>simpop</code> is used by <code>ipsecr.fit</code> for popmethod 'internal'. It is faster and simpler than the <span class="pkg">secr</span> function <code>sim.popn</code>. The details component 'distribution' is a character value that may be ‘poisson’ (default) or 'even.
+</p>
+<p><code>simCH</code> is used by <code>ipsecr.fit</code> for CHmethod 'internal'. It is faster and simpler than the <span class="pkg">secr</span> function <code>sim.capthist</code>, and optionally simulates non-target interference. The argument <code>detparmat</code> is an individual x parameter matrix, with parameters in the order usual for <code>detectfn</code>.
+</p>
+<p><code>D</code> and <code>NT</code> are matrices with one column per session. 
+</p>
+<p><code>proxyfn1</code> is a simple proxy function included mostly for historical reasons. It updates the function of Efford (2004) by log-transforming N, using a complementary log-log transformation instead of odds for p, and using log(RPSV(capthist)) for sigma. If you're interested, look at the code.
+</p>
+<p><code>rpsv(capthist)</code> is equivalent to <span class="pkg">secr</span> RPSV(capthist, CC = TRUE). <code>rpsvi(capthist)</code> returns a vector of individual-specific rpsv.
+</p>
+
+
+<h3>Value</h3>
+
+<p>proxy.ms – a numeric vector of length &gt;= 3 corresponding to proxies for a wide range of models, 
+including multi-session density and non-target interference models.
+</p>
+<p>detectionDesignData – a dataframe with one row per individual per session (byoccasion = FALSE) or one row per individual per occasion per session (byoccasion = TRUE), ordered by session, occasion and individual. Columns include x and y coordinates of the individual's centroid, session, and any individual covariates.
+</p>
+<p>proxyfn1 – a numeric vector of length 3 corresponding to proxies for 
+population size, capture probability intercept and scale of detection.
+</p>
+<p>simpop – a <code>popn</code> object.
+</p>
+<p>simCH – a single-session <code>capthist</code> object. 
+</p>
+<p>rpsv – scalar
+</p>
+<p>rpsvi – vector, one element per animal
+</p>
+
+
+<h3>Note</h3>
+
+<p><code>proxyfn0</code> was removed in version 1.2.0.
+</p>
+
+
+<h3>References</h3>
+
+<p>Efford, M. G. (2004) Density estimation in live-trapping studies. <em>Oikos</em> <b>106</b>, 598–610.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ipsecr.fit</code>, 
+<code>plotProxy</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+proxy.ms(captdata)
+
+</code></pre>
+
+
+</div>

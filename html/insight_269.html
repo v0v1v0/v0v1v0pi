@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>text_remove_backticks</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Remove backticks from a string</h2>
+
+<h3>Description</h3>
+
+<p>This function removes backticks from a string.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">text_remove_backticks(x, ...)
+
+## S3 method for class 'data.frame'
+text_remove_backticks(x, column = "Parameter", verbose = FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A character vector, a data frame or a matrix. If a matrix,
+backticks are removed from the column and row names, not from values
+of a character vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Currently not used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>column</code></td>
+<td>
+<p>If <code>x</code> is a data frame, specify the column of character
+vectors, where backticks should be removed. If <code>NULL</code>, all character
+vectors are processed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Toggle warnings.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>x</code>, where all backticks are removed.
+</p>
+
+
+<h3>Note</h3>
+
+<p>If <code>x</code> is a character vector or data frame, backticks are removed from
+the elements of that character vector (or character vectors from the data
+frame.) If <code>x</code> is a matrix, the behaviour slightly differs: in this case,
+backticks are removed from the column and row names. The reason for this
+behaviour is that this function mainly serves formatting coefficient names.
+For <code>vcov()</code> (a matrix), row and column names equal the coefficient names
+and therefore are manipulated then.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># example model
+data(iris)
+iris$`a m` &lt;- iris$Species
+iris$`Sepal Width` &lt;- iris$Sepal.Width
+model &lt;- lm(`Sepal Width` ~ Petal.Length + `a m`, data = iris)
+
+# remove backticks from string
+names(coef(model))
+text_remove_backticks(names(coef(model)))
+
+# remove backticks from character variable in a data frame
+# column defaults to "Parameter".
+d &lt;- data.frame(
+  Parameter = names(coef(model)),
+  Estimate = unname(coef(model))
+)
+d
+text_remove_backticks(d)
+</code></pre>
+
+
+</div>

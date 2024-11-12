@@ -1,0 +1,333 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>irlba</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Find a few approximate singular values and corresponding
+singular vectors of a matrix.</h2>
+
+<h3>Description</h3>
+
+<p>The augmented implicitly restarted Lanczos bidiagonalization algorithm
+(IRLBA) finds a few approximate largest (or, optionally, smallest) singular
+values and corresponding
+singular vectors of a sparse or dense matrix using a method of Baglama and
+Reichel.  It is a fast and memory-efficient way to compute a partial SVD.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">irlba(A, nv = 5, nu = nv, maxit = 1000, work = nv + 7, reorth = TRUE,
+  tol = 1e-05, v = NULL, right_only = FALSE, verbose = FALSE,
+  scale = NULL, center = NULL, shift = NULL, mult = NULL,
+  fastpath = TRUE, svtol = tol, smallest = FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>numeric real- or complex-valued matrix or real-valued sparse matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nv</code></td>
+<td>
+<p>number of right singular vectors to estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nu</code></td>
+<td>
+<p>number of left singular vectors to estimate (defaults to <code>nv</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxit</code></td>
+<td>
+<p>maximum number of iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>work</code></td>
+<td>
+<p>working subspace dimension, larger values can speed convergence at the cost of more memory use.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reorth</code></td>
+<td>
+<p>if <code>TRUE</code>, apply full reorthogonalization to both SVD bases, otherwise
+only apply reorthogonalization to the right SVD basis vectors; the latter case is cheaper per
+iteration but, overall, may require more iterations for convergence. Automatically <code>TRUE</code>
+when <code>fastpath=TRUE</code> (see below).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>convergence is determined when <code class="reqn">\|A^TU - VS\| &lt; tol\|A\|</code>,
+and when the maximum relative change in estimated singular values from one iteration to the
+next is less than <code>svtol = tol</code> (see <code>svtol</code> below),
+where the spectral norm ||A|| is approximated by the
+largest estimated singular value, and U, V, S are the matrices corresponding
+to the estimated left and right singular vectors, and diagonal matrix of
+estimated singular values, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v</code></td>
+<td>
+<p>optional starting vector or output from a previous run of <code>irlba</code> used
+to restart the algorithm from where it left off (see the notes).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>right_only</code></td>
+<td>
+<p>logical value indicating return only the right singular vectors
+(<code>TRUE</code>) or both sets of vectors (<code>FALSE</code>). The right_only option can be
+cheaper to compute and use much less memory when <code>nrow(A) &gt;&gt; ncol(A)</code> but note
+that obtained solutions typically lose accuracy due to lack of re-orthogonalization in the
+algorithm and that <code>right_only = TRUE</code> sets <code>fastpath = FALSE</code> (only use this option
+for really large problems that run out of memory and when <code>nrow(A) &gt;&gt; ncol(A)</code>).
+Consider increasing the <code>work</code> option to improve accuracy with <code>right_only=TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>logical value that when <code>TRUE</code> prints status messages during the computation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p>optional column scaling vector whose values divide each column of <code>A</code>;
+must be as long as the number of columns of <code>A</code> (see notes).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>center</code></td>
+<td>
+<p>optional column centering vector whose values are subtracted from each
+column of <code>A</code>; must be as long as the number of columns of <code>A</code> and may
+not be used together with the deflation options below (see notes).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shift</code></td>
+<td>
+<p>optional shift value (square matrices only, see notes).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mult</code></td>
+<td>
+<p>DEPRECATED optional custom matrix multiplication function (default is <code>%*%</code>, see notes).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fastpath</code></td>
+<td>
+<p>try a fast C algorithm implementation if possible; set <code>fastpath=FALSE</code> to use the
+reference R implementation. See the notes for more details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>svtol</code></td>
+<td>
+<p>additional stopping tolerance on maximum allowed absolute relative change across each
+estimated singular value between iterations.
+The default value of this parameter is to set it to <code>tol</code>. You can set <code>svtol=Inf</code> to
+effectively disable this stopping criterion. Setting <code>svtol=Inf</code> allows the method to
+terminate on the first Lanczos iteration if it finds an invariant subspace, but with less certainty
+that the converged subspace is the desired one. (It may, for instance, miss some of the largest
+singular values in difficult problems.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smallest</code></td>
+<td>
+<p>set <code>smallest=TRUE</code> to estimate the smallest singular values and associated
+singular vectors. WARNING: this option is somewhat experimental, and may produce poor
+estimates for ill-conditioned matrices.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>optional additional arguments used to support experimental and deprecated features.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a list with entries:
+</p>
+
+<dl>
+<dt>d:</dt>
+<dd>
+<p> max(nu, nv) approximate singular values</p>
+</dd>
+<dt>u:</dt>
+<dd>
+<p> nu approximate left singular vectors (only when right_only=FALSE)</p>
+</dd>
+<dt>v:</dt>
+<dd>
+<p> nv approximate right singular vectors</p>
+</dd>
+<dt>iter:</dt>
+<dd>
+<p> The number of Lanczos iterations carried out</p>
+</dd>
+<dt>mprod:</dt>
+<dd>
+<p> The total number of matrix vector products carried out</p>
+</dd>
+</dl>
+<h3>Note</h3>
+
+<p>The syntax of <code>irlba</code> partially follows <code>svd</code>, with an important
+exception. The usual R <code>svd</code> function always returns a complete set of
+singular values, even if the number of singular vectors <code>nu</code> or <code>nv</code>
+is set less than the maximum. The <code>irlba</code> function returns a number of
+estimated singular values equal to the maximum of the number of specified
+singular vectors <code>nu</code> and <code>nv</code>.
+</p>
+<p>Use the optional <code>scale</code> parameter to implicitly scale each column of
+the matrix <code>A</code> by the values in the <code>scale</code> vector, computing the
+truncated SVD of the column-scaled <code>sweep(A, 2, scale, FUN=`/`)</code>, or
+equivalently, <code>A %*% diag(1 / scale)</code>, without explicitly forming the
+scaled matrix. <code>scale</code> must be a non-zero vector of length equal
+to the number of columns of <code>A</code>.
+</p>
+<p>Use the optional <code>center</code> parameter to implicitly subtract the values
+in the <code>center</code> vector from each column of <code>A</code>, computing the
+truncated SVD of <code>sweep(A, 2, center, FUN=`-`)</code>,
+without explicitly forming the centered matrix. <code>center</code>
+must be a vector of length equal to the number of columns of <code>A</code>.
+This option may be used to efficiently compute principal components without
+explicitly forming the centered matrix (which can, importantly, preserve
+sparsity in the matrix). See the examples.
+</p>
+<p>The optional <code>shift</code> scalar valued argument applies only to square matrices; use it
+to estimate the partial svd of <code>A + diag(shift, nrow(A), nrow(A))</code>
+(without explicitly forming the shifted matrix).
+</p>
+<p>(Deprecated) Specify an optional alternative matrix multiplication operator in the
+<code>mult</code> parameter. <code>mult</code> must be a function of two arguments,
+and must handle both cases where one argument is a vector and the other
+a matrix. This option is deprecated and will be removed in a future version.
+The new preferred method simply uses R itself to define a custom matrix class
+with your user-defined matrix multiplication operator. See the examples.
+</p>
+<p>Use the <code>v</code> option to supply a starting vector for the iterative
+method. A random vector is used by default (precede with <code>set.seed()</code>
+for reproducibility). Optionally set <code>v</code> to
+the output of a previous run of <code>irlba</code> to restart the method, adding
+additional singular values/vectors without recomputing the solution
+subspace. See the examples.
+</p>
+<p>The function may generate the following warnings:
+</p>
+
+<ul>
+<li>
+<p>"did not converge–results might be invalid!; try increasing work or maxit"
+means that the algorithm didn't
+converge – this is potentially a serious problem and the returned results may not be valid. <code>irlba</code>
+reports a warning here instead of an error so that you can inspect whatever is returned. If this
+happens, carefully heed the warning and inspect the result. You may also try setting <code>fastpath=FALSE</code>.
+</p>
+</li>
+<li>
+<p>"You're computing a large percentage of total singular values, standard svd might work better!"
+<code>irlba</code> is designed to efficiently compute a few of the largest singular values and associated
+singular vectors of a matrix. The standard <code>svd</code> function will be more efficient for computing
+large numbers of singular values than <code>irlba</code>.
+</p>
+</li>
+<li>
+<p>"convergence criterion below machine epsilon" means that the product of <code>tol</code> and the
+largest estimated singular value is really small and the normal convergence criterion is only
+met up to round off error.
+</p>
+</li>
+</ul>
+<p>The function might return an error for several reasons including a situation when the starting
+vector <code>v</code> is near the null space of the matrix. In that case, try a different <code>v</code>.
+</p>
+<p>The <code>fastpath=TRUE</code> option only supports real-valued matrices and sparse matrices
+of type <code>dgCMatrix</code> (for now). Other problems fall back to the reference
+R implementation.
+</p>
+
+
+<h3>References</h3>
+
+<p>Baglama, James, and Lothar Reichel. "Augmented implicitly restarted Lanczos bidiagonalization methods." SIAM Journal on Scientific Computing 27.1 (2005): 19-42.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>svd</code>, <code>prcomp</code>, <code>partial_eigen</code>, <code>svdr</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(1)
+
+A &lt;- matrix(runif(400), nrow=20)
+S &lt;- irlba(A, 3)
+S$d
+
+# Compare with svd
+svd(A)$d[1:3]
+
+# Restart the algorithm to compute more singular values
+# (starting with an existing solution S)
+S1 &lt;- irlba(A, 5, v=S)
+
+# Estimate smallest singular values
+irlba(A, 3, smallest=TRUE)$d
+
+#Compare with
+tail(svd(A)$d, 3)
+
+# Principal components (see also prcomp_irlba)
+P &lt;- irlba(A, nv=1, center=colMeans(A))
+
+# Compare with prcomp and prcomp_irlba (might vary up to sign)
+cbind(P$v,
+      prcomp(A)$rotation[, 1],
+      prcomp_irlba(A)$rotation[, 1])
+
+# A custom matrix multiplication function that scales the columns of A
+# (cf the scale option). This function scales the columns of A to unit norm.
+col_scale &lt;- sqrt(apply(A, 2, crossprod))
+setClass("scaled_matrix", contains="matrix", slots=c(scale="numeric"))
+setMethod("%*%", signature(x="scaled_matrix", y="numeric"),
+   function(x ,y) x@.Data %*% (y / x@scale))
+setMethod("%*%", signature(x="numeric", y="scaled_matrix"),
+   function(x ,y) (x %*% y@.Data) / y@scale)
+a &lt;- new("scaled_matrix", A, scale=col_scale)
+irlba(a, 3)$d
+
+# Compare with:
+svd(sweep(A, 2, col_scale, FUN=`/`))$d[1:3]
+
+
+</code></pre>
+
+
+</div>

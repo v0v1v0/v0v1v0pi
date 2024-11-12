@@ -1,0 +1,125 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>IP classes</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>IPv4, IPv6 and IP classes</h2>
+
+<h3>Description</h3>
+
+<p>classes for IPv4 and IPv6 addresses</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  ipv4(object,...)
+  ipv6(object,...)
+  ip(e1,e2,...)
+  
+  
+  
+  
+  
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+
+<table><tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>a vector of IPv4 or IPv6 strings. If missing, returns an empty IPv4 or IPv6 object</p>
+</td>
+</tr></table>
+<table><tr style="vertical-align: top;">
+<td><code>e1, e2</code></td>
+<td>
+<p>either e1= a vector of IPv4 or IPv6 strings (and e2 missing) or objects of class e1 = an object of class IPv4' and e2 = an object of class 'IPv6</p>
+</td>
+</tr></table>
+<table><tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>for <code>c</code>, zero or more objects objects of either class 'IPv4' or 'IPv6'or 'IP' exclusively</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+
+<p>IPv4 and IPv6 objects are created either from either character strings or integer vectors through <code>ipv4()</code> and <code>ipv6()</code> calls.
+</p>
+
+<p>IP objects store both IPv4 and IPv6 addresses. IP are created either from a character string or from IPv4 and IPv6 objects through <code>ip()</code> calls. 
+
+Since the IPv4 and IPv6 protocols use a different address representation, IP objects store both IPv4 and IPv6 addresses but do not mix them. The i-th element of an IP object can only an IPv4 or an IPv6 address but not both. So, if the i-th IPv4 is set, the corresponding i-th IPv6 must be NA and vice-versa.
+</p>
+
+<p>in addition to object creation, he <code>ipv4()</code> and <code>ipv6()</code> methods also extract the IPv4 and IPv6 addresses from an IP object and return an object with the same length. Use the drop argument to remove all NA values.
+</p>
+
+<p>Like atomic base R vectors, IPv4, IPv6 and IP objects elements can be subsetted (<code>[</code>) and replaced (<code>[&lt;-</code>) and named (<code>name&lt;-</code>). Objects can also be concatenated (<code>c()</code> or <code>rbind2()</code>) or stored in a <code>data.frame</code>.
+</p>
+
+<p>Note that in order to avoid undesirable side-effects, <code>is.numeric()</code> returns <code>FALSE</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##
+ipv4("0.0.0.0")==ipv4(0L)
+##
+ipv6("::")==ipv6(0L)
+## create an empty object
+ip0    &lt;- ip()
+## grow it
+ip0[3] &lt;- ipv4(3L)
+ip0[5] &lt;- ipv6(5L)
+ip0
+## same thing with NA
+ip0    &lt;- ip()
+ip0[2] &lt;- NA
+ip0
+## private networks
+ip.strings &lt;- c(v4 = "192.0.0.1", v6 = "fd00::1" )
+##
+(ip4 &lt;- ipv4(ip.strings))
+##
+(ip6 &lt;- ipv6(ip.strings))
+##
+(ip &lt;- ip(ip.strings))
+##
+all(ip==ip(ip4, ip6))
+##
+pnet0 &lt;- data.frame(
+  ip 
+  , v = ip.version(ip)
+)
+##
+pnet1 &lt;- rbind(
+  pnet0
+  , within(pnet0, ip &lt;- ip+1L)
+)
+##
+pnet0==pnet1[1:2,] 
+## fails (why?): 
+identical(pnet0,pnet1[1:2,])
+##
+ip(ip4[1],ip6[2],append=TRUE)
+##
+## IPv6 transition mechanism
+##
+## IPv4-mapped Address
+(ip6 &lt;- ipv6("::ffff:c000:0280"))==ipv6("::ffff:192.0.2.128")
+##
+ipv6.reserved()[ip.index(ipv6.reserved())(ip6)]
+## NAT64 IPv4-IPv6 translation
+(ip6 &lt;- ipv6("64:ff9b::c000:201") ) &amp; ipv6.hostmask(96)
+##
+ipv6.reserved()[ip.index(ipv6.reserved())(ip6)]
+</code></pre>
+
+
+</div>

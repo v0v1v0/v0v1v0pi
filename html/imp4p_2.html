@@ -1,0 +1,103 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>estim.bound</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Estimation of lower and upper bounds for missing values.
+</h2>
+
+<h3>Description</h3>
+
+<p>This function allows estimating lower and upper bounds for missing values of an input matrix. It can be used before to use the functions <code>prob.mcar</code> and <code>prob.mcar.tab</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">estim.bound(tab, conditions, q=0.95)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>tab</code></td>
+<td>
+<p>A data matrix containing numeric and missing values. Each column of this matrix is assumed to correspond to the intensities measured in an experimental sample, and each row to the ones of an identified peptide.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conditions</code></td>
+<td>
+<p>A vector of factors indicating the biological condition to which each sample belongs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>A numeric value allowing to define confidence intervals for missing values (see Details).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>In each condition, this function estimates lower and upper bounds for missing values of row <code>i</code> by:
+</p>
+<p><code>upper(i)=max(tab[i,]);</code>
+</p>
+<p><code>lower(i)=max(tab[i,])-quant_diff(q);</code>
+</p>
+<p>where <code>quant_diff(q)</code> corresponds to a quantile value of the differences between the maximum and the minimum of the observed values for all the peptides in the condition. As a result, if <code>q</code> is close to 1, <code>quant_diff(q)</code> represents an extrem value between the maximum and the minimum of the intensity values in a condition for a peptide.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list composed of:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>tab.lower</code></td>
+<td>
+<p>A matrix with the lower bounds for each missing value in <code>tab</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tab.upper</code></td>
+<td>
+<p>A matrix with the upper bounds for each missing value in <code>tab</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Quentin Giai Gianetto &lt;quentin2g@yahoo.fr&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>prob.mcar</code>,<code>prob.mcar.tab</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#Simulating data
+res.sim=sim.data(nb.pept=2000,nb.miss=600,pi.mcar=0.2,para=0.5,nb.cond=2,nb.repbio=3,
+nb.sample=5,m.c=25,sd.c=2,sd.rb=0.5,sd.r=0.2);
+
+data=res.sim$dat.obs;
+cond=res.sim$conditions;
+
+#Estimation of lower and upper bounds for each missing value
+res=estim.bound(data,conditions=cond);
+
+</code></pre>
+
+
+</div>

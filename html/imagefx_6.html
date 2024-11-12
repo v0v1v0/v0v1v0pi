@@ -1,0 +1,203 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>calc.blob.stats</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+
+Calculate Color and Spatial Statistics from Blob Region
+</h2>
+
+<h3>Description</h3>
+
+
+<p>Wrapper function (see details) that calculates various statistics on x,y data that corresponds to an image.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">calc.blob.stats(img, xy.coords)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>img</code></td>
+<td>
+
+
+<p>Matrix whose values at <code>xy.coords</code> are statistically analyzed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xy.coords</code></td>
+<td>
+
+
+<p>Index locations corresponding region of interest (e.g. blob region) in the <code>img</code>
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<p>Function calls multiple statistical functions (e.g. <code>mean</code>, <code>sd</code>) and applies them to regions in the <code>img</code> according to the index locations given by <code>xy.coords</code>.  In general, this function is commented to promote any modifications needed to fit the users needs.  For example, adding or removing statistical analyses is straight forward.
+</p>
+
+
+<h3>Value</h3>
+
+
+
+
+
+
+<p>Numeric vector giving the statistics of the blob region.
+</p>
+
+
+<h3>Author(s)</h3>
+
+
+<p>Alex J.C. Witsil
+</p>
+
+
+<h3>See Also</h3>
+
+
+<p><code>mean</code>
+<code>sd</code>
+<code>sum</code>
+<code>colMeans</code>
+<code>rowMeans</code>
+<code>length</code>
+<code>skewness</code>
+<code>kurtosis</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+############
+### EG 1 ###
+############
+## example with synthetic data
+
+## create an image that is a simple gaussian
+img &lt;- build.gaus(100,100,sig.x=2,sig.y=10,x.mid=80,y.mid=60)
+
+## find the where the maximum value is
+img.max &lt;- which(img==max(img),arr.ind=TRUE)
+
+## define a sigma for the low pass filter
+sig=5
+
+## define the low pass filter as another gaussian
+lp.filt &lt;- build.gaus(nrow(img),ncol(img),sig.x=sig)
+
+## define a window size for the connected component algorithm
+win.size=0.05
+
+## perform the blob detection
+blob &lt;- blob.extract(img=img, blob.point=img.max,win.size=win.size,gaus=lp.filt)
+
+#################################
+### CALCULATE BLOB STATISTICS ###
+#################################
+
+blob.stats &lt;- calc.blob.stats(img, blob$xy.coords)
+print(blob.stats)
+
+
+############
+### EG 2 ###
+############
+
+## example with volcano image data.
+data(sakurajima)
+
+######################
+### PRE PROCESSING ###
+######################
+
+## crop accroding to these corner values
+xleft = 1
+xright = 188
+ybottom = 1
+ytop = 396
+
+## crop the image using crop.image
+cropped &lt;- crop.image(sakurajima, xleft, ybottom, xright, ytop)
+
+## redefine the crop image
+img &lt;- cropped$img.crop
+
+## separate the image into red, green, and blue images
+r.img &lt;- img[,,1]
+g.img &lt;- img[,,2]
+b.img &lt;- img[,,3]
+
+## remove the mean
+r.img &lt;- r.img-mean(r.img)
+g.img &lt;- g.img-mean(g.img)
+b.img &lt;- b.img-mean(b.img)
+
+## calculate the the plane trend...
+r.img.trend &lt;- fit3d(r.img)
+g.img.trend &lt;- fit3d(g.img)
+b.img.trend &lt;- fit3d(b.img)
+
+## remove the trend
+r.img.dtrend &lt;- r.img-r.img.trend
+g.img.dtrend &lt;- g.img-g.img.trend
+b.img.dtrend &lt;- b.img-b.img.trend
+
+
+################################
+### SET UP SOME FILTER MASKS ###
+################################
+
+## define a sigma for the LP Gaussian Filter
+gaus.sig=30
+
+## build the Gaussian filter
+gaus &lt;- build.gaus(nrow(img),ncol(img),gaus.sig)
+
+## find the maximum value of each RGB channel
+blob.r.point &lt;- which(r.img.dtrend==max(r.img.dtrend),arr.ind=TRUE)
+blob.g.point &lt;- which(g.img.dtrend==max(g.img.dtrend),arr.ind=TRUE)
+blob.b.point &lt;- which(b.img.dtrend==max(b.img.dtrend),arr.ind=TRUE)
+
+## set a window size to be used in the connected component algorithm
+win.size = 0.05
+
+## extract the blob xy locations
+blob.r &lt;- blob.extract(r.img.dtrend,blob.r.point,win.size,gaus)
+blob.g &lt;- blob.extract(g.img.dtrend,blob.r.point,win.size,gaus)
+blob.b &lt;- blob.extract(b.img.dtrend,blob.r.point,win.size,gaus)
+
+
+#################################
+### CALCULATE BLOB STATISTICS ###
+#################################
+
+r.blob.stats &lt;- calc.blob.stats(r.img.dtrend, blob.r$xy.coords)
+g.blob.stats &lt;- calc.blob.stats(g.img.dtrend, blob.g$xy.coords)
+b.blob.stats &lt;- calc.blob.stats(b.img.dtrend, blob.b$xy.coords)
+
+print(r.blob.stats)
+print(g.blob.stats)
+print(b.blob.stats)
+
+</code></pre>
+
+
+</div>

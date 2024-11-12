@@ -1,0 +1,337 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>longitudinalPrime</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Selects a set variables to be retained in a data frame of longitudinal data</h2>
+
+<h3>Description</h3>
+
+<p>Forms the prime traits by selecting a subset of the traits in a data.frame of 
+imaging data produced by the Lemna Tec Scanalyzer. The imaging traits to be retained 
+are specified using the <code>traits</code> and <code>labsCamerasViews</code> arguments. Some imaging 
+traits are divided by 10000 to convert them from pixels to kilopixels. 
+Also added are factors and explanatory variates that might be of use in an analysis.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">longitudinalPrime(data, cartId = "Snapshot.ID.Tag", 
+                  imageTimes = "Snapshot.Time.Stamp", 
+                  timeAfterStart = "Time.after.Planting..d.",
+                  idcolumns = c("Genotype.ID","Treatment.1"), 
+                  traits = list(all = c("Area", 
+                                        "Boundary.Points.To.Area.Ratio", 
+                                        "Caliper.Length", "Compactness", 
+                                        "Convex.Hull.Area"), 
+                                 side = c("Center.Of.Mass.Y", 
+                                          "Max.Dist.Above.Horizon.Line")),
+                  labsCamerasViews = list(all = c("SV1", "SV2", "TV"),
+                                          side = c("SV1", "SV2")), 
+                  smarthouse.lev = NULL, 
+                  calcWaterLoss = TRUE, pixelsPERcm)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A <code>data.frame</code> containing the columns specified by <code>cartId</code>, 
+<code>imageTimes</code>, <code>timeAfterStart</code>, <code>idcolumns</code>, <code>traits</code> and 
+<code>cameras</code> along with  the following columns: 
+</p>
+<p>Smarthouse, Lane, Position, Weight.Before, Weight.After, Water.Amount, 
+</p>
+<p>Projected.Shoot.Area..pixels.
+</p>
+<p>The defaults for the arguments to <code>longitudinalPrime</code> requires a 
+<code>data.frame</code> containing the following columns, although not necessarily 
+in the order given here:
+</p>
+<p>Smarthouse, Lane, Position, Weight.Before, Weight.After, Water.Amount, 
+</p>
+<p>Projected.Shoot.Area..pixels., Area.SV1, Area.SV2, Area.TV, 
+</p>
+<p>Boundary.Points.To.Area.Ratio.SV1, Boundary.Points.To.Area.Ratio.SV2, 
+</p>
+<p>Boundary.Points.To.Area.Ratio.TV,  Caliper.Length.SV1, 
+</p>
+<p>Caliper.Length.SV2, Caliper.Length.TV, 
+</p>
+<p>Compactness.SV1, Compactness.SV2, Compactness.TV, 
+</p>
+<p>Convex.Hull.Area.SV1, Convex.Hull.Area.SV2, Convex.Hull.Area.TV, 
+</p>
+<p>Center.Of.Mass.Y.SV1, Center.Of.Mass.Y.SV2, 
+</p>
+<p>Max.Dist.Above.Horizon.Line.SV1, Max.Dist.Above.Horizon.Line.SV2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cartId</code></td>
+<td>
+<p>A <code>character</code> giving the name of the column that contains
+the unique Id for each cart.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>imageTimes</code></td>
+<td>
+<p>A <code>character</code> giving the name of the column that contains
+the time that each cart was imaged.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timeAfterStart</code></td>
+<td>
+<p>A <code>character</code> giving the name of the column that 
+contains the time after some nominated starting time e.g. the number of days 
+after planting.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>idcolumns</code></td>
+<td>
+<p>A <code>character</code> vector giving the names of the columns that 
+identify differences between the plants or carts e.g. Genotype.ID, 
+Treatment.1, Treatment.2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>traits</code></td>
+<td>
+<p>A <code>character</code> or a <code>list</code> whose components are  
+<code>character</code>s. Each <code>character</code> gives the names of the 
+columns for imaging <code>traits</code> whose values are required for each of the 
+camera-view combinations given in the corresponding <code>list</code> 
+component of <code>labsCamerasViews</code>. If <code>labsCamerasViews</code> or a 
+component of <code>labsCamerasViews</code> is <code>NULL</code>, then the contents of 
+<code>traits</code> or the coresponding component of <code>traits</code> are merely 
+treated as the names of columns to be retained.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>labsCamerasViews</code></td>
+<td>
+<p>A <code>character</code> or a <code>list</code> whose components are  
+<code>character</code>s. Each <code>character</code> gives the labels of the  
+camera-view combinations for which is required values of each of the imaging 
+<code>traits</code> in the corresponding <code>character</code> of <code>traits</code>. 
+It is assumed that the camera-view labels are appended to the trait names and 
+separated from the trait names by a full stop (.). If <code>labsCamerasViews</code> 
+or a component of <code>labsCamerasViews</code> is <code>NULL</code>, then the contents 
+of the <code>traits</code> or the coresponding component of <code>traits</code> are 
+merely treated as the names of columns to be retained.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smarthouse.lev</code></td>
+<td>
+<p>A <code>character</code> vector giving the levels to use 
+for the Smarthouse factor. If <code>NULL</code> then the unique values in Smarthouse 
+will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>calcWaterLoss</code></td>
+<td>
+<p>A <code>logical</code> indicating whether to calculate the Water.Loss. If it is 
+<code>FALSE</code>, <code>Water.Before</code>, <code>Water.After</code> and <code>Water.Amount</code> will not be in 
+the returned <code>data.frame</code>. They can be copied across by listing them in a component 
+of <code>traits</code> and set the corresponding component of <code>cameras</code> to <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pixelsPERcm </code></td>
+<td>
+<p>A <code>numeric</code> giving the number of pixels per cm 
+for the images. <em>No longer used.</em></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The columns are copied from data, except for those columns in the list under <b>Value</b> that have ‘(calculated)’ appended.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>data.frame</code> containing the columns specified by <code>cartId</code>, 
+<code>imageTimes</code>, <code>timeAfterStart</code>, <code>idcolumns</code>, <code>traits</code> and 
+<code>cameras</code>. The defaults will result in the following columns:
+</p>
+
+<ol>
+<li>
+<p> Smarthouse: factor with levels for the Smarthouse
+</p>
+</li>
+<li>
+<p> Lane: factor for lane number in a smarthouse
+</p>
+</li>
+<li>
+<p> Position: factor for east/west position in a lane
+</p>
+</li>
+<li>
+<p> Days: factor for the number of Days After Planting (DAP)
+</p>
+</li>
+<li> <p><code>cartId</code>: unique code for each cart 
+</p>
+</li>
+<li> <p><code>imageTimes</code>: time at which an image was taken in POSIXct format
+</p>
+</li>
+<li>
+<p> Reps: factor indexing the replicates for each combination of the factors in <code>idcolumns</code> (calculated)
+</p>
+</li>
+<li>
+<p> xPosn: numeric for the Positions within a Lane (calculated)
+</p>
+</li>
+<li>
+<p> Hour: hour of the day, to 2 decimal places, at which the image was taken (calculated)
+</p>
+</li>
+<li>
+<p> xDays: numeric for the DAP that is centred by subtracting the mean of the unique days (calculated)
+</p>
+</li>
+<li> <p><code>idcolumns</code>: the columns listed in <code>idcolumns</code> that have been converted to factors
+</p>
+</li>
+<li>
+<p> Weight.Before: weight of the pot before watering (only if <code>calcWaterLoss</code> is <code>TRUE</code>)
+</p>
+</li>
+<li>
+<p> Weight.After: weight of the pot after watering (only if <code>calcWaterLoss</code> is <code>TRUE</code>)
+</p>
+</li>
+<li>
+<p> Water.Amount: the weight of the water added (= Water.After - Water.Before)  (calculated)
+</p>
+</li>
+<li>
+<p> Water.Loss: the difference between Weight.Before for the current imaging and the Weight.After for the previous imaging (calculated unless <code>calcWaterLoss</code> is <code>FALSE</code>)
+</p>
+</li>
+<li>
+<p> Area: the Projected.Shoot.Area..pixels. divided by 1000 (calculated)
+</p>
+</li>
+<li>
+<p> Area.SV1: the Projected.Shoot.Area from Side View 1 divided by 1000 (calculated)
+</p>
+</li>
+<li>
+<p> Area.SV2: the Projected.Shoot.Area from Side View 2 divided by 1000 (calculated)
+</p>
+</li>
+<li>
+<p> Area.TV: the Projected.Shoot.Area from Top View divided by 1000 (calculated)
+</p>
+</li>
+<li>
+<p> Boundary.To.Area.Ratio.SV1 
+</p>
+</li>
+<li>
+<p> Boundary.To.Area.Ratio.SV2 
+</p>
+</li>
+<li>
+<p> Boundary.To.Area.Ratio.TV 
+</p>
+</li>
+<li>
+<p> Caliper.Length.SV1 
+</p>
+</li>
+<li>
+<p> Caliper.Length.SV2 
+</p>
+</li>
+<li>
+<p> Caliper.Length.TV
+</p>
+</li>
+<li>
+<p> Compactness.SV1 from Side View 1
+</p>
+</li>
+<li>
+<p> Compactness.SV2 from Side View 2
+</p>
+</li>
+<li>
+<p> Compactness.TV: from Top View 
+</p>
+</li>
+<li>
+<p> Convex.Hull.Area.SV1: area of Side View 1 Convex Hull divided by 1000 (calculated)
+</p>
+</li>
+<li>
+<p> Convex.Hull.Area.SV2: area of Side View 2 Convex Hull divided by 1000 (calculated)
+</p>
+</li>
+<li>
+<p> Convex.Hull.TV: Convex.Hull.Area.TV divided by 1000 (calculated)
+</p>
+</li>
+<li>
+<p> Center.Of.Mass.Y.SV1: Centre of Mass from Side View 1
+</p>
+</li>
+<li>
+<p> Center.Of.Mass.Y.SV2: Centre of Mass from Side View 2
+</p>
+</li>
+<li>
+<p> Max.Dist.Above.Horizon.Line.SV1: the Max.Dist.Above.Horizon.Line.SV1 converted to cm using <code>pixelsPERcm</code> (calculated)
+</p>
+</li>
+<li>
+<p> Max.Dist.Above.Horizon.Line.SV2: the Max.Dist.Above.Horizon.Line.SV2 converted to cm using <code>pixelsPERcm</code> (calculated)
+</p>
+</li>
+</ol>
+<h3>Author(s)</h3>
+
+<p>Chris Brien</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(exampleData)
+longiPrime.dat &lt;- longitudinalPrime(data=raw.dat, smarthouse.lev=1)
+
+longiPrime.dat &lt;- longitudinalPrime(data=raw.dat, smarthouse.lev=1, 
+                                    traits = list(a = "Area", c = "Compactness"),
+                                    labsCamerasViews = list(all = c("SV1", "SV2", "TV"), 
+                                                            t = "TV"))
+
+longiPrime.dat &lt;- longitudinalPrime(data=raw.dat, smarthouse.lev=1, 
+                                    traits = c("Area.SV1", "Area.SV2", "Area.TV", 
+                                               "Compactness.TV"),
+                                    labsCamerasViews = NULL)
+
+longiPrime.dat &lt;- longitudinalPrime(data=raw.dat, smarthouse.lev=1, 
+                                    calcWaterLoss = FALSE, 
+                                    traits = list(img = c("Area", "Compactness"), 
+                                                  H20 = c("Weight.Before","Weight.After",
+                                                          "Water.Amount")),
+                                    labsCamerasViews = list(all = c("SV1", "SV2", "TV"), 
+                                                            H2O = NULL))
+</code></pre>
+
+
+</div>

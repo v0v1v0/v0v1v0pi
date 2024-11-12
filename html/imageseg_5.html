@@ -1,0 +1,213 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>imageSegmentation</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Model predictions from images based on TensorFlow model</h2>
+
+<h3>Description</h3>
+
+<p>This function uses a pre-trained TensorFlow model to create predictions from input data. It was mainly designed to predict canopy cover and understory vegetation density from forest habitat photographs using the pre-trained models we provide.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">imageSegmentation(
+  model,
+  x,
+  dirOutput,
+  dirExamples,
+  subsetArea,
+  threshold = 0.5,
+  returnInput = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>trained model to use in predictions</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>array of images as model input (can be created with <code>imagesToKerasInput</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dirOutput</code></td>
+<td>
+<p>character. Directory to save output images to (optional)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dirExamples</code></td>
+<td>
+<p>character. Directory to save example classification to (optional)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subsetArea</code></td>
+<td>
+<p>If "circle", vegetation density will be calculated for a circular area in the center of the predicted images. Can also be a number between 0 and 1 (to scale the circle relative to the image dimensions), or a matrix of 0 and 1 in the same dimensions as images in x.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>numeric value at which to split binary predictions. Can be useful to only return high-confidence pixels in predictions. It is not relevant for multi-class predictions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>returnInput</code></td>
+<td>
+<p>logical. If <code>dirOutput</code> is defined, save input images alongside output?</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>By default, vegetation density will be calculated across the entire input images. If canopy images are hemispherical and have black areas in the corner that should be ignored, set <code>subsetArea</code> to "circle". If the relevant section of the images is smaller than the image frame, give a number between 0 and 1 (indicating how big the circle is, relative to the image dimensions).
+Alternatively, provide a custom matrix of 0 and 1 in the same dimensions as the input images in x. 0 indicates areas to ignore in the vegetation calculations, 1 is included. <code>subsetArea = "circle"</code> only works if input images in x are square.
+</p>
+<p>The canopy density models predicts sky and the understory vegetation density model predicts the red flysheet The percentage of these is equivalent to openness (canopy openness or understory openness). This value is in the column "predicted".
+</p>
+<p>The interpretation of openness depends on context:
+</p>
+
+<ul>
+<li>
+<p> Canopy Cover images: openness = Gap Fraction and Fraction Soil
+</p>
+</li>
+<li>
+<p> Hemispherical canopy images: openness = Canopy openness and site openness (in flat terrain)
+</p>
+</li>
+</ul>
+<p>See e.g. Gonsamo et al. (2013) for more details.
+</p>
+<p>Generally speaking, "predicted" is the percentage of the image that is 1 in the binary prediction.
+</p>
+<p>The column "not_predicted" is the opposite (1-predicted). It is thus equivalent to vegetation density in the two vegetation models.
+</p>
+<p>Depending on the context, "not_predicted" can for example mean: canopy cover, canopy closure, understory vegetation density.
+In canopy cover images, the vegetation density corresponds to canopy cover. In hemispherical images, vegetation density corresponds to canopy closure.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list. The type and number of list items depends on the classification. For binary classifications (1 prediction class), the following list items are returned:
+</p>
+
+<ul>
+<li>
+<p> image (input images)
+</p>
+</li>
+<li>
+<p> prediction (model prediction)
+</p>
+</li>
+<li>
+<p> prediction_binary (binary prediction, only 0 or 1)
+</p>
+</li>
+<li>
+<p> examples (images with their image segmentation results)
+</p>
+</li>
+<li>
+<p> summary (data frame with fraction of image predicted)
+</p>
+</li>
+<li>
+<p> mask (an image showing the area for which summary statistics were calculated (in white, only if <code>subsetArea</code> is defined)
+</p>
+</li>
+</ul>
+<p>in multi-class models:
+</p>
+
+<ul>
+<li>
+<p> image (input images)
+</p>
+</li>
+<li>
+<p> prediction_most_likely (the class with the highest probability, coded in grayscale)
+</p>
+</li>
+<li>
+<p> class1 - classX: for each class, the predicted probabilities
+</p>
+</li>
+<li>
+<p> examples (images with their image segmentation results)
+</p>
+</li>
+<li>
+<p> summary (data frame with fraction of image covered by vegetation (black)).
+</p>
+</li>
+<li>
+<p> mask (an image showing the area for which summary statistics were calculated (in white, only if <code>subsetArea</code> is defined)
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Not run: 
+
+# Example 1: Canopy
+wd_images &lt;- system.file("images/canopy/resized",
+                         package = "imageseg")
+images &lt;- loadImages(imageDir = wd_images)
+x &lt;- imagesToKerasInput(images)
+
+wd_model_can &lt;- "C:/Path/To/Model"      # change this
+filename_model_can &lt;- "imageseg_canopy_model.hdf5"
+model_can &lt;- loadModel(file.path(wd_model_can, filename_model_can))
+
+
+results_can &lt;- imageSegmentation(model = model_can,
+                                 x = x)
+results_can$image
+results_can$prediction
+results_can$prediction_binary
+results_can$vegetation
+
+
+# Example 2: Understory
+wd_images_us &lt;- system.file("images/understory/resized",
+                             package = "imageseg")
+images_us &lt;- loadImages(imageDir = wd_images_us)
+x &lt;- imagesToKerasInput(images_us)
+
+# note, here we just specify the complete path, not separate by directory and file name as above
+model_file_us &lt;- "C:/Path/To/Model/imageseg_understory_model.hdf5"
+model_us &lt;- loadModel(model_file_us)
+
+results_us &lt;- imageSegmentation(model = model_us,
+                                x = x)
+results_us$image
+results_us$prediction
+results_us$prediction_binary
+results_us$vegetation
+
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

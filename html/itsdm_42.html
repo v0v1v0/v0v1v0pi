@@ -1,0 +1,131 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>worldclim2</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Download environmental variables made by worldclim version 2.1.</h2>
+
+<h3>Description</h3>
+
+<p>Parse historic worldclim version 2.1 variables
+with a setting of boundary and a few other options.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">worldclim2(
+  var = "tmin",
+  res = 10,
+  bry = NULL,
+  path = NULL,
+  nm_mark = "clip",
+  return_stack = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>var</code></td>
+<td>
+<p>(<code>character</code>) The option for the variable to download,
+should be one of tvag, tmin, tmax, prec, srad, wind, vapr and bio.
+The default is 'tmin'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>res</code></td>
+<td>
+<p>(<code>numeric</code>) The option for the resolution of image to download.
+Should be one of 0.5, 2.5, 5, 10 in minute degree.
+The default is 10.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bry</code></td>
+<td>
+<p>(<code>sf</code> or <code>sp</code>) The boundary to mask the downloaded original data.
+If <code>NULL</code>, it would get global map. If not <code>NULL</code>, it can take <code>sf</code>,
+<code>sfc</code>, <code>SpatialPolygonsDataFrame</code>, <code>SpatialPolygons</code>, etc.
+The default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>path</code></td>
+<td>
+<p>(<code>character</code>) The path to save the downloaded imagery.
+If <code>NULL</code>, it would use the current working directory.
+The default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nm_mark</code></td>
+<td>
+<p>(<code>character</code>) the name mark of clipped images.
+The default is "clip". It would be ignored if <code>bry</code> is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return_stack</code></td>
+<td>
+<p>(<code>logical</code>) if <code>TRUE</code>, stack the imagery together and return.
+If the area is large and resolution is high, it is better not to stack them.
+The default is <code>TRUE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><a href="https://worldclim.org/data/index.html">Web page page for this dataset</a>
+</p>
+
+
+<h3>Value</h3>
+
+<p>if <code>return_stack</code> is <code>TRUE</code>, the images would be
+returned as a <code>stars</code>. Otherwise, nothing to return, but the user
+would receive a message of where the images are.
+</p>
+
+
+<h3>Note</h3>
+
+<p>If it fails due to slow internet, try to set a larger timeout option,
+e.g., using <code>options(timeout = 1e3)</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Fick, Stephen E., and Robert J.
+Hijmans. "WorldClim 2: new 1-km spatial resolution climate surfaces for
+global land areas." <em>International journal of climatology</em>
+37.12 (2017): 4302-4315.<a href="https://doi.org/10.1002/joc.5086">doi:10.1002/joc.5086</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+library(sf)
+library(itsdm)
+
+bry &lt;- sf::st_polygon(
+  list(rbind(c(29.34, -11.72), c(29.34, -0.95),
+             c(40.31, -0.95), c(40.31, -11.72),
+             c(29.34, -11.72)))) %&gt;%
+  st_sfc(crs = 4326)
+
+bios &lt;- worldclim2(var = "tmin", res = 10,
+  bry = bry, nm_mark = 'exp', path = tempdir())
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

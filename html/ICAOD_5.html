@@ -1,0 +1,130 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>crt.bayes.control</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Returns Control Parameters for Approximating Bayesian Criteria</h2>
+
+<h3>Description</h3>
+
+<p>This function returns two lists each corresponds
+to an implemented integration method for approximating the integrals
+in Bayesian criteria.
+The first list is named <code>cubature</code> and contains the <code>hcubature</code>
+control parameters to  approximate the integrals with an adaptive multivariate integration method over hypercubes.
+The second list is named <code>quadrature</code> and contains the <code>createNIGrid</code>
+tuning parameters to approximate the integrals with the quadrature methods.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">crt.bayes.control(
+  method = c("cubature", "quadrature"),
+  cubature = list(tol = 1e-05, maxEval = 50000, absError = 0),
+  quadrature = list(type = c("GLe", "GHe"), level = 6, ndConstruction = "product",
+    level.trans = FALSE)
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>A character denotes which method to be used to approximate the integrals in Bayesian criteria.
+<code>"cubature"</code> corresponds to the adaptive multivariate integration method using the <code>hcubature</code> algorithm (default).
+<code>"quadrature"</code> corresponds the traditional quadrature formulas and calls the function <code>createNIGrid</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cubature</code></td>
+<td>
+<p>A list that will be passed to the arguments of the function <code>hcubature</code> for the adaptive multivariate integration.
+It is required and used when <code>crt.bayes.control$method = "cubature"</code> in the parent function, e.g.  <code>bayes</code>. See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quadrature</code></td>
+<td>
+<p>A list that will be passed to the arguments of the function <code>createNIGrid</code> for the quadrature-based integration.
+It is required and used when <code>crt.bayes.control$method = "quadrature"</code> in the parent function, e.g.  <code>bayes</code>. See 'Details'.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>cubature</code> is a list that its components will be passed to the function <code>hcubature</code> and they are:
+</p>
+
+<dl>
+<dt><code>tol</code></dt>
+<dd>
+<p>The maximum tolerance. Defaults to <code>1e-5</code>.</p>
+</dd>
+<dt><code>maxEval</code></dt>
+<dd>
+<p>The maximum number of function evaluations needed. Note that the actual number of function evaluations performed is only approximately guaranteed not to exceed this number. Defaults to <code>5000</code>.</p>
+</dd>
+<dt><code>absError</code></dt>
+<dd>
+<p>The maximum absolute error tolerated. Defaults to <code>0</code>.</p>
+</dd>
+</dl>
+<p>One can specify a maximum number of function evaluations.
+Otherwise, the integration stops when the estimated error is less than
+the absolute error requested, or when the estimated error is less than
+<code>tol</code> times the absolute value of the integral,  or when the maximum number of iterations
+is reached, whichever is earlier.
+<code>cubature</code> is activated when <code>crt.bayes.control$method = "cubature"</code> in
+any of the parent functions (for example, <code>bayes</code>).
+</p>
+<p><code>quadrature</code> is a list that its components will be passed to
+the function <code>createNIGrid</code> and they are:
+</p>
+
+<dl>
+<dt><code>type</code></dt>
+<dd>
+<p>Quadrature rule (see Details of <code>createNIGrid</code>) Defaults to <code>"GLe"</code>.</p>
+</dd>
+<dt><code>level</code></dt>
+<dd>
+<p>Accuracy level (typically number of grid points for the underlying 1D quadrature rule). Defaults to <code>6</code>.</p>
+</dd>
+<dt><code>ndConstruction</code></dt>
+<dd>
+<p>Character vector which denotes the construction rule
+for multidimensional grids. <code>"product"</code> for product rule,
+returns a full grid (default).
+<code>"sparse"</code> for combination technique,
+leads to a regular sparse grid.</p>
+</dd>
+<dt><code>level.trans</code></dt>
+<dd>
+<p>Logical variable denotes either to take the levels as number of grid points (FALSE = default) or to transform in that manner that number of grid points = 2^(levels-1) (TRUE). See, codecreateNIGrid, for details.</p>
+</dd>
+</dl>
+<p><code>quadrature</code> is activated when <code>crt.bayes.control$method = "quadrature"</code> in
+any of the parent functions (for example, <code>bayes</code>).
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list  of two lists each contains the  control parameters for <code>hcubature</code> and <code>createNIGrid</code>, respectively.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">crt.bayes.control()
+crt.bayes.control(cubature = list(tol = 1e-4))
+crt.bayes.control(quadrature = list(level = 4))
+</code></pre>
+
+
+</div>

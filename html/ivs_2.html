@@ -1,0 +1,360 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>allen-relation-count</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Count relations from Allen's Interval Algebra</h2>
+
+<h3>Description</h3>
+
+<p><code>iv_count_relates()</code> is similar to <code>iv_count_overlaps()</code>, but it counts a
+specific set of relations developed by James Allen in the paper:
+<a href="http://cse.unl.edu/~choueiry/Documents/Allen-CACM1983.pdf">Maintaining Knowledge about Temporal Intervals</a>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iv_count_relates(
+  needles,
+  haystack,
+  ...,
+  type,
+  missing = "equals",
+  no_match = 0L
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>needles, haystack</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[iv]⁠</code>
+</p>
+<p>Interval vectors used for relation matching.
+</p>
+
+<ul>
+<li>
+<p> Each element of <code>needles</code> represents the interval to search for.
+</p>
+</li>
+<li> <p><code>haystack</code> represents the intervals to search in.
+</p>
+</li>
+</ul>
+<p>Prior to comparison, <code>needles</code> and <code>haystack</code> are coerced to the same type.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>These dots are for future extensions and must be empty.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[character(1)]⁠</code>
+</p>
+<p>The type of relationship to find. See the Allen's Interval Algebra section
+for a complete description of each type. One of:
+</p>
+
+<ul>
+<li> <p><code>"precedes"</code>
+</p>
+</li>
+<li> <p><code>"preceded-by"</code>
+</p>
+</li>
+<li> <p><code>"meets"</code>
+</p>
+</li>
+<li> <p><code>"met-by"</code>
+</p>
+</li>
+<li> <p><code>"overlaps"</code>
+</p>
+</li>
+<li> <p><code>"overlapped-by"</code>
+</p>
+</li>
+<li> <p><code>"starts"</code>
+</p>
+</li>
+<li> <p><code>"started-by"</code>
+</p>
+</li>
+<li> <p><code>"during"</code>
+</p>
+</li>
+<li> <p><code>"contains"</code>
+</p>
+</li>
+<li> <p><code>"finishes"</code>
+</p>
+</li>
+<li> <p><code>"finished-by"</code>
+</p>
+</li>
+<li> <p><code>"equals"</code>
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>missing</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[integer(1) / "equals" / "error"]⁠</code>
+</p>
+<p>Handling of missing intervals in <code>needles</code>.
+</p>
+
+<ul>
+<li> <p><code>"equals"</code> considers missing intervals in <code>needles</code> as exactly equal
+to missing intervals in <code>haystack</code> when determining if there is a
+matching relationship between them.
+</p>
+</li>
+<li> <p><code>"error"</code> throws an error if any intervals in <code>needles</code> are missing.
+</p>
+</li>
+<li>
+<p> If a single integer value is provided, this represents the count returned
+for a missing interval in <code>needles</code>. Use <code>0L</code> to force missing intervals
+to never match.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>no_match</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[integer(1) / "error"]⁠</code>
+</p>
+<p>Handling of <code>needles</code> without a match.
+</p>
+
+<ul>
+<li> <p><code>"error"</code> throws an error if any needles have zero matches.
+</p>
+</li>
+<li>
+<p> If a single integer is provided, this represents the count returned for
+a needle with zero matches. The default value gives unmatched needles
+a count of <code>0L</code>.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An integer vector the same size as <code>needles</code>.
+</p>
+
+
+<h3>Allen's Interval Algebra</h3>
+
+<p>The interval algebra developed by James Allen serves as a basis and
+inspiration for <code>iv_locate_overlaps()</code>, <code>iv_locate_precedes()</code>, and
+<code>iv_locate_follows()</code>. The original algebra is composed of 13 relations
+which have the following properties:
+</p>
+
+<ul>
+<li>
+<p> Distinct: No pair of intervals can be related by more than one <code>type</code>.
+</p>
+</li>
+<li>
+<p> Exhaustive: All pairs of intervals are described by one of the <code>type</code>s.
+</p>
+</li>
+<li>
+<p> Qualitative: No numeric intervals are considered. The relationships are
+computed by purely qualitative means.
+</p>
+</li>
+</ul>
+<p>Take the notation that <code>x</code> and <code>y</code> represent two intervals. Now assume that
+<code>x</code> can be represented as <code style="white-space: pre;">⁠[x_s, x_e)⁠</code>, where <code>x_s</code> is the start of the
+interval and <code>x_e</code> is the end of it. Additionally, assume that <code>x_s &lt; x_e</code>.
+With this notation, the 13 relations are as follows:
+</p>
+
+<ul>
+<li> <p><em>Precedes</em>:
+</p>
+<p><code>x_e &lt; y_s</code>
+</p>
+</li>
+<li> <p><em>Preceded-by</em>:
+</p>
+<p><code>x_s &gt; y_e</code>
+</p>
+</li>
+<li> <p><em>Meets</em>:
+</p>
+<p><code>x_e == y_s</code>
+</p>
+</li>
+<li> <p><em>Met-by</em>:
+</p>
+<p><code>x_s == y_e</code>
+</p>
+</li>
+<li> <p><em>Overlaps</em>:
+</p>
+<p><code>(x_s &lt; y_s) &amp; (x_e &gt; y_s) &amp; (x_e &lt; y_e)</code>
+</p>
+</li>
+<li> <p><em>Overlapped-by</em>:
+</p>
+<p><code>(x_e &gt; y_e) &amp; (x_s &lt; y_e) &amp; (x_s &gt; y_s)</code>
+</p>
+</li>
+<li> <p><em>Starts</em>:
+</p>
+<p><code>(x_s == y_s) &amp; (x_e &lt; y_e)</code>
+</p>
+</li>
+<li> <p><em>Started-by</em>:
+</p>
+<p><code>(x_s == y_s) &amp; (x_e &gt; y_e)</code>
+</p>
+</li>
+<li> <p><em>Finishes</em>:
+</p>
+<p><code>(x_s &gt; y_s) &amp; (x_e == y_e)</code>
+</p>
+</li>
+<li> <p><em>Finished-by</em>:
+</p>
+<p><code>(x_s &lt; y_s) &amp; (x_e == y_e)</code>
+</p>
+</li>
+<li> <p><em>During</em>:
+</p>
+<p><code>(x_s &gt; y_s) &amp; (x_e &lt; y_e)</code>
+</p>
+</li>
+<li> <p><em>Contains</em>:
+</p>
+<p><code>(x_s &lt; y_s) &amp; (x_e &gt; y_e)</code>
+</p>
+</li>
+<li> <p><em>Equals</em>:
+</p>
+<p><code>(x_s == y_s) &amp; (x_e == y_e)</code>
+</p>
+</li>
+</ul>
+<p>Note that when <code>missing = "equals"</code>, missing intervals will only match
+the <code>type = "equals"</code> relation. This ensures that the distinct property
+of the algebra is maintained.
+</p>
+
+
+<h4>Connection to other functions</h4>
+
+<p>Note that some of the above relations are fairly restrictive. For example,
+<code>"overlaps"</code> only detects cases where <code>x</code> straddles <code>y_s</code>. It does not
+consider the case where <code>x</code> and <code>y</code> are equal to be an overlap (as this
+is <code>"equals"</code>) nor does it consider when <code>x</code> straddles <code>y_e</code> to be an
+overlap (as this is <code>"overlapped-by"</code>). This makes the relations extremely
+useful from a theoretical perspective, because they can be combined without
+fear of duplicating relations, but they don't match our typical expectations
+for what an "overlap" is.
+</p>
+<p><code>iv_locate_overlaps()</code>, <code>iv_locate_precedes()</code>, and <code>iv_locate_follows()</code> use
+more intuitive <code>type</code>s that aren't distinct, but typically match your
+expectations better. They can each be expressed in terms of Allen's
+relations:
+</p>
+
+<ul>
+<li> <p><code>iv_locate_overlaps()</code>:
+</p>
+
+<ul>
+<li> <p><code>"any"</code>:
+</p>
+<p><code>overlaps | overlapped-by | starts | started-by | finishes | finished-by | during | contains | equals</code>
+</p>
+</li>
+<li> <p><code>"contains"</code>:
+</p>
+<p><code>contains | started-by | finished-by | equals</code>
+</p>
+</li>
+<li> <p><code>"within"</code>:
+</p>
+<p><code>during | starts | finishes | equals</code>
+</p>
+</li>
+<li> <p><code>"starts"</code>:
+</p>
+<p><code>starts | started-by | equals</code>
+</p>
+</li>
+<li> <p><code>"ends"</code>:
+</p>
+<p><code>finishes | finished-by | equals</code>
+</p>
+</li>
+<li> <p><code>"equals"</code>:
+</p>
+<p><code>equals</code>
+</p>
+</li>
+</ul>
+</li>
+<li> <p><code>iv_locate_precedes()</code>:
+</p>
+<p><code>precedes | meets</code>
+</p>
+</li>
+<li> <p><code>iv_locate_follows()</code>:
+</p>
+<p><code>preceded-by | met-by</code>
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p>Locating relations from Allen's Interval Algebra
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x &lt;- iv(1, 3)
+y &lt;- iv(3, 4)
+
+# `"precedes"` is strict, and doesn't let the endpoints match
+iv_count_relates(x, y, type = "precedes")
+
+# Since that is what `"meets"` represents
+iv_count_relates(x, y, type = "meets")
+
+# `"overlaps"` is a very specific type of overlap where an interval in
+# `needles` straddles the start of an interval in `haystack`
+x &lt;- iv_pairs(c(1, 4), c(1, 3), c(0, 3), c(2, 5))
+y &lt;- iv(1, 4)
+
+# It doesn't match equality, or when the starts match, or when the end
+# of the interval in `haystack` is straddled instead
+iv_count_relates(x, y, type = "overlaps")
+</code></pre>
+
+
+</div>

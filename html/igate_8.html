@@ -1,0 +1,184 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>robust.categorical.igate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Robust igate for categorical target variables</h2>
+
+<h3>Description</h3>
+
+<p>This function performs a robust an initial Guided Analysis for parameter testing and
+controlband extraction (iGATE) for a categorical target variable by repeatedly running
+<code>categorical.igate</code> and only returning those parameters that are selected more often than a
+certain threshold.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">robust.categorical.igate(df, versus = 8, target, best.cat, worst.cat,
+  test = "w", ssv = NULL, outlier_removal_ssv = TRUE,
+  iterations = 50, threshold = 0.5)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>Data frame to be analysed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>versus</code></td>
+<td>
+<p>How many Best of the Best and Worst of the Worst do we collect? By default, we will collect 8 of each.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target</code></td>
+<td>
+<p>Target variable to be analysed. Must be categorical.
+Use <code>igate</code> for continuous <code>target</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>best.cat</code></td>
+<td>
+<p>The best category. The <code>versus</code> BOB will be selected randomly from this
+category.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>worst.cat</code></td>
+<td>
+<p>The worst category. The <code>versus</code> WOW will be selected randomly from this
+category.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test</code></td>
+<td>
+<p>Statistical hypothesis test to be used to determine influential
+process parameters. Choose between Wilcoxon Rank test (<code>"w"</code>, default)
+and Student's t-test (<code>"t"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ssv</code></td>
+<td>
+<p>A vector of suspected sources of variation. These are the variables
+in <code>df</code> which we believe might have an influence on the <code>target</code> variable and
+will be tested. If no list of <code>ssv</code> is provided, the test will be performed
+on all numeric variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outlier_removal_ssv</code></td>
+<td>
+<p>Logical. Should outlier removal be performed for each <code>ssv</code> (default: <code>TRUE</code>)?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterations</code></td>
+<td>
+<p>Integer. How often should categorical.igate be performed? A message about how many iterations
+have been perfermed so far will be printed to the console every <code>0.1*iterations</code> iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>Between 0 and 1. Only parameters that are selected at least <code>floor(iterations*threshold)</code>
+times are returned.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>We collect the Best of the Best and the Worst of the Worst
+dynamically dependent on the current <code>ssv</code>. That means, for each <code>ssv</code> we first
+remove all the observations with missing values for that <code>ssv</code> from <code>df</code>.
+Then, based on the remaining observations, we randomly select <code>versus</code>
+observations from the the best category (“Best of the Best”, short BOB)  and
+<code>versus</code> observations from the worst category
+(“Worst of the Worst”, short WOW). By default, we select 8 of each. Since this selection
+happens randomly, it is recommended to use <code>robust.categorical.igate</code> over <code>categorical.igate</code>.
+After the selection we compare BOB and WOW using the the counting method and the specified
+hypothesis test. If the distributions of the <code>ssv</code> in BOB and WOW are
+significantly different, the current <code>ssv</code> has been identified as influential
+to the <code>target</code> variable. An <code>ssv</code> is considered influential, if the test returns
+a count larger/ equal to 6 and/ or a p-value of less than 0.05.
+For the next <code>ssv</code> we again start with the entire dataset <code>df</code>, remove all
+the observations with missing values for that new <code>ssv</code> and then select our
+new BOB and WOW. In particular, for each <code>ssv</code> we might select different observations.
+This dynamic selection is necessary, because in case of an incomplete data set,
+if we select the same BOB and WOW for all the <code>ssv</code>, we might end up with many
+missing values for particular <code>ssv</code>. In that case the hypothesis test loses
+statistical power, because it is used on a smaller sample or worse, might
+fail altogether if the sample size gets too small.
+</p>
+<p>For those <code>ssv</code> determined to be significant, control bands are extracted. The rationale is:
+If the value for an <code>ssv</code> is in the interval [<code>good_lower_bound</code>,<code>good_upper_bound</code>]
+the <code>target</code> is likely to be good. If it is in the interval
+[<code>bad_lower_bound</code>,<code>bad_upper_bound</code>], the <code>target</code> is likely to be bad.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame with the summary statistics for those parameters that were selected
+at least <code>floor(iterations*threshold)</code> times:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+<code>Causes</code> </td>
+<td style="text-align: left;"> Those <code>ssv</code> that have been found to be influential to the <code>target</code> variable.</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>median_count</code> </td>
+<td style="text-align: left;"> The median value returned by the counting method for this parameter. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>median_p_value</code> </td>
+<td style="text-align: left;"> The median p-value of the hypothesis test performed, i.e. either of the
+Wilcoxon rank test (in case <code>test = "w"</code>) or the t-test (if <code>test = "t"</code>).</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>median_good_lower_bound</code> </td>
+<td style="text-align: left;"> The median lower bound for this <code>Cause</code> for good quality.</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>median_good_upper_bound</code> </td>
+<td style="text-align: left;"> The median upper bound for this <code>Cause</code> for good quality.</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>median_bad_lower_bound</code> </td>
+<td style="text-align: left;"> The median lower bound for this <code>Cause</code> for bad quality.</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+<code>median_bad_upper_bound</code> </td>
+<td style="text-align: left;"> The median upper bound for this <code>Cause</code> for bad quality.
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">robust.categorical.igate(mtcars, target = "cyl",
+best.cat = "8", worst.cat = "4", iterations = 50, threshold = 0.5)
+
+</code></pre>
+
+
+</div>

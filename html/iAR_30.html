@@ -1,0 +1,101 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>IARginterpolation</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Interpolation from IAR-Gamma model</h2>
+
+<h3>Description</h3>
+
+<p>Interpolation of missing values from models fitted by <code>IARgamma</code>
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">IARginterpolation(x, y, st, yini = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A given array with the parameters of the IAR-Gamma model. The first element of the array corresponding to the phi parameter, the second to the level parameter mu, and the last one to the scale parameter sigma.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Array with the time series observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>st</code></td>
+<td>
+<p>Array with the irregular observational times.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yini</code></td>
+<td>
+<p>a single value, initial value for the estimation of the missing value of the time series.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with the following components:
+</p>
+
+<ul>
+<li>
+<p>fitted Estimation of a missing value of the IAR-Gamma process.
+</p>
+</li>
+<li>
+<p>ll Value of the negative log likelihood evaluated in the fitted missing values.
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+<p>Eyheramendy S, Elorrieta F, Palma W (2018).
+“An irregular discrete time series model to identify residuals with autocorrelation in astronomical light curves.”
+<em>Monthly Notices of the Royal Astronomical Society</em>, <b>481</b>(4), 4311–4322.
+ISSN 0035-8711, doi: <a href="https://doi.org/10.1093/mnras/sty2487">10.1093/mnras/sty2487</a>, <a href="https://academic.oup.com/mnras/article-pdf/481/4/4311/25906473/sty2487.pdf">https://academic.oup.com/mnras/article-pdf/481/4/4311/25906473/sty2487.pdf</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>gentime</code>, <code>IARgsample</code>, <code>IARgamma</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(6714)
+n&lt;-100
+st&lt;-gentime(n)
+y&lt;-IARgsample(phi=0.9,st=st,n=n,sigma2=1,mu=1)
+model&lt;-IARgamma(y$y, st=st)
+y&lt;-y$y
+napos=10
+y0=y
+y[napos]=NA
+xest=c(model$phi,model$mu,model$sigma)
+yest=IARginterpolation(x=xest,y=y,st=st)
+yest$fitted
+mse=(y0[napos]-yest$fitted)^2
+print(mse)
+plot(st,y,type='l',xlim=c(st[napos-5],st[napos+5]))
+points(st,y,pch=20)
+points(st[napos],yest$fitted,col="red",pch=20)
+</code></pre>
+
+
+</div>

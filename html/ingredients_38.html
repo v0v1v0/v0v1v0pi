@@ -1,0 +1,187 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot.ceteris_paribus_explainer</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plots Ceteris Paribus Profiles</h2>
+
+<h3>Description</h3>
+
+<p>Function <code>plot.ceteris_paribus_explainer</code> plots Individual Variable Profiles for selected observations.
+Various parameters help to decide what should be plotted, profiles, aggregated profiles, points or rugs.
+</p>
+<p>Find more details in <a href="https://ema.drwhy.ai/ceterisParibus.html">Ceteris Paribus Chapter</a>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'ceteris_paribus_explainer'
+plot(
+  x,
+  ...,
+  size = 1,
+  alpha = 1,
+  color = "#46bac2",
+  variable_type = "numerical",
+  facet_ncol = NULL,
+  facet_scales = NULL,
+  variables = NULL,
+  title = "Ceteris Paribus profile",
+  subtitle = NULL,
+  categorical_type = "profiles"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a ceteris paribus explainer produced with function <code>ceteris_paribus()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other explainers that shall be plotted together</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size</code></td>
+<td>
+<p>a numeric. Size of lines to be plotted</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>a numeric between <code>0</code> and <code>1</code>. Opacity of lines</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>color</code></td>
+<td>
+<p>a character. Either name of a color or name of a variable that should be used for coloring</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variable_type</code></td>
+<td>
+<p>a character. If <code>numerical</code> then only numerical variables will be plotted.
+If <code>categorical</code> then only categorical variables will be plotted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>facet_ncol</code></td>
+<td>
+<p>number of columns for the <code>facet_wrap</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>facet_scales</code></td>
+<td>
+<p>a character value for the <code>facet_wrap</code>.
+Default is <code>"free_x"</code>, but <code>"free_y"</code> if <code>categorical_type="bars"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variables</code></td>
+<td>
+<p>if not <code>NULL</code> then only <code>variables</code> will be presented</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>title</code></td>
+<td>
+<p>a character. Plot title. By default "Ceteris Paribus profile".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subtitle</code></td>
+<td>
+<p>a character. Plot subtitle. By default <code>NULL</code> - then subtitle is set to "created for the XXX, YYY model",
+where XXX, YYY are labels of given explainers.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>categorical_type</code></td>
+<td>
+<p>a character. How categorical variables shall be plotted? Either <code>"profiles"</code> (default) or <code>"bars"</code> or <code>"lines"</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a <code>ggplot2</code> object
+</p>
+
+
+<h3>References</h3>
+
+<p>Explanatory Model Analysis. Explore, Explain, and Examine Predictive Models. <a href="https://ema.drwhy.ai/">https://ema.drwhy.ai/</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library("DALEX")
+
+model_titanic_glm &lt;- glm(survived ~ gender + age + fare,
+                         data = titanic_imputed, family = "binomial")
+
+explain_titanic_glm &lt;- explain(model_titanic_glm,
+                               data = titanic_imputed[,-8],
+                               y = titanic_imputed[,8],
+                               verbose = FALSE)
+
+cp_glm &lt;- ceteris_paribus(explain_titanic_glm, titanic_imputed[1,])
+cp_glm
+
+plot(cp_glm, variables = "age")
+
+
+library("ranger")
+model_titanic_rf &lt;- ranger(survived ~., data = titanic_imputed, probability = TRUE)
+
+explain_titanic_rf &lt;- explain(model_titanic_rf,
+                              data = titanic_imputed[,-8],
+                              y = titanic_imputed[,8],
+                              label = "ranger forest",
+                              verbose = FALSE)
+
+selected_passangers &lt;- select_sample(titanic_imputed, n = 100)
+
+cp_rf &lt;- ceteris_paribus(explain_titanic_rf, selected_passangers)
+cp_rf
+
+plot(cp_rf, variables = "age") +
+  show_observations(cp_rf, variables = "age") +
+  show_rugs(cp_rf, variables = "age", color = "red")
+
+selected_passangers &lt;- select_sample(titanic_imputed, n = 1)
+selected_passangers
+
+cp_rf &lt;- ceteris_paribus(explain_titanic_rf, selected_passangers)
+
+plot(cp_rf) +
+  show_observations(cp_rf)
+
+plot(cp_rf, variables = "age") +
+  show_observations(cp_rf, variables = "age")
+
+plot(cp_rf, variables = "class")
+plot(cp_rf, variables = c("class", "embarked"), facet_ncol = 1)
+plot(cp_rf, variables = c("class", "embarked"), facet_ncol = 1, categorical_type = "bars")
+plotD3(cp_rf, variables = c("class", "embarked", "gender"),
+              variable_type = "categorical", scale_plot = TRUE,
+              label_margin = 70)
+
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,246 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bru_mapper_multi</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Mapper for tensor product domains</h2>
+
+<h3>Description</h3>
+
+<p>Constructs a rowwise Kronecker product mapping
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">bru_mapper_multi(mappers)
+
+## S3 method for class 'bru_mapper_multi'
+ibm_n(mapper, inla_f = FALSE, multi = FALSE, ...)
+
+## S3 method for class 'bru_mapper_multi'
+ibm_n_output(mapper, input, ...)
+
+## S3 method for class 'bru_mapper_multi'
+ibm_values(mapper, inla_f = FALSE, multi = FALSE, ...)
+
+## S3 method for class 'bru_mapper_multi'
+ibm_is_linear(mapper, multi = FALSE, ...)
+
+## S3 method for class 'bru_mapper_multi'
+ibm_jacobian(
+  mapper,
+  input,
+  state = NULL,
+  inla_f = FALSE,
+  multi = FALSE,
+  ...,
+  sub_A = NULL
+)
+
+## S3 method for class 'bru_mapper_multi'
+ibm_linear(mapper, input, state, inla_f = FALSE, ...)
+
+## S3 method for class 'bru_mapper_multi'
+ibm_eval(
+  mapper,
+  input,
+  state = NULL,
+  inla_f = FALSE,
+  ...,
+  jacobian = NULL,
+  pre_A = deprecated()
+)
+
+## S3 method for class 'bru_mapper_multi'
+ibm_invalid_output(mapper, input, state, inla_f = FALSE, multi = FALSE, ...)
+
+## S3 method for class 'bru_mapper_multi'
+x[i, drop = TRUE]
+
+## S3 method for class 'bru_mapper_multi'
+ibm_names(mapper)
+
+## S3 replacement method for class 'bru_mapper_multi'
+ibm_names(mapper) &lt;- value
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>mappers</code></td>
+<td>
+<p>A list of <code>bru_mapper</code> objects</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mapper</code></td>
+<td>
+<p>A mapper S3 object, inheriting from <code>bru_mapper</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inla_f</code></td>
+<td>
+<p>logical; when <code>TRUE</code> for <code>ibm_n()</code> and <code>ibm_values()</code>, the
+result must be compatible with the <code>INLA::f(...)</code> and corresponding
+<code>INLA::inla.stack(...)</code> constructions.  For <code style="white-space: pre;">⁠ibm_{eval,jacobian,linear}⁠</code>,
+the <code>input</code> interpretation may be different.
+Implementations do not normally need to do anything different, except
+for mappers of the type needed for hidden multicomponent models such
+as "bym2", which can be handled by <code>bru_mapper_collect</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>multi</code></td>
+<td>
+<p>logical;
+If <code>TRUE</code> (or positive), recurse one level into sub-mappers</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arguments passed on to other methods</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>input</code></td>
+<td>
+<p>Data input for the mapper.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>state</code></td>
+<td>
+<p>A vector of latent state values for the mapping,
+of length <code>ibm_n(mapper, inla_f = FALSE)</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sub_A</code></td>
+<td>
+<p>Internal; precomputed Jacobian matrices.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>jacobian</code></td>
+<td>
+<p>For <code>ibm_eval()</code> methods, an optional pre-computed Jacobian, typically
+supplied by internal methods that already have the Jacobian.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pre_A</code></td>
+<td>
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated"><img src="../help/figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a> in favour of <code>jacobian</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>object from which to extract element(s)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>i</code></td>
+<td>
+<p>indices specifying element(s) to extract</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>drop</code></td>
+<td>
+<p>logical;
+For <code style="white-space: pre;">⁠[.bru_mapper_multi⁠</code>, whether to extract an individual mapper when
+<code>i</code> identifies a single element. If <code>FALSE</code>, a list of sub-mappers is
+returned (suitable e.g. for creating a new <code>bru_mapper_multi</code> object).
+Default: <code>TRUE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>a character vector of up to the same length as the number
+of mappers in the multi-mapper x</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<ul><li> <p><code>ibm_jacobian</code> for <code>bru_mapper_multi</code> accepts a list with
+named entries, or a list with unnamed but ordered elements.
+The names must match the sub-mappers, see <code>ibm_names.bru_mapper_multi()</code>.
+Each list element should take a format accepted by the corresponding
+sub-mapper. In case each element is a vector, the input can be given as a
+data.frame with named columns, a matrix with named columns, or a matrix
+with unnamed but ordered columns.
+</p>
+</li></ul>
+<ul><li> <p><code>ibm_invalid_output</code> for <code>bru_mapper_multi</code> accepts a list with
+named entries, or a list with unnamed but ordered elements.
+The names must match the sub-mappers, see <code>ibm_names.bru_mapper_multi()</code>.
+Each list element should take a format accepted by the corresponding
+sub-mapper. In case each element is a vector, the input can be given as a
+data.frame with named columns, a matrix with named columns, or a matrix
+with unnamed but ordered columns.
+</p>
+</li></ul>
+<h3>Value</h3>
+
+
+<ul><li> <p><code>[</code>-indexing a <code>bru_mapper_multi</code> extracts a subset
+<code>bru_mapper_multi</code> object (for drop <code>FALSE</code>) or an individual sub-mapper
+(for drop <code>TRUE</code>, and <code>i</code> identifies a single element)
+</p>
+</li></ul>
+<h3>Methods (by generic)</h3>
+
+
+<ul><li> <p><code>ibm_names(bru_mapper_multi)</code>: Returns the names from the sub-mappers list
+</p>
+</li></ul>
+<h3>See Also</h3>
+
+<p>bru_mapper, bru_mapper_generics
+</p>
+<p>Other mappers: 
+<code>bru_get_mapper()</code>,
+<code>bru_mapper()</code>,
+<code>bru_mapper.fm_mesh_1d()</code>,
+<code>bru_mapper.fm_mesh_2d()</code>,
+<code>bru_mapper_aggregate()</code>,
+<code>bru_mapper_collect()</code>,
+<code>bru_mapper_const()</code>,
+<code>bru_mapper_factor()</code>,
+<code>bru_mapper_generics</code>,
+<code>bru_mapper_harmonics()</code>,
+<code>bru_mapper_index()</code>,
+<code>bru_mapper_linear()</code>,
+<code>bru_mapper_logsumexp()</code>,
+<code>bru_mapper_marginal()</code>,
+<code>bru_mapper_matrix()</code>,
+<code>bru_mapper_mesh_B()</code>,
+<code>bru_mapper_pipe()</code>,
+<code>bru_mapper_scale()</code>,
+<code>bru_mapper_shift()</code>,
+<code>bru_mapper_taylor()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">(m &lt;- bru_mapper_multi(list(
+  a = bru_mapper_index(2),
+  b = bru_mapper_index(3)
+)))
+ibm_eval2(m, list(a = c(1, 2, 1), b = c(1, 3, 2)), 1:6)
+
+</code></pre>
+
+
+</div>

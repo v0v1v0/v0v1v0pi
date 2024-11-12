@@ -1,0 +1,160 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>transferFunctionMetric</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Cross-spectral comparison</h2>
+
+<h3>Description</h3>
+
+<p>The transferFunctionMetric() function calculates metrics that assess the relationship between
+two SNCLs with the same network, station and channel but separate locations.  When seismometers are
+working properly, the transfer function amplitude and phase will match similar values calculated
+from the instrument responses.
+</p>
+<p>This function calculates the transfer function from data in the incoming streams.
+Response information is then obtained from the <a href="http://service.iris.edu/irisws/evalresp/1/">evalresp web service</a>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">transferFunctionMetric(st1, st2, evalresp1, evalresp2)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>st1</code></td>
+<td>
+<p>a <code>Stream</code> object containing a seismic signal</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>st2</code></td>
+<td>
+<p>a <code>Stream</code> object containing a seismic signal</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>evalresp1</code></td>
+<td>
+<p>a <code>data frame</code> containing an amplitude and phase spectrum</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>evalresp2</code></td>
+<td>
+<p>a <code>data frame</code> containing an amplitude and phase spectrum</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<p>Details of the algorithm are as follows
+</p>
+<pre>
+# compute complex cross-spectrum of traces x and y ==&gt; Pxx, Pxy, Pyy
+# calculate transfer function values:
+#     Txy(f) = Pxy(f) / Pxx(f)
+#     dataGain &lt;- Mod(Txy)
+#     dataPhase &lt;- Arg(Txy)
+#
+# calculate avgDataGain and avgDataPhase values for periods of 5-7s
+#
+# calculate the corresponding response amplitude ratio and phase difference:
+#     request responses for x and y
+#     respGain = respGainy(f) / respGainx(f)
+#     respPhase = respPhasey(f) - respPhasex(f)
+#
+# calculate avgRespGain and avgRespPhase values for periods of 5-7s
+#
+# calculate metrics:
+#     gain_ratio = avgDataGain / avgRespGain
+#     hase_diff = avgDataPhase - avgRespPhase
+#     ms_coherence = |Pxy|^2 / (Pxx*Pyy)
+</pre>
+
+
+<h3>Value</h3>
+
+<p>A list with a single <code>SingleValueMetric</code> object is returned.  The metric name is
+<code>transfer_function</code> and it has three attributes:
+</p>
+
+<ul>
+<li>
+<p><code>gain_ratio</code> – reasonableness of cross-spectral amplitude between <code>st1</code> and <code>st2</code>
+</p>
+</li>
+<li>
+<p><code>phase_diff</code> – reasonableness of cross-spectral phase between <code>st1</code> and <code>st2</code>
+</p>
+</li>
+<li>
+<p><code>ms_coherence</code> – mean square coherence between <code>st1</code> and <code>st2</code>
+</p>
+</li>
+</ul>
+<p>These values can be interpreted as follows:
+</p>
+<p>Whenever <code>ms_coherence ~= 1.0</code>, properly functioning seismometers should have:
+</p>
+
+<ul>
+<li>
+<p><code>gain_raio ~= 1.0</code>
+</p>
+</li>
+<li>
+<p><code>phase_diff &lt; 10.0</code> (degrees)
+</p>
+</li>
+</ul>
+<h3>Note</h3>
+
+<p>Seismic streams passed to transferFunctionMetric() must have the same network, station
+and channel and must cover the same time range. The two channels should also have values of
+azimuth and dip within five degrees of each other.  If sampling rates differ and one is a multiple
+of the other, the stream with the higher sampling rate will be decimated to match the lower sampling rate.
+</p>
+<p>The metricList generated for these two-channel metrics will have a SNCL code of the form:
+<code>N.S.L1:L2.C.Q</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a> (R code),
+Mary Templeton <a href="mailto:mary.templeton@earthscope.org">mary.templeton@earthscope.org</a> (algorithm)
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  ## Not run: 
+# Create a new IrisClient
+iris &lt;- new("IrisClient", debug=TRUE)
+
+# Get seismic data
+starttime &lt;- as.POSIXct("2011-05-01 12:00:00", tz="GMT")
+endtime &lt;- starttime + 3600
+
+st1 &lt;- getDataselect(iris,"CI","PASC","00","BHZ",starttime,endtime,inclusiveEnd=FALSE)
+st2 &lt;- getDataselect(iris,"CI","PASC","10","BHZ",starttime,endtime,inclusiveEnd=FALSE)
+evalresp1 &lt;- IRISSeismic::transferFunctionSpectra(st1,40)
+evalresp2 &lt;- IRISSeismic::transferFunctionSpectra(st2,40)
+
+# Calculate metrics
+metricList &lt;- transferFunctionMetric(st1,st2,evalresp1,evalresp2)
+print(metricList)
+  
+## End(Not run)
+</code></pre>
+
+
+</div>

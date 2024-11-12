@@ -1,0 +1,72 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>metricList2Xml</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create XML for the BSS</h2>
+
+<h3>Description</h3>
+
+<p>The <code>metricList2Xml</code> function converts a list of <code>SingleValueMetric</code>s
+or <code>GeneralValueMetric</code> into an
+XML structure appropriate for submitting to the MUSTANG Backend Storage System (BSS).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">metricList2Xml(metricList)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>metricList</code></td>
+<td>
+<p>a list of <code>SingleValueMetric</code> or <code>GeneralValueMetric</code> objects.</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>Metrics functions return lists of <code>SingleValueMetric</code> or <code>GeneralValueMetric</code> objects.  A long <code>metricList</code> may be built up
+by appending the results of different metrics functions or the same metrics function operating on different seismic signals.
+The list may only contain a single class (<code>SingleValueMetric</code> cannot be mixed with <code>GeneralValueMetric</code> objects).
+These metrics can be submitted to the BSS in a standardized XML format. (see SingleValueMetric-class)
+</p>
+
+
+<h3>Value</h3>
+
+<p>A character string with BSS formatted XML is returned.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  ## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+# Get the waveform
+starttime &lt;- as.POSIXct("2012-01-24", tz="GMT")
+endtime &lt;- as.POSIXct("2012-01-25", tz="GMT")
+st &lt;- getDataselect(iris,"AK","PIN","","BHZ",starttime,endtime)
+
+# Apply a metric and show the results
+metricList &lt;- stateOfHealthMetric(st)
+metricList &lt;- append(metricList, basicStatsMetric(st))
+bssXml &lt;- metricList2Xml(metricList)
+  
+## End(Not run)
+</code></pre>
+
+
+</div>

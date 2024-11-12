@@ -1,0 +1,184 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>isa.unique</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Filter out biclusters that are very similar to each other</h2>
+
+<h3>Description</h3>
+
+<p>From a potentially non-unique set of ISA biclusters, create a unique
+set by removing all biclusters that are similar to others.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S4 method for signature 'list,list'
+ isa.unique(normed.data, isaresult, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>normed.data</code></td>
+<td>
+<p>The normalized input data, a list of two matrices,
+usually the output of <code>isa.normalize</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>isaresult</code></td>
+<td>
+<p>The result of an ISA run, a set of biclusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments, see details below.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function can we called as
+</p>
+<pre>
+    isa.unique(normed.data, isaresult, method = c("cor"),
+               ignore.div = TRUE, cor.limit = 0.9,
+	       neg.cor = TRUE, drop.zero = TRUE)
+	     </pre>
+<p>where the arguments are:
+</p>
+
+<dl>
+<dt>normed.data</dt>
+<dd>
+<p>The normalized input data, a list of two matrices,
+usually the output of <code>isa.normalize</code>.</p>
+</dd>
+<dt>isaresult</dt>
+<dd>
+<p>The result of an ISA run, a set of biclusters.</p>
+</dd>
+<dt>method</dt>
+<dd>
+<p>Character scalar giving the method to be used to
+determine if two biclusters are similar. Right now only
+‘<code>cor</code>’ is implemented, this keeps both biclusters if
+their Pearson correlation is less than <code>cor.limit</code>, both for
+their row and column scores. See also the <code>neg.cor</code> argument.</p>
+</dd>
+<dt>ignore.div</dt>
+<dd>
+<p>Logical scalar, if <code>TRUE</code>, then the divergent
+biclusters will be removed.</p>
+</dd>
+<dt>cor.limit</dt>
+<dd>
+<p>Numeric scalar, giving the correlation limit for the
+‘<code>cor</code>’ method.</p>
+</dd>
+<dt>neg.cor</dt>
+<dd>
+<p>Logical scalar, if <code>TRUE</code>, then the
+‘<code>cor</code>’ method considers the absolute value of the
+correlation.</p>
+</dd>
+<dt>drop.zero</dt>
+<dd>
+<p>Logical scalar, whether to drop biclusters that have
+all zero scores.</p>
+</dd>
+</dl>
+<p>Because of the nature of the ISA algorithm, the set of biclusters
+created by <code>isa.iterate</code> is not unique; many input seeds
+may converge to the same biclusters, even if the input seeds are not
+random.
+</p>
+<p><code>isa.unique</code> filters a set of biclusters and removed the ones
+that are very similar to ones that were already found for another
+seed.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A named list, the filtered <code>isaresult</code>. See the return value of
+<code>isa.iterate</code> for the details.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Gabor Csardi <a href="mailto:Gabor.Csardi@unil.ch">Gabor.Csardi@unil.ch</a> </p>
+
+
+<h3>References</h3>
+
+<p>Bergmann S, Ihmels J, Barkai N: Iterative signature algorithm for the
+analysis of large-scale gene expression data <em>Phys Rev E Stat
+Nonlin Soft Matter Phys.</em> 2003 Mar;67(3 Pt 1):031902. Epub 2003 Mar 11.
+</p>
+<p>Ihmels J, Friedlander G, Bergmann S, Sarig O, Ziv Y, Barkai N:
+Revealing modular organization in the yeast transcriptional network
+<em>Nat Genet.</em> 2002 Aug;31(4):370-7. Epub 2002 Jul 22
+</p>
+<p>Ihmels J, Bergmann S, Barkai N:
+Defining transcription modules using large-scale gene expression data
+<em>Bioinformatics</em> 2004 Sep 1;20(13):1993-2003. Epub 2004 Mar 25.
+</p>
+
+
+<h3>See Also</h3>
+
+ <p>isa2-package for a short introduction on the Iterative
+Signature Algorithm. See <code>isa</code> for an easy way of running
+ISA.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Create an ISA module set
+set.seed(1)
+insili &lt;- isa.in.silico(noise=0.01)
+
+## Random seeds
+seeds &lt;- generate.seeds(length=nrow(insili[[1]]), count=20)
+
+## Normalize input matrix
+nm &lt;- isa.normalize(insili[[1]])
+
+## Do ISA
+isares &lt;- isa.iterate(nm, row.seeds=seeds, thr.row=2, thr.col=1)
+
+## Check correlation among modules
+cc &lt;- cor(isares$rows)
+if (interactive()) { hist(cc[lower.tri(cc)],10) }
+
+## Some of them are quite high, how many?
+undiag &lt;- function(x) { diag(x) &lt;- 0; x }
+sum(undiag(cc) &gt; 0.99, na.rm=TRUE)
+
+## Eliminate duplicated modules
+isares.unique &lt;- isa.unique(nm, isares)
+
+## How many modules left?
+ncol(isares.unique$rows)
+
+## Double check
+cc2 &lt;- cor(isares.unique$rows)
+if (interactive()) { hist(cc2[lower.tri(cc2)],10) }
+
+## High correlation?
+sum(undiag(cc2) &gt; 0.99, na.rm=TRUE)
+
+</code></pre>
+
+
+</div>

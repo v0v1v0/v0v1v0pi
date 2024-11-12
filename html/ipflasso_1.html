@@ -1,0 +1,182 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cvr.adaptive.ipflasso</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Cross-validated integrative lasso with adaptive penalty factors</h2>
+
+<h3>Description</h3>
+
+<p>Runs cvr.ipflasso applying different data based penalty factors to predictors from different blocks.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cvr.adaptive.ipflasso(X, Y, family, type.measure, standardize = TRUE,
+                                  alpha, type.step1, blocks, nfolds, ncv)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>a (nxp) matrix of predictors with observations in rows and predictors in columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>n-vector giving the value of the response (either continuous, numeric-binary 0/1, or <code>Surv</code> object).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>should be "gaussian" for continuous <code>Y</code>, "binomial" for binary <code>Y</code>, "cox" for <code>Y</code> of type <code>Surv</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type.measure</code></td>
+<td>
+<p>the accuracy/error measure computed in cross-validation. If not specified, type.measure is "class" (classification error) if <code>family="binomial"</code>, "mse" (mean squared error) if <code>family="gaussian"</code> and partial likelihood if <code>family="cox"</code>. If <code>family="binomial"</code>, one may specify <code>type.measure="auc"</code> (area under the ROC curve).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>standardize</code></td>
+<td>
+<p>whether the predictors should be standardized or not. Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>the elastic net mixing parameter for step 1: <code>alpha</code>=1 yields the L1 penalty (Lasso), <code>alpha</code>=0 yields the L2 penalty (Ridge).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type.step1</code></td>
+<td>
+<p>whether the models of step 1 should be run on the whole data set <code>X</code> (<code>type.step1="comb"</code>) or separately for each block (<code>type.step1="sep"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>blocks</code></td>
+<td>
+<p>a list of length M of the format <code>list(block1=...,block2=...,</code> where the dots should be replaced by the indices of the predictors included in this block. The blocks should form a partition of 1:p.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nfolds</code></td>
+<td>
+<p>the number of folds of the CV procedure.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncv</code></td>
+<td>
+<p>the number of repetitions of the CV. Not to be confused with <code>nfolds</code>. For example, if one repeats 50 times 5-fold-CV (i.e. considers 50 random partitions into 5 folds in turn and averages the results), <code>nfolds</code> equals 5 and <code>ncv</code> equals 50.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The penalty factors are the inverse arithmetic means of the absolute model coefficients per block, generated in a first step of the function. The user can choose to determine these coefficients by running a Lasso model (<code>alpha=1</code>) or a Ridge model (<code>alpha=0</code>) either on the whole data set (<code>type.step1="comb"</code>) or seperately for each block (<code>type.step1="sep"</code>). If <code>type.step1</code> is ommited, it will be set to <code>"sep"</code> for Lasso and to <code>"comb"</code> for Ridge. 
+If a Lasso model in step 1 returns any zero coefficient mean, the corresponding block will be excluded from the input date set <code>X</code> and step 2 will be run with the remaining blocks. If all model coefficient means are zero, step 2 will not be performed.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with the following arguments:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>coeff</code></td>
+<td>
+<p>the matrix of coefficients with predictors corresponding to rows and lambda values corresponding to columns. The first row contains the intercept of the models (for all families other than <code>"cox"</code>). 
+</p>
+<p>In the special case of separate step 1 Lasso models and all coefficient means equal to zero, the intercept is the average of the separate model intercepts per block.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ind.bestlambda</code></td>
+<td>
+<p>the index of the best lambda according to CV.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>the lambda sequence.
+</p>
+<p>In the special case of separate step 1 Lasso models and all coefficient means equal to zero, it is the lambda sequence with the highest lambda value among the lambda sequences of all blocks.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cvm</code></td>
+<td>
+<p>the CV estimate of the measure specified by <code>type.measure</code> for each candidate lambda value.
+</p>
+<p>In the special case of separate step 1 Lasso models and all coefficient means equal to zero, cmv is the average of the separate model cvms per block.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nzero</code></td>
+<td>
+<p>the number of non-zero coefficients in the selected model.
+</p>
+<p>In the special case of separate step 1 Lasso models and all coefficient means equal to zero, nzero is the sum of the non-zero coefficients of the separate models per block.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>see arguments.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>means.step1</code></td>
+<td>
+<p>the arithmetic means of the absolute model coefficients per block, returned by the first step of the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exc</code></td>
+<td>
+<p>the exclusion vector containing the indices of the block(s) to be excluded from <code>X</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Gerhard Schulze (g-schulze@t-online.de)
+</p>
+
+
+<h3>References</h3>
+
+<p>Schulze, Gerhard (2017): Clinical Outcome Prediction Based on Multi-Omics Data: Extension of IPF-LASSO. Masterarbeit, Ludwig-Maximilians-Universitaet Muenchen
+(Department of Statistics: Technical Reports) https://doi.org/10.5282/ubm/epub.59092
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># load ipflasso library
+library(ipflasso)
+
+# generate dummy data
+X&lt;-matrix(rnorm(50*200),50,200)
+Y&lt;-rbinom(50,1,0.5)
+
+cvr.adaptive.ipflasso(X=X,Y=Y,family="binomial",type.measure="class",standardize=FALSE,
+                      alpha = 1,blocks=list(block1=1:50,block2=51:200),nfolds=5,ncv=10)
+</code></pre>
+
+
+</div>

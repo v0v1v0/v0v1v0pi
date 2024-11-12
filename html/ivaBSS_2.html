@@ -1,0 +1,115 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>avg_ISI</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Average Intersymbol Inference
+</h2>
+
+<h3>Description</h3>
+
+<p>Calculates the average intersymbol inference for two sets of matrices.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">avg_ISI(W, A)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>W</code></td>
+<td>
+
+<p>Array of unmixing matrices with dimension <code>[P, P, D]</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+
+<p>Array of true mixing matrices with dimension <code>[P, P, D]</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function returns the average intersymbol inference for the set of estimated unmixing matrices and the set of true mixing matrices. The average ISI gets the value between 0 and 1, where 0 is the optimal result. The average ISI is calculated as the mean ISI over each dataset separately. The average ISI does not take the permutation of the estimated sources into account.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Numeric value between 0 and 1, where 0 is the optimal result indicating that the sources are separated perfectly in each dataset.
+
+
+
+
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Mika Sipilä
+</p>
+
+
+<h3>References</h3>
+
+<p><cite>Anderson, M. (2013). Independent vector analysis: Theory, algorithms, and applications.
+PhD dissertation, University of Maryland, Baltimore County.</cite>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>joint_ISI</code>, <code>jbss_achieved</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Mixing matrices and unmixing matrices generated
+# from standard normal distribution
+P &lt;- 4; D &lt;- 4;
+W &lt;- array(rnorm(P * P * D), c(P, P, D))
+A &lt;- array(rnorm(P * P * D), c(P, P, D))
+
+avg_ISI(W, A)
+
+if (require("LaplacesDemon")) {
+  # Generate sources from multivariate Laplace distribution
+  P &lt;- 4; N &lt;- 1000; D &lt;- 4;
+  S &lt;- array(NA, c(P, N, D))
+
+  for (i in 1:P) {
+    U &lt;- array(rnorm(D * D), c(D, D))
+    Sigma &lt;- crossprod(U)
+    S[i, , ] &lt;- rmvl(N, rep(0, D), Sigma)
+  }
+
+  # Generate mixing matrices from standard normal distribution
+  A &lt;- array(rnorm(P * P * D), c(P, P, D))
+
+  # Generate mixtures
+  X &lt;- array(NaN, c(P, N, D))
+  for (d in 1:D) {
+    X[, , d] &lt;- A[, , d] %*% S[, , d]
+  }
+
+  # Estimate sources and unmixing matrices
+  res_G &lt;- NewtonIVA(X, source_density = "gaussian")
+  avg_ISI(coef(res_G), A)
+}
+</code></pre>
+
+
+</div>

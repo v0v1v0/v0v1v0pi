@@ -1,0 +1,425 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>infoset</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Procedure to find the most-left distribution set.</h2>
+
+<h3>Description</h3>
+
+<p>Estimation of the vector of unknown parameters for the density functions associated with the
+two mixture components.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">infoset(y)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>object of class "g_ret"</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p>An object of class "infoset" is a list containing the following components for the firse two iterations (k=2):
+</p>
+
+<dl>
+<dt>change.points</dt>
+<dd>
+<p>a vector of change points.</p>
+</dd>
+<dt>prior.probability</dt>
+<dd>
+<p>the a priori probabilities.</p>
+</dd>
+<dt>first.type.errors</dt>
+<dd>
+<p>the cumulative distribution functions associated with the leftmost component of the mixture.</p>
+</dd>
+<dt>second.type.errors</dt>
+<dd>
+<p>the cumulative distribution functions associated with the rightmost component of the mixture.</p>
+</dd>
+<dt>mean</dt>
+<dd>
+<p>the parameters (drift) of the left-hand component of the log-normal mixture.</p>
+</dd>
+<dt>sd</dt>
+<dd>
+<p>the parameters (volatility) of the left-hand component of the log-normal mixture.</p>
+</dd>
+</dl>
+<h3>References</h3>
+
+<p>Mariani, F., Polinesi, G., Recchioni, M. C. (2022). A tail-revisited Markowitz mean-variance approach and a portfolio network centrality. Computational Management Science, 19(3), 425-455.
+</p>
+<p>Mariani, F., Ciommi, M., Chelli, F. M., Recchioni, M. C. (2020). An iterative approach to stratification: Poverty at regional level in Italy. Social Indicators Research, 1-31.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+gross.ret&lt;-as.data.frame(lapply(sample.data, g_ret))
+infoset(gross.ret$ETF_1)
+
+
+result&lt;-NULL
+for(i in 1:ncol(gross.ret)){
+result[[i]]&lt;-infoset(gross.ret[,i])
+}
+output&lt;-matrix(unlist(result),12,ncol=ncol(gross.ret)) # output contains the information set
+output&lt;-t(output)
+rownames(output)&lt;-colnames(gross.ret)
+colnames(output)&lt;-c("ch_1","ch_2","priori_1","priori_2","first_1",
+                "first_2","second_1","second_2","mean_1","mean_2","dev_1", "dev_2")
+output&lt;- as.data.frame(output)
+
+
+
+############################################################
+## EXAMPLE 1: Clustering ETFs
+############################################################
+
+
+library(colorspace)
+library (dendextend)
+group_label &lt;- as.factor(asset.label$label)
+d &lt;- dist(output, method = 'euclidean')
+hc_SIMS &lt;- hclust(d, method = 'complete')
+dend_SIMS &lt;- as.dendrogram(hc_SIMS)
+dend_SIMS &lt;- color_branches(dend_SIMS, k = 4, col = c(1:4))
+labels_colors(dend_SIMS) &lt;-
+       rainbow_hcl(5)[sort_levels_values(as.numeric(group_label)[order.dendrogram(dend_SIMS)])]
+labels(dend_SIMS) &lt;- paste(as.character(group_label)[order.dendrogram(dend_SIMS)],
+       '(', labels(dend_SIMS), ')', sep = '')
+dend_SIMS &lt;- hang.dendrogram(dend_SIMS, hang_height = 0.001)
+dend_SIMS &lt;- assign_values_to_leaves_nodePar(dend_SIMS, 0.5, 'lab.cex')
+dev.new()
+old_par &lt;- par(no.readonly = TRUE)
+on.exit(par(old_par))
+par(mar = c(1.8, 1.8, 1.8, 1))
+plot(dend_SIMS, main = 'Complete linkage (the labels give the true ETF class)',
+     horiz = TRUE, nodePar = list(cex = 0.007))
+legend('topleft', legend = c('emerging equity Asia', 'emerging equity America',
+                           'corporate bond', 'commodities', 'aggregate bond'),
+             fill = c('#BDAB66', '#65BC8C', '#C29DDE', '#E495A5', '#55B8D0'), border = 'white')
+
+
+############################################################
+## EXAMPLE 2: Labelling ETFs
+############################################################
+
+ch &lt;- output$ch_1
+h &lt;- list()
+diff &lt;- list()
+n &lt;- list()
+a_int &lt;- list()
+hh &lt;- list()
+hh_p &lt;- list()
+expected_loss &lt;- list()
+p_loss&lt;-list()
+LR_cp &lt;- list()
+for(i in 1:ncol(gross.ret)) {
+  h[[i]] &lt;- hist(log(gross.ret[[i]]))
+  diff[[i]] &lt;- h[[i]]$breaks - ch[[i]]
+  n[[i]] &lt;- length(diff[[i]][diff[[i]]&lt;0])
+  a_int[[i]] &lt;- h[[i]]$breaks[2] - h[[i]]$breaks[1]
+  hh[[i]] &lt;- h[[i]]$mids*h[[i]]$density*a_int[[i]]
+  hh_p[[i]] &lt;- h[[i]]$density*a_int[[i]]
+  expected_loss[[i]] &lt;- sum(hh[[i]][1:(n[[i]] - 1)]) +
+    h[[i]]$density[n[[i]]]*(ch[[i]]-
+                              h[[i]]$breaks[n[[i]]])*0.5*(ch[[i]] + h[[i]]$breaks[n[[i]]])
+  p_loss[[i]]&lt;-sum(hh_p[[i]][1:(n[[i]] - 1)]) +
+    h[[i]]$density[n[[i]]]*(ch[[i]] - h[[i]]$breaks[n[[i]]])
+  LR_cp[[i]] &lt;- - (expected_loss[[i]]/p_loss[[i]])
+}
+
+############################################################
+## EXAMPLE 3: Portfolio construction
+############################################################
+
+
+W &lt;- list()
+for(t in 0:15){
+  W[[(t+1)]] = sample.data[(1 + t*125):(1290 + t*125), ]
+}
+ret &lt;- list()
+y &lt;- list()
+for(i in 1:ncol(sample.data)){
+  for (t in 1:length(W)){
+    ret[[t]] &lt;- matrix(0,nrow = nrow(W[[1]]) - 1, ncol = ncol(sample.data))
+    y[[t]] &lt;- matrix(0, nrow = nrow(W[[1]]) - 1, ncol = ncol(sample.data))
+  }
+}
+
+ch &lt;- log(output$ch_1)
+h &lt;- list()
+diff &lt;- list()
+n &lt;- list()
+a_int &lt;- list()
+hh &lt;- list()
+LR_cp &lt;- list()
+hh_p &lt;- list()
+p_loss &lt;- list()
+expected_loss &lt;- list()
+
+i &lt;- ncol(sample.data)
+for(t in 1:length(W)){
+  h[[t]] &lt;- vector('list', i)
+  diff[[t]] &lt;- vector('list', i)
+  n[[t]] &lt;- vector('list', i)
+  a_int[[t]] &lt;- vector('list', i)
+  hh[[t]] &lt;- vector('list', i)
+  LR_cp[[t]]&lt;- vector('list', i)
+  hh_p[[t]] &lt;- vector('list', i)
+  p_loss[[t]] &lt;- vector('list', i)
+  expected_loss[[t]] &lt;- vector('list', i)
+}
+
+for(i in 1:ncol(sample.data)){
+  for (t in 1:length(W)){
+    ret[[t]][,i] &lt;- diff(log(W[[t]][, i]))
+    y[[t]][,i] &lt;- exp(ret[[t]][, i])
+    y[[t]][,i] &lt;- sort(y[[t]][, i]) ##gross return
+    h[[t]][[i]] &lt;- hist(log(y[[t]][, i]))
+    diff[[t]][[i]] &lt;- h[[t]][[i]]$breaks-ch[[i]]
+    n[[t]][[i]] &lt;- length(diff[[t]][[i]][diff[[t]][[i]] &lt; 0])
+    a_int[[t]][[i]] &lt;- h[[t]][[i]]$breaks[2] - h[[t]][[i]]$breaks[1]
+    hh[[t]][[i]] &lt;- h[[t]][[i]]$mids*h[[t]][[i]]$density*a_int[[t]][[i]]
+    hh_p[[t]][[i]] &lt;- h[[t]][[i]]$density*a_int[[t]][[i]]
+    expected_loss[[t]][[i]] &lt;- sum(hh[[t]][[i]][1:(n[[t]][[i]] - 1)]) +
+    h[[t]][[i]]$density[n[[t]][[i]]]*(ch[[i]] - h[[t]][[i]]$breaks[n[[t]][[i]]])*0.5*
+   (ch[[i]] + h[[t]][[i]]$breaks[n[[t]][[i]]])
+    p_loss[[t]][[i]] &lt;- sum(hh_p[[t]][[i]][1:(n[[t]][[i]] - 1)]) +
+    h[[t]][[i]]$density[n[[t]][[i]]]*(ch[[i]] - h[[t]][[i]]$breaks[n[[t]][[i]]])
+    LR_cp[[t]][[i]] &lt;- -(expected_loss[[t]][[i]]/p_loss[[t]][[i]])
+  }
+}
+
+# ## Markowitz portfolio
+library(quadprog)
+library(Matrix)
+r &lt;- list()
+meanret &lt;- list()
+COV_ret &lt;- list()
+
+for(t in 1: length(W)){
+  r[[t]] &lt;- matrix(colMeans(ret[[t]]))
+  meanret[[t]] &lt;- sum(r[[t]])/ncol(sample.data)
+  COV_ret[[t]] &lt;- cov(ret[[t]][(1289 - 252):1289, ])
+  COV_ret[[t]] &lt;- nearPD(COV_ret[[t]])$mat
+}
+
+tw &lt;- length(W) - 1
+n &lt;- ncol(sample.data)
+B &lt;- list()
+f &lt;- list()
+sol &lt;- list()
+w_ret &lt;- list()
+Pvalue_ret &lt;- NULL
+Pvalue_M &lt;- list()
+For6m_ret1 &lt;- NULL
+for(t in 1:tw){
+  B[[t]] &lt;- matrix(1, 1, n)
+  B[[t]] &lt;- rbind(B[[t]], t(r[[t]]), diag(n), -diag(n))
+  f[[t]] &lt;- c(1, meanret[[t]], rep(0, n), rep(-1, n))
+  sol[[t]] &lt;- solve.QP(Dmat = COV_ret[[t]], dvec = 0*r[[t]], Amat = t(B[[t]]),
+        bvec = f[[t]], meq = 2)
+  w_ret[[t]] &lt;- round(sol[[t]]$solution,6)
+  Pvalue_ret[t] &lt;- sum(w_ret[[t]]*W[[t]][1289, ])
+  Pvalue_M[[t]] &lt;- (t(w_ret[[t]])%*%t(W[[t+1]][(1289 - 125):1289,]) -
+                 Pvalue_ret[t])/Pvalue_ret[t]
+  For6m_ret1[t] &lt;- Pvalue_M[[t]][60]
+}
+
+# ## Combined Markowitz
+
+for(t in 1:length(W)){
+  LR_cp[[t]] &lt;- matrix(unlist(LR_cp[[t]]), nrow = 1, ncol = ncol(sample.data))
+}
+B &lt;- list()
+f &lt;- list()
+sol &lt;- list()
+w_ret &lt;- list()
+Pvalue_ret &lt;- NULL
+Pvalue_C &lt;- list()
+For6m_ret2 &lt;- NULL
+lambda &lt;- 0.0001
+for(t in 1: tw){
+  B[[t]] &lt;- matrix(1, 1, n)
+  B[[t]] &lt;- rbind(B[[t]], t(r[[t]]), diag(n), -diag(n))
+  f[[t]] &lt;- c(1, meanret[[t]], rep(0, n), rep(-1, n))
+  sol[[t]] &lt;- solve.QP(Dmat = COV_ret[[t]], dvec = -lambda*LR_cp[[t]], Amat = t(B[[t]]),
+                       bvec = f[[t]], meq = 2)
+  w_ret[[t]] &lt;- round(sol[[t]]$solution, 6)
+  Pvalue_ret[t] &lt;- sum(w_ret[[t]]*W[[t]][1289, ])
+  Pvalue_C[[t]] &lt;- (t(w_ret[[t]])%*%t(W[[t+1]][(1289-125):1289,]) -
+                Pvalue_ret[t])/Pvalue_ret[t]
+  For6m_ret2[t] &lt;- Pvalue_C[[t]][60]
+}
+
+# ## Classical EDC
+ret &lt;- list()
+y &lt;- list()
+for(i in 1:ncol(sample.data)){
+  for(t in 1:length(W)){
+    ret[[t]] &lt;- matrix(0, nrow = nrow(W[[1]]) - 1, ncol = ncol(sample.data))
+    y[[t]] &lt;- matrix(0, nrow = nrow(W[[1]]) - 1, ncol = ncol(sample.data))
+  }
+}
+for(i in 1:ncol(sample.data)){
+  for (t in 1:length(W)){
+    ret[[t]][, i] &lt;- diff(log(W[[t]][, i]))
+    y[[t]][, i] &lt;- exp(ret[[t]][, i])
+  }
+}
+
+W_out &lt;- list()
+for(t in 1:16){
+  W_out[[(t)]] = ret[[t]][(1289 - 252):1289, ]
+}
+quant &lt;- matrix(0, nrow = length(W), ncol = ncol(sample.data))
+diff &lt;- list()
+for(t in 1:length(W)){
+  for(i in 1:ncol(sample.data)){
+    quant[t, i] &lt;-quantile(as.numeric(W_out[[(t)]][, i]), probs = 0.05)
+    diff[[t]] &lt;- W_out[[(t)]] - colMeans(W_out[[(t)]])
+    for (j in 1:length(W_out[[t]][, i])){
+      if(W_out[[(t)]][j, i] &gt; quant[t, i]){diff[[t]][j, i] = 0}
+    }
+  }
+}
+
+C_edc &lt;- list()
+
+for(t in 1:length(W)){
+  aux &lt;- matrix(0, nrow = ncol(sample.data), ncol = ncol(sample.data))
+  for(i in 1:ncol(sample.data)){
+    for(j in 1:ncol(sample.data)){
+      aux[i, j] &lt;- (mean(diff[[t]][, i]*diff[[t]][, j]))
+    }
+  }
+  C_edc[[t]] &lt;- aux
+}
+
+r &lt;- list()
+meanret &lt;- list()
+stdev &lt;- list()
+COV_edc &lt;- list()
+
+for(t in 1:length(W_out)){
+  r[[t]] &lt;- matrix(colMeans(ret[[t]]))
+  meanret[[t]] &lt;- sum(r[[t]])/n
+  stdev[[t]] &lt;- apply(W_out[[t]], 2, sd)
+  stdev[[t]] &lt;- matrix(stdev[[t]])
+  COV_edc[[t]] &lt;- nearPD(C_edc[[t]])$mat
+}
+B &lt;- list()
+f &lt;- list()
+sol &lt;- list()
+w_edc &lt;- list()
+Pvalue_edc &lt;- NULL
+Pvalue_EDC &lt;- list()
+For6m_edc1 &lt;- NULL
+for(t in 1: 15){
+  B[[t]]&lt;- matrix(1,1,n)
+  B[[t]]&lt;- rbind(B[[t]], t(r[[t]]), diag(n),-diag(n))
+  f[[t]] &lt;- c(1, meanret[[t]], rep(0, n),rep(-1, n))
+  sol[[t]] &lt;- solve.QP(Dmat = COV_edc[[t]], dvec = 0*r[[t]],
+           Amat = t(B[[t]]), bvec = f[[t]], meq = 2)
+  w_edc[[t]]&lt;-round(sol[[t]]$solution, 6)
+  Pvalue_edc[t]=sum(w_edc[[t]]*W[[t]][1289, ])
+  Pvalue_EDC[[t]] = (t(w_edc[[t]])%*%t(W[[t+1]][(1289-125):1289, ]) -
+               Pvalue_edc[t])/Pvalue_edc[t]
+  For6m_edc1[t] &lt;- Pvalue_EDC[[t]][60]
+}
+
+## Combined EDC
+B &lt;- list()
+f &lt;- list()
+sol &lt;- list()
+w_edc &lt;- list()
+Pvalue_edc &lt;- NULL
+Pvalue_mod_EDC &lt;- list()
+For6m_mod_edc1 &lt;- NULL
+
+for(t in 1: 15){
+  B[[t]]&lt;- matrix(1,1,n)
+  B[[t]]&lt;- rbind(B[[t]], t(r[[t]]), diag(n),-diag(n))
+  f[[t]] &lt;- c(1, meanret[[t]], rep(0, n),rep(-1, n))
+  sol[[t]] &lt;- solve.QP(Dmat = COV_edc[[t]], dvec = lambda*LR_cp[[t]],
+             Amat = t(B[[t]]), bvec = f[[t]], meq = 2)
+  w_edc[[t]]&lt;-round(sol[[t]]$solution, 6)
+  Pvalue_edc[t]=sum(w_edc[[t]]*W[[t]][1289, ])
+  Pvalue_mod_EDC[[t]] = (t(w_edc[[t]])%*%t(W[[t+1]][(1289-125):1289, ]) -
+            Pvalue_edc[t])/Pvalue_edc[t]
+  For6m_mod_edc1[t] &lt;- Pvalue_mod_EDC[[t]][60]
+}
+
+sample_M &lt;- NULL ## Classical Markowitz
+sample_C &lt;- NULL ## Combined Markowitz
+sample_EDC &lt;- NULL ## Classical EDC
+sample_mod_EDC &lt;- NULL ## Combined EDC
+icont &lt;- 0
+count &lt;- 1:15
+for (t in count){
+  for(j in 1:125){
+    icont = icont + 1;
+    sample_M[icont] = Pvalue_M[[t]][1, j]
+    sample_C[icont] = Pvalue_C[[t]][1, j]
+    sample_EDC[icont] = Pvalue_EDC[[t]][1, j]
+    sample_mod_EDC[icont] = Pvalue_mod_EDC[[t]][1, j]
+  }
+}
+dev.new()
+old_par &lt;- par(no.readonly = TRUE)
+on.exit(par(old_par))
+par(mfrow = c(1, 4))
+boxplot(sample_M, ylim = c(-0.20, 0.15), outline = FALSE,
+       main = expression(paste('Classical Markowitz')))
+abline(h = mean(sample_M), col = 'red')
+boxplot(sample_C, ylim = c(-0.20,0.15), outline = FALSE,
+       main = expression(paste('Combined Markowitz')))
+abline(h = mean(sample_C), col = 'red')
+boxplot(sample_EDC, ylim = c(-0.20, 0.15), outline = FALSE,
+       main = expression(paste('Classical EDC')))
+abline(h = mean(sample_EDC), col = 'red')
+boxplot(sample_mod_EDC, ylim = c(-0.20, 0.15), outline = FALSE,
+       main = expression(paste('Combined EDC')))
+abline(h = mean(sample_EDC), col = 'red')
+dev.new()
+par(mfrow = c(2, 1))
+date&lt;-as.Date(sample.data.ts$Date,format='%m/%d/%Y')
+date_parz = seq(from = 1291, to = 3165, by = 64)
+m = length(date_parz)
+date_parz[m] = 3165
+date_1 &lt;- date[1291:3165]
+date_2 &lt;- date[date_parz]
+matplot(date_1, cbind(sample_M, sample_C), type = 'l',
+        col = c('red', 'black'), lty = c(2, 3),
+        ylab = 'profit &amp; loss', xlab = '',xaxt='n', ylim = c(-0.20, 0.15), cex.lab = 1.2)
+axis(1, date_2, format(date_2, '%m/%Y'), cex.axis = .9, las = 2)
+legend('bottomright', legend = c('Classical Markowitz', 'Combined Markowitz'),
+       col=c('red','black'),lty = c(2, 3))
+matplot(date_1, cbind(sample_EDC, sample_mod_EDC), type = 'l',
+        col = c('brown', 'blue'), lty = c(3,1),
+        ylab = 'profit &amp; loss', xlab = '', xaxt = 'n', ylim = c(-0.20, 0.15), cex.lab = 1.2)
+axis(1, date_2, format(date_2, '%m/%Y'), cex.axis = .9, las = 2)
+legend('bottomright', legend = c('Classical EDC', 'Combined EDC'),
+      col = c('brown','blue'), lty = c(3, 1))
+
+
+</code></pre>
+
+
+</div>

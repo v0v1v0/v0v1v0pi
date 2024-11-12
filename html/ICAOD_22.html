@@ -1,0 +1,210 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>leff</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculates Relative Efficiency for Locally Optimal Designs</h2>
+
+<h3>Description</h3>
+
+<p>Given a vector of initial estimates for the parameters, this function calculates the D-and PA- efficiency of a design <code class="reqn">\xi_1</code> with respect to a design <code class="reqn">\xi_2</code>.
+Usually, <code class="reqn">\xi_2</code> is an  optimal design.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">leff(
+  formula,
+  predvars,
+  parvars,
+  family = gaussian(),
+  inipars,
+  type = c("D", "PA"),
+  fimfunc = NULL,
+  x2,
+  w2,
+  x1,
+  w1,
+  npar = length(inipars),
+  prob = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>A linear or nonlinear model <code>formula</code>.
+A symbolic description of the model consists of predictors and the unknown model parameters.
+Will be coerced to a <code>formula</code> if necessary.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predvars</code></td>
+<td>
+<p>A vector of characters. Denotes the predictors in the <code>formula</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parvars</code></td>
+<td>
+<p>A vector of characters. Denotes the unknown parameters in the <code>formula</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>A description of the response distribution and the link function to be used in the model.
+This can be a family function, a call to a family function or a character string naming the family.
+Every family function has a link argument allowing to specify the link function to be applied on the response variable.
+If not specified, default links are used. For details see <code>family</code>.
+By default, a linear gaussian model <code>gaussian()</code> is applied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inipars</code></td>
+<td>
+<p>Vector. Initial values for the unknown parameters. It will be passed to the information matrix and also probability function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>A character. <code>"D"</code> denotes the D-efficiency and <code>"PA"</code> denotes the average P-efficiency.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fimfunc</code></td>
+<td>
+<p>A function. Returns the FIM as a <code>matrix</code>. Required when <code>formula</code> is missing. See 'Details' of <code>minimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x2</code></td>
+<td>
+<p>Vector of design (support) points of the optimal design (<code class="reqn">\xi_2</code>). Similar to <code>x1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w2</code></td>
+<td>
+<p>Vector of corresponding design weights for <code>x2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x1</code></td>
+<td>
+<p>Vector of design (support) points of <code class="reqn">\xi_1</code>. See 'Details' of <code>leff</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w1</code></td>
+<td>
+<p>Vector of corresponding design weights for <code>x1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>npar</code></td>
+<td>
+<p>Number of model parameters.  Used when <code>fimfunc</code> is given instead of <code>formula</code> to specify the number of model parameters.
+If not given, the sensitivity plot may be shifted below the y-axis. When <code>NULL</code>, it will be set here to <code>length(inipars)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob</code></td>
+<td>
+<p>Either <code>formula</code> or a <code>function</code>. When function, its argument are <code>x</code> and <code>param</code>, and they are the same as the arguments in <code>fimfunc</code>.
+<code>prob</code> as a function takes the design points and vector of parameters and returns the probability of success at each design points.
+See 'Examples'.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For a known <code class="reqn">\theta_0</code>, relative D-efficiency is
+</p>
+<p style="text-align: center;"><code class="reqn">exp(\frac{log|M(\xi_1, \theta_0)| - log|M(\xi_2, \theta_0)|}{npar})</code>
+</p>
+
+<p>The relative P-efficiency is
+</p>
+<p style="text-align: center;"><code class="reqn">\exp(\log(\sum_{i=1}^k w_{1i}p(x_{1i}, \theta_0) - \log(\sum_{i=1}^k w_{2i}p(x{2_i}, \theta_0))</code>
+</p>
+
+<p>where <code class="reqn">x_2</code> and <code class="reqn">w_2</code> are usually the support points and the corresponding weights of the optimal design, respectively.
+</p>
+<p>The argument  <code>x1</code> is the vector of design points.
+For design points with more than one dimension (the models with more than one predictors),
+it is a concatenation of the design points, but <strong>dimension-wise</strong>.
+For example, let the model has three predictors   <code class="reqn">(I, S, Z)</code>.
+Then,  a two-point optimal design has the following points:
+<code class="reqn">\{\mbox{point1} = (I_1, S_1, Z_1), \mbox{point2} = (I_2, S_2, Z_2)\}</code>.
+Then, the argument <code>x1</code> is equal to
+<code>x = c(I1, I2, S1, S2, Z1, Z2)</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A value between 0 and 1.
+</p>
+
+
+<h3>References</h3>
+
+<p>McGree, J. M., Eccleston, J. A., and Duffull, S. B. (2008). Compound optimal design criteria for nonlinear models. Journal of Biopharmaceutical Statistics, 18(4), 646-661.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">p &lt;- c(1, -2, 1, -1)
+prior4.4 &lt;- uniform(p -1.5, p + 1.5)
+formula4.4 &lt;- ~exp(b0+b1*x1+b2*x2+b3*x1*x2)/(1+exp(b0+b1*x1+b2*x2+b3*x1*x2))
+prob4.4 &lt;- ~1-1/(1+exp(b0 + b1 * x1 + b2 * x2 + b3 * x1 * x2))
+predvars4.4 &lt;-  c("x1", "x2")
+parvars4.4 &lt;- c("b0", "b1", "b2", "b3")
+
+
+# Locally D-optimal design is as follows:
+## weight and point of D-optimal design
+# Point1     Point2     Point3     Point4
+# /1.00000 \ /-1.00000\ /0.06801 \ /1.00000 \
+# \-1.00000/ \-1.00000/ \1.00000 / \1.00000 /
+#   Weight1    Weight2    Weight3    Weight4
+# 0.250      0.250      0.250      0.250
+
+xopt_D &lt;- c(1, -1, .0680, 1, -1, -1, 1, 1)
+wopt_D &lt;- rep(.25, 4)
+
+# Let see if we use only three of the design points, what is the relative efficiency.
+leff(formula = formula4.4, predvars = predvars4.4, parvars = parvars4.4, family = binomial(),
+     x1 = c(1, -1, .0680,  -1, -1, 1), w1 = c(.33, .33, .33),
+     inipars = p,
+     x2 = xopt_D, w2 = wopt_D)
+# Wow, it heavily drops!
+
+
+# Locally P-optimal design has only one support point and is -1 and 1
+xopt_P &lt;- c(-1, 1)
+wopt_P &lt;- 1
+
+# What is the relative P-efficiency of the D-optimal design with respect to P-optimal design?
+leff(formula = formula4.4, predvars = predvars4.4, parvars = parvars4.4, family = binomial(),
+     x1 = xopt_D, w1 = wopt_D,
+     inipars = p,
+     type = "PA",
+     prob = prob4.4,
+     x2 = xopt_P, w2 = wopt_P)
+# .535
+
+
+</code></pre>
+
+
+</div>

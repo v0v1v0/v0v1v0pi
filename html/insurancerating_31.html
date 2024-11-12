@@ -1,0 +1,115 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>restrict_coef</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Restrict coefficients in the model</h2>
+
+<h3>Description</h3>
+
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental"><img src="../help/figures/lifecycle-experimental.svg" alt="[Experimental]"></a>
+Add restrictions, like a bonus-malus structure, on the risk
+factors used in the model. <code>restrict_coef()</code> must always be followed
+by <code>update_glm()</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">restrict_coef(model, restrictions)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>object of class glm/restricted</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>restrictions</code></td>
+<td>
+<p>data.frame with two columns containing restricted data.
+The first column, with the name of the risk factor as column name, must
+contain the levels of the risk factor. The second column must contain the
+restricted coefficients.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Although restrictions could be applied either to the frequency or
+the severity model, it is more appropriate to impose the restrictions
+on the premium model. This can be achieved by calculating the pure
+premium for each record (i.e. expected number of claims times the expected
+claim amount), then fitting an "unrestricted" Gamma GLM to the pure
+premium,and then imposing the restrictions in a final "restricted" Gamma
+GLM.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Object of class restricted.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Martin Haringa
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>update_glm()</code> for refitting the restricted model,
+and <code>autoplot.restricted()</code>.
+</p>
+<p>Other update_glm: 
+<code>smooth_coef()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Add restrictions to risk factors for region (zip) -------------------------
+
+# Fit frequency and severity model
+library(dplyr)
+freq &lt;- glm(nclaims ~ bm + zip, offset = log(exposure), family = poisson(),
+             data = MTPL)
+sev &lt;- glm(amount ~ bm + zip, weights = nclaims,
+            family = Gamma(link = "log"),
+            data = MTPL |&gt; filter(amount &gt; 0))
+
+# Add predictions for freq and sev to data, and calculate premium
+premium_df &lt;- MTPL |&gt;
+   add_prediction(freq, sev) |&gt;
+   mutate(premium = pred_nclaims_freq * pred_amount_sev)
+
+# Restrictions on risk factors for region (zip)
+zip_df &lt;- data.frame(zip = c(0,1,2,3), zip_rst = c(0.8, 0.9, 1, 1.2))
+
+# Fit unrestricted model
+burn &lt;- glm(premium ~ bm + zip, weights = exposure,
+            family = Gamma(link = "log"), data = premium_df)
+
+# Fit restricted model
+burn_rst &lt;- burn |&gt;
+  restrict_coef(restrictions = zip_df) |&gt;
+  update_glm()
+
+# Show rating factors
+rating_factors(burn_rst)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

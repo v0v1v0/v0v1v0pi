@@ -1,0 +1,86 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>interact</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Build simple interactive interfaces using imager</h2>
+
+<h3>Description</h3>
+
+<p>To explore the effect of certain image manipulations, filter settings, etc., it's useful to have a basic interaction mechanism. You can use shiny for that, but imager provides a lightweight alternative. The user writes a function that gets called every time a user event happens (a click, a keypress, etc.). The role of the function is to process the event and output an image, which will then be displayed.
+You can exit the interface at any time by pressing Esc.
+See examples for more.
+This feature is experimental!!!
+Note that you need X11 library to use this function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">interact(fun, title = "", init)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fun</code></td>
+<td>
+<p>a function that takes a single argument (a list of user events) and returns an image to be plotted. The image won't be rescaled before plotting, so make sure RGB values are in [0,1].</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>title</code></td>
+<td>
+<p>a title for the window (default "", none)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init</code></td>
+<td>
+<p>initial image to display (optional)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>an image, specifically the last image displayed
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Simon Barthelme
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#Implement a basic image gallery:
+#press "right" and "left" to view each image in a list
+gallery &lt;- function(iml)
+{
+    ind &lt;- 1
+    f &lt;- function(state)
+   {
+        if (state$key=="arrowleft")
+        {
+            ind &lt;&lt;- max(ind-1,1)
+        }
+        if (state$key=="arrowright")
+        {
+            ind &lt;&lt;- min(ind+1,length(iml))
+        }
+        iml[[ind]]
+    }
+    interact(f)
+}
+##Not run (interactive only)
+##map_il(1:10,~ isoblur(boats,.)) %&gt;% gallery
+</code></pre>
+
+
+</div>

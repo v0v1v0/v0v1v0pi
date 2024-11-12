@@ -1,0 +1,101 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>resample</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Resampling of data involving a <code>trigrid</code> or a <code>hexagrid</code> object.</h2>
+
+<h3>Description</h3>
+
+<p>The function is used to resolve and resample data stored in <code>SpatRaster</code>s and <code>facelayer</code>s so they can be fitted to and can be plotted by using <code>trigrid</code> or <code>hexagrid</code> objects.
+</p>
+<p>The function applies different resampling algorithms. Currently there are only two implemented methods, one for upscaling and one for downscaling. The downscaling method "average" will tabluate all face centers from the high resolution grid that fall on a coarse resolution cell and average them. The upscaling method "ebaa" (edge breakpoint area approximation) will estimate the areas covered by the high resolution cells using the number of edge breakpoints.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">resample
+
+## S4 method for signature 'SpatRaster,trigrid'
+resample(x, y, method = "near", na.rm = TRUE)
+
+## S4 method for signature 'facelayer,trigrid'
+resample(x, y, method = NULL, res = 5)
+
+## S4 method for signature 'facelayer,SpatRaster'
+resample(x, y, method = NULL, res = 5)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>(<code>SpatRaster</code>, <code>facelayer</code>) Object to resample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>(<code>hexagrid</code> or <code>trigrid</code>) Object describing the target structure.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>(<code>character</code>) The name of the algorithm used for resampling.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.rm</code></td>
+<td>
+<p>(<code>logical</code>) If a face contains a missing value, should its value be <code>NA</code> as well (<code>FALSE</code>) or calculate the mean anyway (<code>TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>res</code></td>
+<td>
+<p>(<code>numeric</code>) Value indicating the precision of area estimation during the upscaling (<code>facelayer</code>-method). In case the <code>"ebaa"</code> method is chosen, the variable indicate the number of breaking points on an edge.</p>
+</td>
+</tr>
+</table>
+<h3>Format</h3>
+
+<p>An object of class <code>standardGeneric</code> of length 1.
+</p>
+
+
+<h3>Details</h3>
+
+<p>This method is necessary to utilize rasterized data in the <code>icosa</code> package. The only method currently implemented upscales the raster data and then resolves the values to the <code>trigrid</code> or <code>hexagrid</code> values, using averages. In the case of resampling <code>SpatRaster</code>s, the <code>method</code> argument will be passed to the <code>resample</code> function.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A named <code>numeric</code> vector.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># create a grid
+g &lt;- trigrid(c(4,4))
+# create a data layer
+fl &lt;- facelayer(g)
+fl@values&lt;-rnorm(length(fl))
+# target structure
+h &lt;- trigrid(4)
+# resampling
+res &lt;- resample(fl, h)
+fl2&lt;-facelayer(h)
+fl2@values[] &lt;- res
+
+</code></pre>
+
+
+</div>

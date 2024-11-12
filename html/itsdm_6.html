@@ -1,0 +1,329 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>evaluate_po</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Evaluate the model based on presence-only data.</h2>
+
+<h3>Description</h3>
+
+<p>This function will calculate two major types of evaluation
+metrics in terms of presence-only data. The first type is presence-only
+customized metrics, such as Contrast Validation Index (CVI),
+continuous Boyce index (CBI), and ROC_ratio.
+The second type is presence-background evaluation metrics by
+extracting background points as pseudo absence observations.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">evaluate_po(
+  model,
+  occ_pred,
+  bg_pred = NULL,
+  var_pred,
+  threshold = NULL,
+  visualize = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>(<code>isolation_forest</code>) The extended isolation forest SDM.
+It could be the item <code>model</code> of <code>POIsotree</code> made by
+function <code>isotree_po</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>occ_pred</code></td>
+<td>
+<p>(<code>vector</code> of <code>numeric</code>) A <code>vector</code> contains predicted values
+at occurrence locations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bg_pred</code></td>
+<td>
+<p>(<code>vector</code> of <code>numeric</code>) the vector contains predicted values
+with same number of background points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var_pred</code></td>
+<td>
+<p>(<code>vector</code> of <code>numeric</code>) the vector contains predicted values
+of the whole area. The reason to take a vector is to keep this function
+flexible for multiple types of output.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>(<code>numeric</code> or <code>NULL</code>) The threshold to calculate
+threshold-based evaluation metrics. If <code>NULL</code>, a recommended threshold
+will be calculated based on optimal TSS value. The default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>visualize</code></td>
+<td>
+<p>(<code>logical</code>) If <code>TRUE</code>, plot the evaluation figures.
+The default is <code>FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<ul>
+<li>
+<p><b>CVI</b> is the proportion of presence points falling in cells having
+a threshold (<code>0.5</code> for example) habitat suitability index minus
+the proportion of cells within this range of threshold of the model.
+Here we used varied thresholds: <code>0.25</code>, <code>0.5</code>, and <code>0.75</code>.
+</p>
+</li>
+<li>
+<p><b>continuous Boyce index (CBI)</b> is made with a 100 resolution of
+moving windows and Kendall method.
+</p>
+</li>
+<li>
+<p><b>ROC_ratio</b> curve plots the proportion of presences falling above a
+range of thresholds against the proportion of cells falling
+above the range of thresholds. The area under the modified
+ROC curve was then called <b>AUC_ratio</b>.
+</p>
+</li>
+<li>
+<p><b>Sensitivity (TPR)</b> = TP/(TP + FN)
+</p>
+</li>
+<li>
+<p><b>Specificity (TNR)</b> = TN/(TN + FP)
+</p>
+</li>
+<li>
+<p><b>True skill statistic (TSS)</b> = Sensitivity + specificity - 1
+</p>
+</li>
+<li>
+<p><b>Jaccard's similarity index</b> = TP/(FN + TP + FP)
+</p>
+</li>
+<li>
+<p><b>Sørensen's similarity index (F-measure)</b> = 2TP/(FN + 2TP + FP)
+</p>
+</li>
+<li>
+<p><b>Overprediction rate</b> = FP/(TP + FP)
+</p>
+</li>
+<li>
+<p><b>Underprediction rate</b> = FN/(TP + FN)
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>(<code>POEvaluation</code>) A list of
+</p>
+
+<ul>
+<li>
+<p><b>po_evaluation</b> is presence-only evaluation metrics. It is a list of
+</p>
+
+<ul>
+<li>
+<p>cvi (<code>list</code>) A list of CVI with 0.25, 0.5, and 0.75 as threshold
+</p>
+</li>
+<li>
+<p>boyce (<code>list</code>) A list of items related to continuous Boyce index (CBI)
+</p>
+</li>
+<li>
+<p>roc_ratio (<code>list</code>) A list of ROC ratio and AUC ratio
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p><b>pb_evaluation</b> is presence-background evaluation metrics.
+It is a list of
+</p>
+
+<ul>
+<li>
+<p>confusion matrix (<code>table</code>) A table of confusion matrix. The columns are
+true values, and the rows are predicted values.
+</p>
+</li>
+<li>
+<p>sensitivity (<code>numeric</code>) The sensitivity or TPR
+</p>
+</li>
+<li>
+<p>specificity (<code>numeric</code>) The specificity or TNR
+</p>
+</li>
+<li>
+<p>TSS (<code>list</code>) A list of info related to true skill statistic (TSS)
+</p>
+
+<ul>
+<li>
+<p>cutoff (<code>vector</code> of <code>numeric</code>) A vector of cutoff threshold values
+</p>
+</li>
+<li>
+<p>tss (<code>vector</code> of <code>numeric</code>) A vector of TSS for each cutoff threshold
+</p>
+</li>
+<li>
+<p>Recommended threshold (<code>numeric</code>) A recommended threshold
+according to TSS
+</p>
+</li>
+<li>
+<p>Optimal TSS (<code>numeric</code>) The best TSS value</p>
+</li>
+</ul>
+</li>
+<li>
+<p>roc (<code>list</code>) A list of ROC values and AUC value
+</p>
+</li>
+<li>
+<p>Jaccard's similarity index (<code>numeric</code>) The Jaccard's similarity index
+</p>
+</li>
+<li>
+<p>Sørensen's similarity index (<code>numeric</code>) The Sørensen's similarity index
+or F-measure
+</p>
+</li>
+<li>
+<p>Overprediction rate (<code>numeric</code>) The Overprediction rate
+</p>
+</li>
+<li>
+<p>Underprediction rate (<code>numeric</code>) The Underprediction rate
+</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3>References</h3>
+
+
+<ul>
+<li>
+<p>Peterson,
+A. Townsend, Monica Papeş, and Jorge Soberón. "Rethinking receiver operating
+characteristic analysis applications in ecological niche modeling."
+<em>Ecological modelling</em> 213.1 (2008): 63-72.
+<a href="https://doi.org/10.1016/j.ecolmodel.2007.11.008">doi:10.1016/j.ecolmodel.2007.11.008</a>
+</p>
+</li>
+<li>
+<p>Hirzel,
+Alexandre H., et al. "Evaluating the ability of habitat suitability models
+to predict species presences." <em>Ecological modelling</em>
+199.2 (2006): 142-152.
+<a href="https://doi.org/10.1016/j.ecolmodel.2006.05.017">doi:10.1016/j.ecolmodel.2006.05.017</a>
+</p>
+</li>
+<li>
+<p>Hirzel, Alexandre
+H., and Raphaël Arlettaz. "Modeling habitat suitability for complex species
+distributions by environmental-distance geometric mean."
+<em>Environmental management</em> 32.5 (2003): 614-623.
+<a href="https://doi.org/10.1007/s00267-003-0040-3">doi:10.1007/s00267-003-0040-3</a>
+</p>
+</li>
+<li>
+<p>Leroy, Boris, et al.
+"Without quality presence-absence data, discrimination metrics such as
+TSS can be misleading measures of model performance."
+<em>Journal of Biogeography</em> 45.9 (2018): 1994-2002.
+<a href="https://doi.org/10.1111/jbi.13402">doi:10.1111/jbi.13402</a>
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>print.POEvaluation</code>, <code>plot.POEvaluation</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Using a pseudo presence-only occurrence dataset of
+# virtual species provided in this package
+library(dplyr)
+library(sf)
+library(stars)
+library(itsdm)
+
+data("occ_virtual_species")
+obs_df &lt;- occ_virtual_species %&gt;% filter(usage == "train")
+eval_df &lt;- occ_virtual_species %&gt;% filter(usage == "eval")
+x_col &lt;- "x"
+y_col &lt;- "y"
+obs_col &lt;- "observation"
+
+# Format the observations
+obs_train_eval &lt;- format_observation(
+  obs_df = obs_df, eval_df = eval_df,
+  x_col = x_col, y_col = y_col, obs_col = obs_col,
+  obs_type = "presence_only")
+
+env_vars &lt;- system.file(
+  'extdata/bioclim_tanzania_10min.tif',
+  package = 'itsdm') %&gt;% read_stars() %&gt;%
+  slice('band', c(1, 5, 12, 16))
+
+# With perfect_presence mode,
+# which should be very rare in reality.
+mod &lt;- isotree_po(
+  obs_mode = "perfect_presence",
+  obs = obs_train_eval$obs,
+  obs_ind_eval = obs_train_eval$eval,
+  variables = env_vars, ntrees = 10,
+  sample_size = 0.8, ndim = 2L,
+  seed = 123L, nthreads = 1,
+  response = FALSE,
+  spatial_response = FALSE,
+  check_variable = FALSE)
+
+# Without background samples or absences
+eval_train &lt;- evaluate_po(
+  mod$model,
+  occ_pred = mod$pred_train$prediction,
+  var_pred = na.omit(as.vector(mod$prediction[[1]])))
+print(eval_train)
+
+# With background samples
+bg_pred &lt;- st_extract(
+  mod$prediction, mod$background_samples) %&gt;%
+  st_drop_geometry()
+eval_train &lt;- evaluate_po(
+  mod$model,
+  occ_pred = mod$pred_train$prediction,
+  bg_pred = bg_pred$prediction,
+  var_pred = na.omit(as.vector(mod$prediction[[1]])))
+plot(eval_train)
+#'
+</code></pre>
+
+
+</div>

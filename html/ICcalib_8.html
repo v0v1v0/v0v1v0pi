@@ -1,0 +1,223 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>CalcVarParam</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Variance estimation for the main proportional hazards model</h2>
+
+<h3>Description</h3>
+
+<p>Estimation of the covariance matrix for the parameters of the main proportional hazards model. 
+This includes the variance of the binary exposure estimate and the other covariates, if included in the model. 
+Each function correspond to a different calibration (or risk-set calibration model).
+</p>
+<p>For nonparametric calibration, bootstrap calculations of the variance and confidence interval for the for the log hazard-ratio of the binary exposure.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">CalcVarParam(theta, tm, event, Z, Q, ps, ps.deriv, w, w.res, fit.cox)
+
+CalcVarParamRSInts(theta, tm, event, Z, Q, ps, ps.deriv, w, w.res,
+  fit.cox.rs.ints, pts.for.ints, n.etas.per.fit)
+
+CalcVarThetaWeib(beta, etas, tm, event, ps, ps.deriv.shape, ps.deriv.scale, w,
+  w.res)
+
+CalcVarThetaWeibRS(beta, etas.matrix, tm, event, ps.rs, ps.deriv.shape.rs,
+  ps.deriv.scale.rs, w, w.res)
+
+CalcVarNpmle(tm, event, w, w.res, BS = 100, CI = T)
+
+CalcVarNpmleRS(tm, event, w, w.res, BS = 100, CI = T)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>theta</code></td>
+<td>
+<p>Coefficient vector from main PH model. First coefficient corresponds to X, the rest to Z</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tm</code></td>
+<td>
+<p>Vector of observed main event time or censoring time</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event</code></td>
+<td>
+<p>Vector of censoring indicators. <code>1</code> for event <code>0</code> for censored</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Z</code></td>
+<td>
+<p>Additional variables for the main model other than the binary covariate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q</code></td>
+<td>
+<p>For PH calibration models: additional covariates</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ps</code></td>
+<td>
+<p>A matrix. Rows are observations, columns are time pointas of the events. The entry at the i-th row and j-column is
+the conditional probability of positive exposure status for observation i at the j-th event time.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ps.deriv</code></td>
+<td>
+<p>A matrix. Rows are observations, columns are time points of the events.  The derivative of <code>ps</code> with 
+respect to the calibration model parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>A matrix of time points when measurements on the binary covariate were obtained.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w.res</code></td>
+<td>
+<p>A matrix of measurement results of the binary covariate. The measurement corresponding to the time points in <code>w</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fit.cox</code></td>
+<td>
+<p>For PH calibration models:  The result of <code>icenReg::ic_sp</code> on the interval-censored data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fit.cox.rs.ints</code></td>
+<td>
+<p>For grouped risk-set PH calibraion: The result of <code>FitCalibCoxRSInts</code> on the interval-censored data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pts.for.ints</code></td>
+<td>
+<p>For grouped-risk set PH calibraion: Points defining the intervals for grouping risk-sets (first one has to be zero). Should be sorted from zero up</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.etas.per.fit</code></td>
+<td>
+<p>For grouped-risk set PH calibraion: A vector. Total number of parameters for each PH calibration fit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p>Coefficient of the binary covariate. The analogue of theta for non-PH calibration models</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>etas</code></td>
+<td>
+<p>For Weibull calibration: Shape and scale parameters of the Weibull calibration model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ps.deriv.shape</code></td>
+<td>
+<p>The derivative of <code>ps</code> with respect to the shape parameter of the Weibull calibration model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ps.deriv.scale</code></td>
+<td>
+<p>The derivative of <code>ps</code> with respect to the scale parameter of the Weibull calibration model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>etas.matrix</code></td>
+<td>
+<p>For Weibull risk-set calibration: Two-columns matrix. Each row contains shape and scale parameters from a Weibull risk-set calibration model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ps.rs</code></td>
+<td>
+<p>A matrix. Rows are observations, columns are time points of the events. The entry at the i-th row and j-column is
+the conditional probability of positive exposure status for observation i at the j-th event time.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ps.deriv.shape.rs</code></td>
+<td>
+<p>For Weibull risk-set calibration:The derivative of <code>ps</code> with respect to the shape parameters of the Weibull risk-set calibration models.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ps.deriv.scale.rs</code></td>
+<td>
+<p>For Weibull risk-set calibration:The derivative of <code>ps</code> with respect to the scale parameters of the Weibull risk-set calibration models.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>BS</code></td>
+<td>
+<p>For nonparametric calibration: Number of bootstrap iterations, Default: 100</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CI</code></td>
+<td>
+<p>For nonparametric calibration: Should the function return confidence intervals?, Default: T</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The covariance matrix. The first row and column are for the binary exposure.
+</p>
+<p>For nonparametric calibration: Variance estimate and possibly confidence interval for the log hazard-ratio of the binary exposure under 
+a nonparametric calibration model.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Simulate data set
+sim.data &lt;- ICcalib:::SimCoxIntervalCensSingle(n.sample = 200, lambda = 0.1, alpha = 0.25, 
+                                               beta0 = log(0.5), mu = 0.2, n.points = 2, 
+                                               weib.shape = 1, weib.scale = 2)
+case.times &lt;- sim.data$obs.tm[sim.data$delta==1]
+# Fit a Weibull calibration model for the covariate starting time distribution
+calib.weib.params &lt;- FitCalibWeibull(w = sim.data$w, w.res = sim.data$w.res)
+px &lt;- t(sapply(case.times, CalcWeibullCalibP, w = sim.data$w, 
+               w.res =  sim.data$w.res, weib.params = calib.weib.params))
+# Calculate derivative matrices
+px.deriv.shape &lt;- t(sapply(case.times, ICcalib:::CalcWeibullCalibPderivShape, 
+w = sim.data$w, w.res =  sim.data$w.res, weib.params = calib.weib.params))
+px.deriv.scale &lt;- t(sapply(case.times, ICcalib:::CalcWeibullCalibPderivScale, 
+w = sim.data$w, w.res = sim.data$ w.res, weib.params = calib.weib.params))
+# Point estimate 
+est.weib.calib &lt;- optimize(f = ICcalib:::CoxLogLikX,  tm = sim.data$obs.tm, 
+                           event = sim.data$delta, ps = px, interval = c(-50,50), 
+                           maximum = TRUE)$maximum
+# Variance estimate (no addtional covariates)
+var.beta.wb &lt;- CalcVarThetaWeib(beta = est.weib.calib, etas = calib.weib.params, 
+                                tm = sim.data$obs.tm, event = sim.data$delta, 
+                                ps = px, ps.deriv.shape = px.deriv.shape, 
+                                ps.deriv.scale =  px.deriv.scale, w = sim.data$w, 
+                                w.res = sim.data$w.res)
+ print(est.weib.calib)
+ print(var.beta.wb)                               
+</code></pre>
+
+
+</div>

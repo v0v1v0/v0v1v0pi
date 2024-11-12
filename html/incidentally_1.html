@@ -1,0 +1,99 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>add.blocks</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Adds a block structure to an incidence matrix</h2>
+
+<h3>Description</h3>
+
+<p><code>add.blocks</code> shuffles an incidence matrix to have a block structure or planted partition while preserving the row and column sums
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">add.blocks(
+  I,
+  rowblock = sample(1:2, replace = T, nrow(I)),
+  colblock = sample(1:2, replace = T, ncol(I)),
+  density = 0.5,
+  sorted = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>I</code></td>
+<td>
+<p>An incidence matrix or igraph bipartite graph</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowblock</code></td>
+<td>
+<p>numeric: vector indicating each row node's block membership</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colblock</code></td>
+<td>
+<p>numeric: vector indicating each column node's block membership</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>density</code></td>
+<td>
+<p>numeric: desired within-block density</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sorted</code></td>
+<td>
+<p>boolean: if TRUE, return incidence matrix permuted by block</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Stochastic block and planted partition models generate graphs in which the probability that two nodes are connected
+depends on whether they are members of the same or different blocks/partitions. Functions such as sample_sbm
+can randomly sample from stochastic block models with given probabilities. In contrast <code>add.blocks</code> adds a block
+structure to an existing incidence matrix while preserving the row and column sums. Row nodes' and column nodes'
+block memberships are supplied in separate vectors. If block membership vectors are not provided, then nodes are
+randomly assigned to two groups.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An incidence matrix or igraph bipartite graph with a block structure
+</p>
+
+
+<h3>References</h3>
+
+<p>Neal, Z. P., Domagalski, R., and Sagan, B. 2021. Comparing alternatives to the fixed degree sequence model for extracting the backbone of bipartite projections. <em>Scientific Reports, 11</em>, 23929. doi: <a href="https://doi.org/10.1038/s41598-021-03238-3">10.1038/s41598-021-03238-3</a>
+</p>
+<p>Neal, Z. P. 2022. incidentally: An R package to generate incidence matrices and bipartite graphs. <em>OSF Preprints</em> doi: <a href="https://doi.org/10.31219/osf.io/ectms">10.31219/osf.io/ectms</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">I &lt;- incidence.from.probability(R = 100, C = 100, P = .1)
+blocked &lt;- add.blocks(I, density = .7)
+all(rowSums(I)==rowSums(blocked))
+all(colSums(I)==colSums(blocked))
+
+B &lt;- igraph::sample_bipartite(100, 100, p=.1)
+blocked &lt;- add.blocks(B, density = .7)
+all(igraph::degree(B)==igraph::degree(blocked))
+</code></pre>
+
+
+</div>

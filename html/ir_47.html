@@ -1,0 +1,136 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ir_smooth</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Smooths infrared spectra in an <code>ir</code> object</h2>
+
+<h3>Description</h3>
+
+<p><code>ir_smooth</code> applies smoothing functions to infrared spectra.
+<code>ir_smooth</code> either performs Savitzky-Golay smoothing, using on
+<code>signal::sgolayfilt()</code>, or Fourier smoothing using
+<code>fda::smooth.basis()</code>. Savitzky-Golay smoothing can
+also be used to compute derivatives of spectra.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ir_smooth(
+  x,
+  method = "sg",
+  p = 3,
+  n = p + 3 - p%%2,
+  ts = 1,
+  m = 0,
+  k = 111,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>ir</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>A character value specifying which smoothing method to apply.
+If <code>method = "sg"</code>, a Savitzky-Golay filter will be applied on the
+spectra. The Savitzky-Golay smoothing will be performed using the function
+<code>signal::sgolayfilt()</code>. If <code>method = "fourier"</code>,
+Fourier smoothing will be performed. Fourier transformation of the spectra is
+performed using the fast discrete Fourier transformation (FFT) as implemented
+in <code>fda::smooth.basis()</code>. A smoothing function can be
+defined by the argment <code>f</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>An integer value representing the filter order (i.e. the degree of
+the polynom) of the Savitzky-Golay filter if <code>method = "sg"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>An odd integer value representing the length (i.e. the number of
+wavenumber values used to construct the polynom) of the Savitzky-Golay filter
+if <code>method = "sg"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ts</code></td>
+<td>
+<p>time scaling factor. See <code>signal::sgolayfilt()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>An integer value representing the mth derivative to compute. This
+option can be used to compute derivatives of spectra. See
+<code>signal::sgolayfilt()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>A positive odd integer representing the number of Fourier basis
+functions to use as smoothed representation of the spectra if
+<code>method = "fourier"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments (ignored).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>When <code>x</code> contains spectra with different wavenumber values, the
+filters are applied for each spectra only on existing wavenumber values. This
+means that the filter window (if <code>method == "sg"</code>) will be different for
+these different spectra.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>x</code> with smoothed spectra.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#' # Savitzky-Golay smoothing
+x1 &lt;-
+   ir::ir_sample_data[1:5, ] %&gt;%
+   ir::ir_smooth(method = "sg", p = 3, n = 51, ts = 1, m = 0)
+
+# Fourier smoothing
+x2 &lt;-
+   ir::ir_sample_data[1:5, ] %&gt;%
+   ir::ir_smooth(method = "fourier", k = 21)
+
+# computing derivative spectra with Savitzky-Golay smoothing (here: first
+# derivative)
+x3 &lt;-
+   ir::ir_sample_data[1:5, ] %&gt;%
+   ir::ir_smooth(method = "sg", p = 3, n = 51, ts = 1, m = 1)
+
+</code></pre>
+
+
+</div>

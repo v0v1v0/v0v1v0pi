@@ -1,0 +1,335 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_metadata_nhgis</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>List available data sources from IPUMS NHGIS</h2>
+
+<h3>Description</h3>
+
+<p>Retrieve information about available NHGIS data sources, including
+<a href="https://www.nhgis.org/overview-nhgis-datasets">datasets</a>,
+data tables (summary tables),
+<a href="https://www.nhgis.org/time-series-tables">time series tables</a>,
+and <a href="https://www.nhgis.org/gis-files">shapefiles</a> (GIS files).
+</p>
+<p>To retrieve summary metadata for all available data sources of a particular
+type, use the <code>type</code> argument. To retrieve detailed metadata for a
+single data source, use the <code>dataset</code>, <code>data_table</code>, or <code>time_series_table</code>
+argument. See the <em>metadata availability</em> section below for information on
+the metadata provided for each data type.
+</p>
+<p>For general information, see the NHGIS
+<a href="https://www.nhgis.org/data-availability">data source overview</a> and the
+<a href="https://www.nhgis.org/frequently-asked-questions-faq">FAQ</a>.
+</p>
+<p>Learn more about the IPUMS API in <code>vignette("ipums-api")</code> and
+NHGIS extract definitions in <code>vignette("ipums-api-nhgis")</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_metadata_nhgis(
+  type = NULL,
+  dataset = NULL,
+  data_table = NULL,
+  time_series_table = NULL,
+  delay = 0,
+  api_key = Sys.getenv("IPUMS_API_KEY")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>One of <code>"datasets"</code>, <code>"data_tables"</code>, <code>"time_series_tables"</code>,
+or <code>"shapefiles"</code> indicating the type of summary metadata to retrieve.
+Leave <code>NULL</code> if requesting metadata for a single <code>dataset</code>, <code>data_table</code>,
+or <code>time_series_table</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dataset</code></td>
+<td>
+<p>Name of an individual dataset for which to retrieve metadata.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_table</code></td>
+<td>
+<p>Name of an individual data table for which to retrieve
+metadata. If provided, an associated <code>dataset</code> must also be specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time_series_table</code></td>
+<td>
+<p>Name of an individual time series table for which
+to retrieve metadata.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delay</code></td>
+<td>
+<p>Number of seconds to delay between
+successive API requests, if multiple requests are needed to retrieve all
+records.
+</p>
+<p>A delay is highly unlikely to be necessary and is intended only as a
+fallback in the event that you cannot retrieve all metadata records without
+exceeding the API rate limit.
+</p>
+<p>Only used if <code>type</code> is provided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>api_key</code></td>
+<td>
+<p>API key associated with your user account. Defaults to the
+value of the <code>IPUMS_API_KEY</code> environment variable. See
+<code>set_ipums_api_key()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>If <code>type</code> is provided, a <code>tibble</code> of
+summary metadata for all data sources of the provided <code>type</code>.
+Otherwise, a named list of metadata for the specified <code>dataset</code>,
+<code>data_table</code>, or <code>time_series_table</code>.
+</p>
+
+
+<h3>Metadata availability</h3>
+
+<p>The following sections summarize the metadata fields provided for each data
+type. Summary metadata include a subset of the fields provided for individual
+data sources.
+</p>
+
+
+<h4>Datasets:</h4>
+
+
+<ul>
+<li> <p><strong><code>name</code>:</strong> The unique identifier for the dataset. This is the value that
+is used to refer to the dataset when interacting with the IPUMS API.
+</p>
+</li>
+<li> <p><strong><code>group</code>:</strong> The group of datasets to which the dataset belongs.
+For instance, 5 separate datasets are part of the
+<code>"2015 American Community Survey"</code> group.
+</p>
+</li>
+<li> <p><strong><code>description</code>:</strong> A short description of the dataset.
+</p>
+</li>
+<li> <p><strong><code>sequence</code>:</strong> Order in which the dataset will appear in the metadata API
+and extracts.
+</p>
+</li>
+<li> <p><strong><code>has_multiple_data_types</code>:</strong> Logical value indicating whether multiple
+data types exist for this dataset. For example, ACS
+datasets include both estimates and margins of error.
+</p>
+</li>
+<li> <p><strong><code>data_tables</code>:</strong> A <code>tibble</code> containing names,
+codes, and descriptions for all data tables available for the dataset.
+</p>
+</li>
+<li> <p><strong><code>geog_levels</code>:</strong> A <code>tibble</code> containing names,
+descriptions, and extent information for the geographic levels available
+for the dataset. The <code>has_geog_extent_selection</code> field contains logical
+values indicating whether extent selection is allowed (and required) for
+the associated geographic level. See <code>geographic_instances</code> below.
+</p>
+</li>
+<li> <p><strong><code>breakdowns</code>:</strong> A <code>tibble</code> containing names,
+types, descriptions, and breakdown values for all breakdowns available
+for the dataset.
+</p>
+</li>
+<li> <p><strong><code>years</code>:</strong> A vector of years for which the dataset is available. This
+field is only present if a dataset is available for multiple years. Note
+that ACS datasets are not considered to be available for multiple years.
+</p>
+</li>
+<li> <p><strong><code>geographic_instances</code>:</strong> A <code>tibble</code> containing
+names and descriptions for all valid geographic extents for the
+dataset. This field is only present if at least one of the dataset's
+<code>geog_levels</code> allows geographic extent selection.
+</p>
+</li>
+</ul>
+<h4>Data tables:</h4>
+
+
+<ul>
+<li> <p><strong><code>name</code>:</strong> The unique identifier for the data table within its dataset.
+This is the value that is used to refer to the data table when interacting
+with the IPUMS API.
+</p>
+</li>
+<li> <p><strong><code>description</code>:</strong> A short description of the data table.
+</p>
+</li>
+<li> <p><strong><code>universe</code>:</strong> The statistical population measured by this data table
+(e.g. persons, families, occupied housing units, etc.)
+</p>
+</li>
+<li> <p><strong><code>nhgis_code</code>:</strong> The code identifying the data table in the extract.
+Variables in the extract data will include column names prefixed with this
+code.
+</p>
+</li>
+<li> <p><strong><code>sequence</code>:</strong> Order in which the data table will appear in the metadata
+API and extracts.
+</p>
+</li>
+<li> <p><strong><code>dataset_name</code>:</strong> Name of the dataset to which this data table belongs.
+</p>
+</li>
+<li> <p><strong><code>n_variables</code>:</strong> Number of variables included in this data table.
+</p>
+</li>
+<li> <p><strong><code>variables</code>:</strong> A <code>tibble</code> containing variable
+descriptions and codes for the variables included in the data table
+</p>
+</li>
+</ul>
+<h4>Time series tables:</h4>
+
+
+<ul>
+<li> <p><strong><code>name</code>:</strong> The unique identifier for the time series table. This is the
+value that is used to refer to the time series table when interacting with
+the IPUMS API.
+</p>
+</li>
+<li> <p><strong><code>description</code>:</strong> A short description of the time series table.
+</p>
+</li>
+<li> <p><strong><code>geographic_integration</code>:</strong> The method by which the time series table
+aligns geographic units across time. <code>"Nominal"</code> integration indicates
+that geographic units are aligned by name (disregarding changes in unit
+boundaries). <code>"Standardized"</code> integration indicates that data from multiple
+time points are standardized to the indicated year's census units. For
+more information, click
+<a href="https://www.nhgis.org/time-series-tables#geographic-integration">here</a>.
+</p>
+</li>
+<li> <p><strong><code>sequence</code>:</strong> Order in which the time series table will appear in the
+metadata API and extracts.
+</p>
+</li>
+<li> <p><strong><code>time_series</code>:</strong> A <code>tibble</code> containing names
+and descriptions for the individual time series available for the
+time series table.
+</p>
+</li>
+<li> <p><strong><code>years</code>:</strong> A <code>tibble</code> containing
+information on the available data years for the
+time series table.
+</p>
+</li>
+<li> <p><strong><code>geog_levels</code>:</strong> A <code>tibble</code> containing names
+and descriptions for the geographic levels available
+for the time series table.
+</p>
+</li>
+</ul>
+<h4>Shapefiles:</h4>
+
+
+<ul>
+<li> <p><strong><code>name</code>:</strong> The unique identifier for the shapefile. This is the
+value that is used to refer to the shapefile when interacting with
+the IPUMS API.
+</p>
+</li>
+<li> <p><strong><code>year</code>:</strong> The survey year in which the shapefile's represented areas
+were used for tabulations, which may be different than the vintage of the
+represented areas. For more information, click
+<a href="https://www.nhgis.org/gis-files#years">here</a>.
+</p>
+</li>
+<li> <p><strong><code>geographic_level</code>:</strong> The geographic level of the shapefile.
+</p>
+</li>
+<li> <p><strong><code>extent</code>:</strong> The geographic extent covered by the shapefile.
+</p>
+</li>
+<li> <p><strong><code>basis</code>:</strong> The derivation source of the shapefile.
+</p>
+</li>
+<li> <p><strong><code>sequence</code>:</strong> Order in which the shapefile will appear in the
+metadata API and extracts.
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>define_extract_nhgis()</code> to create an IPUMS NHGIS extract definition.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+library(dplyr)
+
+# Get summary metadata for all available sources of a given data type
+get_metadata_nhgis("datasets")
+
+# Filter to identify data sources of interest by their metadata values
+all_tsts &lt;- get_metadata_nhgis("time_series_tables")
+
+tsts &lt;- all_tsts %&gt;%
+  filter(
+    grepl("Children", description),
+    grepl("Families", description),
+    geographic_integration == "Standardized to 2010"
+  )
+
+tsts$name
+
+# Get detailed metadata for a single source with its associated argument:
+cs5_meta &lt;- get_metadata_nhgis(time_series_table = "CS5")
+cs5_meta$geog_levels
+
+# Use the available values when defining an NHGIS extract request
+define_extract_nhgis(
+  time_series_tables = tst_spec("CS5", geog_levels = "state")
+)
+
+# Detailed metadata is also provided for datasets and data tables
+get_metadata_nhgis(dataset = "1990_STF1")
+get_metadata_nhgis(data_table = "NP1", dataset = "1990_STF1")
+
+# Iterate over data sources to retrieve detailed metadata for several
+# records. For instance, to get variable metadata for a set of data tables:
+tables &lt;- c("NP1", "NP2", "NP10")
+
+var_meta &lt;- purrr::map(
+  tables,
+  function(dt) {
+    dt_meta &lt;- get_metadata_nhgis(dataset = "1990_STF1", data_table = dt)
+
+    # This ensures you avoid hitting rate limit for large numbers of tables
+    Sys.sleep(1)
+
+    dt_meta$variables
+  }
+)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

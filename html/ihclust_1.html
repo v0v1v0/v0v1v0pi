@@ -1,0 +1,120 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ihclust</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Iterative Hierarchical Clustering (IHC)</h2>
+
+<h3>Description</h3>
+
+<p>This function identifies inhomogeneous clusters using iterative hierarchical clustering (IHC) method.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ihclust(
+  data,
+  smooth = TRUE,
+  cor_criteria = 0.75,
+  max_iteration = 100,
+  verbose = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a numeric matrix, each row representing a time-series
+and each column representing a time point</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smooth</code></td>
+<td>
+<p>if smooth = 'TRUE', a smooth function is applied before clustering</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cor_criteria</code></td>
+<td>
+<p>pre-specified correlation criteria</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_iteration</code></td>
+<td>
+<p>maximum number of iterations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>if verbose = 'TRUE', the result of a progress is printed</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>ihclust
+</p>
+<p>The IHC algorithm implements the three steps as outlined below.
+First, the Initialization step clusters the data using hierarchical clustering.
+Second, cluster centers are obtained as an average of all the data points in the cluster.
+The Merging step considers each of the cluster centers (exemplars) as ‘new data point’,
+and use the same procedure described in the Initialization step to merge the exemplars into a new set of clusters.
+Third, the Pruning step streamlines the clusters and removes inconsistencies by
+reassessing the cluster membership by each data point.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Output from the function is a list of three items:
+</p>
+
+<ul>
+<li>
+<p> Cluster_Label - the cluster label for each data point
+</p>
+</li>
+<li>
+<p> Num_Iterations - total number of iterations
+</p>
+</li>
+<li>
+<p> Unique_Clusters_in_Iteration - unique clusters in each iteration</p>
+</li>
+</ul>
+<h3>References</h3>
+
+<p>1. Song, J., Carey, M., Zhu, H., Miao, H., Ram´ırez, J. C., &amp; Wu, H. (2018). Identifying the dynamic gene regulatory network during latent HIV-1 reactivation using high-dimensional ordinary differential equations. International Journal of Computational Biology and Drug Design, 11,135-153. doi: 10.1504/IJCBDD.2018.10011910.
+2. Wu, S., &amp; Wu, H. (2013). More powerful significant testing for time course gene expression data using functional principal component analysis approaches. BMC Bioinformatics, 14:6.
+3. Carey, M., Wu, S., Gan, G. &amp; Wu, H. (2016). Correlation-based iterative clustering methods for time course data: The identification of temporal gene response modules for influenza infection in humans. Infectious Disease Modeling, 1, 28-39.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># This is an example not using the permutation approach
+
+opioid_data_noNA &lt;- opioidData[complete.cases(opioidData), ] #remove NAs
+
+mydata &lt;- as.matrix(opioid_data_noNA[1:500,4:18])
+
+testchange_results &lt;- testchange(data=mydata,perm=FALSE,time=seq(1,15,1))
+
+data_change &lt;- testchange_results$sig.change
+
+clustering_results &lt;- ihclust(data=data_change, smooth = TRUE,
+
+cor_criteria = 0.75, max_iteration = 100, verbose = TRUE)
+</code></pre>
+
+
+</div>

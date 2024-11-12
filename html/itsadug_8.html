@@ -1,0 +1,89 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>derive_timeseries</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Derive the time series used in the AR1 model.</h2>
+
+<h3>Description</h3>
+
+<p>Derive the time series used in the AR1 model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">derive_timeseries(model, AR.start = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>GAMM model that includes an AR1 model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>AR.start</code></td>
+<td>
+<p>Vector with AR.start information, 
+necessary for the AR1 model. Optional, defaults to NULL.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A vector with time series indication based on the AR1 model.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jacolien van Rij
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other functions for model criticism: 
+<code>acf_n_plots()</code>,
+<code>acf_plot()</code>,
+<code>acf_resid()</code>,
+<code>resid_gam()</code>,
+<code>start_event()</code>,
+<code>start_value_rho()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(simdat)
+
+# add missing values to simdat:
+simdat[sample(nrow(simdat), 15),]$Y &lt;- NA
+simdat &lt;- start_event(simdat, event=c('Subject', 'Trial'))
+
+## Not run: 
+# Run GAMM model:
+m1 &lt;- bam(Y ~ te(Time, Trial)+s(Subject, bs='re'), data=simdat, 
+    rho=.5, AR.start=simdat$start.event)
+simdat$Event &lt;- NA
+simdat[!is.na(simdat$Y),]$Event &lt;- derive_timeseries(m1)
+acf_resid(m1, split_pred=list(Event=simdat$Event))
+
+# And this works too:
+simdat$Event &lt;- derive_timeseries(simdat$start.event)
+acf_resid(m1, split_pred=list(Event=simdat$Event))
+
+# Note that acf_resid automatically makes use of derive_timeseries:
+acf_resid(m1, split_pred='AR.start')
+
+## End(Not run)
+</code></pre>
+
+
+</div>

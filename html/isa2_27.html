@@ -1,0 +1,216 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ppa.iterate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>The Ping-Pong Algorithm</h2>
+
+<h3>Description</h3>
+
+<p>Perform PPA on two (normalized) input matrices.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S4 method for signature 'list'
+ppa.iterate(normed.data, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>normed.data</code></td>
+<td>
+<p>The normalized input matrices. A list of four
+matrices, usually coming from the <code>ppa.normalize</code>
+function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments, see details below.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>ppa.iterate</code> performs the PPA iteration on the specified input
+matrices using given input seeds. It can be called
+as </p>
+<pre>
+    ppa.iterate(normed.data, row1.seeds, col1.seeds,
+                row2.seeds, col2.seeds,
+                thr.row1, thr.col=thr.row1, thr.row2=thr.row1,
+		direction="updown",
+		convegence=c("cor"), cor.limit=0.9,
+		oscillation=FALSE, maxiter=100)
+	      </pre>
+<p>where the arguments are:
+</p>
+
+<dl>
+<dt>normed.data</dt>
+<dd>
+<p>The normalized data, a list of four matrices with
+the appropriate size. They are usually coming from the output of
+the <code>ppa.normalize</code> function.</p>
+</dd>
+<dt>row1.seeds</dt>
+<dd>
+<p>The row seed vectors for the first matrix. At
+least one of the four possible seed vectors must be present and
+they will be concatenated, after doing the suitable
+half-iterations.</p>
+</dd>
+<dt>col1.seeds</dt>
+<dd>
+<p>The column seed vectors for the first matrix. At
+least one of the four possible seed vectors must be present and
+they will be concatenated, after doing the suitable
+half-iterations.</p>
+</dd>
+<dt>row2.seeds</dt>
+<dd>
+<p>The row seed vectors for the second matrix. At
+least one of the four possible seed vectors must be present and
+they will be concatenated, after doing the suitable
+half-iterations.</p>
+</dd>
+<dt>col2.seeds</dt>
+<dd>
+<p>The column seed vectors for the second matrix. At
+least one of the four possible seed vectors must be present and
+they will be concatenated, after doing the suitable
+half-iterations.</p>
+</dd>
+<dt>thr.row1</dt>
+<dd>
+<p>Numeric scalar or vector giving the threshold
+parameter for the rows of the first matrix. Higher values indicate
+a more stringent threshold and the result comodules will contain
+less rows for the first matrix on average. The threshold is
+measured by the number of standard deviations from the 
+mean, over the values of the first row vector. If it is a vector
+then it must contain an entry for each seed.</p>
+</dd>
+<dt>thr.col</dt>
+<dd>
+<p>Numeric scalar or vector giving the threshold
+parameter for the columns of both matrices. The analogue of
+<code>thr.row1</code>.</p>
+</dd>
+<dt>thr.row2</dt>
+<dd>
+<p>Numeric scalar or vector, the threshold parameter(s)
+for the rows of the second matrix. See <code>thr.row1</code> for
+details.</p>
+</dd>
+<dt>direction</dt>
+<dd>
+<p>Character vector of length four, one for each matrix
+multiplication performed during a PPA iteration. 
+It specifies whether we are interested in
+rows/columns that are higher (‘<code>up</code>’) than average,
+lower than average (‘<code>down</code>’), or both
+(‘<code>updown</code>’). The first and the second entry both
+corresponds to the common column dimension of the two matrices, so
+they should be equal, otherwise a warning is given.</p>
+</dd>
+<dt>convergence</dt>
+<dd>
+<p>Character scalar, the convergence criteria for the
+PPA iteration. If it is ‘<code>cor</code>’, then convergence is
+measured based on high Pearson correlation (see the <code>cor.limit</code>
+argument below) of the subsequent row and column
+vectors. Currently this is the only option implemented.</p>
+</dd>
+<dt>cor.limit</dt>
+<dd>
+<p>The correlation limit for convergence if the
+‘<code>cor</code>’ method is used.</p>
+</dd>
+<dt>oscillation</dt>
+<dd>
+<p>Logical scalar, whether to look for oscillating
+seeds. Usually there are not too many oscillating seeds, so it is
+safe to leave this on <code>FALSE</code>.</p>
+</dd>
+<dt>maxiter</dt>
+<dd>
+<p>The maximum number of iterations allowed.</p>
+</dd>
+</dl>
+<h3>Value</h3>
+
+<p>A named list with many components. Please see the manual page of
+<code>link{isa}</code> for a complete description.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Gabor Csardi <a href="mailto:Gabor.Csardi@unil.ch">Gabor.Csardi@unil.ch</a> </p>
+
+
+<h3>References</h3>
+
+<p>Kutalik Z, Bergmann S, Beckmann, J: A modular approach for integrative
+analysis of large-scale gene-expression and drug-response data
+<em>Nat Biotechnol</em> 2008 May; 26(5) 531-9.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See <code>ppa</code> for an easy way of running the PPA
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## A basic PPA workflow with a single threshold combination
+## In-silico data
+set.seed(1)
+insili &lt;- ppa.in.silico()
+
+## Random seeds
+seeds &lt;- generate.seeds(length=nrow(insili[[1]]), count=100)
+
+## Normalize input matrices
+nm &lt;- ppa.normalize(insili[1:2])
+
+## Do PPA
+ppares &lt;- ppa.iterate(nm, row1.seeds=seeds, thr.row1=1, direction="up")
+
+## Eliminate duplicates
+ppares &lt;- ppa.unique(nm, ppares)
+
+## Fitler out not robust ones
+ppares &lt;- ppa.filter.robust(insili[1:2], nm, ppares)
+
+## Print the sizes of the co-modules
+cbind(colSums(ppares$rows1 != 0), colSums(ppares$rows1 != 0),
+      colSums(ppares$columns != 0))
+
+## Plot the original data and the first three modules found
+if (interactive()) {
+  layout(rbind(1:2,3:4))
+  image(insili[[1]], main="In silico data 1")
+  image(outer(ppares$rows1[,1],ppares$columns[,1])+
+        outer(ppares$rows1[,2],ppares$columns[,2])+
+        outer(ppares$rows1[,3],ppares$columns[,3]), main="PPA co-modules 2")
+  image(insili[[2]], main="In silico data 2")
+  image(outer(ppares$rows2[,1],ppares$columns[,1])+
+        outer(ppares$rows2[,2],ppares$columns[,2])+
+        outer(ppares$rows2[,3],ppares$columns[,3]), main="PPA co-modules 2")
+}
+
+</code></pre>
+
+
+</div>

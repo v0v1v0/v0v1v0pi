@@ -1,0 +1,187 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>tp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Dimension Estimation via Translated Poisson Distributions </h2>
+
+<h3>Description</h3>
+
+<p>Estimates the intrinsic dimension of a data set using models of translated
+Poisson distributions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">maxLikGlobalDimEst(data, k, dnoise = NULL, sigma = 0, n = NULL,
+        integral.approximation = 'Haro', unbiased = FALSE,
+        neighborhood.based = TRUE,
+        neighborhood.aggregation = 'maximum.likelihood', iterations = 5, K = 5)
+maxLikPointwiseDimEst(data, k, dnoise = NULL, sigma = 0, n = NULL, indices = NULL,
+             integral.approximation = 'Haro', unbiased = FALSE, iterations = 5)
+maxLikLocalDimEst(data, dnoise = NULL, sigma = 0, n = NULL,
+       integral.approximation = 'Haro',
+       unbiased = FALSE, iterations = 5)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>data set with each row describing a data point.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>the number of distances that should be used for each dimension estimation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dnoise</code></td>
+<td>
+<p>a function or a name of a function giving the translation density. If NULL, no noise is modeled, and the estimator turns into the Hill estimator (see References). Translation densities <code>dnoiseGaussH</code> and <code>dnoiseNcChi</code> are provided in the package. <code>dnoiseGaussH</code> is an approximation of <code>dnoiseNcChi</code>, but faster.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>(estimated) standard deviation of the (isotropic) noise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>dimension of the noise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indices</code></td>
+<td>
+<p>the indices of the data points for which local dimension
+estimation should be made.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>integral.approximation</code></td>
+<td>
+<p> how to approximate the integrals in eq. (5) in Haro et al. (2008). Possible values: <code>'Haro'</code>, <code>'guaranteed.convergence'</code>, <code>'iteration'</code>. See Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unbiased</code></td>
+<td>
+<p> if <code>TRUE</code>, a factor <code>k-2</code> is used instead of the factor <code>k-1</code> that was used in Haro et al. (2008). This makes the estimator is unbiased in the case of data without noise or boundary.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>neighborhood.based</code></td>
+<td>
+<p> if TRUE, dimension estimation is first made for neighborhoods around each data point and final value is aggregated from this. Otherwise dimension estimation is made once, based on distances in entire data set.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>neighborhood.aggregation</code></td>
+<td>
+<p> if <code>neighborhood.based</code>, how should dimension estimates from different neighborhoods be combined. Possible values: <code>'maximum.liklihood'</code> follows Haro et al. (2008) in maximizing likelihood by using the harmonic mean, <code>'mean'</code> follows Levina and Bickel (2005) and takes the mean, <code>'robust'</code> takes the median, to remove influence from possible outliers.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterations</code></td>
+<td>
+<p> for <code>integral.approxmation = 'iteration'</code>, how many iterations should be made.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p> for <code>neighborhood.based = FALSE</code>, how many distances for each data point should be considered when looking for the <code>k</code> shortest distances in the entire data set.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The estimators are based on the referenced paper by Haro et al. (2008), using the assumption that there is a single manifold. The estimator in the paper is obtained using default parameters and <code>dnoise = dnoiseGaussH</code>.
+</p>
+<p>With <code>integral.approximation = 'Haro'</code> the Taylor expansion approximation of <code>r^(m-1)</code> that Haro et al. (2008) used are employed. With <code>integral.approximation = 'guaranteed.convergence'</code>, <code>r</code> is factored out and kept and <code>r^(m-2)</code> is approximated with the corresponding Taylor expansion. This guarantees convergence of the integrals. Divergence might be an issue when the noise is not sufficiently small in comparison to the smallest distances. With <code>integral.approximation = 'iteration'</code>, five iterations is used to determine <code>m</code>. 
+</p>
+<p><code>maxLikLocalDimEst</code> assumes that the data set is local i.e. a piece of a data set cut out by a sphere with a radius such that the data set is well approximated by a hyperplane (meaning that the curvature should be low in the local data set). See <code>localIntrinsicDimension</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>For <code>maxLikGlobalDimEst</code> and <code>maxLikLocalDimEst</code>, a <code>DimEst</code> object with one slot:
+</p>
+<table><tr style="vertical-align: top;">
+<td><code>dim.est</code></td>
+<td>
+<p> the dimension estimate</p>
+</td>
+</tr></table>
+<p>For <code>maxLikPointwiseDimEst</code>, a <code>DimEstPointwise</code> object, inheriting <code>data.frame</code>, with one slot:
+</p>
+<table><tr style="vertical-align: top;">
+<td><code>dim.est</code></td>
+<td>
+<p> the dimension estimate for each data point. Row <code>i</code> has the local dimension estimate at point <code>data[indices[i], ]</code>.</p>
+</td>
+</tr></table>
+<h3>Author(s)</h3>
+
+<p>Kerstin Johnsson, Lund University.
+</p>
+
+
+<h3>References</h3>
+
+<p>Haro, G., Randall, G. and Sapiro, G. (2008) Translated Poisson Mixture Model
+for Stratification Learning. <em>Int. J. Comput. Vis.</em>, <b>80</b>, 358-374.
+</p>
+<p>Hill, B. M. (1975) A simple general approach to inference about the tail of a distribution. <em>Ann. Stat.</em>, <b>3</b>(5) 1163-1174.
+</p>
+<p>Levina, E. and Bickel., P. J. (2005) Maximum likelihood estimation of intrinsic dimension. <em>Advances in Neural Information Processing Systems 17</em>, 777-784. MIT Press.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data &lt;- hyperBall(100, d = 7, n = 13, sd = 0.01)
+maxLikGlobalDimEst(data, 10, dnoiseNcChi, 0.01, 13)
+maxLikGlobalDimEst(data, 10, dnoiseGaussH, 0.01, 13)
+maxLikGlobalDimEst(data, 10, dnoiseGaussH, 0.01, 13)
+maxLikGlobalDimEst(data, 10, dnoiseGaussH, 0.01, 13, neighborhood.aggregation = 'robust')
+maxLikGlobalDimEst(data, 10, dnoiseGaussH, 0.01, 13,
+        integral.approximation = 'guaranteed.convergence',
+        neighborhood.aggregation = 'robust')
+maxLikGlobalDimEst(data, 10, dnoiseGaussH, 0.01, 13,
+        integral.approximation = 'iteration', unbiased = TRUE)
+
+data &lt;- hyperBall(1000, d = 7, n = 13, sd = 0.01)
+maxLikGlobalDimEst(data, 500, dnoiseGaussH, 0.01, 13,
+        neighborhood.based = FALSE)
+maxLikGlobalDimEst(data, 500, dnoiseGaussH, 0.01, 13,
+        integral.approximation = 'guaranteed.convergence',
+        neighborhood.based = FALSE)
+maxLikGlobalDimEst(data, 500, dnoiseGaussH, 0.01, 13,
+        integral.approximation = 'iteration',
+        neighborhood.based = FALSE)
+        
+data &lt;- hyperBall(100, d = 7, n = 13, sd = 0.01)
+maxLikPointwiseDimEst(data, 10, dnoiseNcChi, 0.01, 13, indices=1:10)
+
+data &lt;- cutHyperPlane(50, d = 7, n = 13, sd = 0.01)
+maxLikLocalDimEst(data, dnoiseNcChi, 0.1, 3)
+maxLikLocalDimEst(data, dnoiseGaussH, 0.1, 3)
+maxLikLocalDimEst(data, dnoiseNcChi, 0.1, 3,
+       integral.approximation = 'guaranteed.convergence')
+
+</code></pre>
+
+
+</div>

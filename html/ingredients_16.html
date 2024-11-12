@@ -1,0 +1,104 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ceteris_paribus_2d</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Ceteris Paribus 2D Plot</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates ceteris paribus profiles for grid of values spanned by two variables.
+It may be useful to identify or present interactions between two variables.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ceteris_paribus_2d(explainer, observation, grid_points = 101, variables = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>explainer</code></td>
+<td>
+<p>a model to be explained, preprocessed by the <code>DALEX::explain()</code> function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>observation</code></td>
+<td>
+<p>a new observation for which predictions need to be explained</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grid_points</code></td>
+<td>
+<p>number of points used for response path. Will be used for both variables</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variables</code></td>
+<td>
+<p>if specified, then only these variables will be explained</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>an object of the class <code>ceteris_paribus_2d_explainer</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Explanatory Model Analysis. Explore, Explain, and Examine Predictive Models. <a href="https://ema.drwhy.ai/">https://ema.drwhy.ai/</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library("DALEX")
+library("ingredients")
+
+model_titanic_glm &lt;- glm(survived ~ age + fare,
+                       data = titanic_imputed, family = "binomial")
+
+
+explain_titanic_glm &lt;- explain(model_titanic_glm,
+                               data = titanic_imputed[,-8],
+                               y = titanic_imputed[,8])
+
+cp_rf &lt;- ceteris_paribus_2d(explain_titanic_glm, titanic_imputed[1,],
+                       variables = c("age", "fare", "sibsp"))
+head(cp_rf)
+
+plot(cp_rf)
+
+library("ranger")
+set.seed(59)
+
+apartments_rf_model &lt;- ranger(m2.price ~., data = apartments)
+
+explainer_rf &lt;- explain(apartments_rf_model,
+                        data = apartments_test[,-1],
+                        y = apartments_test[,1],
+                        label = "ranger forest",
+                        verbose = FALSE)
+
+new_apartment &lt;- apartments_test[1,]
+new_apartment
+
+wi_rf_2d &lt;- ceteris_paribus_2d(explainer_rf, observation = new_apartment,
+                               variables = c("surface", "floor", "no.rooms"))
+head(wi_rf_2d)
+plot(wi_rf_2d)
+
+
+</code></pre>
+
+
+</div>

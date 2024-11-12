@@ -1,0 +1,234 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>observe</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate observed statistics</h2>
+
+<h3>Description</h3>
+
+<p>This function is a wrapper that calls <code>specify()</code>, <code>hypothesize()</code>, and
+<code>calculate()</code> consecutively that can be used to calculate observed
+statistics from data. <code>hypothesize()</code> will only be called if a point
+null hypothesis parameter is supplied.
+</p>
+<p>Learn more in <code>vignette("infer")</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">observe(
+  x,
+  formula,
+  response = NULL,
+  explanatory = NULL,
+  success = NULL,
+  null = NULL,
+  p = NULL,
+  mu = NULL,
+  med = NULL,
+  sigma = NULL,
+  stat = c("mean", "median", "sum", "sd", "prop", "count", "diff in means",
+    "diff in medians", "diff in props", "Chisq", "F", "slope", "correlation", "t", "z",
+    "ratio of props", "odds ratio"),
+  order = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A data frame that can be coerced into a tibble.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>A formula with the response variable on the left and the
+explanatory on the right. Alternatively, a <code>response</code> and <code>explanatory</code>
+argument can be supplied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>response</code></td>
+<td>
+<p>The variable name in <code>x</code> that will serve as the response.
+This is an alternative to using the <code>formula</code> argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>explanatory</code></td>
+<td>
+<p>The variable name in <code>x</code> that will serve as the
+explanatory variable. This is an alternative to using the formula argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>success</code></td>
+<td>
+<p>The level of <code>response</code> that will be considered a success, as
+a string. Needed for inference on one proportion, a difference in
+proportions, and corresponding z stats.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>null</code></td>
+<td>
+<p>The null hypothesis. Options include <code>"independence"</code>,
+<code>"point"</code>, and <code>"paired independence"</code>.
+</p>
+
+<ul>
+<li> <p><code>independence</code>: Should be used with both a <code>response</code> and <code>explanatory</code>
+variable. Indicates that the values of the specified <code>response</code> variable
+are independent of the associated values in <code>explanatory</code>.
+</p>
+</li>
+<li> <p><code>point</code>: Should be used with only a <code>response</code> variable. Indicates
+that a point estimate based on the values in <code>response</code> is associated
+with a parameter. Sometimes requires supplying one of <code>p</code>, <code>mu</code>, <code>med</code>, or
+<code>sigma</code>.
+</p>
+</li>
+<li> <p><code style="white-space: pre;">⁠paired independence⁠</code>: Should be used with only a <code>response</code> variable
+giving the pre-computed difference between paired observations. Indicates
+that the order of subtraction between paired values does not affect the
+resulting distribution.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>The true proportion of successes (a number between 0 and 1). To be used with point null hypotheses when the specified response
+variable is categorical.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu</code></td>
+<td>
+<p>The true mean (any numerical value). To be used with point null
+hypotheses when the specified response variable is continuous.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>med</code></td>
+<td>
+<p>The true median (any numerical value). To be used with point null
+hypotheses when the specified response variable is continuous.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>The true standard deviation (any numerical value). To be used with
+point null hypotheses.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stat</code></td>
+<td>
+<p>A string giving the type of the statistic to calculate. Current
+options include <code>"mean"</code>, <code>"median"</code>, <code>"sum"</code>, <code>"sd"</code>, <code>"prop"</code>, <code>"count"</code>,
+<code>"diff in means"</code>, <code>"diff in medians"</code>, <code>"diff in props"</code>, <code>"Chisq"</code> (or
+<code>"chisq"</code>), <code>"F"</code> (or <code>"f"</code>), <code>"t"</code>, <code>"z"</code>, <code>"ratio of props"</code>, <code>"slope"</code>,
+<code>"odds ratio"</code>, <code>"ratio of means"</code>, and <code>"correlation"</code>. <code>infer</code> only
+supports theoretical tests on one or two means via the <code>"t"</code> distribution
+and one or two proportions via the <code>"z"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>order</code></td>
+<td>
+<p>A string vector of specifying the order in which the levels of
+the explanatory variable should be ordered for subtraction (or division
+for ratio-based statistics), where <code>order = c("first", "second")</code> means
+<code>("first" - "second")</code>, or the analogue for ratios. Needed for inference on
+difference in means, medians, proportions, ratios, t, and z statistics.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>To pass options like <code>na.rm = TRUE</code> into functions like
+mean(), sd(), etc. Can also be used to
+supply hypothesized null values for the <code>"t"</code> statistic or additional
+arguments to <code>stats::chisq.test()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A 1-column tibble containing the calculated statistic <code>stat</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other wrapper functions: 
+<code>chisq_stat()</code>,
+<code>chisq_test()</code>,
+<code>prop_test()</code>,
+<code>t_stat()</code>,
+<code>t_test()</code>
+</p>
+<p>Other functions for calculating observed statistics: 
+<code>chisq_stat()</code>,
+<code>t_stat()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># calculating the observed mean number of hours worked per week
+gss %&gt;%
+  observe(hours ~ NULL, stat = "mean")
+
+# equivalently, calculating the same statistic with the core verbs
+gss %&gt;%
+  specify(response = hours) %&gt;%
+  calculate(stat = "mean")
+
+# calculating a t statistic for hypothesized mu = 40 hours worked/week
+gss %&gt;%
+  observe(hours ~ NULL, stat = "t", null = "point", mu = 40)
+
+# equivalently, calculating the same statistic with the core verbs
+gss %&gt;%
+  specify(response = hours) %&gt;%
+  hypothesize(null = "point", mu = 40) %&gt;%
+  calculate(stat = "t")
+
+# similarly for a difference in means in age based on whether
+# the respondent has a college degree
+observe(
+  gss,
+  age ~ college,
+  stat = "diff in means",
+  order = c("degree", "no degree")
+)
+
+# equivalently, calculating the same statistic with the core verbs
+gss %&gt;%
+  specify(age ~ college) %&gt;%
+  calculate("diff in means", order = c("degree", "no degree"))
+
+# for a more in-depth explanation of how to use the infer package
+## Not run: 
+vignette("infer")
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

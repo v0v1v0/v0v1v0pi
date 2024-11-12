@@ -1,0 +1,122 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>make.mon.ui</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Function for creating the matrix ui for monotonicity (in)equality restrictions </h2>
+
+<h3>Description</h3>
+
+<p>Function <code>make.mon.ui</code> creates the matrix <code>ui</code> for a factor, depending on its coding. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">make.mon.ui(x, type = "coeff", contr = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p> an <code>R</code> factor (in case of <code>type = "coeff"</code>) or 
+the dimension of the multivariate normal distribution (in case of <code>type = "mean"</code>) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p> the situation for which <code>ui</code> is needed: can be <code>coeff</code> 
+for coefficients in a linear model or <code>mean</code> for the expectation vector 
+of a multivariate normal distribution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>contr</code></td>
+<td>
+<p> relevant in case of <code>type = "coeff"</code> only, ignored otherwise;<br>
+the contrast with which <code>x</code> is coded;<br>
+if the <code>contrasts</code> attribute of <code>x</code> is a character string, 
+<code>contr = NULL</code> uses this character string, otherwise <code>contr = NULL</code> 
+is identical to <code>contr = "contr.treatment"</code>.  
+</p>
+<p>Explicit choices for <code>contr</code> can be any of <code>contr.treatment</code>, 
+<code>contr.SAS</code>, <code>contr.diff</code> and <code>contr.sum</code>) (must be given in quotes).<br> 
+The other generally-available 
+codings (<code>contr.helmert</code> and <code>contr.poly</code>) do not 
+easily permit conclusions about monotonicity.<br>
+If the value for <code>contr</code> is not compatible with the factors coding, 
+an error is thrown.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function determines the matrix <code>ui</code> as needed for the functions in 
+packge <span class="pkg">ic.infer</span>, when a monotone increase from first to last level 
+of the <code>x</code> is under investigation (<code>type = "coeff"</code>) 
+or when a monotone increase among the components of the expectation vector is 
+investigated (<code>type = "mean"</code>). The respective monotone decrease can be accomodated 
+by <code>-make.mon.ui()</code>.
+</p>
+<p>If the coding of the factor <code>x</code> is explicitly given, the function throws an error 
+if the actual coding does not correspond to the specified value of <code>contr</code>.
+</p>
+<p>Care is needed when using <code>make.mon.ui</code> with a linear model: It is the users responsibility 
+to make sure that the coding used in the model corresponds to the coding used in 
+<code>make.mon.ui</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a square matrix with as many rows and columns as there are dummy variables 
+for the factor 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Ulrike Groemping, BHT Berlin </p>
+
+
+<h3>See Also</h3>
+
+<p> See also <code>contrasts</code> for how to apply contrasts, 
+<code>contrast</code> for the available contrasts in package <span class="pkg">stats</span>, 
+<code>contr.diff</code> for the specific monotonicity contrast function 
+from this package. </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">gifte &lt;- boot::poisons    ## gifte is German for poisons
+## default: contr.treatment (with default base 1)
+linmod &lt;- lm(1/time~poison+treat, gifte)
+summary(orlm(linmod, ui=make.mon.ui(gifte$poison), index=2:3))
+
+## next: contr.diff
+contrasts(gifte$poison) &lt;- "contr.diff" 
+linmod &lt;- lm(1/time~poison+treat, gifte)
+summary(orlm(linmod, ui=make.mon.ui(gifte$poison), index=2:3))
+
+## next: contr.SAS
+contrasts(gifte$poison) &lt;- "contr.SAS"
+linmod &lt;- lm(1/time~poison+treat, gifte)
+summary(orlm(linmod, ui=make.mon.ui(gifte$poison), index=2:3))
+
+## next: contr.sum
+contrasts(gifte$poison) &lt;- "contr.sum"
+linmod &lt;- lm(1/time~poison+treat, gifte)
+summary(orlm(linmod, ui=make.mon.ui(gifte$poison), index=2:3))
+
+
+</code></pre>
+
+
+</div>

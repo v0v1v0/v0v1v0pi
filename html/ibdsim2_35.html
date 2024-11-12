@@ -1,0 +1,108 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>realised</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Realised relatedness</h2>
+
+<h3>Description</h3>
+
+<p>Compute the realised values of various pedigree coefficients, from simulated
+data. The current implementation covers inbreeding coefficients for single
+pedigree members, and kinship, kappa and condensed identity coefficients for
+pairwise relationships.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">realisedInbreeding(sims, id = NULL, unit = "cm")
+
+realisedKinship(sims, ids = NULL, unit = "cm")
+
+realisedKappa(sims, ids = NULL, unit = "cm")
+
+realisedIdentity(sims, ids = NULL, unit = "cm")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>sims</code></td>
+<td>
+<p>A list of genome simulations, as output by <code>ibdsim()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id, ids</code></td>
+<td>
+<p>A vector with one or two ID labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unit</code></td>
+<td>
+<p>Either "mb" (megabases) or "cm" (centiMorgan); the length unit
+for genomic segments. Default is "cm", which normally gives lower variance.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The inbreeding coefficient <code class="reqn">f</code> of a pedigree member is defined as the
+probability of autozygosity (homozygous for alleles that are identical by
+descent) in a random autosomal locus. Equivalently, the inbreeding
+coefficient is the <em>expected</em> autozygous proportion of the autosomal
+chromosomes.
+</p>
+<p>The <em>realised</em> inbreeding coefficient <code class="reqn">f_R</code> in a given individual is the
+actual fraction of the autosomes covered by autozygous segments. Because of
+the stochastic nature of meiotic recombination, this may deviate
+substantially from the pedigree-based expectation.
+</p>
+<p>Similarly, the pedigree-based IBD coefficients <code class="reqn">\kappa_0, \kappa_1,
+\kappa_2</code> of noninbred pairs of individuals have realised counterparts. For
+any given pair of individuals we define <code class="reqn">k_i</code> to be the actual fraction
+of the autosome where the individuals share exactly <code class="reqn">i</code> alleles IBD,
+where <code class="reqn">i = 0,1,2</code>.
+</p>
+<p>Finally, we can do the same thing for each of the nine condensed identity
+coefficients of Jacquard. For each <code class="reqn">i = 1,...,9</code> we define <code class="reqn">D_i</code> the
+be the fraction of the autosome where a given pair of individuals are in
+identity state <code class="reqn">i</code>. This uses the conventional ordering of the nine
+condensed identity states; see for instance the <a href="https://github.com/magnusdv/ribd"><code>ribd</code> GitHub page</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Realised IBD coefficients between full siblings
+x = nuclearPed(2)
+s = ibdsim(x, N = 2) # increase N
+realisedKappa(s, ids = 3:4)
+
+###########
+
+# Realised inbreeding coefficients, child of first cousins
+x = cousinPed(1, child = TRUE)
+s = ibdsim(x, N = 2) # increase N
+realisedInbreeding(s, id = 9)
+
+# Same data: realised kinship coefficients between the parents
+realisedKinship(s, ids = parents(x, 9))
+
+###########
+
+# Realised identity coefficients after full sib mating
+x = fullSibMating(1)
+s = ibdsim(x, N = 2) # increase N
+realisedIdentity(s, ids = 5:6)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,257 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mds</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Multidimensional Scaling</h2>
+
+<h3>Description</h3>
+
+<p>Performs classical or nonmetric Multidimensional
+Scaling analysis
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mds(x, ...)
+
+## Default S3 method:
+mds(
+  x,
+  classical = FALSE,
+  plot = TRUE,
+  shepard = FALSE,
+  nnlines = FALSE,
+  pos = NULL,
+  col = "black",
+  bg = "white",
+  xlab = NA,
+  ylab = NA,
+  asp = 1,
+  ...
+)
+
+## S3 method for class 'detritals'
+mds(
+  x,
+  method = "KS",
+  classical = FALSE,
+  plot = TRUE,
+  shepard = FALSE,
+  nnlines = FALSE,
+  pos = NULL,
+  col = "black",
+  bg = "white",
+  xlab = NA,
+  ylab = NA,
+  hide = NULL,
+  asp = 1,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a dissimilarity matrix OR an object of class
+<code>detrital</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>optional arguments to the generic <code>plot</code> function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>classical</code></td>
+<td>
+<p>logical flag indicating whether classical
+(<code>TRUE</code>) or nonmetric (<code>FALSE</code>) MDS should be used</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>show the MDS configuration (if <code>shepard=FALSE</code>) or
+Shepard plot (if <code>shepard=TRUE</code>) on a graphical device</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shepard</code></td>
+<td>
+<p>logical flag indicating whether the graphical output
+should show the MDS configuration (<code>shepard=FALSE</code>) or a
+Shepard plot with the 'stress' value. This argument is only
+used if <code>plot=TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nnlines</code></td>
+<td>
+<p>if <code>TRUE</code>, draws nearest neighbour lines</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pos</code></td>
+<td>
+<p>a position specifier for the labels (if
+<code>par('pch')!=NA</code>). Values of 1, 2, 3 and 4 indicate
+positions below, to the left of, above and to the right of the
+MDS coordinates, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p>plot colour (may be a vector)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bg</code></td>
+<td>
+<p>background colour (may be a vector)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>a string with the label of the x axis</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>a string with the label of the y axis</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>asp</code></td>
+<td>
+<p>aspect ratio of the MDS configuration. See
+<code>plot.window</code> for further details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>either <code>'KS'</code> (for the Kolmogorov-Smirnov
+distance) or <code>'W2'</code> (for the Wasserstein-2 distance).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hide</code></td>
+<td>
+<p>vector with indices of aliquots that should be removed
+from the plot.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Multidimensional Scaling (MDS) is a dimension-reducting technique
+that takes a matrix of pairwise ‘dissimilarities’ between objects
+(e.g., age distributions) as input and produces a configuration of
+two (or higher-) dimensional coordinates as output, so that the
+Euclidean distances between these coordinates approximate the
+dissimilarities of the input matrix. Thus, an MDS-configuration
+serves as a ‘map’ in which similar samples cluster closely together
+and dissimilar samples plot far apart. In the context of detrital
+geochronology, the dissimilarity between samples is given by the
+statistical distance between age distributions. There are many ways
+to define this statistical distance. <code>IsoplotR</code> uses the
+Kolmogorov-Smirnov (KS) statistic due to its simplicity and the
+fact that it behaves like a true distance in the mathematical sense
+of the word (Vermeesch, 2013). The KS-distance is given by the
+maximum vertical distance between two <code>cad</code> step
+functions. Thus, the KS-distance takes on values between zero
+(perfect match between two age distributions) and one (no overlap
+between two distributions).  Calculating the KS-distance between
+samples two at a time populates a symmetric dissimilarity matrix
+with positive values and a zero diagonal. <code>IsoplotR</code>
+implements two algorithms to convert this matrix into a
+configuration. The first (‘classical’) approach uses a sequence of
+basic matrix manipulations developed by Young and Householder
+(1938) and Torgerson (1952) to achieve a linear fit between the
+KS-distances and the fitted distances on the MDS configuration. The
+second, more sophisticated (‘nonmetric’) approach subjects the
+input distances to a transformation <code class="reqn">f</code> prior to fitting a
+configuration:
+<br><br><code class="reqn">\delta_{i,j} = f(KS_{i,j})</code>
+<br><br>
+where <code class="reqn">KS_{i,j}</code> is the KS-distance between samples <code class="reqn">i</code> and
+<code class="reqn">j</code> (for <code class="reqn">1 \leq i \neq j \leq n</code>) and <code class="reqn">\delta_{i,j}</code>
+is the ‘disparity’ (Kruskal, 1964).  Fitting an MDS
+configuration then involves finding the disparity transformation
+that maximises the goodness of fit (or minimises the ‘stress’)
+between the disparities and the fitted distances. The latter two
+quantities can also be plotted against each other as a 'Shepard
+plot'.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns an object of class <code>MDS</code>, i.e. a list
+containing the following items:
+</p>
+
+<dl>
+<dt>points</dt>
+<dd>
+<p>a two-column vector of the fitted configuration</p>
+</dd>
+<dt>classical</dt>
+<dd>
+<p>a logical flag indicating whether the MDS
+configuration was obtained by classical (<code>TRUE</code>) or
+nonmetric (<code>FALSE</code>) MDS</p>
+</dd>
+<dt>diss</dt>
+<dd>
+<p>the dissimilarity matrix used for the MDS analysis</p>
+</dd>
+<dt>stress</dt>
+<dd>
+<p>(only if <code>classical=TRUE</code>) the final stress
+achieved (in percent)</p>
+</dd>
+</dl>
+<h3>References</h3>
+
+<p>Kruskal, J., 1964. Multidimensional scaling by optimizing goodness
+of fit to a nonmetric hypothesis. Psychometrika 29 (1), 1-27.
+</p>
+<p>Torgerson, W. S. Multidimensional scaling: I. Theory and
+method. Psychometrika, 17(4): 401-419, 1952.
+</p>
+<p>Vermeesch, P., 2013. Multi-sample comparison of detrital age
+distributions. Chemical Geology, 341, pp.140-146.
+</p>
+<p>Young, G. and Householder, A. S. Discussion of a set of points in
+terms of their mutual distances. Psychometrika, 3(1):19-22, 1938.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>cad</code>, <code>kde</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">attach(examples)
+mds(DZ,nnlines=TRUE,pch=21,cex=5)
+dev.new()
+mds(DZ,shepard=TRUE)
+</code></pre>
+
+
+</div>

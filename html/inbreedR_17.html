@@ -1,0 +1,196 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>simulate_r2_hf</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculates the expected squared correlation between heteorzygosity and inbreeding for simulated marker sets</h2>
+
+<h3>Description</h3>
+
+<p>This function can be used to simulate genotype data, draw random subsamples and calculate the
+expected squared correlations between heterozygosity and fitness (<code class="reqn">r2(h, f)</code>).
+Every subset of markers is drawn independently to give insights
+into the variation and precision of <code class="reqn">r2(h, f)</code> calculated from a given number of markers and individuals.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">simulate_r2_hf(n_ind = NULL, H_nonInb = 0.5, meanF = 0.2, varF = 0.03,
+  subsets = NULL, reps = 100, type = c("msats", "snps"), CI = 0.95)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>n_ind</code></td>
+<td>
+<p>number of individuals to sample from the population</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>H_nonInb</code></td>
+<td>
+<p>true genome-wide heteorzygosity of a non-inbred individual</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meanF</code></td>
+<td>
+<p>mean realized inbreeding f</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>varF</code></td>
+<td>
+<p>variance in realized inbreeding f</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subsets</code></td>
+<td>
+<p>a vector specifying the sizes of marker-subsets to draw. Specifying  <code>subsets = c(2, 5, 10, 15, 20)</code> 
+would draw marker sets of 2 to 20 markers. The minimum number of markers is 2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reps</code></td>
+<td>
+<p>number of resampling repetitions</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>specifies g2 formula. Type "snps" for large datasets and "msats" for smaller datasets.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CI</code></td>
+<td>
+<p>Confidence intervals to calculate (default to 0.95)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>simulate_r2_hf</code> function simulates genotypes from which subsets of loci can be sampled independently. 
+These simulations can be used to evaluate the effects of the number of individuals 
+and loci on the precision and magnitude of the expected squared correlation between heterozygosity and inbreeding 
+(<code class="reqn">r2(h, f)</code>). The user specifies the number of simulated individuals (<code>n_ind</code>), the subsets of 
+loci (<code>subsets</code>) to be drawn, the heterozygosity of non-inbred individuals (<code>H_nonInb</code>) and the 
+distribution of <em>f</em> among the simulated individuals. The <em>f</em> values of the simulated individuals are sampled
+randomly from a beta distribution with mean (<code>meanF</code>) and variance (<code>varF</code>) specified by the user 
+(e.g. as in wang2011). This enables the simulation to mimic populations with known inbreeding 
+characteristics, or to simulate hypothetical scenarios of interest. For computational simplicity, allele 
+frequencies are assumed to be constant across all loci and the simulated loci are unlinked. Genotypes
+(i.e. the heterozygosity/homozygosity status at each locus) are assigned stochastically based on the <em>f</em>
+values of the simulated individuals. Specifically, the probability of an individual being heterozygous at
+any given locus (<code class="reqn">H</code>) is expressed as <code class="reqn">H = H0(1-f)</code> , where <code class="reqn">H0</code> is the user-specified heterozygosity of a 
+non-inbred individual and <em>f</em> is an individual's inbreeding coefficient drawn from the beta distribution.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>simulate_r2_hf</code> returns an object of class "inbreed".
+The functions 'print' and 'plot' are used to print a summary and to plot the r2(h, f) values with means and confidence intervals
+</p>
+<p>An 'inbreed' object from  <code>simulate_g2</code> is a list containing the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>function call.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>estMat</code></td>
+<td>
+<p>matrix with all r2(h,f) estimates. Each row contains the values for a given subset of markers</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_ind</code></td>
+<td>
+<p>specified number of individuals</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subsets</code></td>
+<td>
+<p>vector specifying the marker sets</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reps</code></td>
+<td>
+<p>repetitions per subset</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>H_nonInb</code></td>
+<td>
+<p>true genome-wide heteorzygosity of a non-inbred individual</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meanF</code></td>
+<td>
+<p>mean realized inbreeding f</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>varF</code></td>
+<td>
+<p>variance in realized inbreeding f</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_val</code></td>
+<td>
+<p>minimum g2 value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_val</code></td>
+<td>
+<p>maximum g2 value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>all_CI</code></td>
+<td>
+<p>confidence intervals for all subsets</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>all_sd</code></td>
+<td>
+<p>standard deviations for all subsets</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Marty Kardos (marty.kardos@ebc.uu.se) &amp;
+Martin A. Stoffel (martin.adam.stoffel@gmail.com)
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(mouse_msats)
+genotypes &lt;- convert_raw(mouse_msats)
+sim_r2 &lt;- simulate_r2_hf(n_ind = 10, H_nonInb = 0.5, meanF = 0.2, varF = 0.03,
+                      subsets = c(4,6,8,10), reps = 100, 
+                      type = "msats")
+plot(sim_r2)
+</code></pre>
+
+
+</div>

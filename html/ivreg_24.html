@@ -1,0 +1,320 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>influence.ivreg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Deletion and Other Diagnostic Methods for <code>"ivreg"</code> Objects</h2>
+
+<h3>Description</h3>
+
+<p>Methods for computing deletion and other regression diagnostics for 2SLS regression.
+It's generally more efficient to compute the deletion diagnostics via the <code>influence</code>
+method and then to extract the various specific diagnostics with the methods for
+<code>"influence.ivreg"</code> objects. Other diagnostics for linear models, such as
+added-variable plots (<code>avPlots</code>) and component-plus-residual
+plots (<code>crPlots</code>), also work, as do effect plots
+(e.g., <code>predictorEffects</code>) with residuals (see the examples below).
+The pointwise confidence envelope for the <code>qqPlot</code> method assumes an independent random sample
+from the t distribution with degrees of freedom equal to the residual degrees of
+freedom for the model and so are approximate, because the studentized residuals aren't
+independent.
+</p>
+<p>For additional information, see the vignette
+<a href="../doc/Diagnostics-for-2SLS-Regression.pdf">Diagnostics for 2SLS Regression</a>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'ivreg'
+influence(
+  model,
+  sigma. = n &lt;= 1000,
+  type = c("stage2", "both", "maximum"),
+  applyfun = NULL,
+  ncores = NULL,
+  ...
+)
+
+## S3 method for class 'ivreg'
+rstudent(model, ...)
+
+## S3 method for class 'ivreg'
+cooks.distance(model, ...)
+
+## S3 method for class 'influence.ivreg'
+dfbeta(model, ...)
+
+## S3 method for class 'ivreg'
+dfbeta(model, ...)
+
+## S3 method for class 'ivreg'
+hatvalues(model, type = c("stage2", "both", "maximum", "stage1"), ...)
+
+## S3 method for class 'influence.ivreg'
+rstudent(model, ...)
+
+## S3 method for class 'influence.ivreg'
+hatvalues(model, ...)
+
+## S3 method for class 'influence.ivreg'
+cooks.distance(model, ...)
+
+## S3 method for class 'influence.ivreg'
+qqPlot(
+  x,
+  ylab = paste("Studentized Residuals(", deparse(substitute(x)), ")", sep = ""),
+  distribution = c("t", "norm"),
+  ...
+)
+
+## S3 method for class 'ivreg'
+influencePlot(model, ...)
+
+## S3 method for class 'influence.ivreg'
+influencePlot(model, ...)
+
+## S3 method for class 'ivreg'
+infIndexPlot(model, ...)
+
+## S3 method for class 'influence.ivreg'
+infIndexPlot(model, ...)
+
+## S3 method for class 'influence.ivreg'
+model.matrix(object, ...)
+
+## S3 method for class 'ivreg'
+avPlots(model, terms, ...)
+
+## S3 method for class 'ivreg'
+avPlot(model, ...)
+
+## S3 method for class 'ivreg'
+mcPlots(model, terms, ...)
+
+## S3 method for class 'ivreg'
+mcPlot(model, ...)
+
+## S3 method for class 'ivreg'
+Boot(
+  object,
+  f = coef,
+  labels = names(f(object)),
+  R = 999,
+  method = "case",
+  ncores = 1,
+  ...
+)
+
+## S3 method for class 'ivreg'
+crPlots(model, terms, ...)
+
+## S3 method for class 'ivreg'
+crPlot(model, ...)
+
+## S3 method for class 'ivreg'
+ceresPlots(model, terms, ...)
+
+## S3 method for class 'ivreg'
+ceresPlot(model, ...)
+
+## S3 method for class 'ivreg'
+plot(x, ...)
+
+## S3 method for class 'ivreg'
+qqPlot(x, distribution = c("t", "norm"), ...)
+
+## S3 method for class 'ivreg'
+outlierTest(model, ...)
+
+## S3 method for class 'ivreg'
+spreadLevelPlot(x, main = "Spread-Level Plot", ...)
+
+## S3 method for class 'ivreg'
+ncvTest(model, ...)
+
+## S3 method for class 'ivreg'
+deviance(object, ...)
+
+## S3 method for class 'rivreg'
+influence(model, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model, x, object</code></td>
+<td>
+<p>A <code>"ivreg"</code> or <code>"influence.ivreg"</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma.</code></td>
+<td>
+<p>If <code>TRUE</code> (the default for 1000 or fewer cases), the deleted value
+of the residual standard deviation is computed for each case; if <code>FALSE</code>, the
+overall residual standard deviation is used to compute other deletion diagnostics.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>If <code>"stage2"</code> (the default), hatvalues are for the second stage regression;
+if <code>"both"</code>, the hatvalues are the geometric mean of the casewise hatvalues for the
+two stages; if <code>"maximum"</code>, the hatvalues are the larger of the casewise
+hatvalues for the two stages. In computing the geometric mean or casewise maximum hatvalues,
+the hatvalues for each stage are first divided by their average (number of coefficients in
+stage regression/number of cases); the geometric mean or casewise maximum values are then
+multiplied by the average hatvalue from the second stage.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>applyfun</code></td>
+<td>
+<p>Optional loop replacement function that should work like
+<code>lapply</code> with arguments <code>function(X, FUN, ...)</code>. The default
+is to use a loop unless the <code>ncores</code> argument is specified (see below).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncores</code></td>
+<td>
+<p>Numeric, number of cores to be used in parallel computations. If set
+to an integer the <code>applyfun</code> is set to use either <code>parLapply</code>
+(on Windows) or
+</p>
+<p><code>mclapply</code>
+(otherwise) with the desired number of cores.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>arguments to be passed down.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>The vertical axis label.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distribution</code></td>
+<td>
+<p><code>"t"</code> (the default) or <code>"norm"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>terms</code></td>
+<td>
+<p>Terms for which added-variable plots are to be constructed; the default,
+if the argument isn't specified, is the <code>"regressors"</code> component of the model formula.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>f, labels, R</code></td>
+<td>
+<p>see <code>Boot</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>only <code>"case"</code> (case resampling) is supported: see <code>Boot</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p>Main title for the graph.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>In the case of <code>influence.ivreg</code>, an object of class <code>"influence.ivreg"</code>
+with the following components:
+</p>
+
+<dl>
+<dt><code>coefficients</code></dt>
+<dd>
+<p>the estimated regression coefficients</p>
+</dd>
+<dt><code>model</code></dt>
+<dd>
+<p>the model matrix</p>
+</dd>
+<dt><code>dfbeta</code></dt>
+<dd>
+<p>influence on coefficients</p>
+</dd>
+<dt><code>sigma</code></dt>
+<dd>
+<p>deleted values of the residual standard deviation</p>
+</dd>
+<dt><code>dffits</code></dt>
+<dd>
+<p>overall influence on the regression coefficients</p>
+</dd>
+<dt><code>cookd</code></dt>
+<dd>
+<p>Cook's distances</p>
+</dd>
+<dt><code>hatvalues</code></dt>
+<dd>
+<p>hatvalues</p>
+</dd>
+<dt><code>rstudent</code></dt>
+<dd>
+<p>Studentized residuals</p>
+</dd>
+<dt><code>df.residual</code></dt>
+<dd>
+<p>residual degrees of freedom</p>
+</dd>
+</dl>
+<p>In the case of other methods, such as <code>rstudent.ivreg</code> or
+<code>rstudent.influence.ivreg</code>, the corresponding diagnostic statistics.
+Many other methods (e.g., <code>crPlot.ivreg</code>, <code>avPlot.ivreg</code>, <code>Effect.ivreg</code>)
+draw graphs.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ivreg</code>, <code>avPlots</code>,
+<code>crPlots</code>, <code>predictorEffects</code>,
+<code>qqPlot</code>, <code>influencePlot</code>,
+<code>infIndexPlot</code>, <code>Boot</code>,
+<code>outlierTest</code>, <code>spreadLevelPlot</code>,
+<code>ncvTest</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">kmenta.eq1 &lt;- ivreg(Q ~ P + D | D + F + A, data = Kmenta)
+summary(kmenta.eq1)
+car::avPlots(kmenta.eq1)
+car::mcPlots(kmenta.eq1)
+car::crPlots(kmenta.eq1)
+car::ceresPlots(kmenta.eq1)
+car::influencePlot(kmenta.eq1)
+car::influenceIndexPlot(kmenta.eq1)
+car::qqPlot(kmenta.eq1)
+car::spreadLevelPlot(kmenta.eq1)
+plot(effects::predictorEffects(kmenta.eq1, residuals = TRUE))
+set.seed &lt;- 12321 # for reproducibility
+confint(car::Boot(kmenta.eq1, R = 250)) # 250 reps for brevity
+car::outlierTest(kmenta.eq1)
+car::ncvTest(kmenta.eq1)
+
+</code></pre>
+
+
+</div>

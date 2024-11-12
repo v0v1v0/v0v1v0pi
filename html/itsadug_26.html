@@ -1,0 +1,229 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>inspect_random</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Inspection and interpretation of random factor smooths.</h2>
+
+<h3>Description</h3>
+
+<p>Inspection and interpretation of random factor smooths.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">inspect_random(
+  model,
+  select = 1,
+  fun = NULL,
+  cond = NULL,
+  n.grid = 30,
+  print.summary = getOption("itsadug_print"),
+  plot = TRUE,
+  add = FALSE,
+  main = NULL,
+  xlab = NULL,
+  ylab = NULL,
+  ylim = NULL,
+  h0 = 0,
+  v0 = NULL,
+  eegAxis = FALSE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A gam object, produced by <code>gam</code> or 
+<code>bam</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>select</code></td>
+<td>
+<p>A number, indicating the model term to be selected.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fun</code></td>
+<td>
+<p>A string or function description to apply to the random effects 
+estimates. When NULL (default), the estimates for the random effects are 
+returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cond</code></td>
+<td>
+<p>A named list of the values to restrict the estimates for the 
+random predictor terms. When NULL (default) all levels are returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.grid</code></td>
+<td>
+<p>Number of data points estimated for each random smooth.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print.summary</code></td>
+<td>
+<p>Logical: whether or not to print a summary of the 
+values selected for each predictor. 
+Default set to the print info messages option 
+(see <code>infoMessages</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>Logical: whether or not to plot the random effect estimates 
+(TRUE by default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add</code></td>
+<td>
+<p>Logical: whether or not to add the random effect estimates 
+to an existing plot (FALSE by default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p>Changing the main title for the plot, see also title.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>Changing the label for the x axis, 
+defaults to a description of x.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>Changing the label for the y axis, 
+defaults to a description of y.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylim</code></td>
+<td>
+<p>Changing the y limits of the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h0</code></td>
+<td>
+<p>A vector indicating where to add solid horizontal lines 
+for reference. By default 0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v0</code></td>
+<td>
+<p>A vector indicating where to add dotted vertical lines 
+for reference. By default no values provided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eegAxis</code></td>
+<td>
+<p>Whether or not to reverse the y-axis 
+(plotting negative upwards).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other options to pass on to <code>lines</code>, 
+see <code>par</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A data frame with estimates for random effects
+is optionally returned.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jacolien van Rij
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other Functions for model inspection: 
+<code>dispersion()</code>,
+<code>fvisgam()</code>,
+<code>gamtabs()</code>,
+<code>plot_data()</code>,
+<code>plot_parametric()</code>,
+<code>plot_smooth()</code>,
+<code>plot_topo()</code>,
+<code>pvisgam()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># load data:
+data(simdat)
+
+## Not run: 
+# Condition as factor, to have a random intercept
+# for illustration purposes:
+simdat$Condition &lt;- as.factor(simdat$Condition)
+
+# Model with random effect and interactions:
+m2 &lt;- bam(Y ~ s(Time) + s(Trial)
++ ti(Time, Trial)
++ s(Condition, bs='re')
++ s(Time, Subject, bs='fs', m=1),
+data=simdat)
+
+# extract with wrong select value:
+newd &lt;- inspect_random(m2, select=4)
+# results in warning, automatically takes select=5
+head(newd)
+inspect_random(m2, select=5, cond=list(Subject=c('a01','a02','a03')))
+
+# Alternatively, fix random effect of Condition, and plot 
+# random effects for subjects with lattice:
+newd &lt;- inspect_random(m2, select=5,
+    cond=list(Subject=unique(simdat[simdat$Condition==0,'Subject'])),
+    plot=FALSE)
+
+# Make lattice plot:
+require(lattice)
+lattice::xyplot(fit~Time | Subject,
+    data=newd, type='l',
+    xlab='Time', ylab='Partial effect')
+
+# Using argument 'fun':
+inspect_random(m2, select=5, fun=mean, 
+    cond=list(Subject=unique(simdat[simdat$Condition==0,'Subject'])))
+inspect_random(m2, select=5, fun=mean, 
+    cond=list(Subject=unique(simdat[simdat$Condition==2,'Subject'])),
+    col='red', add=TRUE)
+
+## End(Not run)
+
+# see the vignette for examples:
+vignette('overview', package='itsadug')
+</code></pre>
+
+
+</div>

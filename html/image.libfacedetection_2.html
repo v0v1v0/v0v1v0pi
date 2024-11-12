@@ -1,0 +1,144 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot.libfacedetection</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot detected faces</h2>
+
+<h3>Description</h3>
+
+<p>Plot functionality for bounding boxes detected with <code>image_detect_faces</code>
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'libfacedetection'
+plot(
+  x,
+  image,
+  border = "red",
+  lwd = 5,
+  only_box = FALSE,
+  col = "red",
+  cex = 2,
+  landmarks = FALSE,
+  col_landmarks = "black",
+  cex_landmarks = 1,
+  pch_landmarks = 20,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>object of class <code>libfacedetection</code> as returned by <code>image_detect_faces</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>image</code></td>
+<td>
+<p>object of class <code>magick-image</code> which was used to construct <code>x</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>border</code></td>
+<td>
+<p>color of the border of the box. Defaults to red. Passed on to <code>rect</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lwd</code></td>
+<td>
+<p>line width of the border of the box. Defaults to 5. Passed on to <code>rect</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>only_box</code></td>
+<td>
+<p>logical indicating to draw only the box and not the text on top of it. Defaults to FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p>color of the text on the box. Defaults to red. Passed on to <code>text</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex</code></td>
+<td>
+<p>character expension factor of the text on the box. Defaults to 2. Passed on to <code>text</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>landmarks</code></td>
+<td>
+<p>logical indicating to plot the landmarks as points. Defaults to FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col_landmarks</code></td>
+<td>
+<p>color of the point of the landmarks. Defaults to black.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cex_landmarks</code></td>
+<td>
+<p>cex of the point of the landmarks. Defaults to 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pch_landmarks</code></td>
+<td>
+<p>pch of the point of the landmarks. Defaults to 20.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other parameters passed on to <code>rect</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>an object of class <code>magick-image</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(magick)
+path &lt;- system.file(package="image.libfacedetection", "images", "handshake.jpg")
+x &lt;- image_read(path)
+x
+faces &lt;- image_detect_faces(x)
+faces
+plot(faces, x, border = "red", lwd = 7, col = "white")
+plot(faces, x, border = "red", lwd = 7, col = "white", landmarks = TRUE, 
+     col_landmarks = "purple", cex_landmarks = 2, pch_landmarks = 4)
+
+## show one detected face
+face &lt;- head(faces$detections, 1)
+image_crop(x, geometry_area(x = face$x, y = face$y, 
+                            width = face$width, height = face$height))
+## show all detected faces
+boxcontent &lt;- lapply(seq_len(faces$nr), FUN=function(i){
+  face &lt;- faces$detections[i, ]
+  image_crop(x, geometry_area(x = face$x, y = face$y, 
+                              width = face$width, height = face$height))
+})
+boxcontent &lt;- do.call(c, boxcontent)
+boxcontent
+</code></pre>
+
+
+</div>

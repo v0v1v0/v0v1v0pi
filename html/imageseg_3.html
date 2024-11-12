@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>findValidRegion</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Subset image to valid (informative) region</h2>
+
+<h3>Description</h3>
+
+<p>Load images, find and crop valid (informative) region. This function removes black borders from images, and is suitable for restricting hemispherical (fisheye) images to the actual informative region in the image center.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">findValidRegion(image, fileName, threshold = 0.1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>image</code></td>
+<td>
+<p>magick image</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fileName</code></td>
+<td>
+<p>file name of image to load</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>numeric. Minimum range (max - min) of grayscale values for rows/columns to be included in the output image.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Images are converted to grayscale according to the formula in Li et al. (2020). L = 0.30R + 0.59G + 0.11B
+We use a default threshold of 10, but it can be adjusted freely.
+</p>
+<p>This function can optionally be called inside <code>resizeImages</code> to crop each image to the informative region before resizing to the dimensions expected by the models. It is not recommended though since it may return different crop masks for images and their masks.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with 3 items:
+</p>
+<p>* img: the magick image.
+* geometry_area: a geometry string that can be used as argument <code>geometry</code> in <code>image_crop</code>.
+* geometry_area_df: a data frame containing the information from geometry_area (can be useful for finding consensus are to crop from many images)
+</p>
+
+
+<h3>Warning</h3>
+
+<p>Depending on the quality of the photographic equipment used, supposedly dark regions of images may be affected by stray light and light diffraction. This will be especially prevalend when using fisheye adapters, e.g. for smartphones. In such cases, the function will not provide reliable output. Adjusting 'threshold' may help to a degree, but needs to be set on a case-to-case basis for individual images. In such cases it might be easier to instead use e.g. GIMP to measure out the valid image region.
+</p>
+
+
+<h3>References</h3>
+
+<p>Li, Kexin, et al. "A New Method for Forest Canopy Hemispherical Photography Segmentation Based on Deep Learning." Forests 11.12 (2020): 1366.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+wd_images_can &lt;- system.file("images/canopy/raw",
+                              package = "imageseg")
+lf &lt;- list.files(wd_images_can, full.names = TRUE)
+img &lt;- findValidRegion(fileName = lf[1])
+img
+
+# finding consensus among multiple images
+## Not run: 
+wd_with_many_images &lt;- "..."
+lf &lt;- list.files(wd_with_many_images)
+test &lt;- lapply(lf, findValidRegion)
+# combine geometry_area_df from many images
+geometry_areas_df &lt;- do.call(rbind, lapply(test, FUN = function(x) x$geometry_area_df))
+# summary to decide on suitable values
+summary(geometry_areas_df)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

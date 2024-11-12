@@ -1,0 +1,228 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ivbounds</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Bounds for counterfactual outcome probabilities in instrumental variables scenarios 
+</h2>
+
+<h3>Description</h3>
+
+<p><code>ivbounds</code> computes non-parametric bounds for counterfactual outcome probabilities
+in instrumental variables scenarios. Let <code class="reqn">Y</code>, <code class="reqn">X</code>, and <code class="reqn">Z</code> 
+be the outcome, exposure, and instrument, respectively. <code class="reqn">Y</code> and <code class="reqn">X</code> must be binary, 
+whereas <code class="reqn">Z</code> can be either binary or ternary. 
+Ternary instruments are common in, for instance, Mendelian randomization. 
+Let <code class="reqn">p(Y_x=1)</code> be the counterfactual probability of the outcome, had all 
+subjects been exposed to level <code class="reqn">x</code>. <code>ivbounds</code> computes bounds for the 
+counterfactuals probabilities <code class="reqn">p(Y_1=1)</code> and <code class="reqn">p(Y_0=1)</code>. Below, we define
+<code class="reqn">p_{yx.z}=p(Y=y,X=x|Z=x)</code>. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ivbounds(data, Z, X, Y, monotonicity=FALSE, weights)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>either a data frame containing the variables in the model, or a named vector  
+<code>(p00.0,...,p11.1)</code> when <code class="reqn">Z</code> is binary, or 
+a named vector <code>(p00.0,...,p11.2)</code> when <code class="reqn">Z</code> is ternary.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Z</code></td>
+<td>
+
+<p>a string containing the name of the instrument <code class="reqn">Z</code> in <code>data</code> if
+<code>data</code> is a data frame. In this case <code class="reqn">Z</code> has to be coded as (0,1) when
+binary, and coded as (0,1,2) when ternary. <code>Z</code> is not specified if 
+<code>data</code> is a vector of probabilities.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+
+<p>a string containing the name of the exposure <code class="reqn">X</code> in <code>data</code> if
+<code>data</code> is a data frame. In this case <code class="reqn">X</code> has to be coded as (0,1). 
+<code>X</code> is not specified if <code>data</code> is a vector of probabilities. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+
+<p>a string containing the name of the outcome <code class="reqn">Y</code> in <code>data</code> if
+<code>data</code> is a data frame. In this case <code class="reqn">Y</code> has to be coded as (0,1). 
+<code>Y</code> is not specified if <code>data</code> is a vector of probabilities. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>monotonicity</code></td>
+<td>
+
+<p>logical. It is sometimes realistic to make the monotonicity assumption 
+<code class="reqn">z \geq z' \Rightarrow X_z \geq X_{z'}</code>. Should the bounds be computed 
+under this assumption?
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+
+<p>an optional vector of ‘prior weights’ to be used in the fitting process. 
+Should be NULL or a numeric vector. Only applicable if <code>data</code> is 
+a data frame.  
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>ivbounds</code> uses linear programming techniques to bound the counterfactual probabilities
+<code class="reqn">p(Y_1=1)</code> and <code class="reqn">p(Y_0=1)</code>. Bounds for a causal effect, defined as a contrast between these,
+are obtained by plugging in the bounds for <code class="reqn">p(Y_1=1)</code> and <code class="reqn">p(Y_0=1)</code> into the 
+contrast. For instance, bounds for the causal risk difference <code class="reqn">p(Y_1=1)-p(Y_0=1)</code>
+are obtained as <code class="reqn">[min\{p(Y_1=1)\}-max\{p(Y_0=1)\},max\{p(Y_1=1)\}-min\{p(Y_0=1)\}]</code>.
+In addition to the bounds, <code>ivbounds</code> evaluates the IV inequality
+</p>
+<p style="text-align: center;"><code class="reqn">\max\limits_{x}\sum_{y}\max\limits_{z}p_{yx.z}\leq 1.</code>
+</p>
+ 
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>"ivbounds"</code> is a list containing 
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+
+<p>the matched call. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p0</code></td>
+<td>
+
+<p>a named vector with elements <code>"min"</code> and <code>"max"</code>, containing the 
+evaluated lower and upper bounds for <code class="reqn">p(Y_0=1)</code>, respectively. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p1</code></td>
+<td>
+
+<p>a named vector with elements <code>"min"</code> and <code>"max"</code>, containing the 
+evaluated lower and upper bounds for <code class="reqn">p(Y_1=1)</code>, respectively. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p0.symbolic</code></td>
+<td>
+
+<p>a named vector with elements <code>"min"</code> and <code>"max"</code>, containing the 
+lower and upper bounds for <code class="reqn">p(Y_0=1)</code>, respectively, on a symbolic form
+(i.e. as strings). 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p1.symbolic</code></td>
+<td>
+
+<p>a named vector with elements <code>"min"</code> and <code>"max"</code>, containing the 
+lower and upper bounds for <code class="reqn">p(Y_1=1)</code>, respectively, on a symbolic form
+(i.e. as strings). 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>IVinequality</code></td>
+<td>
+
+<p>logical. Does the IV inequality hold?  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conditions</code></td>
+<td>
+
+<p>a character vector containing the violated condiations, if <code>IVinequality=FALSE</code>.  
+</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Arvid Sjolander. 
+</p>
+
+
+<h3>References</h3>
+
+<p>Balke, A. and Pearl, J. (1997). <em>Bounds on treatment effects from studies with imperfect compliance</em>.
+<em>Journal of the American Statistical Association</em> <b>92</b>(439), 1171-1176. 
+</p>
+<p>Sjolander A., Martinussen T. (2019). Instrumental variable estimation with the R package ivtools.
+<em>Epidemiologic Methods</em> <b>8</b>(1), 1-20.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+##Vitamin A example from Balke and Pearl (1997).
+n000 &lt;- 74
+n001 &lt;- 34
+n010 &lt;- 0
+n011 &lt;- 12
+n100 &lt;- 11514
+n101 &lt;- 2385
+n110 &lt;- 0
+n111 &lt;- 9663
+n0 &lt;- n000+n010+n100+n110
+n1 &lt;- n001+n011+n101+n111
+
+#with data frame...
+data &lt;- data.frame(Y=c(0,0,0,0,1,1,1,1), X=c(0,0,1,1,0,0,1,1), 
+  Z=c(0,1,0,1,0,1,0,1))
+n &lt;- c(n000, n001, n010, n011, n100, n101, n110, n111)
+b &lt;- ivbounds(data=data, Z="Z", X="X", Y="Y", weights=n)
+summary(b)
+
+#...or with vector of probabilities
+p &lt;- n/rep(c(n0, n1), 4)
+names(p) &lt;- c("p00.0", "p00.1", "p01.0", "p01.1", 
+  "p10.0", "p10.1", "p11.0", "p11.1") 
+b &lt;- ivbounds(data=p)
+summary(b)
+
+
+
+</code></pre>
+
+
+</div>

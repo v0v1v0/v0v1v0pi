@@ -1,0 +1,193 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>inspect_data_cat_as_dichotom</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Validate categorical data as dichotomous</h2>
+
+<h3>Description</h3>
+
+<p><code>inspect_data_cat_as_dichotom</code> checks if an object contains
+valid categorical data that is eligible to be used as dichotomous data. This
+can be useful to validate inputs in user-defined functions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">inspect_data_cat_as_dichotom(
+  data,
+  success,
+  allow_nas = TRUE,
+  warning_nas = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data, success</code></td>
+<td>
+<p>Arbitrary objects. <code>success</code> is meant to indicate the
+value of <code>data</code> that corresponds to a success.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allow_nas</code></td>
+<td>
+<p>Logical value. If <code>TRUE</code> then <code>NA</code> and <code>NaN</code> values in
+<code>data</code> are allowed. If <code>FALSE</code>, execution is stopped and an error message is
+thrown in case there are <code>NA</code> or <code>NaN</code> values in <code>data</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warning_nas</code></td>
+<td>
+<p>Logical value. If <code>TRUE</code> then the presence of <code>NA</code> or
+<code>NaN</code> values in <code>data</code> generates a warning message. <code>NA</code> and <code>NaN</code> values
+pass silently otherwise (if <code>allow_nas</code> is set to<code>TRUE</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>inspect_data_cat_as_dichotom</code> conducts a series of tests to check
+if <code>data</code> contains valid categorical data that is eligible to be used as
+dichotomous data. Namely, <code>inspect_data_cat_as_dichotom</code> checks if:
+</p>
+
+<ul>
+<li> <p><code>data</code> and <code>success</code> are <code>NULL</code> or empty.
+</p>
+</li>
+<li> <p><code>data</code> and <code>success</code> are atomic and have an eligible data type (logical,
+integer, double, character).
+</p>
+</li>
+<li> <p><code>data</code> and <code>success</code> have <code>NA</code> or <code>NaN</code> values.
+</p>
+</li>
+<li> <p><code>success</code> has <code>length</code> 1.
+</p>
+</li>
+<li> <p><code>success</code> is observed in <code>data</code>.
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p><code>inspect_data_cat_as_dichotom</code> does not return any output. There are
+three possible outcomes:
+</p>
+
+<ul>
+<li>
+<p> The call is silent if:
+</p>
+
+<ul>
+<li> <p><code>data</code> contains valid categorical data that is eligible to be used as
+dichotomous data and there are no <code>NA</code> or <code>NaN</code> values in <code>data</code>.
+</p>
+</li>
+<li> <p><code>data</code> contains valid categorical data that is eligible to be used as
+dichotomous data, there are some <code>NA</code> or <code>NaN</code> values in <code>data</code>,
+<code>allow_nas</code> is set to <code>TRUE</code> and <code>warning_nas</code> is set to <code>FALSE</code>.
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p> An informative warning message is thrown if:
+</p>
+
+<ul>
+<li> <p><code>data</code> contains valid categorical data that is eligible to be used as
+dichotomous data and <code>success</code> is not observed in <code>data</code>.
+</p>
+</li>
+<li> <p><code>data</code> contains valid categorical data that is eligible to be used as
+dichotomous data, there are <code>NA</code> or <code>NaN</code> values in <code>data</code> and both
+<code>allow_nas</code> and <code>warning_nas</code> are set to <code>TRUE</code>.
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p> An informative error message is thrown and the execution is stopped if:
+</p>
+
+<ul>
+<li> <p><code>data</code> does not contain valid categorical data that is eligible to be
+used as dichotomous data.
+</p>
+</li>
+<li> <p><code>data</code> contains valid categorical data that is eligible to be used as
+dichotomous data, there are some <code>NA</code> or <code>NaN</code> values in <code>data</code> and
+<code>allow_nas</code> is set to <code>FALSE</code>.
+</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3>See Also</h3>
+
+
+<ul>
+<li> <p><code>inspect_data_categorical</code> to validate categorical.
+</p>
+</li>
+<li> <p><code>inspect_par_multinomial</code> to validate vectors of
+Multinomial proportions.
+</p>
+</li>
+<li> <p><code>inspect_data_dichotomous</code> to validate dichotomous
+data.
+</p>
+</li>
+<li> <p><code>inspect_par_bernoulli</code> to validate
+Bernoulli/Binomial proportions.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Calls that pass silently:
+x1 &lt;- c(1, 0, 0, 1, 0)
+x2 &lt;- c(FALSE, FALSE, TRUE)
+x3 &lt;- c("yes", "no", "yes")
+x4 &lt;- factor(c("yes", "no", "yes"))
+x5 &lt;- c(1, 0, 0, 1, 0, NA)
+inspect_data_cat_as_dichotom(x1, success = 1)
+inspect_data_cat_as_dichotom(x2, success = TRUE)
+inspect_data_cat_as_dichotom(x3, success = "yes")
+inspect_data_cat_as_dichotom(x4, success = "yes")
+inspect_data_cat_as_dichotom(x5, success = 1)
+
+# Calls that throw an informative warning message:
+y1 &lt;- c(1, 1, NA, 0, 0)
+y2 &lt;- c(0, 0)
+success &lt;- 1
+try(inspect_data_cat_as_dichotom(y1, success = 1, warning_nas = TRUE))
+try(inspect_data_cat_as_dichotom(y2, success = success))
+
+# Calls that throw an informative error message:
+try(inspect_data_cat_as_dichotom(y1, 1, allow_nas = FALSE))
+try(inspect_data_cat_as_dichotom(NULL, 1))
+try(inspect_data_cat_as_dichotom(c(1, 0), NULL))
+try(inspect_data_cat_as_dichotom(list(1, 0), 1))
+try(inspect_data_cat_as_dichotom(c(1, 0), list(1)))
+try(inspect_data_cat_as_dichotom(numeric(0), 0))
+try(inspect_data_cat_as_dichotom(1, numeric(0)))
+try(inspect_data_cat_as_dichotom(NaN, 1))
+try(inspect_data_cat_as_dichotom(NA, 1))
+try(inspect_data_cat_as_dichotom(c(1, 0), NA))
+try(inspect_data_cat_as_dichotom(c(1, 0), NaN))
+try(inspect_data_cat_as_dichotom(c(1, 0), 2))
+</code></pre>
+
+
+</div>

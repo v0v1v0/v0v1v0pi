@@ -1,0 +1,131 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>HTP2</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Production Measurements of High-Tech Parts - Singular Case</h2>
+
+<h3>Description</h3>
+
+<p>The <code>HTP2</code> data set contains 457 high-tech parts designed for consumer
+products characterized by 149 tests.
+These tests are performed to ensure a high quality of the production.
+All these 457 parts were considered functional and have been sold.
+However the part 28 showed defects in use and was
+returned to the manufacturer by the customer. Therefore this part
+can be considered as outlier.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">data("HTP2")
+</code></pre>
+
+
+<h3>Format</h3>
+
+<p>A data frame with 457 rows and 149 variables V.1 - V.149, presenting
+some collinearity issues.
+</p>
+
+
+<h3>Source</h3>
+
+<p>Anonymized data from a nondisclosed manufacturer.
+</p>
+
+
+<h3>References</h3>
+
+<p>Archimbaud, A., Drmac, Z., Nordhausen, K., Radojcic, U. and Ruiz-Gazen, A.
+(2023) Numerical Considerations and a New Implementation for Invariant
+Coordinate Selection. <em>SIAM Journal on Mathematics of Data Science</em>,
+<b>5</b>(1), 97–121. <a href="https://doi.org/10.1137/22M1498759">doi:10.1137/22M1498759</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># HTP2 data: the observation 28 is considered as an outlier
+data("HTP2")
+outliers &lt;- c(28)
+boxplot(HTP2, horizontal = TRUE)
+# Outlier detection using ICS
+library(ICS)
+## Not run: 
+out &lt;- ICS_outlier(HTP2, ICS_algorithm = "QR",
+                   method = "norm_test",
+                   test = "agostino.test", level_test = 0.05,
+                   level_dist = 0.01, n_dist = 50)
+
+# Here there is a singularity issue. One solution is to first reduce the 
+# dimension. To ensure higher numerical stability of the subsequent methods
+# we suggest to permute the data and to use the QR decomposition instead of
+# the regular SVD decomposition.
+Xt &lt;- HTP2
+# Normalization by the mean 
+Xt.c &lt;- sweep(HTP2, 2, colMeans(HTP2), "-")
+
+# Permutation by rows 
+# decreasing by infinity norm:  absolute maximum
+norm_inf &lt;- apply(Xt.c, 1, function(x) max(abs(x)))
+order_rows &lt;- order(norm_inf, decreasing = TRUE)
+Xt_row_per &lt;- Xt.c[order_rows,]
+
+# QR decomposition of Xt with column pivoting from LAPACK 
+qr_Xt &lt;- qr(1/sqrt(nrow(Xt.c)-1)*Xt_row_per, LAPACK = TRUE)
+
+# Estimation of rank q 
+# R is nxp, but with only zero for rows &gt; p
+# the diag of R is already in decreasing order and is a good approximation
+# of the rank of X.c. To decide on which singular values are zero we use
+# a relative criteria based on previous values.
+# R should be pxp
+R &lt;- qr.R(qr_Xt)
+r_all &lt;- abs(diag(R))
+r_ratios &lt;- r_all[2:length(r_all)]/r_all[1:(length(r_all)-1)]
+q &lt;- which(r_ratios &lt; max(dim(Xt.c)) *.Machine$double.eps)[1]
+q &lt;- ifelse(is.na(q), length(r_all), q)
+
+# Q should be nxp but we are only interested in nxq
+Q1 &lt;- qr.Q(qr_Xt)[,1:q]
+
+# QR decomposition of Rt 
+R_q &lt;- R[1:q, ]
+qr_R &lt;- qr(t(R_q), LAPACK = TRUE)
+Tau &lt;- qr.Q(qr_R)[1:q, ]
+Omega1 &lt;- qr.R(qr_R)[1:q, 1:q]
+
+# New X tilde 
+# permutation matrices
+# permutation of rows
+Pi2 &lt;- data.frame(model.matrix(~ . -1, data = data.frame(row=as.character(order_rows))))
+Pi2 &lt;- Pi2[,order(as.numeric(substr(colnames(Pi2), start = 4, stop = nchar(colnames(Pi2)))))]
+colnames(Pi2) &lt;- rownames(Xt)
+
+# permutation of cols
+Pi3 &lt;- data.frame(model.matrix(~ . -1, data = data.frame(col=as.character( qr_R$pivot))))
+Pi3 &lt;- t(Pi3[,order(as.numeric(substr(colnames(Pi3), start = 4, stop = nchar(colnames(Pi3)))))])
+
+X_tilde &lt;- sqrt(nrow(Xt)-1)* Tau %*% t(Pi3) %*% t(Q1)
+
+Xt_tilde &lt;- t(Pi2) %*% t(X_tilde)
+
+# Run ICS_outlier
+out &lt;- ICS_outlier(Xt_tilde, ICS_algorithm = "QR",
+method = "norm_test",
+test = "agostino.test", level_test = 0.01,
+level_dist = 0.01, n_dist = 50)
+
+summary(out)
+plot(out)
+text(outliers, out$ics_distances[outliers], outliers, pos = 2, cex = 0.9, col = 2)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

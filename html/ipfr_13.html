@@ -1,0 +1,182 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ipu_nr</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Iterative Proportional Updating (Newton-Raphson)</h2>
+
+<h3>Description</h3>
+
+<p>List balancing similar to <code>ipu</code>, but using the
+Newton-Raphson approach to optimization. Created primarily as a point of
+comparison for <code>ipu</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ipu_nr(
+  primary_seed,
+  primary_targets,
+  secondary_seed = NULL,
+  secondary_targets = NULL,
+  target_priority = 1e+07,
+  relative_gap = 0.01,
+  max_iterations = 100,
+  absolute_diff = 10,
+  weight_floor = 1e-05,
+  verbose = FALSE,
+  max_ratio = 10000,
+  min_ratio = 1e-04
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>primary_seed</code></td>
+<td>
+<p>In population synthesis or household survey expansion, 
+this would be the household seed table (each record would represent a 
+household). It could also be a trip table, where each row represents an 
+origin-destination pair. Must contain a <code>pid</code> ("primary ID") field
+that is unique for each row. Must also contain a geography field that
+starts with "geo_".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>primary_targets</code></td>
+<td>
+<p>A <code>named list</code> of data frames.  Each name in the 
+list defines a marginal dimension and must match a column from the 
+<code>primary_seed</code> table. The data frame associated with each named list
+element must contain a geography field (starts with "geo_"). Each row in
+the target table defines a new geography (these could be TAZs, tracts,
+clusters, etc.). The other column names define the marginal categories that
+targets are provided for. The vignette provides more detail.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>secondary_seed</code></td>
+<td>
+<p>Most commonly, if the primary_seed describes households, the 
+secondary seed table would describe a unique person with each row. Must
+also contain the <code>pid</code> column that links each person to their 
+respective household in <code>primary_seed</code>. Must not contain any geography
+fields (starting with "geo_").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>secondary_targets</code></td>
+<td>
+<p>Same format as <code>primary_targets</code>, but they constrain 
+the <code>secondary_seed</code> table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target_priority</code></td>
+<td>
+<p>This argument controls how quickly each set of 
+targets is relaxed. In other words: how important it is to match the target
+exactly. Defaults to <code>10,000,000</code>, which means that all targets should
+be matched exactly.
+</p>
+
+<dl>
+<dt><code>real</code></dt>
+<dd>
+<p>This priority value will be used for each target table.</p>
+</dd>
+<dt><code>named list</code></dt>
+<dd>
+<p>Each named entry must match an entry in either
+<code>primary_targets</code> or <code>secondary_targets</code> and have a <code>real</code>.
+This priority will be applied to that target table. Any targets not in the
+list will default to <code>10,000,000</code>.</p>
+</dd>
+<dt><code>data.frame</code></dt>
+<dd>
+<p>Column <code>target</code> must have values that match an
+entry in either <code>primary_targets</code> or <code>secondary_targets</code>. Column 
+<code>priority</code> contains the values to use for priority. Any targets not in
+the table will default to <code>10,000,000</code>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>relative_gap</code></td>
+<td>
+<p>After each iteration, the weights are compared to the
+previous weights and the 
+the <code>relative_gap</code> threshold, then the process terminates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_iterations</code></td>
+<td>
+<p>maximum number of iterations to perform, even if 
+<code>relative_gap</code> is not reached.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>absolute_diff</code></td>
+<td>
+<p>Upon completion, the <code>ipu()</code> function will report
+the worst-performing marginal category and geography based on the percent
+difference from the target. <code>absolute_diff</code> is a threshold below which
+percent differences don't matter.
+</p>
+<p>For example, if if a target value was 2, and the expanded weights equaled
+1, that's a 100
+is only 1.
+</p>
+<p>Defaults to 10.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weight_floor</code></td>
+<td>
+<p>Minimum weight to allow in any cell to prevent zero
+weights. Set to .0001 by default.  Should be arbitrarily small compared to
+your seed table weights.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Print iteration details and worst marginal stats upon 
+completion? Default <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_ratio</code></td>
+<td>
+<p><code>real</code> number. The average weight per seed record is
+calculated by dividing the total of the targets by the number of records.
+The max_scale caps the maximum weight at a multiple of that average. Defaults
+to <code>10000</code> (basically turned off).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_ratio</code></td>
+<td>
+<p><code>real</code> number. The average weight per seed record is
+calculated by dividing the total of the targets by the number of records.
+The min_scale caps the minimum weight at a multiple of that average. Defaults
+to <code>0.0001</code> (basically turned off).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a <code>named list</code> with the <code>primary_seed</code> with weight, a 
+histogram of the weight distribution, and two comparison tables to aid in
+reporting.
+</p>
+
+
+</div>

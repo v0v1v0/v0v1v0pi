@@ -1,0 +1,148 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>reduce</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Reduce portfolio by merging redundant date ranges</h2>
+
+<h3>Description</h3>
+
+<p>Transform all the date ranges together as a set to produce a
+new set of date ranges. Ranges separated by a gap of at least <code>min.gapwidth</code>
+days are not merged.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">reduce(df, begin, end, ..., agg_cols = NULL, agg = "sum", min.gapwidth = 5)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>data.frame</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>begin</code></td>
+<td>
+<p>name of column <code>df</code> with begin dates</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>end</code></td>
+<td>
+<p>name of column in <code>df</code> with end dates</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>names of columns in <code>df</code> used to group date ranges by</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>agg_cols</code></td>
+<td>
+<p>list with columns in <code>df</code> to aggregate by (defaults to NULL)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>agg</code></td>
+<td>
+<p>aggregation type (defaults to "sum")</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.gapwidth</code></td>
+<td>
+<p>ranges separated by a gap of at least <code>min.gapwidth</code>
+days are not merged. Defaults to 5.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function is adopted from <code>IRanges::reduce()</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>"reduce"</code>.
+The function <code>summary</code> is used to obtain and print a summary of the results.
+An object of class <code>"reduce"</code> is a list usually containing at least the
+following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>data frame with reduced time periods</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>begin</code></td>
+<td>
+<p>name of column in <code>df</code> with begin dates</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>end</code></td>
+<td>
+<p>name of column in <code>df</code> with end dates</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cols</code></td>
+<td>
+<p>names of columns in <code>df</code> used to group date ranges by</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Martin Haringa
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">portfolio &lt;- structure(list(policy_nr = c("12345", "12345", "12345", "12345",
+"12345", "12345", "12345", "12345", "12345", "12345", "12345"),
+productgroup = c("fire", "fire", "fire", "fire", "fire", "fire",
+"fire", "fire", "fire", "fire", "fire"), product = c("contents",
+"contents", "contents", "contents", "contents", "contents", "contents",
+"contents", "contents", "contents", "contents"),
+begin_dat = structure(c(16709,16740, 16801, 17410, 17440, 17805, 17897,
+17956, 17987, 18017, 18262), class = "Date"),
+end_dat = structure(c(16739, 16800, 16831, 17439, 17531, 17896, 17955,
+17986, 18016, 18261, 18292), class = "Date"),
+premium = c(89L, 58L, 83L, 73L, 69L, 94L, 91L, 97L, 57L, 65L, 55L)),
+row.names = c(NA, -11L), class = "data.frame")
+
+# Merge periods
+pt1 &lt;- reduce(portfolio, begin = begin_dat, end = end_dat, policy_nr,
+    productgroup, product, min.gapwidth = 5)
+
+# Aggregate per period
+summary(pt1, period = "days", policy_nr, productgroup, product)
+
+# Merge periods and sum premium per period
+pt2 &lt;- reduce(portfolio, begin = begin_dat, end = end_dat, policy_nr,
+    productgroup, product, agg_cols = list(premium), min.gapwidth = 5)
+
+# Create summary with aggregation per week
+summary(pt2, period = "weeks", policy_nr, productgroup, product)
+
+
+</code></pre>
+
+
+</div>

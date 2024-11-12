@@ -1,0 +1,189 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ISS</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>ISS</h2>
+
+<h3>Description</h3>
+
+<p>The function implements the combination of p-value calculation and familywise
+error rate control through DAG testing procedures described in Müller et al. (2023).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ISS(
+  X,
+  y,
+  tau,
+  alpha = 0.05,
+  m = nrow(X),
+  p_value = c("sub-Gaussian-normalmixture", "sub-Gaussian", "Gaussian", "classification",
+    "quantile"),
+  sigma2,
+  rho = 1/2,
+  FWER_control = c("ISS", "Holm", "MG all", "MG any", "split", "split oracle"),
+  minimal = FALSE,
+  split_proportion = 1/2,
+  eta = NA,
+  theta = 1/2
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>a numeric matrix specifying the covariates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>a numeric vector with <code>length(y) == nrow(X)</code> specifying the responses.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau</code></td>
+<td>
+<p>a single numeric value specifying the threshold of interest.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>a numeric value in (0, 1] specifying the Type I error rate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>an integer value between 1 and <code>nrow(X)</code> specifying the size of
+the subsample of <code>X</code> at which the hypotheses should be tested.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p_value</code></td>
+<td>
+<p>one of <code>c("sub-Gaussian", "sub-Gaussian-normalmixture", "Gaussian", "classification", "quantile")</code> specifying
+which p-value construction should be used. See Definitions 1, 18, 19 and 21 and Lemma 24 by Müller et al. (2023) respectively.
+For <code>p_value == "quantile"</code>, the version with the p-value from Definition 19 is implemented.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma2</code></td>
+<td>
+<p>a single positive numeric value specifying the variance parameter (only needed if <code>p_value %in% c("sub-Gaussian", "sub-Gaussian-normalmixture")</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+<p>a single positive numeric value serving as hyperparameter (only used if <code>p_value == "sub-Gaussian-normalmixture"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FWER_control</code></td>
+<td>
+<p>one of <code>c("ISS", "Holm", "MG all", "MG any", "split", "split oracle")</code>, specifying how the
+familywise error rate is controlled. The first corresponds to Algorithm 1 by Müller et al. (2023),
+the second is Holm's procedure, the two starting with "MG" correspond to the procedures by Meijer and Goeman (2015)
+for one-way logical relationships, and the final two containing "split" to the sample splitting techniques in Appendix B of Müller et al. (2023).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minimal</code></td>
+<td>
+<p>a logical value determining whether the output should be reduced to the minimal number of points leading to the same selected set.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>split_proportion</code></td>
+<td>
+<p>when <code>FWER_control %in% c("split", "split oracle")</code>, the number of data points in the first split of the data is <code>ceiling(split_proportion * nrow(X))</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eta</code></td>
+<td>
+<p>when <code>FWER_control == "split oracle"</code>, this parameter needs to be used to provide the true regression function, which should take a vector of covariates as inputs and output a single numeric value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta</code></td>
+<td>
+<p>a single numeric value in (0, 1) specifying the quantile of interest when <code>p_value_method == "quantile"</code>. Defaults to 1/2, i.e.~the median.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A numeric matrix giving the points in <code>X</code> determined to lie in the <code>tau</code>-superlevel set of the regression function with probability at least 1 - <code>alpha</code> or, if <code>minimal == TRUE</code>, a subset of points thereof that have the same upper hull.
+</p>
+
+
+<h3>References</h3>
+
+<p>Meijer RJ, Goeman JJ (2015).
+“A multiple testing method for hypotheses structured in a directed acyclic graph.”
+<em>Biometrical Journal</em>, <b>57</b>(1), 123–143.<br><br> Müller MM, Reeve HWJ, Cannings TI, Samworth RJ (2023).
+“Isotonic subgroup selection.”
+<em>arXiv preprint arXiv:2305.04852v2</em>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">d &lt;- 2
+n &lt;- 1000
+m &lt;- 100
+sigma2 &lt;- (1 / 4)^2
+tau &lt;- 0.5
+alpha &lt;- 0.05
+
+X &lt;- matrix(runif(n * d), nrow = n)
+eta_X &lt;- apply(X, MARGIN = 1, max)
+y &lt;- eta_X + rnorm(n, sd = sqrt(sigma2))
+X_rej &lt;- ISS(X = X, y = y, tau = tau, alpha = alpha, m = m, sigma2 = sigma2)
+
+if (d == 2) {
+  plot(0, type = "n", xlim = c(0, 1), ylim = c(0, 1), xlab = NA, ylab = NA)
+  for (i in 1:nrow(X_rej)) {
+    rect(
+      xleft = X_rej[i, 1], xright = 1, ybottom = X_rej[i, 2], ytop = 1,
+      border = NA, col = "indianred"
+    )
+  }
+
+  points(X, pch = 16, cex = 0.5, col = "gray")
+  points(X[1:m, ], pch = 16, cex = 0.5, col = "black")
+  lines(x = c(0, tau), y = c(tau, tau), lty = 2)
+  lines(x = c(tau, tau), y = c(tau, 0), lty = 2)
+
+  legend(
+    x = "bottomleft",
+    legend = c(
+      "superlevel set boundary",
+      "untested covariate points",
+      "tested covariate points",
+      "selected set"
+    ),
+    col = c("black", "gray", "black", "indianred"),
+    lty = c(2, NA, NA, NA),
+    lwd = c(1, NA, NA, NA),
+    pch = c(NA, 16, 16, NA),
+    fill = c(NA, NA, NA, "indianred"),
+    border = c(NA, NA, NA, "indianred")
+  )
+}
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,159 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>SingleValueMetric-class</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Class <code>"SingleValueMetric"</code>
+</h2>
+
+<h3>Description</h3>
+
+<p>A container for metrics results and associated metadata.  This information is used to create XML that is
+then submitted to the MUSTANG Backend Storage System (BSS). This has been superceded by <code>GeneralValueMetric</code> 
+and is no longer in use.
+</p>
+
+
+<h3>Objects from the Class</h3>
+
+<p>Objects can be created by calls of the form:
+</p>
+<p><code>new("SingleValueMetric", snclq, starttime, endtime, metricName, value)</code>
+</p>
+<p>Lists of <code>SingleValueMetric</code> objects are returned by various metrics functions in this package.
+</p>
+
+
+<h3>Slots</h3>
+
+
+<dl>
+<dt>
+<code>snclq</code>:</dt>
+<dd>
+<p>Object of class <code>"character"</code>: SNCLQ identifier.</p>
+</dd>
+<dt>
+<code>metricName</code>:</dt>
+<dd>
+<p>Object of class <code>"character"</code>: Name of the metric.</p>
+</dd>
+<dt>
+<code>starttime</code>:</dt>
+<dd>
+<p>Object of class <code>"POSIXct"</code>: Start time.</p>
+</dd>
+<dt>
+<code>endtime</code>:</dt>
+<dd>
+<p>Object of class <code>"POSIXct"</code>: End time.</p>
+</dd>
+<dt>
+<code>valueName</code>:</dt>
+<dd>
+<p>Object of class <code>"character"</code>: Name of the XML value identifier (default=<code>"value"</code>).</p>
+</dd>
+<dt>
+<code>value</code>:</dt>
+<dd>
+<p>Object of class <code>"numeric"</code>: Metric value.</p>
+</dd>
+<dt>
+<code>valueString</code>:</dt>
+<dd>
+<p>Object of class <code>"character"</code>: String representation of the metric value.</p>
+</dd>
+<dt>
+<code>quality_flag</code>:</dt>
+<dd>
+<p>Object of class <code>"numeric"</code>: Quality flag.</p>
+</dd>
+<dt>
+<code>quality_flagString</code>:</dt>
+<dd>
+<p>Object of class <code>"character"</code>: String representation of quality flag.</p>
+</dd>
+<dt>
+<code>attributeName</code>:</dt>
+<dd>
+<p>Object of class <code>"character"</code>: Name of one or more optional attributes.</p>
+</dd>
+<dt>
+<code>attributeValueString</code>:</dt>
+<dd>
+<p>Object of class <code>"character"</code>: String representation of one or more attribute values.</p>
+</dd>
+</dl>
+<h3>Methods</h3>
+
+
+
+<dl>
+<dt>show</dt>
+<dd>
+<p><code>signature(object = "SingleValueMetric")</code>: Prettyprints the information in the <code>SingleValueMetric</code> </p>
+</dd>
+</dl>
+<h3>Note</h3>
+
+<p>The <code>starttime</code> and <code>endtime</code> slots are typically associated with the <em>user requested</em> times 
+which may not match up with the
+<code>starttime</code> associated with the first <code>Trace</code> and the <code>endtime</code> associated with last <code>Trace</code>
+in the <code>Stream</code> object being analyzed.  This ensures that
+metrics results for a single time period but covering many stations or channels will have the same date range and
+improves performance of the BSS which expects XML of the following form:
+</p>
+<pre>
+&lt;measurements&gt;
+  &lt;date start='2012-02-10T00:00:00.000' end='2012-02-10T09:20:00.000'&gt;
+    &lt;target snclq='N.S.L.C1.Q'&gt;
+      &lt;example value='1.0'/&gt;
+    &lt;/target&gt;
+    &lt;target snclq='N.S.L.C2.Q'&gt;
+      &lt;example value='2.0'/&gt;
+    &lt;/target&gt;
+    &lt;target snclq='N.S.L.C3.Q'&gt;
+      &lt;example value='3.0'/&gt;
+    &lt;/target&gt;
+  &lt;/date&gt;
+  &lt;/date&gt;
+&lt;/measurements&gt;
+</pre>
+<p>The <code>quality_flag</code> is an optional value available for storing information related to the
+processing of a particular metric.  Its meaning will vary from metric to metric.
+</p>
+<p>For an IRIS/DMC specific example, the <code>station_completeness</code> metric obtains a list of available channels
+for a station from the availability web service and compares this list with the list of <code>percent_availability</code> metrics for this station stored in the MUSTANG BSS.  In the case of the <code>station_completeness</code> metric, the 
+<code>quality_flag</code> is set to the number of channels that should be available but for whom no <code>percent_availability</code> measure is obtained form the BSS.
+</p>
+<p>The <code>attributeName</code> and <code>attributeValueString</code> slots can be used to store additional attributes associated with a metric values. For example, the <code>max_stalta</code> value for a seismic trace can be calculated and a metric can be created that contains this value and another attribute with a string representation of the time at which this maximum occurred.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  ## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+# Get the waveform
+starttime &lt;- as.POSIXct("2012-01-24", tz="GMT")
+endtime &lt;- as.POSIXct("2012-01-25", tz="GMT")
+st &lt;- getDataselect(iris,"AK","PIN","","BHZ",starttime,endtime)
+
+# Apply a metric and show the results
+metricList &lt;- basicStatsMetric(st)
+show(metricList[[1]])
+  
+## End(Not run)
+</code></pre>
+
+
+</div>

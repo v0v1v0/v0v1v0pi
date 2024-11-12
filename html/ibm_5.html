@@ -1,0 +1,158 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>localLotkaVolterra</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Lotka-Volterra with local predation interactions</h2>
+
+<h3>Description</h3>
+
+<p>This function simulates several trajectories for a 
+Lotka-Volterra model with local predation interactions as decribed
+in Brigatti et al. (2009).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">localLotkaVolterra(
+  par,
+  T,
+  replicates = 1,
+  dim = 1,
+  periodic = TRUE,
+  spatial = FALSE,
+  verbose = FALSE,
+  maxpop = 1e+06,
+  fill = NA,
+  probs = seq(0, 1, 0.01)
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>par</code></td>
+<td>
+<p>A list containing the parameters to run the model, currently
+the growth rate of prey (r), the mortality rate of predator (l), predation
+interaction parameters (alpha and beta), diffusion rates (D), diameters of 
+local interaction (L) and initial population size (initial). For D, L and
+initial population, a list with two values (named N and P) is required.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>T</code></td>
+<td>
+<p>Time horizon, number of time steps to be simulated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>replicates</code></td>
+<td>
+<p>Number of replicates (trajectories) to be simulated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dim</code></td>
+<td>
+<p>Spatial dimension for the space. Can be 1, 2 or 3.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>periodic</code></td>
+<td>
+<p>Spatial boundary conditions. If <code>periodic</code> is set to 
+<code>TRUE</code>, the space is a torus. If set to <code>FALSE</code>, the boundaries 
+are reflective.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spatial</code></td>
+<td>
+<p>Boolean, should spatial outputs (position of individuals) to 
+be saved?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Boolean, to print population sizes by step?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxpop</code></td>
+<td>
+<p>Maximum population size. If predator or prey population size</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fill</code></td>
+<td>
+<p>Value to initially fill the population arrays. Default to NA, 0 is an option too.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probs</code></td>
+<td>
+<p>Vector of probabilities to compute quantiles of the predator-prey interactions. 
+get bigger, the simulation ends.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with the following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>A matrix with prey population sizes by time (rows) and replicates (columns)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>P</code></td>
+<td>
+<p>A matrix with predator population sizes by time (rows) and replicates (columns)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pop</code></td>
+<td>
+<p>Prey and predator positions by time, if <code>spatial</code> is <code>TRUE</code></p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Ricardo Oliveros–Ramos
+</p>
+
+
+<h3>References</h3>
+
+<p>Brigatti et al. 2009.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+set.seed(880820)
+par = list(alpha=5e-4, gamma=0.5, r=0.1, m=0.05, D=list(N=8e-5, P=8e-5), 
+L=list(N=0.2, P=0.2))
+N0 = with(par, m/(2*gamma*alpha*L$P))
+P0 = with(par, r/(2*alpha*L$N))
+par$initial = list(N=round(N0), P=round(P0))
+sim = localLotkaVolterra(par, T=240, replicates=100, maxpop = 1e4)
+plot(sim)
+
+## End(Not run) 
+</code></pre>
+
+
+</div>

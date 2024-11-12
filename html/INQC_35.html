@@ -1,0 +1,82 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sunafterdark</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Maximum sunshine hours (only for "non-blended" ECA&amp;D data)</h2>
+
+<h3>Description</h3>
+
+<p>This function compares sunshine data to the maximum theoretical sunshine at an ECA&amp;D station,
+according the day, lat and lon. Maximum sunshine hours are computed from the "suncalc" package, using
+"night" and "dawn" parameters. This contrasts quite a lot with other functions computing "daylength".
+This formulation is more conservative
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sunafterdark(y, code = "991274")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>ECA&amp;D style two columns with date (yyyymmdd) and  values (expressed in 0.1 hours)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>code</code></td>
+<td>
+<p>"numeric" part of the ECA&amp;D SOUID, expressed as character, to avoid trouble with leading zeroes</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>depends on either a previous execution of listas() or on a proper execution of listas() to run properly
+</p>
+
+
+<h3>Value</h3>
+
+<p>vector with the list of positions which do not pass this test. If all positions pass the test, returns NULL
+</p>
+
+
+<h3>See Also</h3>
+
+<p>listas()
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#Set a temporal working directory:
+wd &lt;- tempdir(); wd0 &lt;- setwd(wd)
+#Extract the non-blended ECA&amp;D data and a station file from the example data folder
+path2sslist&lt;-system.file("extdata", "ECA_blend_source_ss.txt", package = "INQC")
+sslist&lt;-readr::read_lines_raw(path2sslist)
+readr::write_lines(sslist,'ECA_blend_source_ss.txt')
+path2ssdata&lt;-system.file("extdata", "SS_SOUID132728.txt", package = "INQC")
+#Read the sunshine data
+y&lt;-readecad(input=path2ssdata,missing= -9999)[,3:4]
+options("homefolder"='./'); options("blend"=FALSE)
+listonator(check=TRUE)
+#Call sunafterdark()
+sunafterdark(y,code='132728')
+#Introduce error values in the sunshine data
+y[1:10,2]&lt;-200
+#Call sunafterdark()
+sunafterdark(y,code='132728')
+#Return to user's working directory:
+setwd(wd0)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,123 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>covW</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>One-step M-estimator</h2>
+
+<h3>Description</h3>
+
+<p>Estimates the scatter matrix based on one-step M-estimator using mean and covariance matrix as starting point.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">covW(X, na.action = na.fail, alpha = 1, cf = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>numeric <code class="reqn">n \times p</code> data matrix or dataframe.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+<p>a function which indicates what should happen when the data contain 'NA's. Default is to fail.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>parameter of the one-step M-estimator. By default equals to 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cf</code></td>
+<td>
+<p>consistency factor of the one-step M-estimator. By default equals to 1.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>It is given for <code class="reqn">n \times p</code> matrix <code class="reqn">X</code> by
+</p>
+<p style="text-align: center;"><code class="reqn">COV_{w}(X)=\frac{1}{n} {cf} \sum_{i=1}^n w(D^2(x_i))
+(x_i - \bar{ x})^\top(x_i - \bar{ x}),</code>
+</p>
+
+<p>where <code class="reqn">\bar{x}</code> is the mean vector, <code class="reqn">D^2(x_i)</code> is the squared
+Mahalanobis distance, <code class="reqn">w(d)=d^\alpha</code> is a
+non-negative and continuous weight function and <code class="reqn">{cf}</code> is a consistency factor.
+Note that the consistency factor, which makes the estimator consistent at the multivariate normal distribution, is in most case unknown and therefore the default is to use simply <code>cf = 1</code>.
+</p>
+
+<ul>
+<li>
+<p> If <code class="reqn">w(d)=1</code>, we get the covariance matrix <code>cov()</code> (up to the factor
+<code class="reqn">1/(n-1)</code> instead of <code class="reqn">1/n</code>).
+</p>
+</li>
+<li>
+<p> If <code class="reqn">\alpha=-1</code>, we get the <code>covAxis()</code>.
+</p>
+</li>
+<li>
+<p> If <code class="reqn">\alpha=1</code>, we get the <code>cov4()</code> with <code class="reqn">{cf} = \frac{1}{p+2}</code>.
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>A matrix containing the one-step M-scatter.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Aurore Archimbaud and Klaus Nordhausen
+</p>
+
+
+<h3>References</h3>
+
+<p>Archimbaud, A., Drmac, Z., Nordhausen, K., Radojicic, U. and
+Ruiz-Gazen, A. (2023). SIAM Journal on Mathematics of Data Science (SIMODS),
+Vol.5(1):97–121. <a href="https://doi.org/10.1137/22M1498759">doi:10.1137/22M1498759</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>cov()</code>, <code>cov4()</code>, <code>covAxis()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(iris)
+X &lt;- iris[,1:4]
+
+# Equivalence with covAxis
+covW(X, alpha = -1, cf = ncol(X))
+covAxis(X)
+
+# Equivalence with cov4
+covW(X, alpha = 1, cf = 1/(ncol(X)+2))
+cov4(X)
+
+# covW with alpha = 0.5
+covW(X, alpha = 0.5)
+
+</code></pre>
+
+
+</div>

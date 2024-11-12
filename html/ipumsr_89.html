@@ -1,0 +1,160 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>remove_from_extract</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Remove values from an existing IPUMS extract definition</h2>
+
+<h3>Description</h3>
+
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental"><img src="../help/figures/lifecycle-experimental.svg" alt="[Experimental]"></a>
+</p>
+<p>Remove values for specific fields in an existing <code>ipums_extract</code>
+object. This function is an S3 generic whose behavior will depend on the
+subclass (i.e. collection) of the extract being modified.
+</p>
+
+<ul>
+<li>
+<p> To remove from an <strong>IPUMS Microdata</strong> extract definition, click
+here. This includes:
+</p>
+
+<ul>
+<li>
+<p> IPUMS USA
+</p>
+</li>
+<li>
+<p> IPUMS CPS
+</p>
+</li>
+<li>
+<p> IPUMS International
+</p>
+</li>
+<li>
+<p> IPUMS Time Use (ATUS, AHTUS, MTUS)
+</p>
+</li>
+<li>
+<p> IPUMS Health Surveys (NHIS, MEPS)
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p> To remove from an <strong>IPUMS NHGIS</strong> extract definition, click
+here
+</p>
+</li>
+</ul>
+<p>This function is marked as experimental because it is typically not the best
+option for maintaining reproducible extract definitions and may be retired
+in the future. For reproducibility, users should strive to build extract
+definitions with <code>define_extract_micro()</code> or <code>define_extract_nhgis()</code>.
+</p>
+<p>If you have a complicated extract definition to revise, but do not have
+the original extract definition code that created it, we suggest that you
+save the revised extract as a JSON file with <code>save_extract_as_json()</code>. This
+will create a stable version of the extract definition that
+can be used in the future as needed.
+</p>
+<p>To add new values to an extract, see <code>add_to_extract()</code>.
+</p>
+<p>Learn more about the IPUMS API in <code>vignette("ipums-api")</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">remove_from_extract(extract, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>extract</code></td>
+<td>
+<p>An <code>ipums_extract</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments specifying the extract fields and values to
+remove from the extract definition.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of the same class as <code>extract</code> containing the modified
+extract definition
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>add_to_extract()</code> to add values to an extract definition.
+</p>
+<p><code>define_extract_micro()</code> or <code>define_extract_nhgis()</code> to define an
+extract request manually
+</p>
+<p><code>submit_extract()</code> to submit an extract request for processing.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Microdata extracts
+usa_extract &lt;- define_extract_micro(
+  collection = "usa",
+  description = "USA example",
+  samples = c("us2013a", "us2014a"),
+  variables = list(
+    var_spec("AGE"),
+    var_spec("SEX", case_selections = "2"),
+    var_spec("YEAR")
+  )
+)
+
+# Remove variables from an extract definition
+remove_from_extract(
+  usa_extract,
+  samples = "us2014a",
+  variables = c("AGE", "SEX")
+)
+
+# Remove detailed specifications for an existing variable
+remove_from_extract(
+  usa_extract,
+  variables = var_spec("SEX", case_selections = "2")
+)
+
+# NHGIS extracts
+nhgis_extract &lt;- define_extract_nhgis(
+  datasets = ds_spec(
+    "1990_STF1",
+    data_tables = c("NP1", "NP2", "NP3"),
+    geog_levels = "county"
+  ),
+  time_series_tables = tst_spec("A00", geog_levels = "county")
+)
+
+# Remove an existing dataset or time series table
+remove_from_extract(nhgis_extract, datasets = "1990_STF1")
+
+# Remove detailed specifications from an existing dataset or
+# time series table
+remove_from_extract(
+  nhgis_extract,
+  datasets = ds_spec("1990_STF1", data_tables = "NP1")
+)
+</code></pre>
+
+
+</div>

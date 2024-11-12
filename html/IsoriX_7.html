@@ -1,0 +1,132 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>CalibDataAlien</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulated calibration dataset</h2>
+
+<h3>Description</h3>
+
+<p>This dataset contains simulated hydrogen delta values for corresponding locations
+based on an assumed linear relationship between the animal tissue value and the
+hydrogen delta values in the environment.
+The data can be used as an example to fit a calibration model using the
+function <code>calibfit</code>.
+</p>
+
+
+<h3>Format</h3>
+
+<p>A <em>dataframe</em> with x observations and 6 variables:</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+    </td>
+<td style="text-align: left;">  </td>
+<td style="text-align: left;">  </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+   site_ID </td>
+<td style="text-align: left;"> (<em>factor</em>) </td>
+<td style="text-align: left;"> Identification of the sampling site </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+   long </td>
+<td style="text-align: left;"> (<em>numeric</em>) </td>
+<td style="text-align: left;"> Longitude coordinate (decimal degrees) </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+   lat </td>
+<td style="text-align: left;"> (<em>numeric</em>) </td>
+<td style="text-align: left;"> Latitude coordinate (decimal degrees) </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+   elev </td>
+<td style="text-align: left;"> (<em>numeric</em>) </td>
+<td style="text-align: left;"> Elevation asl (m) </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+   sample_ID </td>
+<td style="text-align: left;"> (<em>factor</em>) </td>
+<td style="text-align: left;"> Identification of the sampled animal </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+   tissue.value </td>
+<td style="text-align: left;"> (<em>numeric</em>) </td>
+<td style="text-align: left;"> Hydrogen delta value of the tissue </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Users who wish to use their own dataset for calibration should create a
+<em>dataframe</em> of similar structure than this one. The columns should possess
+the same names as the ones described above. If the elevation is unknown at the
+sampling sites, elevation information can be extracted from a high resolution elevation
+raster using the function <code>terra::extract</code>. In this dataset, we
+retrieved elevations from the Global Multi-resolution Terrain Elevation Data
+2010.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>calibfit</code> to fit a calibration model
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+head(CalibDataAlien)
+str(CalibDataAlien)
+
+## The examples below will only be run if sufficient time is allowed
+## You can change that by typing e.g. options_IsoriX(example_maxtime = XX)
+## if you want to allow for examples taking up to ca. XX seconds to run
+## (so don't write XX but put a number instead!)
+
+if (getOption_IsoriX("example_maxtime") &gt; 30) {
+  ## We prepare the precipitation data
+  GNIPDataDEagg &lt;- prepsources(data = GNIPDataDE)
+
+  ## We fit the models for Germany
+  GermanFit &lt;- isofit(data = GNIPDataDEagg)
+
+  ## We build the isoscape
+  GermanScape &lt;- isoscape(raster = ElevRasterDE, isofit = GermanFit)
+
+  ## We create a simulated dataset with 50 site and 10 observations per site
+  set.seed(2L)
+  CalibDataAlien &lt;- create_aliens(
+    calib_fn = list(intercept = 3, slope = 0.5, resid_var = 5),
+    isoscape = GermanScape,
+    raster = ElevRasterDE,
+    n_sites = 50,
+    min_n_samples = 10,
+    max_n_samples = 10
+  )
+  plot(sample_value ~ source_value, data = CalibDataAlien)
+  abline(3, 0.5)
+
+  CalibDataAlien$source_value &lt;- NULL
+
+  ## Uncomment the following to store the file as we did
+  # save(CalibDataAlien, file = "CalibDataAlien.rda", compress = "xz")
+}
+
+</code></pre>
+
+
+</div>

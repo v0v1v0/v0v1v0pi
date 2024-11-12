@@ -1,0 +1,90 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>component_eval</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Evaluate component values in predictor expressions</h2>
+
+<h3>Description</h3>
+
+<p>In predictor expressions, <code>name_eval(...)</code> can be used to evaluate
+the effect of a component called "name".
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">component_eval(
+  main,
+  group = NULL,
+  replicate = NULL,
+  weights = NULL,
+  .state = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>main, group, replicate, weights</code></td>
+<td>
+<p>Specification of where to evaluate a component.
+The four inputs are passed on to the joint <code>bru_mapper</code> for the component,
+as
+</p>
+<div class="sourceCode"><pre>list(mapper = list(
+       main = main,
+       group = group,
+       replicate = replicate),
+     scale = weights)
+</pre></div>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.state</code></td>
+<td>
+<p>The internal component state. Normally supplied automatically
+by the internal methods for evaluating inlabru predictor expressions.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A vector of values for a component
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+if (bru_safe_inla()) {
+  mesh &lt;- fmesher::fm_mesh_2d_inla(
+    cbind(0, 0),
+    offset = 2, max.edge = 0.25
+  )
+  spde &lt;- INLA::inla.spde2.pcmatern(mesh,
+    prior.range = c(0.1, 0.01),
+    prior.sigma = c(2, 0.01)
+  )
+  data &lt;- sp::SpatialPointsDataFrame(
+    matrix(runif(10), 5, 2),
+    data = data.frame(z = rnorm(5))
+  )
+  fit &lt;- bru(z ~ -1 + field(coordinates, model = spde),
+    family = "gaussian", data = data
+  )
+  pred &lt;- predict(
+    fit,
+    data = data.frame(x = 0.5, y = 0.5),
+    formula = ~ field_eval(cbind(x, y))
+  )
+}
+
+## End(Not run)
+</code></pre>
+
+
+</div>

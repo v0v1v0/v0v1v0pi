@@ -1,0 +1,173 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>intervalGRaverage</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculates the growth rates for a specified time interval by taking weighted averages of growth rates for times within the interval</h2>
+
+<h3>Description</h3>
+
+<p>Using previously calculated growth rates over time, calculates 
+the Absolute Growth Rates for a specified interval 
+using the weighted averages of AGRs for each time point in the 
+interval (AGR) and the Relative Growth Rates for a specified 
+interval using the weighted geometric means of RGRs for each time 
+point in the interval (RGR).</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">intervalGRaverage(responses, individuals = "Snapshot.ID.Tag", 
+                  which.rates = c("AGR","RGR"), suffices.rates=c("AGR","RGR"), 
+                  start.time, end.time, times.factor = "Days", suffix.interval, 
+                  data, sep=".", na.rm=TRUE)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>responses</code></td>
+<td>
+<p>A <code>character</code> giving the names of the 
+<code>responses</code> for which there are columns 
+in <code>data</code> that contain the growth rates that are to be 
+averaged. The names of the growth rates should have 
+either <code>AGR</code> or <code>RGR</code> appended to the 
+<code>responses</code> names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>individuals</code></td>
+<td>
+<p>A <code>character</code> giving the name(s) of the 
+<code>factor</code>(s) that define the subsets of the <code>data</code> 
+for which each subset corresponds to the <code>responses</code> 
+for an individual.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>which.rates</code></td>
+<td>
+<p>A <code>character</code> giving the growth rates that are 
+to be averaged to obtain growth rates for an interval. 
+It should be a combination <code>"AGR"</code> and <code>"RGR"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>suffices.rates</code></td>
+<td>
+<p>A <code>character</code> giving the suffices to be 
+appended to <code>response</code> to form the names of the columns 
+containing the calculated the growth rates and in which growth 
+rates are to be stored. Their elements will be matched with 
+those of <code>which.rates</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start.time</code></td>
+<td>
+<p>A <code>numeric</code> giving the times,
+in terms of levels of <code>times.factor</code>, that will give a 
+single value for each <code>Snapshot.ID.Tag</code> and that will 
+be taken as the observation at the start of the interval for 
+which the growth rate is to be calculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>end.time</code></td>
+<td>
+<p>A <code>numeric</code> giving the times, 
+in terms of levels of <code>times.factor</code>, that will give a 
+single value for each <code>Snapshot.ID.Tag</code> and that will be 
+taken as the observation at the end of the interval for which 
+the growth rate is to be calculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>times.factor</code></td>
+<td>
+<p>A <code>character</code> giving the name of the column in 
+<code>data</code> containing the factor for times at which the data was 
+collected. Its levels will be used in calculating growth rates and 
+should be numeric values stored as characters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>suffix.interval</code></td>
+<td>
+<p>A <code>character</code> giving the suffix to be 
+appended to <code>response</code>.<code>suffices.rates</code> to form the 
+names of the columns containing the calculated the growth rates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A <code>data.frame</code> containing the columns from which the 
+growth rates are to be calculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep</code></td>
+<td>
+<p>A <code>character</code> giving the separator to use when the 
+levels of <code>individuals</code> are combined. This is needed to avoid 
+using a <code>character</code> that occurs in a factor to delimit 
+levels when the levels of <code>individuals</code> are combined to 
+identify subsets.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.rm</code></td>
+<td>
+<p>A <code>logical</code> indicating whether <code>NA</code> values should be 
+stripped before the calculation of weighted means proceeds.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>AGR</code> for an interval is calculated as the weighted mean of the 
+AGRs for times within the interval. The RGR is calculated as the weighted 
+geometric mean of the RGRs for times within the interval; in fact the exponential is taken of the weighted means of the logs of the RGRs. The weights are 
+obtained from the <code>times.factor</code>. They are taken as the sum of half the time subintervals before and after each time, except for the end points; the end points are taken to be the subintervals at the start and end of the interval.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>data.frame</code> with the growth rates. 
+The name of each column is the concatenation of (i) one of 
+<code>responses</code>, (ii) one of <code>AGR</code>, <code>PGR</code> or <code>RGR</code>,
+or the appropriate element of <code>suffices.rates</code>, and (iii) 
+<code>suffix.interval</code>, the three components being separated by 
+full stops.</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Chris Brien</p>
+
+
+<h3>See Also</h3>
+
+<p><code>intervalGRdiff</code>, <code>intervalWUI</code>, <code>splitValueCalculate</code>, <code>getDates</code>, <code>GrowthRates</code>, <code>splitSplines</code>, <code>splitContGRdiff</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(exampleData)
+longi.dat &lt;- splitSplines(longi.dat, response="Area", x="xDays", 
+                          INDICES = "Snapshot.ID.Tag", 
+                          df = 4, deriv=1, suffices.deriv="AGRdv", RGR="RGRdv")
+Area.smooth.GR &lt;- intervalGRaverage("Area.smooth", which.rates = c("AGR","RGR"), 
+                                    suffices.rates = c("AGRdv","RGRdv"), 
+                                    start.time = 31, end.time = 35, 
+                                    suffix.interval = "31to35",
+                                    data = longi.dat)
+</code></pre>
+
+
+</div>

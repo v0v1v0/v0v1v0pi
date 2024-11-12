@@ -1,0 +1,287 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ib</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Bias correction via iterative bootstrap</h2>
+
+<h3>Description</h3>
+
+<p><code>ib</code> is used to correct the bias of a fitted model <code>object</code>
+with the iterative bootstrap procedure.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ib(object, thetastart = NULL, control = list(...), extra_param = FALSE, ...)
+
+## S4 method for signature 'betareg'
+ib(object, thetastart = NULL, control = list(...), extra_param = FALSE, ...)
+
+## S4 method for signature 'glm'
+ib(object, thetastart = NULL, control = list(...), extra_param = FALSE, ...)
+
+## S4 method for signature 'lm'
+ib(object, thetastart = NULL, control = list(...), extra_param = FALSE, ...)
+
+## S4 method for signature 'lmerMod'
+ib(object, thetastart = NULL, control = list(...), extra_param = FALSE, ...)
+
+## S4 method for signature 'nls'
+ib(object, thetastart = NULL, control = list(...), extra_param = FALSE, ...)
+
+## S4 method for signature 'vglm'
+ib(object, thetastart = NULL, control = list(...), extra_param = FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>an <code>object</code> representing a fitted model (see 'Details').</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thetastart</code></td>
+<td>
+<p>an optional starting value for the iterative procedure.
+If <code>NULL</code> (default), the procedure starts at the estimates in <code>object</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>a <code>list</code> of parameters for controlling the iterative procedure
+(see <code>ibControl</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>extra_param</code></td>
+<td>
+<p>if <code>TRUE</code>, the bias of estimation of extra parameters
+is performed (see 'Details').</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional optional arguments (see 'Details').</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The iterative bootstrap procedure is described in
+Kuk (1995) and further
+studied by Guerrier et al. (2019) and
+Guerrier et al. (2020). The <em>k</em>th iteration of this
+algorithm is
+</p>
+<p style="text-align: center;"><code class="reqn">\hat{\theta}^{k} = \hat{\theta}^{k-1} + \hat{\pi} -
+\frac{1}{H}\sum_{h=1}^H\hat{\pi}_h(\hat{\theta}^{k-1})</code>
+</p>
+
+<p>for <code class="reqn">k=1,2,\ldots</code> and where the sum is over <code class="reqn">h=1,\ldots,H</code>.
+The estimate <code class="reqn">\hat{\pi}</code> is provided by the <code>object</code>.
+The value <code class="reqn">\hat{\pi}_h(\hat{\theta})</code> is a parametric bootstrap
+estimate where the bootstrap sample is generated from <code class="reqn">\hat{\theta}</code>
+and a fixed <code>seed</code> (see <code>ibControl</code>).
+The greater the parameter value <code class="reqn">H</code> generally the better bias correction
+but the more computation it requires (see <code>ibControl</code>).
+If <code>thetastart=NULL</code>, the initial value of the procedure is <code class="reqn">\hat{\theta}^{0}=\hat{\pi}</code>.
+The number of iterations are controlled by <code>maxit</code> parameter of <code>ibControl</code>.
+</p>
+<p>By default, the method correct <code>coefficients</code> only. For
+extra parameters, it depends on the model. These extra parameters may have
+some constraints (e.g. positivity). If <code>constraint=TRUE</code> (see
+<code>ibControl</code>), then a transformation from the constraint space to the
+real is used for the update.
+</p>
+<p>For betareg, <code>extra_param</code> is not available
+as by default mean and precision parameters are corrected.
+Currently the 'identity' link function is not supported for precision
+parameters.
+</p>
+<p>For glm, if <code>extra_param=TRUE</code>: the shape parameter for the
+<code>Gamma</code>, the variance of the residuals in <code>lm</code> or
+the overdispersion parameter of the negative binomial regression in <code>glm.nb</code>,
+are also corrected. Note that the <code>quasi</code> families
+are not supported for the moment as they have no simulation method
+(see <code>simulate</code>). Bias correction for extra parameters
+of the <code>inverse.gaussian</code> is not yet implemented.
+</p>
+<p>For lm, if <code>extra_param=TRUE</code>: the variance of the residuals is
+also corrected. Note that using the <code>ib</code> is not useful as coefficients
+are already unbiased, unless one considers different
+data generating mechanism such as censoring, missing values
+and outliers (see <code>ibControl</code>).
+</p>
+<p>For <code>lmer</code>, by default, only the fixed effects are corrected.
+If <code>extra_param=TRUE</code>: all the random effects
+(variances and correlations) and the variance
+of the residuals are also corrected.
+Note that using the <code>ib</code> is
+certainly not useful with the argument <code>REML=TRUE</code> in
+<code>lmer</code> as the bias of variance components is
+already addressed, unless one considers different
+data generating mechanism such as censoring, missing values
+and outliers (see <code>ibControl</code>).
+</p>
+<p>For nls, if <code>extra_param=TRUE</code>: the variance of the residuals is
+also corrected.
+</p>
+<p>For vglm, <code>extra_param</code> is currently not used.
+Indeed, the philosophy of a vector generalized linear model is to
+potentially model all parameters of a distribution with a linear predictor.
+Hence, what would be considered as an extra parameter in <code>glm</code>
+for instance, may already be captured by the default <code>coefficients</code>.
+However, correcting the bias of a <code>coefficients</code> does not imply
+that the bias of the parameter of the distribution is corrected
+(by <a href="https://en.wikipedia.org/wiki/Jensen's_inequality">Jensen's inequality</a>),
+so we may use this feature in a future version of the package.
+Note that we currently only support distributions
+with a <code>simslot</code> (see <code>simulate.vlm</code>).
+</p>
+
+
+<h3>Value</h3>
+
+<p>A fitted model <code>object</code> of class Ib.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Samuel Orso
+</p>
+
+
+<h3>References</h3>
+
+<p>Guerrier S, Dupuis-Lozeron E, Ma Y, Victoria-Feser M (2019).
+“Simulation-Based Bias Correction Methods for Complex Models.”
+<em>Journal of the American Statistical Association</em>, <b>114</b>(525), 146-157.
+doi: <a href="https://doi.org/10.1080/01621459.2017.1380031">10.1080/01621459.2017.1380031</a>, https://doi.org/10.1080/01621459.2017.1380031.<br><br> Guerrier S, Karemera M, Orso S, Victoria-Feser M, Zhang Y (2020).
+“A General Approach for Simulation-based Bias Correction in High Dimensional Settings.”
+<a href="https://arxiv.org/pdf/2010.13687.pdf">https://arxiv.org/pdf/2010.13687.pdf</a>.
+Version 2: 13 Nov 2020, 2010.13687, <a href="https://arxiv.org/pdf/2010.13687.pdf">https://arxiv.org/pdf/2010.13687.pdf</a>.<br><br> Kuk AYC (1995).
+“Asymptotically Unbiased Estimation in Generalized Linear Models with Random Effects.”
+<em>Journal of the Royal Statistical Society: Series B (Methodological)</em>, <b>57</b>(2), 395-407.
+doi: <a href="https://doi.org/10.1111/j.2517-6161.1995.tb02035.x">10.1111/j.2517-6161.1995.tb02035.x</a>, https://rss.onlinelibrary.wiley.com/doi/pdf/10.1111/j.2517-6161.1995.tb02035.x, <a href="https://rss.onlinelibrary.wiley.com/doi/abs/10.1111/j.2517-6161.1995.tb02035.x">https://rss.onlinelibrary.wiley.com/doi/abs/10.1111/j.2517-6161.1995.tb02035.x</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>betareg</code>
+</p>
+<p><code>glm</code>, <code>glm.nb</code>
+</p>
+<p><code>lm</code>
+</p>
+<p><code>lmer</code>
+</p>
+<p><code>nls</code>
+</p>
+<p><code>vglm</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## beta regression
+library(betareg)
+data("GasolineYield", package = "betareg")
+## currently link.phi = "identity" is not supported
+## fit_beta &lt;- betareg(yield ~ batch + temp, data = GasolineYield)
+fit_beta &lt;- betareg(yield ~ batch + temp, link.phi = "log", data = GasolineYield)
+fit_ib &lt;- ib(fit_beta)
+
+# precision parameter can also depend on covariates
+fit_beta &lt;- betareg(yield ~ batch + temp | temp, data = GasolineYield)
+fit_ib &lt;- ib(fit_beta)
+## poisson regression
+counts &lt;- c(18,17,15,20,10,20,25,13,12)
+outcome &lt;- gl(3,1,9)
+treatment &lt;- gl(3,3)
+pois_fit &lt;- glm(counts ~ outcome + treatment, family = poisson())
+fit_ib &lt;- ib(pois_fit)
+summary(fit_ib)
+## Set H = 1000
+## Not run: 
+fit_ib &lt;- ib(pois_fit, control=list(H=1000))
+summary(fit_ib)
+
+## End(Not run)
+
+## gamma regression
+clotting &lt;- data.frame(
+  u = c(5,10,15,20,30,40,60,80,100),
+  lot1 = c(118,58,42,35,27,25,21,19,18),
+  lot2 = c(69,35,26,21,18,16,13,12,12))
+fit_gamma &lt;- glm(lot2 ~ log(u), data = clotting, family = Gamma(link = "inverse"))
+fit_ib &lt;- ib(fit_gamma)
+## summary(fit_ib)
+## correct for shape parameter and show iterations
+## Not run: 
+fit_ib &lt;- ib(fit_gamma, control=list(verbose=TRUE), extra_param = TRUE)
+summary(fit_ib)
+
+## End(Not run)
+
+## negative binomial regression
+library(MASS)
+fit_nb &lt;- glm.nb(Days ~ Sex/(Age + Eth*Lrn), data = quine)
+fit_ib &lt;- ib(fit_nb)
+## summary(fit_ib)
+## correct for overdispersion with H=100
+## Not run: 
+fit_ib &lt;- ib(fit_nb, control=list(H=100), extra_param = TRUE)
+summary(fit_ib)
+
+## End(Not run)
+
+## linear regression
+fit_lm &lt;- lm(disp ~ cyl + hp + wt, data = mtcars)
+fit_ib &lt;- ib(fit_lm)
+summary(fit_ib)
+## correct for variance of residuals
+fit_ib &lt;- ib(fit_lm, extra_param = TRUE)
+summary(fit_ib)
+
+## linear mixed-effects regression
+library(lme4)
+fit_lmm &lt;- lmer(Reaction ~ Days + (Days | Subject), data = sleepstudy, REML = FALSE)
+fit_ib &lt;- ib(fit_lmm)
+summary(fit_ib)
+## correct for variances and correlation
+## Not run: 
+fit_ib &lt;- ib(fit_lmm, extra_param = TRUE)
+summary(fit_ib)
+
+## End(Not run)
+
+## nonlinear regression
+DNase1 &lt;- subset(DNase, Run == 1)
+fit_nls &lt;- nls(density ~ SSlogis(log(conc), Asym, xmid, scal), data = DNase1)
+fit_ib &lt;- ib(fit_nls)
+summary(fit_ib)
+
+## student regression
+library(VGAM)
+tdata &lt;- data.frame(x = runif(nn &lt;- 1000))
+tdata &lt;- transform(tdata,
+                   y = rt(nn, df = exp(exp(0.5 - x))))
+fit_vglm &lt;- vglm(y ~ x, studentt3, data = tdata)
+fit_ib &lt;- ib(fit_vglm)
+summary(fit_ib)
+</code></pre>
+
+
+</div>

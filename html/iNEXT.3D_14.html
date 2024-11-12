@@ -1,0 +1,278 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ObsAsy3D</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Asymptotic diversity and observed diversity of order q</h2>
+
+<h3>Description</h3>
+
+<p><code>ObsAsy3D</code> computes observed and asymptotic diversity of order q between 0 and 2 (in increments of 0.2) for 3D diversity; these 3D values with different order q can be used to depict a q-profile in the <code>ggObsAsy3D</code> function.<br><br> 
+It also computes observed and asymptotic PD for various reference times by specifying the argument <code>PDreftime</code>; these PD values with different reference times can be used to depict a time-profile in the <code>ggObsAsy3D</code> function.<br><br>
+It also computes observed and asymptotic FD for various threshold tau levels by specifying the argument <code>FDtau</code>; these FD values with different threshold levels can be used to depict a tau-profile in the <code>ggObsAsy3D</code> function.<br><br>
+For each dimension, by default, both the observed and asymptotic diversity estimates will be computed.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ObsAsy3D(
+  data,
+  diversity = "TD",
+  q = seq(0, 2, 0.2),
+  datatype = "abundance",
+  nboot = 50,
+  conf = 0.95,
+  nT = NULL,
+  method = c("Asymptotic", "Observed"),
+  PDtree,
+  PDreftime = NULL,
+  PDtype = "meanPD",
+  FDdistM,
+  FDtype = "AUC",
+  FDtau = NULL,
+  FDcut_number = 50
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>(a) For <code>datatype = "abundance"</code>, data can be input as a vector of species abundances (for a single assemblage), matrix/data.frame (species by assemblages), or a list of species abundance vectors. <br>
+(b) For <code>datatype = "incidence_raw"</code>, data can be input as a list of matrices/data.frames (species by sampling units); data can also be input as a single matrix/data.frame by merging all sampling units across assemblages based on species identity; in this case, the number of sampling units (<code>nT</code>, see below) must be specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diversity</code></td>
+<td>
+<p>selection of diversity type: <code>'TD'</code> = Taxonomic diversity, <code>'PD'</code> = Phylogenetic diversity, and <code>'FD'</code> = Functional diversity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>a numerical vector specifying the diversity orders. Default is <code>seq(0, 2, by = 0.2)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>datatype</code></td>
+<td>
+<p>data type of input data: individual-based abundance data (<code>datatype = "abundance"</code>) or species by sampling-units incidence/occurrence matrix (<code>datatype = "incidence_raw"</code>) with all entries being 0 (non-detection) or 1 (detection).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nboot</code></td>
+<td>
+<p>a positive integer specifying the number of bootstrap replications when assessing sampling uncertainty and constructing confidence intervals. Enter 0 to skip the bootstrap procedures. Default is 50.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf</code></td>
+<td>
+<p>a positive number &lt; 1 specifying the level of confidence interval. Default is 0.95.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nT</code></td>
+<td>
+<p>(required only when <code>datatype = "incidence_raw"</code> and input data in a single matrix/data.frame) a vector of positive integers specifying the number of sampling units in each assemblage. If assemblage names are not specified (i.e., <code>names(nT) = NULL</code>), then assemblages are automatically named as "assemblage1", "assemblage2",..., etc.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>Select <code>'Asymptotic'</code> or <code>'Observed'</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PDtree</code></td>
+<td>
+<p>(required argument for <code>diversity = "PD"</code>), a phylogenetic tree in Newick format for all observed species in the pooled assemblage.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PDreftime</code></td>
+<td>
+<p>(argument only for <code>diversity = "PD"</code>), a vector of numerical values specifying reference times for PD. Default is <code>NULL</code> (i.e., the age of the root of <code>PDtree</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PDtype</code></td>
+<td>
+<p>(argument only for <code>diversity = "PD"</code>), select PD type: <code>PDtype = "PD"</code> (effective total branch length) or <code>PDtype = "meanPD"</code> (effective number of equally divergent lineages). Default is <code>"meanPD"</code>, where <code>meanPD = PD/tree depth</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FDdistM</code></td>
+<td>
+<p>(required argument for <code>diversity = "FD"</code>), a species pairwise distance matrix for all species in the pooled assemblage.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FDtype</code></td>
+<td>
+<p>(argument only for <code>diversity = "FD"</code>), select FD type: <code>FDtype = "tau_values"</code> for FD under specified threshold values, or <code>FDtype = "AUC"</code> (area under the curve of tau-profile) for an overall FD which integrates all threshold values between zero and one. Default is <code>"AUC"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FDtau</code></td>
+<td>
+<p>(argument only for <code>diversity = "FD"</code> and <code>FDtype = "tau_values"</code>), a numerical vector between 0 and 1 specifying tau values (threshold levels). If <code>NULL</code> (default), then threshold is set to be the mean distance between any two individuals randomly selected from the pooled assemblage (i.e., quadratic entropy).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FDcut_number</code></td>
+<td>
+<p>(argument only for <code>diversity = "FD"</code> and <code>FDtype = "AUC"</code>), a numeric number to cut [0, 1] interval into equal-spaced sub-intervals to obtain the AUC value by integrating the tau-profile. Equivalently, the number of tau values that will be considered to compute the integrated AUC value. Default is <code>FDcut_number = 50</code>. A larger value can be set to obtain more accurate AUC value.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a data frame including the following information/statistics: 
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Assemblage</code></td>
+<td>
+<p>the name of assemblage.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Order.q</code></td>
+<td>
+<p>the diversity order of q.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qTD, qPD, qFD</code></td>
+<td>
+<p>the estimated asymptotic diversity or observed diversity of order q.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s.e.</code></td>
+<td>
+<p>standard error of diversity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qTD.LCL, qPD.LCL, qFD.LCL and qTD.UCL, qPD.UCL, qFD.UCL</code></td>
+<td>
+<p>the bootstrap lower and upper confidence limits for the diversity of order q at the specified level (with a default value of 0.95).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Method</code></td>
+<td>
+<p><code>"Asymptotic"</code> means asymptotic diversity and <code>"Observed"</code> means observed diversity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Reftime</code></td>
+<td>
+<p>the reference times for PD.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Type</code></td>
+<td>
+<p><code>"PD"</code> (effective total branch length) or <code>"meanPD"</code> (effective number of equally divergent lineages) for PD.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Tau</code></td>
+<td>
+<p>the threshold of functional distinctiveness between any two species for FD (under <code>FDtype = tau_values</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Compute the observed and asymptotic taxonomic diversity for abundance data
+# with order q between 0 and 2 (in increments of 0.2 by default)
+data(Brazil_rainforest_abun_data)
+output_ObsAsy_TD_abun &lt;- ObsAsy3D(Brazil_rainforest_abun_data, diversity = 'TD', 
+                                  datatype = "abundance")
+output_ObsAsy_TD_abun
+
+
+# Compute the observed and asymptotic phylogenetic diversity for abundance data
+# with order q = 0, 1, 2 under reference times from 0.01 to 400 (tree height).
+data(Brazil_rainforest_abun_data)
+data(Brazil_rainforest_phylo_tree)
+data &lt;- Brazil_rainforest_abun_data
+tree &lt;- Brazil_rainforest_phylo_tree
+output_ObsAsy_PD_abun &lt;- ObsAsy3D(data, diversity = 'PD', q = c(0, 1, 2), 
+                                  PDreftime = seq(0.01, 400, length.out = 20),
+                                  datatype = "abundance", nboot = 20, PDtree = tree)
+output_ObsAsy_PD_abun
+
+
+# Compute the observed and asymptotic functional diversity for abundance data
+# with order q = 0, 1, 2 under tau values from 0 to 1.
+data(Brazil_rainforest_abun_data)
+data(Brazil_rainforest_distance_matrix)
+data &lt;- Brazil_rainforest_abun_data
+distM &lt;- Brazil_rainforest_distance_matrix
+output_ObsAsy_FD_abun_tau &lt;- ObsAsy3D(data, diversity = 'FD', q = c(0, 1, 2), 
+                                      datatype = "abundance", nboot = 10, FDdistM = distM, 
+                                      FDtype = 'tau_values', FDtau = seq(0, 1, 0.05))
+output_ObsAsy_FD_abun_tau
+
+
+# Compute the observed and asymptotic functional diversity for abundance data
+# with order q between 0 and 2 (in increments of 0.5).
+data(Brazil_rainforest_abun_data)
+data(Brazil_rainforest_distance_matrix)
+data &lt;- Brazil_rainforest_abun_data
+distM &lt;- Brazil_rainforest_distance_matrix
+output_ObsAsy_FD_abun &lt;- ObsAsy3D(data, diversity = 'FD', q = seq(0, 2, 0.5), 
+                                  datatype = "abundance", nboot = 10, 
+                                  FDdistM = distM, FDtype = 'AUC')
+output_ObsAsy_FD_abun
+
+
+# Compute the observed and asymptotic taxonomic diversity for incidence data
+# with order q between 0 and 2 (in increments of 0.2 by default).
+data(Fish_incidence_data)
+output_ObsAsy_TD_inci &lt;- ObsAsy3D(Fish_incidence_data, diversity = 'TD', 
+                                  datatype = "incidence_raw")
+output_ObsAsy_TD_inci
+
+
+# Compute the observed and asymptotic phylogenetic diversity for incidence data
+# with order q between 0 and 2 (in increments of 0.2 by default), 
+# for the default reference time = 0.977 (the tree depth).
+data(Fish_incidence_data)
+data(Fish_phylo_tree)
+data &lt;- Fish_incidence_data
+tree &lt;- Fish_phylo_tree
+output_ObsAsy_PD_inci &lt;- ObsAsy3D(data, diversity = 'PD', q = seq(0, 2, 0.2), 
+                                  datatype = "incidence_raw", nboot = 20, PDtree = tree, 
+                                  PDreftime = NULL)
+output_ObsAsy_PD_inci
+
+
+# Compute the observed and asymptotic functional diversity for incidence data
+# with order q between 0 and 2 (in increments of 0.2 by default).
+data(Fish_incidence_data)
+data(Fish_distance_matrix)
+data &lt;- Fish_incidence_data
+distM &lt;- Fish_distance_matrix
+output_ObsAsy_FD_inci &lt;- ObsAsy3D(data, diversity = 'FD', datatype = "incidence_raw", 
+                                  nboot = 20, FDdistM = distM, FDtype = 'AUC')
+output_ObsAsy_FD_inci
+
+
+
+</code></pre>
+
+
+</div>

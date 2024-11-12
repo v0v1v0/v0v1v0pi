@@ -1,0 +1,146 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>LIML</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Limited Information Maximum Likelihood Ratio (LIML) Estimator</h2>
+
+<h3>Description</h3>
+
+<p><code>LIML</code> computes the LIML estimate for the <code>ivmodel</code> object.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">LIML(ivmodel,
+     beta0 = 0, alpha = 0.05,
+     manyweakSE = FALSE, heteroSE = FALSE,clusterID = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ivmodel</code></td>
+<td>
+<p><code>ivmodel</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta0</code></td>
+<td>
+<p>Null value <code class="reqn">\beta_0</code> for testing null hypothesis <code class="reqn">H_0: \beta = \beta_0</code> in <code>ivmodel</code>. Default is 0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>The significance level for hypothesis testing. Default is
+0.05.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>manyweakSE</code></td>
+<td>
+<p>Should many weak instrument (and
+heteroscedastic-robust) asymptotics in Hansen, Hausman and Newey
+(2008) be used to compute standard errors?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>heteroSE</code></td>
+<td>
+<p>Should heteroscedastic-robust standard errors be used? Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clusterID</code></td>
+<td>
+<p>If cluster-robust standard errors are desired, provide a vector of length that's identical to the sample size. For example, if n = 6 and clusterID = c(1,1,1,2,2,2), there would be two clusters where the first cluster is formed by the first three observations and the second cluster is formed by the last three observations. clusterID can be numeric, character, or factor.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>LIML</code> computes the LIML estimate for the instrumental variables model in <code>ivmodel</code>, specifically for the parameter <code class="reqn">beta</code>. The computation uses <code>KClass</code> with the value of <code class="reqn">k = k_{LIML}</code>, which is the smallest root of the equation
+</p>
+<p style="text-align: center;"><code class="reqn">det(L^T L - k L^T R_Z L) = 0</code>
+</p>
+
+<p>where <code class="reqn">L</code> is a matrix of two columns, the first column consisting of the outcome vector, <code class="reqn">Y</code>, and the second column consisting of the endogenous variable, <code class="reqn">D</code>, and <code class="reqn">R_Z = I - Z (Z^T Z)^{-1} Z^T</code> with <code class="reqn">Z</code> being the matrix of instruments. <code>LIML</code> generates a point estimate, a standard error associated with the point estimate, a test statistic and a p value under the null hypothesis <code class="reqn">H_0: \beta = \beta_0</code> in <code>ivmodel</code> along with a <code class="reqn">1-\alpha</code> confidence interval.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>LIML</code> returns a list containing the following components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>The k value for LIML.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>point.est</code></td>
+<td>
+<p>Point estimate of <code class="reqn">\beta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>std.err</code></td>
+<td>
+<p>Standard error of the estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test.stat</code></td>
+<td>
+<p>The value of the test statistic for testing the null hypothesis <code class="reqn">H_0: \beta = \beta_0</code> in <code>ivmodel</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.value</code></td>
+<td>
+<p>The p value of the test under the null hypothesis <code class="reqn">H_0: \beta = \beta_0</code> in <code>ivmodel</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci</code></td>
+<td>
+<p>A matrix of one row by two columns specifying the confidence interval associated with the Fuller estimator.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Yang Jiang, Hyunseung Kang, Dylan Small</p>
+
+
+<h3>See Also</h3>
+
+<p>See also <code>ivmodel</code> for details on the instrumental variables model. See also <code>KClass</code> for more information about the k-Class estimator.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(card.data)
+Y=card.data[,"lwage"]
+D=card.data[,"educ"]
+Z=card.data[,c("nearc4","nearc2")]
+Xname=c("exper", "expersq", "black", "south", "smsa", "reg661",
+        "reg662", "reg663", "reg664", "reg665", "reg666", "reg667",
+		"reg668", "smsa66")
+X=card.data[,Xname]
+card.model2IV = ivmodel(Y=Y,D=D,Z=Z,X=X)
+LIML(card.model2IV,alpha=0.01)
+</code></pre>
+
+
+</div>

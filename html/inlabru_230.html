@@ -1,0 +1,203 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>generate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generate samples from fitted bru models</h2>
+
+<h3>Description</h3>
+
+<p>Generic function for sampling for fitted models. The function invokes
+particular methods which depend on the class of the first argument.
+</p>
+<p>Takes a fitted <code>bru</code> object produced by the function <code>bru()</code> and produces
+samples given a new set of values for the model covariates or the original
+values used for the model fit. The samples can be based on any R expression
+that is valid given these values/covariates and the joint
+posterior of the estimated random effects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">generate(object, ...)
+
+## S3 method for class 'bru'
+generate(
+  object,
+  newdata = NULL,
+  formula = NULL,
+  n.samples = 100,
+  seed = 0L,
+  num.threads = NULL,
+  include = NULL,
+  exclude = NULL,
+  used = NULL,
+  ...,
+  data = deprecated()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>A <code>bru</code> object obtained by calling <code>bru()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional, unused arguments.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p>A data.frame or SpatialPointsDataFrame of covariates needed
+for sampling.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>A formula where the right hand side defines an R expression
+to evaluate for each generated sample. If <code>NULL</code>, the latent and
+hyperparameter states are returned as named list elements.
+See Details for more information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.samples</code></td>
+<td>
+<p>Integer setting the number of samples to draw in order to
+calculate the posterior statistics.
+The default, 100, is rather low but provides a quick approximate result.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>Random number generator seed passed on to
+<code>INLA::inla.posterior.sample</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.threads</code></td>
+<td>
+<p>Specification of desired number of threads for parallel
+computations. Default NULL, leaves it up to INLA.
+When seed != 0, overridden to "1:1"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include</code></td>
+<td>
+<p>Character vector of component labels that are needed by the
+predictor expression; Default: NULL (include all components that are not
+explicitly excluded) if <code>newdata</code> is provided, otherwise <code>character(0)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exclude</code></td>
+<td>
+<p>Character vector of component labels that are not used by the
+predictor expression. The exclusion list is applied to the list
+as determined by the <code>include</code> parameter; Default: NULL (do not remove
+any components from the inclusion list)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>used</code></td>
+<td>
+<p>Either <code>NULL</code> or a <code>bru_used()</code> object, overriding <code>include</code> and
+<code>exclude</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Deprecated. Use <code>newdata</code> instead.
+sampling.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>In addition to the component names (that give the effect of each component
+evaluated for the input data), the suffix <code style="white-space: pre;">⁠_latent⁠</code> variable name can be used
+to directly access the latent state for a component, and the suffix function
+<code style="white-space: pre;">⁠_eval⁠</code> can be used to evaluate a component at other input values than the
+expressions defined in the component definition itself, e.g.
+<code>field_eval(cbind(x, y))</code> for a component that was defined with
+<code>field(coordinates, ...)</code> (see also <code>component_eval()</code>).
+</p>
+<p>For "iid" models with <code>mapper = bru_mapper_index(n)</code>, <code>rnorm()</code> is used to
+generate new realisations for indices greater than <code>n</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The form of the value returned by <code>generate()</code> depends on the data
+class and prediction formula. Normally, a data.frame is returned, or a list
+of data.frames (if the prediction formula generates a list)
+</p>
+<p>List of generated samples
+</p>
+
+
+<h3>See Also</h3>
+
+<p>predict.bru
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+if (bru_safe_inla(multicore = FALSE) &amp;&amp;
+    require("sn", quietly = TRUE)) {
+
+  # Generate data for a simple linear model
+
+  input.df &lt;- data.frame(x = cos(1:10))
+  input.df &lt;- within(input.df, y &lt;- 5 + 2 * cos(1:10) + rnorm(10, mean = 0, sd = 0.1))
+
+  # Fit the model
+
+  fit &lt;- bru(y ~ xeff(main = x, model = "linear"),
+    family = "gaussian", data = input.df
+  )
+  summary(fit)
+
+  # Generate samples for some predefined x
+
+  df &lt;- data.frame(x = seq(-4, 4, by = 0.1))
+  smp &lt;- generate(fit, df, ~ xeff + Intercept, n.samples = 10)
+
+  # Plot the resulting realizations
+
+  plot(df$x, smp[, 1], type = "l")
+  for (k in 2:ncol(smp)) points(df$x, smp[, k], type = "l")
+
+  # We can also draw samples form the joint posterior
+
+  df &lt;- data.frame(x = 1)
+  smp &lt;- generate(fit, df, ~ data.frame(xeff, Intercept), n.samples = 10)
+  smp[[1]]
+
+  # ... and plot them
+  if (require(ggplot2, quietly = TRUE)) {
+    plot(do.call(rbind, smp))
+  }
+}
+
+</code></pre>
+
+
+</div>

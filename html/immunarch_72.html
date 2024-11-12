@@ -1,0 +1,113 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pubRep</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create a repertoire of public clonotypes</h2>
+
+<h3>Description</h3>
+
+<p>Create a repertoire of public clonotypes
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pubRep(
+  .data,
+  .col = "aa+v",
+  .quant = c("count", "prop"),
+  .coding = TRUE,
+  .min.samples = 1,
+  .max.samples = NA,
+  .verbose = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>.data</code></td>
+<td>
+<p>The data to be processed. Can be data.frame,
+data.table, or a list of these objects.
+</p>
+<p>Every object must have columns in the immunarch compatible format.
+immunarch_data_format
+</p>
+<p>Competent users may provide advanced data representations:
+DBI database connections, Apache Spark DataFrame from copy_to or a list
+of these objects. They are supported with the same limitations as basic objects.
+</p>
+<p>Note: each connection must represent a separate repertoire.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.col</code></td>
+<td>
+<p>A string that specifies the column(s) to be processed. Outputs one of the
+following strings, separated by the plus sign: "nt" for nucleotide sequences,
+"aa" for amino acid sequences, "v" for V gene segments, "j" for J gene segments. E.g.,
+pass "aa+v" to compute overlaps on CDR3 amino acid sequences paired with V gene segments, i.e.,
+in this case a unique clonotype is a pair of CDR3 amino acid and V gene segment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.quant</code></td>
+<td>
+<p>A string that specifies the column to be processed. Set "count" to see
+public clonotype sharing with the number of clones, set "prop" to see proportions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.coding</code></td>
+<td>
+<p>Logical. If TRUE then preprocesses the data to filter out non-coding sequences.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.min.samples</code></td>
+<td>
+<p>Integer. A minimal number of samples a clonotype must have to be included
+in the public repertoire table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.max.samples</code></td>
+<td>
+<p>Integer. A maxminal number of samples a clonotype must have to be included
+in the public repertoire table. Set NA (by default) to have the maximal amount of samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.verbose</code></td>
+<td>
+<p>Logical. If TRUE then outputs the progress.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Data table with columns for:
+</p>
+<p>- Clonotypes (e.g., CDR3 sequence, or two columns for CDR3 sequence and V gene)
+</p>
+<p>- Incidence of clonotypes
+</p>
+<p>- Per-sample proportions or counts
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Subset the data to make the example faster to run
+immdata$data &lt;- lapply(immdata$data, head, 2000)
+pr &lt;- pubRep(immdata$data, .verbose = FALSE)
+vis(pr, "clonotypes", 1, 2)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,221 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bNTI.big.cm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Beta nearest taxon index (betaNTI) from big data and under multiple metacommunities
+</h2>
+
+<h3>Description</h3>
+
+<p>To calculate pairwise beta nearest taxon index (betaNTI) by randomizing in the whole species pool or within each group. Package bigmemory (Kane et al 2013) is used to deal with large datasets. Besides, this function can deal with local communities under different metacommunities (regional pools).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">bNTI.big.cm(comm, meta.group = NULL, meta.spool = NULL,
+            pd.desc = "pd.desc", pd.spname, pd.wd,
+            spname.check = TRUE, nworker = 4,
+            memo.size.GB = 50, weighted = TRUE,
+            exclude.consp = FALSE, rand = 1000,
+            output.dtail = FALSE, RC = FALSE, trace = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>comm</code></td>
+<td>
+<p>matrix or data.frame, community data, each row is a sample or site, each colname is a species or OTU or gene, thus rownames should be sample IDs, colnames should be taxa IDs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meta.group</code></td>
+<td>
+<p>matrix or data.frame, a one-column (n x 1) matrix indicating which metacommunity each sample belongs to. rownames are sample IDs. first column is metacommunity IDs. Such that different samples can belong to different metacommunities. If input a n x m matrix, only the first column is used. NULL means all samples belong to the same metacommunity. Default is NULL, means all samples are under the same metacommunity (the same regional species pool).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meta.spool</code></td>
+<td>
+<p>a list object, each element is a character vector listing all taxa IDs in a metacommunity. The names of the elements indicate metacommunity names, which should be the same as the metacommunity names in meta.group. Default is NULL, means to use the observed taxa in comm across samples within the same metacommunity that is defined by meta.group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pd.desc</code></td>
+<td>
+<p>the name of the file to hold the backingfile description of the phylogenetic distance matrix, it is usually "pd.desc" if using default setting in pdist.big function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pd.spname</code></td>
+<td>
+<p>character vector, taxa id in the same rank as the big matrix of phylogenetic distances.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pd.wd</code></td>
+<td>
+<p>folder path, where the bigmemmory file of the phylogenetic distance matrix are saved.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spname.check</code></td>
+<td>
+<p>logic, whether to check the OTU ids (species names) in community matrix and phylogenetic distance matrix are the same.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nworker</code></td>
+<td>
+<p>for parallel computing. Either a character vector of host names on which to run the worker copies of R, or a positive integer (in which case that number of copies is run on localhost). default is 4, means 4 threads will be run.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>memo.size.GB</code></td>
+<td>
+<p>numeric, to set the memory size as you need, so that calculation of large tree will not be limited by physical memory. unit is Gb. default is 50Gb.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weighted</code></td>
+<td>
+<p>Logic, consider abundances or not (just presence/absence). default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exclude.consp</code></td>
+<td>
+<p>Logic, should conspecific taxa in different communities be exclude from MNTD calculations? default is FALSE. The same as in the function bmntd.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rand</code></td>
+<td>
+<p>integer, randomization times. default is 1000.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output.dtail</code></td>
+<td>
+<p>logic, if TRUE, the betaNTI, RC value, observed betaMNTD, all null betaMNTD values will all be output, if FALSE, only output betaNTI or RC.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RC</code></td>
+<td>
+<p>logic, whether to use modified RC merics to evaluate significance of betaMNTD insteal of betaNTI (standardized effect size).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trace</code></td>
+<td>
+<p>logic, whether to show the progress when the code is running.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function is particularly designed for samples from different metacommunities. The null model "taxa shuffle" will be done under different metacommunities, separately (and independently). All other details are the same as the function bNTI.big.
+</p>
+
+
+<h3>Value</h3>
+
+<p>If output.detail=FALSE (default), a matrix of betaNTI values (if RC=FALSE) or RC values (if RC=TRUE) is returned. If output.detail=TRUE, a list is returned.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>bNTI</code></td>
+<td>
+<p>a matrix of pairwise betaNTI values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RC.bMNTD</code></td>
+<td>
+<p>a matrix of RC values based on null model test of betaMNTD. Ouput when RC=TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bMNTD</code></td>
+<td>
+<p>observed betaMNTD values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bMNTD.rand</code></td>
+<td>
+<p>a matrix of all null results.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Version 1: 2021.8.2
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Daliang Ning
+</p>
+
+
+<h3>References</h3>
+
+<p>Webb, C.O., Ackerly, D.D. &amp; Kembel, S.W. (2008). Phylocom: software for the analysis of phylogenetic community structure and trait evolution. Bioinformatics, 24, 2098-2100.
+</p>
+<p>Kembel, S.W. (2009). Disentangling niche and neutral influences on community assembly: assessing the performance of community phylogenetic structure tests. Ecol Lett, 12, 949-960.
+</p>
+<p>Stegen, J.C., Lin, X., Konopka, A.E. &amp; Fredrickson, J.K. (2012). Stochastic and deterministic assembly processes in subsurface microbial communities. Isme Journal, 6, 1653-1664.
+</p>
+<p>Chase, J.M., Kraft, N.J.B., Smith, K.G., Vellend, M. &amp; Inouye, B.D. (2011). Using null models to disentangle variation in community dissimilarity from variation in alpha-diversity. Ecosphere, 2, 1-11.
+</p>
+<p>Kane, M.J., Emerson, J., Weston, S. (2013). Scalable Strategies for Computing with Massive Data. Journal of Statistical Software, 55(14), 1-19. URL http://www.jstatsoft.org/v55/i14/.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>bNTI.big</code>, <code>qpen.cm</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("example.data")
+comm=example.data$comm
+tree=example.data$tree
+
+# In this example, 10 samples from one metacommunity,
+# the other 10 samples from another metacommunity.
+meta.group=data.frame(meta.com=c(rep("meta1",10),rep("meta2",10)))
+rownames(meta.group)=rownames(comm)
+
+# since pdist.big need to save output to a certain folder,
+# the following code is set as 'not test'.
+# but you may test the code on your computer after change the path for 'save.wd'.
+
+wd0=getwd()
+save.wd=paste0(tempdir(),"/pdbig.bNTI.big.cm")
+# you may change save.wd to the folder you want to save the pd.big output.
+nworker=2 # parallel computing thread number
+pd.big=pdist.big(tree = tree, wd=save.wd, nworker = nworker)
+rand.time=20 # usually use 1000 for real data.
+bNTI=bNTI.big.cm(comm=comm, meta.group=meta.group,pd.desc=pd.big$pd.file,
+                pd.spname=pd.big$tip.label,pd.wd=pd.big$pd.wd,
+                spname.check=TRUE, nworker=nworker, memo.size.GB=50,
+                weighted=TRUE, exclude.consp=FALSE,rand=rand.time,
+                output.dtail=FALSE, RC=FALSE, trace=TRUE)
+setwd(wd0)
+
+</code></pre>
+
+
+</div>

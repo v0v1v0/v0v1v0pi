@@ -1,0 +1,142 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>isniglmmbin</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Function for ISNI computation when the longitudinal/clustered binary outcome follows a GLMM.</h2>
+
+<h3>Description</h3>
+
+<p>Calculate the ISNI when the regression outcome is subject to missingness and follows generalized linear mixed-effects models (GLMMs) for binary outcomes.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">isniglmmbin(formula, data, random, id, weights, subset, predprobobs,
+  misni = FALSE, nAGQ = 10, method = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>an object of class "Formula": a symbolic description of the models to be fitted for the outcome and missingness status variable.
+The details of model specification are given under "Details".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>the name of data frame containing all the variables in the model and all the observations including those intended to be collected
+but became missing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random</code></td>
+<td>
+<p>an object of class "formula": an one-sided linear formula description of the random-effects part of the model to be fitted
+for the outcome</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>the name of the level-2 clustering variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>frequency weights to be assigned to each <code>id</code>. when supplied, indicates differential weights are used; otherwise each <code>id</code> is weighted equally.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+<p>an optional vector specifying a subset of observations to be used in the fitting process for the outcome model and the missingness mechanism model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predprobobs</code></td>
+<td>
+<p>Null if using buil-in multinomial transitional logistic model to obtain predicted probabilities of being observed;
+otherwise user supply the name of the variable in <code>data</code> that gives these probabilities for all the observations in the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>misni</code></td>
+<td>
+<p>FALSE if using the default approach to computing ISNI with a scalar nonignorability parameter;
+TRUE when computing ISNI with multiple nonignorability parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nAGQ</code></td>
+<td>
+<p>integer scalar - the number of points per axis for evaluating the adaptive Gauss-Hermite approximation to the log-likelihood for
+obtaining MAR estimates using the R function glmer().
+Defaults to 10, corresponding to the 10-points Gaussian quarature. A value of 1 corresponds to Laplace approximation. Values greater than 1 produce
+greater accuracy in the  evaluation of the log-likelihood at the expense of speed.  A value of zero
+uses a faster but less exact form of parameter estimation for GLMMs by optimizing the random effects and the fixed-effects
+coefficients in the penalized iteratively reweighted least squares step. (See documentation for glmer() for Details.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>Indicate the method to obtain the MAR estimates:
+1: GLMER(); 2:  OPTIM()</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The ISNI analysis is based on a joint selection model and requires specifying two model equations: the outcome model and the missingness mechanism model.
+At a minimum, the user should supply a single-equation in the typical form:  <code>response</code> ~ <code>Xterms</code> where <code>response</code> is the (numeric or factor) vector for the binnary outcome of interest and <code>Xterms</code>
+is a series of terms, separated by + operators, which specify a linear predictor for response. With the signle-equation specification, the <code>isniglmm</code> function
+will by default use the utility function <code>definemissingstatus</code> provided in the package to generate the
+missingness status variables at the current and prior visits and then use <code>Xterms</code> as the predictors for fitting a first-order transitional missing data model.
+It is important to sort within-<code>id</code> observations  by time so that the missingness status variables can be defined correctly in this default setting.  The <code>isniglmmbin()</code> then computes the MAR estimates and conducts ISNI computation
+to evaluate the rate of change of model estimates in the neighborhood of the MAR model where the missingness probability is allowed to depend on the unobserved value
+of <code>response</code>,   even after  conditioning on the other  missingness predictors.
+</p>
+<p>The above single-equation formula specification uses the same set of predictors for the outcome model and the missingness mechanism model for computing ISNI.
+To use different sets of predictors, one can explicitly specifiy a two-equation formula as: <code>response</code> | <code>miss + missprior</code> ~ <code>Xterms</code> |  <code>Sterms</code>,
+which specifies the formula  for the outcome model as <code>response</code> ~ <code>Xterms</code> and that for the missingness mechanism model as <code>miss | missprior</code> ~ <code>Sterms</code>,
+where <code>Xterms</code> and <code>Sterms</code> can be different, <code>miss</code> and <code>missprior</code> are the variable names in <code>data</code> denoting the missingness status at the
+current and prior visits, respectively.
+</p>
+<p>For <code>isniglmm</code>, <code>response</code> ~ <code>Xterms</code> specfied the fixed-effect part of the linear mixed-effects model for the outcome. The random-effect part of the model is
+specified as a one-sided formula via the argument <code>random</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Xie H. A Local Sensitivity Analysis Approach to Longitudinal Non-Gaussian Data with Non-Ignorable Dropout. Statist Med. 2008;27:3155-3177. <br>
+Xie H. Analyzing Longitudinal Clinical Trial Data with Nonignorable Missingness and Unknown Missingness Reasons. Comput Stat Data Anal. 2012;56:1287-1300. <br>
+Xie H, Qian Y. Measuring the Impact of Nonignorability in Panel Data with Non-Monotone Nonresponse. Journal of Applied Econometrics. 2012;27:129-159. <br></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(skquit)
+
+formula=quit~time
+## formula=quit~time + helmert1:as.factor(time) +helmert2:as.factor(time)+ helmert3:as.factor(time)
+random=~1
+
+## Uncomment the following two lines of codes to run isniglmmbin() and report result with summary()
+##result=isniglmmbin(formula, skquit, random, id,misni=FALSE,method=1)
+##summary(result)
+
+</code></pre>
+
+
+</div>

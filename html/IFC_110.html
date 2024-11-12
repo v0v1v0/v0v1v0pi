@@ -1,0 +1,192 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ExportToReport</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Graphical and Statistic Report Generation</h2>
+
+<h3>Description</h3>
+
+<p>Generates report from 'IFC_data' object.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ExportToReport(
+  obj,
+  selection,
+  write_to,
+  overwrite = FALSE,
+  onepage = TRUE,
+  color_mode = c("white", "black")[1],
+  add_key = "panel",
+  precision = c("light", "full")[1],
+  trunc_labels = 38,
+  trans = "asinh",
+  bin,
+  viewport = "ideas",
+  backend = "lattice",
+  display_progress = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+<p>an 'IFC_data' object extracted with features extracted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>selection</code></td>
+<td>
+<p>indices of desired graphs. It can be provided as an integer vector or as a matrix.<br>
+In such case, the layout of the matrix will reflect the layout of the extracted graphs.<br>
+NA value will result in an empty place.<br>
+Otherwise, when 'selection' is provided as a vector not identical to seq_along(obj$graphs), 'onepage' parameter will be set to FALSE.<br>
+Note that indices are read from left to right, from top to bottom. Default is missing for extracting all graphs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>write_to</code></td>
+<td>
+<p>pattern used to export file(s).
+Placeholders, like c("%d/%s_fromR.pdf", "%d/%s_fromR.csv"), will be substituted:<br>
+-%d: with full path directory of 'obj$fileName'<br>
+-%p: with first parent directory of 'obj$fileName'<br>
+-%e: with extension of 'obj$fileName' (without leading .)<br>
+-%s: with shortname from 'obj$fileName' (i.e. basename without extension).<br>
+Exported file(s) extension(s) will be deduced from this pattern. Note that has to be a .pdf and/or .csv.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overwrite</code></td>
+<td>
+<p>whether to overwrite file or not. Default is FALSE.
+Note that if TRUE, it will overwrite file. In addition a warning message will be sent.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>onepage</code></td>
+<td>
+<p>whether to generate a pdf with all graphs on one page or not. Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>color_mode</code></td>
+<td>
+<p>Whether to extract colors from obj in white or black mode. Default is "white".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add_key</code></td>
+<td>
+<p>whether to draw a "global" key under title or in the first "panel" or "both". Default is "panel".<br>
+Accepted values are either: FALSE, "panel", "global", "both" or c("panel", "global").<br>
+Note that it only applies when display is seen as overlaying populations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>precision</code></td>
+<td>
+<p>when graphs is a 2D scatter with population overlay, this argument controls amount of information displayed. Default is "light".<br>
+-"light", the default, will only display points of same coordinates that are amoung the other layers.<br>
+-"full" will display all the layers.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trunc_labels</code></td>
+<td>
+<p>maximum number of characters to display for labels. Default is 38.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trans</code></td>
+<td>
+<p>name of the transformation function for density graphs. If missing the default, the BasePop[[1]]$densitytrans, if any, will be retrieved, otherwise "asinh" will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bin</code></td>
+<td>
+<p>default number of bin used for histogram. Default is missing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>viewport</code></td>
+<td>
+<p>Either "ideas", "data" or "max" defining limits used for the graph. Default is "ideas".<br>
+-"ideas" will use same limits as the one defined in ideas.<br>
+-"data" will use data to define limits.<br>
+-"max" will use data and regions drawn to define limits.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>backend</code></td>
+<td>
+<p>backend used for drawing. Allowed are "lattice", "base", "raster". Default is "lattice".<br>
+-"lattice" is the original one used in <span class="pkg">IFC</span> using <span class="pkg">lattice</span>,<br>
+-"base" will produce the plot using <span class="pkg">base</span>,<br>
+-"raster" uses "base" for plotting but 2D graphs points will be produced as <code>rasterImage</code>.<br>
+This has the main advantage of being super fast allowing for plotting a huge amount of points while generating smaller objects (in bytes).
+However, plot quality is impacted with "raster" method and resizing can lead to unpleasant looking.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>display_progress</code></td>
+<td>
+<p>whether to display a progress bar. Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other parameters to be passed.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>depending on 'write_to', function will create .pdf and/or .csv file(s) report with according to graphs found in 'obj'.<br>
+- csv file if created will contain "Min.","1st Qu.","Median","Mean","3rd Qu.","Max." for each graph found for x and y (if not histogram) for drawn populations and regions.<br>
+- pdf file if created will contain graphs and to a certain extent some stats "Min.", "Median", "Mean", "Max." (no more than 7 rows).<br>
+Note that only graphs will be exported (no images, features values, population stats, ...) in the same layout they were created and without sizing.
+</p>
+
+
+<h3>Value</h3>
+
+<p>It invisibly returns full path of exported .pdf and/or .csv file(s).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">if(requireNamespace("IFCdata", quietly = TRUE)) {
+  tmp &lt;- tempdir(check = TRUE)
+  ## use a daf file
+  file_daf &lt;- system.file("extdata", "example.daf", package = "IFCdata")
+  daf &lt;- ExtractFromDAF(fileName = file_daf, extract_images = FALSE,
+                        extract_offsets = FALSE, display_progress = FALSE)
+  L = length(daf$graphs)
+  if(L &gt; 0) { 
+    ## randomly export at most 5 graphs from daf
+    sel = sample(1:L, min(5, L))
+    ExportToReport(obj = daf, selection = sel,
+                   write_to = paste0(tmp, "\\test.pdf"), overwrite = TRUE)
+  }
+} else {
+  message(sprintf('Please run `install.packages("IFCdata", repos = "%s", type = "source")` %s',
+                  'https://gitdemont.github.io/IFCdata/',
+                  'to install extra files required to run this example.'))
+}
+</code></pre>
+
+
+</div>

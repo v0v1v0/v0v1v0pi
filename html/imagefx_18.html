@@ -1,0 +1,137 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pcorr3d</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+
+Phase Correlation of Images 
+</h2>
+
+<h3>Description</h3>
+
+
+<p>Input two images (matrices) and perform phase correlation by multiplication in the frequency domain.  Return the maximum phase correlation value, its associated shift vector (x and y), and the phase correlation matrix.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pcorr3d(img1,img2)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>img1</code></td>
+<td>
+
+<p>Image (matrix) 1
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>img2</code></td>
+<td>
+
+<p>Image (matrix) 2 with same dimensions of <code>img1</code> 
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<p>Phase correlation calculated in the frequency domain as a multiplication.  The dimensions of <code>img1</code> and <code>img2</code> must match.  If <code>pcorr3d</code> is used to apply a match filter, it is logical to input the image to be searched over as <code>img1</code> and the match filter as <code>img2</code>.  Similarly, if tracking relative motion between images, it is logical to input the first image at time t=n as <code>img1</code> and the second image at time t=n+1 as <code>img2</code>, otherwise motions will backwards.  
+</p>
+
+
+<h3>Value</h3>
+
+
+
+
+
+
+<p>List whose values correspond to:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>max.shifts</code></td>
+<td>
+<p>Vector of length two whose values are the x and y indices associated with the highest phase correlation value.  Note these values are shifted according to the zero frequency which changes depending on the dimensions of <code>img1</code> and/or <code>img2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.corr</code></td>
+<td>
+<p>Highest normalized phase correlation value in the correlation matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>corr.mat</code></td>
+<td>
+<p>Normalized phase correlation matrix</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+
+<p>Alex J.C. Witsil
+</p>
+
+
+<h3>See Also</h3>
+
+
+<p><code>xcorr3d</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#################
+### Example 1 ###
+#################
+## track movement between images
+
+## load in the images
+data(tux1,tux2)
+
+## now find the shift vector by using the phase correlation function 
+shifts &lt;- pcorr3d(tux1,tux2)
+
+## ---- Plotting Example 1  ----- ##
+
+split.screen(c(1,2))
+screen(1)
+image(1:nrow(tux1),1:ncol(tux1),tux1,col=gray.colors(200))
+
+## define an example arrow starting and end points based on the shift found
+x0 = nrow(tux1)/2
+y0 = ncol(tux1)/2
+x1 = x0 + shifts$max.shifts[1]
+y1 = y0 + shifts$max.shifts[2]
+
+## add arrows indicating how the image shifted
+arrows(x0,y0,x1,y1)
+
+## add a point where the arrow is
+points(nrow(tux1)/2+shifts$max.shifts[1],ncol(tux1)/2+shifts$max.shifts[2],pch=21,bg='green')
+
+screen(2)
+image(1:nrow(tux2),1:ncol(tux2),tux2,col=gray.colors(200))
+points(nrow(tux1)/2+shifts$max.shifts[1],ncol(tux1)/2+shifts$max.shifts[2],pch=21,bg='green')
+
+## close the screen
+close.screen(all.screens=TRUE)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,231 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Interaction</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Feature interactions</h2>
+
+<h3>Description</h3>
+
+<p>Feature interactions
+</p>
+<p>Feature interactions
+</p>
+
+
+<h3>Details</h3>
+
+<p><code>Interaction</code> estimates the feature interactions in a prediction model.
+</p>
+<p>Interactions between features are measured via the decomposition of the
+prediction function: If a feature <code>j</code> has no interaction with any other
+feature, the prediction function can be expressed as the sum of the partial
+function that depends only on <code>j</code> and the partial function that only depends
+on features other than <code>j</code>. If the variance of the full function is
+completely explained by the sum of the partial functions, there is no
+interaction between feature <code>j</code> and the other features. Any variance that is
+not explained can be attributed to the interaction and is used as a measure
+of interaction strength.
+</p>
+<p>The interaction strength between two features is the proportion of the
+variance of the 2-dimensional partial dependence function that is not
+explained by the sum of the two 1-dimensional partial dependence functions.
+</p>
+<p>The interaction is measured by Friedman's H-statistic (square root of the
+H-squared test statistic) and takes on values between 0 (no interaction) to 1
+(100% of standard deviation of f(x) du to interaction).
+</p>
+<p>To learn more about interaction effects, read the Interpretable Machine Learning book:
+<a href="https://christophm.github.io/interpretable-ml-book/interaction.html">https://christophm.github.io/interpretable-ml-book/interaction.html</a>
+</p>
+
+
+<h3>Parallelization</h3>
+
+<p>Parallelization is supported via package <a href="https://CRAN.R-project.org/package=future"><span class="pkg">future</span></a>.
+To initialize future-based parallelization, select an appropriate backend and
+specify the amount of workers.
+For example, to use a PSOCK based cluster backend do:
+</p>
+<div class="sourceCode r"><pre>future::plan(multisession, workers = 2)
+&lt;iml function here&gt;
+</pre></div>
+<p>Consult the resources of the <a href="https://CRAN.R-project.org/package=future"><span class="pkg">future</span></a> package for more parallel
+backend options.
+</p>
+
+
+<h3>Super class</h3>
+
+<p><code>iml::InterpretationMethod</code> -&gt; <code>Interaction</code>
+</p>
+
+
+<h3>Public fields</h3>
+
+<div class="r6-fields">
+
+<dl>
+<dt><code>grid.size</code></dt>
+<dd>
+<p>(<code>logical(1)</code>)<br>
+The number of values per feature that should be used to estimate the
+interaction strength.</p>
+</dd>
+</dl>
+</div>
+
+
+<h3>Methods</h3>
+
+
+
+<h4>Public methods</h4>
+
+
+<ul>
+<li> <p><a href="#method-Interaction-new"><code>Interaction$new()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-Interaction-clone"><code>Interaction$clone()</code></a>
+</p>
+</li>
+</ul>
+<details open><summary>Inherited methods</summary><ul>
+<li><span class="pkg-link" data-pkg="iml" data-topic="InterpretationMethod" data-id="plot"><a href="../../iml/html/InterpretationMethod.html#method-InterpretationMethod-plot"><code>iml::InterpretationMethod$plot()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="iml" data-topic="InterpretationMethod" data-id="print"><a href="../../iml/html/InterpretationMethod.html#method-InterpretationMethod-print"><code>iml::InterpretationMethod$print()</code></a></span></li>
+</ul></details><hr>
+<a id="method-Interaction-new"></a>
+
+
+
+<h4>Method <code>new()</code>
+</h4>
+
+<p>Create an Interaction object
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>Interaction$new(predictor, feature = NULL, grid.size = 30)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>predictor</code></dt>
+<dd>
+<p>Predictor<br>
+The object (created with <code>Predictor$new()</code>) holding the machine
+learning model and the data.</p>
+</dd>
+<dt><code>feature</code></dt>
+<dd>
+<p>(<code>character(1)</code> | <code>character(2)</code> | <code>numeric(1)</code> |
+<code>numeric(2)</code>)<br>
+The feature name or index for which to compute the effects.</p>
+</dd>
+<dt><code>grid.size</code></dt>
+<dd>
+<p>(<code>numeric(1)</code> | <code>numeric(2)</code>)<br>
+The size of the grid for evaluating the predictions.</p>
+</dd>
+</dl>
+</div>
+
+
+
+<h5>Returns</h5>
+
+<p>data.frame with the interaction strength (column <code>.interation</code>) per
+feature calculated as Friedman's H-statistic and - in the case of a
+multi-dimensional outcome - per class.
+</p>
+
+
+<hr>
+<a id="method-Interaction-clone"></a>
+
+
+
+<h4>Method <code>clone()</code>
+</h4>
+
+<p>The objects of this class are cloneable with this method.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>Interaction$clone(deep = FALSE)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>deep</code></dt>
+<dd>
+<p>Whether to make a deep clone.</p>
+</dd>
+</dl>
+</div>
+
+
+
+
+<h3>References</h3>
+
+<p>Friedman, Jerome H., and Bogdan E. Popescu. "Predictive learning
+via rule ensembles." The Annals of Applied Statistics 2.3 (2008): 916-954.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+library("rpart")
+set.seed(42)
+# Fit a CART on the Boston housing data set
+data("Boston", package = "MASS")
+rf &lt;- rpart(medv ~ ., data = Boston)
+# Create a model object
+mod &lt;- Predictor$new(rf, data = Boston[-which(names(Boston) == "medv")])
+
+# Measure the interaction strength
+ia &lt;- Interaction$new(mod)
+
+# Plot the resulting leaf nodes
+plot(ia)
+
+# Extract the results
+dat &lt;- ia$results
+head(dat)
+
+# Interaction also works with multiclass classification
+rf &lt;- rpart(Species ~ ., data = iris)
+mod &lt;- Predictor$new(rf, data = iris, type = "prob")
+
+# For some models we have to specify additional arguments for the
+# predict function
+ia &lt;- Interaction$new(mod)
+
+ia$plot()
+
+# For multiclass classification models, you can choose to only show one class:
+mod &lt;- Predictor$new(rf, data = iris, type = "prob", class = "virginica")
+plot(Interaction$new(mod))
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

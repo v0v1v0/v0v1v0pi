@@ -1,0 +1,113 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>simICCdata</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulated data example from Aguinis and Culpepper (2015).</h2>
+
+<h3>Description</h3>
+
+<p>A simulated data example from Aguinis and Culpepper (2015) to demonstrate
+the <code>icc_beta</code> function for computing the proportion of variance
+in the outcome variable that is attributed to heterogeneity in slopes due to
+higher-order processes/units.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">simICCdata
+</code></pre>
+
+
+<h3>Format</h3>
+
+<p>A data frame with 900 observations (i.e., 30 observations nested
+within 30 groups) on the following 6 variables.
+</p>
+
+<dl>
+<dt><code>l1id</code></dt>
+<dd>
+<p>A within group ID variable.</p>
+</dd>
+<dt><code>l2id</code></dt>
+<dd>
+<p>A group ID variable.</p>
+</dd>
+<dt><code>one</code></dt>
+<dd>
+<p>A column of 1's for the intercept.</p>
+</dd>
+<dt><code>X1</code></dt>
+<dd>
+<p>A simulated level 1 predictor.</p>
+</dd>
+<dt><code>X2</code></dt>
+<dd>
+<p>A simulated level 1 predictor.</p>
+</dd>
+<dt><code>Y</code></dt>
+<dd>
+<p>A simulated outcome variable.</p>
+</dd>
+</dl>
+<h3>Details</h3>
+
+<p>See Aguinis and Culpepper (2015) for the model used to simulate the dataset.
+</p>
+
+
+<h3>Source</h3>
+
+<p>Aguinis, H., &amp; Culpepper, S.A. (2015). An expanded decision
+making procedure for examining cross-level interaction effects with
+multilevel modeling. <em>Organizational Research Methods</em>.
+Available at: <a href="http://www.hermanaguinis.com/pubs.html">http://www.hermanaguinis.com/pubs.html</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>lmer</code>, <code>model.matrix</code>,
+<code>VarCorr</code>, <code>LRTSim</code>,
+<code>Hofmann</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+data(simICCdata)
+if(requireNamespace("lme4")){ 
+library("lme4")
+
+# computing icca
+vy &lt;- var(simICCdata$Y)
+lmm0 &lt;- lmer(Y ~ (1|l2id), data = simICCdata, REML = FALSE)
+VarCorr(lmm0)$l2id[1,1]/vy
+
+# Create simICCdata2
+grp_means = aggregate(simICCdata[c('X1','X2')], simICCdata['l2id'],mean)
+colnames(grp_means)[2:3] = c('m_X1','m_X2')
+simICCdata2 = merge(simICCdata, grp_means, by='l2id')
+
+# Estimating random slopes model
+lmm1  &lt;- lmer(Y ~ I(X1-m_X1) + I(X2-m_X2) + (I(X1-m_X1) + I(X2-m_X2) | l2id),
+              data = simICCdata2, REML = FALSE)
+X &lt;- model.matrix(lmm1)
+p &lt;- ncol(X)
+T1 &lt;- VarCorr(lmm1) $l2id[1:p,1:p]
+# computing iccb
+# Notice '+1' because icc_beta assumes l2ids are from 1 to 30.
+icc_beta(X, simICCdata2$l2id+1, T1, vy)$rho_beta
+} else {
+ stop("Please install `lme4` to run the above example.")
+}
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,132 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>lbl_relabel</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Modify value labels for a labelled vector</h2>
+
+<h3>Description</h3>
+
+<p>Update the mapping between values and labels in a
+<code>labelled</code> vector. These functions allow you to
+simultaneously update data values and the existing value labels.
+Modifying data values directly does not result in updated value labels.
+</p>
+<p>Use <code>lbl_relabel()</code> to manually specify new value/label mappings. This
+allows for the addition of new labels.
+</p>
+<p>Use <code>lbl_collapse()</code> to collapse detailed labels into more general
+categories. Values can be grouped together and associated with individual
+labels that already exist in the <code>labelled</code> vector.
+</p>
+<p>Unlabelled values will be converted to <code>NA</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">lbl_relabel(x, ...)
+
+lbl_collapse(x, .fun)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A <code>labelled</code> vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arbitrary number of two-sided formulas.
+</p>
+<p>The left hand side should be a label placeholder created with <code>lbl()</code> or a
+value that already exists in the data.
+</p>
+<p>The right hand side should be a function taking <code>.val</code> and <code>.lbl</code>
+arguments that evaluates to <code>TRUE</code> for all
+cases that should receive the label specified on the left hand side.
+</p>
+<p>Can be provided as an anonymous function or formula. See Details section.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.fun</code></td>
+<td>
+<p>A function taking <code>.val</code> and <code>.lbl</code> arguments that returns
+the value associated with an existing label in the vector. Input values to
+this function will be relabeled with the label of the function's output
+value.
+</p>
+<p>Can be provided as an anonymous function or formula. See Details section.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Several <code style="white-space: pre;">⁠lbl_*()⁠</code> functions include arguments that can be passed a function
+of <code>.val</code> and/or <code>.lbl</code>. These refer to the existing values and
+labels in the input vector, respectively.
+</p>
+<p>Use <code>.val</code> to refer to the <em>values</em> in the vector's value labels.
+Use <code>.lbl</code> to refer to the <em>label names</em> in the vector's value labels.
+</p>
+<p>Note that not all <code style="white-space: pre;">⁠lbl_*()⁠</code> functions support both of these arguments.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>labelled</code> vector
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other lbl_helpers: 
+<code>lbl()</code>,
+<code>lbl_add()</code>,
+<code>lbl_clean()</code>,
+<code>lbl_define()</code>,
+<code>lbl_na_if()</code>,
+<code>zap_ipums_attributes()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x &lt;- haven::labelled(
+  c(10, 10, 11, 20, 21, 30, 99, 30, 10),
+  c(
+    Yes = 10, `Yes - Logically Assigned` = 11,
+    No = 20, Unlikely = 21, Maybe = 30, NIU = 99
+  )
+)
+
+# Convert cases with value 11 to value 10 and associate with 10's label
+lbl_relabel(x, 10 ~ .val == 11)
+lbl_relabel(x, lbl("Yes") ~ .val == 11)
+
+# To relabel using new value/label pairs, use `lbl()` to define a new pair
+lbl_relabel(
+  x,
+  lbl(10, "Yes/Yes-ish") ~ .val %in% c(10, 11),
+  lbl(90, "???") ~ .val == 99 | .lbl == "Maybe"
+)
+
+# Collapse labels to create new label groups
+lbl_collapse(x, ~ (.val %/% 10) * 10)
+
+# These are equivalent
+lbl_collapse(x, ~ ifelse(.val == 10, 11, .val))
+lbl_relabel(x, 11 ~ .val == 10)
+</code></pre>
+
+
+</div>

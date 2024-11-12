@@ -1,0 +1,128 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>reqAccountUpdates</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Request Account Updates </h2>
+
+<h3>Description</h3>
+
+<p>Request and view account details from Interactive Brokers
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">reqAccountUpdates(conn, 
+                  subscribe = TRUE,
+                  acctCode = "1",
+                  eventWrapper = eWrapper(), 
+                  CALLBACK=twsCALLBACK, 
+                  ...)
+
+.reqAccountUpdates(conn, subscribe = TRUE, acctCode = "1")
+
+twsPortfolioValue(x, zero.pos=TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>conn</code></td>
+<td>
+<p> A twsConnection object </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subscribe</code></td>
+<td>
+<p> subscribe (TRUE) or unsubscribe (FALSE) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>acctCode</code></td>
+<td>
+<p> an account description - not used for most accounts </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eventWrapper</code></td>
+<td>
+<p> message-level callback closure </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CALLBACK</code></td>
+<td>
+<p> main receiver loop, if any </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p> object to extract PortfolioValue from. See details. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zero.pos</code></td>
+<td>
+<p> should PortfolioValue include zero positions? </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> additional args </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>By default, for non-FA accounts, this returns the current login's
+account information.
+</p>
+<p>This main version returns a list of objects as
+returned by the TWS.  <code>.reqAccountUpdates</code> sends
+the request to subscribe or cancel, but returns immediately.
+This is designed to be used within a larger
+custom callback routine, where the <code>eventWrapper</code> object
+passed to processMsg (see also) keeps trace of the portfolio
+updates in a consistent manner.
+</p>
+<p><code>twsPortfolioValue</code> extracts into a data.frame commonly
+used fields from all positions held. There are currently methods
+for the the default returned object of <code>reqAccountUpdates</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Jeffrey A. Ryan </p>
+
+
+<h3>References</h3>
+
+<p> Interactive Brokers API: <a href="https://www.interactivebrokers.com">https://www.interactivebrokers.com</a> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+  tws &lt;- twsConnect()
+
+  reqAccountUpdates(tws)        # this will return a AccountUpdate object
+  .reqAccountUpdates(tws)       # this will return immediately
+
+  .reqAccountUpdates(tws, FALSE)  # cancel the request
+  cancelAccountUpdates(tws)     # the same
+
+  twsDisconnect(tes)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

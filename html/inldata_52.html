@@ -1,0 +1,157 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>write_datasets</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Write Package Datasets</h2>
+
+<h3>Description</h3>
+
+<p>Exports the content of package datasets into non-proprietary, open,
+and well-documented standard file formats, enhancing their accessibility for future use.
+It supports multiple formats:
+CSV,
+JSON (requires <code>jsonlite</code> package),
+Arrow Parquet (requires <code>arrow</code> package),
+Excel XLMS (requires <code>writexl</code> package),
+GeoJSON,
+Shapefile, and
+GeoTIFF.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">write_datasets(
+  package,
+  destdir = getwd(),
+  formats = NULL,
+  gzip = NULL,
+  overwrite = TRUE,
+  include = NULL,
+  exclude = NULL,
+  pretty = TRUE,
+  quiet = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>package</code></td>
+<td>
+<p>'character' string.
+Name of a package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>destdir</code></td>
+<td>
+<p>'character' string.
+Destination directory to write files, with tilde-expansion performed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formats</code></td>
+<td>
+<p>'character' vector.
+Formats for saving datasets.
+Choose from one or more of the following formats:
+<code>txt</code>, <code>json</code>, <code>csv</code>, <code>xlsx</code>, <code>parquet</code>, <code>geojson</code>, <code>shp</code>, and <code>tiff</code>.
+Please refer to the <em>Details</em> section for a description of each format.
+All file formats are saved to the disk by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gzip</code></td>
+<td>
+<p>'character' vector.
+File <code>formats</code> that are eligible for Gzip compression.
+At present, it accommodates <code>txt</code>, <code>json</code>, and <code>geojson</code> formats exclusively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overwrite</code></td>
+<td>
+<p>'logical' flag.
+Whether to overwrite an existing file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include</code></td>
+<td>
+<p>'character' vector.
+Names(s) of datasets to include.
+By default, a file is created for each package dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exclude</code></td>
+<td>
+<p>'character' vector.
+Name(s) of datasets to exclude.
+By default, none are excluded.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pretty</code></td>
+<td>
+<p>'logical' flag.
+Whether to add indentation, whitespace, and newlines to JSON output (default is <code>TRUE</code>).
+See <code>prettify</code> function for details.
+The tradeoff for human-readable output is a much larger file size.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>'logical' flag.
+Whether to suppress printing of debugging information.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Different types of datasets are written to various file formats.
+For instance, a dataset in the form of a data table (<code>data.frame</code> class) is exported to
+a CSV (<code>csv</code>), JSON (<code>json</code>), Parquet (<code>parquet</code>), and Spreadsheet (<code>xlsx</code>) file.
+A dataset representing simple features (<code>sf</code> or <code>sfc</code> class) is exported to
+a GeoJSON (<code>geojson</code>) and Shapefile (<code>shp</code>) file.
+A spatial-raster dataset (<code>SpatRaster</code> or <code>PackedSpatRaster</code> class) is exported to
+a GeoTIFF (<code>tiff</code>) file.
+Lastly, a coordinate reference system (<code>crs</code> class) is exported to a text (<code>txt</code>) file.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Invisibly returns the output file path(s).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>J.C. Fisher, U.S. Geological Survey, Idaho Water Science Center
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">dir &lt;- tempfile("")
+write_datasets(
+  package = "inldata",
+  destdir = dir,
+  formats = c("txt", "csv", "json", "geojson"),
+  include = c("crs", "dl", "inl"),
+  pretty = FALSE,
+  quiet = TRUE
+)
+
+unlink(dir, recursive = TRUE)
+</code></pre>
+
+
+</div>

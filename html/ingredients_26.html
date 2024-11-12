@@ -1,0 +1,180 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>describe.partial_dependence_explainer</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Natural language description of feature importance explainer</h2>
+
+<h3>Description</h3>
+
+<p>Generic function <code>describe</code> generates a natural language
+description of <code>ceteris_paribus()</code>, <code>aggregated_profiles()</code> and
+<code>feature_importance()</code> explanations what enchaces their interpretability.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'partial_dependence_explainer'
+describe(
+  x,
+  nonsignificance_treshold = 0.15,
+  ...,
+  display_values = FALSE,
+  display_numbers = FALSE,
+  variables = NULL,
+  label = "prediction"
+)
+
+describe(x, ...)
+
+## S3 method for class 'ceteris_paribus_explainer'
+describe(
+  x,
+  nonsignificance_treshold = 0.15,
+  ...,
+  display_values = FALSE,
+  display_numbers = FALSE,
+  variables = NULL,
+  label = "prediction"
+)
+
+## S3 method for class 'feature_importance_explainer'
+describe(x, nonsignificance_treshold = 0.15, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a ceteris paribus explanation produced with function <code>ceteris_paribus()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nonsignificance_treshold</code></td>
+<td>
+<p>a parameter specifying a treshold for variable importance</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>display_values</code></td>
+<td>
+<p>allows for displaying variable values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>display_numbers</code></td>
+<td>
+<p>allows for displaying numerical values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variables</code></td>
+<td>
+<p>a character of a single variable name to be described</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label</code></td>
+<td>
+<p>label for model's prediction</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Function <code>describe.ceteris_paribus()</code> generates a natural language description of
+ceteris paribus profile. The description summarizes variable values, that would change
+model's prediction at most. If a ceteris paribus profile for multiple variables is passed,
+<code>variables</code> must specify a single variable to be described. Works only for a ceteris paribus profile
+for one observation. In current version only categorical values are discribed. For <code>display_numbers = TRUE</code>
+three most important variable values are displayed, while <code>display_numbers = FALSE</code> displays
+all the important variables, however without further details.
+</p>
+<p>Function <code>describe.ceteris_paribus()</code> generates a natural language description of
+ceteris paribus profile. The description summarizes variable values, that would change
+model's prediction at most. If a ceteris paribus profile for multiple variables is passed,
+<code>variables</code> must specify a single variable to be described. Works only for a ceteris paribus profile
+for one observation. For <code>display_numbers = TRUE</code>
+three most important variable values are displayed, while <code>display_numbers = FALSE</code> displays
+all the important variables, however without further details.
+</p>
+<p>Function <code>describe.feature_importance_explainer()</code> generates a natural language
+description of feature importance explanation. It prints the number of important variables, that
+have significant dropout difference from the full model, depending on <code>nonsignificance_treshold</code>.
+The description prints the three most important variables for the model's prediction.
+The current design of DALEX explainer does not allow for displaying variables values.
+</p>
+
+
+<h3>References</h3>
+
+<p>Explanatory Model Analysis. Explore, Explain, and Examine Predictive Models. <a href="https://ema.drwhy.ai/">https://ema.drwhy.ai/</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library("DALEX")
+library("ingredients")
+library("ranger")
+
+
+model_titanic_rf &lt;- ranger(survived ~., data = titanic_imputed, probability = TRUE)
+
+explain_titanic_rf &lt;- explain(model_titanic_rf,
+                              data = titanic_imputed[,-8],
+                              y = titanic_imputed[,8],
+                              label = "ranger forest",
+                              verbose = FALSE)
+
+selected_passangers &lt;- select_sample(titanic_imputed, n = 10)
+cp_rf &lt;- ceteris_paribus(explain_titanic_rf, selected_passangers)
+pdp &lt;- aggregate_profiles(cp_rf, type = "partial", variable_type = "categorical")
+describe(pdp, variables = "gender")
+
+
+library("DALEX")
+library("ingredients")
+library("ranger")
+
+
+model_titanic_rf &lt;- ranger(survived ~.,  data = titanic_imputed, probability = TRUE)
+
+explain_titanic_rf &lt;- explain(model_titanic_rf,
+                              data = titanic_imputed[,-8],
+                              y = titanic_imputed[,8],
+                              label = "ranger forest",
+                              verbose = FALSE)
+
+selected_passanger &lt;- select_sample(titanic_imputed, n = 1, seed = 123)
+cp_rf &lt;- ceteris_paribus(explain_titanic_rf, selected_passanger)
+
+plot(cp_rf, variable_type = "categorical")
+describe(cp_rf, variables = "class", label = "the predicted probability")
+
+library("DALEX")
+library("ingredients")
+
+lm_model &lt;- lm(m2.price~., data = apartments)
+explainer_lm &lt;- explain(lm_model, data = apartments[,-1], y = apartments[,1])
+
+fi_lm &lt;- feature_importance(explainer_lm, loss_function = DALEX::loss_root_mean_square)
+
+plot(fi_lm)
+describe(fi_lm)
+
+</code></pre>
+
+
+</div>

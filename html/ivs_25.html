@@ -1,0 +1,253 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>relation-count</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Count relationships between two ivs</h2>
+
+<h3>Description</h3>
+
+<p>This family of functions counts different types of relationships between
+two ivs. It works similar to <code>base::match()</code>, where <code>needles[i]</code> checks for
+a relationship in all of <code>haystack</code>.
+</p>
+
+<ul>
+<li> <p><code>iv_count_overlaps()</code> counts instances of a specific <code>type</code> of overlap
+between the two ivs.
+</p>
+</li>
+<li> <p><code>iv_count_precedes()</code> counts instances when <code>needles[i]</code> precedes (i.e.
+comes before) any interval in <code>haystack</code>.
+</p>
+</li>
+<li> <p><code>iv_count_follows()</code> counts instances when <code>needles[i]</code> follows (i.e.
+comes after) any interval in <code>haystack</code>.
+</p>
+</li>
+</ul>
+<p>These functions return an integer vector the same size as <code>needles</code>
+containing a count of the times a particular relationship between the <code>i</code>-th
+interval of <code>needles</code> and any interval of <code>haystack</code> occurred.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iv_count_overlaps(
+  needles,
+  haystack,
+  ...,
+  type = "any",
+  missing = "equals",
+  no_match = 0L
+)
+
+iv_count_precedes(
+  needles,
+  haystack,
+  ...,
+  closest = FALSE,
+  missing = "equals",
+  no_match = 0L
+)
+
+iv_count_follows(
+  needles,
+  haystack,
+  ...,
+  closest = FALSE,
+  missing = "equals",
+  no_match = 0L
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>needles, haystack</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[iv]⁠</code>
+</p>
+<p>Interval vectors used for relation matching.
+</p>
+
+<ul>
+<li>
+<p> Each element of <code>needles</code> represents the interval to search for.
+</p>
+</li>
+<li> <p><code>haystack</code> represents the intervals to search in.
+</p>
+</li>
+</ul>
+<p>Prior to comparison, <code>needles</code> and <code>haystack</code> are coerced to the same type.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>These dots are for future extensions and must be empty.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[character(1)]⁠</code>
+</p>
+<p>The type of relationship to find. One of:
+</p>
+
+<ul>
+<li> <p><code>"any"</code>: Finds any overlap whatsoever between an interval in <code>needles</code>
+and an interval in <code>haystack</code>.
+</p>
+</li>
+<li> <p><code>"within"</code>: Finds when an interval in <code>needles</code> is completely within
+(or equal to) an interval in <code>haystack</code>.
+</p>
+</li>
+<li> <p><code>"contains"</code>: Finds when an interval in <code>needles</code> completely contains
+(or equals) an interval in <code>haystack</code>.
+</p>
+</li>
+<li> <p><code>"equals"</code>: Finds when an interval in <code>needles</code> is exactly equal to
+an interval in <code>haystack</code>.
+</p>
+</li>
+<li> <p><code>"starts"</code>: Finds when the start of an interval in <code>needles</code> matches the
+start of an interval in <code>haystack</code>.
+</p>
+</li>
+<li> <p><code>"ends"</code>: Finds when the end of an interval in <code>needles</code> matches the end
+of an interval in <code>haystack</code>.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>missing</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[integer(1) / "equals" / "error"]⁠</code>
+</p>
+<p>Handling of missing intervals in <code>needles</code>.
+</p>
+
+<ul>
+<li> <p><code>"equals"</code> considers missing intervals in <code>needles</code> as exactly equal
+to missing intervals in <code>haystack</code> when determining if there is a
+matching relationship between them.
+</p>
+</li>
+<li> <p><code>"error"</code> throws an error if any intervals in <code>needles</code> are missing.
+</p>
+</li>
+<li>
+<p> If a single integer value is provided, this represents the count returned
+for a missing interval in <code>needles</code>. Use <code>0L</code> to force missing intervals
+to never match.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>no_match</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[integer(1) / "error"]⁠</code>
+</p>
+<p>Handling of <code>needles</code> without a match.
+</p>
+
+<ul>
+<li> <p><code>"error"</code> throws an error if any needles have zero matches.
+</p>
+</li>
+<li>
+<p> If a single integer is provided, this represents the count returned for
+a needle with zero matches. The default value gives unmatched needles
+a count of <code>0L</code>.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>closest</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[TRUE / FALSE]⁠</code>
+</p>
+<p>Should only the closest relationship be returned?
+</p>
+<p>If <code>TRUE</code>, will only return the closest interval(s) in <code>haystack</code> that
+the current value of <code>needles</code> either precedes or follows. Note that
+multiple intervals can still be returned if there are ties, which can
+be resolved using <code>multiple</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An integer vector the same size as <code>needles</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Locating relationships
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(vctrs)
+
+x &lt;- iv_pairs(
+  as.Date(c("2019-01-05", "2019-01-10")),
+  as.Date(c("2019-01-07", "2019-01-15")),
+  as.Date(c("2019-01-20", "2019-01-31"))
+)
+
+y &lt;- iv_pairs(
+  as.Date(c("2019-01-01", "2019-01-03")),
+  as.Date(c("2019-01-04", "2019-01-08")),
+  as.Date(c("2019-01-07", "2019-01-09")),
+  as.Date(c("2019-01-10", "2019-01-20")),
+  as.Date(c("2019-01-15", "2019-01-20"))
+)
+
+x
+y
+
+# Count the number of times `x` overlaps `y` at all
+iv_count_overlaps(x, y)
+
+# Count the number of times `y` is within an interval in `x`
+iv_count_overlaps(y, x, type = "within")
+
+# Count the number of times `x` precedes `y`
+iv_count_precedes(x, y)
+
+# ---------------------------------------------------------------------------
+
+a &lt;- iv(c(1, NA), c(2, NA))
+b &lt;- iv(c(NA, NA), c(NA, NA))
+
+# Missing intervals are seen as exactly equal by default, so they are
+# considered to overlap
+iv_count_overlaps(a, b)
+
+# If you'd like missing intervals to be treated as unmatched, set
+# `missing = 0L`
+iv_count_overlaps(a, b, missing = 0L)
+
+# If you'd like to propagate missing intervals, set `missing = NA`
+iv_count_overlaps(a, b, missing = NA)
+</code></pre>
+
+
+</div>

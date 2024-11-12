@@ -1,0 +1,182 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>variable_contrib</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Evaluate variable contributions for targeted observations.</h2>
+
+<h3>Description</h3>
+
+<p>Evaluate variable contribution for targeted observations according
+to SHapley Additive exPlanations (SHAP).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">variable_contrib(
+  model,
+  var_occ,
+  var_occ_analysis,
+  shap_nsim = 100,
+  visualize = FALSE,
+  seed = 10,
+  pfun = .pfun_shap
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>(<code>isolation_forest</code> or other model) The SDM.
+It could be the item <code>model</code> of <code>POIsotree</code> made by function <code>isotree_po</code>.
+It also could be other user-fitted models as long as the <code>pfun</code> can work on it.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var_occ</code></td>
+<td>
+<p>(<code>data.frame</code>, <code>tibble</code>) The <code>data.frame</code> style table that
+include values of environmental variables at occurrence locations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var_occ_analysis</code></td>
+<td>
+<p>(<code>data.frame</code>, <code>tibble</code>) The <code>data.frame</code> style table that
+include values of environmental variables at occurrence locations for analysis. It
+could be either <code>var_occ</code> or its subset, or any new dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shap_nsim</code></td>
+<td>
+<p>(<code>integer</code>) The number of Monte Carlo repetitions in SHAP
+method to use for estimating each Shapley value. See details in documentation of
+function <code>explain</code> in package <code>fastshap</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>visualize</code></td>
+<td>
+<p>(<code>logical</code>) if <code>TRUE</code>, plot the response curves.
+The default is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>(<code>integer</code>) The seed for any random progress. The default is <code>10L</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pfun</code></td>
+<td>
+<p>(<code>function</code>) The predict function that requires two arguments,
+<code>object</code> and <code>newdata</code>.
+It is only required when <code>model</code> is not <code>isolation_forest</code>.
+The default is the wrapper function designed for iForest model in <code>itsdm</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>(<code>VariableContribution</code>) A list of
+</p>
+
+<ul>
+<li>
+<p>shapley_values (<code>data.frame</code>) A table of Shapley values of each variables for
+all observations
+</p>
+</li>
+<li>
+<p>feature_values (<code>tibble</code>) A table of values of each variables for all
+observations</p>
+</li>
+</ul>
+<h3>References</h3>
+
+
+<ul>
+<li>
+<p><a href="https://github.com/bgreenwell/fastshap">https://github.com/
+bgreenwell/fastshap</a>
+</p>
+</li>
+<li>
+<p><a href="https://github.com/slundberg/shap">https://github.com/slundberg/shap</a>
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>plot.VariableContribution</code>
+<code>explain</code> in <code>fastshap</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Using a pseudo presence-only occurrence dataset of
+# virtual species provided in this package
+library(dplyr)
+library(sf)
+library(stars)
+library(itsdm)
+
+# Prepare data
+data("occ_virtual_species")
+obs_df &lt;- occ_virtual_species %&gt;% filter(usage == "train")
+eval_df &lt;- occ_virtual_species %&gt;% filter(usage == "eval")
+x_col &lt;- "x"
+y_col &lt;- "y"
+obs_col &lt;- "observation"
+
+# Format the observations
+obs_train_eval &lt;- format_observation(
+  obs_df = obs_df, eval_df = eval_df,
+  x_col = x_col, y_col = y_col, obs_col = obs_col,
+  obs_type = "presence_only")
+
+env_vars &lt;- system.file(
+  'extdata/bioclim_tanzania_10min.tif',
+  package = 'itsdm') %&gt;% read_stars() %&gt;%
+  slice('band', c(1, 5, 12))
+
+# With imperfect_presence mode,
+mod &lt;- isotree_po(
+  obs_mode = "imperfect_presence",
+  obs = obs_train_eval$obs,
+  obs_ind_eval = obs_train_eval$eval,
+  variables = env_vars, ntrees = 5,
+  sample_size = 0.8, ndim = 1L,
+  seed = 123L, nthreads = 1,
+  response = FALSE,
+  spatial_response = FALSE,
+  check_variable = FALSE)
+
+var_contribution &lt;- variable_contrib(
+  model = mod$model,
+  var_occ = mod$vars_train,
+  var_occ_analysis = mod$vars_train %&gt;% slice(1:2))
+## Not run: 
+plot(var_contribution,
+  num_features = 3,
+  plot_each_obs = TRUE)
+
+# Plot together
+plot(var_contribution)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

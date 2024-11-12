@@ -1,0 +1,178 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>DataInfo3D</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Data information for reference samples</h2>
+
+<h3>Description</h3>
+
+<p><code>DataInfo3D</code> provides basic data information for 3D diversity based on a reference sample.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">DataInfo3D(
+  data,
+  diversity = "TD",
+  datatype = "abundance",
+  nT = NULL,
+  PDtree,
+  PDreftime = NULL,
+  FDdistM,
+  FDtype = "AUC",
+  FDtau = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>(a) For <code>datatype = "abundance"</code>, data can be input as a vector of species abundances (for a single assemblage), matrix/data.frame (species by assemblages), or a list of species abundance vectors. <br>
+(b) For <code>datatype = "incidence_raw"</code>, data can be input as a list of matrices/data.frames (species by sampling units); data can also be input as a single matrix/data.frame by merging all sampling units across assemblages based on species identity; in this case, the number of sampling units (<code>nT</code>, see below) must be specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diversity</code></td>
+<td>
+<p>selection of diversity type: <code>'TD'</code> = Taxonomic diversity, <code>'PD'</code> = Phylogenetic diversity, and <code>'FD'</code> = Functional diversity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>datatype</code></td>
+<td>
+<p>data type of input data: individual-based abundance data (<code>datatype = "abundance"</code>) or species by sampling-units incidence/occurrence matrix (<code>datatype = "incidence_raw"</code>) with all entries being 0 (non-detection) or 1 (detection).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nT</code></td>
+<td>
+<p>(required only when <code>datatype = "incidence_raw"</code> and input data in a single matrix/data.frame) a vector of positive integers specifying the number of sampling units in each assemblage. If assemblage names are not specified (i.e., <code>names(nT) = NULL</code>), then assemblages are automatically named as "assemblage1", "assemblage2",..., etc.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PDtree</code></td>
+<td>
+<p>(required argument for <code>diversity = "PD"</code>), a phylogenetic tree in Newick format for all observed species in the pooled assemblage.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PDreftime</code></td>
+<td>
+<p>(argument only for <code>diversity = "PD"</code>), a vector of numerical values specifying reference times for PD. Default is <code>NULL</code> (i.e., the age of the root of <code>PDtree</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FDdistM</code></td>
+<td>
+<p>(required argument for <code>diversity = "FD"</code>), a species pairwise distance matrix for all species in the pooled assemblage.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FDtype</code></td>
+<td>
+<p>(argument only for <code>diversity = "FD"</code>), select FD type: <code>FDtype = "tau_values"</code> for FD under specified threshold values, or <code>FDtype = "AUC"</code> (area under the curve of tau-profile) for an overall FD which integrates all threshold values between zero and one. Default is <code>"AUC"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FDtau</code></td>
+<td>
+<p>(argument only for <code>diversity = "FD"</code> and <code>FDtype = "tau_values"</code>), a numerical vector between 0 and 1 specifying tau values (threshold levels). If <code>NULL</code> (default), then threshold is set to be the mean distance between any two individuals randomly selected from the pooled assemblage (i.e., quadratic entropy).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a data.frame including basic data information.<br><br> 
+For abundance data, basic information shared by TD, mean-PD and FD includes assemblage name (<code>Assemblage</code>),
+sample size (<code>n</code>), observed species richness (<code>S.obs</code>), sample coverage estimates of the reference sample (<code>SC(n)</code>), 
+sample coverage estimate for twice the reference sample size (<code>SC(2n)</code>). Other additional information is given below.<br><br>
+(1) TD: the first five species abundance counts (<code>f1</code>–<code>f5</code>).<br><br>
+(2) Mean-PD: the observed total branch length in the phylogenetic tree (<code>PD.obs</code>), 
+the number of singletons (<code>f1*</code>) and doubletons (<code>f2*</code>) in the node/branch abundance set, as well as the total branch length 
+of those singletons (<code>g1</code>) and of those doubletons (<code>g2</code>), and the reference time (<code>Reftime</code>).<br><br>
+(3) FD (<code>FDtype = "AUC"</code>): the minimum distance among all non-diagonal elements in the distance matrix (<code>dmin</code>), the mean distance
+(<code>dmean</code>), and the maximum distance (<code>dmax</code>) in the distance matrix.<br><br>
+(4) FD (<code>FDtype = "tau_values"</code>): the number of singletons (<code>a1*</code>) and of doubletons (<code>a2*</code>) among the functionally indistinct
+set at the specified threshold level <code>'Tau'</code>, as well as the total attribute contribution of singletons (<code>h1</code>) and of doubletons (<code>h2</code>)
+at the specified threshold level <code>'Tau'</code>.<br><br></p>
+<p>For incidence data, the basic information for TD includes assemblage name (<code>Assemblage</code>), number of sampling units (<code>T</code>), 
+total number of incidences (<code>U</code>), observed species richness (<code>S.obs</code>), 
+sample coverage estimates of the reference sample (<code>SC(T)</code>), sample coverage estimate for twice the reference sample size
+(<code>SC(2T)</code>), as well as the first five species incidence frequency counts (<code>Q1</code>–<code>Q5</code>). For mean-PD and FD, output is similar to that
+for abundance data.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Taxonomic diversity for abundance data
+data(Brazil_rainforest_abun_data)
+DataInfo3D(Brazil_rainforest_abun_data, diversity = 'TD', datatype = "abundance")
+
+
+# Phylogenetic diversity for abundance data
+data(Brazil_rainforest_abun_data)
+data(Brazil_rainforest_phylo_tree)
+data &lt;- Brazil_rainforest_abun_data
+tree &lt;- Brazil_rainforest_phylo_tree
+DataInfo3D(data, diversity = 'PD', datatype = "abundance", PDtree = tree)
+
+
+# Functional diversity for abundance data with FDtype = 'AUC'
+data(Brazil_rainforest_abun_data)
+data(Brazil_rainforest_distance_matrix)
+data &lt;- Brazil_rainforest_abun_data
+distM &lt;- Brazil_rainforest_distance_matrix
+DataInfo3D(data, diversity = 'FD', datatype = "abundance", 
+           FDdistM = distM, FDtype = 'AUC')
+           
+# Functional diversity for abundance data with FDtype = 'tau_values'
+data(Brazil_rainforest_abun_data)
+data(Brazil_rainforest_distance_matrix)
+data &lt;- Brazil_rainforest_abun_data
+distM &lt;- Brazil_rainforest_distance_matrix
+DataInfo3D(data, diversity = 'FD', datatype = "abundance", 
+           FDdistM = distM, FDtype = 'tau_values')
+
+
+# Taxonomic diversity for incidence data
+data(Fish_incidence_data)
+DataInfo3D(Fish_incidence_data, diversity = 'TD', datatype = "incidence_raw")
+
+
+# Phylogenetic diversity for incidence data
+data(Fish_incidence_data)
+data(Fish_phylo_tree)
+data &lt;- Fish_incidence_data
+tree &lt;- Fish_phylo_tree
+DataInfo3D(data, diversity = 'PD', datatype = "incidence_raw", PDtree = tree)
+
+
+# Functional diversity for incidence data with FDtype = 'AUC'
+data(Fish_incidence_data)
+data(Fish_distance_matrix)
+data &lt;- Fish_incidence_data
+distM &lt;- Fish_distance_matrix
+DataInfo3D(data, diversity = 'FD', datatype = "incidence_raw", 
+           FDdistM = distM, FDtype = 'AUC')
+           
+# Functional diversity for incidence data with FDtype = 'tau_values'
+data(Fish_incidence_data)
+data(Fish_distance_matrix)
+data &lt;- Fish_incidence_data
+distM &lt;- Fish_distance_matrix
+DataInfo3D(data, diversity = 'FD', datatype = "incidence_raw", 
+           FDdistM = distM, FDtype = 'tau_values')
+
+
+</code></pre>
+
+
+</div>

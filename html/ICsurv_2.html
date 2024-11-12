@@ -1,0 +1,180 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fast.PH.ICsurv.EM</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+EM algorithm for general interval-censored data under the proportional hazards model
+</h2>
+
+<h3>Description</h3>
+
+<p>This function is equivalent to the function "PH.ICsurv.EM" but runs much faster. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fast.PH.ICsurv.EM(d1, d2, d3, Li, Ri, Xp, n.int, order, g0, b0,  tol, t.seq, equal = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>d1</code></td>
+<td>
+<p>vector indicating whether an observation is left-censored (1) or not (0).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d2</code></td>
+<td>
+<p>vector indicating whether an observation is interval-censored (1) or not (0).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d3</code></td>
+<td>
+<p>vector indicating whether an observation is right-censored (1) or not (0).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Li</code></td>
+<td>
+<p>the left endpoint of the observed interval, if an observation is left-censored its corresponding entry should be 0. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Ri</code></td>
+<td>
+<p>the right endpoint of the observed interval, if an observation is right-censored its corresponding entry should be Inf. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Xp</code></td>
+<td>
+<p>design matrix of predictor variables (in columns), should be specified without an intercept term.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.int</code></td>
+<td>
+<p>the number of interior knots to be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>order</code></td>
+<td>
+<p>the order of the basis functions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>g0</code></td>
+<td>
+<p>initial estimate of the spline coefficients; should be of length n.int+order.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b0</code></td>
+<td>
+<p>initial estimate of regression coefficients; should be of length dim(Xp)[2].</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>the convergence criterion of the EM algorithm, see details for further description.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t.seq</code></td>
+<td>
+<p>an increasing sequence of points at which the cumulative baseline hazard function is evaluated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>equal</code></td>
+<td>
+<p>logical, if TRUE knots are spaced evenly across the range of the endpoints of the observed intervals and if FALSE knots are placed at quantiles.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The above function fits the semiparametric proportional hazards model (PH), proposed in Wang et al. (2014+), to interval censored data via an EM algorithm. For a 
+discussion of starting values, number of interior knots, order, and further details please see Wang et al. (2014+). The EM algorithm converges when the maximum of 
+the absolute difference in the parameter estimates (to include the regression and spline coefficients) is less than tol. The Hessian matrix of the observed likelihood 
+is given in the output. The variance-covariance matrix of the estimated regression and spline coefficients can be obtained by taking the inverse of the Hessian matrix.
+When the Hessian matrix is singular, the variance matrix of the regression parameters is obtained by using the inverse of blocked matrix, which only involves taking inverse of lower dimensional matrices. To further provide robustness, the generalized inverse function "ginv" in the supporting package "MASS" is used in this case. 
+A function in the supporting R package "matrixcalc" is used to check whether the Hessian matrix is singular.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>estimates of the regression coefficients.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>g</code></td>
+<td>
+<p>estimates of the spline coefficients.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hz</code></td>
+<td>
+<p>estimated cumulative baseline hazard function evaluated at the points t.seq.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Hessian</code></td>
+<td>
+<p>the Hessian matrix. Its inverse is the variance covariance matrix of b and g.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var.b</code></td>
+<td>
+<p>the variance covariance matrix of b</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>flag</code></td>
+<td>
+<p>the indicator whether the Hessian matrix is non-singular. When flag=0, the variance estimate may not be accurate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>AIC</code></td>
+<td>
+<p>the Akaike information criterion.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>BIC</code></td>
+<td>
+<p>the Bayesian information/Schwarz criterion.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ll</code></td>
+<td>
+<p>the value of the maximized log-likelihood.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Wang, L., McMahan, C., and Hudgens, M. (2014+). A flexible and computationally efficient method for fitting the proportional hazards model to interval censored data. Submitted. 
+</p>
+
+
+</div>

@@ -1,0 +1,74 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_insee_title</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get title from INSEE series idbank</h2>
+
+<h3>Description</h3>
+
+<p>Get title from INSEE series idbank
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_insee_title(..., lang = "en")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>list of series key (idbank)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lang</code></td>
+<td>
+<p>language of the title, by default it is Engligh, if lang is different from "en" then French will be the title's language</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Query INSEE website to get series title from series key (idbank).
+Any query to INSEE database can handle around 400 idbanks at maximum, if necessary the idbank list will then be splitted in several lists of 400 idbanks each.
+Consequently, it is not advised to use it on the whole idbank dataset, the user should filter the idbank dataset first.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a character vector with the titles
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#example 1 : industrial production index on manufacturing and industrial activities
+title = get_insee_title("010537900")
+
+#example 2 : automotive industry and overall industrial production
+library(magrittr)
+library(dplyr)
+library(stringr)
+
+idbank_list_selected =
+  get_idbank_list("IPI-2015") %&gt;% #industrial production index dataset
+  filter(FREQ == "M") %&gt;% #monthly
+  filter(NATURE == "INDICE") %&gt;% #index
+  filter(CORRECTION  == "CVS-CJO") %&gt;% #Working day and seasonally adjusted SA-WDA
+  filter(str_detect(NAF2,"^29$|A10-BE")) %&gt;% #automotive industry and overall industrial production
+  mutate(title = get_insee_title(idbank))
+
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,115 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>make_2d_Isingland</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Make a 2D landscape for an Ising network</h2>
+
+<h3>Description</h3>
+
+<p>Calculate the potential value <code class="reqn">U(n)</code> for each system state, represented by the
+number of active nodes <code class="reqn">n</code>. The potential value is determined so that the Boltzmann
+distribution is preserved. The Boltzmann distribution is the basis and the
+steady-state distribution of all dynamic methods for Ising models, including
+those used in <code>IsingSampler::IsingSampler()</code> and Glauber dynamics. This means
+that if you assume the real-life system has the same steady-state distribution
+as the Boltzmann distribution of the Ising model, then possibility that their
+are <code class="reqn">n</code> active nodes in the system is proportional to <code class="reqn">e^{U(n)}</code>.
+Because of this property of <code class="reqn">e^{U(n)}</code>, it is aligned with the potential
+landscape definition by Wang et al. (2008) and can quantitatively represent
+the stability of different system states.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">make_2d_Isingland(thresholds, weiadj, beta = 1, transform = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>thresholds, weiadj</code></td>
+<td>
+<p>The thresholds and the weighted adjacency matrix
+of the Ising network. If you have an <code>IsingFit</code> object estimated using
+<code>IsingFit::IsingFit()</code>, you can find those two parameters in its components
+(<code style="white-space: pre;">⁠&lt;IsingFit&gt;$thresholds⁠</code> and <code style="white-space: pre;">⁠&lt;IsingFit&gt;$weiadj⁠</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p>The <code class="reqn">\beta</code> value for calculating the Hamiltonian.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>transform</code></td>
+<td>
+<p>By default, this function considers the Ising network
+to use <code>-1</code> and <code>1</code> for two states. Set <code>transform = TRUE</code> if the Ising
+network uses <code>0</code> and <code>1</code> for two states, <em>which is often the case for the
+Ising networks estimated using</em> <code>IsingFit::IsingFit()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The potential function <code class="reqn">U(n)</code> is calculated by the following equation:
+</p>
+<p style="text-align: center;"><code class="reqn">U(n) = -\log(\sum_{v}^{a(v)=n} e^{-\beta H(v)})/\beta,</code>
+</p>
+
+<p>where <code class="reqn">v</code> represent a specific activation state of the network,
+<code class="reqn">a(v)</code> is the number of active nodes for <code class="reqn">v</code>, and <code class="reqn">H</code> is the
+Hamiltonian function for Ising networks.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code style="white-space: pre;">⁠2d_Isingland⁠</code> object that contains the following components:
+</p>
+
+<ul>
+<li> <p><code>dist_raw</code>,<code>dist</code> Two tibbles containing the probability
+distribution and the potential values for different states.
+</p>
+</li>
+<li> <p><code>thresholds</code>,<code>weiadj</code>,<code>beta</code> The parameters supplied to the function.
+</p>
+</li>
+<li> <p><code>Nvar</code> The number of variables (nodes) in the Ising network.
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+<p>Wang, J., Xu, L., &amp; Wang, E. (2008). Potential landscape and flux framework of nonequilibrium networks: Robustness, dissipation, and coherence of biochemical oscillations. Proceedings of the National Academy of Sciences, 105(34), 12271-12276. https://doi.org/10.1073/pnas.0800579105
+Sacha Epskamp (2020). IsingSampler: Sampling methods and distribution functions for the Ising model. R package version 0.2.1. https://CRAN.R-project.org/package=IsingSampler
+Glauber, R. J. (1963). Time-dependent statistics of the Ising model. Journal of Mathematical Physics, 4(2), 294-307. https://doi.org/10.1063/1.1703954
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>make_3d_Isingland()</code> if you have two groups of nodes that you want
+to count the number of active ones separately.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">Nvar &lt;- 10
+m &lt;- rep(0, Nvar)
+w &lt;- matrix(0.1, Nvar, Nvar)
+diag(w) &lt;- 0
+result1 &lt;- make_2d_Isingland(m, w)
+plot(result1)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,134 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>isa.normalize</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Normalize input data for use with ISA</h2>
+
+<h3>Description</h3>
+
+<p>Normalize a matrix and create a form that can be effectively used for
+ISA runs.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S4 method for signature 'matrix'
+isa.normalize(data, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A numeric matrix, the input data. It might contains
+<code>NA</code> and/or <code>NaN</code> values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments, see details below.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function can be called as
+</p>
+<pre>
+    isa.normalize(data, prenormalize = FALSE)    
+  </pre>
+<p>where the arguments are:
+</p>
+
+<dl>
+<dt>data</dt>
+<dd>
+<p>A numeric matrix, the input data. It might contains
+<code>NA</code> and/or <code>NaN</code> values.</p>
+</dd>
+<dt>prenormalize</dt>
+<dd>
+<p>Logical scalar, see details below.</p>
+</dd>
+</dl>
+<p>It was observed that the ISA works better if the input matrix is
+scaled and its rows have mean zero and standard deviation one.
+</p>
+<p>An ISA step consists of two sub-steps, and this implies two different
+normalizations, in the first the rows, in the second the columns of
+the input matrix will be scaled.
+</p>
+<p>If the <code>prenormalize</code> argument is set to <code>TRUE</code>, then
+row-wise scaling is calculated on the column-wise scaled matrix and
+not on the input matrix directly.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of two normalized matrices, the first one is transposed.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Gabor Csardi <a href="mailto:Gabor.Csardi@unil.ch">Gabor.Csardi@unil.ch</a> </p>
+
+
+<h3>References</h3>
+
+<p>Bergmann S, Ihmels J, Barkai N: Iterative signature algorithm for the
+analysis of large-scale gene expression data <em>Phys Rev E Stat
+Nonlin Soft Matter Phys.</em> 2003 Mar;67(3 Pt 1):031902. Epub 2003 Mar 11.
+</p>
+<p>Ihmels J, Friedlander G, Bergmann S, Sarig O, Ziv Y, Barkai N:
+Revealing modular organization in the yeast transcriptional network
+<em>Nat Genet.</em> 2002 Aug;31(4):370-7. Epub 2002 Jul 22
+</p>
+<p>Ihmels J, Bergmann S, Barkai N:
+Defining transcription modules using large-scale gene expression data
+<em>Bioinformatics</em> 2004 Sep 1;20(13):1993-2003. Epub 2004 Mar 25.
+</p>
+
+
+<h3>See Also</h3>
+
+ <p>isa2-package for a short introduction on the Iterative
+Signature Algorithm. See <code>isa</code> for an easy way of running
+ISA.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## In-silico data
+set.seed(1)
+insili &lt;- isa.in.silico()
+nm &lt;- isa.normalize(insili[[1]])
+
+## Check it
+max(abs(rowSums(nm[[1]])))
+max(abs(rowSums(nm[[2]])))
+
+max(abs(apply(t(nm[[1]]), 2, sd) - 1))
+max(abs(apply(t(nm[[2]]), 2, sd) - 1))
+
+## Plot them
+if (interactive()) {
+  layout(rbind(1:2,3:4))
+  image(insili[[1]], main="Original data")
+  image(t(nm[[1]]), main="Row normalized")
+  image(nm[[2]], main="Column normalized")
+}
+
+</code></pre>
+
+
+</div>

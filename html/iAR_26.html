@@ -1,0 +1,101 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>IARforecast</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Forecast from IAR model</h2>
+
+<h3>Description</h3>
+
+<p>Forecast from models fitted by <code>IARloglik</code>
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">IARforecast(phi, y, st, standardized = TRUE, zero.mean = TRUE, tAhead)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>phi</code></td>
+<td>
+<p>Estimated phi parameter by the iAR model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Array with the time series observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>st</code></td>
+<td>
+<p>Array with the irregular observational times.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>standardized</code></td>
+<td>
+<p>logical; if TRUE, the array y is standardized; if FALSE, y contains the raw time series</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zero.mean</code></td>
+<td>
+<p>logical; if TRUE, the array y has zero mean; if FALSE, y has a mean different from zero.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tAhead</code></td>
+<td>
+<p>The time ahead for forecast is required.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Forecasted value from the iAR model
+</p>
+
+
+<h3>References</h3>
+
+<p>Eyheramendy S, Elorrieta F, Palma W (2018).
+“An irregular discrete time series model to identify residuals with autocorrelation in astronomical light curves.”
+<em>Monthly Notices of the Royal Astronomical Society</em>, <b>481</b>(4), 4311–4322.
+ISSN 0035-8711, doi: <a href="https://doi.org/10.1093/mnras/sty2487">10.1093/mnras/sty2487</a>, <a href="https://academic.oup.com/mnras/article-pdf/481/4/4311/25906473/sty2487.pdf">https://academic.oup.com/mnras/article-pdf/481/4/4311/25906473/sty2487.pdf</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>gentime</code>, <code>IARsample</code>, <code>IARloglik</code>, <code>IARkalman</code>, <code>IARfit</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+set.seed(6714)
+st&lt;-gentime(n=100)
+y&lt;-IARsample(phi=0.99,st=st,n=100)
+y&lt;-y$series
+n=length(y)
+p=trunc(n*0.99)
+ytr=y[1:p]
+yte=y[(p+1):n]
+str=st[1:p]
+ste=st[(p+1):n]
+tahead=ste-str[p]
+phi=IARloglik(y=ytr,st=str)$phi
+forIAR=IARforecast(phi=phi,y=ytr,st=str,tAhead=tahead)
+</code></pre>
+
+
+</div>

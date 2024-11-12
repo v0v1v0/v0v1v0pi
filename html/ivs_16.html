@@ -1,0 +1,153 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iv-splits</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Splits</h2>
+
+<h3>Description</h3>
+
+<p>This family of functions revolves around splitting an iv on its endpoints,
+which results in a new iv that is entirely disjoint (i.e. non-overlapping).
+The intervals in the resulting iv are known as "splits".
+</p>
+
+<ul>
+<li> <p><code>iv_splits()</code> computes the disjoint splits for <code>x</code>.
+</p>
+</li>
+<li> <p><code>iv_identify_splits()</code> identifies the splits that correspond to each
+interval in <code>x</code>. It replaces <code>x</code> with a list of the same size where each
+element of the list contains the splits that the corresponding interval in
+<code>x</code> overlaps. This is particularly useful alongside <code>tidyr::unnest()</code>.
+</p>
+</li>
+<li> <p><code>iv_locate_splits()</code> returns a two column data frame with a <code>key</code> column
+containing the result of <code>iv_splits()</code> and a <code>loc</code> list-column containing
+integer vectors that map each interval in <code>x</code> to the splits that it overlaps.
+</p>
+</li>
+</ul>
+<h3>Usage</h3>
+
+<pre><code class="language-R">iv_splits(x, ..., on = NULL)
+
+iv_identify_splits(x, ..., on = NULL)
+
+iv_locate_splits(x, ..., on = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[iv]⁠</code>
+</p>
+<p>An interval vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>These dots are for future extensions and must be empty.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>on</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[vector / NULL]⁠</code>
+</p>
+<p>An optional vector of additional values to split on.
+</p>
+<p>This should have the same type as <code>iv_start(x)</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+
+<ul>
+<li>
+<p> For <code>iv_splits()</code>, an iv with the same type as <code>x</code>.
+</p>
+</li>
+<li>
+<p> For <code>iv_identify_splits()</code>, a list-of containing ivs with the same size as
+<code>x</code>.
+</p>
+</li>
+<li>
+<p> For <code>iv_locate_splits()</code>, a two column data frame with a <code>key</code> column
+of the same type as <code>x</code> and <code>loc</code> list-column containing integer vectors.
+</p>
+</li>
+</ul>
+<h3>Graphical Representation</h3>
+
+<p>Graphically, generating splits looks like:
+</p>
+<p><img src="../help/figures/splits.png" alt="splits.png"></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(tidyr)
+library(dplyr)
+
+# Guests to a party and their arrival/departure times
+guests &lt;- tibble(
+  arrive = as.POSIXct(
+    c("2008-05-20 19:30:00", "2008-05-20 20:10:00", "2008-05-20 22:15:00"),
+    tz = "UTC"
+  ),
+  depart = as.POSIXct(
+    c("2008-05-20 23:00:00", "2008-05-21 00:00:00", "2008-05-21 00:30:00"),
+    tz = "UTC"
+  ),
+  name = list(
+    c("Mary", "Harry"),
+    c("Diana", "Susan"),
+    "Peter"
+  )
+)
+
+guests &lt;- unnest(guests, name) %&gt;%
+  mutate(iv = iv(arrive, depart), .keep = "unused")
+
+guests
+
+# You can determine the disjoint intervals at which people
+# arrived/departed with `iv_splits()`
+iv_splits(guests$iv)
+
+# Say you'd like to determine who was at the party at any given time
+# throughout the night
+guests &lt;- mutate(guests, splits = iv_identify_splits(iv))
+guests
+
+# Unnest the splits to generate disjoint intervals for each guest
+guests &lt;- guests %&gt;%
+  unnest(splits) %&gt;%
+  select(name, splits)
+
+guests
+
+# Tabulate who was there at any given time
+guests %&gt;%
+  summarise(n = n(), who = list(name), .by = splits)
+
+# ---------------------------------------------------------------------------
+
+x &lt;- iv_pairs(c(1, 5), c(4, 9), c(12, 15))
+x
+
+# You can provide additional singular values to split on with `on`
+iv_splits(x, on = c(2, 13))
+</code></pre>
+
+
+</div>

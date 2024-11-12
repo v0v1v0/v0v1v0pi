@@ -1,0 +1,132 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mScore</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>mScore.</h2>
+
+<h3>Description</h3>
+
+<p><code>mScore</code> will calculate a mass defect weighted score for an mz/int values measure for an isotopic cluster in comparison to the theoretically expected pattern.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mScore(
+  obs = NULL,
+  the = NULL,
+  dabs = 5e-04,
+  dppm = 2,
+  int_prec = 0.02,
+  limit = 0,
+  rnd_prec = 0
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obs</code></td>
+<td>
+<p>Observed (measured) values, a matrix with two rows (mz/int).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>the</code></td>
+<td>
+<p>Theoretical (estimated from sum formula) values, a matrix with two rows (mz/int).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dabs</code></td>
+<td>
+<p>Absolute allowed mass deviation (the expected mass precision will influence mScore – see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dppm</code></td>
+<td>
+<p>Relative allowed mass deviation (the expected mass precision will influence mScore – see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>int_prec</code></td>
+<td>
+<p>The expected intensity precision will influence mScore (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>limit</code></td>
+<td>
+<p>minimal value of mScore. Should be left on zero.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rnd_prec</code></td>
+<td>
+<p>Rounding precision of mScore.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The maximum expected average mass error should be specified in ppm. A observed pattern deviating
+that much from the theoretical pattern would still receive a reasonable (average) mScore while
+observations deviating stronger or less strong will reach lower or higher mScores respectively.
+Likewise the intensity precision should specify the average quality of your device to maintain
+stable isotopic ratios.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Scalar mScore giving the quality of the observed data if theoretical data are true.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># get theoretical isotopic pattern of Glucose
+glc &lt;- c(180.063388, 0.920845, 181.066845, 0.065214, 182.068041, 0.013043)
+glc &lt;- matrix(glc, nrow=2)
+mScore(obs=glc, the=glc)
+# modify pattern by maximum allowable error (2ppm mass error, 2% int error)
+glc_theoretic &lt;- glc
+glc[1,] &lt;- glc[1,]+2*glc[1,]/10^6
+glc[2,1:2] &lt;- c(-0.02,0.02)+glc[2,1:2]
+mScore(obs=glc, the=glc_theoretic)
+
+# simulate mass and int defects
+ef &lt;- function(x, e) {runif(1,x-x*e,x+x*e)}
+glc_obs &lt;- glc
+glc_obs[1,] &lt;- sapply(glc[1,], ef, e=2*10^-6)
+glc_obs[2,] &lt;- sapply(glc[2,], ef, e=0.02)
+mScore(obs=glc_obs, the=glc)
+# simulate mass and int defects systematically
+ef &lt;- function(x, e) {runif(1,x-x*e,x+x*e)}
+n &lt;- 11
+mz_err &lt;- round(seq(0,5,length.out=n),3)
+int_err &lt;- round(seq(0,0.1,length.out=n),3)
+mat &lt;- matrix(NA, ncol=n, nrow=n, dimnames=list(mz_err, 100*int_err))
+glc_obs &lt;- glc
+for (i in 1:n) {
+ glc_obs[1,] &lt;- sapply(glc[1,], ef, e=mz_err[i]*10^-6)
+ for (j in 1:n) {
+   glc_obs[2,] &lt;- sapply(glc[2,], ef, e=int_err[j])
+   mat[i,j] &lt;- mScore(obs=glc_obs, the=glc)
+ }
+}
+plot(x=1:n, y=1:n, type="n",axes=FALSE, xlab="mass error [ppm]", ylab="isoratio error [%]")
+axis(3,at=1:n,rownames(mat),las=2); axis(4,at=1:n,colnames(mat),las=2); box()
+cols &lt;- grDevices::colorRampPalette(colors=c(2,6,3))(diff(range(mat))+1)
+cols &lt;- cols[mat-min(mat)+1]
+text(x=rep(1:n,each=n), y=rep(1:n,times=n), labels=as.vector(mat), col=cols)
+
+</code></pre>
+
+
+</div>

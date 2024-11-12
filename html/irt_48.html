@@ -1,0 +1,144 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cat_sim</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Computerized Adaptive Test (CAT) Simulation</h2>
+
+<h3>Description</h3>
+
+<p><code>cat_sim</code> function simulates computerized adaptive test (CAT) for
+one or more simulees. For long simulations, <code>cat_sim_fast</code>
+function can be used.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cat_sim(true_ability, cd, verbose = -1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>true_ability</code></td>
+<td>
+<p>True ability vector to generate item responses.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cd</code></td>
+<td>
+<p>A <code>cat_design</code> object that is created by function
+<code>create_cat_design</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>This is an integer that will print the stage of the test.
+For example, if the value verbose = 10, a message will be printed at
+each tenth iteration of the cat_simulation. Default value is <code>-1</code>,
+where no message will be printed. If the value is <code>0</code>, only the
+start time and end time of the simulation will be printed.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>If the length of <code>true_ability</code> vector is one a
+<code>"cat_output"</code> class output will be returned.
+This is a list containing following elements:
+</p>
+
+<dl>
+<dt>true_ability</dt>
+<dd>
+<p>True ability (theta) value to generate item
+responses.</p>
+</dd>
+<dt>est_history</dt>
+<dd>
+<p>A list where each element represent a step of the
+CAT test. It has following elements:
+</p>
+
+<dl>
+<dt>est_before</dt>
+<dd>
+<p>The estimated ability before the administration
+of the item. </p>
+</dd>
+<dt>se_before</dt>
+<dd>
+<p>The standard error of the estimated ability before
+the administration of the item. </p>
+</dd>
+<dt>testlet</dt>
+<dd>
+<p><code>TRUE</code> if the item belongs to a testlet.</p>
+</dd>
+<dt>item</dt>
+<dd>
+<p><code>Item-class</code> object that is administered at
+this step.</p>
+</dd>
+<dt>resp</dt>
+<dd>
+<p>The simulated response of the simulee for the item
+administered at this step using simulee's <code>true_ability</code>
+value.</p>
+</dd>
+<dt>est_after</dt>
+<dd>
+<p>The estimated ability after the administration
+of the item.</p>
+</dd>
+<dt>se_after</dt>
+<dd>
+<p>The standard error of the estimated ability after
+the administration of the item. </p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>If the length of the <code>true_ability</code> is more than 1, a list of
+<code>cat_output</code> objects will be returned for each value of
+<code>true_ability</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Emre Gonulates
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>create_cat_design</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">ip &lt;- generate_ip(n = 50)
+# Check the default:
+cd &lt;- create_cat_design(ip = ip)
+cat_sim(true_ability = rnorm(1), cd = cd)
+
+# Multiple theta, optionally set names to the the vector to give examinee IDs
+true_theta &lt;- setNames(c(-2, 0.4, 1.5), c("Jimmy", "Ali", "Mirabel"))
+cd &lt;- create_cat_design(
+  ip = ip,
+  ability_est_rule = 'ml',
+  termination_rule = c('min_item', 'min_se', 'max_item'),
+  termination_par = list(min_item = 10, min_se = .33, max_item = 20))
+cat_sim(true_ability = true_theta, cd = cd)
+</code></pre>
+
+
+</div>

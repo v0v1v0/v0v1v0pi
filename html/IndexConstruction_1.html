@@ -1,0 +1,291 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>indexComp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Index derivation for price and liquidity indices
+</h2>
+
+<h3>Description</h3>
+
+<p><code>indexComp</code> derives an Index from the given price and market capitalization or liquidity data. The number of constituents can be fixed or being chosen flexible based on the methodology from Trimborn and Haerdle (2018). This is the main function of the package. The derived index is meant for analysis purposes. For a continuous updating and display of an index on a website, please refer to the remaining functions. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">indexComp(market, price, vol = NULL, weighting = "market", weighting.all = "market", 
+ic = "AIC", eval.seq = c("sequential", "all.together"), 
+optimum = c("local", "global"), start.const = 1, steps = 1, fixed.value = NULL, 
+base.value = 1000, derivation.period = 1, derivation.period.ic = 3, days.line)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>market</code></td>
+<td>
+
+<p>An xts object with the market capitalization data. The default is <code>NULL</code>, an entry is necessary if weighting is set to <code>"market"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>price</code></td>
+<td>
+
+<p>An xts object with the price data. An entry is always required.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vol</code></td>
+<td>
+
+<p>An xts object with the trading volume (liquidity) data. The default is <code>NULL</code>, an entry is necessary if weighting is set to <code>"volume"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weighting</code></td>
+<td>
+
+<p>The weighting scheme to be applied. <code>"market"</code> refers to weighting by market capitalization, <code>"volume"</code> refers to weighting by trading volume.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weighting.all</code></td>
+<td>
+
+<p>The weighting scheme to be applied to the full market index. <code>"market"</code> refers to weighting by market capitalization, <code>"volume"</code> refers to weighting by trading volume.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ic</code></td>
+<td>
+
+<p>Information Criterion to be used for the evaluation of the appropriate index to be used. Possible entries are <code>"AIC"</code>, <code>"GCV"</code>, <code>"GFCV"</code>, <code>"SH"</code>, <code>"Cp"</code> and <code>"FPE"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eval.seq</code></td>
+<td>
+
+<p>Indicates how the evaluation of the candidate indices by the ic shall be performed. <code>"all.together"</code> evaluates all indices against each other, <code>"sequential"</code> evaluates always two consecutive indices against each other.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optimum</code></td>
+<td>
+
+<p>Define how to choose the optimal index. Either a <code>"local"</code> optimum is chosen, thus the derivation stops the first time the results become worse under the chosen <code>ic</code>, or a <code>"global"</code> optimum is chosen, thus all indices are derived and the best fitting one under the <code>ic</code> is chosen.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start.const</code></td>
+<td>
+
+<p>The number of constituents to start constructing the indices with. The default is <code>1</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>steps</code></td>
+<td>
+
+<p>The step width for the number of constituents to construct the next index from. The default is <code>1</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed.value</code></td>
+<td>
+
+<p>In case no <code>ic</code> for the number of constituents for the index shall be applied, give the number of constituents the index shall contain. In that case, <code>"ic"</code>, <code>"eval.seq"</code>, <code>"optimum"</code>, <code>"start.const"</code> and <code>"steps"</code> are inactive parameters. The default is <code>NULL</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>base.value</code></td>
+<td>
+
+<p>The starting value for the index. The default is <code>1000</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>derivation.period</code></td>
+<td>
+
+<p>The number of month after which the weights of the index are reallocated. The default is <code>1</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>derivation.period.ic</code></td>
+<td>
+
+<p>The number of month after which the composition of the index is derived again, thus the number of constituents is reevaluated. The default is <code>3</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>days.line</code></td>
+<td>
+
+<p>The days of the month to perform the recalculation on. Can be calculated from switchDates.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For more details, please see the methodology section of the paper Trimborn and Haerdle (2018).
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of the <code>class</code> IndexConstruction with the components
+</p>
+<table><tr style="vertical-align: top;">
+<td><code>results</code></td>
+<td>
+<p>A list containing the results of the model fitting</p>
+</td>
+</tr></table>
+<ul>
+<li>
+<p><code>index</code> The optimal index
+</p>
+</li>
+<li>
+<p><code>totalIndex</code> The index of all constituents
+</p>
+</li>
+<li>
+<p><code>totalIndexRebased</code> The index of all constituents rebased at the index each time after altering the number of index constituents which is useful for comparisons with the market
+</p>
+</li>
+<li>
+<p><code>assets</code> A list containing the assets considered for index construction in each period
+</p>
+</li>
+<li>
+<p><code>weights</code> A list containing the weights assigned to the selected index constituents in each period
+</p>
+</li>
+<li>
+<p><code>weightsRelative</code> A list containing the relative weights assigned to the selected index constituents in each period
+</p>
+</li>
+</ul>
+<table><tr style="vertical-align: top;">
+<td><code>inputs</code></td>
+<td>
+<p>A list containing the inputs for model fitting</p>
+</td>
+</tr></table>
+<ul>
+<li>
+<p><code>marketCap</code> The provided dataset of the market capitalization of each asset for index construction
+</p>
+</li>
+<li>
+<p><code>price</code> The provided dataset of the price series of each asset for index construction
+</p>
+</li>
+<li>
+<p><code>tradingVolume</code> The provided dataset of the trading volume of each asset for index construction
+</p>
+</li>
+<li>
+<p><code>daysDerivation</code> The provided vector of dates on which to rederive the index weights and number of index constituents
+</p>
+</li>
+</ul>
+<table>
+<tr style="vertical-align: top;">
+<td><code>weighting</code></td>
+<td>
+<p>The selected weighting scheme</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weighting.all</code></td>
+<td>
+<p>The selected weighting.all scheme</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ic</code></td>
+<td>
+<p>The selected ic</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eval.seq</code></td>
+<td>
+<p>The selected eval.seq scheme</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optimum</code></td>
+<td>
+<p>The selected optimization scheme</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start.const</code></td>
+<td>
+<p>The selected number of starting constituents for the index</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>steps</code></td>
+<td>
+<p>The selected step size for the selection of the constituents for the index</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>derivation.period</code></td>
+<td>
+<p>The selected period for rederivation of the weights of the index constituents</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>derivation.period.ic</code></td>
+<td>
+<p>The selected period for rederivation of the number of index constituents</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Trimborn, S. and Haerdle, W.K. (2018). CRIX an Index for cryptocurrencies, <em>Journal of Empirical Finance</em> 49, pp. 107-122. <a href="https://doi.org/10.1016/j.jempfin.2018.08.004">https://doi.org/10.1016/j.jempfin.2018.08.004</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(CryptoData)
+
+price = price["2014-03-31::2015-01-31"]
+market = market["2014-03-31::2015-01-31"]
+vol = vol["2014-03-31::2015-01-31"]
+days.line = switchDates(price, specificDate = "1")
+
+indexComp(market = market, price = price, vol = vol, weighting = "market", 
+weighting.all = "market", ic = "AIC", eval.seq = "sequential", optimum = "local", 
+start.const = 5, steps = 5, days.line = days.line)
+</code></pre>
+
+
+</div>

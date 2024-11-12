@@ -1,0 +1,231 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>intRegGOF</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Integrated Regression Goodness of Fit </h2>
+
+<h3>Description</h3>
+
+<p>Integrated Regression Goodness of Fit to test if a given model 
+is suitable to represent the regression function for a given
+data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  intRegGOF(obj, covars = NULL, B = 499, LINMOD = FALSE)
+  ## S3 method for class 'intRegGOF'
+print(x,...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+<p> An object of class <code>lm</code>, <code>glm</code> or 
+<code>nls</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>covars</code></td>
+<td>
+<p> Names of continuous (numerical) variates used to  
+compute Integrated Regression. They should be variables contained
+</p>
+<p>in the data frame used to compute the regression fit.   </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p> Bootstrap resampling size.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LINMOD</code></td>
+<td>
+<p>When <code>TRUE</code> and if <code>obj</code> is an object of class 
+<code>lm</code> Linear Model matrix fitting equations are used.  </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p> An object of class <code>intRegGOF</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> Further parameters for print command. </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The Integrated Regression Goodness of Fit technique is introduce in 
+Stute(1997). The main idea is to study the process that results
+from the cumulation of the residuals up to a given value of the 
+covariates. Once this process is built, different functional over 
+it can be considered to measure the discrepany between the true
+regression function and its estimation. 
+</p>
+<p>The tests that implements this function is
+</p>
+<p style="text-align: center;"><code class="reqn">
+    H_0:m\in M \ \textrm{vs} \ H_1:m\notin M
+  </code>
+</p>
+
+<p>being <code class="reqn">m</code> the regression function, and <code class="reqn">M</code> a given class
+of functions. The statistics considered are
+</p>
+<p style="text-align: center;"><code class="reqn"> K_n=\sup_{x\in R^d}|R^w_n(x)| </code>
+</p>
+
+<p style="text-align: center;"><code class="reqn"> W^2_n=\int_{R^d}R^w_n(z)^2 \,dF(z). </code>
+</p>
+ 
+<p>where <code class="reqn">R^w_n(z)</code> is the cumulated residual process:
+</p>
+<p style="text-align: center;"><code class="reqn"> R^w_n(x)=n^{-1/2}\sum^n_{i=1}(y_i-\hat y_i)I(x_i\le x). </code>
+</p>
+
+<p>As the stochastic behaviour of this cumulated residual process is 
+quite complex, the implementation of the technique is based on 
+resampling techniques. In particular the chosen implementation is
+based on Wild Bootstrap methods.
+</p>
+<p>The method also handles selection biased data by means of 
+compensation, by means of the weights used to fit the resgression 
+function when computing the cumulated residual process.
+</p>
+<p>At the moment only <code>'response'</code> type of residuals are considered,
+jointly with wild bootstrap resampling technique and the result for 
+discrete responses might no be proper. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>This function returns an object of class <code>intRegGOF</code>, a 
+<code>list</code> which cointains following objects:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>call </code></td>
+<td>
+<p>The call to the function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>regObj </code></td>
+<td>
+<p>String with the <code>lm</code>, <code>glm</code> or <code>nls</code>
+object whose fit is cheked</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>regModel </code></td>
+<td>
+<p><code>lm</code>, <code>glm</code> or <code>nls</code> object call.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.value </code></td>
+<td>
+<p><code class="reqn">p</code>–values for <code class="reqn">K_n</code> and <code class="reqn">W^2_n</code> statistics.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>datStat </code></td>
+<td>
+<p>value of <code class="reqn">K_n</code> and <code class="reqn">W^2_n</code> statistics.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>covars </code></td>
+<td>
+<p> continuous (numerical) variates used to  
+compute Integrated Regression.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intErr </code></td>
+<td>
+<p> cumulated residual process at the values of 
+<code>covars</code> in data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xLT </code></td>
+<td>
+<p>structure with the order of <code>covars</code> summation. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bootSamp</code></td>
+<td>
+<p> Bootstrap samples for <code class="reqn">K_n</code> and <code class="reqn">W^2_n</code>. </p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>This method requires more testing, and careful study of the 
+effect of factors (discrete random variables) when fitting 
+the model.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Jorge Luis Ojeda Cabrera (<a href="mailto:jojeda@unizar.es">jojeda@unizar.es</a>). </p>
+
+
+<h3>References</h3>
+
+<p>Stute, W. (1997). 
+<em>Nonparametric model checks for regression</em>. 
+Ann. Statist.,  25(2), pp. 613–641.
+</p>
+<p>Ojeda, J. L., W. González-Manteiga W. and Cristóbal, J. A
+<em>A bootstrap based Model Checking for Selection–Biased data</em>
+Reports in Statistics and Operations Research, U. de Santiago de Compostela.
+Report 07-05
+<a href="http://eio.usc.es/eipc1/BASE/BASEMASTER/FORMULARIOS-PHP-DPTO/REPORTS/447report07_05.pdf">http://eio.usc.es/eipc1/BASE/BASEMASTER/FORMULARIOS-PHP-DPTO/REPORTS/447report07_05.pdf</a>
+</p>
+<p>Ojeda, J. L., Cristóbal, J. A., and Alcalá, J. T. (2008). 
+<em> A bootstrap approach to model checking for linear models 
+under length-biased data</em>. 
+Ann. Inst.  Statist. Math., 60(3), pp. 519–543.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>lm</code>, <code>glm</code>, <code>nls</code> and its methods 
+<code>summary</code>, <code>print</code>, <code>plot</code>, etc... 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">n &lt;- 50
+d &lt;- data.frame( X1=runif(n),X2=runif(n))
+d$Y &lt;- 1 + 2*d$X1 + rnorm(n,sd=.125)
+plot( d ) 
+intRegGOF(lm(Y~X1+X2,d),B=99)
+intRegGOF(a &lt;- lm(Y~X1-1,d),B=99) 
+intRegGOF(a,c("X1","X2"),B=99) 
+intRegGOF(a,~X2+X1,B=99) 
+</code></pre>
+
+
+</div>

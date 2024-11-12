@@ -1,0 +1,100 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>miss.total.process</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Estimating the missing data mechanism in a sample.
+</h2>
+
+<h3>Description</h3>
+
+<p>This function allows estimating the missing data mechanism, i.e. the probability to be missing  in function of the intensity level, from an estimation of a mixture model of MNAR and MCAR values (see <code>estim.mix</code> function).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">miss.total.process(abs,pi_na,F_na,F_tot)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>abs</code></td>
+<td>
+<p>The interval on which is estimated the missing data mechanism.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pi_na</code></td>
+<td>
+<p>The proportion of missing values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>F_na</code></td>
+<td>
+<p>An estimation of the cumulative distribution function of the missing values on the interval <code>abs</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>F_tot</code></td>
+<td>
+<p>An estimation of the cumulative distribution function of the complete values on the interval <code>abs</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list composed of:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>abs</code></td>
+<td>
+<p>The interval on which is estimated the missing data mechanism.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>The estimated probability to be missing in function of the intensity level.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Quentin Giai Gianetto &lt;quentin2g@yahoo.fr&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>estim.mix</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#Simulating data
+res.sim=sim.data(nb.pept=2000,nb.miss=600);
+
+#Imputation of missing values with the slsa algorithm
+dat.slsa=impute.slsa(tab=res.sim$dat.obs,conditions=res.sim$condition,repbio=res.sim$repbio);
+
+#Estimation of the mixture model
+res=estim.mix(tab=res.sim$dat.obs, tab.imp=dat.slsa, conditions=res.sim$condition);
+
+#Estimating the missing mechanism in the first replicate
+mtp=miss.total.process(res$abs.mod,res$pi.na[1],res$F.na[,1],res$F.tot[,1])
+plot(mtp$abs,mtp$p,ty="l",xlab="Intensity values",ylab="Estimated probability to be missing")
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,163 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>remove_nonwear</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Detect and remove accelerometer non-wear time</h2>
+
+<h3>Description</h3>
+
+<p>Detects the accelerometer non-wear time based on an algorithm developed
+by van Hees (see Details) and remove these periods from the raw data. This
+function can also draw a plot to better visualize the detected non-wear
+periods and generate a wear time daily summary.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">remove_nonwear(
+  data,
+  window1 = 60,
+  window2 = 15,
+  threshold = 2,
+  min_hour_crit = 0,
+  min_day_crit = 0,
+  plot = FALSE,
+  save_plot = FALSE,
+  save_summary = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>An <code>impactr_data</code> object, as obtained with
+read_acc().</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>window1, window2</code></td>
+<td>
+<p>Windows size, in minutes, for the non-wear
+detection algorithm. Defaults to 60 and 15 minutes, respectively.
+Also, <code>window2</code> must be smaller than <code>window1</code>, and
+<code>window1</code> must be a multiple of <code>window2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>Number of axes that need to meet the non-wear criteria.
+Defaults to 2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_hour_crit</code></td>
+<td>
+<p>The minimum number of hours marked as wear time
+in a day for it to be considered valid (see Data validation).
+Defaults to 0, meaning that every day is considered valid.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_day_crit</code></td>
+<td>
+<p>The minimum number of valid days for the data of
+a given subject to be considered valid (see Data validation).
+Defaults to 0, meaning that all data is valid.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>A logical value indicating whether or not to display the
+plot to visualize the detected non-wear periods. Defaults to <code>FALSE</code>.
+Notice that the plot will only be displayed in your R session if you do
+not provide a path to save the plot (see the argument <code>save_plot</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>save_plot, save_summary</code></td>
+<td>
+<p>Indicates whether of not to save the plot to
+visualize the detected non-wear periods to a pdf file and the wear time
+daily summary to a csv file, respectively. Defaults to <code>FALSE</code>.
+Provide a valid path to a file, ending with the ".pdf" extension for the
+plot or with the ".csv" extension to the summary, as a character string
+if you want the outputs to be saved.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class <code>impactr_data</code> and a plot if
+<code>plot = TRUE</code> and <code>save_plot = FALSE</code>.
+</p>
+
+
+<h3>The non-wear detection algorithm</h3>
+
+<p>The current version of this algorithm is described in a paper by van Hees
+et al (see References) and also in this
+<a href="https://CRAN.R-project.org/package=GGIR/vignettes/GGIR.html#53_Non-wear_detection">vignette</a> from package GGIR.
+Briefly, in a first stage it identifies non-wear time based on threshold
+values of standard deviation (0.013<em>g</em>) and range (0.050<em>g</em>) of
+raw acceleration from each axis. The classification is done per blocks of
+<code>window2</code> size (default 15 minutes) based on the characteristics of
+a larger <code>window1</code> (default 60 minutes) centred at the
+<code>window2</code>. In the second stage of the algorithm, the plausibility of
+wear periods in between non-wear periods is tested based on the duration
+and proportion of the duration relative to the surrounding non-wear
+periods.
+</p>
+
+
+<h3>Data validation</h3>
+
+<p>After the detection of non-wear periods through the algorithm, a data
+validation step is applied. For each measurement day to be considered
+valid, it has to present a minimum number of wear time hours determined
+by the <code>min_hour_crit</code> argument. If the number of wear time hours of
+a given day falls below the threshold, the whole day is considered invalid
+and is then removed from the subsequent analyses. The whole measurement
+is also classified as valid or invalid based on the number of valid days
+and a threshold given by <code>min_day_crit</code>. If the number of valid days
+is less than the value determined by the <code>min_day_crit</code> argument,
+the whole data is deleted and the <code>remove_nonwear()</code> function
+signals an error, stopping its execution. Nevertheless, this error does
+not prevent the plot to be displayed or saved, or the wear time daily
+summary to be saved, if the arguments are set to do so.
+</p>
+
+
+<h3>References</h3>
+
+
+<ul><li>
+<p> van Hees VT, Gorzelniak L, Dean León EC, Eder M, Pias M, Taherian S,
+Ekelund U, Renström F, Franks PW, Horsch A, Brage S. Separating movement
+and gravity components in an acceleration signal and implications for the
+assessment of human daily physical activity. PLoS One. 2013. Apr 23.
+<a href="https://doi.org/10.1371/journal.pone.0061691">doi:10.1371/journal.pone.0061691</a>.
+</p>
+</li></ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Ensure that {accdata} package is available before running the example.
+# If it is not, run install_accdata() to install the required package.
+if (requireNamespace("accdata", quietly = TRUE)) {
+  data &lt;- import_dataset("daily_acc_3d")
+  remove_nonwear(data)
+}
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,190 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>icpower_weibull</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Study design in the presence of error-prone diagnostic tests and 
+self-reported outcomes for Weibull model</h2>
+
+<h3>Description</h3>
+
+<p>This functions works same way as <code>icpower</code> function 
+except that it assumes the survival function follows Weibull
+distribution. The scale parameter is assumed to be same for
+both treatment and control groups.
+This can be used estimate power and sample size for interval
+censored data using Weibull model, which is a cpecial case
+when both sensitivity and specificity being 1.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">icpower_weibull(
+  HR,
+  sensitivity,
+  specificity,
+  shape,
+  scale,
+  times,
+  N = NULL,
+  power = NULL,
+  rho = 0.5,
+  alpha = 0.05,
+  pmiss = 0,
+  pcensor = 0,
+  design = "MCAR",
+  negpred = 1
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>HR</code></td>
+<td>
+<p>hazard ratio under the alternative hypothesis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sensitivity</code></td>
+<td>
+<p>the sensitivity of test.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>specificity</code></td>
+<td>
+<p>the specificity of test</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shape</code></td>
+<td>
+<p>shape parameter of the Weibull distribution for reference group</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p>scale parameter of the Weibull distributions. Same for all groups</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>times</code></td>
+<td>
+<p>the visit times</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>a vector of sample sizes to calculate corresponding powers. If one 
+needs to calculate sample size, then set to NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>power</code></td>
+<td>
+<p>a vector of powers to calculate corresponding sample sizes. If 
+one needs to calculate power, then set to NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+<p>proportion of subjects in baseline(reference) group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>type I error.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pmiss</code></td>
+<td>
+<p>a value or a vector (must have same length as survivals) of the 
+probabilities of each test being randomly missing at each test time. If 
+pmiss is a single value, then each test is assumed to have an identical 
+probability of missingness.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pcensor</code></td>
+<td>
+<p>a value or a vector (must have same length as testtimes) of
+the probability of censoring at each visit, assuming censoring process
+is independent on other missing mechanisms.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>design</code></td>
+<td>
+<p>missing mechanism: "MCAR" or "NTFP".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>negpred</code></td>
+<td>
+<p>baseline negative predictive value, i.e. the probability of 
+being truely disease free for those who were tested (reported) as disease 
+free at baseline. If baseline screening test is perfect, then negpred = 1.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>To calculate sample sizes for a vector of powers, set N = NULL. To 
+calculate powers for a vector of sample sizes, set power = NULL. One and 
+only one of power and N should be specified, and the other set to NULL. 
+This function uses an enumeration algorithm to calculate the expected 
+Fisher information matrix. The expected Fisher information matrix is used 
+to obtain the variance of the coefficient corresponding to the treatment 
+group indicator.
+</p>
+
+
+<h3>Value</h3>
+
+ <ul>
+<li>
+<p> result: a data frame with calculated sample size and 
+power </p>
+</li>
+<li>
+<p> I1 and I2: calculated unit Fisher information matrices for each
+group, which can be used to calculate more values of sample size and power 
+for the same design without the need to enumerate again </p>
+</li>
+</ul>
+<h3>Note</h3>
+
+<p>When diagnostic test is perfect, i.e. sensitivity=1 and 
+specificity=1, use <code>icpowerpf</code> instead to obtain significantly 
+improved computational efficiency.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>icpowerpf</code> <code>icpower</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+icpower_weibull(2, 0.75, 0.98, 1, 0.1, 1:8, power = 0.9)$result
+
+# Interval censoring
+icpower_weibull(2, 1, 1, 1, 0.1, 1:8, power = 0.9)$result
+
+</code></pre>
+
+
+</div>

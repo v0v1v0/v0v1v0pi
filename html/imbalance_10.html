@@ -1,0 +1,112 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>neater</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fitering of oversampled data based on non-cooperative game theory</h2>
+
+<h3>Description</h3>
+
+<p>Filters oversampled examples from a binary class <code>dataset</code> using game
+theory to find out if keeping an example is worthy enough.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">neater(
+  dataset,
+  newSamples,
+  k = 3,
+  iterations = 100,
+  smoothFactor = 1,
+  classAttr = "Class"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dataset</code></td>
+<td>
+<p>The original <code>data.frame</code>. All columns, except
+<code>classAttr</code> one, have to be numeric or coercible to numeric.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newSamples</code></td>
+<td>
+<p>A <code>data.frame</code> containing the samples to be filtered.
+Must have the same structure as <code>dataset</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>Integer. Number of nearest neighbours to use in KNN algorithm to
+rule out samples. By default, 3.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterations</code></td>
+<td>
+<p>Integer. Number of iterations for the algorithm. By
+default, 100.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smoothFactor</code></td>
+<td>
+<p>A positive <code>numeric</code>. By default, 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>classAttr</code></td>
+<td>
+<p><code>character</code>. Indicates the class attribute from
+<code>dataset</code> and <code>newSamples</code>. Must exist in them.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Uses game theory and Nash equilibriums to calculate the minority examples
+probability of trully belonging to the minority class. It discards examples
+which at the final stage of the algorithm have more probability of being a
+majority example than a minority one.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Filtered samples as a <code>data.frame</code> with same structure as
+<code>newSamples</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Almogahed, B.A.; Kakadiaris, I.A. Neater: Filtering of Over-Sampled Data
+Using Non-Cooperative Game Theory. Soft Computing 19 (2014), Nr. 11, p.
+3301–3322.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(iris0)
+
+newSamples &lt;- smotefamily::SMOTE(iris0[,-5], iris0[,5])$syn_data
+# SMOTE overrides Class attr turning it into class
+# and dataset must have same class attribute as newSamples
+names(newSamples) &lt;- c(names(newSamples)[-5], "Class")
+
+neater(iris0, newSamples, k = 5, iterations = 100,
+       smoothFactor = 1, classAttr = "Class")
+</code></pre>
+
+
+</div>

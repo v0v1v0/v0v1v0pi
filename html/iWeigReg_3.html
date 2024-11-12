@@ -1,0 +1,169 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ate.creg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calibrated regression estimator for the causal-inference setup</h2>
+
+<h3>Description</h3>
+
+<p>This function implements the calibrated (or doubly robust) regression estimator of the average treatment effect in causal inference in Tan (2006), JASA.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ate.creg(y, tr, p, g0,g1, X=NULL, evar=TRUE, inv="solve")</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>A vector of observed outcomes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tr</code></td>
+<td>
+<p>A vector of treatment indicators (=1 if treated or 0 if untreated).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>A vector of known or fitted propensity scores.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>g0</code></td>
+<td>
+<p>A matrix of calibration variables for treatment 0 (see the details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>g1</code></td>
+<td>
+<p>A matrix of calibration variables for treatment 1 (see the details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>The model matrix for the propensity score model, assumed to be logistic (set <code>X=NULL</code> if <code>p</code> is known or treated to be so).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>evar</code></td>
+<td>
+<p>Logical; if <code>FALSE</code>, no variance estimation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inv</code></td>
+<td>
+<p>Type of matrix inversion, set to "solve" (default) or "ginv" (which can be used in the case of computational singularity).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The columns of <code>g0</code> (or respectively <code>g1</code>) correspond to calibration variables for treatment 0 (or treatment 1), which can be specified to include a constant and the fitted outcome regression function for treatment 0 (or treatment 1). See the examples below. In general, a calibration variable is a function of measured covariates selected to exploit the fact that its weighted treatment-specific mean should equal to its unweighted population mean.
+</p>
+<p>To estimate the propensity scores, a logistic regression model is assumed.
+The model matrix <code>X</code> does not need to be provided and can be set to <code>NULL</code>, in which case the estimated propensity scores are treated as known in the estimation.
+If the model matrix <code>X</code> is provided, then the "score," <code>(tr-p)X</code>, from the logistic regression is used to generate additional calibration constraints in the estimation. This may sometimes lead to unreliable estimates due to multicollinearity, as discussed in Tan (2006). Therefore, this option should be used with caution.
+</p>
+<p>Variance estimation is based on asymptotic expansions in Tan (2013). Alternatively, resampling methods (e.g., bootstrap) can be used.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>mu</code></td>
+<td>
+<p>The estimated means for treatments 1 and 0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diff</code></td>
+<td>
+<p>The estimated average treatment effect.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v</code></td>
+<td>
+<p>The estimated variances of <code>mu</code>, if <code>evar=TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>v.diff</code></td>
+<td>
+<p>The estimated variance of <code>diff</code>, if <code>evar=TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>A matrix of two colums, giving the vector of regression coefficients for treatments 1 and 0 respectively.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Tan, Z. (2006) "A distributional approach for causal inference using propensity scores," <em>Journal of the American Statistical Association</em>, 101, 1619-1637.
+</p>
+<p>Tan, Z. (2010) "Bounded, efficient and doubly robust estimation with inverse weighting,"
+<em>Biometrika</em>, 97, 661-682.
+</p>
+<p>Tan, Z. (2013) "Variance estimation under misspecified models,"
+unpublished manuscript, <a href="http://www.stat.rutgers.edu/~ztan">http://www.stat.rutgers.edu/~ztan</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(KS.data)
+attach(KS.data)
+z=cbind(z1,z2,z3,z4)
+x=cbind(x1,x2,x3,x4)
+
+#logistic propensity score model, correct
+ppi.glm &lt;- glm(tr~z, family=binomial(link=logit))
+
+X &lt;- model.matrix(ppi.glm)
+ppi.hat &lt;- ppi.glm$fitted
+
+#outcome regression model, misspecified
+y.fam &lt;- gaussian(link=identity)
+
+eta1.glm &lt;- glm(y ~ x, subset=tr==1, 
+               family=y.fam, control=glm.control(maxit=1000))
+eta1.hat &lt;- predict.glm(eta1.glm, 
+               newdata=data.frame(x=x), type="response")
+
+eta0.glm &lt;- glm(y ~ x, subset=tr==0, 
+               family=y.fam, control=glm.control(maxit=1000))
+eta0.hat &lt;- predict.glm(eta0.glm, 
+               newdata=data.frame(x=x), type="response")
+
+#ppi.hat treated as known
+out.reg &lt;- ate.creg(y, tr, ppi.hat, 
+                     g0=cbind(1,eta0.hat),g1=cbind(1,eta1.hat))
+out.reg$diff
+out.reg$v.diff
+
+#ppi.hat treated as estimated
+out.reg &lt;- ate.creg(y, tr, ppi.hat, 
+                     g0=cbind(1,eta0.hat),g1=cbind(1,eta1.hat), X)
+out.reg$diff
+out.reg$v.diff
+</code></pre>
+
+
+</div>

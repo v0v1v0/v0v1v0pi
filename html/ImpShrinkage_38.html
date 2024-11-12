@@ -1,0 +1,142 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>teststat</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Test-Statistics</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates the test statistics, assuming
+<code class="reqn">\mathcal{H}_0: H \beta = h</code>. When the error has a normal distribution,
+it is defined as
+</p>
+<p style="text-align: center;"><code class="reqn">\mathcal{L} = \frac{(H\hat{\beta}^{U}-h)^{\top}(H(X^{\top}X)^{-1}
+H^{\top})^{-1}(H\hat{\beta}^{U}-h) }{q s^2_{unr}}</code>
+</p>
+
+<p>and when the error has a non-normal distribution, as
+</p>
+<p style="text-align: center;"><code class="reqn">\mathcal{L} = \frac{(H\hat{\beta}^{U}-h)^{\top}(H(X^{\top}X)^{-1}
+H^{\top})^{-1}(H\hat{\beta}^{U}-h) }{s^2_{unr}}</code>
+</p>
+
+<p>where
+</p>
+
+<ul>
+<li> <p><code class="reqn">\hat{\beta}^{U}</code> is the unrestricted estimator; See <code>unrReg</code>.
+</p>
+</li>
+<li> <p><code class="reqn">q</code> is the number of restrictions, i.e., the number of rows of known matrix
+<code class="reqn">H</code>;
+</p>
+</li>
+<li> <p><code class="reqn">s^2_{unr}</code> is the corresponding unrestricted estimator of
+<code class="reqn">\sigma^2</code>.
+</p>
+</li>
+</ul>
+<h3>Usage</h3>
+
+<pre><code class="language-R">teststat(X, y, H, h, is_error_normal = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>Matrix with input observations, of dimension <code>n</code> x <code>p</code>;
+each row is an observation vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Vector with response observations of size <code>n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>H</code></td>
+<td>
+<p>A given <code>q</code> x <code>p</code> matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>A given <code>q</code> x <code>1</code> vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>is_error_normal</code></td>
+<td>
+<p>logical value indicating whether the errors follow a
+normal distribution. If <code>is_error_normal</code> is <code>TRUE</code>, the distribution
+of the test statistics for the null hypothesis is the F distribution
+(<code>FDist</code>).On the other hand, if the errors have a
+non-normal distribution, the asymptotic distribution of the test statistics
+is the <code class="reqn">\chi^2</code> distribution (<code>Chisquare</code>). By default,
+<code>is_error_normal</code> is set to <code>FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The value of the test statistic.
+</p>
+
+
+<h3>References</h3>
+
+<p>Saleh, A. K. Md. Ehsanes. (2006). <em>Theory of Preliminary Test and
+Stein‐Type Estimation With Applications</em>, Wiley.
+</p>
+<p>Kaciranlar, S., Akdeniz, S. S. F., Styan, G. P. &amp; Werner, H. J. (1999). A new biased
+estimators in linear regression and detailed
+analysis of the widely-analysed dataset on
+portland cement. <em>Sankhya, Series B</em>, 61(3), 443-459.
+</p>
+<p>Kibria, B. M. Golam (2005). Applications of Some Improved Estimators in Linear Regression,
+<em>Journal of Modern Applied Statistical Methods</em>, 5(2), 367- 380.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">n_obs &lt;- 100
+p_vars &lt;- 5
+beta &lt;- c(2, 1, 3, 0, 5)
+simulated_data &lt;- simdata(n = n_obs, p_vars, beta)
+X &lt;- simulated_data$X
+y &lt;- simulated_data$y
+p &lt;- ncol(X)
+# H beta = h
+H &lt;- matrix(c(1, 1, -1, 0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 1, 0), nrow = 3, ncol = p, byrow = TRUE)
+h &lt;- rep(0, nrow(H))
+teststat(X, y, H, h)
+
+# H beta != h
+H &lt;- matrix(c(1, 1, -1, 0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 1, 0), nrow = 3, ncol = p, byrow = TRUE)
+h &lt;- rep(1, nrow(H))
+teststat(X, y, H, h)
+
+data(cement)
+X &lt;- as.matrix(cbind(1, cement[, 1:4]))
+y &lt;- cement$y
+# Based on Kaciranlar et al. (1999)
+H &lt;- matrix(c(0, 1, -1, 1, 0), nrow = 1, ncol = 5, byrow = TRUE)
+h &lt;- rep(0, nrow(H))
+teststat(X, y, H, h)
+# Based on Kibria (2005)
+H &lt;- matrix(c(0, 1, -1, 1, 0, 0, 0, 1, -1, -1, 0, 1, -1, 0, -1), nrow = 3, ncol = 5, byrow = TRUE)
+h &lt;- rep(0, nrow(H))
+teststat(X, y, H, h)
+</code></pre>
+
+
+</div>

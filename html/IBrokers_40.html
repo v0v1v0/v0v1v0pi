@@ -1,0 +1,250 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>reqHistoricalData</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Request Historical Data From TWS </h2>
+
+<h3>Description</h3>
+
+<p>Makes a request to the Interactive Brokers Trader Workstation (TWS),
+and returns an xts object containing the results of the request
+if successful.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">reqHistoricalData(conn,
+                  Contract,
+                  endDateTime,
+                  barSize = "1 day",
+                  duration = "1 M",
+                  useRTH = "1",
+                  whatToShow = "TRADES", 
+                  timeFormat = "1",
+                  tzone = "",
+                  verbose = TRUE,
+                  tickerId = "1",
+                  eventHistoricalData,
+                  file)
+
+reqHistory(conn, Contract, barSize, ...)
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>conn</code></td>
+<td>
+<p> a <code>twsConnection</code> object </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Contract</code></td>
+<td>
+<p> a <code>twsContract</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>endDateTime</code></td>
+<td>
+<p> end date/time for request. See details. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>barSize</code></td>
+<td>
+<p> bar size to retrieve </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>duration</code></td>
+<td>
+<p> time span the request will cover </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>useRTH</code></td>
+<td>
+<p> limited to regular trading hours </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>whatToShow</code></td>
+<td>
+<p> type of data to be extracted </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timeFormat</code></td>
+<td>
+<p> POSIX style or seconds from 1970-01-01 </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tzone</code></td>
+<td>
+<p> time zone of the resulting intraday series (if applicable) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p> should progress be documented </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tickerId</code></td>
+<td>
+<p> a unique id to associte with the request </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eventHistoricalData</code></td>
+<td>
+<p> callback function to process data </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p> file to write data to </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> args to pass to reqHistoricalData </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>reqHistory</code> function is a simple wrapper to
+request maximal history from IB. It is meant to be
+used directlty, or as a template for new wrappers.
+</p>
+<p>All arguments should be character strings.  Attempts will
+be made to coerce, but should not be relied upon.
+</p>
+<p>The <code>endDateTime</code> argument must be of the form
+'CCYYMMDD HH:MM:SS TZ'. If not specified the current
+time as returned from the TWS server will be used. This
+is the preferred method for backfilling data. The ‘TZ’
+portion of the string is optional.
+</p>
+<p>Legal <code>barSize</code> values are
+‘1 secs’,‘5 secs’,‘15 secs’,
+‘30 mins’,‘1 min’,‘2 mins’,
+‘3 mins’,‘5 mins’,‘15 mins’,
+‘30 mins’,‘1 hour’,‘1 day’,
+‘1 week’,‘1 month’,‘3 months’,
+and ‘1 year’.
+</p>
+<p>Partial matching is attempted, but it is best to specify the <code>barSize</code>
+value exactly as they are given above. There is no guarantee from the API
+that all will work for all securities or durations.
+</p>
+<p>The duration string must be of the form ‘n u’
+where ‘n’ is an integer and ‘u’ is one of:
+‘S’ (seconds),
+‘D’ (days),
+‘W’ (weeks),
+‘M’ (months),
+or ‘Y’ (year).
+For example, ‘1 W’ would return one week of data.
+At present the limit for years is 1.
+</p>
+<p><code>useRTH</code> takes either ‘1’ or ‘0’,
+indicating the request to return only regular trade
+hour data, or all data, respectively.
+</p>
+<p><code>whatToShow</code> can be any one of the following,
+though depending on the overall request it may not succeed.
+‘TRADES’, ‘MIDPOINT’, ‘BID’,
+‘ASK’, ‘BID_ASK’.
+</p>
+<p><code>time.format</code> should simply be left alone. :D
+</p>
+<p><code>eventHistoricalData</code> accepts a user function to process the raw
+data returned by the TWS.  This consists of a character
+vector that includes the first five elements of header
+information, with the fifth element specifying the number
+of rows in the results set.  Passing <code>NULL</code> to 
+<code>eventHistoricalData</code> will return the raw character vector.
+If nothing is specified, an xts object is returned.
+</p>
+<p>The <code>eventHistoricalData</code> function, if any, is called after all
+data has been received by the client.
+</p>
+<p>The <code>file</code> argument calls <code>write.table</code> to produce
+output suitable to reading in by <code>read.csv</code>. The <code>file</code>
+argument is passed to the write.table call, and if an empty
+string will return the output to the console.
+</p>
+<p>The <em>hasGaps</em> column is converted automatically from
+(true,false) to 1 or 0, respectively. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns an <code>xts</code> object containing the requested data, along
+with additional information stored in the objects <code>xtsAttributes</code>,
+unless <code>callback</code> or <code>file</code> is specified.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The rules for historical data requests are somewhat vague. Not all
+symbols have data, and those that do may only be available with specific
+combinations of barSize and duration arguments. At present the only
+way to know is to try the combination in question.
+</p>
+<p>There is a strictly enforced 10 seconds between request pacing rule
+implemented by the TWS. Keep this in mind.
+IBrokers currently does <em>not</em> manage this for the user via
+reqHistoricalData, though reqHistory does.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Jeffrey A. Ryan </p>
+
+
+<h3>References</h3>
+
+<p> Interactive Brokers <a href="https://www.interactivebrokers.com">https://www.interactivebrokers.com</a> </p>
+
+
+<h3>See Also</h3>
+
+ <p><code>twsContract</code>, <code>twsConnect</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+tws &lt;- twsConnect()
+contract &lt;- twsEquity('QQQQ','SMART','ISLAND')
+
+# by default retreives 30 days of daily data
+reqHistoricalData(tws, Contract=contract)
+
+# by default retreives a year of 1 minute bars
+Sys.sleep(10) # mandatory 10s between request to avoid IB pacing violation
+reqHistory(tws, Contract=contract)
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,123 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>spikesMetric</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Find spikes using a rolling Hampel filter</h2>
+
+<h3>Description</h3>
+
+<p>The spikesMetric() function determines the number of spikes in a seismic <code>Stream</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">spikesMetric(st, windowSize=41, thresholdMin=10, selectivity=NA, fixedThreshold=TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>st</code></td>
+<td>
+<p> a <code>Stream</code> object containing a seismic signal</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>windowSize</code></td>
+<td>
+<p> The window size to roll over (default=<code>41</code>) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thresholdMin</code></td>
+<td>
+<p> Initial value for outlier detection (default=<code>10.0</code>) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>selectivity</code></td>
+<td>
+<p> Numeric factor [0-1] used in determining outliers, or NA if fixedThreshold=TRUE (default=<code>NA</code>) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixedThreshold</code></td>
+<td>
+<p>TRUE or FALSE, set the threshold=thresholdMin and ignore selectivity (default=<code>TRUE</code>)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function uses the output of the <code>findOutliers()</code> function in the <span class="pkg">seismicRoll</span>
+package to calculate the number of 'spikes' containing outliers.
+</p>
+<p>The <code>thresholdMin</code> level is similar to a sigma value for normally distributed data.
+Hampel filter values above 6.0 indicate a data value that is extremely unlikely
+to be part of a normal distribution (~ 1/500 million) and therefore very likely to be an outlier. By
+choosing a relatively large value for <code>thresholdMin</code> we make it less likely that we
+will generate false positives. False positives can include high frequency environmental noise.
+</p>
+<p>The <code>selectivity</code> is a value between 0 and 1 and is used to generate an appropriate 
+threshold for outlier detection based on the statistics of the incoming data. A lower value
+for <code>selectivity</code> will result in more outliers while a value closer to 1.0 will result in 
+fewer. The code ignores selectivity if <code>fixedThreshold=TRUE</code>.
+</p>
+<p>The <code>fixedThreshold</code> is a logical <code>TRUE</code> or <code>FALSE</code>. If <code>TRUE</code>, then the threshold is set to <code>thresholdMin</code>.
+If <code>FALSE</code>, then the threshold is set to maximum value of the <code>roll_hample()</code> function output multiplied by the <code>selectivity</code>.
+</p>
+<p>The total count of spikes reflects the number of outlier data points that are separated by at least 
+one non-outlier data point. Each individual spike may contain more than one data point.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of <code>SingleValueMetric</code> objects is returned.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The <code>thresholdMin</code> parameter is sensitive to the data sampling rate. The default
+value of 10 seems to work well with sampling rates of 10 Hz or higher ('B..' or 'H..' channels).  For
+'L..' channels with a sampling rate of 1 Hz <code>thresholdMin=12.0</code> or larger may be more appropriate.
+</p>
+<p><strong>More testing of spiky signals at different resolutions is needed.</strong>
+</p>
+
+<p>See the <span class="pkg">seismicRoll</span> package for documentation on the findOutliers() function.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  ## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+# Get the waveform
+starttime &lt;- as.POSIXct("2013-01-03 15:00:00", tz="GMT")
+endtime &lt;- starttime + 3600 * 3  
+st &lt;- getDataselect(iris,"IU","RAO","10","BHZ",starttime,endtime)
+
+# Calculate the gaps metrics and show the results
+metricList &lt;- spikesMetric(st)
+dummy &lt;- show(metricList)
+  
+## End(Not run)
+</code></pre>
+
+
+</div>

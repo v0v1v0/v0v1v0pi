@@ -1,0 +1,240 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Pretreatment</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Pretreat the IAT data in input.
+</h2>
+
+<h3>Description</h3>
+
+<p>Convert the initial dataframe of the IAT in a simpler dataframe, which is the input
+of subsequent functions in this package.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Pretreatment(IATdata,
+  label_subject = "subject",
+  label_latency = "latency",
+  label_accuracy = "correct",
+  label_block = "blockcode",
+  block_pair1 = c("pair1_left", "pair1_right"),
+  block_pair2 = c("pair2_left", "pair2_right"),
+  label_trial = NA,
+  trial_left = NA,
+  trial_right = NA,
+  label_praccrit=NA,
+  block_prac=NA,
+  block_crit=NA,
+  label_stimulus=NA)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>IATdata</code></td>
+<td>
+<p>The input dataframe. I consider the the output of the IAT implemented in Inquisit (a row by trial). Only 7 columns are important for computation.<br>
+- a column with subject numbers<br>
+- a column with latencies<br>
+- a column with accuracy (1 = correct, 0 = incorrect)<br>
+- a column including the block codes, i.e. one or more strings that describe the kind of block (e.g., "compatible" vs. "incompatible")<br>
+- a column including the trial codes, i.e. one or more strings that describe the kind of trial (e.g., "response_left" vs. "response_right")<br>
+- a column including information about which are the practice and which the critical combined categorization blocks.<br>
+- a column with the original stimuli (optional)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label_subject</code></td>
+<td>
+<p>String. Name of the column in <code>IATdata</code> with the subject numbers</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label_latency</code></td>
+<td>
+<p>String. Name of the column in <code>IATdata</code> with the latencies</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label_accuracy</code></td>
+<td>
+<p>String. Name of the column in <code>IATdata</code> with the accuracy</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label_block</code></td>
+<td>
+<p>String. Name of the column in <code>IATdata</code> with the block names</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>block_pair1</code></td>
+<td>
+<p>Vector of strings. Elements of the column indicated in <code>label_block</code> that correspond the one of the critical blocks of the IAT</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>block_pair2</code></td>
+<td>
+<p>Vector of strings. Elements of the column indicated in <code>label_block</code> that correspond the the other critical block of the IAT (with respect to the one indicated by <code>block_pair1</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label_trial</code></td>
+<td>
+<p>String (optional). Name of the column in <code>IATdata</code> with the trial names</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trial_left</code></td>
+<td>
+<p>Vector of strings(optional). Elements of the column indicated in <code>label_trial</code> that correspond to trials that required to to press the left button to give the correct response.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trial_right</code></td>
+<td>
+<p>Vector of strings(optional). Elements of the column indicated in <code>label_trial</code> that correspond to trials that required to to press the right button to give the correct response.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label_praccrit</code></td>
+<td>
+<p>String (optional). The column in which the information about practice and critical trials is stored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>block_prac</code></td>
+<td>
+<p>Vector of strings (optional). The elements of the column indicated in <code>label_praccrit</code> that correspond to the practice combined blocks</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>block_crit</code></td>
+<td>
+<p>Vector of strings (optional). The elements of the column indicated in <code>label_praccrit</code> that correspond to the critical combined blocks</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label_stimulus</code></td>
+<td>
+<p>(optional) The variable name in <code>IATdata</code> that keeps information about the stimulus presented in each trial</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a dataframe with the following columns:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>subject</code></td>
+<td>
+<p>Univocally identifies a participant.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>correct</code></td>
+<td>
+<p>(logical). has value TRUE or 1 if the trial was answered correctly, FALSE or 0 otherwise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>latency</code></td>
+<td>
+<p>(numeric). Response latency.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>blockcode</code></td>
+<td>
+<p>(factor). Can assume only two values, <code>"pair1"</code> and <code>"pair2"</code>. <code>"pair1"</code> is for one critical block and <code>"pair2"</code> is the other critical block.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>praccrit</code></td>
+<td>
+<p>(factor, optional). Can assume only two values, <code>"prac"</code> is for practice combined categorization block and <code>"crit"</code> is for critical combined categorization block. In a IAT with 60 trials for each double categorization block, the first 20 are sometimes administered as practice block, the other 40 as critical.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trialcode</code></td>
+<td>
+<p>(factor, optional). Code for the trial, has value <code>"left"</code> if the correct response required to press the left button, <code>"right"</code> if it required to press the right button.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stimulus</code></td>
+<td>
+<p>(character, optional). The stimulus item.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Giulio Costantini
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#### generate random IAT data ####
+set.seed(1234)
+rawIATdata &lt;- data.frame(
+  # ID of each participant (N = 10)
+  ID = rep(1:10, each = 180), 
+  # seven-block structure, as in Greenwald, Nosek &amp; Banaji (2003)
+  # block 1 = target discrimination (e.g., Bush vs. Gore items)
+  # block 2 = attribute discrimination (e.g., Pleasant words vs. unpleasant)
+  # block 3 = combined practice (e.g., Bush + pleasant vs. Gore + unpleasant)
+  # block 4 = combined critical  (e.g., Bush + pleasant vs. Gore + unpleasant)
+  # block 5 = reversed target discrimination (e.g., Gore vs. Bush)
+  # block 6 = reversed combined practice (e.g., Gore + pleasant vs. Bush + unpleasant)
+  # block 7 = reversed combined critical (e.g., Gore + pleasant vs. Bush + unpleasant)
+  block = rep(c(rep(1:3, each = 20),
+                rep(4, 40),
+                rep(5:6, each = 20),
+                rep(7, 40)), 10),
+# expected proportion of errors = 10 percent
+  correct = sample(c(0, 1), size = 1800, replace = TRUE, prob = c(.2, .8)),
+  # reaction times are generated from a mix of two chi2 distributions,
+  # one centered on 550ms and one on 100ms to simulate fast latencies
+  latency = round(sample(c(rchisq(1500, df = 1, ncp = 550),
+                           rchisq(300, df = 1, ncp = 100)), 1800)))
+
+# add some IAT effect by making trials longer in block 6 and 7
+rawIATdata[rawIATdata$block &gt;= 6, "latency"] &lt;- 
+  rawIATdata[rawIATdata$block &gt;= 6, "latency"] + 100
+  
+# add some more effect for subjects 1 to 5
+rawIATdata[rawIATdata$block &gt;= 6 &amp;
+             rawIATdata$ID &lt;= 5, "latency"] &lt;- 
+  rawIATdata[rawIATdata$block &gt;= 6 &amp;
+             rawIATdata$ID &lt;= 5, "latency"] + 100
+               
+head(rawIATdata)
+               
+#### pretreat IAT data using function Pretreatment ####
+IATdata &lt;- Pretreatment(rawIATdata,
+                             label_subject = "ID",
+                          label_latency = "latency",
+                          label_accuracy = "correct",
+                          label_block = "block",
+                          block_pair1 = c(3, 4),
+                          block_pair2 = c(6, 7),
+                          label_praccrit = "block",
+                          block_prac = c(3, 6),
+                          block_crit = c(4, 7))
+# data are now in the correct format
+head(IATdata)
+</code></pre>
+
+
+</div>

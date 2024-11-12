@@ -1,0 +1,94 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>orbi_calculate_summarized_ratio</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate isotopocule ratio</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates the ratio of two isotopocules (the <code>numerator</code> and <code>denominator</code>). This function averages multiple measurements of each using the <code>ratio_method</code> and returns a single value. Normally this function is not called directly by the user, but via the function <code>orbi_summarize_results()</code>, which calculates isotopocule ratios and other results for an entire dataset.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">orbi_calculate_summarized_ratio(
+  numerator,
+  denominator,
+  ratio_method = c("direct", "mean", "sum", "median", "geometric_mean", "slope",
+    "weighted_sum")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>numerator</code></td>
+<td>
+<p>Column(s) used as numerator; contains ion counts</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>denominator</code></td>
+<td>
+<p>Column used as denominator; contains ion counts</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ratio_method</code></td>
+<td>
+<p>Method for computing the ratio. <strong>Please note well</strong>: the formula used to calculate ion ratios matters! Do not simply use arithmetic mean. The best option may depend on the type of data you are processing (e.g., MS1 versus M+1 fragmentation). <code>ratio_method</code> can be one of the following:
+</p>
+
+<ul>
+<li> <p><code>mean</code>: arithmetic mean of ratios from individual scans.
+</p>
+</li>
+<li> <p><code>sum</code>: sum of all ions of the numerator across all scans divided by the sum of all ions observed for the denominator across all scans.
+</p>
+</li>
+<li> <p><code>geometric_mean</code>: geometric mean of ratios from individual scans.
+</p>
+</li>
+<li> <p><code>slope</code>: The ratio is calculated using the slope obtained from a linear regression model that is weighted by the <code style="white-space: pre;">⁠numerator x⁠</code>, using <code>stats::lm(x ~ y + 0, weights = x)</code>.
+</p>
+</li>
+<li> <p><code>weighted_sum</code>: A derivative of the <code>sum</code> option. The weighing function ensures that each scan contributes equal weight to the ratio calculation,
+i.e. scans with more ions in the Orbitrap do not contribute disproportionately to the total <code>sum</code> of <code>x</code> and <code>y</code> that is used to calculate <code>x/y</code>.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Single value ratio between the isotopocules defined as <code>numerator</code> and <code>denominator</code> calculated using the <code>ratio_method</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">df &lt;-
+  system.file("extdata", "testfile_flow.isox", package = "isoorbi") |&gt;
+  orbi_read_isox()
+
+ions_18O &lt;- dplyr::filter(df, isotopocule == "18O")$ions.incremental
+ions_M0 &lt;- dplyr::filter(df, isotopocule == "M0")$ions.incremental
+
+orbi_calculate_summarized_ratio(
+  numerator = ions_18O, denominator = ions_M0, ratio_method = "sum"
+)
+
+orbi_calculate_summarized_ratio(
+  numerator = ions_18O, denominator = ions_M0, ratio_method = "slope"
+)
+
+</code></pre>
+
+
+</div>

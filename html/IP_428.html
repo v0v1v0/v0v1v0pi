@@ -1,0 +1,166 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Bitwise-methods</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Bitwise operations </h2>
+
+<h3>Description</h3>
+
+<p>Methods for IP bitwise operations
+
+
+<code>!e1</code> 
+
+<code>e1 &amp; e2</code> 
+
+<code>e1 | e2</code>
+
+<code>e1 %&gt;&gt;% e2</code>
+
+<code>e1 %&lt;&lt;% e2</code>
+
+<code>e1 ^ e2 </code>
+
+<code>ip.xor(e1 , e2 )</code>
+
+<code>ipv4.netmask(n)</code>
+
+<code>ipv6.netmask(n)</code>
+
+<code>ipv4.hostmask(n)</code>
+
+<code>ipv6.hostmask(n)</code>
+
+</p>
+
+
+<h3>Arguments</h3>
+
+
+<table><tr style="vertical-align: top;">
+<td><code>e1</code></td>
+<td>
+
+<p>an object of either an 'IPv4', 'IPv6' or 'IP' class  
+</p>
+</td>
+</tr></table>
+<table><tr style="vertical-align: top;">
+<td><code>e2</code></td>
+<td>
+
+<p>an object of either an 'IPv4', 'IPv6' or 'IP' class except for shifts where e2 is like 'n' 
+</p>
+</td>
+</tr></table>
+<table><tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+
+<p>an integer in the range (0,32) for IPv4 or in the (0,128) for IPv6 for masking methods
+</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+
+<p>The <code>&amp;</code>, <code>|</code> and <code>!</code> operators behave differently from their base R counterparts in that they perform bitwise operation much like in the C language.
+
+</p>
+
+
+<ul>
+<li> <p><code>&amp;</code> : bitwise AND
+
+</p>
+</li>
+<li> <p><code>|</code> : bitwise non exclusive OR
+
+</p>
+</li>
+<li> <p><code>!</code> : bitwise NOT
+</p>
+</li>
+</ul>
+<p><code>ip.xor()</code> provides a faster alternative to base <code>xor()</code>.
+</p>
+
+<p><code>%&gt;&gt;%</code> and <code>%&lt;&lt;%</code> perform left (binary division) and right shift (binary multiplication) respectively.
+</p>
+
+<p>The <code>*.netmask()</code> and <code>*.hostmask()</code> functions return the net and host mask of specified length <code>n</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>an object of either an 'IPv4', 'IPv6' or 'IP' class
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##
+private.network &lt;- ipv4r("192.0.0.0/16")
+##
+(mask.len &lt;- ceiling(log2(ip.range(private.network))))
+##
+ip &lt;- ipv4("192.168.1.1") 
+##
+(netmask &lt;- ipv4.netmask(mask.len))
+##
+ip &amp; netmask
+##
+(hostmask &lt;- ipv4.hostmask(mask.len))
+##
+ip &amp; hostmask
+##
+((ip &amp; netmask) | (ip &amp; hostmask) )==ip
+## 2 complement
+((!ip) + 1L)==-ip
+##
+ipv4('0.0.0.2') %&gt;&gt;% 1L
+##
+ipv4('0.0.0.2') %&lt;&lt;% 1L
+##
+## branchless swap
+##
+ipv4.ifelse &lt;- function(test, yes, no){
+  ## 
+  if( ( class(yes)!='IPv4' ) | ( class(no)!='IPv4' ) ){
+    stop('both arguments should be of class IPv4')
+  }
+  ##
+  ip.xor(
+    no
+    , ip.xor(
+      no, yes
+    ) &amp; -(ipv4(test)) ## mask
+  )
+}
+##
+x &lt;- ipv4('192.168.0.0') + 1:5
+## recycling without warning (yet)
+y &lt;- x + c(1,-1)
+##
+test &lt;- x &lt; y
+##
+data.frame(
+  x, y, test, res= ipv4.ifelse(test , x,y)
+)
+##
+##
+##
+ip6 &lt;- ipv6("2606:2800:220:1:248:1893:25c8:1946")
+## Unicast addresses global routing prefix
+ip6 &amp; ipv6.netmask(48)
+## Subnet ID
+ip6 &amp; (ipv6.hostmask(128-16) %&lt;&lt;% 64L)
+## Interface ID 
+ip6 &amp; ipv6.hostmask(64)
+</code></pre>
+
+
+</div>

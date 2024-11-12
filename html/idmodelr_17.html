@@ -1,0 +1,153 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>scenario_analysis</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>A Function to Perform Scenario Analysis for a Generic Model Object.</h2>
+
+<h3>Description</h3>
+
+<p>This function uses parameter permutations produced by
+<code>generate_parameter_permutations</code> to simulate from a supplied model function.
+It can be used to examine multiple scenarios, with any number of parameter variations, for multiple samples.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">scenario_analysis(
+  parameter_df,
+  variable_params = NULL,
+  model = NULL,
+  sim_fn = NULL,
+  summary_fn = NULL,
+  cores = 1,
+  rerun = FALSE,
+  verbose = FALSE,
+  by_row = FALSE,
+  test = FALSE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>parameter_df</code></td>
+<td>
+<p>A dataframe of parameter permutations as produced by <code>generate_parameter_permutations</code>.
+Using the default options it will save results when run for the first time, and afterwards load them in.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variable_params</code></td>
+<td>
+<p>A character vector containing the names of the parameters that are varied in <code>parameter_df</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A model compatible with your <code>sim_fn</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sim_fn</code></td>
+<td>
+<p>A generic simulation function, with the first argument as the model object,
+a <code>params</code> argument, and a <code>as.data.frame</code> argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>summary_fn</code></td>
+<td>
+<p>A function which accepts a single dataframe argument customised to fit with the standard
+output of <code>scenario_analysis</code>  and your <code>simulate_model</code> function. Defaults to <code>NULL</code> for which
+no summarisation takes place. Warning: If a previous analysis has been saved, changing this option will not
+summarise the result. The analysis must be rerun.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>The number of cores to use for the scenario analysis, defaults to 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rerun</code></td>
+<td>
+<p>A logical indicating if the function should be rerun or saved results should be loaded.
+Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Logical (defaults to <code>FALSE</code>) indicating if progress information should be printed to the console.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>by_row</code></td>
+<td>
+<p>Logical (defaults to <code>FALSE</code>) indicating if inputted parameters should be inputted as a block to <code>sim_fn</code>
+or individually. If <code>TRUE</code> then function will always return a tibble. Does not currently work with sim_fn that produces
+multiple simulations for a single parameter set - for this scenario a block based approach or post processing is required.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test</code></td>
+<td>
+<p>A logical (defaults to <code>FALSE</code>) if <code>TRUE</code> function uses multicore functionality regardless
+of the number of cores specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Pass additional arguments to sim_fn. Only implemented when a single core is used.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A tidy dataframe containing simulated model trajectories for each scenario
+varied parameter combination. Use 'tidyr::unnest“ to examine all simulation results.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+scenarios &lt;- data.frame(scenario = c("test_1", "test_2"), scenario_param = c(0, 1))
+variable_params &lt;-  data.frame(variable = c(0, 0.5, 1))
+fixed_params &lt;- c(fixed_1 = 2, fixed_2 = c(1, 3, 4))
+sample_params &lt;- c(sample_1 = 2, sample_2 = c(2, 1))
+
+parameter_df &lt;- generate_parameter_permutations(variable_params, fixed_params, sample_params,
+                                                excluded_params = c("variable"), scenarios,
+                                                parameter_samples = 10)
+
+## set up dummy simulation function (returning an empty dataframe)
+dummy_sim_fn &lt;- function(object, inits, params, times, as.data.frame) {
+ x &lt;- tibble::tibble()
+ return(x)
+}
+
+## Set up dummy summary function
+dummy_sum_fn &lt;- function(df){
+df &lt;- dplyr::mutate(df, summarised_simulations = simulations)
+
+return(df)
+}
+dummy_model &lt;- function(){}
+
+## Run scenario analysis
+scenario_analysis(parameter_df, variable_params = "variable", model = dummy_model,
+                  sim_fn = dummy_sim_fn, cores = 1, summary_fn = dummy_sum_fn)
+</code></pre>
+
+
+</div>

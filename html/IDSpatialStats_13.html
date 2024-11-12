@@ -1,0 +1,130 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get.pi</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generalized version of <code>get.pi</code>
+</h2>
+
+<h3>Description</h3>
+
+<p>Generalized version of the <code>get.pi</code> function that takes in an arbitrary function and
+returns the probability that a point within a particular range of a point of interest shares the relationship
+specified by the passed in function with that point.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get.pi(posmat, fun, r = 1, r.low = rep(0, length(r)), data.frame = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>posmat</code></td>
+<td>
+<p>a matrix with columns x, y and any other named columns
+columns needed by <code>fun</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fun</code></td>
+<td>
+<p>a function that takes in two rows of <code>posmat</code> and returns:
+</p>
+
+<ol>
+<li>
+<p> for pairs included in the numerator and denominator
+</p>
+</li>
+<li>
+<p> for pairs that should only be included in the denominator
+</p>
+</li>
+<li>
+<p> for pairs that should be ignored all together</p>
+</li>
+</ol>
+<p>Note that names from <code>posmat</code> are not preserved in calls to <code>fun</code>, so the columns of the matrix should be
+referenced numerically
+so this is not available to the <code>fun</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>the series of spatial distances (or there maximums) we are
+interested in</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r.low</code></td>
+<td>
+<p>the low end of each range, 0 by default</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.frame</code></td>
+<td>
+<p>logical indicating whether to return results as a data frame (default = TRUE)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>pi value for each distance range that we look at. Where:
+</p>
+<p style="text-align: center;"><code class="reqn"> \pi(d_1, d_2) = \frac{\sum \boldsymbol{1} (d_{ij} \in [d_1,d_2)) \boldsymbol{1} (f(i,j)=1) }{\sum \sum \boldsymbol{1} [d_{ij} \in (d_1,d_2)) \boldsymbol{1} (f(i,j) \in \{1,2\}) }</code>
+</p>
+
+
+
+<h3>Author(s)</h3>
+
+<p>Justin Lessler and Henrik Salje
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other get.pi: 
+<code>get.pi.bootstrap()</code>,
+<code>get.pi.ci()</code>,
+<code>get.pi.permute()</code>,
+<code>get.pi.typed()</code>,
+<code>get.pi.typed.bootstrap()</code>,
+<code>get.pi.typed.permute()</code>
+</p>
+<p>Other spatialtau: 
+<code>get.tau()</code>,
+<code>get.theta()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+data(DengueSimR02)
+
+r.max&lt;-seq(20,1000,20)
+r.min&lt;-seq(0,980,20)
+
+sero.type.func&lt;-function(a,b,tlimit=20){
+  if(a[5]==b[5]&amp;(abs(a[3]-b[3])&lt;=tlimit)){rc=1}
+  else{rc=2}
+  return(rc)
+}
+
+sero.pi&lt;-get.pi(DengueSimR02,sero.type.func,r=r.max,r.low=r.min)
+
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,161 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bru</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Convenient model fitting using (iterated) INLA</h2>
+
+<h3>Description</h3>
+
+<p>This method is a wrapper for <code>INLA::inla</code> and provides
+multiple enhancements.
+</p>
+
+<ul>
+<li>
+<p>Easy usage of spatial covariates and automatic construction of inla
+projection matrices for (spatial) SPDE models. This feature is
+accessible via the <code>components</code> parameter. Practical examples on how to
+use spatial data by means of the components parameter can also be found
+by looking at the lgcp function's documentation.
+</p>
+</li>
+<li>
+<p>Constructing multiple likelihoods is straight forward. See like for
+more information on how to provide additional likelihoods to <code>bru</code>
+using the <code>...</code> parameter list.
+</p>
+</li>
+<li>
+<p>Support for non-linear predictors. See example below.
+</p>
+</li>
+<li>
+<p>Log Gaussian Cox process (LGCP) inference is
+available by using the <code>cp</code> family or (even easier) by using the
+lgcp function.
+</p>
+</li>
+</ul>
+<h3>Usage</h3>
+
+<pre><code class="language-R">bru(components = ~Intercept(1), ..., options = list(), .envir = parent.frame())
+
+bru_rerun(result, options = list())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>components</code></td>
+<td>
+<p>A <code>formula</code>-like specification of latent components.
+Also used to define a default linear additive predictor.  See
+<code>component()</code> for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Likelihoods, each constructed by a calling <code>like()</code>, or named
+parameters that can be passed to a single <code>like()</code> call. Note that
+all the arguments will be evaluated before calling <code>like()</code> in order
+to detect if they are <code>like</code> objects. This means that
+special arguments that need to be evaluated in the context of
+<code>response_data</code> or <code>data</code> (such as Ntrials) may will only work that
+way in direct calls to <code>like()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>options</code></td>
+<td>
+<p>A bru_options options object or a list of options passed
+on to <code>bru_options()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.envir</code></td>
+<td>
+<p>Environment for component evaluation (for when a non-formula
+specification is used)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>result</code></td>
+<td>
+<p>A previous estimation object of class <code>bru</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<ul><li> <p><code>bru_rerun</code> Continue the optimisation from a previously computed estimate.
+</p>
+</li></ul>
+<h3>Value</h3>
+
+<p>bru returns an object of class "bru". A <code>bru</code> object inherits
+from <code>INLA::inla</code> (see the inla documentation for its properties) and
+adds additional information stored in the <code>bru_info</code> field.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Fabian E. Bachl <a href="mailto:bachlfab@gmail.com">bachlfab@gmail.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+if (bru_safe_inla(multicore = FALSE)) {
+
+  # Simulate some covariates x and observations y
+  input.df &lt;- data.frame(x = cos(1:10))
+  input.df &lt;- within(input.df, y &lt;- 5 + 2 * x + rnorm(10, mean = 0, sd = 0.1))
+
+  # Fit a Gaussian likelihood model
+  fit &lt;- bru(y ~ x + Intercept, family = "gaussian", data = input.df)
+
+  # Obtain summary
+  fit$summary.fixed
+}
+
+
+if (bru_safe_inla(multicore = FALSE)) {
+
+  # Alternatively, we can use the like() function to construct the likelihood:
+
+  lik &lt;- like(family = "gaussian", formula = y ~ x + Intercept, data = input.df)
+  fit &lt;- bru(~ x + Intercept(1), lik)
+  fit$summary.fixed
+}
+
+# An important addition to the INLA methodology is bru's ability to use
+# non-linear predictors. Such a predictor can be formulated via like()'s
+# \code{formula} parameter. The z(1) notation is needed to ensure that
+# the z component should be interpreted as single latent variable and not
+# a covariate:
+
+if (bru_safe_inla(multicore = FALSE)) {
+  z &lt;- 2
+  input.df &lt;- within(input.df, y &lt;- 5 + exp(z) * x + rnorm(10, mean = 0, sd = 0.1))
+  lik &lt;- like(
+    family = "gaussian", data = input.df,
+    formula = y ~ exp(z) * x + Intercept
+  )
+  fit &lt;- bru(~ z(1) + Intercept(1), lik)
+
+  # Check the result (z posterior should be around 2)
+  fit$summary.fixed
+}
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,223 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>graph_match_convex</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Frank-Wolfe Graph Matching Methods</h2>
+
+<h3>Description</h3>
+
+<p>Match two given graphs, returns a list of graph matching
+results, including matching correspondence vector of <code class="reqn">G_2</code> with respect
+to <code class="reqn">G_1</code>, doubly stochastic matrix and permutation matrix.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">graph_match_convex(
+  A,
+  B,
+  seeds = NULL,
+  similarity = NULL,
+  start = "bari",
+  max_iter = 100,
+  tol = 1e-05,
+  lap_method = NULL
+)
+
+graph_match_indefinite(
+  A,
+  B,
+  seeds = NULL,
+  similarity = NULL,
+  start = "bari",
+  max_iter = 20,
+  lap_method = NULL
+)
+
+graph_match_PATH(
+  A,
+  B,
+  seeds = NULL,
+  similarity = NULL,
+  epsilon = 1,
+  tol = 1e-05,
+  max_iter = 20,
+  lap_method = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>A matrix, igraph object, or list of either.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>A matrix, igraph object, or list of either.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seeds</code></td>
+<td>
+<p>A vector of integers or logicals, a matrix or a data frame. If
+the seed pairs have the same indices in both graphs then seeds can be a
+vector. If not, seeds must be  a matrix or a data frame, with the first
+column being the indices of <code class="reqn">G_1</code> and the second column being the
+corresponding indices of <code class="reqn">G_2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>similarity</code></td>
+<td>
+<p>A matrix. An <code>n-by-n</code> matrix containing vertex similarities.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start</code></td>
+<td>
+<p>A matrix or a character. Any <code>nns-by-nns</code> matrix or
+character value like "bari", "rds" or "convex" to initialize the starting matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_iter</code></td>
+<td>
+<p>A number. Maximum number of replacing matches.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>A number. Tolerance of edge disagreements.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lap_method</code></td>
+<td>
+<p>Choice for lap method. One of "lapjv", "lapmod", or "clue".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>epsilon</code></td>
+<td>
+<p>A small number</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>graph_match_indefinite</code>, <code>graph_match_convex</code> and <code>graph_match_PATH</code>
+return an object of class "<code>graphMatch</code>" which is a list containing the following
+components:
+</p>
+
+<dl>
+<dt>corr_A</dt>
+<dd>
+<p>matching correspondence in <code class="reqn">G_1</code></p>
+</dd>
+<dt>corr_B</dt>
+<dd>
+<p>matching correspondence in <code class="reqn">G_2</code></p>
+</dd>
+<dt>soft</dt>
+<dd>
+<p>the doubly stochastic matrix from the last iteration with which one can
+extract more than one matching candidates</p>
+</dd>
+<dt>iter</dt>
+<dd>
+<p>number of iterations until convergence or reaches the <code>max_iter</code></p>
+</dd>
+<dt>max_iter</dt>
+<dd>
+<p>Maximum number of replacing matches</p>
+</dd>
+<dt>lap_method</dt>
+<dd>
+<p>Choice for solving the LAP</p>
+</dd>
+<dt>seeds</dt>
+<dd>
+<p>a vector of logicals indicating if the corresponding vertex is a seed</p>
+</dd>
+</dl>
+<h3>References</h3>
+
+<p>Y. Aflalo and A. Bronstein and R. Kimmel (2014), <em>On convex
+relaxation of graph isomorphism</em>. Proceedings of the National Academy of Sciences,
+pages 2942-2947.
+</p>
+<p>V. Lyzinski and D. E. Fishkind and M. Fiori and J. T. Vogelstein and C. E. Priebe
+and G. Sapiro (2016), <em>Graph Matching: Relax at Your Own Risk</em>. IEEE TPAMI, pages 60-73.
+</p>
+<p>V. Lyzinski and D. E. Fishkind and C. E. Priebe (2014), <em>Seeded Graph Matching
+for Correlated Erdos-Renyi Graphs</em>.J. Mach. Learn. Res., pages 3513-3540.
+</p>
+<p>M. Zaslavskiy, F. Bach and J. Vert (2009), <em>A Path following
+algorithm for the graph matching problem</em>. IEEE Trans Pattern Anal Mach Intell,
+pages 2227-2242.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+cgnp_pair &lt;- sample_correlated_gnp_pair(n = 10, corr =  0.9, p =  0.5)
+g1 &lt;- cgnp_pair$graph1
+g2 &lt;- cgnp_pair$graph2
+# match G_1 &amp; G_2 with no seeds
+gm(g1, g2, method = "convex", max_iter = 10)
+seeds &lt;- 1:10 &lt;= 3
+gm(g1, g2, seeds, method = "convex", max_iter = 10)
+
+
+
+
+# match G_1 &amp; G_2 with some known node pairs as seeds
+cgnp_pair &lt;- sample_correlated_gnp_pair(n = 10, corr =  0.3, p =  0.5)
+g1 &lt;- cgnp_pair$graph1
+g2 &lt;- cgnp_pair$graph2
+seeds &lt;- 1:10 &lt;= 3
+GM_bari &lt;- gm(g1, g2, seeds, method = "indefinite", start = "bari")
+GM_bari
+GM_bari[!GM_bari$seeds] # matching correspondence for non-seeds
+
+summary(GM_bari, g1, g2, true_label = 1:10)
+
+# match G_1 &amp; G_2 with some incorrect seeds
+hard_seeds &lt;- matrix(c(4,6,5,4),2)
+seeds &lt;- rbind(as.matrix(check_seeds(seeds, nv = 10)$seeds),hard_seeds)
+GM_badseed &lt;- gm(g1, g2, seeds, method = "indefinite")
+
+GM_badseed[] # get the corresponding permutation matrix
+GM_badseed %*% g2 # permute the second graph according to match result: PBP^T
+GM_badseed$soft # doubly stochastic matrix from the last step of Frank-Wolfe iterations
+GM_badseed$iter # number of iterations
+GM_badseed$max_iter # preset maximum number of iterations: 20
+
+# match two multi-layer graphs
+gp_list &lt;- replicate(3, sample_correlated_gnp_pair(20, .3, .5), simplify = FALSE)
+A &lt;- lapply(gp_list, function(gp)gp[[1]])
+B &lt;- lapply(gp_list, function(gp)gp[[2]])
+
+match_multi_layer &lt;- gm(A, B, seeds = 1:10, method = "indefinite", start = "bari", max_iter = 20)
+summary(match_multi_layer, A, B)
+
+# match G_1 &amp; G_2 using PATH algorithm
+gm(g1, g2, method = "PATH")
+
+
+</code></pre>
+
+
+</div>

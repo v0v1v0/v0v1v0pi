@@ -1,0 +1,245 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>isar</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Individual Diversity Area Relationships</h2>
+
+<h3>Description</h3>
+
+<p>Estimate different Individual Diversity-Area Relationships from a multivariate point pattern.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  isar(mippp, mippp.sp=NULL, mimark=NULL,  namesmark=NULL, r=NULL,
+   buffer=0, bfw=NULL)
+  ipscar(mippp, mippp.sp=NULL, mimark=NULL,  namesmark=NULL,
+   tree=NULL, r=NULL, buffer=0, bfw=NULL, correct.phylo="mean")
+  ipsear(mippp, mippp.sp=NULL, mimark=NULL,  namesmark=NULL,
+   tree=NULL, r=NULL, buffer=0, bfw=NULL, correct.phylo="mean")
+  ipsvar(mippp, mippp.sp=NULL, mimark=NULL,  namesmark=NULL,
+   tree=NULL, r=NULL, buffer=0, bfw=NULL, correct.phylo="mean")
+  ipsrar(mippp, mippp.sp=NULL, mimark=NULL,  namesmark=NULL,
+   tree=NULL, r=NULL, buffer=0, bfw=NULL, correct.phylo="mean")
+  ifdar(mippp, mippp.sp=NULL, mimark=NULL,  namesmark=NULL,
+   traits=NULL, r=NULL, buffer=0, bfw=NULL, correct.trait.na=FALSE,
+     correct.trait="mean")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>mippp</code></td>
+<td>
+<p>A multitype (a.k.a. multivariate) marked point pattern. An object with the ppp format of <span class="pkg">spatstat</span>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mippp.sp</code></td>
+<td>
+<p>Univariate point pattern of the focal species. An object with the ppp format of <span class="pkg">spatstat</span>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mimark</code></td>
+<td>
+<p>Character. Name of the focal species in the multitype <code>mippp</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>namesmark</code></td>
+<td>
+<p>Character. If the marks in <code>mippp</code> are within a <code>data.frame</code>, the name of the column with the species names</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>buffer</code></td>
+<td>
+<p>One of "adapt", i.e., compute an adaptive buffer, or a number indicating de width of a fixed buffer area around the plot border</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bfw</code></td>
+<td>
+<p>An owin object indicating the limits of the buffer area.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>Vector of distances to compute IDAR(r) functions</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tree</code></td>
+<td>
+<p>A phylogenetic tree in <code>phylo</code> format (<span class="pkg">ape</span>) or a phylogenetic covariance matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>traits</code></td>
+<td>
+<p>A data.frame of traits, or a distance matrix among species (in <code>dist</code> or <code>matrix</code> format) computed on a data.frame of traits.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>correct.phylo</code></td>
+<td>
+<p>Character. Either <code>"mean"</code> meaning <em>"include missing species in the tree with a constant mean phylogenetic covariance"</em> or <code>"exclude"</code>, meaning <em>"exclude missing species in the tree from the analysis"</em> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>correct.trait.na</code></td>
+<td>
+<p>Logical flag indicating whether <code>NA</code> values in the matrix of traits should be "corrected": NA values will be assigned the mean trait value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>correct.trait</code></td>
+<td>
+<p>Character. Either <code>"mean"</code> or <code>"exclude"</code>. Species missing in the data.frame of traits will be assigned mean trait values or  will be excluded from the analysis, respectively. </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>In 2007, Wiegand et al. developed the concept of Individual Species-Area Relationship. Basically, this consist in computing species accumulation curves by samping areas with varying radius <code class="reqn">r</code> around the individual trees of a <em>focal</em> species. Here we extend this concept to other diversity-area relationships and provide functions to compute individual phylogenetic diversity-area and individual functional diversity-area relationships. The individual phylogenetic functions are based in Helmus et al. (2007) measures, i.e., phylogenetic species variability (<code>ipsvar</code>), phylogenetic species richness (<code>ipsrar</code>), phylogenetic species evenness (<code>ipsear</code>), and phylogenetic species clustering (<code>ipscar</code>). The individual functional-diversity function (<code>ifdar</code>) is based in the functional dispersion measure (FDis) of Laliberté and Legendre (2010).
+</p>
+<p>Although recent litterature (e.g., Wiegand and Moloney 2014) suggest that buffer correction is not necessary for this type of statistics, and by default all functionsare estimated without buffer (e.g., <code>buffer=0</code>), several  edge correction coould be employed. For example,  an adaptative buffer correction could be used (<code>buffer="adapt"</code>), i.e., for each radius <code class="reqn">r</code>, only individuals of the focal species that are placed at a distance <code class="reqn">&gt;=r</code> from the border of the plot are considered in the computation of the different meassures. It is also possible to set a fixed buffer width  (e.g., <code>buffer=30</code>), which will accelerate te computations but will discard many useful trees. It is also possible to provide also a fixed window (in the argument <code>bfw</code>) to indicate the limits of the buffer area. This could be useful to computing the IDAR(r) functions in different subsets of the original plot (e.g., in different "habitats"). 
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class "<code>fv</code>", see  fv.object, which can be plotted directly using  plot.fv. 
+</p>
+<p>Essentially a data frame containing a column named <em>r</em> with the vector of values of the argument r at which the IDAR(r) function has been estimated and  aonther column, named <em>"isar", "ipsvar", "ipsrar", "ipsear", "ipscar"</em> or <em>"ifdar"</em>, according to the selected idar argment. This column contains an estimate of the selected IDAR(R) function.
+</p>
+
+
+<h3>Warning</h3>
+
+<p>The transcription of species names in the multivariate <code>mippp</code>, in the row names of  the <code>data.frame</code> of traits (or in the names or <code>dimnames</code> of  the distance matrices) should be identical. The same applies to the <code>tiplabels</code> of the phylogenetic tree.
+</p>
+
+
+<h3>Simulation envelopes</h3>
+
+<p>To compute simulation envelopes for the IDAR(r) functions,  use <code>envelope</code>. See the examples in this help page and in <code>ipsim</code> to know how to compute simulation envelopes from appropriate null models.
+</p>
+<p>To compute envelopes for "crossed" IDAR(r) functions or to accelerate the computation of "single" IDAR(r) functions, use <code>envelope4idar</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Marcelino de la Cruz <a href="mailto:marcelino.delacruz@urjc.es">marcelino.delacruz@urjc.es</a></p>
+
+
+<h3>References</h3>
+
+<p>Helmus M.R., Bland T.J., Williams C.K. and Ives A.R. (2007) Phylogenetic measures of biodiversity. <em>American Naturalist</em>, 169, E68-E83.
+</p>
+<p>Laliberté, E. and  Legendre, P. (2010) A distance-based framework for measuring functional diversity from multiple traits. <em>Ecology</em> 91, 299-305. 
+</p>
+<p>Wiegand,T., Gunatilleke, C.V.S., Gunatilleke, I.A.U.N. and  Huth, A. (2007) How individual species structure diversity in tropical forests. <em>PNAS</em> 104, 19029-19033.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>psd</code> for a description of the phylogenetic measures of Helmus et al. (2007).
+</p>
+<p><code>fdisp</code> for a description of the functional dispersion measure (FDis) of Laliberté and Legendre (2010).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# ISAR
+   # Point pattern with a data.frame of marks
+   data(SF)
+   isar.sp_44 &lt;- isar(mippp = SF, mimark="sp_44", namesmark="species", r=1:40) 
+   plot(isar.sp_44)
+ 
+   # Point pattern with just a vector of marks
+    data(lansing)
+    isar.blackoak &lt;- isar(mippp = lansing, mimark="blackoak",  r=seq(0.01, 0.25, le=100))
+    plot(isar.blackoak)
+
+   # Examples of the use of different buffers
+     # No  buffer at all (by deffault, buffer = 0)
+     isar.sp_44.0 &lt;- isar(mippp = SF, mimark="sp_44", namesmark="species", r=1:18)    
+
+     # Adaptive buffer (for each r, use only points within a r distance form the border)
+     isar.sp_44.a &lt;- isar(mippp = SF, mimark="sp_44", namesmark="species", r=1:18,
+                                buffer="adapt") 
+
+     # Predefined window, for example with a buffer of 7 m within plot limits
+     mibfw&lt;- erosion(SF$win, r=7)
+      isar.sp_44.w &lt;- isar(mippp = SF, mimark="sp_44", namesmark="species", r=1:18, bfw=mibfw) 
+
+
+   ######################
+   ### Phylogenetic functions ###
+   ######################
+   
+data(SFphylotree)
+
+# IPSCAR
+    ipscar.sp_44 &lt;- ipscar(mippp = SF, mimark="sp_44", namesmark="species", r=1:40,
+                                     tree=SFphylotree)
+    plot(ipscar.sp_44)
+ 
+# IPSEAR
+    ipsear.sp_44 &lt;- ipsear(mippp = SF, mimark="sp_44", namesmark="species", r=1:40,
+                                  tree=SFphylotree)
+    plot(ipsear.sp_44)
+
+# IPSVAR
+    ipsvar.sp_44 &lt;- ipsvar(mippp = SF, mimark="sp_44", namesmark="species", r=1:40,
+                                   tree=SFphylotree)
+    plot(ipsvar.sp_44)
+
+# IPSRAR
+    ipsrar.sp_44 &lt;- ipsrar(mippp = SF, mimark="sp_44", namesmark="species", r=1:40,
+                                  tree=SFphylotree)
+    plot(ipsrar.sp_44)
+ 
+  #####################
+  ###  Functional functions ###
+  #####################
+ 
+data(SFtraits)
+
+# IFDAR
+   # this will cause an error becuse some species have NA's in the vector of trait values
+## Not run: 
+  # ifdar.sp_44 &lt;- ifdar(mippp = SF, mimark="sp_44", namesmark="species", traits=SFtraits,
+  #                           r=1:40, correct.trait="exclude")
+
+## End(Not run)
+   # "correct" NA's in trait values  by assigning tospecies without traits the average of the trait 
+   # for  all the other species
+   ifdar.sp_44 &lt;- ifdar(mippp = SF, mimark="sp_44", namesmark="species",  traits=SFtraits,
+			      r=1:40, correct.trait.na=TRUE)
+
+    #"correct"  the existence of NA's in trait values  by excluding species without traits from the
+    # analysis
+    ifdar.sp_44 &lt;- ifdar(mippp = SF, mimark="sp_44", namesmark="species", traits=SFtraits,
+                               r=1:40, correct.trait.na=TRUE,correct.trait="exclude")
+
+     plot(ifdar.sp_44)
+
+# For examples of envelopes for these functions  see the help page of ipsim() or envelope4idar()
+
+</code></pre>
+
+
+</div>

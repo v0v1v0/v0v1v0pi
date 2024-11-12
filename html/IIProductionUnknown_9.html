@@ -1,0 +1,128 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>LossSource</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Obtaining indices associated with sources of loss</h2>
+
+<h3>Description</h3>
+
+<p>These functions allow to calculate the total n of the L.S. (n),
+R.P., ks, c, ds, n.I.I., S.n.I.I., and percentage of I.I. (P.I.I.) by each L.S..<br>
+Equations:
+R.P. = Damage or defoliation <br>
+n=total n per sample <br>
+k.s.= R.P./n <br>
+c = SUM of occurrence of L.S. on the samples, where, absence = 0 or presence = 1.<br>
+ds = 1 - P of the chi-square test of L.S. on the samples.<br>
+n.I.I.=ks x c x ds <br>
+S.n.I.I. = sum of all n.I.I.<br>
+Percentage of I.I. (P.I.I.)=(n.I.I. of each L.S./sum of all n.I.I.)*100
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">LossSource(DataLoss,DataResult,Cols=c(1,3,5),verbose)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>DataLoss</code></td>
+<td>
+<p>It is a data frame or matrix object containing data from loss sources.
+Sources of loss refers to the number of individuals per observation that cause damage to the system.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DataResult</code></td>
+<td>
+<p>Matrix or data frame with loss sources.
+Solution sources refers to the number of individuals per observation that cause a reduction in the sources of loss in the system.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Cols</code></td>
+<td>
+<p>Most important data loss columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Logical value (TRUE/FALSE). TRUE displays the results of the analysis.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The function returns the Percentage of Importance Index-Production Unknown and estimates of variables used in its construction.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Germano Leao Demolin-Leite (Instituto de Ciencias Agrarias da UFMG) <br>
+Alcinei Mistico Azevedo (Instituto de Ciencias Agrarias da UFMG)
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>EffectivenessOfSolution</code> ,  <code>SolutionSource</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("DataLossSource")
+ChisqTest_Distribution(DataLossSource)
+
+data("DataSolutionSource")
+ChisqTest_Distribution(DataSolutionSource)
+
+data("DataDefoliation")
+data("DataDamage")
+
+DataResult&lt;-cbind(DataDefoliation,DataDamage$D.L.S.2,DataDefoliation,
+DataDamage$D.L.S.4,DataDefoliation)
+ResultLossSource&lt;-LossSource(DataLoss = DataLossSource,DataResult =DataResult,
+Cols=c(1,3,5),verbose=TRUE)
+
+EOS&lt;-EffectivenessOfSolution(DataLossSource =DataLossSource,
+                            DataSolutionSource =DataSolutionSource,
+                            ResultLossSource = ResultLossSource)
+
+EOS
+#Put: y and y
+# ID=SelectEffectivenessOfSolution(EOS)
+ID&lt;-c(FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,
+FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE)
+ResultSolutionSource&lt;-SolutionSource(SolutionData =DataSolutionSource,Production =DataResult,
+                                    EffectivenessOfSolution =EOS ,Id = ID,Verbose = TRUE  )
+ResultSolutionSource
+
+# Put: y,n,y,n,y,n and y
+# ReductionAbundance(ResultSolutionSource,ResultLossSource,
+#                  EffectivenessOfSolution=EOS)
+
+###################################################
+EOSDamage&lt;-EffectivenessOfSolution(DataLossSource =DataDamage,
+                                  DataSolutionSource =DataSolutionSource,
+                                  ResultLossSource = NULL)
+
+
+EOSDamage
+
+# Put: y, n and y
+#ReductionDamage(ResultSolutionSource,LossSource=DataDamage,
+#                EffectivenessOfSolution=EOSDamage)
+
+</code></pre>
+
+
+</div>

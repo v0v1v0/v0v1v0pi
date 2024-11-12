@@ -1,0 +1,107 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>IP range classes</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>IPv4, IPv6 and IP ranges classes</h2>
+
+<h3>Description</h3>
+
+<p>classes for IPv4 and IPv6 ranges addresses</p>
+
+
+<h3>Details</h3>
+
+
+<p>IPv4 and IPv6 ranges may be created from character vector using either range or Classless Inter-Domain Routing (CIDR) notation. 
+Range notation represents ranges by using first and last address separated by a dash (<code>"&lt;ipr-start/&gt;-&lt;ipr-end/&gt;"</code>). 
+CIDR notation uses a network prefix and a network identifier separated by a slash (<code>"&lt;net-prefix/&gt;/&lt;identifier/&gt;"</code>). 
+The network identifier is a decimal number which counts the number of leading 1 bits in the subnet mask (see <code>hostmask()</code>).
+</p>
+
+<p>the lo() and hi() methods extract the low and high ends of ip ranges. When extracting IPv4r or IPv6r parts from IPr objects, use the drop argument to remove all NA values.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##
+## Range notation
+##
+ipv4r("192.0.0.0-192.0.0.10")
+##
+## CIDR notation
+##
+## The entire IPv4 address space
+ipv4(ipv4r('0.0.0.0/0'))
+## Is there life on Mars ? (Martian packets)
+ipv4r("100.64.0.0/10")
+##
+ip4 &lt;- ipv4("192.0.0.0")
+## power of 2 
+ipv4r( print(sprintf("%s-%s", ip4,  ip4 + ( 2^8-1) ) ))
+## not a power of 2
+ipv4r( print(sprintf("%s-%s", ip4,  ip4 + 10 ) ))
+##
+## Network classes
+##
+ip.class &lt;- data.frame(
+  name = paste('class', LETTERS[1:5])
+  , class = ipv4r(
+  c(
+        '0.0.0.0/8'                 ## Class A
+      , '128.0.0.0/16'              ## Class B
+      , '192.0.0.0/24'              ## Class C
+      , '224.0.0.0-239.255.255.255' ## Class D
+      , '240.0.0.0-255.255.255.255' ## Class E
+    )
+  )
+)
+##
+## extract IP range start and end
+##
+(class.ip &lt;- ipv4(ip.class$class))
+##
+lo(ip.class$class)==class.ip$lo
+##
+hi(ip.class$class)==class.ip$hi
+##
+## # of hosts on this network
+##
+ip.range(ip.class$class)
+## this is ok for IP v4 but may cause loss of precision for IPv6
+## (please refer to the Arithmetic section)
+ip.range(ip.class$class)==as.numeric(class.ip$hi - class.ip$lo)
+##
+##
+##
+ipr0 &lt;- ipr()
+##
+ipr0[3] &lt;- ipv4r(
+  "0.0.0.0", "0.0.0.1"
+
+)
+ipr0[5] &lt;- ipv6r(
+  "::" , 0L
+)
+ipr0
+##
+ipr0    &lt;- ipr()
+ipr0[2] &lt;- NA
+ipr0
+##
+## sequences
+##
+seq(ipv4r('0.0.0.0/24'), by=5)
+seq(ipv4r('0.0.0.0/24'), length.out=3)
+##
+seq(ipv6r('::/120'), b=5)
+seq(ipv6r('::/120'), length.out=3)
+##
+## throws an error : seq(ipv6r('::/96'),by=1)
+## because this would yield a 2^32 vector
+</code></pre>
+
+
+</div>

@@ -1,0 +1,230 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iapws95</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+IAPWS-95 Formulation in Single Phase Regions
+</h2>
+
+<h3>Description</h3>
+
+<p>Compute thermodynamic and transport properties of water and steam
+using the IAPWS formulation 1995.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iapws95(what, p, t, rho, h, state = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>what</code></td>
+<td>
+
+<p>a character vector listing the output properties.
+See Details for available properties.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+
+<p>a numeric vector giving the pressure values in MPa.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t</code></td>
+<td>
+
+<p>a numeric vector giving the temperature values in K.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+
+<p>a numeric vector giving the density values in kg/m<code class="reqn">^3</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+
+<p>a numeric vector giving the specific enthalpy values in kJ/kg.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>state</code></td>
+<td>
+
+<p><code>NULL</code> or a character vector giving the physical state.
+One of <code>"liquid"</code>, <code>"gas"</code> or <code>"supercritical"</code>.
+In case of <code>NULL</code>, the state is determined by the function
+<code>iapws95_state()</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The available properties for <code>what</code> are:
+</p>
+
+<ul>
+<li> <p><code>"f"</code>: the specific free energy in kJ/kg.
+</p>
+</li>
+<li> <p><code>"g"</code>: the specific Gibbs enthalpy in kJ/kg.
+</p>
+</li>
+<li> <p><code>"u"</code>: the specific internal energy in kJ/kg.
+</p>
+</li>
+<li> <p><code>"h"</code>: the specific enthalpy in kJ/kg.
+</p>
+</li>
+<li> <p><code>"s"</code>: the specific entropy in kJ/K/kg.
+</p>
+</li>
+<li> <p><code>"t"</code>: the temperature in K.
+</p>
+</li>
+<li> <p><code>"p"</code>: the pressure in MPa.
+</p>
+</li>
+<li> <p><code>"v"</code>: the specific volume in m<code class="reqn">^3</code>/kg.
+</p>
+</li>
+<li> <p><code>"rho"</code>: the mass density in kg/m<code class="reqn">^3</code>.
+</p>
+</li>
+<li> <p><code>"cv"</code>: the specific isochoric heat capacity in kJ/K/kg.
+</p>
+</li>
+<li> <p><code>"cp"</code>: the specific isobaric heat capacity in kJ/K/kg.
+</p>
+</li>
+<li> <p><code>"alpha"</code>: the expansion coefficient in 1/K
+</p>
+</li>
+<li> <p><code>"beta"</code>: the pressure coefficient in MPa/K.
+</p>
+</li>
+<li> <p><code>"kappat"</code>: the isothermal compressibility in 1/MPa.
+</p>
+</li>
+<li> <p><code>"w"</code>: the speed of sound in m/s.
+</p>
+</li>
+<li> <p><code>"eta"</code>: the dynamic viscosity in <code class="reqn">\mu</code>Pa.s.
+</p>
+</li>
+<li> <p><code>"lambda"</code>: the thermal conductivity in mW/K/m.
+
+
+</p>
+</li>
+</ul>
+<p>A valid pair of <code>p</code>, <code>rho</code>, <code>t</code> and <code>h</code> is needed:
+either <code>(p, t)</code>, <code>(rho, t)</code> or <code>(p, h)</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A numeric matrix of dimension <code>c(n, length(what))</code> with <code>n</code>
+the maximum length of either <code>rho</code>, <code>p</code>, <code>t</code>, <code>h</code>
+or <code>state</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Computing several properties in a single call may be more efficient
+than separately because most of the computation time is shared.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Debove
+</p>
+
+
+<h3>References</h3>
+
+<p>International Association for the Properties of Water and Steam,
+IAPWS R6-95(2018), <em>Revised Release on the IAPWS Formulation 1995
+for the Thermodynamic Properties of Ordinary Water Substance
+for General and Scientific Use.</em>
+</p>
+<p>International Association for the Properties of Water and Steam,
+IAPWS R12-08(2008), <em>Release on the IAPWS Formulation 2008
+for the Viscosity of Ordinary Water Substance.</em>
+</p>
+<p>International Association for the Properties of Water and Steam,
+IAPWS R15-11(2011), <em>Release on the IAPWS Formulation 2011
+for the Thermal Conductivity of Ordinary Water Substance.</em>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># IAPWS-95 Tab. 7
+tab &lt;- iapws95(c("p", "cv", "w", "s"),
+               t = c(300, 300, 300,
+                     500, 500, 500, 500,
+                     647,
+                     900, 900, 900),
+               rho = c(0.9965560e3, 0.1005308e4, 0.1188202e4,
+                       0.4350000e0, 0.4532000e1, 0.8380250e3, 0.1084564e4,
+                       0.3580000e3,
+                       0.2410000e0, 0.5261500e2, 0.8707690e3))
+format(tab, scientific = TRUE, digits = 9)
+
+
+# Viscosity Tab. 4
+tab &lt;- iapws95("eta",
+               t = c(298.15, 298.15, 373.15,
+                     433.15, 433.15,
+                     873.15, 873.15, 873.15,
+                     1173.15, 1173.15, 1173.15),
+               rho = c(998, 1200, 1000,
+                       1, 1000,
+                       1, 100, 600,
+                       1, 100, 400))
+format(tab, digits = 8)
+
+
+# Viscosity Tab. 5
+tab &lt;- iapws95("eta", t = 647.35, rho = c(122, 222, 272, 322, 372, 422))
+format(tab, digits = 8)
+
+
+# Thermal conductivity Tab. 4
+tab &lt;- iapws95("lambda", t = c(298.15, 298.15, 298.15, 873.15),
+               rho = c(0, 998, 1200, 0))
+format(tab, digits = 9)
+
+
+# Thermal conductivity Tab. 5
+tab &lt;- iapws95("lambda", t = 647.35,
+               rho = c(1, 122, 222, 272, 322, 372, 422, 750))
+format(tab, digits = 9)
+
+</code></pre>
+
+
+</div>

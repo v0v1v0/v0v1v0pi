@@ -1,0 +1,207 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>loadISEdata</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Load ISE calibration and experimental data.</h2>
+
+<h3>Description</h3>
+
+<p>Loads tab-delimited calibration and (if it exists) experimental sample data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">loadISEdata(filename.calibration, filename.experimental = NA)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>filename.calibration</code></td>
+<td>
+<p>The name and location of the tab-delimited calibration file<br>
+It should have the following structure:<br>
+First line (header row): ISEID log10x emf<br>
+Remaining lines (data): ISEID is an identifier for the ISE.  The ISEID variables should be integers, with the lowest value equal to 1, and no gaps.  That is, if there are four ISEs, they must be labeled 1, 2, 3, and 4. log10x is the log10 concentration (mol/l) of the calibration samples. The emf readings (in mV) follow.<br></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filename.experimental</code></td>
+<td>
+<p>The experimental file (if there is one, otherwise keep the default filename.experimental=NA) should have one of the following structures:<br><br>
+basic model: The header row will include ISEID, SampleID, and emf.  ISEID is defined the same way as in the calibration file.  SampleID is an integer indicating which sample is being measured, and must follow the same numbering rules as ISEID. Finally, emf is the mV reading of the experimental samples for each ISE.<br> or<br>
+standard addition: When using the standard addition model, the experimental file will contain ISEID and SampleID as before.  Two emf values are recorded: emf1 is the mV reading of the sample, and emf2 is the mV reading of the sample plus the addition.  Additionally, V.s is the volume of the sample, V.add is the volume of the addition, and conc.add is the concentration (mol/l) of the addition.  The units of V.s and V.add do not matter as long as they are the same. <br></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Internally calls 'ISEdata.calibration' if there is no experimental data.
+</p>
+
+
+<h3>Value</h3>
+
+<p>loadISEdata returns the following values in a list of class ISEdata:<br>
+Calibration variables:<br></p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>N </code></td>
+<td>
+<p>Total number of calibration measurements (e.g. for 5 calibration points measured with 3 ISEs, N = 15)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R </code></td>
+<td>
+<p>Number of ISEs</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ISEID </code></td>
+<td>
+<p>Identifier for the ISE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log10x </code></td>
+<td>
+<p>log concentration (mol/l) of calibration data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>emf </code></td>
+<td>
+<p>emf (mV) for calibration data</p>
+</td>
+</tr>
+</table>
+<p>Experimental variables:<br></p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>M </code></td>
+<td>
+<p>Number of experimental samples</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>M.obs </code></td>
+<td>
+<p>Total number of experimental measurements. E.g. for 4 samples each measured by 3 ISEs, M.obs = 12. Only returned if R &gt; 1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ISEID.exp </code></td>
+<td>
+<p>Identifier for the ISE for the experimental data (returned if R &gt;1)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x.exp </code></td>
+<td>
+<p>Identifier for the experimental (returned if R &gt; 1)</p>
+</td>
+</tr>
+</table>
+<p>Basic format only: <br></p>
+<table><tr style="vertical-align: top;">
+<td><code>emf.exp </code></td>
+<td>
+<p>emf (mV) for experimental data</p>
+</td>
+</tr></table>
+<p>Standard addition format only:<br></p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>delta.emf </code></td>
+<td>
+<p>difference between emf1 and emf2 (mV) for experimental data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>V.s </code></td>
+<td>
+<p>Sample volume (any units allowed but must be consistent)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>V.add </code></td>
+<td>
+<p>Volume added to the sample</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conc.add </code></td>
+<td>
+<p>Concentration added.</p>
+</td>
+</tr>
+</table>
+<p>Summary variables of calibration and experimental data:<br></p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>calibration.only </code></td>
+<td>
+<p>Indicates whether there was only calibration data (TRUE) or calibration and experimental data (FALSE)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stdadd </code></td>
+<td>
+<p>Indicates whether standard addition was used. Returns NA (calibration data only), FALSE (basic experimental data), or TRUE (standard addition experimental data)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.calib </code></td>
+<td>
+<p>The loaded calibration data frame</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.exp </code></td>
+<td>
+<p>The loaded experimental data frame</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Peter Dillingham <a href="mailto:peter.dillingham@otago.ac.nz">peter.dillingham@otago.ac.nz</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">###
+# Loading the example tab-delimited text files for the lead data
+###
+
+# 1. Find pathnames for the lead example txt files:
+path.calib = paste(path.package('ISEtools'), "/extdata", 
+	"/Lead_calibration.txt", sep="")
+path.basic = paste(path.package('ISEtools'), "/extdata", 
+	"/Lead_experimentalBasic.txt", sep="")
+path.sa = paste(path.package('ISEtools'), "/extdata", 
+	"/Lead_experimentalSA.txt", sep="")
+# Load the calibration data
+lead.example1 = loadISEdata(filename.calibration = path.calib)
+print(lead.example1)
+
+# ... and with experimental data, Basic format
+lead.example2 = loadISEdata(filename.calibration = path.calib, 
+	filename.experimental = path.basic)
+print(lead.example2)
+	
+# ... and with experimental data, Standard Addition format
+lead.example3 = loadISEdata(filename.calibration = path.calib, 
+	filename.experimental = path.sa)
+print(lead.example3)
+</code></pre>
+
+
+</div>

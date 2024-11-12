@@ -1,0 +1,186 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>reqMktDepth</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Request Market Depth Feed from TWS </h2>
+
+<h3>Description</h3>
+
+<p>Allows for streaming market depth (order book) data
+to be handled in <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span>.  
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">reqMktDepth(conn, 
+            Contract,
+            tickerId = "1",
+            numRows = "20",
+            timeStamp = TRUE,
+            playback = 1,
+            file = "",
+            verbose = TRUE,
+            eventWrapper = eWrapper(),
+            CALLBACK = twsCALLBACK, ...)
+
+cancelMktDepth(conn,tickerId)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>conn</code></td>
+<td>
+<p> a valid <code>twsConnection</code> connection </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Contract</code></td>
+<td>
+ <p><code>twsContract</code> object(s) requested data for </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tickerId</code></td>
+<td>
+<p> the ticker id to associate with the returned data </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numRows</code></td>
+<td>
+<p> depth of book </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timeStamp</code></td>
+<td>
+<p> include <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> time stamps </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>playback</code></td>
+<td>
+<p> playback speed adjustment </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p> passed to internal <code>cat</code> calls. See associated help. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p> print diagnostics? </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eventWrapper</code></td>
+<td>
+<p> callback closure </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CALLBACK</code></td>
+<td>
+<p> main reciever loop </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> additional args </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function provides <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> level access to book data
+as returned by the TWS API.  The Interactive Brokers documentation
+should be reference for the exact meaning of the returned data.
+</p>
+<p><code>timeStamps</code> is unique to the R API in that each incoming signal
+will be marked with a (potentially) unique timestamp. 
+Alternatively it is possible to pass a formatting string for use
+in <code>format(Sys.time())</code>. To suppress the time stamp set the
+argument to NULL.
+</p>
+<p>Callbacks, via eventUpdateMktDepth, eventUpdateMktDepthL2, or
+CALLBACK are designed to allow for <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> level processing
+of the real-time data stream.
+</p>
+<p>The first two correspond to actions based upon the actual signal
+recieved.  These may be user-defined functions taking
+the appropriate arguments.  Each message recieved (each
+update to the market depth) will invoke one
+of these callbacks.  By default when nothing is
+specified, the code will call the default method for
+printing the results to the screen via <code>cat</code>.
+</p>
+<p>Note that the use of the argument <code>file</code> will
+be passed to these <code>cat</code> calls, and therefore
+it will be possible to use the functionality of <code>cat</code>
+directly - e.g. piping output or writing to a connection.  The
+simplest use of file would be to specify the name of a file
+to append the output of the stream to.
+</p>
+<p>The <code>CALLBACK</code> argument is used for more control of the
+incoming results.  This requires user-level error checking
+as well as TWS API interaction.  It is here for advanced use
+and until documented should be left alone. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>The book depth.
+</p>
+
+
+<h3>Note</h3>
+
+ 
+<p>As <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> is single threaded - this request will run until
+interupted by an error or by user action. Both will
+clean up after themselves when appropriate.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Jeffrey A. Ryan </p>
+
+
+<h3>References</h3>
+
+<p> Interactive Brokers API:
+<a href="https://interactivebrokers.github.io/tws-api/index.html">https://interactivebrokers.github.io/tws-api/index.html</a> </p>
+
+
+<h3>See Also</h3>
+
+ <p><code>twsConnect</code>,<code>twsContract</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+tws &lt;- twsConnect()
+contract &lt;- twsEquity("QQQQ","SMART","ISLAND")
+reqMktDepth(tws, contract)
+
+# write to a file
+reqMktDepth(tws, contract, file='out.dat')
+
+## End(Not run)
+</code></pre>
+
+
+</div>

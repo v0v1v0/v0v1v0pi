@@ -1,0 +1,127 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>logratio</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Log Ratio Analysis for the Implicit Association Test (IAT)</h2>
+
+<h3>Description</h3>
+
+<p>Log ratio analysis for the IAT.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">logratio(rt, subject, block_type, trial_num, group,
+  block_order = c("original", "reverse"), min_limit = 400,
+  max_limit = 10000, rt_min = 200, correctvec = NULL,
+  trace = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>rt</code></td>
+<td>
+<p>A vector specifying all the reaction times.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subject</code></td>
+<td>
+<p>A vector specifying the subject IDs for the <code>rt</code> vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>block_type</code></td>
+<td>
+<p>A vector specifying the block type for the <code>rt</code> vector. There should be two blocks.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trial_num</code></td>
+<td>
+<p>A vector specifying the trial number for each observation in the <code>rt</code> vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group</code></td>
+<td>
+<p>A data frame with two columns specifying the subject IDs and corresponding group. There should be two groups.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>block_order</code></td>
+<td>
+<p>A character string specifying the order of the two groups.
+There are two options: "original" puts the first group in the numerator of the ratio, and
+"reverse" puts the second group in the numerator of the ratio.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_limit</code></td>
+<td>
+<p>A numeric specifying the lower limit for the reaction times to be included. The default option is 400.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_limit</code></td>
+<td>
+<p>A numeric specifying the upper limit for the reaction times to be included. The default option is 10000.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rt_min</code></td>
+<td>
+<p>A numeric specifying the minimum time required for reaction. The default option is 200.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>correctvec</code></td>
+<td>
+<p>A vector specifying whether or not the response is correct (0 for incorrect, 1 for correct). 
+The default option is NULL, in which case, all the responses are assumed to be correct.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trace</code></td>
+<td>
+<p>A boolean specifying whether or not the progress should be displayed on the screen. The default option is FALSE.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>scores</code></td>
+<td>
+<p>A list containing the IAT scores using the log ratio analysis.</p>
+</td>
+</tr></table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(reactiontimes)
+data(grouping)
+rt &lt;- reactiontimes$rt
+subject &lt;- reactiontimes$subId
+block_type &lt;- reactiontimes$block_type
+trial_num &lt;- reactiontimes$trial_num
+block_order &lt;- "reverse"
+
+results &lt;- logratio(rt=rt, subject=subject, block_type=block_type, trial_num=trial_num,
+group=grouping, block_order=block_order, trace=TRUE)
+femaleRatioLog&lt;-results$`0`
+maleRatioLog&lt;-results$`1`
+two.sample.var(femaleRatioLog,maleRatioLog,alternative="two.sided",
+scale.option="Levene.Med.0",scale.adj=TRUE,paired=FALSE)
+Bonett.Seier.test(femaleRatioLog,maleRatioLog,alternative="two.sided")
+
+
+</code></pre>
+
+
+</div>

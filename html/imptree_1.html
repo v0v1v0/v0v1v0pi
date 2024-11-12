@@ -1,0 +1,83 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>imptree-package</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>imptree: Classification Trees with Imprecise Probabilities</h2>
+
+<h3>Description</h3>
+
+<p>The <code>imptree</code> package implements the creation of 
+imprecise classification trees based on algorithm developed by 
+Abellan and Moral. 
+The credal sets of the classification variable within each node
+are estimated by either the imprecise Dirichlet model (IDM) or the 
+nonparametric predictive inference (NPI).
+As split possible split criteria serve the 'information gain', 
+based on the maximal entropy distribution, and the adaptable 
+entropy-range based criterion propsed by Fink and Crossman.
+It also implements different correction terms for the entropy.
+</p>
+<p>The performance of the tree can be evaluated with respect to the
+common criteria in the context of imprecise classification trees.
+</p>
+<p>It also provides the functionality for estimating credal sets via 
+IDM or NPI and obtain their minimal/maximal entropy (distribution) 
+to be used outside the tree growing process.
+</p>
+
+
+<h3>References</h3>
+
+<p>Abellán,
+J. and Moral, S. (2005), Upper entropy of credal sets. Applications to 
+credal classification, <em>International Journal of Approximate Reasoning</em>
+<b>39</b>, pp. 235–255.
+</p>
+<p>Baker, R. M. (2010), <em>Multinomial Nonparametric Predictive Inference:
+Selection, Classification and Subcategory Data</em>, PhD thesis. Durham University, GB.
+</p>
+<p>Strobl, C. (2005), Variable Selection in Classification Trees Based on
+Imprecise Probabilities, <em>ISIPTA '05: Proceedings of the Fourth
+International Symposium on Imprecise Probabilities and Their Applications</em>,
+339–348.
+</p>
+<p>Fink, P. and Crossman, R.J. (2013), Entropy based classification trees,
+<em>ISIPTA '13: Proceedings of the Eighth International Symposium on Imprecise
+Probability: Theories and Applications</em>, pp. 139–147.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>imptree</code> for tree creation, <code>probInterval</code> for the credal set
+and entropy estimation functionality
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("carEvaluation")
+
+## create a tree with IDM (s=1) to full size
+## carEvaluation, leaving the first 10 observations out
+ip &lt;- imptree(acceptance~., data = carEvaluation[-(1:10),], 
+  method="IDM", method.param = list(splitmetric = "globalmax", s = 1), 
+  control = list(depth = NULL, minbucket = 1))
+
+## summarize the tree and show performance on training data
+summary(ip)
+
+## predict the first 10 observations
+## Note: The result of the prediction is return invisibly
+pp &lt;- predict(ip, dominance = "max", data = carEvaluation[(1:10),])
+## print the general evaluation statistics
+print(pp)
+## display the predicted class labels
+pp$classes
+
+</code></pre>
+
+
+</div>

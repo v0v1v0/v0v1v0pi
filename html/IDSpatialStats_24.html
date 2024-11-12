@@ -1,0 +1,137 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get.tau.typed</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Optimized version of <code>get.tau</code> for typed data</h2>
+
+<h3>Description</h3>
+
+<p>Version of th e <code>get.tau</code> function that is optimized for
+statically typed data. That is data where we want the relationship between
+points of type A and points of type B
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get.tau.typed(
+  posmat,
+  typeA = -1,
+  typeB = -1,
+  r = 1,
+  r.low = rep(0, length(r)),
+  comparison.type = "representative",
+  data.frame = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>posmat</code></td>
+<td>
+<p>a matrix with columns type, x and y</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>typeA</code></td>
+<td>
+<p>the "from" type that we are interested in, -1 is wildcard</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>typeB</code></td>
+<td>
+<p>the "to" type that we are interested i, -1 is wildcard</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>the series of spatial distances we are interested in</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r.low</code></td>
+<td>
+<p>the low end of each range....0  by default</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comparison.type</code></td>
+<td>
+<p>what type of points are included in the comparison set.
+</p>
+
+<ul>
+<li>
+<p> "representative" if comparison set is representative of the underlying population
+</p>
+</li>
+<li>
+<p> "independent" if comparison set is cases/events coming from an indepedent process
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.frame</code></td>
+<td>
+<p>logical indicating whether to return results as a data frame (default = TRUE)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>data frame of tau values for all the distances
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Justin Lessler and Henrik Salje
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other get.tau: 
+<code>get.tau()</code>,
+<code>get.tau.bootstrap()</code>,
+<code>get.tau.ci()</code>,
+<code>get.tau.permute()</code>,
+<code>get.tau.typed.bootstrap()</code>,
+<code>get.tau.typed.permute()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+data(DengueSimR02)
+
+r.max&lt;-seq(20,1000,20)
+r.min&lt;-seq(0,980,20)
+r.mid&lt;-(r.max+r.min)/2
+
+#Lets see if there's a difference in spatial dependence by time case occurs
+type&lt;-2-(DengueSimR02[,"time"]&lt;120)
+tmp&lt;-cbind(DengueSimR02,type=type)
+
+typed.tau&lt;-get.tau.typed(tmp,typeA=1,typeB=2,r=r.max,r.low=r.min,comparison.type = "independent")
+
+plot(r.mid,typed.tau$tau,log="y",cex.axis=1.25,
+     xlab="Distance (m)",ylab="Tau",cex.main=0.9,lwd=2,type="l")
+abline(h=1,lty=2)
+
+
+</code></pre>
+
+
+</div>

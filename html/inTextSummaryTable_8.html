@@ -1,0 +1,248 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>computeSummaryStatistics</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compute summary statistics of interest of an unique variable of interest.</h2>
+
+<h3>Description</h3>
+
+<p>Additionally, this function run extra checks on the data:
+</p>
+
+<ul>
+<li>
+<p>an error message is triggered if any subject (identified by <code>subjectVar</code>) 
+have different values in a continuous <code>var</code>
+
+</p>
+</li>
+<li>
+<p>an indicative message is triggered if multiple but identical records are available
+for <code>subjectVar</code> and a continuous <code>var</code>
+</p>
+</li>
+</ul>
+<h3>Usage</h3>
+
+<pre><code class="language-R">computeSummaryStatistics(
+  data,
+  var = NULL,
+  varTotalInclude = FALSE,
+  statsExtra = NULL,
+  subjectVar = "USUBJID",
+  filterEmptyVar = TRUE,
+  type = "auto",
+  checkVarDiffBySubj = c("error", "warning", "none"),
+  msgLabel = NULL,
+  msgVars = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Data.frame with dataset to consider for the summary table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var</code></td>
+<td>
+<p>Character vector with variable(s) of <code>data</code>, 
+to compute statistics on.<br>
+If NULL (by default), counts by row/column variable(s) are computed.<br>
+To also return counts of the <code>rowVar</code> in case other <code>var</code>
+are specified, you can include: 'all' in the <code>var</code>.<br>
+Missing values, if present, are filtered 
+(also for the report of number of subjects/records).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>varTotalInclude</code></td>
+<td>
+<p>Logical (FALSE by default)
+Should the total across all categories of <code>var</code> 
+be included for the count table?
+Only used if <code>var</code> is a categorical variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statsExtra</code></td>
+<td>
+<p>(optional) Named list with functions for additional custom
+statistics to be computed.<br>
+Each function:
+</p>
+
+<ul>
+<li>
+<p>has as parameter, either: 'x': the variable (<code>var</code>) to compute
+the summary statistic on or 'data': the entire dataset
+</p>
+</li>
+<li>
+<p>returns the corresponding summary statistic as a numeric vector
+</p>
+</li>
+</ul>
+<p>For example, to additionally compute the coefficient of variation, this can be set to:
+<code>list(statCVPerc = function(x) sd(x)/mean(x)*100)</code> (or <code>cv</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subjectVar</code></td>
+<td>
+<p>String, variable of <code>data</code> with subject ID,
+'USUBJID' by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filterEmptyVar</code></td>
+<td>
+<p>Logical, if TRUE doesn't return any results
+if the variable is empty, otherwise return 0 for the counts and NA for summary 
+statistics.
+Criterias to consider a variable empty are:
+</p>
+
+<ul>
+<li>
+<p>for a continuous variable: all missing (NA)
+</p>
+</li>
+<li>
+<p>for a categorical variable: all missing or **category is included in the 
+factor levels but not available in <code>data</code>**
+</p>
+</li>
+</ul>
+<p>By default, an empty variable are filtered.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>String with type of table: 
+</p>
+
+<ul>
+<li>
+<p>'summaryTable': summary table with statistics for numeric variable
+</p>
+</li>
+<li>
+<p>'countTable': count table
+</p>
+</li>
+<li>
+<p>'auto' (by default): 'summaryTable' if the variable is numeric,
+'countTable' otherwise
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>checkVarDiffBySubj</code></td>
+<td>
+<p>String, 'error' (default), 'warning',
+or 'none'.  
+Should an error, a warning, or nothing be produced
+if a continuous variable (<code>var</code>) contains
+different values for the same subject?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>msgLabel</code></td>
+<td>
+<p>(optional) String with label for the data (NULL by default), 
+included in the message/warning for checks.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>msgVars</code></td>
+<td>
+<p>(optional) Character vector with columns of <code>data</code>
+containing extra variables (besides <code>var</code> and <code>subjectVar</code>)
+that should be included in the message/warning for checks.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Data.frame with summary statistics in columns,
+depending if <code>type</code> is:
+</p>
+
+<ul>
+<li>
+<p>'summary': 
+</p>
+
+<ul>
+<li>
+<p>'statN': number of subjects
+</p>
+</li>
+<li>
+<p>'statm': number of records
+</p>
+</li>
+<li>
+<p>'statMean': mean of <code>var</code>
+</p>
+</li>
+<li>
+<p>'statSD': standard deviation of <code>var</code>
+</p>
+</li>
+<li>
+<p>'statSE': standard error the mean of <code>var</code>
+</p>
+</li>
+<li>
+<p>'statMedian': median of <code>var</code>
+</p>
+</li>
+<li>
+<p>'statMin': minimum of <code>var</code>
+</p>
+</li>
+<li>
+<p>'statMax': maximum of <code>var</code>
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p>'count': 
+</p>
+
+<ul>
+<li>
+<p>'variableGroup': factor with groups of <code>var</code> for which counts are reported
+</p>
+</li>
+<li>
+<p>'statN': number of subjects
+</p>
+</li>
+<li>
+<p>'statm': number of records
+</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Laure Cougnaud
+</p>
+
+
+</div>

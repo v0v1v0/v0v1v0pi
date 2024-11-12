@@ -1,0 +1,251 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dis.kstest</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>The Monte Carlo estimate for the p-value of a discrete KS Test</h2>
+
+<h3>Description</h3>
+
+<p>Computes the Monte Carlo estimate for the p-value of a discrete one-sample Kolmogorov-Smirnov (KS) Test for Poisson, negative
+binomial, beta binomial, beta negative binomial distributions and their zero-inflated as well as hurdle versions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dis.kstest(x, nsim = 100, bootstrap = TRUE, distri = "Poisson",
+  r = NULL, p = NULL, alpha1 = NULL, alpha2 = NULL, n = NULL,
+  lowerbound = 0.01, upperbound = 10000, parallel = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A vector of count data. Should be non-negative integers. If elements of x are not integers, they will be
+automatically rounded up to the smallest integers that are no less than themselves.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>The number of bootstrapped samples or simulated samples generated to compute p-value. If it is not an integer,
+nsim will be automatically rounded up to the smallest integer that is no less than nsim. Should be greater than 30. Default is
+100.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bootstrap</code></td>
+<td>
+<p>Whether to generate bootstrapped samples or not. See Details. 'TRUE' or any numeric non-zero value indicates
+the generation of bootstrapped samples. The default is 'TRUE'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distri</code></td>
+<td>
+<p>The distribution used as the null hypothesis. Can be one of {'poisson','nb','bb',
+'bnb','zip','zinb','zibb', zibnb','ph','nbh','bbh','bnbh'}, which corresponds to Poisson, negative binomial, beta binomial
+and beta negative binomial distributions and their zero-inflated as well as hurdle versions, respectively. Default is 'Poisson'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>An initial value of the number of success before which m failures are observed, where m is the element of x.
+Must be a positive number, but not required to be an integer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>An initial value of the probability of success, should be a positive value within (0,1).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha1</code></td>
+<td>
+<p>An initial value for the first shape parameter of beta distribution. Should be a positive number.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha2</code></td>
+<td>
+<p>An initial value for the second shape parameter of beta distribution. Should be a positive number.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>An initial value of the number of trials. Must be a positive number, but not required to be an integer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lowerbound</code></td>
+<td>
+<p>A lower searching bound used in the optimization of likelihood function. Should be a small positive number.
+The default is 1e-2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upperbound</code></td>
+<td>
+<p>An upper searching bound used in the optimization of likelihood function. Should be a large positive number.
+The default is 1e4.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>whether to use multiple threads to parallelize computation. Default is FALSE. Please aware that it may take
+longer time to execute the program with <code>parallel=FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For arguments <code>nsim</code>, <code>bootstrap</code>, <code>distri</code>, if the length is larger than 1, only the first element will be used.
+For other arguments except for <code>x</code>, the first valid value will be used if the input is not <code>NULL</code>, otherwise some
+naive sample estimates will be fed into the algorithm. Note that only the initial values that are occurred in the null
+distribution <code>distri</code> are needed. For example, with <code>distri=poisson</code>, user may provide a value for <code>lambda</code> but
+not for <code>r</code> or <code>p</code>, though it won't disturb the algorithm.
+</p>
+<p>With an output p-value less than some user-specified significance level, <code>x</code> is very likely from a distribution other
+than the <code>distri</code>, given the current data. If p-values of more than one distributions are greater than the pre-specified
+significance level, user may consider a following likelihood ratio test to select a 'better' distribution.
+</p>
+<p>The methodology of computing Monte Carlo p-value is taken from Aldirawi et al. (2019). With <code>bootstrap=TRUE</code>, <code>nsim</code>
+bootstrapped samples will be generated by resampling <code>x</code> without replacement. Otherwise, <code>nsim</code> samples are
+simulated from the null distribution with the maximum likelihood estimate of original data <code>x</code>. Then compute the maximum
+likelihood estimates of <code>nsim</code> bootstrapped or simulated samples, based on which <code>nsim</code> new samples are generated
+under the null distribution. <code>nsim</code> KS statistics are calculated for the <code>nsim</code> new samples, then the Monte Carlo
+p-value is resulted from comparing the <code>nsim</code> KS statistics and the statistic of original data <code>x</code>.
+</p>
+<p>During the process of computing maximum likelihood estimates, the negative log likelihood function is minimized via basic R
+function <code>optim</code> with the searching interval decided by <code>lowerbound</code> and <code>upperbound</code>, except that the optimization
+of <code>p</code> takes <code>1-lowerbound</code> as the upper searching bound.
+</p>
+<p>To accelerate the whole process, the algorithm uses the parallel strategy via the packages <code>foreach</code> and
+<code>doParallel</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class 'dis.kstest' including the following elements:
+</p>
+
+<ul>
+<li>
+<p>x: <code>x</code> used in computation.
+</p>
+</li>
+<li>
+<p>nsim: nsim used in computation.
+</p>
+</li>
+<li>
+<p>bootstrap: bootstrap used in computation.
+</p>
+</li>
+<li>
+<p>distri: distri used in computation..
+</p>
+</li>
+<li>
+<p>lowerbound: lowerbound used in computation.
+</p>
+</li>
+<li>
+<p>upperbound: upperboound used in computation.
+</p>
+</li>
+<li>
+<p>mle_new: A matrix of the maximum likelihood estimates of unknown parameters under the null distribution, using
+<code class="reqn">nsim</code> bootstrapped or simulated samples.
+</p>
+</li>
+<li>
+<p>mle_ori: A row vector of the maximum likelihood estimates of unknown parameters under the null distribution, using the
+original data <code>x</code>.
+</p>
+</li>
+<li>
+<p>pvalue: Monte Carlo p-value of the one-sample KS test.
+</p>
+</li>
+<li>
+<p>N: length of <code>x</code>.
+</p>
+</li>
+<li>
+<p>r: initial value of r used in computation.
+</p>
+</li>
+<li>
+<p>p: initial value of p used in computation.
+</p>
+</li>
+<li>
+<p>alpha1: initial value of alpha1 used in computation.
+</p>
+</li>
+<li>
+<p>alpha2: initial value of alpha2 used in computation.
+</p>
+</li>
+<li>
+<p>n: initial value of n used in computation.
+</p>
+</li>
+</ul>
+<h3>Reference</h3>
+
+
+<ul>
+<li>
+<p>H. Aldirawi, J. Yang, A. A. Metwally (2019). Identifying Appropriate Probabilistic Models for Sparse Discrete Omics Data,
+accepted for publication in 2019 IEEE EMBS International Conference on Biomedical &amp; Health Informatics (BHI).
+</p>
+</li>
+<li>
+<p>T. Wolodzko (2019). extraDistr: Additional Univariate and Multivariate Distributions, R package version 1.8.11,
+https://CRAN.R-project.org/package=extraDistr.
+</p>
+</li>
+<li>
+<p>R. Calaway, Microsoft Corporation, S. Weston, D. Tenenbaum (2017). doParallel: Foreach Parallel Adaptor for the 'parallel'
+Package, R package version 1.0.11, https://CRAN.R-project.org/package=doParallel.
+</p>
+</li>
+<li>
+<p>R. Calaway, Microsoft, S. Weston (2017). foreach: Provides Foreach Looping Construct for R, R package version 1.4.4,
+https://CRAN.R-project.org/package=foreach.
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>model.lrt</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+set.seed(2001)
+temp1=sample.zi(N=300,phi=0.3,distri='poisson',lambda=5)
+dis.kstest(temp1,nsim=100,bootstrap=TRUE,distri='Poisson')$pvalue
+dis.kstest(temp1,nsim=100,bootstrap=TRUE,distri='nb')$pvalue
+dis.kstest(temp1,nsim=100,bootstrap=TRUE,distri='zip')$pvalue
+dis.kstest(temp1,nsim=100,bootstrap=TRUE,distri='zinb')$pvalue
+
+</code></pre>
+
+
+</div>

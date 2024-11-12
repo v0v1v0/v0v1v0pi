@@ -1,0 +1,106 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>SNRMetric</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Signal to Noise Ratio</h2>
+
+<h3>Description</h3>
+
+<p>The SNRMetric() function calculates the Signal-to-Noise Ratio of a seismic trace by one
+of several named algorithms.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">SNRMetric(st, algorithm, windowSecs)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>st</code></td>
+<td>
+<p> a <code>Stream</code> object containing a seismic signal </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algorithm</code></td>
+<td>
+<p> a named algorithm to use for calculating SNR (default=<code>"splitWindow"</code>) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>windowSecs</code></td>
+<td>
+<p> width (seconds) of the full window used in SNR calculations (default=<code>60</code>) </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Seismic signals in the Stream must be without gaps, <em>i.e.</em> contained within a single Trace.
+</p>
+<p><strong><code>algorithm="splitWindow"</code></strong>
+</p>
+<p>This algorithm uses the midpoint of the seismic signal as the border between noise to the left
+of the midpoint and signal to the right.
+The value for signal-to-noise is just the rmsVariance calculated for 
+windowSecs/2 seconds of data to the right of the midpoint divided by the rmsVariance
+for windowSecs/2 seconds of data to the left of the midpoint.
+</p>
+<p>No other algorithms have been vetted at this point.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with a single <code>SingleValueMetric</code> object is returned.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"> ## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+# Get an hour long waveform centered on a big quake
+starttime &lt;- as.POSIXct("2010-02-27 06:16:15",tz="GMT")
+endtime &lt;- as.POSIXct("2010-02-27 07:16:15",tz="GMT")
+st &lt;- getDataselect(iris,"IU","ANMO","00","BHZ",starttime,endtime)
+tr &lt;- st@traces[[1]]
+
+# Calculate the SNR metric and show the results
+metricList &lt;- SNRMetric(st)
+dummy &lt;- lapply(metricList, show)
+  
+## End(Not run)
+</code></pre>
+
+
+</div>

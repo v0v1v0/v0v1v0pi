@@ -1,0 +1,282 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>GradientBased</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Super class for gradient-based interpretation methods</h2>
+
+<h3>Description</h3>
+
+<p>Super class for gradient-based interpretation methods. This
+class inherits from <code>InterpretingMethod</code>. It summarizes all implemented
+gradient-based methods and provides a private function to calculate the
+gradients w.r.t. to the input for given data. Implemented are:
+</p>
+
+<ul>
+<li> <p><em>Vanilla Gradients</em> and <em>Gradient<code class="reqn">\times</code>Input</em> (<code>Gradient</code>)
+</p>
+</li>
+<li> <p><em>Integrated Gradients</em> (<code>IntegratedGradient</code>)
+</p>
+</li>
+<li> <p><em>SmoothGrad</em> and <em>SmoothGrad<code class="reqn">\times</code>Input</em> (<code>SmoothGrad</code>)
+</p>
+</li>
+<li> <p><em>ExpectedGradients</em> (<code>ExpectedGradient</code>)
+</p>
+</li>
+</ul>
+<h3>Super class</h3>
+
+<p><code>innsight::InterpretingMethod</code> -&gt; <code>GradientBased</code>
+</p>
+
+
+<h3>Public fields</h3>
+
+<div class="r6-fields">
+
+<dl>
+<dt><code>times_input</code></dt>
+<dd>
+<p>(<code style="white-space: pre;">⁠logical(1⁠</code>))<br>
+This logical value indicates whether the results
+were multiplied by the provided input data or not.<br></p>
+</dd>
+</dl>
+</div>
+
+
+<h3>Methods</h3>
+
+
+
+<h4>Public methods</h4>
+
+
+<ul>
+<li> <p><a href="#method-GradientBased-new"><code>GradientBased$new()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-GradientBased-clone"><code>GradientBased$clone()</code></a>
+</p>
+</li>
+</ul>
+<details open><summary>Inherited methods</summary><ul>
+<li><span class="pkg-link" data-pkg="innsight" data-topic="InterpretingMethod" data-id="get_result"><a href="../../innsight/html/InterpretingMethod.html#method-InterpretingMethod-get_result"><code>innsight::InterpretingMethod$get_result()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="innsight" data-topic="InterpretingMethod" data-id="plot"><a href="../../innsight/html/InterpretingMethod.html#method-InterpretingMethod-plot"><code>innsight::InterpretingMethod$plot()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="innsight" data-topic="InterpretingMethod" data-id="plot_global"><a href="../../innsight/html/InterpretingMethod.html#method-InterpretingMethod-plot_global"><code>innsight::InterpretingMethod$plot_global()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="innsight" data-topic="InterpretingMethod" data-id="print"><a href="../../innsight/html/InterpretingMethod.html#method-InterpretingMethod-print"><code>innsight::InterpretingMethod$print()</code></a></span></li>
+</ul></details><hr>
+<a id="method-GradientBased-new"></a>
+
+
+
+<h4>Method <code>new()</code>
+</h4>
+
+<p>Create a new instance of this class. When initialized,
+the method is applied to the given data and the results are stored in
+the field <code>result</code>.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>GradientBased$new(
+  converter,
+  data,
+  channels_first = TRUE,
+  output_idx = NULL,
+  output_label = NULL,
+  ignore_last_act = TRUE,
+  times_input = TRUE,
+  verbose = interactive(),
+  dtype = "float"
+)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>converter</code></dt>
+<dd>
+<p>(<code>Converter</code>)<br>
+An instance of the <code>Converter</code> class that includes the
+torch-converted model and some other model-specific attributes. See
+<code>Converter</code> for details.<br></p>
+</dd>
+<dt><code>data</code></dt>
+<dd>
+<p>(<code>array</code>, <code>data.frame</code>, <code>torch_tensor</code> or <code>list</code>)<br>
+The data to which the method is to be applied. These must
+have the same format as the input data of the passed model to the
+converter object. This means either
+</p>
+
+<ul>
+<li>
+<p> an <code>array</code>, <code>data.frame</code>, <code>torch_tensor</code> or array-like format of
+size <em>(batch_size, dim_in)</em>, if e.g., the model has only one input layer, or
+</p>
+</li>
+<li>
+<p> a <code>list</code> with the corresponding input data (according to the
+upper point) for each of the input layers.<br></p>
+</li>
+</ul>
+</dd>
+<dt><code>channels_first</code></dt>
+<dd>
+<p>(<code>logical(1)</code>)<br>
+The channel position of the given data (argument
+<code>data</code>). If <code>TRUE</code>, the channel axis is placed at the second position
+between the batch size and the rest of the input axes, e.g.,
+<code>c(10,3,32,32)</code> for a batch of ten images with three channels and a
+height and width of 32 pixels. Otherwise (<code>FALSE</code>), the channel axis
+is at the last position, i.e., <code>c(10,32,32,3)</code>. If the data
+has no channel axis, use the default value <code>TRUE</code>.<br></p>
+</dd>
+<dt><code>output_idx</code></dt>
+<dd>
+<p>(<code>integer</code>, <code>list</code> or <code>NULL</code>)<br>
+These indices specify the output nodes for which
+the method is to be applied. In order to allow models with multiple
+output layers, there are the following possibilities to select
+the indices of the output nodes in the individual output layers:
+</p>
+
+<ul>
+<li>
+<p> An <code>integer</code> vector of indices: If the model has only one output
+layer, the values correspond to the indices of the output nodes, e.g.,
+<code>c(1,3,4)</code> for the first, third and fourth output node. If there are
+multiple output layers, the indices of the output nodes from the first
+output layer are considered.
+</p>
+</li>
+<li>
+<p> A <code>list</code> of <code>integer</code> vectors of indices: If the method is to be
+applied to output nodes from different layers, a list can be passed
+that specifies the desired indices of the output nodes for each
+output layer. Unwanted output layers have the entry <code>NULL</code> instead of
+a vector of indices, e.g., <code>list(NULL, c(1,3))</code> for the first and
+third output node in the second output layer.
+</p>
+</li>
+<li> <p><code>NULL</code> (default): The method is applied to all output nodes in
+the first output layer but is limited to the first ten as the
+calculations become more computationally expensive for more output
+nodes.<br></p>
+</li>
+</ul>
+</dd>
+<dt><code>output_label</code></dt>
+<dd>
+<p>(<code>character</code>, <code>factor</code>, <code>list</code> or <code>NULL</code>)<br>
+These values specify the output nodes for which
+the method is to be applied. Only values that were previously passed with
+the argument <code>output_names</code> in the <code>converter</code> can be used. In order to
+allow models with multiple
+output layers, there are the following possibilities to select
+the names of the output nodes in the individual output layers:
+</p>
+
+<ul>
+<li>
+<p> A <code>character</code> vector or <code>factor</code> of labels: If the model has only one output
+layer, the values correspond to the labels of the output nodes named in the
+passed <code>Converter</code> object, e.g.,
+<code>c("a", "c", "d")</code> for the first, third and fourth output node if the
+output names are <code>c("a", "b", "c", "d")</code>. If there are
+multiple output layers, the names of the output nodes from the first
+output layer are considered.
+</p>
+</li>
+<li>
+<p> A <code>list</code> of <code>charactor</code>/<code>factor</code> vectors of labels: If the method is to be
+applied to output nodes from different layers, a list can be passed
+that specifies the desired labels of the output nodes for each
+output layer. Unwanted output layers have the entry <code>NULL</code> instead of
+a vector of labels, e.g., <code>list(NULL, c("a", "c"))</code> for the first and
+third output node in the second output layer.
+</p>
+</li>
+<li> <p><code>NULL</code> (default): The method is applied to all output nodes in
+the first output layer but is limited to the first ten as the
+calculations become more computationally expensive for more output
+nodes.<br></p>
+</li>
+</ul>
+</dd>
+<dt><code>ignore_last_act</code></dt>
+<dd>
+<p>(<code>logical(1)</code>)<br>
+Set this logical value to include the last
+activation functions for each output layer, or not (default: <code>TRUE</code>).
+In practice, the last activation (especially for softmax activation) is
+often omitted.<br></p>
+</dd>
+<dt><code>times_input</code></dt>
+<dd>
+<p>(<code style="white-space: pre;">⁠logical(1⁠</code>)<br>
+Multiplies the gradients with the input features.
+This method is called <em>Gradient<code class="reqn">\times</code>Input</em>.<br></p>
+</dd>
+<dt><code>verbose</code></dt>
+<dd>
+<p>(<code>logical(1)</code>)<br>
+This logical argument determines whether a progress bar is
+displayed for the calculation of the method or not. The default value is
+the output of the primitive R function <code>interactive()</code>.<br></p>
+</dd>
+<dt><code>dtype</code></dt>
+<dd>
+<p>(<code>character(1)</code>)<br>
+The data type for the calculations. Use
+either <code>'float'</code> for torch_float or <code>'double'</code> for
+torch_double.<br></p>
+</dd>
+</dl>
+</div>
+
+
+<hr>
+<a id="method-GradientBased-clone"></a>
+
+
+
+<h4>Method <code>clone()</code>
+</h4>
+
+<p>The objects of this class are cloneable with this method.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>GradientBased$clone(deep = FALSE)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>deep</code></dt>
+<dd>
+<p>Whether to make a deep clone.</p>
+</dd>
+</dl>
+</div>
+
+
+
+
+</div>

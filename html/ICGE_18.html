@@ -1,0 +1,131 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>INCAnumclu</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>  Estimation of Number of Clusters in Data </h2>
+
+<h3>Description</h3>
+
+<p><code>INCAnumclu</code> helps to estimate the number of clusters in a
+dataset. The INCA index associated to different partitions with
+different number of clusters is calculated.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">INCAnumclu(d, K, method = "pam", pert, L= NULL, noise=NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p> a distance matrix or a <code>dist</code> object with distance information between units.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p> the maximum number of cluster to be considered. For each k value ( k=2,..,K)  a partition with k clusters is calculated. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p> character string defining the clustering method in
+order to obtain the partitions. The hierarchical aglomerative clustering methods are perfomed via <code>hclust</code> function in package <span class="pkg">fastcluster</span>. Other clustering methods are performed  via the functions in package <span class="pkg">cluster</span>, such as: <code>pam</code>, 
+<code>diana</code> and  <code>fanny</code>. The available clustering methods are <code>pam</code> (default method), <code>average</code> (UPGMA), <code>single</code> (single linkage),
+<code>complete</code> (complete linkage), <code>ward.D2</code> (Ward's method), <code>ward.D</code>, <code>centroid</code>, <code>median</code>, <code>diana</code> (hierarchical
+divisive) and <code>fanny</code> (fuzzy clustering). Nevertheless, the user can introduce
+particular or custom  partitions indicating <code>method="partition"</code> and specifying
+the partitions in argument <code>pert</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pert</code></td>
+<td>
+<p>only useful when parameter <code>method</code>="partition"; it
+is a matrix and each column contains a partition of the units. That means that each column is an n-vector that indicates which group each unit belongs to. Note that the expected values of each column of <code>pert</code> are numbers greater than or equal to 1 (for instance 1,2,3,4..., k). </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L</code></td>
+<td>
+<p> default value NULL, but when some units are considered by
+the user as noise units, <code>L</code> must be specified as follows: (a)
+<code>L</code> is greater than or equal to 1 and all units in clusters with a
+cardinal &lt;= L  are considered noise units; (b) <code>L="custom"</code> when the user wants to specify which units are considered noise units. These units must be specified in argument <code>noise</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>noise</code></td>
+<td>
+<p>when <code>L="custom"</code>, it is a logical vector indicating
+the units considered by the user as noise units.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns an object of class <code>incanc</code> which is a numeric vector containing the INCA index associated to each of the k (k=2,...,K) partitions. When <code>noise</code> is no null, the function returns a list with the INCA index for each partition, which is calculated without noise units as well as with noise units. The associated <code>plot</code> returns INCA index plot, both, with and without noise.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>  Itziar Irigoien <a href="mailto:itziar.irigoien@ehu.eus">itziar.irigoien@ehu.eus</a>; Konputazio Zientziak eta Adimen Artifiziala, Euskal Herriko Unibertsitatea (UPV/EHU), Donostia, Spain.
+</p>
+<p>Conchita Arenas <a href="mailto:carenas@ub.edu">carenas@ub.edu</a>; Departament d'Estadistica, Universitat de Barcelona, Barcelona, Spain.
+</p>
+
+
+<h3>References</h3>
+
+<p> Irigoien, I. and  Arenas, C. (2008). INCA: New statistic for estimating the number of clusters and identifying atypical units.
+<em>Statistics in Medicine</em>, <b>27</b>(15), 2948–2973.
+</p>
+<p>Arenas, C. and Cuadras, C.M. (2002). Some recent statistical methods based on distances.<em> Contributions to Science</em>, <b>2</b>, 183–191.
+</p>
+
+
+<h3>See Also</h3>
+
+  <p><code>INCAindex</code>, <code>estW</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#------- Example 1 --------------------------------------
+#generate 3 clusters, each of them with 20 objects in dimension 5.
+mu1 &lt;- sample(1:10, 5, replace=TRUE)
+x1 &lt;- matrix(rnorm(20*5, mean = mu1, sd = 1),ncol=5, byrow=TRUE)
+mu2 &lt;- sample(1:10, 5, replace=TRUE)
+x2 &lt;- matrix(rnorm(20*5, mean = mu2, sd = 1),ncol=5, byrow=TRUE)
+mu3 &lt;- sample(1:10, 5, replace=TRUE)
+x3 &lt;- matrix(rnorm(20*5, mean = mu3, sd = 1),ncol=5, byrow=TRUE)
+x &lt;- rbind(x1,x2,x3)
+
+# calculte euclidean distance between them
+d &lt;- dist(x)
+
+# calculate the INCA index associated to partitions with k=2, ..., k=5 clusters.
+INCAnumclu(d, K=5)
+out &lt;- INCAnumclu(d, K=5)
+plot(out)
+
+#------- Example 1 cont. --------------------------------
+# With hypothetical noise elements
+noiseunits &lt;- rep(FALSE, 60)
+noiseunits[sample(1:60, 20)] &lt;- TRUE
+out &lt;- INCAnumclu(d, K=5, L="custom", noise=noiseunits)
+plot(out)
+</code></pre>
+
+
+</div>

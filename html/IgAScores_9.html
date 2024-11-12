@@ -1,0 +1,184 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>simulateigaseq</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate an IgA-Seq dataset from a pre-defined set of IgA-binding probabilities</h2>
+
+<h3>Description</h3>
+
+<p>Simulates IgA-Seq to create datasets with a defined binding distribution that can be used to test scoring method performance
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">simulateigaseq(
+  igavalmeans = NULL,
+  igavalsds = NULL,
+  nosamples = 10,
+  samplingdepth = 1e+05,
+  posthresh = 4,
+  negthresh = 2,
+  seed = 66,
+  betweengroups = FALSE,
+  betweenper = 10,
+  betweensp = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>igavalmeans</code></td>
+<td>
+<p>A vector of mean IgA values for as many species as you wish to simulate. Will default to an exponentially distributed vector of 10 species.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>igavalsds</code></td>
+<td>
+<p>A vector of standard deviations that will be used to generate IgA value distributions alongside the means. Defaults to 1 for all values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nosamples</code></td>
+<td>
+<p>The number of samples to generate simulated data from. Defaults to 10.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>samplingdepth</code></td>
+<td>
+<p>The number of bacteria to simulate in each sample. Defaults to 100000.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>posthresh</code></td>
+<td>
+<p>The IgA value threshold above which a bacteria will be considered IgA positive. Defaults to 4 (which is reasonable with the other defaults). It is recommended to run a simulation twice to determine reasonable thresholds on the first go.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>negthresh</code></td>
+<td>
+<p>The IgA value threshold below which a bacteria will be considered IgA negative. Defaults to 2 (which is reasonable with the other defaults). It is recommended to run a simulation twice to determine reasonable thresholds on the first go.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>Seed for random number generation. Has a default so must be changed to rerun simulations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>betweengroups</code></td>
+<td>
+<p>If TRUE this will modify starting abundances of half of the samples similarly (by adding betweenper% of total counts to a single species) to simulate the case where there is an abundance shift without a change in IgA binding affinity. Defaults to FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>betweenper</code></td>
+<td>
+<p>Percentage of total counts to add to a species in the second group in the betweengroups mode.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>betweensp</code></td>
+<td>
+<p>Species (by index) to increased in between groups simulation. Chosen at random if NULL (default).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function will generate a simulated immunoglobulin A sequencing (IgA-Seq) data set starting from a list containing the mean (and standard deviations) of IgA binding values expected for each species and cut-offs for defining the IgA positive and negative gates.
+The input is a vector giving the average IgA value of each species (any arbitrary value that will represent the relative level of IgA binding between the species, ensure standard deviation and cut-offs are in the same magnitude).
+These values are treated as the means of a normal distribution of IgA binding values for each species.
+Species counts are generated on a log distribution for a given number of samples at an even depth.
+For each bacteria in each sample, an IgA binding value is then assigned by sampling from its species IgA value distribution.
+The value thresholds defining the positive and negative gates are then used to generate positive and negative counts tables of the bacteria whose values fall into these groups.
+A second mode can also be used (by toggling betweengroups) that will introduce a consistent abundance change in half the samples by increasing one species in them. This can be used to simulate case-control experiments where, as an example,  one taxa has bloomed.
+Further details can be found in Jackson et al. (2020, doi: <a href="https://doi.org/10.1101/2020.08.19.257501">10.1101/2020.08.19.257501</a>).
+</p>
+<p>Note: IgA values are simulated for each bacteria in each sample, setting the combination of the samplingdepth, number of species, and number of samples too high will slow the data generation.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list containing the simulated data set and relevant input parameters.
+</p>
+
+<ul>
+<li>
+<p> presortcounts - A data frame containing simulated species counts for each sample in the pre-sort sample.
+</p>
+</li>
+<li>
+<p> presortabunds - presortcounts as relative abundances.
+</p>
+</li>
+<li>
+<p> poscounts - A data frame containing simulated species counts for each sample in the IgA positive fraction.
+</p>
+</li>
+<li>
+<p> posabunds - poscounts as relative abundances.
+</p>
+</li>
+<li>
+<p> negcounts - A data frame containing simulated species counts for each sample in the IgA negative fraction.
+</p>
+</li>
+<li>
+<p> negabunds - negcounts as relative abundances.
+</p>
+</li>
+<li>
+<p> possizes - A vector of the IgA positive fraction sizes for each sample.
+</p>
+</li>
+<li>
+<p> negsizes - A vector of the IgA negative fraction sizes for each sample.
+</p>
+</li>
+<li>
+<p> igabinding - A long format data frame containing the simulated IgA binding values for all simulated bacteria used to generate the count tables.
+</p>
+</li>
+<li>
+<p> igavalmeans - A vector of the mean IgA values for each species used in the simulation.
+</p>
+</li>
+<li>
+<p> igavalsds - A vector of the standard deviations of the IgA values for each species used in the simulation.
+</p>
+</li>
+<li>
+<p> posthresh - Numeric, the lower threshold used to determine a bacteria is IgA postive in the simulation.
+</p>
+</li>
+<li>
+<p> negthresh - Numeric, the upper threshold used to determine a bacteria is IgA negative in the simulation.
+</p>
+</li>
+<li>
+<p> expgroup - A vector showing class labels for the experimental group of each sample in the experiment. Will be uniform unless doing between group simulations.
+</p>
+</li>
+<li>
+<p> expspecies - Numeric, showing which species was modelled as differentially abundant between experimental groups when carryingout between group simulations.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">dat &lt;- simulateigaseq(c(0.1,1,10,15),rep(1,4),posthresh=8,negthresh=4,samplingdepth=100)
+</code></pre>
+
+
+</div>

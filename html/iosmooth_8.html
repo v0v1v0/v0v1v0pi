@@ -1,0 +1,136 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ioksmooth</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Nadaraya-Watson regression estimator with infinite order kernels.
+</h2>
+
+<h3>Description</h3>
+
+<p>Calculates the Nadaraya-Watson nonparametric kernel regression estimator using infinite order flat-top kernels.  These estimators have been shown to automatically achieve optimal rates of covergence across a wide range of scenarios.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ioksmooth(x, y, bw = 0.1, kernel = c("Trap", "Rect", "SupSm"), n.points = 100, x.points)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>Predictor variable <code>x</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+
+<p>Response variable <code>y</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bw</code></td>
+<td>
+
+<p>The kernel bandwidth.  Can be chosen with the help of <code>bwplot</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kernel</code></td>
+<td>
+
+<p>Three flat-top kernels are implemented, described by the shape of their Fourier transforms.  "Trap" is trapezoid shaped and is the default.  The rectangular kernel is not recommended and is here for comparison only.  SuperSmooth is infinitely differentiable in the Fourier domain, which, in theory, minimizes edge effects in the interior of the domain.  It is calculated numerically, and will be slower.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.points</code></td>
+<td>
+
+<p>The number of points at which the density estimate will be calculated if <code>x.points</code> is not specified.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x.points</code></td>
+<td>
+
+<p>The points at which the density should be calculated.  If missing, the function defaults to the range of <code>x</code> +/- 5%. 
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list of length 2
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p> The <code>x</code> values at which the regression is estimated (<code>x.points</code> if specified).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p> The estimated regression function at the associated x values.</p>
+</td>
+</tr>
+</table>
+<h3>Warning </h3>
+
+<p>The regressions can be unstable in regions where the design density is low.  For regression, <code>bwplot</code> can be used to visually select the large low frequency component, but it is not amenable to algorithmic bandwidth choice.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Timothy L. McMurry
+</p>
+
+
+<h3>References</h3>
+
+<p>McMurry, T. L., &amp; Politis, D. N. (2004). Nonparametric regression with infinite order flat-top kernels. <em>Journal of Nonparametric Statistics</em>, 16(3-4), 549-562.
+</p>
+<p>McMurry, T. L., &amp; Politis, D. N. (2008). Minimally biased nonparametric regression and autoregression. <em>REVSTAT-Statistical Journal</em>, 6(2), 123-150.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>bwplot</code>, <code>bwplot.numeric</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(123)
+x &lt;- sort(runif(200, 0, 2*pi))
+# Regression function
+r &lt;- exp(-x^2) + sin(x) 
+# Observed response
+y &lt;- r + 0.3*rnorm(200)
+bwplot(x, y, smax=10)
+# Choose bandwidth about 1/2
+plot(x, y)
+lines(ioksmooth(x, y, bw=1/2, kernel="Trap"))
+# Add the truth in red
+lines(x, r, col="red")
+</code></pre>
+
+
+</div>

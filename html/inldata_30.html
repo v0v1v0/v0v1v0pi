@@ -1,0 +1,204 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>make_datasets</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create Package Datasets</h2>
+
+<h3>Description</h3>
+
+<p>Create datasets for the <span class="pkg">inldata</span> package and save each as an
+R-data file with the <code>.rda</code> extension, which is a format native to <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span>.
+The <span class="pkg">stats</span> <span class="pkg">dataRetrieval</span>, and <span class="pkg">stringi</span> packages must be available.
+This function is intended for use by <span class="pkg">inldata</span>-package developers.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">make_datasets(
+  path = getwd(),
+  destdir = file.path(path, "data"),
+  clean = FALSE,
+  tz = "America/Denver",
+  census_yr = 2023,
+  buffer_dist = 1000,
+  resolution = 100,
+  warn = 1,
+  timeout = 10,
+  compress = "xz",
+  seed = 0L,
+  quiet = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>path</code></td>
+<td>
+<p>'character' string.
+Path to the package's source directory, with tilde-expansion performed.
+Defaults to the working directory.
+Ensure that under the <code>path</code> is a folder named <code>data-raw</code>
+that contains the raw data files required for the build process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>destdir</code></td>
+<td>
+<p>'character' string.
+Destination directory to write R-data files, with tilde-expansion performed.
+Defaults to the <code>data</code> directory located under <code>path</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clean</code></td>
+<td>
+<p>'logical' flag.
+Whether to delete all pre-existing R-data files in the destination directory.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tz</code></td>
+<td>
+<p>'character' string.
+Time zone specification.
+Defaults to Mountain Standard Time (North America).
+See <code>OlsonNames</code> for time zone information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>census_yr</code></td>
+<td>
+<p>'integer' number.
+United States census year.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>buffer_dist</code></td>
+<td>
+<p>'numeric' number.
+Buffer distance for the study area defined by the bounding of the sample <code>sites</code> dataset.
+Specified in units of the coordinate reference system (<code>crs$units</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resolution</code></td>
+<td>
+<p>'numeric' number.
+Spatial resolution of the raster grid, in meters.
+Specify in units of the coordinate reference system (<code>crs$units</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn</code></td>
+<td>
+<p>'integer' value.
+Sets the handling of warning messages.
+Choose value of less than 0 to show no warnings, 1 to print warnings (default),
+and 2 to error on warnings.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timeout</code></td>
+<td>
+<p>'integer' number.
+Timeout for some of the internet operations, in minutes.
+Defaults to 10 minutes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>compress</code></td>
+<td>
+<p>'logical' flag or 'character' string.
+Whether compression should be used when saving a dataset to file.
+Character strings "auto", "gzip", "bzip2" and "xz" (default) are accepted.
+See the <code>save</code> function for details on compression types.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>'integer' count.
+Random number generator state, used to create reproducible results.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>'logical' flag.
+Whether to suppress printing of debugging information.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function retrieves and parses datasets from local and remote sources.
+Access to the internet is required to download data from the following remote sources:
+</p>
+
+<ul>
+<li>
+<p> National Elevation Dataset (<a href="https://www.usgs.gov/publications/national-elevation-dataset">NED</a>)
+on <a href="https://prd-tnm.s3.amazonaws.com/">Amazon's Cloud</a>.
+</p>
+</li>
+<li>
+<p> Spatial data from the
+<a href="https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-geodatabase-file.html">TIGER/Line Geodatabase</a>
+that contains spatial extracts from the U.S. Census Bureau's
+<a href="https://www2.census.gov/geo/tiger/TGRGDB22/">MAF/TIGER database</a>.
+</p>
+</li>
+<li>
+<p> National Hydrography Dataset
+(<a href="https://www.usgs.gov/national-hydrography/national-hydrography-dataset">NHD</a>)
+data from the USGS NHD file geodatabase on <a href="https://dmap-data-commons-ow.s3.amazonaws.com/">Amazon's Cloud</a>.
+</p>
+</li>
+</ul>
+<p>Each of the package dataset's represents a snapshot of the data at a specified point in time.
+While geospatial datasets may change very little over time
+(such as the boundary of the Idaho National Laboratory),
+other datasets continue to grow as new data becomes available
+(such as water-quality data measured in <code>samples</code> collected from wells).
+</p>
+<p>To ensure that the function retrieves the most recent data versions,
+it is recommended to periodically check the URLs of remote sources and update them within the function.
+It is also advisable to document any changes in the datasets and update their help documentation accordingly.
+</p>
+<p>Files downloaded during intermediate stages of the build process
+are cached on your computer to speed up future builds.
+You can specify the path to the cache directory by setting an environment variable named <code>CACHE_DIR</code>.
+By default the location of the cache directory is determined by the <code>get_cache_dir()</code> command.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns the paths to the newly created R Data files invisibly.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>J.C. Fisher, U.S. Geological Survey, Idaho Water Science Center
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example requires that the 'path' argument be specified as
+# the top-level directory of the inldata package repository.
+## Not run: 
+  make_datasets(destdir = tempfile(""))
+
+## End(Not run)
+</code></pre>
+
+
+</div>

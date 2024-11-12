@@ -1,0 +1,143 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>DLS3.2</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>DLS Method 3.2</h2>
+
+<h3>Description</h3>
+
+<p>Apply ICES method 3.2 to calculate catch advice for data-limited stocks
+(DLS).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">DLS3.2(lastadvice, index, len = c(3, 2), buffer = FALSE, i1, i2)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>lastadvice</code></td>
+<td>
+<p>last catch advice given for this stock.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>index</code></td>
+<td>
+<p>stock size index.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>len</code></td>
+<td>
+<p>two integers, indicating the desired lengths of reference vectors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>buffer</code></td>
+<td>
+<p>whether to apply a -20% precautionary buffer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>i1</code></td>
+<td>
+<p>included for backward compatibility, use <code>len</code> instead.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>i2</code></td>
+<td>
+<p>included for backward compatibility, use <code>len</code> instead.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function compares the average values of two reference vectors <code>i1</code>
+and <code>i2</code>. In the simplest case, only <code>lastadvice</code> and <code>index</code>
+are required to calculate the advice.
+</p>
+<p>The default value of <code>len = c(3, 2)</code> produces vectors <code>i1</code> and
+<code>i2</code> of lengths 3 and 2,
+</p>
+<p><code style="white-space: pre;">⁠  ⁠</code>i1 = (I[n-4], I[n-3], I[n-2])
+</p>
+<p><code style="white-space: pre;">⁠  ⁠</code>i2 = (I[n-1], I[n])
+</p>
+<p>where I is a stock size index of length n.
+</p>
+<p>Other vector lengths can be used, such as <code>len = c(5, 2)</code> to get
+</p>
+<p><code style="white-space: pre;">⁠  ⁠</code>i1 = (I[n-6], I[n-5], I[n-4], I[n-3], I[n-2])
+</p>
+<p><code style="white-space: pre;">⁠  ⁠</code>i2 = (I[n-1], I[n])
+</p>
+<p>Finally, a -20% precautionary buffer can be applied at the end of all
+calculations.
+</p>
+<p>See the ICES (2012) guidance report for details.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list containing the resulting <code>advice</code> and other elements showing
+intermediate steps in the calculations.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Anne Cooper and Arni Magnusson.
+</p>
+
+
+<h3>References</h3>
+
+<p>ICES (2012) ICES DLS guidance report: ICES implementation of advice for
+data-limited stocks in 2012 in its 2012 advice.
+<a href="http://ices.dk/sites/pub/Publication%20Reports/Expert%20Group%20Report/acom/2012/ADHOC/DLS%20Guidance%20Report%202012.pdf"><em>ICES
+CM 2012/ACOM:68</em></a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>read.dls</code> and <code>write.dls</code> read and write DLS3.2
+results to file.
+</p>
+<p><code>icesAdvice-package</code> gives an overview of the package.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Three hypothetical surveys
+survey &lt;- data.frame(year=2001:2010, randu[1:10,])
+
+DLS3.2(1000, survey$x)
+
+DLS3.2(1000, survey$y)
+DLS3.2(1000, survey$y, len=c(5,2))
+
+DLS3.2(1000, survey$z)
+DLS3.2(1000, survey$z, buffer=TRUE)
+
+# Plot
+output &lt;- DLS3.2(1000, survey$y)
+plot(y~year, survey, ylab="index", type="b", lty=3)
+segments(2006, output$i1bar, 2008, lwd=2)
+segments(2009, output$i2bar, 2010, lwd=2)
+
+</code></pre>
+
+
+</div>

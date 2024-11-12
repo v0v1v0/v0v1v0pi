@@ -1,0 +1,346 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dtw</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Dynamic Time Warping
+</h2>
+
+<h3>Description</h3>
+
+<p>Calculate the DTW distance, cost matrices and direction matrices including the warping path two multivariate time series.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dtw(Q, C, dist_method = c("norm1", "norm2", "norm2_square"), 
+    step_pattern = c("symmetric2", "symmetric1"), ws = NULL,
+    return_cm = FALSE,
+    return_diffM = FALSE,
+    return_wp = FALSE,
+    return_diffp = FALSE,
+    return_QC = FALSE)
+                     
+cm(Q, C, dist_method = c("norm1", "norm2", "norm2_square"), 
+   ws = NULL, ...)
+   
+## S3 method for class 'idtw'
+print(x, digits = getOption("digits"), ...)
+
+## S3 method for class 'idtw'
+summary(object, ...)
+
+is.idtw(x)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Q</code></td>
+<td>
+<p>Query time series. Q needs to be one of the following: (1) a one dimensional vector, (2) a matrix where each row is one observations and each column is one dimension of the time series, or (3) a matrix of differences/ costs (diffM, cm). If Q and C are matrices they need to have the same number of columns.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C</code></td>
+<td>
+
+<p>Candidate time series. C needs to be one of the following: (1) a one dimensional vector, (2) a matrix where each row is one observations and each column is one dimension of the time series, or (3) if Q is a matrix of differences or costs C needs to be the respective character string 'diffM' or 'cm'.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist_method</code></td>
+<td>
+<p>character, describes the method of distance measure for multivariate time series (this parameter is ignored for univariate time series). Currently supported methods are 'norm1' (default, is the Manhattan distance), 'norm2' (is the Euclidean distance) and 'norm2_square'. For the function <code>cm()</code> the parameter <code>dist_method</code> can also be a user defined distance function (see details and examples).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>step_pattern</code></td>
+<td>
+<p>character, describes the step pattern. Currently implemented are the patterns <code>symmetric1</code> and <code>symmetric2</code>, see details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ws</code></td>
+<td>
+
+<p>integer, describes the window size for the sakoe chiba window. If NULL, then no window is applied. (default = NULL)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return_cm</code></td>
+<td>
+<p>logical, if TRUE then the Matrix of costs (the absolute value) is returned. (default = FALSE)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return_diffM</code></td>
+<td>
+
+<p>logical, if TRUE then the Matrix of differences (not the absolute value) is returned. (default = FALSE)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return_wp</code></td>
+<td>
+
+<p>logical, if TRUE then the warping path is returned. (default = FALSE) If return_diffp == TRUE, then return_wp is set to TRUE as well.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return_diffp</code></td>
+<td>
+
+<p>logical, if TRUE then the path of differences (not the absolute value) is returned. (default = FALSE)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return_QC</code></td>
+<td>
+
+<p>logical, if TRUE then the input vectors Q and C are appended to the returned list. This is useful for the <code>plot.idtw</code> function.  (default = FALSE)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>output from <code>dtw</code> or <code>idtw</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>any R object
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional arguments, e.g. passed to <code>print</code>, <code>summary</code>, or a user defined distance function for <code>cm()</code> 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+
+<p>passed to <code>round</code> and <code>print</code>
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The dynamic time warping distance is the element in the last row and last column of the global cost matrix. 
+</p>
+<p>For the multivariate case where Q is a matrix of n rows and k columns and C is a matrix of m rows and k columns
+the dist_method parameter defines the following distance measures: 
+</p>
+<p>norm1: </p>
+<p style="text-align: center;"><code class="reqn">dist(Q_{i,.}, C_{j,.}) = \sum {l = 1:k}  |Q_{i,l} - C_{j,l}|</code>
+</p>
+
+<p>norm2: </p>
+<p style="text-align: center;"><code class="reqn">dist(Q_{i,.}, C_{j,.}) = (\sum {l = 1:k} (Q_{i,l} - C_{j,l})^2)^0.5</code>
+</p>
+
+<p>norm2_square: </p>
+<p style="text-align: center;"><code class="reqn">dist(Q_{i,.}, C_{j,.}) = \sum{l = 1:k} (Q_{i,l} - C_{j,l})^2</code>
+</p>
+
+<p>The parameter <code>step_pattern</code> describes how the two time series are aligned. 
+If <code>step_pattern == "symmetric1"</code> then  </p>
+<p style="text-align: center;"><code class="reqn">gcm_{i,j} = cm{i,j} + min(gcm_{i-1,j}, gcm{i-1, j-1}, gcm{i, i-1} </code>
+</p>
+<p>.
+</p>
+<p>If <code>step_pattern == "symmetric2"</code> then  </p>
+<p style="text-align: center;"><code class="reqn">gcm_{i,j} = cm{i,j} + min(gcm_{i-1,j}, cm{i,j}+ gcm{i-1, j-1}, gcm{i, i-1} </code>
+</p>
+<p>.
+</p>
+<p>To make DTW distances comparable for many time series of different lengths use the <code>normlized_distance</code> with the setting <code>step_method = 'symmetric2'</code>. Please find a more detailed discussion and further references here: <a href="http://dtw.r-forge.r-project.org/">http://dtw.r-forge.r-project.org/</a>.
+</p>
+<p>User defined distance function:
+To calculate the DTW distance measure of two time series a distance function for the local distance of two observations <code>Q[i, ]</code> and <code>C[j, ]</code> of the time series <code>Q</code> and <code>C</code> has to be selected. The predefined distance function are 'norm1', 'norm2' and 'norm2-square'. It is also possible to define a customized distance function and use the cost matrix <code>cm</code> as input for the DTW algorithm, also for the incremental functions. In the following experiment we apply the cosine distance as local distance function:
+</p>
+<p style="text-align: center;"><code class="reqn">
+ d_cos(C_i, Q_j) = 1 - (\sum{o=1:O} Q_{io} * C_{jo})/ ((\sum{o=1:O} Q_{io}^2)^0.5 * (\sum{o=1:O} C_{jo}^2)^0.5).
+</code>
+</p>
+
+
+
+<h3>Value</h3>
+
+
+
+
+
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>distance</code></td>
+<td>
+<p>the DTW distance, that is the element of the last row and last column of gcm</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>normalized_distance</code></td>
+<td>
+<p>the normalized DTW distance, that is the distance divided by <code>N+M</code>, where N and M are the lengths of the time series Q and C, respectively. If <code>step_pattern == 'symmetric1'</code> no normalization is performed and <code>NA</code> is returned (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gcm</code></td>
+<td>
+<p>global cost matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dm</code></td>
+<td>
+<p>direction matrix (3=up, 1=diagonal, 2=left)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wp</code></td>
+<td>
+<p>warping path</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ii</code></td>
+<td>
+<p>indices of Q of the optimal path</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>jj</code></td>
+<td>
+<p>indices of C of the optimal path</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cm</code></td>
+<td>
+<p>Matrix of costs</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diffM</code></td>
+<td>
+<p>Matrix of differences</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diffp</code></td>
+<td>
+<p>path of differences</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q</code></td>
+<td>
+<p>input Q</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C</code></td>
+<td>
+<p>input C</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+
+<ul>
+<li>
+<p> Leodolter, M.; Pland, C.; Brändle, N; <em>IncDTW: An R Package for Incremental Calculation of Dynamic Time Warping</em>. Journal of Statistical Software, 99(9), 1-23. doi: <a href="https://doi.org/10.18637/jss.v099.i09">10.18637/jss.v099.i09</a>
+</p>
+</li>
+<li>
+<p> Sakoe, H.; Chiba, S., <em>Dynamic programming algorithm optimization for spoken word recognition, Acoustics, Speech, and Signal Processing</em> [see also IEEE Transactions on Signal Processing], IEEE Transactions on , vol.26, no.1, pp. 43-49, Feb 1978. http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1163055
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#--- univariate
+Q &lt;- cumsum(rnorm(100))
+C &lt;- Q[11:100] + rnorm(90, 0, 0.5)
+tmp &lt;- dtw(Q = Q, C = C, ws = 15, return_diffM = FALSE, 
+           return_QC = TRUE, return_wp = TRUE)
+names(tmp)
+print(tmp, digits = 3)
+plot(tmp)
+plot(tmp, type = "warp")
+
+
+#--- compare different input variations
+dtw_base  &lt;- dtw(Q = Q, C = C, ws = 15, return_diffM = TRUE)
+dtw_diffM &lt;- dtw(Q = dtw_base$diffM, C = "diffM", ws = 15, 
+                 return_diffM = TRUE)
+dtw_cm    &lt;- dtw(Q = abs(dtw_base$diffM), C = "cm", ws = 15, 
+                 return_diffM = TRUE)
+
+identical(dtw_base$gcm, dtw_cm$gcm)
+identical(dtw_base$gcm, dtw_diffM$gcm)
+
+# of course no diffM is returned in the 'cm'-case
+dtw_cm$diffM
+
+
+#--- multivariate case
+Q &lt;- matrix(rnorm(100), ncol=2)
+C &lt;- matrix(rnorm(80), ncol=2)
+dtw(Q = Q, C = C, ws = 30, dist_method = "norm2")
+
+
+#--- user defined distance function
+# We define the distance function d_cos and use it as input for the cost matrix function cm. 
+# We can pass the output from cm() to dtw2vec(), and also to idtw2vec() for the 
+# incrermental calculation:
+
+d_cos &lt;- function(x, y){ 
+  1 - sum(x * y)/(sqrt(sum(x^2)) * sqrt(sum(y^2)))
+}
+
+Q &lt;- matrix(rnorm(100), ncol=5, nrow=20)
+C &lt;- matrix(rnorm(150), ncol=5, nrow=30)
+cm1 &lt;- cm(Q, C, dist_method = d_cos)
+dtw2vec(Q = cm1, C = "cm")$distance
+
+res0 &lt;- idtw2vec(Q = cm1[ ,1:20], newObs =  "cm")
+idtw2vec(Q = cm1[ ,21:30], newObs =  "cm", gcm_lc = res0$gcm_lc_new)$distance
+
+# The DTW distances -- based on the customized distance function -- of the 
+# incremental calculation and the one from scratch are identical.
+
+
+</code></pre>
+
+
+</div>

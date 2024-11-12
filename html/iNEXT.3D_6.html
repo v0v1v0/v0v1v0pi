@@ -1,0 +1,280 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>estimate3D</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compute 3D diversity estimates with a particular set of sample sizes/coverages</h2>
+
+<h3>Description</h3>
+
+<p><code>estimate3D</code> computes 3D diversity (Hill-Chao number with q = 0, 1 and 2) with a particular set of user-specified levels of sample sizes or sample coverages. If no sample sizes or coverages are specified, this function by default computes 3D diversity estimates for the minimum sample coverage or minimum sample size among all samples extrapolated to double reference sizes.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">estimate3D(
+  data,
+  diversity = "TD",
+  q = c(0, 1, 2),
+  datatype = "abundance",
+  base = "coverage",
+  level = NULL,
+  nboot = 50,
+  conf = 0.95,
+  nT = NULL,
+  PDtree,
+  PDreftime = NULL,
+  PDtype = "meanPD",
+  FDdistM,
+  FDtype = "AUC",
+  FDtau = NULL,
+  FDcut_number = 50
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>(a) For <code>datatype = "abundance"</code>, data can be input as a vector of species abundances (for a single assemblage), matrix/data.frame (species by assemblages), or a list of species abundance vectors. <br>
+(b) For <code>datatype = "incidence_raw"</code>, data can be input as a list of matrices/data.frames (species by sampling units); data can also be input as a single matrix/data.frame by merging all sampling units across assemblages based on species identity; in this case, the number of sampling units (<code>nT</code>, see below) must be specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diversity</code></td>
+<td>
+<p>selection of diversity type: <code>'TD'</code> = Taxonomic diversity, <code>'PD'</code> = Phylogenetic diversity, and <code>'FD'</code> = Functional diversity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>a numerical vector specifying the diversity orders. Default is <code>c(0, 1, 2)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>datatype</code></td>
+<td>
+<p>data type of input data: individual-based abundance data (<code>datatype = "abundance"</code>) or species by sampling-units incidence/occurrence matrix (<code>datatype = "incidence_raw"</code>) with all entries being 0 (non-detection) or 1 (detection).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>base</code></td>
+<td>
+<p>selection of sample-size-based (<code>base = "size"</code>) or coverage-based (<code>base = "coverage"</code>) rarefaction and extrapolation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+<p>A numerical vector specifying the particular sample sizes or sample coverages (between 0 and 1) for which 3D diversity estimates (q =0, 1 and 2) will be computed. <br>
+If <code>base = "coverage"</code> (default) and <code>level = NULL</code>, then this function computes the diversity estimates for the minimum sample coverage among all samples extrapolated to double reference sizes. <br>
+If <code>base = "size"</code> and <code>level = NULL</code>, then this function computes the diversity estimates for the minimum sample size among all samples extrapolated to double reference sizes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nboot</code></td>
+<td>
+<p>a positive integer specifying the number of bootstrap replications when assessing sampling uncertainty and constructing confidence intervals. Enter 0 to skip the bootstrap procedures. Default is 50.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf</code></td>
+<td>
+<p>a positive number &lt; 1 specifying the level of confidence interval. Default is 0.95.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nT</code></td>
+<td>
+<p>(required only when <code>datatype = "incidence_raw"</code> and input data in a single matrix/data.frame) a vector of positive integers specifying the number of sampling units in each assemblage. If assemblage names are not specified (i.e., <code>names(nT) = NULL</code>), then assemblages are automatically named as "assemblage1", "assemblage2",..., etc.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PDtree</code></td>
+<td>
+<p>(required argument for <code>diversity = "PD"</code>), a phylogenetic tree in Newick format for all observed species in the pooled assemblage.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PDreftime</code></td>
+<td>
+<p>(argument only for <code>diversity = "PD"</code>), a vector of numerical values specifying reference times for PD. Default is <code>NULL</code> (i.e., the age of the root of <code>PDtree</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PDtype</code></td>
+<td>
+<p>(argument only for <code>diversity = "PD"</code>), select PD type: <code>PDtype = "PD"</code> (effective total branch length) or <code>PDtype = "meanPD"</code> (effective number of equally divergent lineages). Default is <code>"meanPD"</code>, where <code>meanPD = PD/tree depth</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FDdistM</code></td>
+<td>
+<p>(required argument for <code>diversity = "FD"</code>), a species pairwise distance matrix for all species in the pooled assemblage.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FDtype</code></td>
+<td>
+<p>(argument only for <code>diversity = "FD"</code>), select FD type: <code>FDtype = "tau_values"</code> for FD under specified threshold values, or <code>FDtype = "AUC"</code> (area under the curve of tau-profile) for an overall FD which integrates all threshold values between zero and one. Default is <code>"AUC"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FDtau</code></td>
+<td>
+<p>(argument only for <code>diversity = "FD"</code> and <code>FDtype = "tau_values"</code>), a numerical vector between 0 and 1 specifying tau values (threshold levels). If <code>NULL</code> (default), then threshold is set to be the mean distance between any two individuals randomly selected from the pooled assemblage (i.e., quadratic entropy).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FDcut_number</code></td>
+<td>
+<p>(argument only for <code>diversity = "FD"</code> and <code>FDtype = "AUC"</code>), a numeric number to cut [0, 1] interval into equal-spaced sub-intervals to obtain the AUC value by integrating the tau-profile. Equivalently, the number of tau values that will be considered to compute the integrated AUC value. Default is <code>FDcut_number = 50</code>. A larger value can be set to obtain more accurate AUC value.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a data.frame of diversity table including the following arguments: (when <code>base = "coverage"</code>)
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Assemblage</code></td>
+<td>
+<p>the name of assemblage.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Order.q</code></td>
+<td>
+<p>the diversity order of q.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SC</code></td>
+<td>
+<p>the target standardized coverage value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m, mT</code></td>
+<td>
+<p>the corresponding sample size (or number of sampling units) for the standardized coverage value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qTD, qPD, qFD</code></td>
+<td>
+<p>the estimated diversity of order q for the target coverage value. The estimate for complete coverage (when <code>base = "coverage"</code> and <code>level = 1</code>, or <code>base = "size"</code> and <code>level = Inf</code>) represents the estimated asymptotic diversity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Method</code></td>
+<td>
+<p>Rarefaction, Observed, or Extrapolation, depending on whether the target coverage is less than, equal to, or greater than the coverage of the reference sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s.e.</code></td>
+<td>
+<p>standard error of diversity estimate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qTD.LCL, qPD.LCL, qFD.LCL and qTD.UCL, qPD.UCL, qFD.UCL</code></td>
+<td>
+<p>the bootstrap lower and upper confidence limits for the diversity of order q at the specified level (with a default value of 0.95).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Reftime</code></td>
+<td>
+<p>the reference times for PD.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Type</code></td>
+<td>
+<p><code>"PD"</code> (effective total branch length) or <code>"meanPD"</code> (effective number of equally divergent lineages) for PD.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Tau</code></td>
+<td>
+<p>the threshold of functional distinctiveness between any two species for FD (under <code>FDtype = tau_values</code>).</p>
+</td>
+</tr>
+</table>
+<p>Similar output is obtained for <code>base = "size"</code>. <br><br></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Taxonomic diversity for abundance data with two target coverages (93% and 97%)
+data(Brazil_rainforest_abun_data)
+output_est_TD_abun &lt;- estimate3D(Brazil_rainforest_abun_data, diversity = 'TD', q = c(0, 1, 2), 
+                                 datatype = "abundance", base = "coverage", level = c(0.93, 0.97))
+output_est_TD_abun
+
+
+# Phylogenetic diversity for abundance data with two target sizes (1500 and 3500)
+data(Brazil_rainforest_abun_data)
+data(Brazil_rainforest_phylo_tree)
+data &lt;- Brazil_rainforest_abun_data
+tree &lt;- Brazil_rainforest_phylo_tree
+output_est_PD_abun &lt;- estimate3D(data, diversity = 'PD', datatype = "abundance", 
+                                 base = "size", level = c(1500, 3500), PDtree = tree)
+output_est_PD_abun
+
+
+# Functional diversity for abundance data with two target coverages (93% and 97%)
+data(Brazil_rainforest_abun_data)
+data(Brazil_rainforest_distance_matrix)
+data &lt;- Brazil_rainforest_abun_data
+distM &lt;- Brazil_rainforest_distance_matrix
+output_est_FD_abun &lt;- estimate3D(data, diversity = 'FD', datatype = "abundance", 
+                                 base = "coverage", level = c(0.93, 0.97), nboot = 10, 
+                                 FDdistM = distM, FDtype = 'AUC')
+output_est_FD_abun
+
+
+# Taxonomic diversity for incidence data with two target coverages (97.5% and 99%)
+data(Fish_incidence_data)
+output_est_TD_inci &lt;- estimate3D(Fish_incidence_data, diversity = 'TD', q = c(0, 1, 2), 
+                                 datatype = "incidence_raw", base = "coverage", 
+                                 level = c(0.975, 0.99))
+output_est_TD_inci
+
+
+# Phylogenetic diversity for incidence data with two target coverages (97.5% and 99%)
+data(Fish_incidence_data)
+data(Fish_phylo_tree)
+data &lt;- Fish_incidence_data
+tree &lt;- Fish_phylo_tree
+output_est_PD_inci &lt;- estimate3D(data, diversity = 'PD', datatype = "incidence_raw", 
+                                 base = "coverage", level = c(0.975, 0.99), PDtree = tree)
+output_est_PD_inci
+
+
+# Functional diversity for incidence data with two target number of sampling units (30 and 70)
+data(Fish_incidence_data)
+data(Fish_distance_matrix)
+data &lt;- Fish_incidence_data
+distM &lt;- Fish_distance_matrix
+output_est_FD_inci &lt;- estimate3D(data, diversity = 'FD', datatype = "incidence_raw", 
+                                 base = "size", level = c(30, 70), nboot = 10, 
+                                 FDdistM = distM, FDtype = 'AUC')
+output_est_FD_inci
+
+
+
+</code></pre>
+
+
+</div>

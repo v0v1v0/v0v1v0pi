@@ -1,0 +1,142 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iv</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create an interval vector</h2>
+
+<h3>Description</h3>
+
+
+<ul>
+<li> <p><code>iv()</code> creates an interval vector from <code>start</code> and <code>end</code> vectors. This
+is how you will typically create interval vectors, and is often used with
+columns in a data frame.
+</p>
+</li>
+<li> <p><code>iv_pairs()</code> creates an interval vector from <em>pairs</em>. This is often useful
+for interactive testing, as it provides a more intuitive interface for
+creating small interval vectors. It should generally not be used on a large
+scale because it can be slow.
+</p>
+</li>
+</ul>
+<h4>Intervals</h4>
+
+<p>Interval vectors are <em>right-open</em>, i.e. <code style="white-space: pre;">⁠[start, end)⁠</code>. This means that
+<code>start &lt; end</code> is a requirement to generate an interval vector. In particular,
+empty intervals with <code>start == end</code> are not allowed.
+</p>
+<p>Right-open intervals tend to be the most practically useful. For example,
+<code style="white-space: pre;">⁠[2019-01-01 00:00:00, 2019-01-02 00:00:00)⁠</code> nicely encapsulates all times on
+<code>2019-01-01</code>. With closed intervals, you'd have to attempt to specify this as
+<code style="white-space: pre;">⁠2019-01-01 23:59:59⁠</code>, which is inconvenient and inaccurate, as it doesn't
+capture fractional seconds.
+</p>
+<p>Right-open intervals also have the extremely nice technical property that
+they create a closed algebra. Concretely, the complement of a vector of
+right-open intervals and the union, intersection, or difference of two
+vectors of right-open intervals will always result in another vector of
+right-open intervals.
+</p>
+
+
+
+<h4>Missing intervals</h4>
+
+<p>When creating interval vectors with <code>iv()</code>, if either bound is
+incomplete, then both bounds are set to
+their missing value.
+</p>
+
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iv(start, end, ..., ptype = NULL, size = NULL)
+
+iv_pairs(..., ptype = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>start, end</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[vector]⁠</code>
+</p>
+<p>A pair of vectors to represent the bounds of the intervals.
+</p>
+<p>To be a valid interval vector, <code>start</code> must be strictly less than <code>end</code>.
+</p>
+<p>If either <code>start</code> or <code>end</code> are incomplete / missing, then both bounds will
+be coerced to missing values.
+</p>
+<p><code>start</code> and <code>end</code> are recycled against each other and are cast to the same
+type.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>For <code>iv_pairs()</code>:
+</p>
+<p><code style="white-space: pre;">⁠[vector pairs]⁠</code>
+</p>
+<p>Vectors of size 2 representing intervals to include in the result.
+</p>
+<p>All inputs will be cast to the same type.
+</p>
+<p>For <code>iv()</code>:
+</p>
+<p>These dots are for future extensions and must be empty.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ptype</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[vector(0) / NULL]⁠</code>
+</p>
+<p>A prototype to force for the inner type of the resulting iv. If <code>NULL</code>,
+this defaults to the common type of the inputs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[integer(1) / NULL]⁠</code>
+</p>
+<p>A size to force for the resulting iv. If <code>NULL</code>, this defaults to the
+common size of the inputs.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An iv.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(dplyr, warn.conflicts = FALSE)
+
+set.seed(123)
+
+x &lt;- tibble(
+  start = as.Date("2019-01-01") + 1:5,
+  end = start + sample(1:10, length(start), replace = TRUE)
+)
+
+# Typically you'll use `iv()` with columns of a data frame
+mutate(x, iv = iv(start, end), .keep = "unused")
+
+# `iv_pairs()` is useful for generating interval vectors interactively
+iv_pairs(c(1, 5), c(2, 3), c(6, 10))
+</code></pre>
+
+
+</div>

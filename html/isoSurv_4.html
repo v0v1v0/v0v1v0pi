@@ -1,0 +1,137 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>isoph</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit Isotonic Proportional Hazards Model</h2>
+
+<h3>Description</h3>
+
+<p>Nonparametric estimation of a monotone covariate effect under the proportional hazards model.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  isoph(formula, data, maxiter, eps)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>a formula object: response ~ iso(<code class="reqn">z</code>,shape="increasing")+<code class="reqn">x_1+x_2+...+x_p</code>. The response must be right-censored survival outcome using the Surv function in the survival package. The iso function attributes the covariate <code class="reqn">z</code>' name, shape and anchor point.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>data.frame includes variables named in the formula argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+<p>maximum number of iteration (default is <code class="reqn">10^4</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>stopping convergence criteria (default is <code class="reqn">10^-3</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The isoph function estimates (<code class="reqn">\psi</code>, <code class="reqn">\beta</code>) in the isotonic proportional hazards model, defined as
+</p>
+<p style="text-align: center;"><code class="reqn">\lambda(t|z,x)=\lambda0(t)exp(\psi(z)+\beta_1x_1+\beta_2x_2+...+\beta_px_p),</code>
+</p>
+
+<p>based on the partial likelihood with unspecified baseline hazard function <code class="reqn">\lambda0</code>, where <code class="reqn">\psi</code> is a monotone increasing (or decreasing) covariate effect function, <code class="reqn">z</code> is a univariate variable, <code class="reqn">x=(x_1,x_2,...,x_p)</code> is a set of covariates, and <code class="reqn">\beta=(\beta_1,\beta_2,...,\beta_p)</code> is a set of corresponding regression parameters. It allows to estimate <code class="reqn">\psi</code> only if <code class="reqn">x</code> is removed in the formula object. Using the nonparametric maximum likelihood approaches, estimated <code class="reqn">\psi</code> is a right continuous increasing (or left continuos decreasing) step function.
+</p>
+<p>For the anchor constraint, one point has to be fixed with <code class="reqn">\psi(K)=0</code> to solve the identifiability problem, e.g. <code class="reqn">\lambda0(t)exp(\psi(z))=(\lambda0(t)exp(-c))(exp(\psi(z)+c))</code> for any constant <code class="reqn">c</code>. <code class="reqn">K</code> is called an anchor point. By default, we set <code class="reqn">K</code> as a median of values of <code class="reqn">z</code>'s. The choice of anchor points are not important because, for example, different anchor points results in the same hazard ratios.</p>
+
+
+<h3>Value</h3>
+
+<p>A list of class isoph:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>iso.cov</code></td>
+<td>
+<p>data.frame with <code class="reqn">z</code> and estimated <code class="reqn">\psi</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p>estimated <code class="reqn">\beta_1,\beta_2,...,\beta_p</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conv</code></td>
+<td>
+<p>algorithm convergence status.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter</code></td>
+<td>
+<p>total number of iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Zk</code></td>
+<td>
+<p>anchor point satisfying <code class="reqn">\psi(Zk)</code>=0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shape</code></td>
+<td>
+<p>Order-restriction imposed on <code class="reqn">\psi</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Yunro Chung [aut, cre]</p>
+
+
+<h3>References</h3>
+
+<p>Yunro Chung, Anastasia Ivanova, Michael G. Hudgens, Jason P. Fine, Partial likelihood estimation of isotonic proportional hazards models, Biometrika. 2018, 105 (1), 133-148. doi:10.1093/biomet/asx064</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># test1
+test1=data.frame(
+  time=  c(2, 5, 1, 7, 9, 5, 3, 6, 8, 9, 7, 4, 5, 2, 8),
+  status=c(0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1),
+  z=     c(2, 1, 1, 3, 5, 6, 7, 9, 3, 0, 2, 7, 3, 9, 4)
+)
+isoph.fit1=isoph(Surv(time, status)~iso(z,shape="inc"),data=test1)
+print(isoph.fit1)
+plot(isoph.fit1)
+
+# test2
+test2=data.frame(
+  time=  c(2, 5, 1, 7, 9, 5, 3, 6, 8, 9, 7, 4, 5, 2, 8),
+  status=c(0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1),
+  z=     c(2, 1, 1, 3, 5, 6, 7, 9, 3, 0, 2, 7, 3, 9, 4),
+  trt=   c(1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0)
+)
+isoph.fit2=isoph(Surv(time, status)~iso(z,shape="inc")+trt, data=test2)
+print(isoph.fit2)
+plot(isoph.fit2)
+</code></pre>
+
+
+</div>

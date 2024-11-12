@@ -1,0 +1,118 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ci</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Confidence intervals</h2>
+
+<h3>Description</h3>
+
+<p>Given a parameter estimate and its standard error,
+calculate the corresponding 1-sigma, 2-sigma or
+<code class="reqn">100(1-\alpha)\%</code> confidence interval, in absolute or
+relative units.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ci(x = 0, sx, oerr = 3, df = NULL, absolute = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>scalar estimate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sx</code></td>
+<td>
+<p>scalar or vector with the standard error of x without and
+(optionally) with <code class="reqn">\sqrt{MSWD}</code> overdispersion multiplier.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>oerr</code></td>
+<td>
+<p>indicates if the confidence intervals should be
+reported as:
+</p>
+<p><code>1</code>: 1<code class="reqn">\sigma</code> absolute uncertainties.
+</p>
+<p><code>2</code>: 2<code class="reqn">\sigma</code> absolute uncertainties.
+</p>
+<p><code>3</code>: absolute (1-<code class="reqn">\alpha</code>)% confidence intervals, where
+<code class="reqn">\alpha</code> equales the value that is stored in
+<code>settings('alpha')</code>.
+</p>
+<p><code>4</code>: 1<code class="reqn">\sigma</code> relative uncertainties (<code class="reqn">\%</code>).
+</p>
+<p><code>5</code>: 2<code class="reqn">\sigma</code> relative uncertainties (<code class="reqn">\%</code>).
+</p>
+<p><code>6</code>: relative (1-<code class="reqn">\alpha</code>)% confidence intervals, where
+<code class="reqn">\alpha</code> equales the value that is stored in
+<code>settings('alpha')</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>(optional) number of degrees of freedom. Only used if
+<code>sx</code> is a vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>absolute</code></td>
+<td>
+<p>logical. Returns absolute uncertainties even if
+<code>oerr</code> is greater than 3. Used for some internal
+<code>IsoplotR</code> functions.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Several of <code>IsoplotR</code>'s plotting functions (including
+<code>isochron</code>, <code>weightedmean</code>,
+<code>concordia</code>, <code>radialplot</code> and
+<code>helioplot</code>) return lists of parameters and their
+standard errors. For ‘model-1’ fits, if the data pass a
+Chi-square test of homogeneity, then just one estimate for the
+standard error is reported.  This estimate can be converted to
+a confidence interval by multiplication with the appropriate
+quantile of a Normal distribution. Datasets that fail the
+Chi-square test are said to be ‘overdispersed’ with respect to
+the analytical uncertainties. The simplest way (‘model-1’) to
+deal with overdispersion is to inflate the standard error with
+a <code class="reqn">\sqrt{MSWD}</code> premultiplier. In this case,
+<code>IsoplotR</code> returns two estimates of the standard error.
+To convert the second estimate to a confidence interval
+requires multiplication with the desired quantile of a
+t-distribution with the appropriate degrees of freedom.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A scalar or vector of the same size as <code>sx</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">attach(examples)
+fit &lt;- isochron(PbPb,plot=FALSE,exterr=FALSE)
+err &lt;- ci(x=fit$age[1],sx=fit$age[-1],oerr=5,df=fit$df)
+message('age=',signif(fit$age[1],4),'Ma, ',
+        '2se=',signif(err[1],2),'%, ',
+        '2se(with dispersion)=',signif(err[2],2),'%')
+</code></pre>
+
+
+</div>

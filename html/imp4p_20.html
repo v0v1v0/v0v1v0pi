@@ -1,0 +1,321 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mi.mix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Multiple imputation from a matrix of probabilities of being MCAR for each missing value.
+</h2>
+
+<h3>Description</h3>
+
+<p>This function allows imputing data sets with a multiple imputation strategy. For details, see Giai Gianetto Q. et al. (2020) (doi: doi: <a href="https://doi.org/10.1101/2020.05.29.122770">10.1101/2020.05.29.122770</a>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mi.mix(tab, tab.imp, prob.MCAR, conditions, repbio=NULL, reptech=NULL, nb.iter=3, nknn=15,
+weight=1, selec="all", siz=500, ind.comp=1, methodMCAR="mle", q=0.95,
+progress.bar=TRUE, details=FALSE, ncp.max=5, maxiter = 10, ntree = 100,
+variablewise = FALSE, decreasing = FALSE, verbose = FALSE, mtry = floor(sqrt(ncol(tab))),
+replace = TRUE,classwt = NULL, cutoff = NULL, strata = NULL, sampsize = NULL,
+nodesize = NULL, maxnodes = NULL,xtrue = NA, parallelize = c('no', 'variables',
+'forests'), methodMNAR="igcda",q.min = 0.025, q.norm = 3, eps = 0, distribution = "unif",
+param1 = 3, param2 = 1, R.q.min=1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>tab</code></td>
+<td>
+<p>A data matrix containing numeric and missing values. Each column of this matrix is assumed to correspond to an experimental sample, and each row to an identified peptide.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tab.imp</code></td>
+<td>
+<p>A matrix where the missing values of <code>tab</code> have been imputed under the assumption that they are all MCAR. For instance, such a matrix can be obtained from the function <code>impute.slsa</code> of this package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob.MCAR</code></td>
+<td>
+<p>A matrix of probabilities that each missing value is MCAR. For instance such a matrix can be obtained from the function <code>prob.mcar.tab</code> of this package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conditions</code></td>
+<td>
+<p>A vector of factors indicating the biological condition to which each column (experimental sample) belongs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>repbio</code></td>
+<td>
+<p>A vector of factors indicating the biological replicate to which each column belongs. Default is NULL (no experimental design is considered).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reptech</code></td>
+<td>
+<p>A vector of factors indicating the technical replicate to which each column belongs. Default is NULL (no experimental design is considered).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nb.iter</code></td>
+<td>
+<p>The number of iterations used for the multiple imputation method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nknn</code></td>
+<td>
+<p>The number of nearest neighbours used in the SLSA algorithm (see <code>impute.slsa</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>selec</code></td>
+<td>
+<p>A parameter to select a part of the dataset to find nearest neighbours between rows. This can be useful for big data sets (see <code>impute.slsa</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>siz</code></td>
+<td>
+<p>A parameter to select a part of the dataset to perform imputations with a MCAR-devoted algorithm. This can be useful for big data sets. Note that <code>siz</code> needs to be inferior to <code>selec</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weight</code></td>
+<td>
+<p>The way of weighting in the algorithm (see <code>impute.slsa</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ind.comp</code></td>
+<td>
+<p>If <code>ind.comp=1</code>, only nearest neighbours without missing values are selected to fit linear models (see <code>impute.slsa</code>). Else, they can contain missing values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>methodMCAR</code></td>
+<td>
+<p>The method used for imputing MCAR data. If <code>methodi="mle"</code> (default), then the <code>impute.mle</code> function is used (imputation using an EM algorithm). If <code>methodi="pca"</code>, then the <code>impute.PCA</code> function is used (imputation using Principal Component Analysis). If <code>methodi="rf"</code>, then the <code>impute.RF</code> function is used (imputation using Random Forest). Else, the <code>impute.slsa</code> function is used (imputation using Least Squares on nearest neighbours).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>methodMNAR</code></td>
+<td>
+<p>The method used for imputing MNAR data. If <code>methodMNAR="igcda"</code> (default), then the <code>impute.igcda</code> function is used. Else, the <code>impute.pa</code> function is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>A quantile value (see <code>impute.igcda</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>progress.bar</code></td>
+<td>
+<p>If <code>TRUE</code>, a progress bar is displayed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>details</code></td>
+<td>
+<p>If <code>TRUE</code>, the function gives a list of three values: <code>imputed.matrix</code> a matrix with the average of imputed values for each missing value, <code>sd.imputed.matrix</code> a matrix with the standard deviations of imputed values for each missing value, <code>all.imputed.matrices</code> an array with all the <code>nb.iter</code> matrices of imputed values that have been generated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncp.max</code></td>
+<td>
+<p>parameter of the <code>impute.PCA</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ntree</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variablewise</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>decreasing</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mtry</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>replace</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>classwt</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cutoff</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>strata</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sampsize</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nodesize</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxnodes</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xtrue</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallelize</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q.min</code></td>
+<td>
+<p>parameter of the <code>impute.pa</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q.norm</code></td>
+<td>
+<p>parameter of the <code>impute.pa</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>parameter of the <code>impute.pa</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distribution</code></td>
+<td>
+<p>parameter of the <code>impute.pa</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>param1</code></td>
+<td>
+<p>parameter of the <code>impute.pa</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>param2</code></td>
+<td>
+<p>parameter of the <code>impute.pa</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R.q.min</code></td>
+<td>
+<p>parameter of the <code>impute.pa</code> function.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>At each iteration, a matrix indicating the MCAR values is generated by Bernouilli distributions having parameters given by the matrix <code>prob.MCAR</code>. The generated MCAR values are next imputed thanks to the matrix <code>tab.imp</code>. For each row containing MNAR values, the other rows are imputed thanks to the function  <code>impute.igcda</code> and, next, the considered row is imputed thanks to one of the MCAR-devoted imputation methods (<code>impute.mle</code>, <code>impute.RF</code>, <code>impute.PCA</code> or <code>impute.slsa</code>). So, the function <code>impute.igcda</code> allows to deform the correlation structure of the dataset in view to be closer to that of the true values, while the MCAR-devoted imputation method will impute by taking into account this modified correlation structure.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The input matrix <code>tab</code> with average imputed values instead of missing values if <code>details=FALSE</code> (default). If <code>details=TRUE</code>, a list of three values: <code>imputed.matrix</code> a matrix with the average of imputed values for each missing value, <code>sd.imputed.matrix</code> a matrix with the standard deviations of imputed values for each missing value, <code>all.imputed.matrices</code> an array with all the <code>nb.iter</code> matrices of imputed values that have been generated.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Quentin Giai Gianetto &lt;quentin2g@yahoo.fr&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Giai Gianetto, Q., Wieczorek S., Couté Y., Burger, T. (2020).  A peptide-level multiple imputation strategy accounting for the different natures of missing values in proteomics data. bioRxiv 2020.05.29.122770; doi: doi: <a href="https://doi.org/10.1101/2020.05.29.122770">10.1101/2020.05.29.122770</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#Simulating data
+res.sim=sim.data(nb.pept=5000,nb.miss=1000);
+
+#Fast imputation of missing values with the impute.rand algorithm
+dat.rand=impute.rand(tab=res.sim$dat.obs,conditions=res.sim$condition);
+
+#Estimation of the mixture model
+res=estim.mix(tab=res.sim$dat.obs, tab.imp=dat.rand, conditions=res.sim$condition);
+
+#Computing probabilities to be MCAR
+born=estim.bound(tab=res.sim$dat.obs,conditions=res.sim$condition);
+proba=prob.mcar.tab(tab.u=born$tab.upper,res=res);
+
+#Multiple imputation strategy with 3 iterations (can be time consuming in function of the data set!)
+data.mi=mi.mix(tab=res.sim$dat.obs, tab.imp=dat.rand, prob.MCAR=proba, conditions=
+res.sim$conditions, repbio=res.sim$repbio, nb.iter=3);
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,219 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>imager.combine</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Combining images</h2>
+
+<h3>Description</h3>
+
+<p>These functions take a list of images and combine them by adding, multiplying, taking the parallel min or max, etc.
+The max. in absolute value of (x1,x2) is defined as x1 if (|x1| &gt; |x2|), x2 otherwise. It's useful for example in getting the most extreme value while keeping the sign. 
+"parsort","parrank" and "parorder" aren't really reductions because they return a list of the same size. They perform a pixel-wise sort (resp. order and rank) across the list.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">add(x, na.rm = FALSE)
+
+wsum(x, w, na.rm = FALSE)
+
+average(x, na.rm = FALSE)
+
+mult(x, na.rm = FALSE)
+
+parmax(x, na.rm = FALSE)
+
+parmax.abs(x)
+
+parmin.abs(x)
+
+parmin(x, na.rm = FALSE)
+
+enorm(x)
+
+parmed(x, na.rm = FALSE)
+
+parquan(x, prob = 0.5, na.rm = FALSE)
+
+parvar(x, na.rm = FALSE)
+
+parsd(x, na.rm = FALSE)
+
+parall(x)
+
+parany(x)
+
+equal(x)
+
+which.parmax(x)
+
+which.parmin(x)
+
+parsort(x, increasing = TRUE)
+
+parorder(x, increasing = TRUE)
+
+parrank(x, increasing = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a list of images</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.rm</code></td>
+<td>
+<p>ignore NAs (default FALSE)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>weights (must be the same length as the list)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob</code></td>
+<td>
+<p>probability level for parquan, default of 0.5 returns the median</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>increasing</code></td>
+<td>
+<p>if TRUE, sort in increasing order (default TRUE)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>parvar returns an unbiased estimate of the variance (as in the base var function). parsd returns the square root of parvar. parquan returns the specified quantile, and defines this in the same manner as the default R quantile function (type = 7). Using parmed and parquan with quan = 0.5 will return the same result, but parmed will be slightly faster (but only a few percent).
+</p>
+<p>To correctly use multiple threads users should set <span class="option">nthreads</span> in <code>cimg.use.openmp</code>. You also need to be careful that this is not higher than the value in the system environment variable OMP_THREAD_LIMIT (this can be checked with Sys.getenv('OMP_THREAD_LIMIT')). The OMP_THREAD_LIMIT thread limit usually needs to be correctly set before launching R, so using Sys.setenv once a session has started is not certain to work.
+</p>
+
+
+<h3>Functions</h3>
+
+
+<ul>
+<li> <p><code>add()</code>: Add images
+</p>
+</li>
+<li> <p><code>wsum()</code>: Weighted sum of images
+</p>
+</li>
+<li> <p><code>average()</code>: Average images
+</p>
+</li>
+<li> <p><code>mult()</code>: Multiply images (pointwise)
+</p>
+</li>
+<li> <p><code>parmax()</code>: Parallel max over images
+</p>
+</li>
+<li> <p><code>parmax.abs()</code>: Parallel max in absolute value over images,
+</p>
+</li>
+<li> <p><code>parmin.abs()</code>: Parallel min in absolute value over images,
+</p>
+</li>
+<li> <p><code>parmin()</code>: Parallel min over images
+</p>
+</li>
+<li> <p><code>enorm()</code>: Euclidean norm (i.e. sqrt(A^2 + B^2 + ...))
+</p>
+</li>
+<li> <p><code>parmed()</code>: Parallel Median over images
+</p>
+</li>
+<li> <p><code>parquan()</code>: Parallel Quantile over images
+</p>
+</li>
+<li> <p><code>parvar()</code>: Variance
+</p>
+</li>
+<li> <p><code>parsd()</code>: Std. deviation
+</p>
+</li>
+<li> <p><code>parall()</code>: Parallel all (for pixsets)
+</p>
+</li>
+<li> <p><code>parany()</code>: Parallel any (for pixsets)
+</p>
+</li>
+<li> <p><code>equal()</code>: Test equality
+</p>
+</li>
+<li> <p><code>which.parmax()</code>: index of parallel maxima
+</p>
+</li>
+<li> <p><code>which.parmin()</code>: index of parallel minima
+</p>
+</li>
+<li> <p><code>parsort()</code>: pixel-wise sort
+</p>
+</li>
+<li> <p><code>parorder()</code>: pixel-wise order
+</p>
+</li>
+<li> <p><code>parrank()</code>: pixel-wise rank
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Simon Barthelme
+</p>
+
+
+<h3>See Also</h3>
+
+<p>imsplit,Reduce
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+im1 &lt;- as.cimg(function(x,y) x,50,50)
+im2 &lt;- as.cimg(function(x,y) y,50,50)
+im3 &lt;- as.cimg(function(x,y) cos(x/10),50,50)
+l &lt;- imlist(im1,im2,im3)
+add(l) %&gt;% plot #Add the images
+average(l) %&gt;% plot #Average the images
+mult(l) %&gt;% plot #Multiply
+wsum(l,c(.1,8,.1)) %&gt;% plot #Weighted sum
+parmax(l) %&gt;% plot #Parallel max
+parmin(l) %&gt;% plot #Parallel min
+parmed(l) %&gt;% plot #Parallel median
+parsd(l) %&gt;% plot #Parallel std. dev
+#parsort can also be used to produce parallel max. and min
+(parsort(l)[[1]]) %&gt;% plot("Parallel min")
+(parsort(l)[[length(l)]]) %&gt;% plot("Parallel max")
+#Resize boats so the next examples run faster
+im &lt;- imresize(boats,.5)
+#Edge detection (Euclidean norm of gradient)
+imgradient(im,"xy") %&gt;% enorm %&gt;% plot
+#Pseudo-artistic effects
+l &lt;- map_il(seq(1,35,5),~ boxblur(im,.))
+parmin(l) %&gt;% plot
+average(l) %&gt;% plot
+mult(l) %&gt;% plot
+#At each pixel, which colour channel has the maximum value?
+imsplit(im,"c") %&gt;% which.parmax %&gt;% table
+#Same thing using parorder (ties are broken differently)!!!
+imsplit(im,"c") %&gt;% { parorder(.)[[length(.)]] } %&gt;% table
+</code></pre>
+
+
+</div>

@@ -1,0 +1,149 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>igraph-vs-attributes</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Query or set attributes of the vertices in a vertex sequence</h2>
+
+<h3>Description</h3>
+
+<p>The <code>$</code> operator is a syntactic sugar to query and set the
+attributes of the vertices in a vertex sequence.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 replacement method for class 'igraph.vs'
+x[[i]] &lt;- value
+
+## S3 replacement method for class 'igraph.vs'
+x[i] &lt;- value
+
+## S3 method for class 'igraph.vs'
+x$name
+
+## S3 replacement method for class 'igraph.vs'
+x$name &lt;- value
+
+V(x) &lt;- value
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A vertex sequence. For <code style="white-space: pre;">⁠V&lt;-⁠</code> it is a graph.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>i</code></td>
+<td>
+<p>Index.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>value</code></td>
+<td>
+<p>New value of the attribute, for the vertices in the
+vertex sequence.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name</code></td>
+<td>
+<p>Name of the vertex attribute to query or set.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The query form of <code>$</code> is a shortcut for
+<code>vertex_attr()</code>, e.g. <code>V(g)[idx]$attr</code> is equivalent
+to <code>vertex_attr(g, attr, V(g)[idx])</code>.
+</p>
+<p>The assignment form of <code>$</code> is a shortcut for
+<code>set_vertex_attr()</code>, e.g. <code>V(g)[idx]$attr &lt;- value</code> is
+equivalent to <code>g &lt;- set_vertex_attr(g, attr, V(g)[idx], value)</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A vector or list, containing the values of
+attribute <code>name</code> for the vertices in the vertex sequence.
+For numeric, character or logical attributes, it is a vector of the
+appropriate type, otherwise it is a list.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other vertex and edge sequences: 
+<code>E()</code>,
+<code>V()</code>,
+<code>as_ids()</code>,
+<code>igraph-es-attributes</code>,
+<code>igraph-es-indexing</code>,
+<code>igraph-es-indexing2</code>,
+<code>igraph-vs-indexing</code>,
+<code>igraph-vs-indexing2</code>,
+<code>print.igraph.es()</code>,
+<code>print.igraph.vs()</code>
+</p>
+<p>Vertex, edge and graph attributes
+<code>delete_edge_attr()</code>,
+<code>delete_graph_attr()</code>,
+<code>delete_vertex_attr()</code>,
+<code>edge_attr()</code>,
+<code>edge_attr&lt;-()</code>,
+<code>edge_attr_names()</code>,
+<code>graph_attr()</code>,
+<code>graph_attr&lt;-()</code>,
+<code>graph_attr_names()</code>,
+<code>igraph-attribute-combination</code>,
+<code>igraph-dollar</code>,
+<code>set_edge_attr()</code>,
+<code>set_graph_attr()</code>,
+<code>set_vertex_attr()</code>,
+<code>vertex_attr()</code>,
+<code>vertex_attr&lt;-()</code>,
+<code>vertex_attr_names()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">g &lt;- make_(
+  ring(10),
+  with_vertex_(
+    name = LETTERS[1:10],
+    color = sample(1:2, 10, replace = TRUE)
+  )
+)
+V(g)$name
+V(g)$color
+V(g)$frame.color &lt;- V(g)$color
+
+# color vertices of the largest component
+largest_comp &lt;- function(graph) {
+  cl &lt;- components(graph)
+  V(graph)[which.max(cl$csize) == cl$membership]
+}
+g &lt;- sample_(
+  gnp(100, 2 / 100),
+  with_vertex_(size = 3, label = ""),
+  with_graph_(layout = layout_with_fr)
+)
+giant_v &lt;- largest_comp(g)
+V(g)$color &lt;- "blue"
+V(g)[giant_v]$color &lt;- "orange"
+plot(g)
+</code></pre>
+
+
+</div>

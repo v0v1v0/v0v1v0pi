@@ -1,0 +1,145 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>double_rank</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Two-sided double-rank test for Fisher's sharp null
+hypothesis in a cluster-level proportional treatment effect model</h2>
+
+<h3>Description</h3>
+
+<p><code>double_rank</code> returns the two-sided p-value testing
+Fisher's sharp null hypothesis in a cluster-level proportional
+treatment effect model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">double_rank(beta_0, R_t, R_c, d_t, d_c, Z_t, Z_c, psi = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>beta_0</code></td>
+<td>
+<p>The magnitude of the proportional treatment effect to
+be tested.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R_t</code></td>
+<td>
+<p>A length-K vector where K is equal to the number of
+clusters and the kth entry equal to
+the sum of unit-level outcomes in the encouraged cluster
+of the kth matched pair of two clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R_c</code></td>
+<td>
+<p>A length-K vector where K is equal to the number of
+clusters and the kth entry equal to
+the sum of unit-level outcomes in the control cluster
+of the kth matched pair of two clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d_t</code></td>
+<td>
+<p>A length-K vector where K is equal to the number of
+clusters and the kth entry equal to the sum of unit-level
+treatment received in the encouraged cluster
+of the kth matched pair of two clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d_c</code></td>
+<td>
+<p>A length-K vector where K is equal to the number of
+clusters and the kth entry equal to the sum of unit-level
+treatment received in the control cluster
+of the kth matched pair of two clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Z_t</code></td>
+<td>
+<p>A length-K vector where K is equal to the number of
+clusters and the kth entry equal to the encoruagement dose,
+i.e., the magnitude of the instrumental variable, of the
+encouraged cluster in the kth matched pair of two clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Z_c</code></td>
+<td>
+<p>A length-K vector where K is equal to the number of
+clusters and the kth entry equal to the encoruagement dose,
+i.e., the magnitude of the instrumental variable, of the
+control cluster in the kth matched pair of two clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>psi</code></td>
+<td>
+<p>A function specifying the score used in the test statistic.
+See Details.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Double-rank test statistics is a flexible family of nonparametric
+test statistics. Function <code>psi</code> is a function that specifies
+the relationship between d_k, the normalized rank of the absolute
+treated-minus-control dose difference in the instrumental variable,
+and q_k, the normalized rank of the absoluve treated-minus-control
+dose difference in the observed outcome. For instance, psi(d_k, q_k)
+= 1 yields the sign test, psi(d_k, q_k) = q_k yields the Wilcoxon
+signed rank test. The default setting, psi(d_k, q_k) = d_k * q_k, yields
+the dose-weighted signed rank test.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of five elements: two-sided p-value, deviate, test statistics,
+expectation of the test statistic under the null hypothesis,
+and variance of the test statistic under the null hypothesis.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">R_t = encouraged_clusters$aggregated_outcome
+R_c = control_clusters$aggregated_outcome
+d_t = encouraged_clusters$aggregated_treatment
+d_c = control_clusters$aggregated_treatment
+Z_t = encouraged_clusters$IV
+Z_c = control_clusters$IV
+
+
+# Test beta = 0 in the proportional treatment effect
+# model with the help of the double rank test using
+# default psi(d_k, q_k) = d_k * q_k:
+res = double_rank(0, R_t, R_c, d_t, d_c, Z_t, Z_c)
+
+# Define a new psi function: psi(d_k, q_k) = q_k
+psi_2 &lt;- function(x, y) y
+
+# Using psi_2 and the double rank test is reduced to the
+#Wilcoxon signed rank test.
+res_2 = double_rank(0, R_t, R_c, d_t, d_c,
+     Z_t, Z_c, psi = psi_2)
+
+
+</code></pre>
+
+
+</div>

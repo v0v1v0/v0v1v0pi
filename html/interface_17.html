@@ -1,0 +1,114 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>type.frame</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create a typed data frame</h2>
+
+<h3>Description</h3>
+
+<p>Creates a data frame with specified column types and validation rules. 
+Ensures that the data frame adheres to the specified structure and validation rules during creation and modification.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">type.frame(
+  frame,
+  col_types,
+  freeze_n_cols = TRUE,
+  row_callback = NULL,
+  allow_na = TRUE,
+  on_violation = c("error", "warning", "silent")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>frame</code></td>
+<td>
+<p>The base data structure (e.g., data.frame, data.table).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col_types</code></td>
+<td>
+<p>A list of column types and validators.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>freeze_n_cols</code></td>
+<td>
+<p>Logical, whether to freeze the number of columns (default: TRUE).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>row_callback</code></td>
+<td>
+<p>A function to validate and process each row (optional).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allow_na</code></td>
+<td>
+<p>Logical, whether to allow NA values (default: TRUE).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>on_violation</code></td>
+<td>
+<p>Action to take on violation: "error", "warning", or "silent" (default: "error").</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The 'type.frame' function defines a blueprint for a data frame, specifying the types of its columns and optional validation rules for its rows. 
+When a data frame is created or modified using this blueprint, it ensures that all data adheres to the specified rules.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A function that creates typed data frames. When called, this function returns
+an object of class 'typed_frame' (which also inherits from the base frame class used, i.e. data.frame, data.table).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Define a typed data frame
+PersonFrame &lt;- type.frame(
+    frame = data.frame,
+    col_types = list(
+        id = integer,
+        name = character,
+        age = numeric,
+        is_student = logical
+    )
+)
+
+# Create a data frame
+persons &lt;- PersonFrame(
+    id = 1:3,
+    name = c("Alice", "Bob", "Charlie"),
+    age = c(25, 30, 35),
+    is_student = c(TRUE, FALSE, TRUE)
+)
+
+print(persons)
+
+# Invalid modification (throws error)
+try(persons$id &lt;- letters[1:3])
+
+# Adding a column (throws error if freeze_n_cols is TRUE)
+try(persons$yeet &lt;- letters[1:3])
+</code></pre>
+
+
+</div>

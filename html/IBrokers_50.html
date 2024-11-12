@@ -1,0 +1,194 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>reqRealTimeBars</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Request Real Time Bars from TWS </h2>
+
+<h3>Description</h3>
+
+<p>Allows for streaming real-time bars to be handled in <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span>
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">reqRealTimeBars(conn,
+                Contract,
+                whatToShow = "TRADES", 
+                barSize = "5",
+                useRTH = TRUE,
+                playback = 1,
+                tickerId = "1",
+                file = "",
+                verbose = TRUE,
+                eventWrapper=eWrapper(),
+                CALLBACK=twsCALLBACK,
+                ...) 
+
+cancelRealTimeBars(conn, tickerId)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>conn</code></td>
+<td>
+<p> a valid <code>twsConnection</code> or <code>twsPlayback</code> object </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Contract</code></td>
+<td>
+ <p><code>twsContract</code> object(s) requested </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tickerId</code></td>
+<td>
+<p> the ticker id to associate with the returned bars </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>whatToShow</code></td>
+<td>
+<p> what to show </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>barSize</code></td>
+<td>
+<p> bar size - currently on 5 secs is TWS supported </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>playback</code></td>
+<td>
+<p> playback speed adjustment </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>useRTH</code></td>
+<td>
+<p> regular trading hours (logical) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p> passed to internal <code>cat</code> calls. See associated help. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p> print diagnostics </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eventWrapper</code></td>
+<td>
+<p> eventWrapper object </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CALLBACK</code></td>
+<td>
+<p> main reciever callback </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> additional args to callback </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function provides R level access to real time (5 second) bars
+returned by the TWS API.  The Interactive Brokers documentation
+should be reference for the exact meaning of the returned data.
+</p>
+<p>If the <code>conn</code> is a connection of data to be played
+back all other arguments are ignores, except for <code>playback</code>,
+which is a multiplier of the bar size in seconds.  To force
+all data to be read without pause set this to 0.
+</p>
+<p>Callbacks, via eventRealTimeBars and CALLBACK are
+designed to allow for R level processing of the real-time data
+stream.
+</p>
+<p>eventWrapper allows for direct manipulation of the actual
+signal recieved.
+These may be user-defined functions taking the
+appropriate arguments.  Each message recieved (each new bar)
+will invoke one of this callback.
+By default when nothing is specified, the code will
+call the default method for printing the results to the screen via
+'cat'.
+</p>
+<p>Note that the use of the argument 'file' will be passed to these
+'cat' calls, and therefore it will be possible to use the
+functionality of 'cat' directly - e.g. piping output or writing to
+a connection.  The simplest use of file would be to specify the
+name of a file, or open connection to append the output of the stream to.
+</p>
+<p>The 'CALLBACK' argument is used for more control of the incoming
+results.  This requires user-level error checking as well as TWS
+API interaction.  It is here for advanced use and until documented
+should be left alone.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The real-time bar data requested.
+</p>
+
+
+<h3>Note</h3>
+
+<p>As R is single threaded - this request will run until interupted
+by an error or by user action. Both will clean up after themselves
+when appropriate.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Jeffrey A. Ryan </p>
+
+
+<h3>References</h3>
+
+<p> Interactive Brokers TWS API
+<a href="https://interactivebrokers.github.io/tws-api/index.html">https://interactivebrokers.github.io/tws-api/index.html</a>
+</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>twsConnect</code>,<code>twsContract</code>,<code>eWrapper</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+tws &lt;- twsConnect()
+contract &lt;- twsEquity("QQQQ","SMART","ISLAND")
+reqRealTimeBars(tws, contract)
+
+# write to an open file connection
+fh &lt;- file('out.dat',open='a')
+reqRealTimeBars(tws, contract, file=fh)
+close(fh)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

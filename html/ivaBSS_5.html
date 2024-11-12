@@ -1,0 +1,235 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fastIVA</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Fast Fixed-point IVA Algorithm
+</h2>
+
+<h3>Description</h3>
+
+<p>The algorithm estimates the sources from multiple dependent datasets
+jointly using their observed mixtures. The estimation is done by
+maximizing the independence between the sources, when the estimated unmixing matrices are restricted to be orthogonal. The options for different source densities are provided.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fastIVA(X, source_density="laplace_diag", student_df=1,
+max_iter = 1024, eps = 1e-6, W_init = NA, verbose = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>numeric data array containing the observed mixtures with dimension <code>[P, N, D]</code>,
+where <code>P</code> is the dimension of the observed dataset, <code>N</code> is the number of the observations
+and <code>D</code> is the number of the datasets. The number of datasets <code>D</code> should be at least 2. Missing values are not allowed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>source_density</code></td>
+<td>
+
+<p>string to determine which source density model should be used. The options are <code>"laplace_diag"</code>, <code>"student"</code> or <code>"entropic"</code>. For more information see the details section.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>student_df</code></td>
+<td>
+<p>integer.
+The degree of freedom for multivariate Student's distribution. Used only if <code>source_denisty = "student"</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_iter</code></td>
+<td>
+<p>positive integer, used to define the maximum number of iterations for algorithm to run. If <code>max_iter</code> is reached, the unmixing matrices of the last iteration are used.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+
+<p>convergence tolerance, when the convergence measure is smaller than <code>eps</code>, the algorithm stops.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>W_init</code></td>
+<td>
+
+<p>numeric array of dimension <code>[P, P, D]</code> containing initial unmixing matrices. If not set, initialized with identity matrices.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>logical. If <code>TRUE</code> the convergence measure is printed during the learning process.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The algorithm uses fixed-point iteration to estimate to estimate the multivariate source signals from their observed mixtures. The elements of the source signals, or the datasets, should be dependent of each other to achieve the estimates where the sources are aligned in same order for each dataset. If the datasets are not dependent, the sources can still be separated but not necessarily aligned. This algorithm restricts the estimates unmixing matrices to be orthogonal. For more of the fast fixed-point IVA algorithm, see Lee, I. et al (2007).
+</p>
+<p>The source density model should be selected to match the density of the true source signals. When <code>source_density = "laplace_diag"</code>, the multivariate Laplace source density model with diagonal covariance structure is used. When <code>source_density = "entropic"</code>, the approximated entropy based source density model is used. For more about multivariate Laplace and entropic source density models, see Lee, I. et al (2007).
+When <code>source_density = "student"</code> the multivariate Student's source density model is used, for more see Liang, Y. et al (2013).
+</p>
+<p>The algorithm assumes that observed signals are multivariate, i.e. the number of datasets <code>D &gt;= 2</code>. The estimated signals are zero mean and scaled to unit variance.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>"iva"</code>.
+
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>S</code></td>
+<td>
+<p>The estimated source signals with dimension <code>[P, N, D]</code>. The estimated source signals are zero mean with unit variance.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>W</code></td>
+<td>
+<p>The estimated unmixing matrices with dimension <code>[P, P, D]</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>W_whitened</code></td>
+<td>
+<p>The estimated unmixing matrices with dimension <code>[P, P, D]</code> for whitened data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>V</code></td>
+<td>
+<p>The whitening matrices with dimension <code>[P, P, D]</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X_means</code></td>
+<td>
+<p>The means for each observed mixture with dimension <code>[P, D]</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>niter</code></td>
+<td>
+<p>The number of iterations that the algorithm did run.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>converged</code></td>
+<td>
+<p>Logical value which tells if the algorithm converged.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>source_density</code></td>
+<td>
+<p>The source density model used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>The number of observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>The number of datasets.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>P</code></td>
+<td>
+<p>The number of sources.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>student_df</code></td>
+<td>
+<p>The degree of freedom for Student's source density model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>The function call.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DNAME</code></td>
+<td>
+<p>The name of the variable containing the observed mixtures.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Mika Sipilä
+</p>
+
+
+<h3>References</h3>
+
+<p><cite>Lee, I., Kim, T., &amp; Lee, T.-W. (2007). Fast fixed-point independent vector analysis algorithms
+for convolutive blind source separation. Signal Processing, 87, 1859–1871.
+&lt;doi:10.1016/j.sigpro.2007.01.010&gt;</cite>
+</p>
+<p><cite>Liang, Y., Chen, G., Naqvi, S., &amp; Chambers, J. A. (2013). Independent vector analysis
+with multivariate Student’s t-distribution source prior for speech separation. Electronics
+Letters, 49, 1035–1036. &lt;doi:10.1049/el.2013.1999&gt;</cite>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>NewtonIVA</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">if (require("LaplacesDemon")) {
+  # Generate sources from multivariate Laplace distribution
+  P &lt;- 2; N &lt;- 1000; D &lt;- 5;
+  S &lt;- array(NA, c(P, N, D))
+
+  for (i in 1:P) {
+    S[i, , ] &lt;- rmvl(N, rep(0, D), diag(D))
+  }
+
+  # Generate mixing matrices from standard normal distribution
+  A &lt;- array(rnorm(P * P * D), c(P, P, D))
+
+  # Generate mixtures
+  X &lt;- array(NaN, c(P, N, D))
+  for (d in 1:D) {
+    X[, , d] &lt;- A[, , d] %*% S[, , d]
+  }
+
+  # Estimate sources and unmixing matrices
+  res &lt;- fastIVA(X)
+}
+</code></pre>
+
+
+</div>

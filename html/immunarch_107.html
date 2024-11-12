@@ -1,0 +1,133 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>trackClonotypes</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Track clonotypes across time and data points</h2>
+
+<h3>Description</h3>
+
+<p>Tracks the temporal dynamics of clonotypes in repertoires. For example, tracking across multiple
+time points after vaccination.
+</p>
+<p>Note: duplicated clonotypes are merged and their counts are summed up.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">trackClonotypes(.data, .which = list(1, 15), .col = "aa", .norm = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>.data</code></td>
+<td>
+<p>The data to process. It can be a data.frame, a
+data.table, or a list of these objects.
+</p>
+<p>Every object must have columns in the immunarch compatible format.
+immunarch_data_format
+</p>
+<p>Competent users may provide advanced data representations:
+DBI database connections, Apache Spark DataFrame from copy_to or a list
+of these objects. They are supported with the same limitations as basic objects.
+</p>
+<p>Note: each connection must represent a separate repertoire.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.which</code></td>
+<td>
+<p>An argument that regulates which clonotypes to choose for tracking. There are three options for this argument:
+</p>
+<p>1) passes a list with two elements <code>list(X, Y)</code>, where <code>X</code> is the name or the index of a target repertoire from ".data", and
+<code>Y</code> is the number of the most abundant clonotypes to take from <code>X</code>.
+</p>
+<p>2) passes a character vector of sequences to take from all data frames;
+</p>
+<p>3) passes a data frame (data table, database) with one or more columns - first for sequences, and other for gene segments (if applicable).
+</p>
+<p>See the "Examples" below with examples for each option.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.col</code></td>
+<td>
+<p>A character vector of length 1. Specifies an identifier for a column, from which the function
+chooses clonotype sequences. Specify "nt" for nucleotide sequences, "aa" for amino acid sequences,
+"aa+v" for amino acid sequences and Variable genes, "nt+j" for nucleotide
+sequences with Joining genes, or any combination of the above.
+Used only if ".which" has option 1) or option 2).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.norm</code></td>
+<td>
+<p>Logical. If TRUE then uses Proportion instead of the number of Clones per clonotype to store
+in the function output.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Data frame with input sequences and counts or proportions for each of the input repertoire.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Load an example data that comes with immunarch
+data(immdata)
+
+# Make the data smaller in order to speed up the examples
+immdata$data &lt;- immdata$data[c(1, 2, 3, 7, 8, 9)]
+immdata$meta &lt;- immdata$meta[c(1, 2, 3, 7, 8, 9), ]
+
+# Option 1
+# Choose the first 10 amino acid clonotype sequences
+# from the first repertoire to track
+tc &lt;- trackClonotypes(immdata$data, list(1, 10), .col = "aa")
+# Choose the first 20 nucleotide clonotype sequences
+# and their V genes from the "MS1" repertoire to track
+tc &lt;- trackClonotypes(immdata$data, list("MS1", 20), .col = "nt+v")
+
+# Option 2
+# Choose clonotypes with amino acid sequences "CASRGLITDTQYF" or "CSASRGSPNEQYF"
+tc &lt;- trackClonotypes(immdata$data, c("CASRGLITDTQYF", "CSASRGSPNEQYF"), .col = "aa")
+
+# Option 3
+# Choose the first 10 clonotypes from the first repertoire
+# with amino acid sequences and V segments
+target &lt;- immdata$data[[1]] %&gt;%
+  select(CDR3.aa, V.name) %&gt;%
+  head(10)
+tc &lt;- trackClonotypes(immdata$data, target)
+
+# Visualise the output regardless of the chosen option
+# Therea are three way to visualise it, regulated by the .plot argument
+vis(tc, .plot = "smooth")
+vis(tc, .plot = "area")
+vis(tc, .plot = "line")
+
+# Visualising timepoints
+# First, we create an additional column in the metadata with randomly choosen timepoints:
+immdata$meta$Timepoint &lt;- sample(1:length(immdata$data))
+immdata$meta
+# Next, we create a vector with samples in the right order,
+# according to the "Timepoint" column (from smallest to greatest):
+sample_order &lt;- order(immdata$meta$Timepoint)
+# Sanity check: timepoints are following the right order:
+immdata$meta$Timepoint[sample_order]
+# Samples, sorted by the timepoints:
+immdata$meta$Sample[sample_order]
+# And finally, we visualise the data:
+vis(tc, .order = sample_order)
+</code></pre>
+
+
+</div>

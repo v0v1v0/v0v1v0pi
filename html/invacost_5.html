@@ -1,0 +1,260 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>modelCosts</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Model the trend of invasive alien species costs over time</h2>
+
+<h3>Description</h3>
+
+<p>This function fits different models on 'InvaCost' data expressed per year 
+in order to estimate and predict the trend of invasive alien Species costs 
+over time.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">modelCosts(
+  costdb,
+  cost.column = "Cost_estimate_per_year_2017_USD_exchange_rate",
+  year.column = "Impact_year",
+  cost.transf = "log10",
+  in.millions = TRUE,
+  confidence.interval = 0.95,
+  minimum.year = 1960,
+  maximum.year = max(costdb[, year.column]),
+  final.year = max(costdb[, year.column]),
+  incomplete.year.threshold = NULL,
+  incomplete.year.weights = NULL,
+  gam.k = -1,
+  mars.nprune = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>costdb</code></td>
+<td>
+<p>The <b>expanded 'InvaCost' database</b> output from 
+<code>expandYearlyCosts</code>,
+where costs occurring over several years are expanded over each year of 
+impact</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cost.column</code></td>
+<td>
+<p>Name of the cost column to use in <code>costdb</code> (usually, 
+choose between the exchange rate (default) or Purchase Power Parity 
+cost per year)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>year.column</code></td>
+<td>
+<p>Name of the year column to use in <code>costdb</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cost.transf</code></td>
+<td>
+<p>Type of transformation you want to apply on cost values.
+The default is a log10 transformation, which is commonly applied in 
+economics,
+allows to fit linear regression with a normal distribution of residuals, 
+and makes plots easier to read. You can apply another transformation by 
+specifying the name of the transformation function (e.g., natural
+logarithm, <code>"log"</code>). Specify <code>NA</code> or <code>NULL</code> to avoid any 
+transformation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>in.millions</code></td>
+<td>
+<p>If <code>TRUE</code>, cost values are transformed in 
+millions (to make graphs easier to read), else if , cost values are
+not transformed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>confidence.interval</code></td>
+<td>
+<p>A numeric value between 0 and 1, corresponding
+to the desired confidence interval around model predictions</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minimum.year</code></td>
+<td>
+<p>The starting year of this analysis. By default, 
+1960 was chosen because it marks the period from which world bank data is 
+available for exchange rates and inflation values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maximum.year</code></td>
+<td>
+<p>The ending year for this analysis. By default, the last
+year of <code>costdb</code> is chosen</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>final.year</code></td>
+<td>
+<p>The year for which the costs predicted by models is
+printed in the output. Default is the last year of <code>costdb</code>. Note that 
+this is only for convenience, since predictions for all years are available
+in the <code>estimated.annual.costs</code> element of the output object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>incomplete.year.threshold</code></td>
+<td>
+<p>Estimated threshold for incomplete cost 
+data. All years above or equal to this threshold will be excluded from 
+model calibration, because of the time-lag between economic impacts of
+invasive alien species and the documentation and publication of these impacts</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>incomplete.year.weights</code></td>
+<td>
+<p>A named vector containing weights of years
+for the regressions. Useful to decrease the weights of incomplete years
+in regressions. Names of this vector must correspond to years</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gam.k</code></td>
+<td>
+<p>The smoothing factor of GAM; default value of -1 lets the
+GAM find the smoothing factor automatically. Provide a manual value if you 
+have expectations about the shape of the curve and want to avoid overfitting
+because of interannual variations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mars.nprune</code></td>
+<td>
+<p>The maximum number of model terms in the MARS model. 
+Lowering this value reduces the number of terms in the MARS model, which
+can be useful if you have expectations about the shape of the curve and want
+to reduce the impact of interannual variations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments (you do not need them!)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A <code>list</code> with 3 to 6 elements (only the first three are
+provided if you selected a cost transformation different from log10):
+</p>
+
+<ul>
+<li>
+<p><code>input.data</code>: the input cost data, for reproducibility of 
+analyses
+</p>
+</li>
+<li>
+<p><code>cost.data</code>: the costs of invasions per year, as sums of all 
+costs for each year
+</p>
+</li>
+<li>
+<p><code>parameters</code>: parameters used to run the function. The 
+<code>minimum.year</code> and <code>maximum.year</code> are based on the input data
+(i.e., the user may specify <code>minimum.year = 1960</code> but the input data may
+only have data starting from 1970, hence the <code>minimum.year</code> will be
+1970)
+</p>
+</li>
+<li>
+<p><code>fitted.models</code>: a list of objects containing the fitted models. 
+They can be extracted individually for refining analyses or making new
+predictions
+</p>
+</li>
+<li>
+<p><code>estimated.annual.costs</code>: a data.frame containing the predicted 
+cost values for each year for all the fitted models
+</p>
+</li>
+<li>
+<p><code>RMSE</code>: an array containing RMSE of models for the calibration 
+data and for all data. <b>NOTE: the RMSE for Quantile Regressions is not a 
+relevant metric, IGNORE it unless you know what you are doing!</b>
+</p>
+</li>
+<li>
+<p><code>final.year.cost</code>: a vector containing the estimated annual
+costs of invasive alien species based on all models for <code>final.year</code>.
+</p>
+</li>
+</ul>
+<p>The structure of this object can be seen using <code>str()</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Boris Leroy <a href="mailto:leroy.boris@gmail.com">leroy.boris@gmail.com</a>, Andrew Kramer, Anne-Charlotte
+Vaissière, Christophe Diagne
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://github.com/Farewe/invacost">https://github.com/Farewe/invacost</a>
+</p>
+<p>Leroy Boris, Kramer Andrew M, Vaissière Anne-Charlotte, Kourantidou Melina,
+Courchamp Franck &amp; Diagne Christophe (2022). Analysing economic costs 
+of invasive alien species with the invacost R package. Methods in Ecology
+and Evolution. <a href="https://doi.org/10.1111/2041-210X.13929">doi:10.1111/2041-210X.13929</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>expandYearlyCosts</code> to get the database in appropriate format.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(invacost)
+
+### Cleaning steps
+# Eliminating data with no information on starting and ending years
+invacost &lt;- invacost[-which(is.na(invacost$Probable_starting_year_adjusted)), ]
+invacost &lt;- invacost[-which(is.na(invacost$Probable_ending_year_adjusted)), ]
+# Keeping only observed and reliable costs
+invacost &lt;- invacost[invacost$Implementation == "Observed", ]
+invacost &lt;- invacost[which(invacost$Method_reliability == "High"), ]
+# Eliminating data with no usable cost value
+invacost &lt;- invacost[-which(is.na(invacost$Cost_estimate_per_year_2017_USD_exchange_rate)), ]
+
+### Expansion
+
+db.over.time &lt;- expandYearlyCosts(invacost,
+                                  startcolumn = "Probable_starting_year_adjusted",
+                                  endcolumn = "Probable_ending_year_adjusted")
+                                  
+### Analysis
+res &lt;- modelCosts(db.over.time)
+res
+</code></pre>
+
+
+</div>

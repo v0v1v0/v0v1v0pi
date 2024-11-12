@@ -1,0 +1,267 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ic.est</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Functions for order-restricted estimates and printing thereof </h2>
+
+<h3>Description</h3>
+
+<p>Function ic.est estimates a mean vector under linear inequality constraints, 
+functions print.orest and summary.orest provide printed results in different 
+degrees of detail.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ic.est(x, Sigma, ui, ci = NULL, index = 1:nrow(Sigma), meq = 0, 
+            tol = sqrt(.Machine$double.eps))
+## S3 method for class 'orest'
+print(x, digits = max(3, getOption("digits") - 3), scientific = FALSE, ...)
+## S3 method for class 'orest'
+summary(object, display.unrestr = FALSE, brief = FALSE, 
+            digits = max(3, getOption("digits") - 3), scientific = FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p> for <code>ic.est</code>: unrestricted vector (e.g. mean of a sample of random vectors), 
+from which the expected value under linear inequality 
+(and perhaps equality) restrictions is to be estimated 
+</p>
+<p>for <code>print.orest</code>: object of class <code>orest</code> 
+(normally produced by <code>ic.est</code> or <code>orlm</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p> for <code>summary.orest</code>: 
+object of class <code>orest</code> 
+(normally produced by <code>ic.est</code> or <code>orlm</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Sigma</code></td>
+<td>
+<p> covariance or correlation matrix (or any multiple thereof) 
+of <code>x</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ui</code></td>
+<td>
+<p> matrix (or vector in case of one single restriction only) 
+defining the left-hand side of the restriction 
+</p>
+<p><code>ui%*%mu &gt;= ci</code>,
+</p>
+<p>where mu is the expectation vector of x;         
+the first few of these restrictions can be declared equality- instead
+of inequality restrictions (cf. argument <code>meq</code>); 
+if only part of the elements of mu are subject to restrictions, 
+the columns of ui can be restricted to these elements, if their 
+index numbers are provided in <code>index</code>
+</p>
+<p>Rows of <code>ui</code> must be linearly independent; 
+in case of linearly dependent rows the function gives an error 
+message with a hint which subset of rows is independent.
+Note that the restrictions must define a (possibly translated) cone,
+i.e. e.g. interval restrictions on a parameter are not permitted. 
+</p>
+<p>See <code>contr.diff</code> for examples of how to comfortably 
+define various types of restriction.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci</code></td>
+<td>
+<p> vector on the right-hand side of the restriction (cf. <code>ui</code>),
+defaults to a vector of zeroes </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>index</code></td>
+<td>
+<p> index numbers of the components of mu, 
+which are subject to the specified constraints 
+as <code>ui%*%mu[index] &gt;= ci</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meq</code></td>
+<td>
+<p> integer number (default 0) giving the number of rows of ui that 
+are used for equality restrictions instead of inequality 
+restrictions. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>numerical tolerance value; 
+estimates closer to 0 than tol are set to exactly 0</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p> number of digits to be used in printing </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scientific</code></td>
+<td>
+<p> if <code>FALSE</code>, suppresses scientific representation of 
+numbers (default: <code>FALSE</code>) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> further arguments to <code>print</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>display.unrestr</code></td>
+<td>
+<p> if TRUE, unrestricted estimate (i.e. <code>object</code>) is also displayed </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>brief</code></td>
+<td>
+<p> if <code>TRUE</code>, suppress printing of restrictions; 
+default: <code>FALSE</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Function <code>ic.est</code> heavily relies on package <span class="pkg">quadprog</span> for determining 
+the optimizer. It is a convenience wrapper for <code>solve.QP</code> from that package. 
+The function is guaranteed to work appropriately if the specified restrictions 
+determine a (translated) cone.  In that case, the estimate is the projection along 
+matrix <code>Sigma</code> onto one of the faces of that cone (including the interior 
+as the face of the highest dimension); this means that it minimizes the 
+quadratic form <code>t(x-b)%*%solve(Sigma,x-b)</code> among all b that satisfy the 
+restrictions <code>ui%*%b&gt;=ci</code> (or, if specified by <code>meq</code>, 
+with the first <code>meq</code> restrictions equality instead of inequality restrictions). 
+</p>
+
+
+<h3>Value</h3>
+
+<p>Function <code>ic.est</code> outputs a list with the following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>b.unrestr </code></td>
+<td>
+<p>x</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b.restr </code></td>
+<td>
+<p>restricted estimate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Sigma</code></td>
+<td>
+<p> as input </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ui</code></td>
+<td>
+<p> as input</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci</code></td>
+<td>
+<p> as input</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>restr.index</code></td>
+<td>
+<p> index of components of mu, 
+which are subject to the specified constraints as in input index </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meq</code></td>
+<td>
+<p> as input</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iact</code></td>
+<td>
+<p> active restrictions, i.e. restrictions that are satisfied with 
+equality in the solution, as output by <code>solve.QP</code></p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p> Ulrike Groemping, BHT Berlin </p>
+
+
+<h3>See Also</h3>
+
+<p> See also <code>ic.test</code>, <code>ic.weights</code>, 
+<code>orlm</code>, <code>solve.QP</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## different correlation structures
+corr.plus &lt;- matrix(c(1,0.9,0.9,1),2,2)
+corr.null &lt;- matrix(c(1,0,0,1),2,2)
+corr.minus &lt;- matrix(c(1,-0.9,-0.9,1),2,2)
+## unrestricted vectors
+x1 &lt;- c(1, -1)
+x2 &lt;- c(-1, -1)
+x3 &lt;- c(10, -1)
+## estimation under restriction non-negative orthant
+## or first element equal to 0, second non-negative
+ice &lt;- ic.est(x1, corr.plus, ui=diag(c(1,1)), ci=c(0,0))
+ice
+summary(ice)
+ice2 &lt;-ic.est(x1, corr.plus, ui=diag(c(1,1)), ci=c(0,0), meq=1)
+summary(ice2)
+ic.est(x2, corr.plus, ui=diag(c(1,1)), ci=c(0,0))
+ic.est(x2, corr.plus, ui=diag(c(1,1)), ci=c(0,0), meq=1)
+ic.est(x3, corr.plus, ui=diag(c(1,1)), ci=c(0,0))
+ic.est(x3, corr.plus, ui=diag(c(1,1)), ci=c(0,0), meq=1)
+ic.est(x1, corr.null, ui=diag(c(1,1)), ci=c(0,0))
+ic.est(x1, corr.null, ui=diag(c(1,1)), ci=c(0,0), meq=1)
+ic.est(x2, corr.null, ui=diag(c(1,1)), ci=c(0,0))
+ic.est(x2, corr.null, ui=diag(c(1,1)), ci=c(0,0), meq=1)
+ic.est(x3, corr.null, ui=diag(c(1,1)), ci=c(0,0))
+ic.est(x3, corr.null, ui=diag(c(1,1)), ci=c(0,0), meq=1)
+ic.est(x1, corr.minus, ui=diag(c(1,1)), ci=c(0,0))
+ic.est(x1, corr.minus, ui=diag(c(1,1)), ci=c(0,0), meq=1)
+ic.est(x2, corr.minus, ui=diag(c(1,1)), ci=c(0,0))
+ic.est(x2, corr.minus, ui=diag(c(1,1)), ci=c(0,0), meq=1)
+ic.est(x3, corr.minus, ui=diag(c(1,1)), ci=c(0,0))
+ic.est(x3, corr.minus, ui=diag(c(1,1)), ci=c(0,0), meq=1)
+## estimation under one element restricted to being non-negative
+ic.est(x3, corr.plus, ui=1, ci=0, index=1)
+ic.est(x3, corr.plus, ui=1, ci=0, index=2)
+</code></pre>
+
+
+</div>

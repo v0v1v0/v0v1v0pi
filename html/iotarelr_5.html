@@ -1,0 +1,265 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>compute_iota2</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Computes Iota and its elements in version 2</h2>
+
+<h3>Description</h3>
+
+<p>Fits a model of Iota2 to the data
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">compute_iota2(
+  data,
+  random_starts = 10,
+  max_iterations = 5000,
+  cr_rel_change = 1e-12,
+  con_step_size = 1e-04,
+  con_rel_convergence = 1e-12,
+  con_max_iterations = 5000,
+  con_random_starts = 5,
+  b_min = 0.01,
+  fast = TRUE,
+  trace = TRUE,
+  con_trace = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Data for which the elements should be estimated. Data must be
+an object of type <code>data.frame</code> or <code>matrix</code> with cases in the rows and
+raters in the columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random_starts</code></td>
+<td>
+<p>An integer for the number of random starts for the
+EM algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_iterations</code></td>
+<td>
+<p>An integer for the maximum number of iterations within
+the EM algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cr_rel_change</code></td>
+<td>
+<p>Positive numeric value for defining the convergence of the
+EM algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>con_step_size</code></td>
+<td>
+<p><code>Double</code> for specifying the size for increasing or
+decreasing the probabilities during the conditioning stage of estimation.
+This value should not be less than 1e-3.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>con_rel_convergence</code></td>
+<td>
+<p><code>Double</code> for determining the convergence
+criterion during the conditioning stage. The algorithm stops if the relative change
+is smaller than this criterion.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>con_max_iterations</code></td>
+<td>
+<p><code>Integer</code> for the maximum number of iterations
+during the conditioning stage.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>con_random_starts</code></td>
+<td>
+<p><code>Integer</code> for the number of random starts
+within the conditioning stage.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b_min</code></td>
+<td>
+<p>Value ranging between 0 and 1, determining the minimal size of
+the categories for checking if boundary values occurred. The algorithm tries
+to select solutions that are not considered to be boundary values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fast</code></td>
+<td>
+<p><code>Bool</code> If <code>TRUE</code> a fast estimation is applied during the
+condition stage. This option ignores all parameters beginning with "con_".
+If <code>FALSE</code> the estimation described in Berding and
+Pargmann (2022) is used. Default is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trace</code></td>
+<td>
+<p><code>TRUE</code> for printing progress information on the console.
+<code>FALSE</code> if this information is not to be printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>con_trace</code></td>
+<td>
+<p><code>TRUE</code> for printing progress information on the console
+during estimations in the conditioning stage. <code>FALSE</code> if this information
+is not to be printed.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a <code>list</code> with the following three components:
+The first component <code>estimates_categorical_level</code> comprises all
+elements that describe the ratings on a categorical level. The elements are
+sub-divided into raw estimates and chance-corrected estimates.
+</p>
+
+<dl>
+<dt><code>raw_estimates</code></dt>
+<dd>
+
+<dl>
+<dt><code>alpha_reliability: </code></dt>
+<dd>
+<p>A vector containing the Alpha
+Reliabilities for each category. These values represent probabilities.</p>
+</dd>
+<dt><code>beta_reliability: </code></dt>
+<dd>
+<p>A vector containing the Beta Reliabilities for each
+category. These values represent probabilities.</p>
+</dd>
+<dt><code>assignment_error_matrix: </code></dt>
+<dd>
+<p>Assignment Error Matrix containing the conditional
+probabilities for assigning a unit of category i to categories 1 to n.</p>
+</dd>
+<dt><code>iota: </code></dt>
+<dd>
+<p>A vector containing the Iota values for each category.</p>
+</dd>
+<dt><code>iota_error_1: </code></dt>
+<dd>
+<p>A vector containing the Iota Error Type I values for each category.</p>
+</dd>
+<dt><code>iota_error_2: </code></dt>
+<dd>
+<p>A vector containing the Iota Error Type II values for each category.</p>
+</dd>
+</dl>
+</dd>
+<dt><code>elements_chance_corrected</code></dt>
+<dd>
+
+<dl>
+<dt><code>alpha_reliability: </code></dt>
+<dd>
+<p>A vector containing the chance-corrected Alpha Reliabilities for each category.</p>
+</dd>
+<dt><code>beta_reliability: </code></dt>
+<dd>
+<p>A vector containing the chance-corrected Beta Reliabilities for each category.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>The second component <code>estimates_scale_level</code> contains elements for
+describing the quality of the ratings on a scale level. It comprises the
+following elements:
+</p>
+
+<dl>
+<dt><code>iota_index: </code></dt>
+<dd>
+<p>The Iota Index, representing the reliability on a scale level.</p>
+</dd>
+<dt><code>iota_index_d4: </code></dt>
+<dd>
+<p>The Static Iota Index, which is a transformation of the original Iota Index,
+in order to consider the uncertainty of estimation.</p>
+</dd>
+<dt><code>iota_index_dyn2: </code></dt>
+<dd>
+<p>The Dynamic Iota Index, which is a transformation of the original Iota Index,
+in order to consider the uncertainty of estimation.</p>
+</dd>
+</dl>
+<p>The third component <code>information</code> contains important information
+regarding the parameter estimation. It comprises the following elements:
+</p>
+
+<dl>
+<dt><code>log_likelihood: </code></dt>
+<dd>
+<p>Log-likelihood of the best solution.</p>
+</dd>
+<dt><code>convergence: </code></dt>
+<dd>
+<p>If estimation converged 0, otherwise 1.</p>
+</dd>
+<dt><code>est_true_cat_sizes: </code></dt>
+<dd>
+<p>Estimated categorical sizes. This is the estimated amount of the categories.</p>
+</dd>
+<dt><code>conformity: </code></dt>
+<dd>
+<p><code>0</code> if the solution is in line with assumptions of weak superiority.
+A number greater 0 indicates the number of violations of the assumption
+of weak superiority.</p>
+</dd>
+<dt><code>random_starts: </code></dt>
+<dd>
+<p>Numer of random starts for the EM algorithm.</p>
+</dd>
+<dt><code>boundaries: </code></dt>
+<dd>
+<p><code>False</code> if the best solution does not contain boundary values.
+<code>True</code> if the best solution does contain boundary values</p>
+</dd>
+<dt><code>p_boundaries: </code></dt>
+<dd>
+<p>Percentage of solutions with boundary values during the estimation.</p>
+</dd>
+<dt><code>call: </code></dt>
+<dd>
+<p>Name of the function that created the object.</p>
+</dd>
+<dt><code>n_rater: </code></dt>
+<dd>
+<p>Number of raters.</p>
+</dd>
+<dt><code>n_cunits: </code></dt>
+<dd>
+<p>Number of coding units.</p>
+</dd>
+</dl>
+<h3>References</h3>
+
+<p>Florian Berding and Julia Pargmann (2022).Iota Reliability Concept
+of the Second Generation. Measures for Content Analysis Done by
+Humans or Artificial Intelligences. Berlin: Logos.
+https://doi.org/10.30819/5581
+</p>
+
+
+</div>

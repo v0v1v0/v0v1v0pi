@@ -1,0 +1,183 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>SIRladle</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Ladle Estimate for SIR
+</h2>
+
+<h3>Description</h3>
+
+<p>In the supervised dimension reduction context with response y and explaining variables x, this functions provides the ladle estimate 
+for the dimension of the central subspace for SIR.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">SIRladle(X, y, h = 10, n.boot = 200, 
+         ncomp = ifelse(ncol(X) &gt; 10, floor(ncol(X)/log(ncol(X))), ncol(X) - 1), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>numeric data matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>numeric response vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>number of slices in SIR.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.boot</code></td>
+<td>
+<p>number of bootstrapping samples to be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncomp</code></td>
+<td>
+<p>The number of components among which the ladle estimator is to be searched. The default here follows
+the recommendation of Luo and Li 2016.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>arguments passed on to <code>quantile</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The idea here is that the eigenvalues of the SIR-M matrix are of the form  <code class="reqn">\lambda_1 \geq ... \geq \lambda_k &gt; 0 =  ... = 0</code> and the eigenvectors
+of the non-zero eigenvalue span the central subspace.
+</p>
+<p>The ladle estimate for k for this purpose combines the values of the 
+scaled eigenvalues and the variation of the eigenvectors based on bootstrapping. The idea there is that for distinct eigenvales the variation of the eigenvectors
+is small and for equal eigenvalues the corresponding eigenvectors have large variation.
+</p>
+<p>This measure is then computed assuming k=0,..., <code>ncomp</code> and the ladle estimate for k is the value where the measure takes its minimum. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of class ladle containing:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>the string SIR.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>the estimated value of k.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fn</code></td>
+<td>
+<p>vector giving the measures of variation of the eigenvectors using the bootstrapped eigenvectors for the different number of components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phin</code></td>
+<td>
+<p>normalized eigenvalues of the M matrix in the SIR case.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gn</code></td>
+<td>
+<p>the main criterion for the ladle estimate - the sum of fn and phin. k is the value where gn takes its minimum</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>the eigenvalues of the M matrix in the SIR case.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>W</code></td>
+<td>
+<p>the transformation matrix to supervised components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>S</code></td>
+<td>
+<p>data matrix with the centered supervised components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MU</code></td>
+<td>
+<p>the location of the data which was substracted before calculating the supervised components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.name</code></td>
+<td>
+<p>the name of the data for which the ladle estimate was computed.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Klaus Nordhausen
+</p>
+
+
+<h3>References</h3>
+
+<p><cite>Luo, W. and Li, B. (2016), Combining Eigenvalues and Variation of Eigenvectors for Order Determination, Biometrika, 103. 875–887. &lt;doi:10.1093/biomet/asw051&gt;</cite>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ladleplot</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">n &lt;- 1000
+X &lt;- cbind(rnorm(n), rnorm(n), rnorm(n), rnorm(n), rnorm(n))
+eps &lt;- rnorm(n, sd=0.02)
+y &lt;- 4*X[,1] + 2*X[,2] + eps
+
+
+test &lt;- SIRladle(X, y)
+test
+summary(test)
+plot(test)
+pairs(cbind(y, components(test)))
+ladleplot(test)
+ladleplot(test, crit = "fn")
+ladleplot(test, crit = "lambda")
+ladleplot(test, crit = "phin")
+</code></pre>
+
+
+</div>

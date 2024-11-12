@@ -1,0 +1,113 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>triggerOnset</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Event onset triggering</h2>
+
+<h3>Description</h3>
+
+<p>The <code>triggerOnset</code> method of <code>Trace</code> objects uses the numeric vector returned by
+the <code>STALTA</code> "first break picking" method and a user selected threshold to determine the
+arrival time of a seismic event.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">triggerOnset(x, picker, threshold, index)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p> a <code>Trace</code> object </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>picker</code></td>
+<td>
+<p> results from applying the <code>STALTA</code> method to this trace </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p> optional numeric value of the threshold at which triggering should occur </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>index</code></td>
+<td>
+<p> optional logical to return the index (rather than the time) of event onset (default=<code>FALSE</code>) </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This method simply identifies the point at which the <code>picker</code> first rises above the <code>threshold</code>.
+</p>
+<p>When no <code>threshold</code> is supplied, an appropriate value is calculated from the picker with:
+</p>
+<p><code>threshold &lt;- quantile(picker,0.999,na.rm=TRUE)</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A single value is returned identifying the onset of the seismic event or <code>NA</code> if none is detected.
+The returned value wil be a <code>POSIXct</code> time by defult or a numeric index if <code>index=TRUE</code>.
+</p>
+
+
+<h3>Note</h3>
+
+
+<p>The appropriate value for the threshold will depend upon the exact STA/LTA algorithm used and the noise level in the
+signal.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>See Also</h3>
+
+
+<p><code>STALTA</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+starttime &lt;- as.POSIXct("2010-02-27 06:00:00",tz="GMT")
+endtime &lt;- as.POSIXct("2010-02-27 09:00:00",tz="GMT")
+  
+# Get the waveform
+st &lt;- getDataselect(iris,"IU","ANMO","00","BHZ",starttime,endtime)
+tr &lt;- st@traces[[1]]
+picker &lt;- STALTA(tr,3,30)
+
+# Identify the onset of the event
+to &lt;- triggerOnset(tr,picker)
+
+plot(tr)
+abline(v=to, col='red', lwd=2)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,206 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Bagg_pred_Surv</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Bagging survival tree prediction 
+</h2>
+
+<h3>Description</h3>
+
+<p>Use the Bagging improper survival tree to predict on new features and to evaluate the predictor using 
+Out Of Bag Integrated Brier Scores with either the Nelson Aalen estimator or the Breslow estimator. A permutation importance score is also computed using OOB observations.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Bagg_pred_Surv(xdata, Y.names, P.names, resBag, args.parallel = list(numWorkers = 1), 
+               new_data = data.frame(), OOB = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xdata</code></td>
+<td>
+
+<p>The learning data frame
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y.names</code></td>
+<td>
+
+<p>A vector of the names of the two variables of interest (the time-to-event is follow by the event indicator)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>P.names</code></td>
+<td>
+
+<p>The names of independant variables acting on the non-susceptible population (the plateau)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resBag</code></td>
+<td>
+
+<p>The result of the <code>Bagg_Surv</code> function
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>args.parallel</code></td>
+<td>
+
+<p>a list  containing the number of parallel computing arguments: The number of workers, the type of parallelization to achieve, ...  see <code>mclapply</code> for further details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>new_data</code></td>
+<td>
+
+<p>An optional data frame to validate the bagging procedure (the test dataset)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>OOB</code></td>
+<td>
+
+<p>A value of <code>TRUE</code> or <code>FALSE</code> with <code>TRUE</code> indicating  the computation of the  OOB error using the Integrated Brier Score and also the computation of the permutation importance score. 
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>PREDNA</code></td>
+<td>
+<p>A matrix with Nelson Aalen predictions on all individuals of the learning sample </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PREDBRE</code></td>
+<td>
+<p>A matrix with Breslow predictions on all individuals of the learning sample</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tabhazNAa</code></td>
+<td>
+<p>A list of matrix with Nelson Aalen  prediction of each tree of the bagging sequence with the leaf node prediction in each column</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tabhazBRe</code></td>
+<td>
+<p>A list of matrix with Breslow  prediction of each tree of the bagging sequence with the leaf node prediction in each column</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>OOB </code></td>
+<td>
+<p>A value of <code>NULL</code> if <code>OOB</code> is <code>FALSE</code>. A list of twelve elements otherwise:
+<code>IBSKM</code>: The Kaplan-Meier estimation of the Integrated Brier Score; <code>IBSNAOOB</code>: The OOB error using the Nelson-Aalen estimator; <code>IBSBREOOB</code>: The OOB error using the Breslow estimator; <code>vimpoobpbpna</code>: The permutation variable importance using the Nelson-Aalen estimator; <code>vimpoobpbpbre</code>: The permutation variable importance using the Breslow estimator; <code>oobibspbpna</code>: The mean OOB error predictor by predictor using the Nelson-Aalen estimator; <code>oobibspbpbre</code>: The mean OOB error predictor by predictor using the Breslow estimator;  <code>SURVNAOOB</code>: A matrix with the predicted OOB survival using the Nelson-Aalen estimator; <code>SURVBREOOB</code>: A matrix with the predicted OOB survival using the Breslow estimator; <code>BSTKM</code>: The vector of Brier scores using the KM estimator; <code>BSTNAOOB</code>: The vector of Brier scores using the NA estimator; <code>BSTBREOOB</code>: The vector of Brier scores using the BRE estimator.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Timediff</code></td>
+<td>
+<p>The execution time of the prediction  procedure</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TEST</code></td>
+<td>
+<p>A value of <code>NULL</code> if <code>new_data</code> is not available. A list of seven elements otherwise: <code>IBSNAKMnew</code>: The IBS using the NA estimator on the new dataset; <code>IBSBRKMnew</code>: The IBS using the BRE estimator on the new dataset; <code>IBSKMnew</code>: The IBS using the KM estimator on the new dataset; <code>SURVNAnew</code>: A matrix of predicted survival on the new dataset using the NA estimator;
+<code>SURVBREnew</code>: A matrix of predicted survival on the new dataset using the BRE estimator; <code>SURV_NAnew</code>: a vector of survival prediction on the testing dataset using the NA estimator; <code>SURV_BREnew</code>: a vector of survival prediction on the testing dataset using the BRE estimator.
+</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Cyprien Mbogning and Philippe Broet
+</p>
+
+
+<h3>References</h3>
+
+<p>Mbogning, C. and Broet, P. (2016). Bagging survival tree procedure for
+variable selection and prediction in the presence of nonsusceptible patients.
+BMC bioinformatics, 17(1), 1.
+</p>
+<p>Duhaze Julianne et al. (2020). A Machine Learning Approach for High-Dimensional Time-to-Event Prediction With Application to Immunogenicity of Biotherapies in the ABIRISK Cohort. Frontiers in Immunology, (11).
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>Bagg_Surv</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+ data(burn)
+ myarg = list(cp = 0, maxcompete = 0, maxsurrogate = 0, maxdepth = 2)
+ Y.names = c("T3" ,"D3")
+ P.names = 'Z2'
+ T.names = c("Z1", paste("Z", 3:11, sep = ''))
+ mybag = 40
+ feat_samp = length(T.names)
+ set.seed(5000)
+ 
+ burn.BagEssai0 &lt;- suppressWarnings(Bagg_Surv(burn, 
+        Y.names, 
+        P.names, 
+        T.names, 
+        method = "LR", 
+        args.rpart = myarg, 
+        args.parallel = list(numWorkers = 1), 
+        Bag = mybag, feat = feat_samp))
+ 
+ burn.BagEssai1 &lt;- suppressWarnings(Bagg_Surv(burn, 
+        Y.names, 
+        P.names, 
+        T.names, 
+        method = "R2", 
+        args.rpart = myarg, 
+        args.parallel = list(numWorkers = 1), 
+        Bag = mybag, feat = feat_samp))
+
+pred0 &lt;- Bagg_pred_Surv(burn, 
+    Y.names, 
+    P.names, 
+    burn.BagEssai0, 
+    args.parallel = list(numWorkers = 1), 
+    OOB = TRUE) 
+ 
+ 
+ pred1 &lt;- Bagg_pred_Surv(burn, 
+    Y.names, 
+    P.names, 
+    burn.BagEssai1, 
+    args.parallel = list(numWorkers = 1), 
+    OOB = TRUE) 
+ 
+## End(Not run)
+</code></pre>
+
+
+</div>

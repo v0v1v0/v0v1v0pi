@@ -1,0 +1,116 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>IFSM</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+IFSM operator
+</h2>
+
+<h3>Description</h3>
+
+<p>IFSM operator
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">IFSM(x, cf, a, s, k = 2)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>where to approximate the function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cf</code></td>
+<td>
+<p>the vector of coefficients <code class="reqn">phi_i</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s</code></td>
+<td>
+<p>the vector of coefficients <code class="reqn">s_i</code> in: <code class="reqn">w_i = s_i *x + a_i</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+<p>the vector of coefficients <code class="reqn">a_i</code> in: <code class="reqn">w_i = s_i *x + a_i</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>number of iterations, default = 2</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This operator is intended to approximate a function on L2[0,1].
+If ‘u’ is simulated, then the IFSM can be used to simulate a IFSM
+version of ‘u’.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The value of the approximate target function.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>S. M. Iacus</p>
+
+
+<h3>References</h3>
+
+<p>Iacus, S.M, La Torre, D. (2005)
+IFSM representation of Brownian motion with applications to simulation, 
+<em>forthcoming</em>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">require(ifs)
+
+set.seed(123)
+n &lt;- 50
+dt &lt;- 1/n
+t &lt;- (1:n)*dt
+Z &lt;- rnorm(n)
+B &lt;- sqrt(dt)*cumsum(Z)
+
+ifsm.w.maps() -&gt; maps
+a &lt;- maps$a
+s &lt;- maps$s
+
+ifsm.setQF(B, s, a) -&gt; QF
+ifsm.cf(QF$Q,QF$b,QF$L1,QF$L2,s)-&gt; SOL
+psi &lt;- SOL$psi
+
+t1 &lt;- seq(0,1,length=250)
+as.numeric(sapply(t1, function(x) IFSM(x,psi,a,s,k=5))) -&gt; B.ifsm
+old.mar &lt;- par()$mar
+old.mfrow &lt;- par()$mfrow
+par(mfrow=c(2,1))
+par(mar=c(4,4,1,1))
+plot(t1,B.ifsm,type="l",xlab="time",ylab="IFSM")
+plot(t,B,col="red",type="l",xlab="time",ylab="Euler scheme")
+par(mar=old.mar)
+par(mfrow=old.mfrow)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,96 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>summary.iva</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Summarize an Object of Class iva
+</h2>
+
+<h3>Description</h3>
+
+<p><code>summary</code> method for the class <code>"iva"</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'iva'
+summary(object, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>An object of class <code>"iva"</code>, usually the result of a call to <code>NewtonIVA</code> or <code>fastIVA</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Further arguments are not used.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function print all the information of the <code>"iva"</code> object except the estimated sources and the estimated unmixing matrices.
+</p>
+
+
+<h3>Value</h3>
+
+<p>No return value, called for summarizing the object of class <code>"iva"</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Mika Sipilä
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>NewtonIVA</code>, <code>fastIVA</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">if (require("LaplacesDemon")) {
+  # Generate sources from multivariate Laplace distribution
+  P &lt;- 4; N &lt;- 1000; D &lt;- 4;
+  S &lt;- array(NA, c(P, N, D))
+
+  for (i in 1:P) {
+    U &lt;- array(rnorm(D * D), c(D, D))
+    Sigma &lt;- crossprod(U)
+    S[i, , ] &lt;- rmvl(N, rep(0, D), Sigma)
+  }
+
+  # Generate mixing matrices from standard normal distribution
+  A &lt;- array(rnorm(P * P * D), c(P, P, D))
+
+  # Generate mixtures
+  X &lt;- array(NaN, c(P, N, D))
+  for (d in 1:D) {
+    X[, , d] &lt;- A[, , d] %*% S[, , d]
+  }
+
+  # Estimate sources and unmixing matrices
+  res_G &lt;- NewtonIVA(X, source_density = "gaussian")
+  summary(res_G)
+}
+</code></pre>
+
+
+</div>

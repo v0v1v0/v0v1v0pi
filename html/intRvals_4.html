@@ -1,0 +1,103 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fold</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Folds observed arrival intervals to a fundamental interval</h2>
+
+<h3>Description</h3>
+
+<p>Folds observed arrival intervals with missed observations back to their most likely fundamental interval
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fold(object, take.sample = F, sigma.within = NA, silent = F)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>an object of class <code>intRvals</code>, usually a result of a call to estinterval</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>take.sample</code></td>
+<td>
+<p>when <code>TRUE</code> the number of folds of the fundamental interval is sampled randomly, taking into account the probability weight of each possibility. When <code>FALSE</code> the fold with the highest probability weight is taken.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma.within</code></td>
+<td>
+<p>(optional) numeric value with an assumed within-group/subject standard deviation, or '<code>auto</code>' to estimate it automatically using partition.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>silent</code></td>
+<td>
+<p>logical, if <code>TRUE</code> print no text to console</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Arrival intervals containing missed observations are folded to their most likely
+fundamental interval according to a fit of the distribution of intervals by estinterval.
+</p>
+<p>There is inherent uncertainty on how many missed arrival events an observed interval contains, and therefore to
+which fundamental interval it should be folded. Intervals folded to the fundamental
+can therefore introduce extra unexplained variance.
+</p>
+<p>The default is to fold intervals to the
+fundamental with the highest probability weight (<code>take.sample = F</code>). Alternatively, randomly sampled intervals
+can be generated, that take into account the probability weights of each possible fold (<code>take.sample = T</code>).
+</p>
+<p>Intervals <code>x</code> are transformed to their fundamental interval according to
+</p>
+<p style="text-align: center;"><code class="reqn">\mu+(x-i*\mu)/\sqrt i</code>
+</p>
+
+<p>with <code>i-1</code> the estimated number of missed observations within the interval. This transformation scales appropriately
+with the expected broadening of the standard distributions <code class="reqn">\phi(x | i \mu,\sqrt i \sigma)</code> with <code>i</code> in intervalpdf.
+</p>
+<p>When no <code>sigma.within</code> is provided, <code class="reqn">\mu</code> equals the mean arrival rate, estimated by estinterval.
+</p>
+<p>When <code>sigma.within</code> is '<code>auto</code>', <code>sigma.within</code> is estimated using partition.
+</p>
+<p>When <code>sigma.within</code> is a user-specified numeric value or '<code>auto</code>', <code class="reqn">\mu</code> is estimated for each group (
+as specified in the group argument of estinterval),
+by maximizing the log-likelihood of intervalpdf, with its <code>data</code> argument equals to the intervals of the group,
+its <code>sigma</code> argument equal to <code>sigma.within</code>, and its remaining arguments taken from <code>object</code>.
+</p>
+<p>Intervals assigned to the <code>fpp</code> component (see estinterval) are not
+folded, and return as <code>NA</code> values.
+</p>
+
+
+<h3>Value</h3>
+
+<p>numeric vector with intervals folded into the fundamental interval
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">dr=estinterval(goosedrop$interval,group=goosedrop$bout_id)
+# fold assuming no within-group variation:
+interval.fundamental=fold(dr)
+# test whether there is evidence for within-group variation:
+partition(dr)$`p&lt;alpha`   #&gt; TRUE
+# there is evidence, therefore better to fold
+# while accounting for within-group variation:
+interval.fundamental=fold(dr,sigma.within='auto')
+</code></pre>
+
+
+</div>

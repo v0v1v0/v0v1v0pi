@@ -1,0 +1,212 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>convert_to_pa</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Convert predicted suitability to presence-absence map.</h2>
+
+<h3>Description</h3>
+
+<p>Use threshold-based, logistic or linear conversion method to
+convert predicted suitability map to presence-absence map.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">convert_to_pa(
+  suitability,
+  method = "logistic",
+  beta = 0.5,
+  alpha = -0.05,
+  a = 1,
+  b = 0,
+  species_prevalence = NA,
+  threshold = 0.5,
+  seed = 10L,
+  visualize = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>suitability</code></td>
+<td>
+<p>(<code>stars</code> or <code>RasterLayer</code>) The suitability raster.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>(<code>character</code>) The conversion method, must be one of
+'threshold', 'logistic', and 'linear'. The default is 'logistic'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p>(<code>numeric</code>) Works for 'threshold' or 'logistic' method.
+If <code>method</code> is threshold, then <code>beta</code> is the threshold value to cutoff.
+If <code>method</code> is logistic, it is the sigmoid midpoint. The default is <code>0.5</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>(<code>numeric</code>) Works for logistic method.
+It is the logistic growth rate or steepness of the curve.
+The default is <code>-.05</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+<p>(<code>numeric</code>) Works for linear method. It is the slope of the line.
+The default is <code>1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>(<code>numeric</code>) Works for linear method.
+It is the intercept of the line. The default is <code>0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>species_prevalence</code></td>
+<td>
+<p>(<code>numeric</code> or <code>NA</code>) Works for all three methods.
+It is the species prevalence to classify suitability map.
+It could be <code>NA</code>, when the will be calculated automatically
+based on other arguments. The default is <code>NA</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>(<code>numeric</code>) The threshold used to convert probability of
+occurrence to presence-absence map. It ranges in <code style="white-space: pre;">⁠[0, 1]⁠</code>. The default is 0.5.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>(<code>integer</code>) The seed for random progress. The default is <code>10L</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>visualize</code></td>
+<td>
+<p>(<code>logical</code>) If <code>TRUE</code>, plot map of suitability,
+probability of occurrence, and presence-absence together.
+The default is <code>TRUE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Multiple methods and arguments could be used as a combination to do
+the conversion.
+</p>
+
+
+<h3>Value</h3>
+
+<p>(<code>PAConversion</code>) A list of
+</p>
+
+<ul>
+<li>
+<p>suitability (<code>stars</code>) The input suitability map
+</p>
+</li>
+<li>
+<p>probability_of_occurrence (<code>stars</code>) The map of occurrence probability
+</p>
+</li>
+<li>
+<p>pa_conversion (<code>list</code>) A list of conversion arguments
+</p>
+</li>
+<li>
+<p>pa_map (<code>stars</code>) The presence-absence map</p>
+</li>
+</ul>
+<h3>References</h3>
+
+<p><a href="https://github.com/Farewe/virtualspecies/blob/master/R/convertToPA.R">c
+onvertToPA in package <code>virtualspecies</code></a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot.PAConversion</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Using a pseudo presence-only occurrence dataset of
+# virtual species provided in this package
+library(dplyr)
+library(sf)
+library(stars)
+library(itsdm)
+
+# Prepare data
+data("occ_virtual_species")
+obs_df &lt;- occ_virtual_species %&gt;% filter(usage == "train")
+eval_df &lt;- occ_virtual_species %&gt;% filter(usage == "eval")
+x_col &lt;- "x"
+y_col &lt;- "y"
+obs_col &lt;- "observation"
+
+# Format the observations
+obs_train_eval &lt;- format_observation(
+  obs_df = obs_df, eval_df = eval_df,
+  x_col = x_col, y_col = y_col, obs_col = obs_col,
+  obs_type = "presence_only")
+
+env_vars &lt;- system.file(
+  'extdata/bioclim_tanzania_10min.tif',
+  package = 'itsdm') %&gt;% read_stars() %&gt;%
+  slice('band', c(1, 5, 12, 16))
+
+# With imperfect_presence mode,
+mod &lt;- isotree_po(
+  obs_mode = "imperfect_presence",
+  obs = obs_train_eval$obs,
+  obs_ind_eval = obs_train_eval$eval,
+  variables = env_vars, ntrees = 5,
+  sample_size = 0.8, ndim = 1L,
+  nthreads = 1,
+  seed = 123L, response = FALSE,
+  spatial_response = FALSE,
+  check_variable = FALSE)
+
+# Threshold conversion
+pa_thred &lt;- convert_to_pa(mod$prediction,
+                          method = 'threshold', beta = 0.5, visualize = FALSE)
+pa_thred
+plot(pa_thred)
+
+## Not run: 
+# Logistic conversion
+pa_log &lt;- convert_to_pa(mod$prediction, method = 'logistic',
+                        beta = 0.5, alpha = -.05)
+
+# Linear conversion
+pa_lin &lt;- convert_to_pa(mod$prediction, method = 'linear',
+                        a = 1, b = 0)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,118 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bru_model</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create an inlabru model object from model components</h2>
+
+<h3>Description</h3>
+
+<p>The inlabru syntax for model formulae is different from what
+<code>INLA::inla</code> considers a valid.
+In inla most of the effects are defined by adding an <code>f(...)</code> expression to the formula.
+In inlabru the <code>f</code> is replaced by an arbitrary (exceptions: <code>const</code> and <code>offset</code>)
+string that will determine the label of the effect. See Details for further information.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">bru_model(components, lhoods)
+
+## S3 method for class 'bru_model'
+summary(object, ...)
+
+## S3 method for class 'summary_bru_model'
+print(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>components</code></td>
+<td>
+<p>A component_list object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lhoods</code></td>
+<td>
+<p>A list of one or more <code>lhood</code> objects</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>Object to operate on</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arguments passed on to other methods</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A <code>summary_bru_model</code> object to be printed</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For instance
+</p>
+<p><code>y ~ f(myspde, ...)</code>
+</p>
+<p>in INLA is equivalent to
+</p>
+<p><code>y ~ myspde(...)</code>
+</p>
+<p>in inlabru.
+</p>
+<p>A disadvantage of the inla way is that there is no clear separation between the name of the covariate
+and the label of the effect. Furthermore, for some models like SPDE it is much more natural to
+use spatial coordinates as covariates rather than an index into the SPDE vertices. For this purpose
+inlabru provides the <code>main</code> argument. For convenience, the <code>main</code> argument can be used
+like the first argument of the f function, e.g., and is the first argument of the component definition.
+The <code>INLA</code> model formula
+</p>
+<p><code>y ~ f(temperature, model = 'linear')</code>
+</p>
+<p>is equivalent to the <code>inlabru</code> component and formula definition
+</p>
+<p><code>y ~ temperature(temperature, model = 'linear')</code>
+and
+<code>y ~ temperature(main = temperature, model = 'linear')</code>
+as well as
+<code>y ~ temperature(model = 'linear')</code>
+which sets <code>main = temperature</code>.
+</p>
+<p>On the other hand, <code>main</code> can also be a function mapping, e.g the <code>sp::coordinates()</code> function:
+</p>
+<p><code>y ~ mySPDE(coordinates, ...)</code>
+</p>
+<p>This extracts the coordinates from the data object, and maps it to the latent
+field via the information given in the <code>mapper</code>, which by default is
+extracted from the <code>model</code> object, in the case of <code>spde</code> model
+objects.
+</p>
+<p>Morevover, <code>main</code> can be any expression that evaluates within your data as an environment.
+For instance, if your data has columns 'a' and 'b', you can create a fixed effect of 'sin(a+b)' by
+setting <code>map</code> in the following way:
+</p>
+<p><code>y ~ myEffect(sin(a+b))</code>
+</p>
+
+
+<h3>Value</h3>
+
+<p>A bru_model object
+</p>
+
+
+</div>

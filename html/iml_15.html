@@ -1,0 +1,365 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>LocalModel</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>LocalModel</h2>
+
+<h3>Description</h3>
+
+<p><code>LocalModel</code> fits locally weighted linear regression models (logistic
+regression for classification) to explain single predictions of a prediction
+model.
+</p>
+
+
+<h3>Details</h3>
+
+<p>A weighted glm is fitted with the machine learning model prediction as
+target. Data points are weighted by their proximity to the instance to be
+explained, using the gower proximity measure. L1-regularization is used to
+make the results sparse.
+</p>
+<p>The resulting model can be seen as a surrogate for the machine learning
+model, which is only valid for that one point. Categorical features are
+binarized, depending on the category of the instance to be explained: 1 if
+the category is the same, 0 otherwise.
+</p>
+<p>Please note that scaling continuous features in the machine learning method
+might be advisable when using LIME as an interpretation technique. LIME uses
+a distance measure to compute proximity weights for the weighted glm. Hence,
+the original scale of the features may influence the distance measure and
+therewith LIME results.
+</p>
+<p>To learn more about local models, read the Interpretable Machine Learning
+book: <a href="https://christophm.github.io/interpretable-ml-book/lime.html">https://christophm.github.io/interpretable-ml-book/lime.html</a>
+</p>
+<p>The approach is similar to LIME, but has the following differences:
+</p>
+
+<ul>
+<li> <p><strong>Distance measure</strong>: Uses as default the gower proximity (= 1 - gower
+distance) instead of a kernel based on the Euclidean distance. Has the
+advantage to have a meaningful neighborhood and no kernel width to tune.
+When the distance is not <code>"gower"</code>, then the <code>stats::dist()</code> function with the
+chosen method will be used, and turned into a similarity measure:
+<code class="reqn">sqrt(exp(-(distance^2) / (kernel.width^2)))</code>.
+</p>
+</li>
+<li> <p><strong>Sampling</strong>: Uses the original data instead of sampling from normal
+distributions. Has the advantage to follow the original data distribution.
+</p>
+</li>
+<li> <p><strong>Visualization</strong>: Plots effects instead of betas. Both are the same for binary
+features, but ared different for numerical features. For numerical features,
+plotting the betas makes no sense, because a negative beta might still
+increase the prediction when the feature value is also negative.
+</p>
+</li>
+</ul>
+<p>To learn more about local surrogate models, read the Interpretable Machine
+Learning book:
+<a href="https://christophm.github.io/interpretable-ml-book/lime.html">https://christophm.github.io/interpretable-ml-book/lime.html</a>
+</p>
+
+
+<h3>Super class</h3>
+
+<p><code>iml::InterpretationMethod</code> -&gt; <code>LocalModel</code>
+</p>
+
+
+<h3>Public fields</h3>
+
+<div class="r6-fields">
+
+<dl>
+<dt><code>x.interest</code></dt>
+<dd>
+<p>data.frame<br>
+Single row with the instance to be explained.</p>
+</dd>
+<dt><code>k</code></dt>
+<dd>
+<p><code>numeric(1)</code><br>
+The number of features as set by the user.</p>
+</dd>
+<dt><code>model</code></dt>
+<dd>
+<p><code>glmnet</code><br>
+The fitted local model.</p>
+</dd>
+<dt><code>best.fit.index</code></dt>
+<dd>
+<p><code>numeric(1)</code><br>
+The index of the best glmnet fit.</p>
+</dd>
+</dl>
+</div>
+
+
+<h3>Methods</h3>
+
+
+
+<h4>Public methods</h4>
+
+
+<ul>
+<li> <p><a href="#method-LocalModel-new"><code>LocalModel$new()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-LocalModel-predict"><code>LocalModel$predict()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-LocalModel-explain"><code>LocalModel$explain()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-LocalModel-clone"><code>LocalModel$clone()</code></a>
+</p>
+</li>
+</ul>
+<details open><summary>Inherited methods</summary><ul>
+<li><span class="pkg-link" data-pkg="iml" data-topic="InterpretationMethod" data-id="plot"><a href="../../iml/html/InterpretationMethod.html#method-InterpretationMethod-plot"><code>iml::InterpretationMethod$plot()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="iml" data-topic="InterpretationMethod" data-id="print"><a href="../../iml/html/InterpretationMethod.html#method-InterpretationMethod-print"><code>iml::InterpretationMethod$print()</code></a></span></li>
+</ul></details><hr>
+<a id="method-LocalModel-new"></a>
+
+
+
+<h4>Method <code>new()</code>
+</h4>
+
+<p>Create a Local Model object.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>LocalModel$new(
+  predictor,
+  x.interest,
+  dist.fun = "gower",
+  gower.power = 1,
+  kernel.width = NULL,
+  k = 3
+)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>predictor</code></dt>
+<dd>
+<p>Predictor<br>
+The object (created with <code>Predictor$new()</code>) holding the machine
+learning model and the data.</p>
+</dd>
+<dt><code>x.interest</code></dt>
+<dd>
+<p>data.frame<br>
+Single row with the instance to be explained.</p>
+</dd>
+<dt><code>dist.fun</code></dt>
+<dd>
+<p><code>character(1)</code>)<br>
+The name of the distance function for computing proximities (weights in
+the linear model). Defaults to <code>"gower"</code>. Otherwise will be forwarded
+to stats::dist.</p>
+</dd>
+<dt><code>gower.power</code></dt>
+<dd>
+<p>(<code>numeric(1)</code>)<br>
+The calculated gower proximity will be raised to the power of this
+value. Can be used to specify the size of the neighborhood for the
+LocalModel (similar to kernel.width for the euclidean distance).</p>
+</dd>
+<dt><code>kernel.width</code></dt>
+<dd>
+<p>(<code>numeric(1)</code>)<br>
+The width of the kernel for the proximity computation.
+Only used if dist.fun is not <code>"gower"</code>.</p>
+</dd>
+<dt><code>k</code></dt>
+<dd>
+<p><code>numeric(1)</code><br>
+The number of features.</p>
+</dd>
+</dl>
+</div>
+
+
+
+<h5>Returns</h5>
+
+<p>data.frame<br>
+Results with the feature names (<code>feature</code>) and contributions to the
+prediction.
+</p>
+
+
+<hr>
+<a id="method-LocalModel-predict"></a>
+
+
+
+<h4>Method <code>predict()</code>
+</h4>
+
+<p>Method to predict new data with the local model See also
+predict.LocalModel.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>LocalModel$predict(newdata = NULL, ...)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>newdata</code></dt>
+<dd>
+<p>data.frame<br>
+Data to predict on.</p>
+</dd>
+<dt><code>...</code></dt>
+<dd>
+<p>Not used</p>
+</dd>
+</dl>
+</div>
+
+
+<hr>
+<a id="method-LocalModel-explain"></a>
+
+
+
+<h4>Method <code>explain()</code>
+</h4>
+
+<p>Set a new data point to explain.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>LocalModel$explain(x.interest)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>x.interest</code></dt>
+<dd>
+<p>data.frame<br>
+Single row with the instance to be explained.</p>
+</dd>
+</dl>
+</div>
+
+
+<hr>
+<a id="method-LocalModel-clone"></a>
+
+
+
+<h4>Method <code>clone()</code>
+</h4>
+
+<p>The objects of this class are cloneable with this method.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>LocalModel$clone(deep = FALSE)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>deep</code></dt>
+<dd>
+<p>Whether to make a deep clone.</p>
+</dd>
+</dl>
+</div>
+
+
+
+
+<h3>References</h3>
+
+<p>Ribeiro, M. T., Singh, S., &amp; Guestrin, C. (2016). "Why Should I Trust You?":
+Explaining the Predictions of Any Classifier. Retrieved from
+http://arxiv.org/abs/1602.04938
+</p>
+<p>Gower, J. C. (1971), "A general coefficient of similarity and some of its
+properties". Biometrics, 27, 623–637.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot.LocalModel</code> and <code>predict.LocalModel</code>
+</p>
+<p><code>Shapley</code> can also be used to explain single predictions
+</p>
+<p>The package <code>lime</code> with the original implementation
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library("randomForest")
+# First we fit a machine learning model on the Boston housing data
+data("Boston", package = "MASS")
+X &lt;- Boston[-which(names(Boston) == "medv")]
+rf &lt;- randomForest(medv ~ ., data = Boston, ntree = 50)
+mod &lt;- Predictor$new(rf, data = X)
+
+# Explain the first instance of the dataset with the LocalModel method:
+x.interest &lt;- X[1, ]
+lemon &lt;- LocalModel$new(mod, x.interest = x.interest, k = 2)
+lemon
+
+# Look at the results in a table
+lemon$results
+# Or as a plot
+plot(lemon)
+
+# Reuse the object with a new instance to explain
+lemon$x.interest
+lemon$explain(X[2, ])
+lemon$x.interest
+plot(lemon)
+
+# LocalModel also works with multiclass classification
+rf &lt;- randomForest(Species ~ ., data = iris, ntree = 50)
+X &lt;- iris[-which(names(iris) == "Species")]
+mod &lt;- Predictor$new(rf, data = X, type = "prob", class = "setosa")
+
+# Then we explain the first instance of the dataset with the LocalModel method:
+lemon &lt;- LocalModel$new(mod, x.interest = X[1, ], k = 2)
+lemon$results
+plot(lemon)
+</code></pre>
+
+
+</div>

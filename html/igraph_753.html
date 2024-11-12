@@ -1,0 +1,273 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sample_degseq</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generate random graphs with a given degree sequence</h2>
+
+<h3>Description</h3>
+
+<p>It is often useful to create a graph with given vertex degrees. This function
+creates such a graph in a randomized manner.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sample_degseq(
+  out.deg,
+  in.deg = NULL,
+  method = c("configuration", "vl", "fast.heur.simple", "configuration.simple",
+    "edge.switching.simple")
+)
+
+degseq(..., deterministic = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>out.deg</code></td>
+<td>
+<p>Numeric vector, the sequence of degrees (for undirected
+graphs) or out-degrees (for directed graphs). For undirected graphs its sum
+should be even. For directed graphs its sum should be the same as the sum of
+<code>in.deg</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>in.deg</code></td>
+<td>
+<p>For directed graph, the in-degree sequence. By default this is
+<code>NULL</code> and an undirected graph is created.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>Character, the method for generating the graph. See Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Passed to <code>realize_degseq()</code> if ‘deterministic’ is true,
+or to <code>sample_degseq()</code> otherwise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>deterministic</code></td>
+<td>
+<p>Whether the construction should be deterministic</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The “configuration” method (formerly called "simple") implements the
+configuration model. For undirected graphs, it puts all vertex IDs in a bag
+such that the multiplicity of a vertex in the bag is the same as its degree.
+Then it draws pairs from the bag until the bag becomes empty. This method may
+generate both loop (self) edges and multiple edges. For directed graphs,
+the algorithm is basically the same, but two separate bags are used
+for the in- and out-degrees. Undirected graphs are generated
+with probability proportional to <code class="reqn">(\prod_{i&lt;j} A_{ij} ! \prod_i A_{ii} !!)^{-1}</code>,
+where A denotes the adjacency matrix and !! denotes the double factorial.
+Here A is assumed to have twice the number of self-loops on its diagonal.
+The corresponding expression for directed graphs is <code class="reqn">(\prod_{i,j} A_{ij}!)^{-1}</code>.
+Thus the probability of all simple graphs
+(which only have 0s and 1s in the adjacency matrix)
+is the same, while that of non-simple ones depends on their edge and
+self-loop multiplicities.
+</p>
+<p>The “fast.heur.simple” method (formerly called "simple.no.multiple")
+generates simple graphs.
+It is similar to “configuration” but tries to avoid multiple and
+loop edges and restarts the generation from scratch if it gets stuck.
+It can generate all simple realizations of a degree sequence,
+but it is not guaranteed to sample them uniformly.
+This method is relatively fast and it will eventually succeed
+if the provided degree sequence is graphical, but there is no upper bound on
+the number of iterations.
+</p>
+<p>The “configuration.simple” method (formerly called "simple.no.multiple.uniform")
+is
+identical to “configuration”, but if the generated graph is not simple,
+it rejects it and re-starts the generation.
+It generates all simple graphs with the same probability.
+</p>
+<p>The “vl” method samples undirected connected graphs approximately uniformly.
+It is a Monte Carlo method based on degree-preserving edge switches.
+This generator should be favoured if undirected and connected graphs are to be
+generated and execution time is not a concern. igraph uses
+the original implementation of Fabien Viger; for the algorithm, see
+<a href="https://www-complexnetworks.lip6.fr/~latapy/FV/generation.html">https://www-complexnetworks.lip6.fr/~latapy/FV/generation.html</a>
+and the paper <a href="https://arxiv.org/abs/cs/0502085">https://arxiv.org/abs/cs/0502085</a>.
+</p>
+<p>The “edge.switching.simple” is an MCMC sampler based on
+degree-preserving edge switches. It generates simple undirected or directed graphs.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The new graph object.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Gabor Csardi <a href="mailto:csardi.gabor@gmail.com">csardi.gabor@gmail.com</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>simplify()</code> to get rid of the multiple and/or loops edges,
+<code>realize_degseq()</code> for a deterministic variant.
+</p>
+<p>Random graph models (games)
+<code>erdos.renyi.game()</code>,
+<code>sample_()</code>,
+<code>sample_bipartite()</code>,
+<code>sample_chung_lu()</code>,
+<code>sample_correlated_gnp()</code>,
+<code>sample_correlated_gnp_pair()</code>,
+<code>sample_dot_product()</code>,
+<code>sample_fitness()</code>,
+<code>sample_fitness_pl()</code>,
+<code>sample_forestfire()</code>,
+<code>sample_gnm()</code>,
+<code>sample_gnp()</code>,
+<code>sample_grg()</code>,
+<code>sample_growing()</code>,
+<code>sample_hierarchical_sbm()</code>,
+<code>sample_islands()</code>,
+<code>sample_k_regular()</code>,
+<code>sample_last_cit()</code>,
+<code>sample_pa()</code>,
+<code>sample_pa_age()</code>,
+<code>sample_pref()</code>,
+<code>sample_sbm()</code>,
+<code>sample_smallworld()</code>,
+<code>sample_traits_callaway()</code>,
+<code>sample_tree()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## The simple generator
+undirected_graph &lt;- sample_degseq(rep(2, 100))
+degree(undirected_graph)
+is_simple(undirected_graph) # sometimes TRUE, but can be FALSE
+
+
+directed_graph &lt;- sample_degseq(1:10, 10:1)
+degree(directed_graph, mode = "out")
+degree(directed_graph, mode = "in")
+
+## The vl generator
+vl_graph &lt;- sample_degseq(rep(2, 100), method = "vl")
+degree(vl_graph)
+is_simple(vl_graph) # always TRUE
+
+## Exponential degree distribution
+## We fix the seed as there's no guarantee
+##  that randomly picked integers will form a graphical degree sequence
+## (i.e. that there's a graph with these degrees)
+## withr::with_seed(42, {
+## exponential_degrees &lt;- sample(1:100, 100, replace = TRUE, prob = exp(-0.5 * (1:100)))
+## })
+exponential_degrees &lt;- c(
+  5L, 6L, 1L, 4L, 3L, 2L, 3L, 1L, 3L, 3L, 2L, 3L, 6L, 1L, 2L,
+  6L, 8L, 1L, 2L, 2L, 5L, 1L, 10L, 6L, 1L, 2L, 1L, 5L, 2L, 4L,
+  3L, 4L, 1L, 3L, 1L, 4L, 1L, 1L, 5L, 2L, 1L, 2L, 1L, 8L, 2L, 7L,
+  5L, 3L, 8L, 2L, 1L, 1L, 2L, 4L, 1L, 3L, 3L, 1L, 1L, 2L, 3L, 9L,
+  3L, 2L, 4L, 1L, 1L, 4L, 3L, 1L, 1L, 1L, 1L, 2L, 1L, 3L, 1L, 1L,
+  2L, 1L, 2L, 1L, 1L, 3L, 3L, 2L, 1L, 1L, 1L, 1L, 3L, 1L, 1L, 6L,
+  6L, 3L, 1L, 2L, 3L, 2L
+)
+## Note, that we'd have to correct the degree sequence if its sum is odd
+is_exponential_degrees_sum_odd &lt;- (sum(exponential_degrees) %% 2 != 0)
+if (is_exponential_degrees_sum_odd) {
+  exponential_degrees[1] &lt;- exponential_degrees[1] + 1
+}
+exp_vl_graph &lt;- sample_degseq(exponential_degrees, method = "vl")
+all(degree(exp_vl_graph) == exponential_degrees)
+
+## An example that does not work
+
+## withr::with_seed(11, {
+## exponential_degrees &lt;- sample(1:100, 100, replace = TRUE, prob = exp(-0.5 * (1:100)))
+## })
+exponential_degrees &lt;- c(
+  1L, 1L, 2L, 1L, 1L, 7L, 1L, 1L, 5L, 1L, 1L, 2L, 5L, 4L, 3L,
+  2L, 2L, 1L, 1L, 2L, 1L, 3L, 1L, 1L, 1L, 2L, 2L, 1L, 1L, 2L, 2L,
+  1L, 2L, 1L, 4L, 3L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 3L, 1L, 4L, 3L,
+  1L, 2L, 4L, 2L, 2L, 2L, 1L, 1L, 2L, 2L, 4L, 1L, 2L, 1L, 3L, 1L,
+  2L, 3L, 1L, 1L, 2L, 1L, 2L, 3L, 2L, 2L, 1L, 6L, 2L, 1L, 1L, 1L,
+  1L, 1L, 2L, 2L, 1L, 4L, 2L, 1L, 3L, 4L, 1L, 1L, 3L, 1L, 2L, 4L,
+  1L, 3L, 1L, 2L, 1L
+)
+## Note, that we'd have to correct the degree sequence if its sum is odd
+is_exponential_degrees_sum_odd &lt;- (sum(exponential_degrees) %% 2 != 0)
+if (is_exponential_degrees_sum_odd) {
+  exponential_degrees[1] &lt;- exponential_degrees[1] + 1
+}
+exp_vl_graph &lt;- sample_degseq(exponential_degrees, method = "vl")
+
+## Power-law degree distribution
+## We fix the seed as there's no guarantee
+##  that randomly picked integers will form a graphical degree sequence
+## (i.e. that there's a graph with these degrees)
+## withr::with_seed(1, {
+##  powerlaw_degrees &lt;- sample(1:100, 100, replace = TRUE, prob = (1:100)^-2)
+## })
+powerlaw_degrees &lt;- c(
+  1L, 1L, 1L, 6L, 1L, 6L, 10L, 2L, 2L, 1L, 1L, 1L, 2L, 1L, 3L,
+  1L, 2L, 43L, 1L, 3L, 9L, 1L, 2L, 1L, 1L, 1L, 1L, 1L, 4L, 1L,
+  1L, 1L, 1L, 1L, 3L, 2L, 3L, 1L, 2L, 1L, 3L, 2L, 3L, 1L, 1L, 3L,
+  1L, 1L, 2L, 2L, 1L, 4L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 1L, 7L, 1L,
+  1L, 1L, 2L, 1L, 1L, 3L, 1L, 5L, 1L, 4L, 1L, 1L, 1L, 5L, 4L, 1L,
+  3L, 13L, 1L, 2L, 1L, 1L, 2L, 1L, 2L, 1L, 1L, 1L, 1L, 1L, 2L,
+  5L, 3L, 3L, 1L, 1L, 3L, 1L
+)
+## Note, that we correct the degree sequence if its sum is odd
+is_exponential_degrees_sum_odd &lt;- (sum(powerlaw_degrees) %% 2 != 0)
+if (is_exponential_degrees_sum_odd) {
+  powerlaw_degrees[1] &lt;- powerlaw_degrees[1] + 1
+}
+powerlaw_vl_graph &lt;- sample_degseq(powerlaw_degrees, method = "vl")
+all(degree(powerlaw_vl_graph) == powerlaw_degrees)
+
+## An example that does not work
+
+## withr::with_seed(2, {
+##  powerlaw_degrees &lt;- sample(1:100, 100, replace = TRUE, prob = (1:100)^-2)
+## })
+powerlaw_degrees &lt;- c(
+  1L, 2L, 1L, 1L, 10L, 10L, 1L, 4L, 1L, 1L, 1L, 1L, 2L, 1L, 1L,
+  4L, 21L, 1L, 1L, 1L, 2L, 1L, 4L, 1L, 1L, 1L, 1L, 1L, 14L, 1L,
+  1L, 1L, 3L, 4L, 1L, 2L, 4L, 1L, 2L, 1L, 25L, 1L, 1L, 1L, 10L,
+  3L, 19L, 1L, 1L, 3L, 1L, 1L, 2L, 8L, 1L, 3L, 3L, 36L, 2L, 2L,
+  3L, 5L, 2L, 1L, 4L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 2L,
+  1L, 4L, 1L, 1L, 1L, 2L, 1L, 1L, 1L, 4L, 18L, 1L, 2L, 1L, 21L,
+  1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L
+)
+## Note, that we correct the degree sequence if its sum is odd
+is_exponential_degrees_sum_odd &lt;- (sum(powerlaw_degrees) %% 2 != 0)
+if (is_exponential_degrees_sum_odd) {
+  powerlaw_degrees[1] &lt;- powerlaw_degrees[1] + 1
+}
+powerlaw_vl_graph &lt;- sample_degseq(powerlaw_degrees, method = "vl")
+all(degree(powerlaw_vl_graph) == powerlaw_degrees)
+
+</code></pre>
+
+
+</div>

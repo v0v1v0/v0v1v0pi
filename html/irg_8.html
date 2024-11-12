@@ -1,0 +1,112 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>model_ndvi</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Model NDVI time series</h2>
+
+<h3>Description</h3>
+
+<p>Fit double logistic model to NDVI time series given parameters estimated with model_params.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">model_ndvi(DT, observed = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>DT</code></td>
+<td>
+<p>data.table of model parameters (output from model_params).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>observed</code></td>
+<td>
+<p>boolean indicating if a full year of fitted values should be returned (observed = FALSE) or if only observed values will be fit (observed = TRUE)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Model parameter data.table appended with 'fitted' column of double logistic model of NDVI for a full year. Calculated at the daily scale with the following formula from Bischoff et al. (2012).
+</p>
+<p style="text-align: center;"><code class="reqn">fitted = \frac{1}{1 + \exp{\frac{xmidS - t}{scalS}}} - \frac{1}{1 + \exp{\frac{xmidA - t}{scalA}}}</code>
+</p>
+
+<p>(See the "Getting started with irg vignette" for a better formatted formula.)
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://www.journals.uchicago.edu/doi/abs/10.1086/667590">https://www.journals.uchicago.edu/doi/abs/10.1086/667590</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other model: 
+<code>model_params()</code>,
+<code>model_start()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Load data.table
+library(data.table)
+
+# Read in example data
+ndvi &lt;- fread(system.file("extdata", "sampled-ndvi-MODIS-MOD13Q1.csv", package = "irg"))
+
+# Filter and scale NDVI time series
+filter_ndvi(ndvi)
+scale_doy(ndvi)
+scale_ndvi(ndvi)
+
+# Guess starting parameters for xmidS and xmidA
+model_start(ndvi)
+
+## Two options: fit to full year or observed data
+# Option 1 - returns = 'models'
+
+# Double logistic model parameters
+#   given global starting parameters for scalS, scalA
+#   and output of model_start for xmidS, xmidA
+mods &lt;- model_params(
+  ndvi,
+  returns = 'models',
+  xmidS = 'xmidS_start',
+  xmidA = 'xmidA_start',
+  scalS = 0.05,
+  scalA = 0.01
+)
+
+# Fit to the whole year (requires assignment)
+fit &lt;- model_ndvi(mods, observed = FALSE)
+
+# Option 2 - returns = 'columns'
+model_params(
+  ndvi,
+  returns = 'columns',
+  xmidS = 'xmidS_start',
+  xmidA = 'xmidA_start',
+  scalS = 0.05,
+  scalA = 0.01
+)
+
+# Fit double logistic curve to NDVI time series for the observed days
+model_ndvi(ndvi, observed = TRUE)
+
+</code></pre>
+
+
+</div>

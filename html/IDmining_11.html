@@ -1,0 +1,151 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>MINDID_FMC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Functional Measure of Clustering Using the Morisita Estimator of ID</h2>
+
+<h3>Description</h3>
+
+<p>Computes the functional m-Morisita index for a given set of threshold values.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">MINDID_FMC(XY, scaleQ, m=2, thd)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>XY</code></td>
+<td>
+<p>A <code class="reqn">N \times E</code> <code>matrix</code>, <code>data.frame</code> or <code>data.table</code>
+where <code class="reqn">N</code> is the number of data points and <code class="reqn">E</code> is the number of variables
+(i.e. the input variables + the variable measured at each measurement station). The last
+column contains the variable measured at each measurement station. And each input variable
+is rescaled to the [0,1] interval by the function. Typically, the input variables are the X
+and Y coordinates of the measurement stations, but other or additional variables can be
+considered as well.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scaleQ</code></td>
+<td>
+<p>A vector containing the values of <code class="reqn">\ell^{-1}</code>
+chosen by the user (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>The value of the parameter m (by default: <code>m=2</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thd</code></td>
+<td>
+<p>Either a single value or a vector. It contains the value(s) of the threshold(s).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<ol>
+<li> <p><code class="reqn">\ell</code> is the edge length of the grid cells (or quadrats). Since the input variables
+(and consenquently the grid) are rescaled to the <code class="reqn">[0,1]</code> interval, <code class="reqn">\ell</code> is equal
+to <code class="reqn">1</code> for a grid consisting of only one cell.
+</p>
+</li>
+<li> <p><code class="reqn">\ell^{-1}</code> is the number of grid cells (or quadrats) along each axis of the
+Euclidean space in which the data points are embedded.
+</p>
+</li>
+<li> <p><code class="reqn">\ell^{-1}</code> is equal to <code class="reqn">Q^{(1/E)}</code> where <code class="reqn">Q</code> is the number
+of grid cells and <code class="reqn">E</code> is the number of variables (or features).
+</p>
+</li>
+<li> <p><code class="reqn">\ell^{-1}</code> is directly related to <code class="reqn">\delta</code> (see References).
+</p>
+</li>
+<li> <p><code class="reqn">\delta</code> is the diagonal length of the grid cells.
+</p>
+</li>
+</ol>
+<h3>Value</h3>
+
+<p>A <code>vector</code> containing the value(s) of the m-Morisita slope, <code class="reqn">S_m</code>, for each
+threshold value.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jean Golay <a href="mailto:jeangolay@gmail.com">jeangolay@gmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>J. Golay, M. Kanevski, C. D. Vega Orozco and M. Leuenberger (2014).
+The multipoint Morisita index for the analysis of spatial patterns,
+<a href="https://www.sciencedirect.com/science/article/pii/S0378437114002659">Physica A 406:191–202</a>.
+</p>
+<p>J. Golay and M. Kanevski (2015). A new estimator of intrinsic dimension
+based on the multipoint Morisita index,
+<a href="https://www.sciencedirect.com/science/article/pii/S0031320315002320">Pattern Recognition 48 (12):4070–4081</a>.
+</p>
+<p>L. Telesca, J. Golay and M. Kanevski (2015). Morisita-based space-clustering analysis of Swiss seismicity,
+<a href="https://www.sciencedirect.com/science/article/pii/S0378437114008425">Physica A 419:40–47</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+bf    &lt;- Butterfly(10000)
+bf_SP &lt;- bf[,c(1,2,9)]
+
+m      &lt;- 2
+scaleQ &lt;- 5:25
+thd    &lt;- quantile(bf_SP$Y,probs=c(0,0.1,0.2,0.3,
+                                   0.4,0.5,0.6,
+                                   0.7,0.8,0.9))
+
+nbr_shuf    &lt;- 100
+Sm_thd_shuf &lt;- matrix(0,length(thd),nbr_shuf)
+for (i in 1:nbr_shuf){
+  bf_SP_shuf      &lt;- cbind(bf_SP[,1:2],sample(bf_SP$Y,length(bf_SP$Y)))
+  Sm_thd_shuf[,i] &lt;- MINDID_FMC(bf_SP_shuf, scaleQ, m, thd)
+}
+mean_shuf &lt;- apply(Sm_thd_shuf,1,mean)
+
+dev.new(width=6, height=4)
+matplot(1:10,Sm_thd_shuf,type="l",lty=1,col=rgb(1,0,0,0.25),
+        ylim=c(-0.05,0.05),ylab=bquote(S[.(m)]),xaxt="n",
+        xlab="",cex.lab=1.2)
+axis(1,1:10,labels = FALSE)
+text(1:10,par("usr")[3]-0.01,srt=45,ad=1,
+     labels=c("0_100", "10_100","20_100","30_100",
+              "40_100","50_100","60_100",
+              "70_100","80_100","90_100"),xpd=T,font=2,cex=1)
+mtext("Thresholds",side=1,line=3.5,cex=1.2)
+lines(1:10,mean_shuf,type="b",col="blue",pch=19)
+
+legend.text&lt;-c("Shuffled","mean")
+legend.pch=c(NA,19)
+legend.lwd=c(2,2)
+legend.col=c("red","blue")
+legend("topleft",legend=legend.text,pch=legend.pch,lwd=legend.lwd,
+       col=legend.col,ncol=1,text.col="black",cex=1,box.lwd=1,bg="white")
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,160 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fitOnSinglePlat</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Fit IRT model on a single platform
+</h2>
+
+<h3>Description</h3>
+
+<p>This function fits the Item Response Model for one platform. It assumes the user has already dichotomized the data. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fitOnSinglePlat(data, model = 2, guessing = FALSE,
+    sampleIndices = 1:ncol(data), geneIndices = 1:nrow(data), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>A matrix of 0's and 1's with rows being genes (treated as examinees) and columns being samples (treated as items).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+
+<p>IRT model. 1-Rasch model where all item discrination are set to 1;
+2-all item discrimation are set to be equal but not necessarily as 1; 
+3-the 2PL model where no constraint is put on the item difficulty and discrimination parameter.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>guessing</code></td>
+<td>
+
+<p>A logical variable indicating whether to include guessing parameter in the model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sampleIndices</code></td>
+<td>
+
+<p>Indices of the samples to be feeded into the model. Default is set to use all samples.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>geneIndices</code></td>
+<td>
+
+<p>Indices of the genes to be feeded into the model. Default is to use all genes.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Additional options available in ltm package. Currently not used in intIRT package.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list giving the estimated IRT model and related information
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>fit</code></td>
+<td>
+<p>An object returned by calling ltm package. Item parameters and other auxillary inforamtion (i.e. loglikelihood, convergence, Hessian) can be accessed
+from this object. For more details, please refer to ltm package</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>The model type</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>guessing</code></td>
+<td>
+<p>The guessing parameter</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sampleIndices</code></td>
+<td>
+<p>The sample indices used in the model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>geneIndices</code></td>
+<td>
+<p>The gene indices used in the model</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Pan Tong (nickytong@gmail.com), Kevin R Coombes (krc@silicovore.com)
+</p>
+
+
+<h3>References</h3>
+
+<p>Rizopoulos, D. (2006) ltm: An R package for latent variable modelling and item response theory analyses. 
+Journal of Statistical Software, 17(5), 1-25.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>computeAbility, intIRTeasyRun, calculatePermutedScoreByGeneSampling</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># number of items and number of genes
+nSample &lt;- 10
+nGene &lt;- 2000
+set.seed(1000)
+a &lt;- rgamma(nSample, shape=1, scale=1)
+b &lt;- rgamma(nSample, shape=1, scale=1)
+# true latent traits
+theta &lt;- rnorm(nGene, mean=0)
+
+# probability of correct response (P_ij) for gene i in sample j
+P &lt;- matrix(NA, nrow=nGene, ncol=nSample)
+for(i in 1:nSample){
+	P[, i] &lt;- exp(a[i]*(theta-b[i]))/(1+exp(a[i]*(theta-b[i])))
+}
+# binary matrix
+X &lt;- matrix(NA, nrow=nGene, ncol=nSample)
+for(i in 1:nSample){
+	X[, i] &lt;- rbinom(nGene, size=1, prob=P[, i])
+}
+# IRT fitting
+fit2PL &lt;- fitOnSinglePlat(X, model=3)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,128 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bwplot.numeric</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Bandwidth plot for density estimation or regression
+</h2>
+
+<h3>Description</h3>
+
+<p>Plots the magnitude of the empirical characteristic function at frequencies 0 to <code>smax</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'numeric'
+bwplot(x, y, smax = 13.49/IQR(x), normalize = FALSE, n.points = 1000, c.thresh = 2, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>A univariate data set.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+
+<p>A vector of responses, for regression only.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smax</code></td>
+<td>
+
+<p>The algorithm searches for smoothing parameters on the interval <code>[0, smax]</code>.  <code>smax</code> is problem dependent, and the defaults are not consistently appropriate.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>normalize</code></td>
+<td>
+
+<p>Rescale the sample characteristic function so that it is 1 at frequency 0.  Does not affect plots for density estimation.  For regression it is often better to leave this as <code>FALSE</code>.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.points</code></td>
+<td>
+
+<p>The number of points in <code>[0, smax]</code> at which at which the sample characteristic function is calculated.  If the sample characteristic function is highly oscillatory on <code>[0,smax]</code>, this may need to be increased.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c.thresh</code></td>
+<td>
+
+<p>For regression, this is not meaningful.  For density estimation, the bandwidth is chosen by looking for the first time the sample characteristic function drops below <code>c.thresh*sqrt(log(n,10)/n)</code> and stays below that level for a distance of <code>Kn</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Currently unimplemented.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Produces a plot that is helpful in choosing the bandwidth for infinite order flat-top kernel smoothers.  Roughly, the bandwidth should be chosen to let the large low frequency component pass unpreturbed while damping out smaller high frequency components.  This can be accomplished by choosing <code>h = 1/l</code> where <code>l</code> is a frequency threshold above which the sample characteristic function is negligible.  For regression, this is done heuristically.  For density estimation there is a formal recommendation, implemented in <code>bwplot.numeric</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Timothy L. McMurry
+</p>
+
+
+<h3>References</h3>
+
+<p>Politis, D. N. (2003). Adaptive bandwidth choice. <em>Journal of Nonparametric Statistics</em>, 15(4-5), 517-533.
+</p>
+<p>McMurry, T. L. and Politis, D. N. Minimally biased nonparametric regression and autoregression. <em>RevStat - Statistical Journal</em>, 6(2):123-150, 2008
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>bwadap</code>, <code>bwadap.ts</code>, <code>bwplot.numeric</code>, <code>bwplot</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">### Density Estimation
+set.seed(123)
+x &lt;- rnorm(100)
+bwplot(x, smax=8)
+#Choose bandwidth roughly h=1/2
+plot(iodensity(x, bw=1/2), type="l")
+rug(x)
+
+#### Nadaraya-Watson kernel regression
+y &lt;- sin(x) + .1 *rnorm(100)
+bwplot(x,y, smax=12)
+# Choose bandwidth roughly h = 1/2.5
+plot(x, y)
+lines(ioksmooth(x, y, bw = 1/2.5, kernel="SupSm"), type="l")
+</code></pre>
+
+
+</div>

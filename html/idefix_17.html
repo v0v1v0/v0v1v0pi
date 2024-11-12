@@ -1,0 +1,164 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>SeqKL</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Sequential Kullback-Leibler based algorithm for the MNL model.</h2>
+
+<h3>Description</h3>
+
+<p>Selects the choice set that maximizes the Kullback-Leibler divergence between
+the prior parameter values and the expected posterior, assuming a MNL model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">SeqKL(
+  des = NULL,
+  cand.set,
+  n.alts,
+  par.draws,
+  alt.cte = NULL,
+  no.choice = NULL,
+  weights = NULL,
+  allow.rep = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>des</code></td>
+<td>
+<p>A design matrix in which each row is a profile. If alternative
+specific constants are present, those should be included as the first
+column(s) of the design. Can be generated with <code>Modfed</code> or <code>CEA</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cand.set</code></td>
+<td>
+<p>A numeric matrix in which each row is a possible profile. The
+<code>Profiles</code> function can be used to generate this matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.alts</code></td>
+<td>
+<p>Numeric value indicating the number of alternatives per choice
+set.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>par.draws</code></td>
+<td>
+<p>A matrix or a list, depending on <code>alt.cte</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alt.cte</code></td>
+<td>
+<p>A binary vector indicating for each alternative if an
+alternative specific constant is desired.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>no.choice</code></td>
+<td>
+<p>An integer indicating the no choice alternative. The default
+is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>A vector containing the weights of the draws. Default is
+<code>NULL</code>, See also <code>ImpsampMNL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allow.rep</code></td>
+<td>
+<p>Logical value indicating whether repeated choice sets are
+allowed in the design.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This algorithm is ideally used in an adaptive context. The algorithm selects
+the choice set that maximizes the Kullback-Leibler
+divergence between prior and expected posterior. Otherwisely framed the
+algorithm selects the choice set that maximizes the expected information
+gain.
+</p>
+<p>If <code>alt.cte = NULL</code>, <code>par.draws</code> should be a matrix in which each
+row is a sample from the multivariate parameter distribution. In case that
+<code>alt.cte</code> is not <code>NULL</code>, a list containing two matrices should be
+provided to <code>par.draws</code>. The first matrix containing the parameter draws
+for the alternative specific parameters. The second matrix containing the
+draws for the rest of the parameters.
+</p>
+<p>The list of potential choice sets are created using
+<code>combn</code>. The <code>weights</code> argument can be used when the
+<code>par.draws</code> have
+weights. This is for example the case when parameter values are updated using
+<code>ImpsampMNL</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>set</code></td>
+<td>
+<p>Numeric matrix containing the choice set that maximizes the expected KL divergence.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kl</code></td>
+<td>
+<p>Numeric value which is the Kullback leibler divergence.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Crabbe M, Akinc D, Vandebroek M (2014).
+“Fast algorithms to generate individualized designs for the mixed logit choice model.”
+<a href="https://www.sciencedirect.com/science/article/pii/S0191261513002178">https://www.sciencedirect.com/science/article/pii/S0191261513002178</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># KL efficient choice set, given parameter draws. 
+# Candidate profiles 
+cs &lt;- Profiles(lvls = c(3, 3), coding = c("E", "E"))
+m &lt;- c(0.3, 0.2, -0.3, -0.2) # Prior mean (4 parameters).
+pc &lt;- diag(length(m)) # Prior variance
+set.seed(123)
+ps &lt;- MASS::mvrnorm(n = 10, mu = m, Sigma = pc) # 10 draws.
+# Efficient choice set to add. 
+SeqKL(cand.set = cs, n.alts = 2, alt.cte = NULL, par.draws = ps, weights = NULL)
+
+# KL efficient choice set, given parameter draws. 
+# Candidate profiles 
+cs &lt;- Profiles(lvls = c(3, 3), coding = c("C", "E"), c.lvls = list(c(5,3,1)))
+m &lt;- c(0.7, 0.3, -0.3, -0.2) # Prior mean (4 parameters).
+pc &lt;- diag(length(m)) # Prior variance
+set.seed(123)
+ps &lt;- MASS::mvrnorm(n = 10, mu = m, Sigma = pc) # 10 draws.
+sample &lt;- list(ps[ , 1], ps[ , 2:4])
+ac &lt;- c(1, 0) # Alternative specific constant. 
+# Efficient choice set to add. 
+SeqKL(cand.set = cs, n.alts = 2, alt.cte = ac, par.draws = sample, weights = NULL)
+</code></pre>
+
+
+</div>

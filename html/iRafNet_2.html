@@ -1,0 +1,86 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iRafNet_network</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compute permutation-based FDR of importance scores and return estimated regulations.</h2>
+
+<h3>Description</h3>
+
+<p>This function computes permutation-based FDR of importance scores and returns gene-gene regulations.  
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iRafNet_network(out.iRafNet,out.perm,TH)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>out.iRafNet</code></td>
+<td>
+<p>Output object from function <code>iRafNet</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>out.perm</code></td>
+<td>
+<p>Output object from function <code>Run_permutation.</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TH</code></td>
+<td>
+<p>Threshold for FDR.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>List of estimated regulations. 
+</p>
+
+
+<h3>References</h3>
+
+<p>Petralia, F., Song, W.M., Tu, Z. and Wang, P. (2016). New method for joint network analysis reveals common and different coexpression patterns among genes and proteins in breast cancer. <em>Journal of proteome research</em>, <b>15</b>(3), pp.743-754.
+</p>
+<p>A. Liaw and M. Wiener (2002). Classification and Regression by randomForest. <em>R News</em> <b>2</b>, 18–22.
+</p>
+<p>Xie, Y., Pan, W. and Khodursky, A.B., 2005. A note on using permutation-based false discovery rate estimates to compare different analysis methods for microarray data. <em>Bioinformatics</em>, <b>21</b>(23), pp.4280-4288.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+  # --- Generate data sets
+  n&lt;-20           # sample size 
+  p&lt;-5            # number of genes
+  genes.name&lt;-paste("G",seq(1,p),sep="")   # genes name
+  M=5;            # number of permutations
+  data&lt;-matrix(rnorm(p*n),n,p)       # generate gene expression matrix
+  data[,1]&lt;-data[,2]                 # var 1 and var 2 interact
+  W&lt;-abs(matrix(rnorm(p*p),p,p))     # generate weights for regulatory relationships
+  
+  # --- Standardize variables to mean 0 and variance 1
+  data &lt;- (apply(data, 2, function(x) { (x - mean(x)) / sd(x) } ))
+
+  # --- Run iRafNet and obtain importance score of regulatory relationships
+  out.iRafNet&lt;-iRafNet(data,W,mtry=round(sqrt(p-1)),ntree=1000,genes.name)
+
+  # --- Run iRafNet for M permuted data sets
+  out.perm&lt;-Run_permutation(data,W,mtry=round(sqrt(p-1)),ntree=1000,genes.name,M)
+
+  # --- Derive final networks
+  final.net&lt;-iRafNet_network(out.iRafNet,out.perm,0.001)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,169 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>IntMPP</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulated intervals  in a vector of point processes</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates a  point estimation and a confidence interval
+for a  given parameter related to a  vector of point processes using a Monte Carlo  
+(or parametric bootstrap) approach. The  estimator of the parameter must be a function 
+of the occurrence points of   the (possibly dependent)  marginal  processes of the vector of processes.
+</p>
+<p>It calls the auxiliary function <code>funMPPGen</code> (not intended
+for the users), see  Details.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">IntMPP(funMPP.name, funMPP.args, fun.name, fun.args = NULL, nsim=1000, clevel = 0.95, 
+    cores = 1, fixed.seed = NULL) </code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>funMPP.name</code></td>
+<td>
+<p>Name of the function defining the  distribution of the vector of point processes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>funMPP.args</code></td>
+<td>
+<p>Additional arguments for the function <code>funMPP.name</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fun.name</code></td>
+<td>
+<p>Name of the function to calculate the estimation of the parameters. 
+The  first argument of this function must be  a list called posNH.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fun.args</code></td>
+<td>
+<p>A list whose elements are the additional arguments for the function <code>fun.name</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>Number of simulations to be carried out.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clevel</code></td>
+<td>
+<p>Confidence level of the interval. A value  in (0,1).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>Optional.  Number of cores of the computer to be used in the calculations. Default: one core is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed.seed</code></td>
+<td>
+<p>An integer or NULL. If it is an integer, that is the value  used to set the seed 
+in  random  generation processes. It it is NULL, a random seed is used.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function  calculates a  point estimation and a confidence interval of a  
+parameter related to a  vector of point processes. It calls the auxiliary function <code>funMPPGen</code>, which generates  a  sample of  vectors of processes  using a
+parametric model. The parameter of interest  is estimated using  each process in that sample, so that a sample of values 
+of the estimator is obtained. The mean of that sample is the point estimator, and the adequate sample percentiles give 
+the lower and upper bounds of the confidence interval. 
+</p>
+<p>The parametric model is specified by the arguments <code>funMPP.name</code> and 
+<code>funMPP.args</code>.  Functions <code>DepNHCPSP</code>, <code>DepNHNeyScot</code>, <code>DepNHPPqueue</code> and 
+<code>DepNHPPMarked</code> can be used  as input of the argument <code>funMPP.name</code> to generate
+the corresponding vector of processes. 
+</p>
+<p>The  considered estimator must be a function of the occurrence points of the vector of processes and  
+any additional arguments, provided by argument  <code>fun.args</code>, which must be a list. The first argument of the
+function <code>fun.name</code> must be  a list called <code>posNH</code> whose elements are  numeric vectors containing the
+occurrence points of  each point process in the vector. For example,  the first element of the output list of 
+<code>DepNHCPSP</code>  can be used as first argument of <code>fun.name</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p> A list with elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>valmed</code></td>
+<td>
+<p>Point estimation (mean value) of the parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>valinf</code></td>
+<td>
+<p>Lower bound of the generated interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>valsup</code></td>
+<td>
+<p>Upper bound of the generated interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>Input argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed.seed</code></td>
+<td>
+<p>Input argument.</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Calculation of the point estimation and  95% intervals based on 1000 simulations 
+#of the   number of accurrences in each marginal process of a bivariate  Neyman-Scot process
+# in  the time interval [100,200]
+#NumI calculates the   number of occurrences in interval I in each element of  the list posNH
+
+set.seed(123)
+lambdai&lt;-runif(1000,0.01,0.02)
+
+aux&lt;-IntMPP(funMPP.name="DepNHNeyScot", funMPP.args=list(lambdaParent=lambdai,d=2, 
+  lambdaNumP=c(2,1), dplot=FALSE), fun.name="NumI", fun.args = list(I=c(100,200)), 
+  fixed.seed = 125) 
+
+
+# Calculation of the point estimation and a 95% interval based on 1000 simulations 
+#of the  first occurrence time in  a multivariate  CPSP with d=3
+#firstt calculates the  minimim occurrence time of  all the elements in the list posNH
+
+#set.seed(124)
+#lambdaij&lt;-runif(1000,0.005,0.02)
+#set.seed(125)
+#lambdaijk&lt;-runif(1000,0.001,0.02)
+#lambdaiM&lt;-cbind(lambdai,lambdai, lambdai, lambdaij, lambdaij, lambdaij, lambdaijk)
+#aux&lt;-IntMPP(funMPP.name="DepNHCPSP",funMPP.args=list(lambdaiM=lambdaiM,d=3,dplot=FALSE), 
+#  fun.name="firstt", fixed.seed = 125) 
+
+
+</code></pre>
+
+
+</div>

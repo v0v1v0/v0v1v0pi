@@ -1,0 +1,216 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ludwig</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Linear regression of U-Pb data with correlated errors, taking
+into account decay constant uncertainties.</h2>
+
+<h3>Description</h3>
+
+<p>Implements the maximum likelihood algorithm for Total-Pb/U isochron
+regression of Ludwig (1998) and extends the underlying methodology
+to accommodate U-Th-Pb data and initial U-series disequilibrium.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ludwig(
+  x,
+  model = 1,
+  anchor = 0,
+  exterr = FALSE,
+  type = "joint",
+  plot = FALSE,
+  ...
+)
+
+ludwig(
+  x,
+  model = 1,
+  anchor = 0,
+  exterr = FALSE,
+  type = "joint",
+  plot = FALSE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an object of class <code>UPb</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>one of three regression models:
+</p>
+<p><code>1</code>: fit a discordia_line through the data using the maximum
+likelihood algorithm of Ludwig (1998), which assumes that the
+scatter of the data is solely due to the analytical
+uncertainties. In this case, <code>IsoplotR</code> will either calculate
+an upper and lower intercept age (for Wetherill concordia), or a
+lower intercept age and common
+(<code class="reqn">^{207}</code>Pb/<code class="reqn">^{206}</code>Pb)<code class="reqn">_\circ</code>-ratio intercept (for
+Tera-Wasserburg). If the p-value for the chi-square test is less
+than <code>alpha()</code>, then the analytical uncertainties are augmented
+by a factor <code class="reqn">\sqrt{MSWD}</code>.
+</p>
+<p><code>2</code>: fit a discordia_line ignoring the analytical uncertainties
+</p>
+<p><code>3</code>: fit a discordia_line using a modified maximum likelihood
+algorithm that includes accounts for any overdispersion by adding a
+geological (co)variance term.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>anchor</code></td>
+<td>
+<p>control parameters to fix the intercept age or common Pb
+composition of the isochron fit. This can be a scalar or a vector.
+</p>
+<p>If <code>anchor[1]=0</code>: do not anchor the isochron.
+</p>
+<p>If <code>anchor[1]=1</code>: fix the common Pb composition at the values
+stored in <code>settings('iratio',...)</code>.
+</p>
+<p>If <code>anchor[1]=2</code>: force the isochron line to intersect the
+concordia line at an age equal to <code>anchor[2]</code>.
+</p>
+<p>If <code>anchor[1]=3</code>: anchor the isochron line to the
+Stacey-Kramers mantle evolution model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exterr</code></td>
+<td>
+<p>propagate external sources of
+uncertainty (i.e. decay constants)?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>only relevant if <code>x$format&gt;3</code>. Can take on the following
+values:
+</p>
+<p><code>'joint'</code> or <code>0</code>: 3-dimensional isochron regression.
+</p>
+<p><code>1</code>: 2-dimensional regression of
+<code class="reqn">{}^{204}</code>Pb/<code class="reqn">{}^{206}</code>Pb vs.
+<code class="reqn">{}^{238}</code>U/<code class="reqn">{}^{206}</code>Pb (for U-Pb formats 4, 5 and 6), or
+of <code class="reqn">{}^{208}</code>Pb/<code class="reqn">{}^{206}</code>Pb vs.
+<code class="reqn">{}^{238}</code>U/<code class="reqn">{}^{206}</code>Pb (for U-Pb formats 7 and 8).
+</p>
+<p><code>2</code>: 2-dimensional regression of
+<code class="reqn">{}^{204}</code>Pb/<code class="reqn">{}^{207}</code>Pb vs.
+<code class="reqn">{}^{235}</code>U/<code class="reqn">{}^{207}</code>Pb (for U-Pb formats 4, 5 and 6), or
+of <code class="reqn">{}^{208}</code>Pb/<code class="reqn">{}^{207}</code>Pb vs.
+<code class="reqn">{}^{235}</code>U/<code class="reqn">{}^{207}</code>Pb (for U-Pb formats 7 and 8).
+</p>
+<p><code>3</code>: 2-dimensional regression of
+<code class="reqn">{}^{206}</code>Pb/<code class="reqn">{}^{208}</code>Pb vs.
+<code class="reqn">{}^{232}</code>Th/<code class="reqn">{}^{208}</code>Pb (only for U-Pb formats 7 and 8).
+</p>
+<p><code>4</code>: 2-dimensional regression of
+<code class="reqn">{}^{207}</code>Pb/<code class="reqn">{}^{208}</code>Pb vs.
+<code class="reqn">{}^{232}</code>Th/<code class="reqn">{}^{208}</code>Pb (only for U-Pb formats 7 and 8).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>logical. Only relevant for datasets with measured
+disequilibrium. If <code>TRUE</code>, plots the posterior
+distribution of the age and initial activity ratios.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>optional arguments</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The 3-dimensional regression algorithm of Ludwig and Titterington
+(1994) was modified by Ludwig (1998) to fit so-called 'Total Pb-U
+isochrons'. These are constrained to a radiogenic endmember
+composition that falls on the <code>concordia</code> line. In its
+most sophisticated form, this algorithm does not only allow for
+correlated errors between variables, but also between
+aliquots. <code>IsoplotR</code> currently uses this algorithm to
+propagate decay constant uncertainties in the total Pb-U isochron
+ages.
+</p>
+
+
+<h3>Value</h3>
+
+
+<dl>
+<dt>par</dt>
+<dd>
+<p>a vector with the lower concordia intercept, the common
+Pb ratios, the dispersion parameter (if <code>model=3</code>), and the
+initial <code class="reqn">{}^{234}</code>U/<code class="reqn">{}^{238}</code>U and
+<code class="reqn">{}^{230}</code>Th/<code class="reqn">{}^{238}</code>U activity ratio (in the presence of
+initial disequilibrium).</p>
+</dd>
+<dt>cov</dt>
+<dd>
+<p>the covariance matrix of <code>par</code></p>
+</dd>
+<dt>df</dt>
+<dd>
+<p>the degrees of freedom of the model fit (<code class="reqn">n-2</code> if
+<code>x$format&lt;4</code> or <code class="reqn">2n-3</code> if <code>x$format&gt;3</code>, where <code class="reqn">n</code>
+is the number of aliquots).</p>
+</dd>
+<dt>mswd</dt>
+<dd>
+<p>the mean square of weighted deviates (a.k.a. reduced
+Chi-square statistic) for the fit.</p>
+</dd>
+<dt>p.value</dt>
+<dd>
+<p>p-value of a Chi-square test for the linear fit</p>
+</dd>
+</dl>
+<h3>References</h3>
+
+<p>Ludwig, K.R., 1998. On the treatment of concordant uranium-lead
+ages. Geochimica et Cosmochimica Acta, 62(4), pp.665-676.
+</p>
+<p>Ludwig, K.R. and Titterington, D.M., 1994. Calculation of
+<code class="reqn">^{230}</code>Th/U isochrons, ages, and errors. Geochimica et
+Cosmochimica Acta, 58(22), pp.5031-5042.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>concordia</code>, <code>titterington</code>,
+<code>isochron</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">f &lt;- system.file("UPb4.csv",package="IsoplotR")
+d &lt;- read.data(f,method="U-Pb",format=4)
+fit &lt;- ludwig(d)
+
+</code></pre>
+
+
+</div>

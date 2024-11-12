@@ -1,0 +1,168 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plotD3</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plots Ceteris Paribus Profiles in D3 with r2d3 Package.</h2>
+
+<h3>Description</h3>
+
+<p>Function <code>plotD3.ceteris_paribus_explainer</code> plots Individual Variable Profiles for selected observations.
+It uses output from <code>ceteris_paribus</code> function.
+Various parameters help to decide what should be plotted, profiles, aggregated profiles, points or rugs.
+</p>
+<p>Find more details in <a href="https://ema.drwhy.ai/ceterisParibus.html">Ceteris Paribus Chapter</a>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">plotD3(x, ...)
+
+## S3 method for class 'ceteris_paribus_explainer'
+plotD3(
+  x,
+  ...,
+  size = 2,
+  alpha = 1,
+  color = "#46bac2",
+  variable_type = "numerical",
+  facet_ncol = 2,
+  scale_plot = FALSE,
+  variables = NULL,
+  chart_title = "Ceteris Paribus Profiles",
+  label_margin = 60,
+  show_observations = TRUE,
+  show_rugs = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a ceteris paribus explainer produced with function <code>ceteris_paribus()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other explainers that shall be plotted together</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size</code></td>
+<td>
+<p>a numeric. Set width of lines</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>a numeric between <code>0</code> and <code>1</code>. Opacity of lines</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>color</code></td>
+<td>
+<p>a character.  Set line color</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variable_type</code></td>
+<td>
+<p>a character. If "numerical" then only numerical variables will be plotted.
+If "categorical" then only categorical variables will be plotted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>facet_ncol</code></td>
+<td>
+<p>number of columns for the <code>facet_wrap</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale_plot</code></td>
+<td>
+<p>a logical. If <code>TRUE</code>, the height of plot scales with window size. By default it's <code>FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variables</code></td>
+<td>
+<p>if not <code>NULL</code> then only <code>variables</code> will be presented</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>chart_title</code></td>
+<td>
+<p>a character. Set custom title</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label_margin</code></td>
+<td>
+<p>a numeric. Set width of label margins in <code>categorical</code> type</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>show_observations</code></td>
+<td>
+<p>a logical. Adds observations layer to a plot. By default it's <code>TRUE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>show_rugs</code></td>
+<td>
+<p>a logical. Adds rugs layer to a plot. By default it's <code>TRUE</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a <code>r2d3</code> object.
+</p>
+
+
+<h3>References</h3>
+
+<p>Explanatory Model Analysis. Explore, Explain, and Examine Predictive Models. <a href="https://ema.drwhy.ai/">https://ema.drwhy.ai/</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library("DALEX")
+library("ingredients")
+library("ranger")
+
+
+model_titanic_rf &lt;- ranger(survived ~., data = titanic_imputed, probability = TRUE)
+
+explain_titanic_rf &lt;- explain(model_titanic_rf,
+                              data = titanic_imputed[,-8],
+                              y = titanic_imputed[,8],
+                              label = "ranger forest",
+                              verbose = FALSE)
+
+selected_passangers &lt;- select_sample(titanic_imputed, n = 10)
+cp_rf &lt;- ceteris_paribus(explain_titanic_rf, selected_passangers)
+
+plotD3(cp_rf, variables = c("age","parch","fare","sibsp"),
+     facet_ncol = 2, scale_plot = TRUE)
+
+selected_passanger &lt;- select_sample(titanic_imputed, n = 1)
+cp_rf &lt;- ceteris_paribus(explain_titanic_rf, selected_passanger)
+
+plotD3(cp_rf, variables = c("class", "embarked", "gender", "sibsp"),
+     facet_ncol = 2, variable_type = "categorical", label_margin = 100, scale_plot = TRUE)
+
+
+</code></pre>
+
+
+</div>

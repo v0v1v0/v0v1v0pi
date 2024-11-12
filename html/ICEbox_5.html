@@ -1,0 +1,264 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot.ice</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Plotting of <code>ice</code> objects.
+</h2>
+
+<h3>Description</h3>
+
+<p>Plotting of <code>ice</code> objects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'ice'
+plot(x, plot_margin = 0.05, frac_to_plot = 1, 
+	 plot_points_indices = NULL, plot_orig_pts_preds = TRUE, 
+     pts_preds_size = 1.5, colorvec, color_by = NULL, 
+     x_quantile = TRUE, plot_pdp = TRUE,
+     centered = FALSE, prop_range_y = TRUE, 
+     rug_quantile = seq(from = 0, to = 1, by = 0.1),
+     centered_percentile = 0, 
+     point_labels = NULL, point_labels_size = NULL, 
+     prop_type,...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>Object of class <code>ice</code> to plot.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_margin</code></td>
+<td>
+
+<p>Extra margin to pass to <code>ylim</code> as a fraction of the range of <code>x$ice_curves</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>frac_to_plot</code></td>
+<td>
+
+<p>If <code>frac_to_plot</code> is less than 1, randomly plot <code>frac_to_plot</code> fraction of the
+curves in <code>x$ice_curves</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_points_indices</code></td>
+<td>
+
+<p>If not <code>NULL</code>, this plots only the indices of interest. If not <code>NULL</code>, <code>frac_to_plot</code> must be 1 otherwise
+an error is thrown. Default is <code>NULL</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_orig_pts_preds</code></td>
+<td>
+
+<p>If <code>TRUE</code>, marks each curve at the location of the observation's actual fitted value. If <code>FALSE</code>,
+no mark is drawn.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pts_preds_size</code></td>
+<td>
+
+<p>Size of points to make if <code>plot_origin_pts_preds</code> is <code>TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colorvec</code></td>
+<td>
+
+<p>Optional vector of colors to use for each curve.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>color_by</code></td>
+<td>
+
+<p>Optional variable name in <code>Xice</code>, column number in <code>Xice</code>, or data vector of the correct length to color curves by. 
+If the <code>color_by</code>
+variable has 10 or fewer unique values, a discrete set of colors is used for each value and a legend is 
+printed and returned. If there are more values, curves are colored from light to dark corresponding 
+to low to high values of the variable specified by <code>color_by</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x_quantile</code></td>
+<td>
+
+<p>If <code>TRUE</code>, the plot is drawn with the x-axis taken to be <code>quantile(gridpts)</code>. If <code>FALSE</code>,
+the predictor's original scale is used.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_pdp</code></td>
+<td>
+
+<p>If <code>TRUE</code>, the PDP is plotted and highlighted in yellow.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>centered</code></td>
+<td>
+
+<p>If <code>TRUE</code>, all curves are re-centered to be 0 at the quantile given by <br><code>centered_percentile</code>.
+See Goldstein et al (2013) for details and examples. If <code>FALSE</code>, the original <code>ice_curves</code> are plotted. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prop_range_y</code></td>
+<td>
+
+<p>When <code>TRUE</code> and <code>centered=TRUE</code> as well, the range of the right vertical axis displays the
+centered values as a fraction of the sd of the fitted values on actual observations if <code>prop_type</code>
+is missing or set to <code>"sd"</code>.  If <code>prop_type</code> is set to <code>"range"</code>, the right axis displays the
+centered values as a fraction of the range of the fitted values over the actual observations.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>centered_percentile</code></td>
+<td>
+
+<p>The percentile of <code>predictor</code> for which all <code>ice_curves</code> are "pinched together" and set to be 0.
+Default is .01.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>point_labels</code></td>
+<td>
+
+<p>If not <code>NULL</code>, labels to plot next to each point. Default is <code>NULL</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>point_labels_size</code></td>
+<td>
+
+<p>If not <code>NULL</code>, size of labels to plot next to each point. Default is <code>NULL</code> which means it's the size of <code>pts_preds_size</code>.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rug_quantile</code></td>
+<td>
+
+<p>If not <code>NULL</code>, tick marks are drawn on the x-axis corresponding to the vector of quantiles specified by this parameter.
+Forced to <code>NULL</code> when <code>x_quantile</code> is set to <code>TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prop_type</code></td>
+<td>
+
+<p>Scaling factor for the right vertical axis in centered plots if <code>prop_range_y</code> is <code>TRUE</code>.  Can be one of 
+<code>"sd"</code> (default) or <code>"range"</code>.  Ignored if <code>centered</code> and <code>prop_range_y</code> are not both <code>TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Other arguments to be passed to the <code>plot</code> function.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with the following elements.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>plot_points_indices</code></td>
+<td>
+<p>Row numbers of <code>Xice</code> of those observations presented in the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>legend_text</code></td>
+<td>
+<p>If the <code>color_by</code> argument was used, 
+a legend describing the map between the <code>color_by</code> predictor
+and curve colors.</p>
+</td>
+</tr>
+</table>
+<h3>See Also</h3>
+
+<p>ice
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+require(ICEbox)
+require(randomForest)
+require(MASS) #has Boston Housing data, Pima
+
+data(Boston) #Boston Housing data
+X = Boston
+y = X$medv
+X$medv = NULL
+
+## build a RF:
+bhd_rf_mod = randomForest(X, y)
+
+## Create an 'ice' object for the predictor "age":
+bhd.ice = ice(object = bhd_rf_mod, X = X, y = y, predictor = "age",
+            frac_to_build = .1) 
+
+## plot
+plot(bhd.ice, x_quantile = TRUE, plot_pdp = TRUE, frac_to_plot = 1) 
+
+## centered plot
+plot(bhd.ice, x_quantile = TRUE, plot_pdp = TRUE, frac_to_plot = 1, 
+		centered = TRUE) 
+
+## color the curves by high and low values of 'rm'.
+# First create an indicator variable which is 1 if the number of 
+# rooms is greater than the median:
+median_rm = median(X$rm)
+bhd.ice$Xice$I_rm = ifelse(bhd.ice$Xice$rm &gt; median_rm, 1, 0)  
+
+plot(bhd.ice, frac_to_plot = 1, centered = TRUE, prop_range_y = TRUE,  
+            x_quantile = T, plot_orig_pts_preds = T, color_by = "I_rm")
+bhd.ice = ice(object = bhd_rf_mod, X = X, y = y, predictor = "age",
+            frac_to_build = 1)             
+plot(bhd.ice, frac_to_plot = 1, centered = TRUE, prop_range_y = TRUE,  
+            x_quantile = T, plot_orig_pts_preds = T, color_by = y)            
+
+## End(Not run)
+</code></pre>
+
+
+</div>

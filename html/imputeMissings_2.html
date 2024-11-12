@@ -1,0 +1,111 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>impute</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Impute missing values with the median/mode or <code>randomForest</code>
+</h2>
+
+<h3>Description</h3>
+
+<p>When the median/mode method is used: character vectors and factors are imputed with the mode. Numeric and integer vectors are imputed with the median.
+When the random forest method is used predictors are first imputed with the median/mode and each variable is then predicted and imputed with that value.
+For predictive contexts there is a <code>compute</code> and an <code>impute</code> function. The former is used on a training set to learn the values (or random forest models) to impute (used to predict).
+The latter is used on both the training and new data to impute the values (or deploy the models) learned by the <code>compute</code> function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">impute(data, object = NULL, method = "median/mode", flag = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A data frame with dummies or numeric variables. When method=="median/mode" columns can be of type "character". When method="randomForest" columns cannot be of type "character".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>If NULL <code>impute</code> will call <code>compute</code> on the current dataset. Otherwise it will accept the output of a call to <code>compute</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>Either "median/mode" or "randomForest". Only works if object = NULL</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>flag</code></td>
+<td>
+<p>Add dummy variables to indicate which rows have been imputed for each variable</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An imputed data frame.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Matthijs Meire, Michel Ballings, Dirk Van den Poel, Maintainer: <a href="mailto:Matthijs.Meire@UGent.be">Matthijs.Meire@UGent.be</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>compute</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#Compute the values on a training dataset and impute them on new data.
+#This is very convenient in predictive contexts. For example:
+
+#define training data
+(train &lt;- data.frame(v_int=as.integer(c(3,3,2,5,1,2,4,6)),
+                 v_num=as.numeric(c(4.1,NA,12.2,11,3.4,1.6,3.3,5.5)),
+                 v_fact=as.factor(c('one','two',NA,'two','two','one','two','two')),
+                 stringsAsFactors = FALSE))
+
+#Compute values on train data
+#randomForest method
+values &lt;- compute(train, method="randomForest")
+#median/mode method
+values2 &lt;- compute(train)
+
+#define new data
+(newdata &lt;- data.frame(v_int=as.integer(c(1,1,2,NA)),
+                 v_num=as.numeric(c(1.1,NA,2.2,NA)),
+                 v_fact=as.factor(c('one','one','one',NA)),
+                 stringsAsFactors = FALSE))
+
+#locate the NA's
+is.na(newdata)
+#how many missings per variable?
+colSums(is.na(newdata))
+
+#Impute on newdata
+impute(newdata,object=values) #using randomForest values
+impute(newdata,object=values2) #using median/mode values
+
+#One can also impute directly in newdata without the compute step
+impute(newdata)
+
+#Flag parameter
+impute(newdata,flag=TRUE)
+</code></pre>
+
+
+</div>

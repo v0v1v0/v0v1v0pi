@@ -1,0 +1,96 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>generateTupelData</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Tuple representation</h2>
+
+<h3>Description</h3>
+
+<p>Generating a tuple representation of a
+data.frame with imprecise observations
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">generateTupelData(data, constraints = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a data.frame object, with potentially
+imprecise entries; see 'Note'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constraints</code></td>
+<td>
+<p>a list of so-called logical constraints or
+fixed zeros. Each element must be an object of class
+<code>"impimp_event"</code>. See 'Details'.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>By specifying <code>constraints</code> one can exlude combinations of
+imputed values which are deemed impossible, so called
+‘logical constraints’ or ‘fixed zeros’.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of length <code>NROW(data)</code> of data.frames
+for the observation within the original data.frame.
+</p>
+<p>Each such data.frame contains the precise observations which
+are compatible with its imprecise representation.
+</p>
+
+
+<h3>Note</h3>
+
+<p>No sanity check is performed on whether <code>data</code> actually
+contains imprecise observations or is in the form for denoting
+imprecision throughoutly used in the impimp-package. A warning is
+triggered if it is not of class <code>"impimp"</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>impimp</code>, <code>impimp_event</code> for
+sepcifying the constraints
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">A &lt;- data.frame(x1 = c(1,0), x2 = c(0,0),
+                y1 = c(1,0), y2 = c(2,2))
+B &lt;- data.frame(x1 = c(1,1,0), x2 = c(0,0,0),
+                z1 = c(0,1,1), z2 = c(0,1,2))
+AimpB &lt;- impimp(A, B, method = "domain")
+
+## no constraints
+generateTupelData(AimpB)
+
+## (y1,z1) = (0,0) as constraint
+generateTupelData(AimpB, list(impimp_event(y1 = 0, z1 = 0)))
+
+
+data(iris)
+generateTupelData(iris) # emits a warning
+
+</code></pre>
+
+
+</div>

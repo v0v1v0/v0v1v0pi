@@ -1,0 +1,118 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>image_canny_edge_detector</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Canny Edge Detector for Images</h2>
+
+<h3>Description</h3>
+
+<p>Canny Edge Detector for Images. See <a href="https://en.wikipedia.org/wiki/Canny_edge_detector">https://en.wikipedia.org/wiki/Canny_edge_detector</a>.
+Adapted from <a href="https://github.com/Neseb/canny">https://github.com/Neseb/canny</a>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">image_canny_edge_detector(x, s = 2, low_thr = 3, high_thr = 10, accGrad = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a matrix of image pixel values in the 0-255 range.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s</code></td>
+<td>
+<p>sigma, the Gaussian filter variance. Defaults to 2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>low_thr</code></td>
+<td>
+<p>lower threshold value of the algorithm. Defaults to 3.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>high_thr</code></td>
+<td>
+<p>upper threshold value of the algorithm. Defaults to 10</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>accGrad</code></td>
+<td>
+<p>logical indicating to trigger higher-order gradient</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a list with element edges which is a matrix with values 0 or 255 indicating
+in the same dimension of <code>x</code>. Next to that
+the list also contains the input parameters s, low_thr, high_thr and accGrad,
+the number of rows (nx) and columns of the image (ny) and the number of pixels which
+have value 255 (pixels_nonzero).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">if(requireNamespace("pixmap")){
+
+library(pixmap)
+imagelocation &lt;- system.file("extdata", "chairs.pgm", package="image.CannyEdges")
+image &lt;- read.pnm(file = imagelocation, cellres = 1)
+x &lt;- image@grey * 255
+
+edges &lt;- image_canny_edge_detector(x)
+edges
+plot(edges)
+
+}
+
+
+if(requireNamespace("magick")){
+##
+## image_canny_edge_detector expects a matrix as input
+##  if you have a jpg/png/... convert it to pgm first or take the r/g/b channel
+library(magick)
+x &lt;- image_read(system.file("extdata", "atomium.jpg", package="image.CannyEdges"))
+x
+image &lt;- image_data(x, channels = "Gray")
+image &lt;- as.integer(image, transpose = TRUE)
+edges &lt;- image_canny_edge_detector(image)
+edges
+plot(edges)
+}
+
+if(requireNamespace("pixmap") &amp;&amp; requireNamespace("magick")){
+##
+## image_canny_edge_detector expects a matrix as input
+##  if you have a jpg/png/... convert it to pgm first or take the r/g/b channel
+library(magick)
+library(pixmap)
+f &lt;- tempfile(fileext = ".pgm")
+x &lt;- image_read(system.file("extdata", "atomium.jpg", package="image.CannyEdges"))
+x &lt;- image_convert(x, format = "pgm", depth = 8)
+image_write(x, path = f, format = "pgm")
+
+image &lt;- read.pnm(f, cellres = 1)
+edges &lt;- image_canny_edge_detector(image@grey * 255)
+edges
+plot(edges)
+
+file.remove(f)
+}
+
+</code></pre>
+
+
+</div>

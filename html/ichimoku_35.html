@@ -1,0 +1,143 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>oanda_stream</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>OANDA Streaming Data</h2>
+
+<h3>Description</h3>
+
+<p>Stream live price and liquidity data for major currencies, metals,
+commodities, government bonds and stock indices from the OANDA fxTrade
+Streaming API.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">oanda_stream(instrument, display = 8L, limit, server, apikey)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>instrument</code></td>
+<td>
+<p>string containing the base currency and quote currency
+delimited by '_' or '-' (e.g. "USD_JPY" or "usd-jpy"). Use the
+<code>oanda_instruments</code> function to return a list of all valid
+instruments.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>display</code></td>
+<td>
+<p>[default 8L] integer rows of data to display in the console
+at any one time.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>limit</code></td>
+<td>
+<p>(optional) specify a time in seconds by which to limit the
+streaming session. The session will end with data returned automatically
+after the specified time has elapsed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>server</code></td>
+<td>
+<p>(optional) specify the "practice" or "live" server according to
+the account type held. If not specified, will default to "practice",
+unless this has been changed by <code>oanda_switch</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>apikey</code></td>
+<td>
+<p>(optional) string containing the OANDA fxTrade API key
+(personal access token), or function that returns this string. Does not
+need to be specified if already stored as the environment variable
+<code>OANDA_API_KEY</code> or by <code>oanda_set_key</code>. Can also be
+entered interactively if not specified.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function connects to the OANDA fxTrade Streaming API. Send an
+interrupt using the 'Esc' key or 'Ctrl+c' to stop the stream and return
+the session data.
+</p>
+<p>Note: only messages of type 'PRICE' are processed. Messages of type
+'HEARTBEAT' consisting of only a timestamp are discarded.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returned invisibly, a dataframe containing the data for the streaming
+session on function exit. The latest rows of the dataframe are printed to
+the console, as governed by the 'display' argument.
+</p>
+
+
+<h3>Streaming Data</h3>
+
+<p>Summarised from the streaming API documentation:
+</p>
+
+<ul>
+<li>
+<p> Pricing stream does not include every single price created for the
+Account
+</p>
+</li>
+<li>
+<p> At most 4 prices are sent per second (every 250 milliseconds) for
+each instrument
+</p>
+</li>
+<li>
+<p> If more than one price is created during the 250 millisecond window,
+only the price in effect at the end of the window is sent
+</p>
+</li>
+<li>
+<p> This means that during periods of rapid price movement, not every
+price is sent
+</p>
+</li>
+<li>
+<p> Pricing windows for different connections to the stream are not all
+aligned in the same way (e.g. to the top of the second)
+</p>
+</li>
+<li>
+<p> This means that during periods of rapid price movement, different
+prices may be observed depending on the alignment for the connection
+</p>
+</li>
+</ul>
+<h3>Further Details</h3>
+
+<p>Please refer to the OANDA fxTrade API vignette by calling:
+<code>vignette("xoanda", package = "ichimoku")</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# OANDA fxTrade API key required to run this example
+data &lt;- oanda_stream("USD_JPY", display = 8L)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

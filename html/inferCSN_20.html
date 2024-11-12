@@ -1,0 +1,193 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>network_sift</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Sifting network</h2>
+
+<h3>Description</h3>
+
+<p>Sifting network
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">network_sift(
+  network_table,
+  matrix = NULL,
+  meta_data = NULL,
+  pseudotime_column = NULL,
+  method = c("entropy", "max"),
+  entropy_method = c("Shannon", "Renyi"),
+  effective_entropy = FALSE,
+  shuffles = 100,
+  entropy_nboot = 300,
+  lag_value = 1,
+  entropy_p_value = 0.05,
+  cores = 1,
+  verbose = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>network_table</code></td>
+<td>
+<p>The weight data table of network.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>matrix</code></td>
+<td>
+<p>The expression matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meta_data</code></td>
+<td>
+<p>The meta data for cells or samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pseudotime_column</code></td>
+<td>
+<p>The column of pseudotime.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>The method used for filter edges.
+Could be choose <code>entropy</code> or <code>max</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>entropy_method</code></td>
+<td>
+<p>If setting <code>method</code> to <code>entropy</code>,
+could be choose <code>Shannon</code> or <code>Renyi</code> to compute entropy.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>effective_entropy</code></td>
+<td>
+<p>Default is <code>FALSE</code>.
+Logical value, using effective entropy to filter weights or not.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shuffles</code></td>
+<td>
+<p>Default is <code>100</code>.
+The number of shuffles used to calculate the effective transfer entropy.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>entropy_nboot</code></td>
+<td>
+<p>Default is <code>300</code>.
+The number of bootstrap replications for each direction of the estimated transfer entropy.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lag_value</code></td>
+<td>
+<p>Default is <code>1</code>.
+Markov order of gene expression values,
+i.e. the number of lagged values affecting the current value of gene expression values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>entropy_p_value</code></td>
+<td>
+<p>P value used to filter edges by entropy.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>The number of cores to use for parallelization with <code>foreach</code>, default is <em><code>1</code></em>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Logical value, default is <em><code>TRUE</code></em>, whether to print progress messages.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Sifted network table
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+data("example_matrix")
+data("example_meta_data")
+data("example_ground_truth")
+network_table &lt;- inferCSN(example_matrix)
+network_table_sifted &lt;- network_sift(network_table)
+network_table_sifted_entropy &lt;- network_sift(
+  network_table,
+  matrix = example_matrix,
+  meta_data = example_meta_data,
+  pseudotime_column = "pseudotime",
+  lag_value = 2,
+  shuffles = 0,
+  entropy_nboot = 0
+)
+
+plot_network_heatmap(
+  example_ground_truth[, 1:3],
+  heatmap_title = "Ground truth",
+  show_names = TRUE,
+  rect_color = "gray70"
+)
+plot_network_heatmap(
+  network_table,
+  heatmap_title = "Raw",
+  show_names = TRUE,
+  rect_color = "gray70"
+)
+plot_network_heatmap(
+  network_table_sifted,
+  heatmap_title = "Filtered",
+  show_names = TRUE,
+  rect_color = "gray70"
+)
+plot_network_heatmap(
+  network_table_sifted_entropy,
+  heatmap_title = "Filtered by entropy",
+  show_names = TRUE,
+  rect_color = "gray70"
+)
+
+calculate_auc(
+  network_table,
+  example_ground_truth,
+  plot = TRUE
+)
+calculate_auc(
+  network_table_sifted,
+  example_ground_truth,
+  plot = TRUE
+)
+calculate_auc(
+  network_table_sifted_entropy,
+  example_ground_truth,
+  plot = TRUE
+)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

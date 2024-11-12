@@ -1,0 +1,273 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>icfit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>calculate non-parametric MLE for interval censored survival function </h2>
+
+<h3>Description</h3>
+
+<p>This function calculates the the non-parametric maximum likelihood estimate for the distribution from interval 
+censored data using the self-consistent estimator, so the associated survival distribution generalizes 
+the Kaplan-Meier estimate to interval censored data. Formulas using <code>Surv</code> are allowed similar to <code>survfit</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">
+## S3 method for class 'formula'
+icfit(formula, data, ...)
+
+## Default S3 method:
+icfit(L, R,initfit =NULL, control=icfitControl(), Lin=NULL, Rin=NULL, conf.int=FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>L</code></td>
+<td>
+<p>numeric vector of left endpoints of censoring interval (equivalent to first element of <code>Surv</code> when type='interval2', see details)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+<p>numeric vector of right endpoints of censoring interval (equivalent to second element of <code>Surv</code> function when type='interval2', see details)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initfit</code></td>
+<td>
+<p>an initial estimate as an object of class <code>icfit</code> or <code>icsurv</code>, or a character vector of the name of the function used to calculate the initial estimate (see details)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>list of arguments for controling algorithm (see <code>icfitControl</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Lin</code></td>
+<td>
+<p>logical vector, should L be included in the interval? (see details)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Rin</code></td>
+<td>
+<p>logical vector, should R be included in the interval? (see details)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>a formula with response a numeric vector (which assumes no censoring) or <code>Surv</code> object
+the right side of the formula may be 1 or a factor (which produces separate fits for each level). </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>an optional matrix or data frame containing the variables in the formula. By default the variables are taken from environment(formula).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf.int</code></td>
+<td>
+<p>logical, estimate confidence interval? For setting conf.level, etc see <code>icfitControl</code>. (May take very long, see Warning)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>values passed to other functions</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>icfit</code> function fits the nonparametric maximum likelihood estimate (NPMLE) of the 
+distribution function for interval censored data. In the default case (when Lin=Rin=NULL) 
+we assume there are n (n=length(L)) failure times, and the ith one is in the interval
+between L[i] and  R[i]. The default is not to include L[i] in the interval unless L[i]=R[i],
+and to include R[i] in the interval unless R[i]=Inf. When Lin and Rin are not NULL they describe 
+whether to include L and R in the associated interval. If either Lin or Rin is length 1 then it is 
+repeated n times, otherwise they should be logicals of length n. 
+</p>
+<p>The algorithm is basically an EM-algorithm applied to 
+interval censored data (see Turnbull, 1976); however 
+first we can define a set of intervals (called the Turnbull intervals)
+which are the only intervals where the NPMLE may change. The Turnbull intervals are also called the 
+innermost intervals, and are the result of the primary reduction (see Aragon and 
+Eberly, 1992). The starting distribution for the E-M algorithm is given by <code>initfit</code>, which may be either 
+(1) NULL, in which case a very simple and quick starting distribution is used (see code), (2) a character vector 
+describing a function with inputs, L,R, Lin, Rin, and A, see for example <code>initcomputeMLE</code>, (3)
+a list giving <code>pf</code> and <code>intmap</code> values, e.g., an <code>icfit</code> object. If option (2) is tried and results in an error then 
+the starting distribution reverts to the one used with option (1).
+Convergence is defined when the maximum 
+reduced gradient is less than epsilon (see <code>icfitControl</code>), and the 
+Kuhn-Tucker conditions are approximately met, 
+otherwise a warning will result.  (see Gentleman and 
+Geyer, 1994). There are other faster algorithms (for example see 
+<code>EMICM</code> in the package 
+<code>Icens</code>.
+</p>
+<p>The output is of class <code>icfit</code> which is identical to the <code>icsurv</code> class of the 
+<code>Icens</code> package when there is only one group for which a distribution is needed. 
+Following that class, there is an <code>intmap</code> element which gives the bounds 
+about which each drop in the NPMLE survival function can occur.  
+</p>
+<p>Since the classes <code>icfit</code> and <code>icsurv</code> are so closely related, one can directly 
+use of initial (and faster) fits from the <code>Icens</code> package as input in 
+<code>initfit</code>. Note that when using a non-null <code>initfit</code>, the <code>Lin</code> and <code>Rin</code> values of the 
+initial fit are ignored. Alternatively, one may give the name of the function used to calculate the initial fit. 
+The function is assumed to input the transpose of the A matrix (called A in the Icens package). Options can be passed 
+to initfit function as a list using the initfitOpts variable in <code>icfitControl</code>.
+</p>
+<p>The advantage of the <code>icfit</code> function over those in <code>Icens</code> package is that it allows a call similar 
+to that used in <code>survfit</code> of the <code>survival</code> package so that different groups may be 
+plotted at the same time with similar calls.  
+</p>
+<p>An <code>icfit</code> object prints as a list (see value below). A <code>print</code> function prints output as a list 
+except suppresses printing of A matrix. A <code>summary</code> function prints the 
+distribution (i.e., probabilities and the intervals where those 
+probability masses are known to reside) for each group in the icfit object. There is also 
+a plot method, see <code>plot.icfit</code>.
+</p>
+<p>For additional references and background see Fay and Shaw (2010).
+</p>
+<p>The confidence interval method is a modified bootstrap. This can be very time consuming, see warning. The method uses a percentile bootstrap confidence interval with default B=200
+replicates (see  <code>icfitControl</code>), with modifications that prevent lower intervals of 1 and upper intervals of 0. Specifically, if there are 
+n observations total, then at any time the largest value of the lower interval for survival is binom.test(n,n,conf.level=control()$conf.level)$conf.int[1] and analogously 
+the upper interval bounds using binom.test(0,n). The output (CI element of returned list) gives confidence intervals just before and just after each 
+assessment time (as defined by icfitControl$timeEpsilon).
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>icfit</code> (same as icsurv class, see details). 
+</p>
+<p>There are 4 methods for this class: <code>plot.icfit</code>, <code>print.icfit</code>, <code>summary.icfit</code>, and <code>[.icfit</code>. The last method 
+pulls out individual fits when the right side of the formula of the <code>icfit</code> call was a factor.  
+</p>
+<p>A list with elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p> this is the n by k matrix of indicator functions, NULL if more than one strata, not printed by default</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>strata</code></td>
+<td>
+<p>a named numeric vector of length of pf vector (jumps in NPMLEs) for each strata, if one strata observation named NPMLE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>error</code></td>
+<td>
+<p>this is max(d + u - n), see Gentleman and Geyer, 1994</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numit</code></td>
+<td>
+<p>number of iterations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pf</code></td>
+<td>
+<p>vector of estimated probabilities of the distribution. if more than one strata, vectors are concatenated</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intmap</code></td>
+<td>
+<p>2 by k matrix, where the ith column defines an interval corresponding to the probability, pf[i]</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>converge</code></td>
+<td>
+<p>a logical, TRUE if normal convergence</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>message</code></td>
+<td>
+<p>character text message on about convergence</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>anypzero</code></td>
+<td>
+<p>logical denoting whether any of the Turnbull intervals were set to zero</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CI</code></td>
+<td>
+<p>if conf.int=TRUE included as a list of lists for each stratum, each one having elements time, lower, upper, confMethod, conf.level</p>
+</td>
+</tr>
+</table>
+<h3>Warning </h3>
+
+<p>The confidence interval method can be very time consuming because it uses a modified bootstrap and the NPMLE is recalculated for each replication.
+That is why the default only uses 200 bootstrap replications.
+A message gives a crude estimate of how long the confidence interval calculation will take (it calculates a per replication value by averaging the time of the first 10 replications), 
+but that estimate can be off by 100 percent or more because the time to calculate each bootstrap replication is quite variable. </p>
+
+
+<h3>Author(s)</h3>
+
+<p> Michael P. Fay</p>
+
+
+<h3>References</h3>
+
+<p>    Aragon, J and Eberly, D (1992). On convergence of convex 
+minorant algorithms for distribution estimation with 
+interval-censored data.  J. of Computational and Graphical 
+Statistics. 1: 129-140.
+</p>
+<p>Fay, MP and Shaw, PA (2010). Exact and Asymptotic Weighted Logrank Tests for Interval Censored Data: The interval R package.
+Journal of Statistical Software. <a href="https://doi.org/10.18637/jss.v036.i02">doi:10.18637/jss.v036.i02</a>. 36 (2):1-34.
+</p>
+<p>Gentleman, R. and Geyer, C.J. (1994). Maximum likelihood 
+for interval censored data:consistency and computation. 
+Biometrika, 81, 618-623.
+</p>
+<p>Turnbull, B.W. (1976) The empirical distribution function 
+with arbitrarily grouped, censored and truncated data. 
+J. R. Statist.  Soc. B 38, 290-295.
+</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>ictest</code>,  <code>EMICM</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(bcos)
+icout&lt;-icfit(Surv(left,right,type="interval2")~treatment, data=bcos)
+plot(icout)
+## can pick out just one group
+plot(icout[1])
+</code></pre>
+
+
+</div>

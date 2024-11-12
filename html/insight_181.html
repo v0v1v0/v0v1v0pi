@@ -1,0 +1,72 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_transformation</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Return function of transformed response variables</h2>
+
+<h3>Description</h3>
+
+<p>This functions checks whether any transformation, such as log- or
+exp-transforming, was applied to the response variable (dependent variable)
+in a regression formula, and returns the related function that was used for
+transformation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_transformation(x, verbose = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A regression model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Logical, if <code>TRUE</code>, prints a warning if the transformation
+could not be determined.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list of two functions: <code style="white-space: pre;">⁠$transformation⁠</code>, the function that was used to
+transform the response variable; <code style="white-space: pre;">⁠$inverse⁠</code>, the inverse-function of
+<code style="white-space: pre;">⁠$transformation⁠</code> (can be used for "back-transformation"). If no
+transformation was applied, both list-elements <code style="white-space: pre;">⁠$transformation⁠</code> and
+<code style="white-space: pre;">⁠$inverse⁠</code> just return <code>function(x) x</code>. If transformation is unknown,
+<code>NULL</code> is returned.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># identity, no transformation
+model &lt;- lm(Sepal.Length ~ Species, data = iris)
+get_transformation(model)
+
+# log-transformation
+model &lt;- lm(log(Sepal.Length) ~ Species, data = iris)
+get_transformation(model)
+
+# log-function
+get_transformation(model)$transformation(0.3)
+log(0.3)
+
+# inverse function is exp()
+get_transformation(model)$inverse(0.3)
+exp(0.3)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,332 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>info</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Item and Test Information Function</h2>
+
+<h3>Description</h3>
+
+<p>This function computes both item and test information functions (Hambleton et al., 1991) given a set of theta values.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">info(x, ...)
+
+## Default S3 method:
+info(x, theta, D = 1, tif = TRUE, ...)
+
+## S3 method for class 'est_item'
+info(x, theta, tif = TRUE, ...)
+
+## S3 method for class 'est_irt'
+info(x, theta, tif = TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A data frame containing the item metadata (e.g., item parameters, number of categories, models ...), an object of class <code>est_item</code>
+obtained from the function <code>est_item</code>, or an object of class <code>est_irt</code> obtained from the function <code>est_irt</code>.
+The data frame of item metadata can be easily obtained using the function <code>shape_df</code>. See below for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments passed to or from other methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta</code></td>
+<td>
+<p>A vector of theta values where item and test information values are computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>A scaling factor in IRT models to make the logistic function as close as possible to the normal ogive function (if set to 1.7).
+Default is 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tif</code></td>
+<td>
+<p>A logical value. If TRUE, the test information function is computed. Default is TRUE.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A specific form of a data frame should be used for the argument <code>x</code>. The first column should have item IDs,
+the second column should contain unique score category numbers of the items, and the third column should include IRT models being fit to the items.
+The available IRT models are "1PLM", "2PLM", "3PLM", and "DRM" for dichotomous item data, and "GRM" and "GPCM" for polytomous item data.
+Note that "DRM" covers all dichotomous IRT models (i.e, "1PLM", "2PLM", and "3PLM") and "GRM" and "GPCM" represent the graded
+response model and (generalized) partial credit model, respectively. The next columns should include the item parameters of the fitted IRT models.
+For dichotomous items, the fourth, fifth, and sixth columns represent the item discrimination (or slope), item difficulty, and
+item guessing parameters, respectively. When "1PLM" and "2PLM" are specified in the third column, NAs should be inserted in the sixth column
+for the item guessing parameters. For polytomous items, the item discrimination (or slope) parameters should be included in the
+fourth column and the item difficulty (or threshold) parameters of category boundaries should be contained from the fifth to the last columns.
+When the number of unique score categories differs between items, the empty cells of item parameters should be filled with NAs.
+In the <span class="pkg">irtQ</span> package, the item difficulty (or threshold) parameters of category boundaries for GPCM are expressed as
+the item location (or overall difficulty) parameter subtracted by the threshold parameter for unique score categories of the item.
+Note that when an GPCM item has <em>K</em> unique score categories, <em>K-1</em> item difficulty parameters are necessary because
+the item difficulty parameter for the first category boundary is always 0. For example, if an GPCM item has five score categories,
+four item difficulty parameters should be specified. An example of a data frame with a single-format test is as follows:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+  ITEM1  </td>
+<td style="text-align: right;"> 2 </td>
+<td style="text-align: left;"> 1PLM </td>
+<td style="text-align: right;"> 1.000 </td>
+<td style="text-align: right;">  1.461 </td>
+<td style="text-align: right;">         NA </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ITEM2  </td>
+<td style="text-align: right;"> 2 </td>
+<td style="text-align: left;"> 2PLM </td>
+<td style="text-align: right;"> 1.921 </td>
+<td style="text-align: right;"> -1.049 </td>
+<td style="text-align: right;">         NA </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ITEM3  </td>
+<td style="text-align: right;"> 2 </td>
+<td style="text-align: left;"> 3PLM </td>
+<td style="text-align: right;"> 1.736 </td>
+<td style="text-align: right;">  1.501 </td>
+<td style="text-align: right;">  0.203 </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ITEM4  </td>
+<td style="text-align: right;"> 2 </td>
+<td style="text-align: left;"> 3PLM </td>
+<td style="text-align: right;"> 0.835 </td>
+<td style="text-align: right;"> -1.049 </td>
+<td style="text-align: right;">  0.182 </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ITEM5  </td>
+<td style="text-align: right;"> 2 </td>
+<td style="text-align: left;"> DRM </td>
+<td style="text-align: right;"> 0.926 </td>
+<td style="text-align: right;">  0.394 </td>
+<td style="text-align: right;">  0.099
+</td>
+</tr>
+</table>
+<p>And an example of a data frame for a mixed-format test is as follows:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+  ITEM1  </td>
+<td style="text-align: right;"> 2 </td>
+<td style="text-align: left;"> 1PLM </td>
+<td style="text-align: right;"> 1.000 </td>
+<td style="text-align: right;">  1.461 </td>
+<td style="text-align: right;">         NA </td>
+<td style="text-align: right;">         NA </td>
+<td style="text-align: right;">         NA</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ITEM2  </td>
+<td style="text-align: right;"> 2 </td>
+<td style="text-align: left;"> 2PLM </td>
+<td style="text-align: right;"> 1.921 </td>
+<td style="text-align: right;"> -1.049 </td>
+<td style="text-align: right;">         NA </td>
+<td style="text-align: right;">         NA </td>
+<td style="text-align: right;">         NA</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ITEM3  </td>
+<td style="text-align: right;"> 2 </td>
+<td style="text-align: left;"> 3PLM </td>
+<td style="text-align: right;"> 0.926 </td>
+<td style="text-align: right;">  0.394 </td>
+<td style="text-align: right;">  0.099 </td>
+<td style="text-align: right;">         NA </td>
+<td style="text-align: right;">         NA</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ITEM4  </td>
+<td style="text-align: right;"> 2 </td>
+<td style="text-align: left;"> DRM </td>
+<td style="text-align: right;"> 1.052 </td>
+<td style="text-align: right;"> -0.407 </td>
+<td style="text-align: right;">  0.201 </td>
+<td style="text-align: right;">         NA </td>
+<td style="text-align: right;">         NA</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ITEM5  </td>
+<td style="text-align: right;"> 4 </td>
+<td style="text-align: left;"> GRM  </td>
+<td style="text-align: right;"> 1.913 </td>
+<td style="text-align: right;"> -1.869 </td>
+<td style="text-align: right;"> -1.238 </td>
+<td style="text-align: right;"> -0.714 </td>
+<td style="text-align: right;">         NA </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ITEM6  </td>
+<td style="text-align: right;"> 5 </td>
+<td style="text-align: left;"> GRM  </td>
+<td style="text-align: right;"> 1.278 </td>
+<td style="text-align: right;"> -0.724 </td>
+<td style="text-align: right;"> -0.068 </td>
+<td style="text-align: right;">  0.568 </td>
+<td style="text-align: right;">  1.072</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ITEM7  </td>
+<td style="text-align: right;"> 4 </td>
+<td style="text-align: left;"> GPCM  </td>
+<td style="text-align: right;"> 1.137 </td>
+<td style="text-align: right;"> -0.374 </td>
+<td style="text-align: right;">  0.215 </td>
+<td style="text-align: right;">  0.848 </td>
+<td style="text-align: right;">         NA </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ITEM8  </td>
+<td style="text-align: right;"> 5 </td>
+<td style="text-align: left;"> GPCM  </td>
+<td style="text-align: right;"> 1.233 </td>
+<td style="text-align: right;"> -2.078 </td>
+<td style="text-align: right;"> -1.347 </td>
+<td style="text-align: right;"> -0.705 </td>
+<td style="text-align: right;"> -0.116
+</td>
+</tr>
+</table>
+<p>See <code>IRT Models</code> section in the page of <code>irtQ-package</code> for more details about the IRT models used in the <span class="pkg">irtQ</span> package.
+An easier way to create a data frame for the argument <code>x</code> is by using the function <code>shape_df</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>This function returns an object of class <code>info</code>. This object contains item and test information values
+given the specified theta values.
+</p>
+
+
+<h3>Methods (by class)</h3>
+
+
+<ul>
+<li> <p><code>info(default)</code>: Default method to compute item and test information functions for
+a data frame <code>x</code> containing the item metadata.
+</p>
+</li>
+<li> <p><code>info(est_item)</code>: An object created by the function <code>est_item</code>.
+</p>
+</li>
+<li> <p><code>info(est_irt)</code>: An object created by the function <code>est_irt</code>.
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Hwanggyu Lim <a href="mailto:hglim83@gmail.com">hglim83@gmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Hambleton, R. K., &amp; Swaminathan, H. (1985) <em>Item response theory: Principles and applications</em>.
+Boston, MA: Kluwer.
+</p>
+<p>Hambleton, R. K., Swaminathan, H., &amp; Rogers, H. J. (1991) <em>Fundamentals of item response theory</em>.
+Newbury Park, CA: Sage.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot.info</code>, <code>shape_df</code>, <code>est_item</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## example 1.
+## using the function "shape_df" to create a data frame of test metadata
+# create a list containing the dichotomous item parameters
+par.drm &lt;- list(
+  a = c(1.1, 1.2, 0.9, 1.8, 1.4),
+  b = c(0.1, -1.6, -0.2, 1.0, 1.2),
+  g = rep(0.2, 5)
+)
+
+# create a list containing the polytomous item parameters
+par.prm &lt;- list(
+  a = c(1.4, 0.6),
+  d = list(c(-1.9, 0.0, 1.2), c(0.4, -1.1, 1.5, 0.2))
+)
+
+# create a numeric vector of score categories for the items
+cats &lt;- c(2, 4, 2, 2, 5, 2, 2)
+
+# create a character vector of IRT models for the items
+model &lt;- c("DRM", "GRM", "DRM", "DRM", "GPCM", "DRM", "DRM")
+
+# create an item metadata set
+test &lt;- shape_df(
+  par.drm = par.drm, par.prm = par.prm,
+  cats = cats, model = model
+) # create a data frame
+
+# set theta values
+theta &lt;- seq(-2, 2, 0.1)
+
+# compute item and test information values given the theta values
+info(x = test, theta = theta, D = 1, tif = TRUE)
+
+
+## example 2.
+## using a "-prm.txt" file obtained from a flexMIRT
+# import the "-prm.txt" output file from flexMIRT
+flex_prm &lt;- system.file("extdata", "flexmirt_sample-prm.txt",
+  package = "irtQ"
+)
+
+# read item parameters and transform them to item metadata
+test_flex &lt;- bring.flexmirt(file = flex_prm, "par")$Group1$full_df
+
+# set theta values
+theta &lt;- seq(-2, 2, 0.1)
+
+# compute item and test information values given the theta values
+info(x = test_flex, theta = theta, D = 1, tif = TRUE)
+
+</code></pre>
+
+
+</div>

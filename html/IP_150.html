@@ -1,0 +1,360 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Hostinfo</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> host-info </h2>
+
+<h3>Description</h3>
+
+<p>Methods for querying information about hosts (DNS) or IP (address spaces)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  
+  host(host,...)
+  
+  host(host,...)
+  
+  host.info(host,...)
+  
+  localhost.ip(...)
+  
+  toIdna(domain, flags)
+  
+  fromIdna(domain, flags)
+  
+  fqdn(hostname) 
+  
+  is.fqdn(hostname)
+  
+  whois(domain, refer , output, verbose)
+  
+  rir.names() 
+  
+  ipv4.rir() 
+  
+  ipv6.rir() 
+  
+  ipv4.addr.space()  
+  
+  ipv6.addr.space()
+  
+  ipv4.reserved()
+  
+  ipv6.reserved()
+  
+  ipv4.recovered()
+  
+  ipv6.unicast()
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+
+<table><tr style="vertical-align: top;">
+<td><code>host</code></td>
+<td>
+
+<p>a vector of either or IPv4, IPv6, IP addresses
+</p>
+</td>
+</tr></table>
+<table><tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>further arguments. Only host.info (default:FALSE) for host() at the moment
+</p>
+</td>
+</tr></table>
+<table><tr style="vertical-align: top;">
+<td><code>hostname</code></td>
+<td>
+
+<p>A character vector of host names
+</p>
+</td>
+</tr></table>
+<table><tr style="vertical-align: top;">
+<td><code>domain</code></td>
+<td>
+
+<p>A character vector of domain names
+</p>
+</td>
+</tr></table>
+<table><tr style="vertical-align: top;">
+<td><code>flags</code></td>
+<td>
+
+<p>Flags for IDNA conversion. "IDNA_DEFAULT": default behavior, "IDNA_ALLOW_UNASSIGNED": allow processing of unassigned Unicode code points, "IDNA_USE_STD3_ASCII_RULES": check output to make sure it is a STD3 conforming host name.
+</p>
+</td>
+</tr></table>
+<table><tr style="vertical-align: top;">
+<td><code>refer</code></td>
+<td>
+
+<p>An optional referrer to be queried
+</p>
+</td>
+</tr></table>
+<table><tr style="vertical-align: top;">
+<td><code>output</code></td>
+<td>
+
+<p>An integer specifying whether to return the raw response from the referrer (0) or parse the response and return a key-value named vector (1). The latter is still experimental due to the heterogeneity of responses.
+</p>
+</td>
+</tr></table>
+<table><tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>An integer specifying the level of verbosity
+</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+
+
+
+<h4>Methods and functions for querying informations about hosts</h4>
+
+
+
+
+<ul>
+<li> <p><code>host()</code> takes a character vector of domain names as arguments for DNS lookup. Addresses can be extracted with the corresponding methods (ipv4(), ipv6(), ip()). 
+Also takes either IPv4, IPv6 or IP objects for reverse DNS lookup and returns the corresponding domain name (or NA if not found).
+
+</p>
+</li>
+<li> <p><code>host.info()</code> (depreciated) takes either IPv4, IPv6 or IP objects for reverse DNS lookup and returns the corresponding domain name (or NA if not found)
+
+</p>
+</li>
+<li> <p><code>localhost.ip()</code> retrieves the host's interfaces IP adresses
+
+</p>
+</li>
+<li> <p><code>fqdn()</code> extracts the fully qualified name of a domain name, -eg to query <code>whois</code> databases
+
+</p>
+</li>
+<li> <p><code>is.fqdn()</code> tests whether strings in a character vector qualify as fully qualified names
+
+</p>
+</li>
+<li> <p><code>whois()</code> queries <code>whois</code> databases for a vector of fully qualified domain names. 
+</p>
+</li>
+</ul>
+<p>Since <code>localhost.ip()</code> needs OS specific system call —as well as <code>host()</code> and <code>host.info()</code>—, this function is only available for <b>POSIX compliant OS</b> at the moment. 
+Support of Internationalized Domain Names (IDN) also depends on the system's libraries. For instance, glibc supports IDN starting with version 2.3.4. Use the <code>toIdna()</code> function to ensure proper domain names encoding. Note that result may differ depdending on the flag argument.
+
+In addition, the <code>host()</code> and <code>host.info()</code> methods are still <b>very experimental</b> and might change in the future.
+</p>
+
+<p><code>whois</code> databases typically contain information such as registrars' names ... 
+Note that responses are not standardized at all and may require an ad hoc parser. 
+This is why the <code>whois()</code> function returns either a (still buggy at the moment) named vector of key-value pairs or the raw responses from the referrers.
+
+The relevant referrer <code>url</code> can be determined automatically (default) or passed as an argument.
+</p>
+
+
+
+
+
+
+<h4>Functions returning IP addresses assignments from IANA registries</h4>
+
+
+
+
+<ul>
+<li> <p><code>ipv4.addr.space()</code> and <code>ipv6.addr.space()</code> : return the corresponding IP address space
+
+</p>
+</li>
+<li> <p><code>ipv4.reserved()</code> and <code>ipv6.reserved()</code> : return the corresponding IP reserved address space 
+
+</p>
+</li>
+<li> <p><code>ipv6.unicast()</code> : IPv6 unicast addresses
+
+</p>
+</li>
+<li> <p><code>ipv4.recovered()</code> : pool of IPv4 addresses recovered by IANA from RIRs
+
+
+</p>
+</li>
+<li> <p><code>ipv4.rir()</code> and <code>ipv6.rir()</code> : returns the RIRs IP address spaces
+
+</p>
+</li>
+<li> <p><code>rir.names()</code> : Regional Internet Registry names
+</p>
+</li>
+</ul>
+<p>The IP address spaces is divided into many ranges with specific purposes. For instance, IP addresses can be assigned to organizations. Some addresses are otherwise reserved for special purposes such as loopback, subnetting, local communications within a private network, multicasting, broadcasting,...
+
+The IP address space is managed globally by the Internet Assigned Numbers Authority (IANA), and locally by five regional Internet registries (RIRs) :  
+
+</p>
+
+
+<ul>
+<li>
+<p> The African Network Information Center (AFRINIC) serves Africa
+
+</p>
+</li>
+<li>
+<p>  The American Registry for Internet Numbers (ARIN) serves Antarctica, Canada, parts of the Caribbean, and the United States
+
+</p>
+</li>
+<li>
+<p> The Asia-Pacific Network Information Centre (APNIC) serves East Asia, Oceania, South Asia, and Southeast Asia
+
+</p>
+</li>
+<li>
+<p> The Latin America and Caribbean Network Information Centre (LACNIC) serves most of the Caribbean and all of Latin America
+
+</p>
+</li>
+<li>
+<p> The Réseaux IP Européens Network Coordination Centre (RIPE NCC) serves Europe, Central Asia, Russia, and West Asia
+</p>
+</li>
+</ul>
+<p>RIRs are responsible in their designated territories for assignment to end users and local Internet registries, such as Internet service providers. 
+</p>
+
+<p>Note differences in ouptut between <code>ipv4.addr.space()</code> and <code>ipv6.addr.space()</code>. 
+RIRs IPv4 and Ipv6 assignments are stored by IANA in tables with different naming scheme (corresponding to <code>ipv4.addr.space()</code> and <code>ipv6.unicast()</code>). 
+In the early days of IPv4 deployment, addresses were assigned directly to end user organizations. Therefore, <code>ipv4.addr.space()</code> also mixes RIR and end user organizations assignments. 
+To find the corresponding RIR, use <code>ipv4.rir()</code> and <code>ipv6.rir()</code> instead.
+
+Also note that some lookups may be misleading because some IPv4 ranges have been transferred from one RIR to an another (see example). For instance, some address ranges were assigned by ARIN in the 80's to European organizations such as universities before RIPE-NCC began its operations in 1992. Those ranges were later transferred to the RIPE NCC but still belong to the ARIN address space.
+
+Likewise, some IPv4 addresses have been recovered by IANA from RIRs in order to delay IPv4 pool exhaustion and were later reassigned to other RIRs (see <code>ipv4.recovered</code>).
+</p>
+
+
+
+<h3>Value</h3>
+
+
+<table><tr style="vertical-align: top;">
+<td><code>host</code></td>
+<td>
+<p>an host object or a character vector</p>
+</td>
+</tr></table>
+<table><tr style="vertical-align: top;">
+<td><code>host.info</code></td>
+<td>
+<p>a character vector</p>
+</td>
+</tr></table>
+<table><tr style="vertical-align: top;">
+<td><code>localhost.ip</code></td>
+<td>
+<p>an IP</p>
+</td>
+</tr></table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">##
+
+host(
+  ipv4(
+    c("127.0.0.1")
+  )
+)
+##
+h &lt;- host(c(
+  "icann.org", "iana.org"
+))
+##
+host(ipv4(h))
+##
+## Domain names internationalization
+##
+##
+## results may vary according to the (POSIX) platform
+host(c("bucher.de", "Bücher.de"))
+
+##
+if( ip.capabilities()["IDN"] ){
+  ## 
+  dn &lt;- c( 
+    enc2utf8("bücher.de") ## ensure UTF-8
+    ## cannot input emoji with Latex 
+    , "\U1f4a9" # or alternatively: rawToChar(as.raw(c(0xf0, 0x9f, 0x92, 0xa9, 0x2e, 0x6c, 0x61)))
+  )
+  ##
+  Encoding(dn) &lt;- "UTF-8"
+  ##
+  dn
+  ## enforce internationalization with different options
+  flags &lt;-rep( c( "IDNA_DEFAULT" , "IDNA_ALLOW_UNASSIGNED"), each = length(dn))
+  ##
+  dni &lt;- toIdna( dn, flags)
+  ## convert back
+  fromIdna(dni, flags)
+
+  ##
+  host(dni)
+
+}
+##
+
+##
+## French country-code top-level domains (ccTLD)
+##
+tld &lt;- whois(
+  c(
+    "fr", "re", "tf", "wf", "pm", "yt"
+    , "nc", "mq"##, "gp", "gf"
+    , "pf"
+  )
+  , verbose = 1 ## be a little verbose
+  , output = 1 ## output key-value pairs
+)
+##
+sapply(tld, function(x) x[names(x)=="whois"])
+##
+## R related info
+##
+rhost     &lt;- host('r-project.org')
+## hostname       : "cran.wu-wien.ac.at"
+rhost.hnm &lt;- host.info(ipv4(rhost))
+## primary domain : "ac.at"
+fqdn(rhost.hnm)
+## ARIN 
+ipv4.rir()[ip.match(ipv4(rhost), ipv4.rir())]
+##
+ip.match(ipv4(rhost), ipv4.recovered())
+## domain name info 
+rdom.wh   &lt;- whois('r-project.org', output=1)
+## "AT"
+rdom.wh[['r-project.org']]['Registrant Country']
+## host
+rhost.wh0 &lt;- whois(ipv4(rhost),verbose = 2, output=1)
+
+</code></pre>
+
+
+</div>

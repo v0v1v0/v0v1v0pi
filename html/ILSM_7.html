@@ -1,0 +1,117 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>igraph_from_matrices</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Transforming matrices into network</h2>
+
+<h3>Description</h3>
+
+<p>Two matrices contain three groups of tropical level species. A multilayer network can be transformed from existing matrices data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">igraph_from_matrices(mat1, mat2, isDirected1 = TRUE, isDirected2 = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>mat1</code></td>
+<td>
+<p>A numeric matrix(or data.frame) representing interactions between two groups of species.Each row and column of matrix represents single species in the second and first groups of the tripartite network respectively.
+Elements of matrix are non-zero numbers if the two groups of species are connected, and 0 otherwise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mat2</code></td>
+<td>
+<p>A numeric matrix(or data.frame) representing interactions between two groups of species.Each row and column of matrix represents single species in the second and third groups of the tripartite network respectively.
+Elements of matrix are non-zero numbers if the two groups of species are connected, and 0 otherwise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>isDirected1</code></td>
+<td>
+<p>Logical. Whether the interaction between the two groups of species in <code>mat1</code> is unidirectional.Default to TRUE, such as Predation and Herbivory. Otherwise it is bidirectional, such as Mutualism.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>isDirected2</code></td>
+<td>
+<p>Logical. Whether the interaction between the two groups of species in <code>mat2</code> is unidirectional.Default to TRUE, such as Predation and Herbivory. Otherwise it is bidirectional, such as Mutualism.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><strong>mat1</strong> and <strong>mat2</strong>
+</p>
+<p>The type of inputting is data frame or matrix, please make sure the row of <code>mat1</code> and <code>mat2</code> correspond with the second group of species that both belong to two subnetworks and interact with other groups of species.
+</p>
+
+<ul>
+<li>
+<p>Try to make the rows of both matrices have the same attributes. Or we default:
+</p>
+</li>
+<li>
+<p>When the two matrices can have different numbers of rows:
+</p>
+
+<ul>
+<li>
+<p>(1). If both matrices have row names, then the function counts all row names to produce two new matrices with the same row names.
+</p>
+</li>
+<li>
+<p>(2). If at most one matrix has row names, the function assigns new row names to both matrices on a row-to-row basis (any extra row names are assigned a new value) and then counts all row names to produce two new matrices with the same row names.
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p>When the two matrices can have the same numbers of rows:
+</p>
+
+<ul><li>
+<p>No matter how the row names of the two matrices are arranged, as long as the row names are exactly the same; But we don't handle matrices with empty row names (the function will give an error).
+</p>
+</li></ul>
+</li>
+<li>
+<p>The two matrices can have different numbers of rows, but read our default handling carefully to make sure the calculation is accurate when using this function!!!
+</p>
+</li>
+</ul>
+<p>The columns of <code>mat1</code> and <code>mat2</code> could be empty. If empty, the function also defaults to the suggested assignment.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Return a network of type "igraph".
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+set.seed(12)
+MAT &lt;- build_net(11,22,21,0.2,asmatrices=TRUE)
+MAT[[1]]
+
+tmat&lt;-t(MAT[[3]])
+colnames(tmat)&lt;-NULL
+igraph_from_matrices(MAT[[3]],MAT[[4]])
+M &lt;- igraph_from_matrices(tmat,MAT[[4]])
+M
+</code></pre>
+
+
+</div>

@@ -1,0 +1,186 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>precip</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>QC for Atmospheric Precipitation (RR)</h2>
+
+<h3>Description</h3>
+
+<p>This function will centralize precipitation-like QC routines. It will create a file in the folder QC
+with an additional 0/1 column, where "1" means test failed.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">precip(
+  element = "RR",
+  large = 5000,
+  small = 0,
+  ret = 500,
+  retornoracha = 500,
+  margin = 20,
+  friki = 150,
+  blocksizeround = 20,
+  blockmanymonth = 15,
+  blockmanyyear = 180,
+  limit = 1500,
+  tolerance = 8,
+  maxseq = 3,
+  roundmax = 10,
+  level = 15,
+  window = 30,
+  margina = 0.999,
+  inisia = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>element</code></td>
+<td>
+<p>two-letters ECA&amp;D code for the element (RR for precipitation)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>large</code></td>
+<td>
+<p>value above which the observation is considered physically impossible for the region</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>small</code></td>
+<td>
+<p>value below which the observation is considered physically impossible for the region</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ret</code></td>
+<td>
+<p>pseudo-return period for the pareto outliers</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>retornoracha</code></td>
+<td>
+<p>return period for the calculation of the maximum dry and wet spell</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>margin</code></td>
+<td>
+<p>frequency difference between consecutive values for repeatedvalue()</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>friki</code></td>
+<td>
+<p>minimum value to be considered by repeatedvalue()</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>blocksizeround</code></td>
+<td>
+<p>maximum number of repeated values with the same decimal, FUNCTION: roundprecip()</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>blockmanymonth</code></td>
+<td>
+<p>maximum number of equal values in a month, FUNCTION: toomany()</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>blockmanyyear</code></td>
+<td>
+<p>maximum number of equal values in a year, FUNCTION: toomany()</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>limit</code></td>
+<td>
+<p>cut threshold for FUNCTION suspectacumprec()</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tolerance</code></td>
+<td>
+<p>number of NA or 0s before allowed before the limit, FUNCTION: suspectacumprec()</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxseq</code></td>
+<td>
+<p>maximum number of consecutive repeated values, FUNCTION: flat() (11.1,11.1,11.1 would be 3 consecutive values)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>roundmax</code></td>
+<td>
+<p>maximum number of consecutive decimal part values, FUNCTION: flat() (10.0, 11.0, 12.0 would be 3 consecutive values)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+<p>number of IQRs, FUNCTION: IQRoutliers()</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>window</code></td>
+<td>
+<p>number of days to be considered (including the target), FUNCTION: IQRoutliers()</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>margina</code></td>
+<td>
+<p>a tolerance margin, expressed as quantile of the differences, FUNCTION: newfriki()</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inisia</code></td>
+<td>
+<p>a logical flag. If it is TRUE inithome() will be called</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>results of QC for RR
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#Set a temporal working directory:
+wd &lt;- tempdir()
+wd0 &lt;- setwd(wd)
+#Create subdirectory where raw data files have to be located
+dir.create(file.path(wd, 'raw'))
+options("homefolder"='./'); options("blend"=FALSE)
+#Extract the ECA&amp;D data and station files from the example data folder
+path2rrlist&lt;-system.file("extdata", "ECA_blend_source_rr.txt", package = "INQC")
+rrlist&lt;-readr::read_lines_raw(path2rrlist)
+readr::write_lines(rrlist,'ECA_blend_source_rr.txt')
+path2rrdata&lt;-system.file("extdata", "RR_SOUID132730.txt", package = "INQC")
+rrdata&lt;-readr::read_lines_raw(path2rrdata)
+readr::write_lines(rrdata, file=paste(wd,'/raw/RR_SOUID132730.txt',sep=''))
+#Perform QC of Atmospheric Precipitation data
+precip(inisia=TRUE)
+#Remove some temporary files
+list = list.files(pattern = "Rfwf")
+file.remove(list)
+#Return to user's working directory:
+setwd(wd0)
+#The QC results can be found in the directory:
+print(wd)
+</code></pre>
+
+
+</div>

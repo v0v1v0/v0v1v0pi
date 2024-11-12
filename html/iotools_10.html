@@ -1,0 +1,194 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>chunk.apply</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Process input by applying a function to each chunk
+</h2>
+
+<h3>Description</h3>
+
+<p><code>chunk.apply</code> processes input in chunks and applies <code>FUN</code>
+to each chunk, collecting the results.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">chunk.apply(input, FUN, ..., CH.MERGE = rbind, CH.MAX.SIZE = 33554432,
+            CH.PARALLEL=1L, CH.SEQUENTIAL=TRUE, CH.BINARY=FALSE,
+            CH.INITIAL=NULL)
+
+chunk.tapply(input, FUN, ..., sep = "\t", CH.MERGE = rbind, CH.MAX.SIZE = 33554432)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>input</code></td>
+<td>
+<p>Either a chunk reader or a file name or connection that
+will be used to create a chunk reader</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FUN</code></td>
+<td>
+<p>Function to apply to each chunk</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional parameters passed to <code>FUN</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep</code></td>
+<td>
+<p>for <code>tapply</code>, gives separator for the key over which
+to apply. Each line is split at the first separator, and the value
+is treated as the key over which to apply the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CH.MERGE</code></td>
+<td>
+<p>Function to call to merge results from all
+chunks. Common values are <code>list</code> to get <code>lapply</code>-like
+behavior, <code>rbind</code> for table-like output or <code>c</code> for a long
+vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CH.MAX.SIZE</code></td>
+<td>
+<p>maximal size of each chunk in bytes</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CH.PARALLEL</code></td>
+<td>
+<p>the number of parallel processes to use in the
+calculation (unix only).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CH.SEQUENTIAL</code></td>
+<td>
+<p>logical, only relevant for parallel
+processing. If <code>TRUE</code> then the chunks are guaranteed to be
+processed in sequential order. If <code>FALSE</code> then the chunks may
+be processed in any order to gain better performance.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CH.BINARY</code></td>
+<td>
+<p>logical, if <code>TRUE</code> then <code>CH.MERGE</code> is a
+binary function used to update the result object for each chunk,
+effectively acting like the <code>Reduce</code> function. If <code>FALSE</code>
+then the results from all chunks are accumulated first and then
+<code>CH.MERGE</code> is called with all chunks as arguments. See below
+for performance considerations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CH.INITIAL</code></td>
+<td>
+<p>Function which will be applied to the first chunk if
+<code>CH.BINARY=TRUE</code>. If <code>NULL</code> then <code>CH.MERGE(NULL,
+      chunk)</code> is called instead.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Due to the fact that chunk-wise processing is typically used when the
+input data is too large to fit in memory, there are additional
+considerations depending on whether the results after applying
+<code>FUN</code> are itself large or not. If they are not, then the apporach
+of accumulating them and then applying <code>CH.MERGE</code> on all results
+at once is typically the most efficient and it is what
+<code>CH.BINARY=FALSE</code> will do.
+</p>
+<p>However, in some situations where the result are resonably big or
+the number of chunks is very high, it may be more efficient to update
+a sort of state based on each arriving chunk instead of collecting all
+results. This can be achieved by setting <code>CH.BINARY=TRUE</code> in which
+case the process is equivalent to:
+</p>
+<pre>res &lt;- CH.INITIAL(FUN(chunk1))
+res &lt;- CH.MERGE(res, FUN(chunk2))
+res &lt;- CH.MERGE(res, FUN(chunk3))
+...
+res</pre>
+<p>If <code>CH.INITITAL</code> is <code>NULL</code> then the first line is
+<code>res &lt;- CH.MERGE(NULL, FUN(chunk1))</code>.
+</p>
+<p>The parameter <code>CH.SEQUENTIAL</code> is only used if parallel
+processing is requested. It allows the system to process chunks out of
+order for performace reasons. If it is <code>TRUE</code> then the order of
+the chunks is respected, but merging can only proceed if the result of
+the next chunk is avaiable. With <code>CH.SEQUENTIAL=FALSE</code> the workers
+will continue processing further chunks as they become avaiable, not
+waiting for the results of the preceding calls. This is more
+efficient, but the order of the chunks in the result is not
+deterministic.
+</p>
+<p>Note that if parallel processing is required then all calls to
+<code>FUN</code> should be considered independent. However, <code>CH.MERGE</code>
+is always run in the current session and thus is allowed to have
+side-effects.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The result of calling <code>CH.MERGE</code> on all chunk results as
+arguments (<code>CH.BINARY=FALSE</code>) or result of the last call to
+binary <code>CH.MERGE</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The input to <code>FUN</code> is the raw chunk, so typically it is
+advisable to use <code>mstrsplit</code> or similar function as the
+first step in <code>FUN</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The support for <code>CH.PARALLEL</code> is considered experimental and may
+change in the future.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Simon Urbanek
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+## compute quantiles of the first variable for each chunk
+## of at most 10kB size
+chunk.apply("input.file.txt",
+            function(o) {
+              m = mstrsplit(o, type='numeric')
+              quantile(m[,1], c(0.25, 0.5, 0.75))
+            }, CH.MAX.SIZE=1e5)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,168 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ICcforest</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit a conditional inference forest for interval-censored survival data</h2>
+
+<h3>Description</h3>
+
+<p>An implementation of the random forest and bagging ensemble algorithms utilizing conditional 
+inference trees as base learners for interval-censored survival data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ICcforest(
+  formula,
+  data,
+  mtry = NULL,
+  ntree = 100L,
+  applyfun = NULL,
+  cores = NULL,
+  na.action = na.pass,
+  suppress = TRUE,
+  trace = TRUE,
+  perturb = list(replace = FALSE, fraction = 0.632),
+  control = partykit::ctree_control(teststat = "quad", testtype = "Univ", mincriterion =
+    0, saveinfo = FALSE, minsplit = nrow(data) * 0.15, minbucket = nrow(data) * 0.06),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>a formula object, with the response being a <code>Surv</code> object, 
+with form
+</p>
+<p><code>Surv(time1, time2, type="interval2")</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a data frame containing the variables named in <code>formula</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mtry</code></td>
+<td>
+<p>number of input variables randomly sampled as candidates at each node for 
+random forest like algorithms. The default <code>mtry</code> is tuned by <code>tuneICRF</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ntree</code></td>
+<td>
+<p>an integer, the number of the trees to grow for the forest. <code>ntree = 100L</code> is set 
+by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>applyfun</code></td>
+<td>
+<p>an optional <code>lapply</code>-style function with arguments 
+<code>function(X, FUN, ...)</code>. 
+It is used for computing the variable selection criterion. The default is to use the
+basic <code>lapply</code> function unless the <code>cores</code> argument is specified (see below). 
+See <code>ctree_control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>numeric. If set to an integer the <code>applyfun</code> is set to <code>mclapply</code> 
+with the desired number of cores. See <code>ctree_control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+<p>a function which indicates what should happen when the data contain 
+missing values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>suppress</code></td>
+<td>
+<p>a logical specifying whether the messages from <code>getFitEsts</code> 
+are suppressed. If <code>FALSE</code>, the messages are printed. <code>suppress = TRUE</code> is set by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trace</code></td>
+<td>
+<p>whether to print the progress of the search of the optimal value of <code>mtry</code>
+when <code>mtry</code> is not specified (see <code>tuneICRF</code>). <code>trace = TRUE</code> is set by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>perturb</code></td>
+<td>
+<p>a list with arguments <code>replace</code> and <code>fraction</code> determining which 
+type of resampling, with <code>replace = TRUE</code> referring to the n-out-of-n 
+bootstrap and <code>replace = FALSE</code> referring to sample splitting. <code>fraction</code> is 
+the proportion of observations to draw without replacement.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>a list of control parameters, see <code>ctree_control</code>.
+<code>control</code> parameters <code>minsplit</code>, <code>minbucket</code> have been adjusted from the 
+<code>cforest</code> defaults. Other default values correspond to those of the 
+default values used by <code>ctree_control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>ICcforest</code> returns an <code>ICcforest</code> object.
+The object belongs to the class <code>ICcforest</code>, as a subclass of <code>cforest</code>.
+This function extends the conditional inference survival forest algorithm in 
+<code>cforest</code> to fit interval-censored survival data.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>ICcforest</code>, as a subclass of <code>cforest</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>predict.ICcforest</code> for prediction, <code>gettree.ICcforest</code>
+for individual tree extraction, and <code>tuneICRF</code> for <code>mtry</code> tuning.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#### Example with miceData
+library(icenReg)
+data(miceData)
+
+## For ICcforest to run, Inf should be set to be a large number, for example, 9999999.
+miceData$u[miceData$u == Inf] &lt;- 9999999.
+
+## Fit an iterval-censored conditional inference forest
+Cforest &lt;- ICcforest(Surv(l, u, type = "interval2") ~ grp, data = miceData)
+
+</code></pre>
+
+
+</div>

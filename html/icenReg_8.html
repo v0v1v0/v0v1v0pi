@@ -1,0 +1,114 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ic_np</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Non-Parametric Estimator for Interval Censored Data</h2>
+
+<h3>Description</h3>
+
+<p>Fits the non-parametric maximum likelihood estimator (NPMLE) for univariate interval censored data. 
+This is a generalization of the Kaplan-Meier curves that allows for interval censoring. 
+Also referred to as the Turnbull estimator.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ic_np(
+  formula = NULL,
+  data,
+  maxIter = 1000,
+  tol = 10^-10,
+  B = c(0, 1),
+  weights = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>Formula for stratification. If only one group, can be left blank and 
+data must be entered as n x 2 matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A <code>data.frame</code> or an n x 2 matrix. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxIter</code></td>
+<td>
+<p>Maximum iterations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>Numeric tolerance</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>Should intervals be open or closed? See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>Weights (optional)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>data</code> must be an n x 2 matrix or data.frame containing two columns of data representing 
+left and right sides of the censoring interval, denoted L and R. This allows for left censored 
+(L == 0), right censored (R == inf), uncensored (L == R) along with general interval censored observations. 
+</p>
+<p>The argument <code>B</code> determines whether the intervals should be open or closed, i.e. 
+<code>B = c(0,1)</code> implies that the event occurs within the interval <code>(l,u]</code>. 
+The exception is that if <code>l == u</code>, it is assumed that the event is uncensored, regardless of <code>B</code>.
+</p>
+<p>The NPMLE is fit using an efficient implementation of the EMICM algorithm.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Clifford Anderson-Bergman
+</p>
+
+
+<h3>References</h3>
+
+<p>Turnbull, B. (1976) The empricial distribution with arbitrarily grouped and censored data 
+<em>Journal of the Royal Statistical Society B</em>, vol 38 p290-295
+</p>
+<p>Wellner, J. A., and Zhan, Y. (1997) A hybrid algorithm for computation of the maximum likelihood estimator 
+from censored data, <em>Journal of the  American Statistical Association</em>, Vol 92, pp945-959
+</p>
+<p>Anderson-Bergman, C. (2016) An efficient implementation of the EMICM algorithm for the interval censored NPMLE
+<em>Journal of Computational and Graphical Statistics</em>, <em>just accepted</em>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(miceData)
+fit &lt;- ic_np(cbind(l, u) ~ grp, data = miceData)
+# Stratifies fits by group
+
+plot(fit) 
+</code></pre>
+
+
+</div>

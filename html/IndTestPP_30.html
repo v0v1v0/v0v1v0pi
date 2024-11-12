@@ -1,0 +1,159 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>TestIndLS</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Lotwick-Silverman test  of independence between point processes</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates a  test  based on the Lotwick-Silverman  (LoS) approach to study the independence 
+between  two or three homogeneous point processes in time.
+The statistic  is based on the close point  sets of the points in the first process.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">TestIndLS(posx, posy, posz=NULL, T,  alpha = 0.05, nTrans = 100, PA = FALSE, 
+	cores=1,fixed.seed=NULL)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>posx</code></td>
+<td>
+<p>Numeric vector. Position of the occurrence points in the first process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>posy</code></td>
+<td>
+<p>Numeric vector. Position of the occurrence points in the second process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>posz</code></td>
+<td>
+<p>Numeric vector. Position of the occurrence points in the third process. Only
+used if there are 3 processes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>T</code></td>
+<td>
+<p>Numeric value. Length of the observed period of the processes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>Optional. Significance level  used to obtain  a decision (reject-no reject)  based on the  test p-value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nTrans</code></td>
+<td>
+<p>Optional. Positive integer. Number of translations to calculate the  test.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PA</code></td>
+<td>
+<p>Optional. Logical flag. If it is TRUE, the close point relation  is
+broadened by including the previous and the following points to the overlapping
+intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>Optional. Number of cores of the computer to be used in the calculations. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed.seed</code></td>
+<td>
+<p>Optional. An integer or NULL. If it is an integer, that is the value used to set the seed 
+in random generation processes. It it is NULL, a random seed is used.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+ 
+<p>The underlying idea  of the test is to compare, for  each  point in  the first process, the behavior  of its  set of close points 
+in the  vector of observed   processes <code class="reqn">(N_x, N_y, N_z)</code>, and in  new  vectors of  independent processes with the
+same marginal distribution. The new independent vectors are obtained using a LoS approach, see Lotwick and Silverman (1982):
+the process <code class="reqn">N_x</code> is fixed and  second and third processes are  obtained by shifting the original ones a random amount. 
+This  translation keeps the distribution of the homogeneous processes,   but breaks any dependence between them.
+If the observed  behavior is significantly different,  independence is rejected. More details can be foun in Cebrian et al. (2020).
+</p>
+<p>The test statistic is the 
+one used in <code>TestIndNH</code>, but the p-value is obtained using a  LoS approach,
+so that it does not require any assumption about the marginal distribution of the processes,
+not even the marginal intensities. The test <code>TestIndNH</code>,   
+can be applied  to study nonhomogeneous processes, but it requires a parametric model for the second process.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with elements:    
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>pv</code></td>
+<td>
+<p>P-value of the independence test.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reject </code></td>
+<td>
+<p>Binary variable indicating if the test is rejected (1) or not (0) at an  alpha significance level.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>est</code></td>
+<td>
+<p>Sample of the KS statistics. The first value corresponds to the observed processes and the others to the generated processes.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Cebrian, A.C., Abaurrea, J.  and Asin, J. (2020).   Testing  independence between two  point processes in time.
+<em>Journal of Simulation and Computational Statistics</em>.
+</p>
+<p>Lotwick, H.W. and Silverman, B.W. (1982). Methods for analysing Spatial processes of several types of points. 
+<em>J.R. Statist. Soc. B</em>, 44(3), pp. 406-13
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>TestIndNH</code>, <code>CondTest</code>, <code>DutilleulPlot</code>, 
+<code>DistShift</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#Test applied to three independent HPP
+
+posx&lt;-simNHPc(lambda=rep(0.1,200),fixed.seed=123)$posNH
+posz&lt;-simNHPc(lambda=rep(0.15,200),fixed.seed=124)$posNH
+posy&lt;-simNHPc(lambda=rep(0.1,200),fixed.seed=125)$posNH
+
+
+aux&lt;-TestIndLS(posx, posy, posz,T=200,
+	cores=1,fixed.seed=321)
+aux$pv
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,159 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot.feature_importance_explainer</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plots Feature Importance</h2>
+
+<h3>Description</h3>
+
+<p>This function plots variable importance calculated as changes in the loss function after variable drops.
+It uses output from <code>feature_importance</code> function that corresponds to
+permutation based measure of variable importance.
+Variables are sorted in the same order in all panels.
+The order depends on the average drop out loss.
+In different panels variable contributions may not look like sorted if variable
+importance is different in different in different models.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'feature_importance_explainer'
+plot(
+  x,
+  ...,
+  max_vars = NULL,
+  show_boxplots = TRUE,
+  bar_width = 10,
+  desc_sorting = TRUE,
+  title = "Feature Importance",
+  subtitle = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a feature importance explainer produced with the <code>feature_importance()</code> function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other explainers that shall be plotted together</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_vars</code></td>
+<td>
+<p>maximum number of variables that shall be presented for for each model.
+By default <code>NULL</code> what means all variables</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>show_boxplots</code></td>
+<td>
+<p>logical if <code>TRUE</code> (default) boxplot will be plotted to show permutation data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bar_width</code></td>
+<td>
+<p>width of bars. By default <code>10</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>desc_sorting</code></td>
+<td>
+<p>logical. Should the bars be sorted descending? By default TRUE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>title</code></td>
+<td>
+<p>the plot's title, by default <code>'Feature Importance'</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subtitle</code></td>
+<td>
+<p>the plot's subtitle. By default - <code>NULL</code>, which means
+the subtitle will be 'created for the XXX model', where XXX is the label of explainer(s)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Find more details in the <a href="https://ema.drwhy.ai/featureImportance.html">Feature Importance Chapter</a>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a <code>ggplot2</code> object
+</p>
+
+
+<h3>References</h3>
+
+<p>Explanatory Model Analysis. Explore, Explain, and Examine Predictive Models. <a href="https://ema.drwhy.ai/">https://ema.drwhy.ai/</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library("DALEX")
+library("ingredients")
+
+model_titanic_glm &lt;- glm(survived ~ gender + age + fare,
+                         data = titanic_imputed, family = "binomial")
+
+explain_titanic_glm &lt;- explain(model_titanic_glm,
+                               data = titanic_imputed[,-8],
+                               y = titanic_imputed[,8])
+
+fi_rf &lt;- feature_importance(explain_titanic_glm, B = 1)
+plot(fi_rf)
+
+
+library("ranger")
+model_titanic_rf &lt;- ranger(survived ~., data = titanic_imputed, probability = TRUE)
+
+explain_titanic_rf &lt;- explain(model_titanic_rf,
+                              data = titanic_imputed[,-8],
+                              y = titanic_imputed[,8],
+                              label = "ranger forest",
+                              verbose = FALSE)
+
+fi_rf &lt;- feature_importance(explain_titanic_rf)
+plot(fi_rf)
+
+HR_rf_model &lt;- ranger(status~., data = HR, probability = TRUE)
+
+explainer_rf  &lt;- explain(HR_rf_model, data = HR, y = HR$status,
+                         verbose = FALSE, precalculate = FALSE)
+
+fi_rf &lt;- feature_importance(explainer_rf, type = "raw", max_vars = 3,
+                            loss_function = DALEX::loss_cross_entropy)
+head(fi_rf)
+plot(fi_rf)
+
+HR_glm_model &lt;- glm(status == "fired"~., data = HR, family = "binomial")
+explainer_glm &lt;- explain(HR_glm_model, data = HR, y = as.numeric(HR$status == "fired"))
+
+fi_glm &lt;- feature_importance(explainer_glm, type = "raw",
+                             loss_function = DALEX::loss_root_mean_square)
+head(fi_glm)
+plot(fi_glm)
+
+
+</code></pre>
+
+
+</div>

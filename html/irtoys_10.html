@@ -1,0 +1,229 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>est</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimate item parameters</h2>
+
+<h3>Description</h3>
+
+<p>Estimate IRT item parameters using either ICL, BILOG, or <code>ltm</code>.
+Provides access to the most widely used options in these programs.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">est(
+  resp,
+  model = "2PL",
+  engine = "icl",
+  omitsWrong = FALSE,
+  nqp = 20,
+  est.distr = FALSE,
+  nch = 5,
+  a.prior = TRUE,
+  b.prior = FALSE,
+  c.prior = TRUE,
+  bilog.defaults = TRUE,
+  rasch = FALSE,
+  run.name = "mymodel"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>resp</code></td>
+<td>
+<p>A matrix of responses: persons as rows, items as columns,
+entries are either 0 or 1, no missing data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>The IRT model: "1PL", "2PL", or "3PL". Default is "2PL".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>engine</code></td>
+<td>
+<p>One of "icl", "bilog", or "ltm". Default is "icl".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>omitsWrong</code></td>
+<td>
+<p>If TRUE, all omitted items will be recoded as wrong
+responses, otherwise they will be treated as missing (default)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nqp</code></td>
+<td>
+<p>Number of quadrature points. Default is 20.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>est.distr</code></td>
+<td>
+<p>T if the probabilities of the latent distribution are to be
+estimated, F if a normal distribution is assumed. Default is F. Ignored when
+<code>engine="ltm"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nch</code></td>
+<td>
+<p>Number of choices in the original item formulation. Used to
+determine the prior for the asymptote when <code>engine="bilog"</code>,
+<code>model="3PL"</code>, and <code>c.prior=T</code>. Default is 5.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a.prior</code></td>
+<td>
+<p>Whether a prior for the item discriminations is used. Ignored
+when <code>model="1PL"</code> or <code>engine="ltm"</code>. Default is T.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b.prior</code></td>
+<td>
+<p>Whether a prior for the item difficulties is used. Ignored
+when <code>engine="ltm"</code>. Default is F.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c.prior</code></td>
+<td>
+<p>Whether a prior for the asymptotes is used. Ignored when
+<code>model="1PL"</code> or <code>model="2PL"</code> or <code>engine="ltm"</code>. Default is
+T.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bilog.defaults</code></td>
+<td>
+<p>When <code>engine="icl"</code> and a prior is used, use the
+default priors in BILOG rather than the default priors in ICL. Ignored when
+<code>engine="ltm"</code>. Default is T.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rasch</code></td>
+<td>
+<p>When <code>engine="bilog"</code> and <code>model="1PL"</code> and
+<code>"rasch"=T</code>, the common value for discriminations is forced to 1, and
+the sum of the difficulties is 0. When <code>engine="ltm"</code> and
+<code>model="1PL"</code> and <code>"rasch"=T</code>, the common value for
+discriminations is forced to 1. Ignored in all other cases. Default is F.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>run.name</code></td>
+<td>
+<p>A (short) string used in the names of all files read or
+written by ICL or BILOG. Default is <code>"mymodel"</code>. Change to something
+else to keep the outputs of ICL of BILOG for further use. Ignored when
+<code>engine="ltm"</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Estimate the parameters of an IRT model defined in the most general case
+("3PL") as
+</p>
+<p style="text-align: center;"><code class="reqn">P(U_{ij}=1|\theta_i,a_j,b_j,c_j)=c_j+(1-c_j)\frac{\displaystyle\exp(a_j(\theta_i-b_j))}{1+\displaystyle\exp(a_j(\theta_i-b_j))}</code>
+</p>
+
+<p>where <code class="reqn">U_{ij}</code> is a binary response given by person <code class="reqn">i</code> to item
+<code class="reqn">j</code>, <code class="reqn">\theta_i</code> is the value of the latent variable ("ability") for
+person <code class="reqn">i</code>, <code class="reqn">a_j</code> is the discrimination parameter for item <code class="reqn">j</code>,
+<code class="reqn">b_j</code> is the difficulty parameter for item <code class="reqn">j</code>, <code class="reqn">c_j</code> is the
+asymptote for item <code class="reqn">j</code>.
+</p>
+<p>Some authors prefer to represent the model with a logit <code class="reqn">1.7a^*_j(\theta_i-b_j)</code>
+rather than <code class="reqn">a_j(\theta_i-b_j)</code>. This option has been removed from <code>irtoys</code>
+as it is not supported by the remaining functions of the package.  
+</p>
+<p>In the 2PL model (<code>model="2PL"</code>), all asymptotes <code class="reqn">c_j</code> are 0. In
+the 1PL model (<code>model="1PL"</code>), all asymptotes <code class="reqn">c_j</code> are 0 and the
+discriminations <code class="reqn">a_j</code> are equal for all items (and sometimes to 1).
+</p>
+<p>Package <code>irtoys</code> provides a simple common interface to the estimation
+of item parameters with three different programs. It only accesses the most
+basic and widely used options in these programs. Each of the three programs
+has a much wider choice of options and cababilities, and serious users must
+still learn the corresponding syntax in order to access the advanced
+features.  Even when models are fit "by hand", <code>irtoys</code> may be useful
+in plotting results, doing comparisons across programs etc.
+</p>
+<p>Estimation of the more complex IRT models (2PL and 3PL) for some "difficult"
+data sets often has to use prior distributions for the item parameters.
+<code>irtoys</code> adopts the default behaviour of BILOG: no priors for <code class="reqn">b</code>
+in any model, priors for <code class="reqn">a</code> in the 2PL and 3PL models, priors for
+<code class="reqn">c</code> in the 3PL model. This can be overriden by changing the values of
+<code>a.prior</code>, <code>b.prior</code>, and <code>c.prior</code>.
+</p>
+<p>If priors are used at all, they will be the same for all items. Note that
+both ICL and BILOG can, at some additional effort, set different priors for
+any individual item. At default, the common priors are the BILOG defaults:
+<code>normal(0,2)</code> for <code class="reqn">b</code>, <code>lognormal (0, 0.5)</code> for <code class="reqn">a</code>, and
+<code>beta(20*p+1, 20(1-p)+1)</code> for <code class="reqn">c</code>; <code class="reqn">p</code> is 1 over the number of
+choices in the original item formulations, which can be set with the
+parameter <code>nch</code>, and is again assumed the same for all items.
+</p>
+<p>When <code>engine="icl"</code> and <code>bilog.defaults=F</code>, any priors used will
+be the ICL default ones, and based on the 4-parameter beta distribution:
+<code>beta(1.01, 1.01, -6, 6)</code> for <code class="reqn">b</code>, <code>beta(1.75, 3, 0, 3)</code> for
+<code class="reqn">a</code>, and <code>beta(3.5, 4, 0, 0.5)</code> for <code class="reqn">c</code>.  When
+<code>engine="ltm"</code>, all commands involving priors are ignored.
+</p>
+<p><code>est</code> only works when some IRT software is installed.  Package
+<code>ltm</code> is automatically loaded. ICL can be downloaded from
+<a href="http://www.openirt.com/b-a-h/software/">http://www.openirt.com/b-a-h/software/</a>. 
+BILOG is commercial software sold by SSI — see
+<a href="https://ssicentral.com/">https://ssicentral.com/</a> for further detail.  On Windows, make sure that the
+executable files (<code>icl.exe</code> for ICL, <code>blm1.exe</code>, <code>blm2.exe</code>,
+and <code>blm3.exe</code>, for BILOG) are located in directories that are included
+in the PATH variable.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with three elements: <code>est</code> and <code>se</code> are 
+matrices containing the parameter estimates and their standard errors, correspondingly.
+Each matrix has three columns: [,1] item
+discrimination <code class="reqn">a</code>, [,2] item difficulty <code class="reqn">b</code>, and [,3] asymptote
+<code class="reqn">c</code>. For the 1PL and 2PL models, all asymptotes are equal to 0; for the
+1PL, the discriminations are all equal but not necessarily equal to 1. The third
+element, <code>vcm</code>, is a list of variance-covariance matrices for the item 
+parameters. Currently, <code>vcm</code> is only used in function <code>irfPlot</code>. 
+When ICL is used as estimation engine, <code>se</code> and <code>vcm</code> are NULL as ICL does not
+compute standard errors for the item parameter estimates.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Ivailo Partchev
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+p.1pl &lt;- est(Scored, model="1PL", engine="ltm")
+p.2pl &lt;- est(Scored, model="2PL", engine="ltm")
+
+</code></pre>
+
+
+</div>

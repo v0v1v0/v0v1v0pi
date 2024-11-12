@@ -1,0 +1,141 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mutate.incidence2</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create, modify, and delete incidence2 columns</h2>
+
+<h3>Description</h3>
+
+<p>Method for dplyr::mutate that implicitly accounts for the inherent
+grouping structure of incidence2 objects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'incidence2'
+mutate(
+  .data,
+  ...,
+  .by,
+  .keep = c("all", "used", "unused", "none"),
+  .before = NULL,
+  .after = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>.data</code></td>
+<td>
+<p>An incidence2 object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>&lt;<code>data-masking</code>&gt; Name-value pairs.
+The name gives the name of the column in the output.
+</p>
+<p>The value can be:
+</p>
+
+<ul>
+<li>
+<p> A vector of length 1, which will be recycled to the correct length.
+</p>
+</li>
+<li>
+<p> A vector the same length as the current group (or the whole data frame
+if ungrouped).
+</p>
+</li>
+<li> <p><code>NULL</code>, to remove the column.
+</p>
+</li>
+<li>
+<p> A data frame or tibble, to create multiple columns in the output.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.by</code></td>
+<td>
+<p>Not used as grouping structure implicit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.keep</code></td>
+<td>
+<p>Control which columns from <code>.data</code> are retained in the output. Grouping
+columns and columns created by <code>...</code> are always kept.
+</p>
+
+<ul>
+<li> <p><code>"all"</code> retains all columns from <code>.data</code>. This is the default.
+</p>
+</li>
+<li> <p><code>"used"</code> retains only the columns used in <code>...</code> to create new
+columns. This is useful for checking your work, as it displays inputs
+and outputs side-by-side.
+</p>
+</li>
+<li> <p><code>"unused"</code> retains only the columns <em>not</em> used in <code>...</code> to create new
+columns. This is useful if you generate new columns, but no longer need
+the columns used to generate them.
+</p>
+</li>
+<li> <p><code>"none"</code> doesn't retain any extra columns from <code>.data</code>. Only the grouping
+variables and columns created by <code>...</code> are kept.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.before, .after</code></td>
+<td>
+<p>&lt;<code>tidy-select</code>&gt; Optionally, control where new columns
+should appear (the default is to add to the right hand side). See
+<code>relocate()</code> for more details.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A modified incidence2 object if the necessary
+invariants are preserved, otherwise a tibble.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>dplyr::mutate for the underlying generic.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+if (requireNamespace("outbreaks", quietly = TRUE) &amp;&amp; requireNamespace("ggplot2", quietly = TRUE)) {
+    data(ebola_sim_clean, package = "outbreaks")
+    ebola_sim_clean$linelist |&gt;
+        subset(!is.na(hospital)) |&gt;
+        incidence_(date_of_onset, hospital, interval = "isoweek") |&gt;
+        mutate(ave = data.table::frollmean(count, n = 3L, align = "right")) |&gt;
+        plot(border_colour = "white", angle = 45) +
+        ggplot2::geom_line(ggplot2::aes(x = date_index, y = ave))
+}
+
+
+</code></pre>
+
+
+</div>

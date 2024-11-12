@@ -1,0 +1,200 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>icc_beta</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Intraclass correlation used to assess variability of lower-order
+relationships across higher-order processes/units.</h2>
+
+<h3>Description</h3>
+
+<p>A function and vignettes for computing the intraclass correlation described
+in Aguinis &amp; Culpepper (2015). iccbeta quantifies the share of variance
+in an outcome variable that is attributed to heterogeneity in slopes due to
+higher-order processes/units.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">icc_beta(x, ...)
+
+## S3 method for class 'lmerMod'
+icc_beta(x, ...)
+
+## Default S3 method:
+icc_beta(x, l2id, T, vy, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A <code>lmer</code> model object or a design matrix with no missing values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional parameters...</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>l2id</code></td>
+<td>
+<p>A <code>vector</code> that identifies group membership. The vector
+must be coded as a sequence of integers from 1 to J,
+the number of groups.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>T</code></td>
+<td>
+<p>A <code>matrix</code> of the estimated variance-covariance matrix of
+a lmer model fit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vy</code></td>
+<td>
+<p>The variance of the outcome variable.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A <code>list</code> with:
+</p>
+
+<ul>
+<li> <p><code>J</code>
+</p>
+</li>
+<li> <p><code>means</code>
+</p>
+</li>
+<li> <p><code>XcpXc</code>
+</p>
+</li>
+<li> <p><code>Nj</code>
+</p>
+</li>
+<li> <p><code>rho_beta</code>
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Steven Andrew Culpepper
+</p>
+
+
+<h3>References</h3>
+
+<p>Aguinis, H., &amp; Culpepper, S.A. (2015). An expanded decision making
+procedure for examining cross-level interaction effects with multilevel
+modeling. <em>Organizational Research Methods</em>. Available at:
+<a href="http://hermanaguinis.com/pubs.html">http://hermanaguinis.com/pubs.html</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>lme4::lmer()</code>, <code>model.matrix()</code>,
+<code>lme4::VarCorr()</code>, <code>RLRsim::LRTSim()</code>,
+iccbeta::Hofmann, and iccbeta::simICCdata
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+
+if(requireNamespace("lme4") &amp;&amp; requireNamespace("RLRsim")){
+
+## Example 1: Simulated Data Example from Aguinis &amp; Culpepper (2015) ----
+data(simICCdata)
+library("lme4")
+
+# Computing icca
+vy &lt;- var(simICCdata$Y)
+lmm0 &lt;- lmer(Y ~ (1 | l2id), data = simICCdata, REML = FALSE)
+VarCorr(lmm0)$l2id[1, 1]/vy
+
+# Create simICCdata2
+grp_means = aggregate(simICCdata[c('X1', 'X2')], simICCdata['l2id'], mean)
+colnames(grp_means)[2:3] = c('m_X1', 'm_X2')
+simICCdata2 = merge(simICCdata, grp_means, by='l2id')
+
+# Estimating random slopes model
+lmm1  &lt;- lmer(Y ~ I(X1 - m_X1) + I(X2 - m_X2) + 
+                 (I(X1 - m_X1) + I(X2 - m_X2) | l2id),
+              data = simICCdata2, REML = FALSE)
+
+## iccbeta calculation on `lmer` object
+icc_beta(lmm1)
+
+## Manual specification of iccbeta
+
+# Extract components from model.
+X &lt;- model.matrix(lmm1)
+p &lt;- ncol(X)
+T1  &lt;- VarCorr(lmm1)$l2id[1:p,1:p]
+
+# Note: vy was computed under "icca"
+
+# Computing iccb
+# Notice '+1' because icc_beta assumes l2ids are from 1 to 30.
+icc_beta(X, simICCdata2$l2id + 1, T1, vy)$rho_beta
+
+## Example 2: Hofmann et al. (2000)   ----
+
+data(Hofmann)
+library("lme4")
+
+# Random-Intercepts Model
+lmmHofmann0 = lmer(helping ~ (1|id), data = Hofmann)
+vy_Hofmann = var(Hofmann[,'helping'])
+
+# Computing icca
+VarCorr(lmmHofmann0)$id[1,1]/vy_Hofmann
+
+# Estimating Group-Mean Centered Random Slopes Model, no level 2 variables
+lmmHofmann1 &lt;- lmer(helping ~ mood_grp_cent + (mood_grp_cent |id),
+                    data = Hofmann, REML = FALSE)
+
+## Automatic calculation of iccbeta using the lmer model
+amod = icc_beta(lmmHofmann1)
+
+## Manual calculation of iccbeta
+
+X_Hofmann &lt;- model.matrix(lmmHofmann1)
+P &lt;- ncol(X_Hofmann)
+T1_Hofmann &lt;- VarCorr(lmmHofmann1)$id[1:P,1:P]
+
+# Computing iccb
+bmod = icc_beta(X_Hofmann, Hofmann[,'id'], T1_Hofmann, vy_Hofmann)$rho_beta
+
+# Performing LR test
+library("RLRsim")
+lmmHofmann1a &lt;- lmer(helping ~ mood_grp_cent + (1 |id),
+                     data = Hofmann, REML = FALSE)
+obs.LRT &lt;- 2*(logLik(lmmHofmann1) - logLik(lmmHofmann1a))[1]
+X &lt;- getME(lmmHofmann1,"X")
+Z &lt;- t(as.matrix(getME(lmmHofmann1,"Zt")))
+sim.LRT &lt;- LRTSim(X, Z, 0, diag(ncol(Z)))
+(pval &lt;- mean(sim.LRT &gt; obs.LRT))
+} else {
+ stop("Please install packages `RLRsim` and `lme4` to run the above example.") 
+} 
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

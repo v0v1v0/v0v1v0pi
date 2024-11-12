@@ -1,0 +1,165 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>infer_logLs</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Infer log Likelihoods using simulated distributions of summary statistics
+</h2>
+
+<h3>Description</h3>
+
+<p>The functions described here are either experimental or relevant only for the primitive workflow.
+</p>
+<p>For each simulated distribution of summary statistics, <code>infer_logLs</code> infers a probability density function, and the density of the observed values of the summary statistics is deduced. By default, inference of each density is performed by <code>infer_logL_by_Rmixmod</code>, which fits a distribution of summary statistics using procedures from the <code>Rmixmod</code> package.        
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">infer_logLs(object, stat.obs, 
+            logLname = Infusion.getOption("logLname"), 
+            verbose = list(most=interactive(), 
+                           final=FALSE), 
+            method = Infusion.getOption("mixturing"),
+            nb_cores = NULL, packages = NULL, cluster_args,
+            ...)
+infer_tailp(object, refDensity, stat.obs,
+                tailNames=Infusion.getOption("tailNames"),
+                verbose=interactive(), method=NULL, cluster_args, ...)
+infer_logL_by_GLMM(EDF,stat.obs,logLname,verbose)
+infer_logL_by_Rmixmod(EDF,stat.obs,logLname,verbose)
+infer_logL_by_mclust(EDF,stat.obs,logLname,verbose)
+infer_logL_by_Hlscv.diag(EDF,stat.obs,logLname,verbose)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>A list of simulated distributions (the return object of <code>add_simulation</code>)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>EDF</code></td>
+<td>
+
+<p>An empirical distribution, with a required <code>par</code> attribute (an element of the <code>object</code> list).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stat.obs</code></td>
+<td>
+
+<p>Named numeric vector of observed values of summary statistics.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>logLname</code></td>
+<td>
+
+<p>The name to be given to the log Likelihood in the return object, or the root of the latter name in case of conflict with other names in this object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tailNames</code></td>
+<td>
+
+<p>Names of “positives” and “negatives” in the binomial response for the inference of tail probabilities. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>refDensity</code></td>
+<td>
+
+<p>An object representing a reference density (such as an <span class="pkg">spaMM</span> fit object or other objects with a similar <code>predict</code> method) which, together with the density inferred from each empirical density, defines a likelihood ratio used to define a rejection region.   
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p> A list as shown by the default, or simply a vector of booleans, indicating respectively
+whether to display (1) some information about progress; (2) a final summary of the results after all elements of <code>simuls</code> have been processed. If a count of 'outlier'(s) is reported, this typically means that <code>stat.obs</code> is not within the envelope of a simulated distribution (or whatever other meaning the user attaches to an <code>FALSE isValid</code> code: see Details)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>A function for density estimation. See Description for the default behaviour and Details for the constraints on input and output of the function. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nb_cores</code></td>
+<td>
+<p>Number of cores for parallel computation. The default is <code>Infusion.getOption("nb_cores")</code>, and 1 if the latter is NULL. <code>nb_cores=1</code> which prevents the use of parallelisation procedures.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster_args</code></td>
+<td>
+<p>A list of arguments, passed to <code>makeCluster</code>. May contain a non-null <code>spec</code> element, in which case the distinct <code>nb_cores</code> argument is ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>packages</code></td>
+<td>
+<p>For parallel evaluation: Names of additional libraries to be loaded on the cores, necessary for evaluation of a user-defined 'method'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>further arguments passed to or from other methods (currently not used).
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>By default, density estimation is based on <code>Rmixmod</code> methods. Other available methods are not routinely used and not all of <code>Infusion</code> features may work with them. The function <code>Rmixmod::mixmodCluster</code>
+is called, with arguments <code>nbCluster=seq_nbCluster(nr=nrow(data))</code> and <code>mixmodGaussianModel=Infusion.getOption("mixmodGaussianModel")</code>. If <code>Infusion.getOption("seq_nbCluster")</code> specifies a sequence of values, then several clusterings are computed and AIC is used to select among them.  
+</p>
+<p><code>infer_logL_by_GLMM</code>, <code>infer_logL_by_Rmixmod</code>, <code>infer_logL_by_mclust</code>, and <code>infer_logL_by_Hlscv.diag</code> are examples of the method that may be provided for density estimation. Other <code>method</code>s may be provided with the same arguments. Their return value must include the element <code>logL</code>, an estimate of the log-density of <code>stat.obs</code>, and the element <code>isValid</code> with values <code>FALSE</code>/<code>TRUE</code> (or 0/1). The standard format for the return value is <code>unlist(c(attr(EDF,"par"),logL,isValid=isValid))</code>.
+</p>
+<p><code>isValid</code> is primarily intended to indicate whether the log likelihood of <code>stat.obs</code> inferred by a given density estimation method was suitable input for inference of the likelihood surface. <code>isValid</code> has two effects: to distinguish points for which isValid is FALSE in the plot produced by <code>plot.SLik</code>; and more critically, to control the sampling of new parameter points within <code>refine</code> so that points for which isValid is FALSE are less likely to be sampled. 
+</p>
+<p>Invalid values may for example indicate a likelihood estimated as zero (since log(0) is not suitable input), or (for density estimation methods which may infer erroneously large values when extrapolating), whether <code>stat.obs</code> is within the convex hull of the EDF. In user-defined <code>method</code>s, invalid inferred logL should be replaced by some alternative low estimate, as all methods included in the package do.    
+</p>
+<p>The source code of <code>infer_logL_by_Hlscv.diag</code> illustrates how to test whether <code>stat.obs</code> is within the convex hull of the EDF, using functions <code>resetCHull</code> and <code>isPointInCHull</code> (exported from the <code>blackbox</code> package).
+</p>
+<p><code>infer_logL_by_Rmixmod</code> calls <code>Rmixmod::mixmodCluster</code>
+<code>infer_logL_by_mclust</code> calls <code>mclust::densityMclust</code>, 
+<code>infer_logL_by_Hlscv.diag</code> calls <code>ks::kde</code>, and <code>infer_logL_by_GLMM</code> fits a binned distribution of summary statistics using a Poisson GLMM with autocorrelated random effects, where the binning is based on a tesselation of a volume containing the whole simulated distribution. Limited experiments so far suggest that the mixture models methods are fast and appropriate (<code>Rmixmod</code>, being a bit faster, is the default method); that the kernel smoothing method is more erratic and moreover requires additional input from the user, hence is not really applicable, for distributions in dimension <em>d</em>= 4 or above; and that the GLMM method is a very good density estimator for <em>d</em>=2 but will challenge one's patience for <em>d</em>=3 and further challenge the computer's memory for <em>d</em>=4.
+</p>
+
+
+<h3>Value</h3>
+
+<p>For <code>infer_logLs</code>, a data frame containing parameter values and their log likelihoods, and additional information such as attributes providing information about the parameter names and statistics names (not detailed here). These attributes are essential for further inferences.
+</p>
+<p>See Details for the required value of the <code>method</code>s called by <code>infer_logLs</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See step (3) of the workflow in the Example on the main <code>Infusion</code> documentation page.  
+</p>
+
+
+</div>

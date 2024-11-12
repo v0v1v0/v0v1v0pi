@@ -1,0 +1,181 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>isomultifit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit isoscape models per strata (typically time interval such as months)</h2>
+
+<h3>Description</h3>
+
+<p>This function fits several set of isoscapes (e.g. one per strata). It can thus be
+used to predict annual averages precipitation weighted isoscapes.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">isomultifit(
+  data,
+  split_by = "month",
+  mean_model_fix = list(elev = FALSE, lat_abs = FALSE, lat_2 = FALSE, long = FALSE,
+    long_2 = FALSE),
+  disp_model_fix = list(elev = FALSE, lat_abs = FALSE, lat_2 = FALSE, long = FALSE,
+    long_2 = FALSE),
+  mean_model_rand = list(uncorr = TRUE, spatial = TRUE),
+  disp_model_rand = list(uncorr = TRUE, spatial = TRUE),
+  uncorr_terms = list(mean_model = "lambda", disp_model = "lambda"),
+  spaMM_method = list(mean_model = "fitme", disp_model = "fitme"),
+  dist_method = "Earth",
+  control_mean = list(),
+  control_disp = list(),
+  verbose = interactive()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>The <em>dataframe</em> containing the data used for fitting the
+isoscape model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>split_by</code></td>
+<td>
+<p>A <em>string</em> indicating the name of the column of
+<code>data</code> used to split the dataset. The function
+<code>isofit</code> will then be called on each of these sub-datasets. The
+default behaviour is to consider that the dataset should be split per
+months (<code>split_by = "month"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean_model_fix</code></td>
+<td>
+<p>A <em>list</em> of <em>logical</em> indicating which fixed
+effects to consider in mean_fit</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>disp_model_fix</code></td>
+<td>
+<p>A <em>list</em> of <em>logical</em> indicating which fixed
+effects to consider in disp_fit</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean_model_rand</code></td>
+<td>
+<p>A <em>list</em> of <em>logical</em> indicating which random
+effects to consider in mean_fit</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>disp_model_rand</code></td>
+<td>
+<p>A <em>list</em> of <em>logical</em> indicating which random
+effects to consider in disp_fit</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>uncorr_terms</code></td>
+<td>
+<p>A <em>list</em> of two strings defining the parametrization
+used to model the uncorrelated random effects for mean_fit and disp_fit</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spaMM_method</code></td>
+<td>
+<p>A <em>list</em> of two strings defining the spaMM functions
+used for mean_fit and disp_fit</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist_method</code></td>
+<td>
+<p>A <em>string</em> indicating the distance method</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control_mean</code></td>
+<td>
+<p>A <em>list</em> of additional arguments to be passed to the
+call of mean_fit</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control_disp</code></td>
+<td>
+<p>A <em>list</em> of additional arguments to be passed to the
+call of disp_fit</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>A <em>logical</em> indicating whether information about the
+progress of the procedure should be displayed or not while the function is
+running. By default verbose is <code>TRUE</code> if users use an interactive R
+session and <code>FALSE</code> otherwise.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function is a wrapper around the function <code>isofit</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>This function returns a <em>list</em> of class <em>MULTIISOFIT</em>
+containing all pairs of inter-related fits (stored under
+<code>multi_fits</code>). The returned <em>list</em> also contains the object
+<code>info_fit</code> that contains all the call arguments.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>isofit</code> for information about the fitting procedure of
+each isoscape.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## The examples below will only be run if sufficient time is allowed
+## You can change that by typing e.g. options_IsoriX(example_maxtime = XX)
+## if you want to allow for examples taking up to ca. XX seconds to run
+## (so don't write XX but put a number instead!)
+
+if (getOption_IsoriX("example_maxtime") &gt; 30) {
+  ## We prepare the GNIP monthly data between January and June for Germany
+
+  GNIPDataDEmonthly &lt;- prepsources(
+    data = GNIPDataDE,
+    month = 1:6,
+    split_by = "month"
+  )
+
+  head(GNIPDataDEmonthly)
+
+  ## We fit the isoscapes
+
+  GermanMonthlyFit &lt;- isomultifit(data = GNIPDataDEmonthly)
+
+  GermanMonthlyFit
+
+  plot(GermanMonthlyFit)
+}
+</code></pre>
+
+
+</div>

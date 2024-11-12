@@ -1,0 +1,105 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>evaluateMatched</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Evaluate product overlap between periods</h2>
+
+<h3>Description</h3>
+
+<p>Evaluate the counts and expenditure for each period with and without
+matching items across periods.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">evaluateMatched(x, pvar, qvar, pervar, prodID, output = "chained")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A dataframe containing price, quantity, a time period identifier
+and a product identifier. It must have column names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pvar</code></td>
+<td>
+<p>A character string for the name of the price variable</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qvar</code></td>
+<td>
+<p>A character string for the name of the quantity variable</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pervar</code></td>
+<td>
+<p>A character string for the name of the time variable. This variable
+must contain integers starting at period 1 and increasing in increments of 1 period.
+There may be observations on multiple products for each time period.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prodID</code></td>
+<td>
+<p>A character string for the name of the product identifier</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output</code></td>
+<td>
+<p>A character string specifying whether the matching should be
+done assuming a chained index or a fixed base index. No index is actually computed,
+but the matching needs to know which periods are being compared. Default is chained.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list of two matrices, one for expenditures and one for counts.
+The first four columns present the base period information
+base_index (the base time period), base (base period expenditure or count),
+base_matched (the expenditure or count of the base period after matching),
+base_share (share of total expenditure in the base period that remains after
+matching). Columns 5-8 are defined analogously for the current period. The matched
+numbers for the base period should be interpreted as the count or expenditure
+that remains after removal of products that exist in the base period, but not
+in the current period. That is, products that existed in the base period but no
+longer exist in the current period are removed by the matching. If new products
+exist in the current period that were not available in the base period, this
+does not affect the matched base period expenditure or count. The appearance
+of new products is captured in the current period matched expenditure and counts.
+Therefore, a base period share that is less than 1 indicates that products have
+disappeared, while a current period share less than 1 indicates that new products
+have appeared.
+</p>
+<p>The count matrix has two additional columns, "new" and "leaving". The new column
+gives the number of products that exist in the current period but not the base period.
+The leaving column gives the count of products that exist in the base period
+but not the current period. Matching removes both of these types of products.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># create CES_sigma_2 dataset removing the observation in time period 4
+# on product 1
+df &lt;- CES_sigma_2[!(CES_sigma_2$time==4 &amp; CES_sigma_2$prodID==1),]
+# evaluate the overlap between periods for this dataset assuming
+# a chained index
+evaluateMatched(df, pvar="prices", qvar="quantities", pervar="time",
+prodID = "prodID", output="chained")
+</code></pre>
+
+
+</div>

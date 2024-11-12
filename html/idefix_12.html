@@ -1,0 +1,232 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Modfed</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Modified Fedorov algorithm for MNL models.</h2>
+
+<h3>Description</h3>
+
+<p>The algorithm swaps every profile of an initial start design with candidate
+profiles. By doing this, it tries to minimize the D(B)-error, based on a
+multinomial logit model. This routine is repeated for multiple starting
+designs.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Modfed(
+  cand.set,
+  n.sets,
+  n.alts,
+  par.draws,
+  alt.cte = NULL,
+  no.choice = FALSE,
+  start.des = NULL,
+  parallel = TRUE,
+  max.iter = Inf,
+  n.start = 12,
+  best = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>cand.set</code></td>
+<td>
+<p>A numeric matrix in which each row is a possible profile. The
+<code>Profiles</code> function can be used to generate this matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.sets</code></td>
+<td>
+<p>Numeric value indicating the number of choice sets.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.alts</code></td>
+<td>
+<p>Numeric value indicating the number of alternatives per choice
+set.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>par.draws</code></td>
+<td>
+<p>A matrix or a list, depending on <code>alt.cte</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alt.cte</code></td>
+<td>
+<p>A binary vector indicating for each alternative whether an
+alternative specific constant is desired. The default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>no.choice</code></td>
+<td>
+<p>A logical value indicating whether a no choice alternative
+should be added to each choice set. The default is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start.des</code></td>
+<td>
+<p>A list containing one or more matrices corresponding to initial start design(s). The default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>Logical value indicating whether computations should be done
+over multiple cores. The default is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.iter</code></td>
+<td>
+<p>A numeric value indicating the maximum number allowed
+iterations. The default is <code>Inf</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.start</code></td>
+<td>
+<p>A numeric value indicating the number of random start designs
+to use. The default is 12.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>best</code></td>
+<td>
+<p>A logical value indicating whether only the best design should be
+returned. The default is <code>TRUE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Each iteration will loop through all profiles from the initial design,
+evaluating the change in D(B)-error for every profile from <code>cand.set</code>.
+The algorithm stops when an iteration occured without replacing a profile or
+when <code>max.iter</code> is reached.
+</p>
+<p>By specifying a numeric vector in <code>par.draws</code>, the D-error will be
+calculated and the design will be optimised locally. By specifying a matrix,
+in which each row is a draw from a multivariate distribution, the DB-error
+will be calculated, and the design will be optimised globally. Whenever there
+are alternative specific constants, <code>par.draws</code> should be a list
+containing two matrices: The first matrix containing the parameter draws for
+the alternative specific constant parameters. The second matrix containing
+the draws for the rest of the parameters.
+</p>
+<p>The DB-error is calculated by taking the mean over D-errors. It could be that
+for some draws the design results in an infinite D-error. The percentage of
+draws for which this was true for the final design can be found in the output
+<code>inf.error</code>.
+</p>
+<p>Alternative specific constants can be specified in <code>alt.cte</code>. The length
+of this binary vector should equal <code>n.alts</code>, were <code>0</code> indicates the
+absence of an alternative specific constant and <code>1</code> the opposite.
+</p>
+<p><code>start.des</code> is a list with one or several matrices  corresponding to
+initial start design(s). In each matrix each
+row is a profile. The number of rows equals <code>n.sets * n.alts</code>, and the
+number of columns equals the number of columns of <code>cand.set</code> + the
+number of non-zero elements in <code>alt.cte</code>. If <code>start.des
+= NULL</code>, <code>n.start</code> random initial designs will be
+generated. If start designs are provided, <code>n.start</code> is ignored.
+</p>
+<p>If <code>no.choice</code> is <code>TRUE</code>, in each choice set an alternative with
+one alternative specific constant is added. The return value of the
+D(B)-error is however based on the design without the no choice option.
+</p>
+<p>When <code>parallel</code> is <code>TRUE</code>, <code>detectCores</code> will
+be used to decide upon the number of available cores. That number minus 1
+cores will be used to search for efficient designs. The computation time will
+decrease significantly when <code>parallel = TRUE</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>If <code>best = TRUE</code> the design with the lowest D(B)-error is returned.
+If <code>best = FALSE</code>, the results of all (provided) start designs are
+returned. </p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>design</code></td>
+<td>
+<p>A
+numeric matrix wich contains an efficient design.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>error</code></td>
+<td>
+<p>Numeric
+value indicating the D(B)-error of the design.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inf.error</code></td>
+<td>
+<p>Numeric
+value indicating the percentage of draws for which the D-error was
+<code>Inf</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probs</code></td>
+<td>
+<p>Numeric matrix containing the probabilities of
+each alternative in each choice set. If a sample matrix was provided in
+<code>par.draws</code>, this is the average over all draws.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Traets F, Sanchez G, Vandebroek M (2020).
+“Generating Optimal Designs for Discrete Choice Experiments in R: The idefix Package.”
+<em>Journal of Statistical Software</em>, <b>96</b>(3).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# DB-efficient designs
+# 3 Attributes, all dummy coded. 1 alternative specific constant = 7 parameters
+cand.set &lt;- Profiles(lvls = c(3, 3, 3), coding = c("D", "D", "D"))
+mu &lt;- c(0.5, 0.8, 0.2, -0.3, -1.2, 1.6, 2.2) # Prior parameter vector
+v &lt;- diag(length(mu)) # Prior variance.
+set.seed(123) 
+pd &lt;- MASS::mvrnorm(n = 10, mu = mu, Sigma = v) # 10 draws.
+p.d &lt;- list(matrix(pd[,1], ncol = 1), pd[,2:7])
+Modfed(cand.set = cand.set, n.sets = 8, n.alts = 2, 
+       alt.cte = c(1, 0), parallel = FALSE, par.draws = p.d, best = FALSE)
+
+# DB-efficient design with start design provided.  
+# 3 Attributes with 3 levels, all dummy coded (= 6 parameters).
+cand.set &lt;- Profiles(lvls = c(3, 3, 3), coding = c("D", "D", "D")) 
+mu &lt;- c(0.8, 0.2, -0.3, -0.2, 0.7, 0.4) # Prior mean (total = 5 parameters).
+v &lt;- diag(length(mu)) # Prior variance.
+sd &lt;- list(example_design)
+set.seed(123)
+ps &lt;- MASS::mvrnorm(n = 10, mu = mu, Sigma = v) # 10 draws.
+Modfed(cand.set = cand.set, n.sets = 8, n.alts = 2, 
+       alt.cte = c(0, 0), parallel = FALSE, par.draws = ps, start.des = sd)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

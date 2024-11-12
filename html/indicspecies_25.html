@@ -1,0 +1,133 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>strassoc</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Strength of species site-group associations</h2>
+
+<h3>Description</h3>
+
+<p>This function computes the strength of the association between a species vector and a vector of memberships to the site-group. Several statistics are possible, following De Cáceres and Legendre (2009). The choice of the most appropriate statistic depends on the application. If required, bootstrap confidence interval bounds are also computed.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">strassoc(
+  X,
+  cluster,
+  func = "r",
+  group = NULL,
+  nboot.ci = NULL,
+  alpha.ci = 0.05,
+  c = 1
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>Community data table (rows are sites, columns are species).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster</code></td>
+<td>
+<p>A vector of numeric group labels for sites.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>func</code></td>
+<td>
+<p>The association index to be used. Accepted function names: "r", "r.g", "IndVal", "IndVal.g", "A", "A.g", "B", "cos", "cos.g", "r.ind", "r.ind.g", "s.ind", "s.ind.g" (lowercase values are also accepted).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group</code></td>
+<td>
+<p>Group for which association values are to be computed. If group=NULL, association values will be computed for all groups.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nboot.ci</code></td>
+<td>
+<p>Number of bootstrap samples. If <code>NULL</code> then confidence intervals are not estimated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha.ci</code></td>
+<td>
+<p>Error in confidence intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c</code></td>
+<td>
+<p>Vector of total abundance per site (used in functions "r.ind", "r.ind.g", "s.ind", "s.ind.g" only).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This R function is applicable to both presence-absence and quantitative species data, depending on the values in the input matrix X.  Indices "r","r.g","cos" and "cos.g" correspond to the general correlation generalization ("r" is the point-biserial correlation coefficient), whereas "r.ind", "r.ind.g", "s.ind" and "s.ind.g" correspond to the individual-based generalization. Both approaches give the same results for binary (presence-absence) species data. Indicator value indices "IndVal" and "IndVal.g" are partial generalizations of the indices of the presence-absence indices. The "IndVal" index of Dufrêne &amp; Legendre (1997) is called "IndVal.g" here and <code>strassoc</code> returns the square root of the original index. Indices "A","A.g" and "B" are the asymmetric quantities into which indicator values "IndVal" and "IndVal.g" can be decomposed. See De Cáceres and Legendre for details on the relationships between these indices and their usage. Bootstrap confidence intervals are computed using the simple percentile method (Manly 1997).
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a matrix of association values, where species are in rows and groups are in columns. If <code>nboot.ci</code> is not null, then a list is returned, where 'stat' contains the matrix of association values, and the lower and upper confidence limits are given in supplementary matrices named 'lowerCI' and 'upperCI' respectively.
+</p>
+
+
+<h3>Note</h3>
+
+<p>This function gives the same association values as function <code>indval</code> in package "labdsv" when used setting <code>func="IndVal.g"</code>, excepting the fact that the square root IndVal values is returned instead of the original IndVal.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Miquel De Cáceres Ainsa,  EMF-CREAF
+</p>
+
+
+<h3>References</h3>
+
+<p>De Cáceres, M. and Legendre, P. 2009. Associations between species and groups of sites: indices and statistical inference. Ecology 90(12): 3566-3574.
+</p>
+<p>Dufrêne, M. and P. Legendre. 1997. Species assemblages and indicator species: The need for a flexible asymetrical approach. Ecological Monographs 67:345-366.
+</p>
+<p>Manly, B. F. J. 1997. Randomization, bootstrap and Monte Carlo methods in biology. Chapman and Hall Texts in Statistical Science Series.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>signassoc</code>, <code>multipatt</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Load species data
+data(wetland) 
+
+## Create three clusters using
+wetkm &lt;- kmeans(wetland, centers=3)
+
+## Compute Dufrene and Legendre's IndVal
+strassoc(wetland, wetkm$cluster, func="IndVal.g") 
+
+## Compute correlation, with bootstrap 95 percent confidence intervals
+strassoc(wetland, wetkm$cluster, func="r.g", 
+         nboot.ci =100) 
+         
+</code></pre>
+
+
+</div>

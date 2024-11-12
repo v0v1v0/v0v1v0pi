@@ -1,0 +1,148 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>MGP_check</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Check the validity of Multiplicative Gamma Process (MGP) hyperparameters</h2>
+
+<h3>Description</h3>
+
+<p>Checks the hyperparameters for the multiplicative gamma process (MGP) shrinkage prior in order to ensure that the property of cumulative shrinkage (in expectation) holds, i.e. checks whether growing mass is assigned to small neighbourhoods of zero as the column index increases.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">MGP_check(ad1,
+          ad2,
+          Q = 3L,
+          phi.shape = NULL,
+          phi.rate = NULL,
+          sigma.shape = NULL,
+          sigma.rate = NULL,
+          bd1 = 1,
+          bd2 = 1,
+          truncated = FALSE,
+          inverse = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ad1, ad2</code></td>
+<td>
+<p>Shape hyperparameters for <code class="reqn">\delta_1</code> and <code class="reqn">\delta_k \forall k\ge 2</code>, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q</code></td>
+<td>
+<p>Number of latent factors. Defaults to <code>3</code>, which is enough to check if the cumulative shrinkage property holds. Supply <code>Q</code> if the actual <em>a priori</em> expected shrinkage factors are of interest.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phi.shape, phi.rate</code></td>
+<td>
+<p>The shape and rate hyperparameters for the gamma prior on the local shrinkage parameters. Not necessary for checking if the cumulative shrinkage property holds, but worth supplying <em>both</em> if the actual <em>a priori</em> expected shrinkage factors are of interest. The default value(s) depends on the value of <code>inverse</code>, but are chosen in such a way that the local shrinkage has no effect on the expectation unless both are supplied. Cannot be incorporated into the expectation if <code>phi.shape &lt; 1</code> and <code>isTRUE(inverse)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma.shape, sigma.rate</code></td>
+<td>
+<p>The shape and rate hyperparameters for the gamma prior on the cluster shrinkage parameters. Not necessary for checking if the cumulative shrinkage property holds, but worth supplying <em>both</em> if the actual <em>a priori</em> expected shrinkage factors are of interest. The default value(s) depends on the value of <code>inverse</code>, but are chosen in such a way that the cluster shrinkage has no effect on the expectation unless both are supplied. Cannot be incorporated into the expectation if <code>sigma.shape &lt; 1</code> and <code>isTRUE(inverse)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bd1, bd2</code></td>
+<td>
+<p>Rate hyperparameters for <code class="reqn">\delta_1</code> and <code class="reqn">\delta_k \forall k\ge 2</code>, respectively. Both default to <code>1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>truncated</code></td>
+<td>
+<p>A logical value indicating whether the version of the MGP prior based on left-truncated gamma distributions is invoked (see <code>ltrgamma</code> and the Zhang et al. reference below). Defaults to <code>FALSE</code>. Note that, when <code>TRUE</code>, the expected shrinkage factors for the first loadings column are not affected and the conditions needed to pass this check for the parameters associated with subsequent columns are much less strict. Moreover, more desirable shrinkage properties are easily obtained.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inverse</code></td>
+<td>
+<p>Logical indicator for whether the cumulative shrinkage property is assessed against the induced Inverse Gamma prior, the default, or in terms of the Gamma prior (which is incorrect). This is always <code>TRUE</code> when used inside <code>mcmc_IMIFA</code>: the <code>FALSE</code> option exists only for demonstration purposes.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This is called inside <code>mcmc_IMIFA</code> for the <code>"IFA"</code>, <code>"MIFA"</code>, <code>"OMIFA"</code> and <code>"IMIFA"</code> methods. This function is vectorised with respect to the arguments <code>ad1</code>, <code>ad2</code>, <code>phi.shape</code>, <code>phi.rate</code>, <code>sigma.shape</code>, <code>sigma.rate</code>, <code>bd1</code> and <code>bd2</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of length 2 containing the following objects:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>expectation</code></td>
+<td>
+<p>The vector (or list of vectors) of actual expected <em>a priori</em> shrinkage factors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>valid</code></td>
+<td>
+<p>A logical (or vector of logicals) indicating whether the cumulative shrinkage property holds (in expectation).</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>It is <em>recommended</em> that <code>ad2</code> be moderately large relative to <code>ad1</code>, even if <code>valid</code> can sometimes be <code>TRUE</code> when this is not the case (e.g. when <code>truncated=TRUE</code>). Similarly, satisfying this condition is no guarantee that <code>valid</code> will be <code>TRUE</code>, unless <code>truncated=TRUE</code>. Therefore, a warning is returned if <code>ad1 &lt;= ad2</code>, regardless of the value taken by <code>valid</code>, when <code>truncated=FALSE</code> (the default).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Keefe Murphy - &lt;<a href="mailto:keefe.murphy@mu.ie">keefe.murphy@mu.ie</a>&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Murphy, K., Viroli, C., and Gormley, I. C. (2020) Infinite mixtures of infinite factor analysers, <em>Bayesian Analysis</em>, 15(3): 937-963. &lt;<a href="https://doi.org/10.1214/19-BA1179">doi:10.1214/19-BA1179</a>&gt;.
+</p>
+<p>Durante, D. (2017). A note on the multiplicative gamma process, <em>Statistics &amp; Probability Letters</em>, 122: 198-204.
+</p>
+<p>Bhattacharya, A. and Dunson, D. B. (2011). Sparse Bayesian infinite factor models, <em>Biometrika</em>, 98(2): 291-306.
+</p>
+<p>Zhang, X., Dunson, D. B., and Carin, L. (2011) Tree-structured infinite sparse factor model. In Getoor, L. and Scheffer, T. (Eds.), <em>Proceedings of the 28th International Conference on Machine Learning (ICML 2011)</em>, June 28-July 2, 2011, Bellevue, WA, USA, pp. 785-792. Madison, WI, USA: Omnipress.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>mcmc_IMIFA</code>, <code>ltrgamma</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Check if expected shrinkage under the MGP increases with the column index (WRONG approach!).
+MGP_check(ad1=1.5, ad2=1.8, Q=10, phi.shape=3, inverse=FALSE)$valid   #TRUE
+
+# Check if the induced IG prior on the MGP column shrinkage parameters
+# is stochastically increasing, thereby inducing cumulative shrinkage (CORRECT approach!).
+MGP_check(ad1=1.5, ad2=1.8, Q=10, phi.shape=3, inverse=TRUE)$valid    #FALSE
+
+# Check again with a parameterisation that IS valid and examine the expected shrinkage values
+(shrink &lt;- MGP_check(ad1=1.5, ad2=2.8, Q=10, phi.shape=2, phi.rate=0.5, inverse=TRUE))
+
+# Check previously invalid parameterisation again using truncated version of the MGP prior
+MGP_check(ad1=1.5, ad2=1.8, Q=10, phi.shape=3, truncated=TRUE)$valid  #TRUE
+</code></pre>
+
+
+</div>

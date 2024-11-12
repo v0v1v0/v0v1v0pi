@@ -1,0 +1,133 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>isomultiscape</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Predicts the average spatial distribution of isotopic values over months,
+years...</h2>
+
+<h3>Description</h3>
+
+<p>This function is the counterpart of <code>isoscape</code> for the objects
+created with <code>isomultifit</code>. It creates the isoscapes for each
+strata (e.g. month) defined by <code>split_by</code> during the call to
+<code>isomultifit</code> and the aggregate them. The function can handle
+weighting for the aggregation process and may thus be used to predict annual
+averages precipitation weighted isoscapes.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">isomultiscape(raster, isofit, weighting = NULL, verbose = interactive())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>raster</code></td>
+<td>
+<p>The structural raster (<em>SpatRaster</em>) such as an elevation
+raster created using <code>prepelev</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>isofit</code></td>
+<td>
+<p>The fitted isoscape created by <code>isofit</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weighting</code></td>
+<td>
+<p>An optional RasterBrick containing the weights</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>A <em>logical</em> indicating whether information about the
+progress of the procedure should be displayed or not while the function is
+running. By default verbose is <code>TRUE</code> if users use an interactive R
+session and <code>FALSE</code> otherwise.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>This function returns a <em>list</em> of class <em>ISOSCAPE</em>
+containing a set of all 8 raster layers mentioned above (all being of
+class <em>SpatRaster</em>), and the location of the sources as spatial points.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>isoscape</code> for details on the function used to compute the isoscapes for each strata
+<code>isomultifit</code> for the function fitting the isoscape
+</p>
+<p><code>plot.ISOSCAPE</code> for the function plotting the isoscape model
+</p>
+<p><code>IsoriX</code> for the complete work-flow
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## The examples below will only be run if sufficient time is allowed
+## You can change that by typing e.g. options_IsoriX(example_maxtime = XX)
+## if you want to allow for examples taking up to ca. XX seconds to run
+## (so don't write XX but put a number instead!)
+
+if (getOption_IsoriX("example_maxtime") &gt; 180) {
+  ## We prepare the data and split them by month:
+
+  GNIPDataDEmonthly &lt;- prepsources(
+    data = GNIPDataDE,
+    split_by = "month"
+  )
+
+  dim(GNIPDataDEmonthly)
+
+  ## We fit the isoscapes:#'
+  GermanMultiFit &lt;- isomultifit(
+    data = GNIPDataDEmonthly,
+    mean_model_fix = list(elev = TRUE, lat.abs = TRUE)
+  )
+
+  ## We build the annual isoscapes by simple averaging (equal weighting):
+  GermanMultiscape &lt;- isomultiscape(
+    raster = ElevRasterDE,
+    isofit = GermanMultiFit
+  )
+
+  ## We build the annual isoscapes with a weighting based on precipitation amount:
+  GermanMultiscapeWeighted &lt;- isomultiscape(
+    raster = ElevRasterDE,
+    isofit = GermanMultiFit,
+    weighting = PrecipBrickDE
+  )
+
+  ## We plot the mean isoscape of the averaging with equal weighting:
+  plot(x = GermanMultiscape, which = "mean")
+
+  ## We plot the mean isoscape of the averaging with precipitation weighting:
+  plot(x = GermanMultiscapeWeighted, which = "mean")
+
+  ## We build the isoscapes for a given month (here January):
+  GermanScapeJan &lt;- isoscape(
+    raster = ElevRasterDE,
+    isofit = GermanMultiFit$multi_fits[["month_1"]]
+  )
+
+  ## We plot the mean isoscape for January:
+  plot(x = GermanScapeJan, which = "mean")
+}
+</code></pre>
+
+
+</div>

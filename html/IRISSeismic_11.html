@@ -1,0 +1,98 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>DDT</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Apply demean, detrend, cosine taper</h2>
+
+<h3>Description</h3>
+
+<p>The <code>DDT</code> method of <code>Trace</code> objects returns a new <code>Trace</code>
+where data in the <code>@data</code> slot have been modified.  This is typically required before 
+peforming any kind of spectral analysis on the seismic trace.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">DDT(x, demean, detrend, taper)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a <code>Trace</code> object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>demean</code></td>
+<td>
+<p>logical specifying whether to deman (default=<code>TRUE</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>detrend</code></td>
+<td>
+<p>logical specifying whether to detrend (default=<code>TRUE</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>taper</code></td>
+<td>
+<p>proportion of the signal to be tapered at each end (default=0.1)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<p>Use <code>taper=0</code> for no tapering.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A new <code>Trace</code> object is returned.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+# P-wave onset for a big quake
+starttime &lt;- as.POSIXct("2010-02-27 06:30:00", tz="GMT")
+endtime &lt;- as.POSIXct("2010-02-27 07:00:00", tz="GMT")
+result &lt;- try(st &lt;- getDataselect(iris,"IU","ANMO","00","BHZ",starttime,endtime))
+if (inherits(result,"try-error")) {
+  message(geterrmessage())
+} else {
+  tr &lt;- st@traces[[1]]
+  trClean &lt;- DDT(tr,TRUE,TRUE,0.1)
+  layout(matrix(seq(2)))
+  plot(tr)
+  abline(h=0,col='gray60')
+  mtext("Raw",side=3,line=-2,adj=0.05,col='red')
+  plot(trClean)
+  abline(h=0,col='gray60')
+  mtext("Demean - Detrend - Cosine Taper",line=-2,side=3,adj=0.05,col='red')
+}
+
+# Restore default layout
+layout(1)
+</code></pre>
+
+
+</div>

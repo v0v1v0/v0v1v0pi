@@ -1,0 +1,93 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getMetrics</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Performance Measures</h2>
+
+<h3>Description</h3>
+
+<p>this function allows to obtain performance measures from Confusion Matrix, it returns a data frame containing performance measures from the confusion matrix given by the <code>caret</code> package.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getMetrics(y, yhat, classtype)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>expression. The class variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yhat</code></td>
+<td>
+<p>expression. The vector of predicted values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>classtype</code></td>
+<td>
+<p>character or numeric. The number of levels in <code>y</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>getMetrics</code> works with target variables that have two, three, four, six or eight classes.
+</p>
+<p>The function relies on the <code>caret</code> package to obtain the confusion matrix from which performance measures are extracted. It can be run for several algorithms, and the results combined into one data frame for easier comparison (see section 'Examples').
+</p>
+<p>Predictions have to be obtained beforehand and used as input for <code>yhat</code>. The <code>predict.train</code> function in <code>caret</code> should be run without argument <code>type</code> when obtaining the predictions.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Outputs an object with performance measures calculated from the confusion matrix given by the <code>caret</code> package. A data frame is the resulting output with the first column giving the name of the performance measure, and the second column giving the corresponding value.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Zakaria Kehel, Bancy Ngatia, Khadija Aziz
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>confusionMatrix</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">if(interactive()){
+# Obtain predictions from previous models
+ 
+data(septoriaDurumWC)  
+split.data &lt;- splitData(septoriaDurumWC, seed = 1234, y = "ST_S", p = 0.7)
+data.train &lt;- split.data$trainset
+data.test &lt;- split.data$testset
+
+knn.mod &lt;- tuneTrain(data = septoriaDurumWC,y = 'ST_S',method = 'knn',positive = 'R')
+nnet.mod &lt;- tuneTrain(data = septoriaDurumWC,y = 'ST_S',method = 'nnet',positive = 'R') 
+
+pred.knn &lt;- predict(knn.mod$Model, newdata = data.test[ , -1])
+pred.nnet &lt;- predict(nnet.mod$Model, newdata = data.test[ , -1])
+
+metrics.knn &lt;- getMetrics(y = data.test$ST_S, yhat = pred.knn, classtype = 2)
+metrics.nnet &lt;- getMetrics(y = data.test$ST_S, yhat = pred.nnet, classtype = 2)
+}
+</code></pre>
+
+
+</div>

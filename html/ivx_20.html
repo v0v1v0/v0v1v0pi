@@ -1,0 +1,173 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ivx_ar</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fitting IVX-AR Models</h2>
+
+<h3>Description</h3>
+
+<p>ivx_ar implements the Yang et al (2020) new instrumental variable based Wald statistic
+(IVX-AR) which accounts for serial correlation and heteroscedasticity in the error
+terms of the linear predictive regression model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ivx_ar(
+  formula,
+  data,
+  horizon,
+  ar = "auto",
+  ar_ic = c("bic", "aic", "aicc"),
+  ar_max = 5,
+  ar_grid = function(x) seq(x - 0.3, x + 0.3, by = 0.02),
+  na.action,
+  contrasts = NULL,
+  offset,
+  model = TRUE,
+  x = FALSE,
+  y = FALSE,
+  ...
+)
+
+## S3 method for class 'ivx_ar'
+print(x, digits = max(3L, getOption("digits") - 3L), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>an object of class "formula" (or one that can be coerced to that class):
+a symbolic description of the model to be fitted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>n optional data frame, list or environment (or object coercible by
+<code>as.data.frame</code> to a data frame) containing
+the variables in the model. If not found in data, the variables are taken
+from environment(formula), typically the environment from which lm is called.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>horizon</code></td>
+<td>
+<p>is the horizon (default horizon = 1 corresponds to a
+short-horizon regression).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ar</code></td>
+<td>
+<p>Method to include the autoregressive terms. "auto" find the optimal
+ar order by using the information criteria. <code>ar = 0</code> reduces to simple <code>ivx</code>.
+<code>ar &gt; 1</code> uses a fixed order to estimate the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ar_ic</code></td>
+<td>
+<p>Information criterion to be used in model selection.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ar_max</code></td>
+<td>
+<p>Maximum ar order of model to fit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ar_grid</code></td>
+<td>
+<p>The ar grid sequence of which to iterate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+<p>a function which indicates what should happen when the data
+contain NAs. The default is set by the na.action setting of <code>options</code>,
+and is <code>na.fail</code> if that is unset. The ‘factory-fresh’
+default is <code>na.omit</code>. Another possible value is <code>NULL</code>,
+no action. Value <code>na.exclude</code> can be useful.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>contrasts</code></td>
+<td>
+<p>an optional list. See the <code>contrasts.arg</code> of
+<code>model.matrix.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+<p>this can be used to specify an a priori known component to be
+included in the linear predictor during fitting. This should be NULL or a
+numeric vector or matrix of extents matching those of the response. One or
+more offset terms can be included in the formula instead or as well, and if more
+than one are specified their sum is used. See model.offset</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>logical. If <code>TRUE</code> the model.frame of the fit is returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an object of class "ivx_ar", usually, a result of a call to ivx_ar.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>logical. If <code>TRUE</code> the response of the fit is returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments to be passed to the low level regression fitting
+functions (see lm).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>the number of significant digits to use when printing.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Yang, B., Long, W., Peng, L., &amp; Cai, Z. (2020). Testing the
+Predictability of US Housing Price Index Returns Based on an IVX-AR Model.
+Journal of the American Statistical Association, 1-22. DOI:
+doi: <a href="https://doi.org/10.1080/01621459.2019.1686392">10.1080/01621459.2019.1686392</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+ivx_ar(hpi ~ log(res) + cpi, ylpc)
+
+ivx_ar(hpi ~ log(res) + cpi, ylpc, ar_ic = "aic")
+
+ivx_ar(hpi ~ log(res) + cpi, ylpc, ar = 1)
+
+</code></pre>
+
+
+</div>

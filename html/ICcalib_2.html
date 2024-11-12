@@ -1,0 +1,100 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>CalcCoxCalibRSIntsP</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculating the probabilities of positive binary exposure status at a given time point using proportional hazards grouped risk-set
+calibration models</h2>
+
+<h3>Description</h3>
+
+<p>For a given time point, calculate the probability of positive exposure value  for multiple observations (participants). 
+The function uses the results of proportional hazards grouped risk-set calibration model fit, and given covariates and collected data on the history 
+of the binary exposure for each participant.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">CalcCoxCalibRSIntsP(w, w.res, point, fit.cox.rs.ints, hz.times, Q, pts.for.ints)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>A matrix of time points when measurements on the binary covariate were obtained.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w.res</code></td>
+<td>
+<p>A matrix of measurement results of the binary covariate. Each measurement corresponds to the time points in <code>w</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>point</code></td>
+<td>
+<p>The time point at which the probabilities are estimated</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fit.cox.rs.ints</code></td>
+<td>
+<p>The result of <code>FitCalibCoxRSInts</code> on the interval-censored data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hz.times</code></td>
+<td>
+<p>Times used for calculating the baseline hazard function from PH calibration model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q</code></td>
+<td>
+<p>Matrix of covariates for the PH calibration model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pts.for.ints</code></td>
+<td>
+<p>Points defining the intervals for grouping risk-sets (first one has to be zero). Should be sorted from zero up</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A vector of estimated probabilities of positive exposure status at time <code>point</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(17)
+sim.data &lt;- ICcalib:::SimCoxIntervalCensCox(n.sample = 100, lambda = 0.1, 
+                                            alpha = 0.25, beta0 = 0, 
+                                            gamma.q = c(log(0.75), log(2.5)), 
+                                            gamma.z = log(1.5), mu = 0.2, 
+                                            n.points = 2)
+# The baseline hazard for the calibration model is calculated in observation times
+cox.hz.times &lt;- sort(unique(sim.data$obs.tm)) 
+# Fit proprtional hazards calibration model
+fit.cox.rs.ints &lt;- FitCalibCoxRSInts(w = sim.data$w, w.res = sim.data$w.res, 
+                                     Q = sim.data$Q, hz.times = cox.hz.times, 
+                                     n.int = 5, order = 2, pts.for.ints = seq(0,4,1), 
+                                     tm = sim.data$obs.tm, event = sim.data$delta)
+# Calculate the conditional probabilities of binary covariate=1 at time one
+probs &lt;- CalcCoxCalibRSIntsP(w = sim.data$w, w.res = sim.data$w.res, point = 1,
+                             fit.cox.rs.ints = fit.cox.rs.ints,
+                             pts.for.ints = seq(0,4,1), Q = sim.data$Q, 
+                             hz.times = cox.hz.times)
+summary(probs)
+</code></pre>
+
+
+</div>

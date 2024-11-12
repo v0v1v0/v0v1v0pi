@@ -1,0 +1,164 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>options</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Infusion options settings</h2>
+
+<h3>Description</h3>
+
+<p>Allow the user to set and examine a variety of <em>options</em>
+which affect operations of the Infusion package. 
+However, typically these should not be modified, and if they are, not more than once in a data analysis.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Infusion.options(...)
+
+Infusion.getOption(x)
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a character string holding an option name.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>A named value, or several of them, or a single unnamed argument which is a named list). 
+The following values, with their defaults, are used in <code>Infusion</code>:
+</p>
+
+<dl>
+<dt><code>mixturing</code></dt>
+<dd>
+<p>character string: package or function to be used for mixture modelling. Recognized packages are <code>"Rmixmod"</code> (the default) and <code>"mclust"</code>;   </p>
+</dd>
+<dt>
+<code>train_cP_size</code>:</dt>
+<dd>
+<p>Expression for <code>train_cP_size</code> argument of <code>project.character</code>.</p>
+</dd>
+<dt>
+<code>trainingsize</code>:</dt>
+<dd>
+<p>Expression for <code>trainingsize</code> argument of <code>project.character</code>.</p>
+</dd>
+<dt>
+<code>projKnotNbr = 1000</code>:</dt>
+<dd>
+<p>default value of <code>trainingsize</code> argument of <code>project.character</code> for REML (as implied by default expression for <code>trainingsize</code>).</p>
+</dd>
+<dt>
+<code>logLname = "logL"</code>:</dt>
+<dd>
+<p>default value of <code>logLname</code> argument of <code>infer_logLs</code>. The name given to the inferred log likelihoods in all analyses.</p>
+</dd>
+<dt>
+<code>LRthreshold= - qchisq(0.999,df=1)/2</code>:</dt>
+<dd>
+<p>A value used internally by <code>sample_volume</code> to sample points 
+in the upper region of the likelihood surface, as defined by the given likelihood ratio threshold.
+</p>
+</dd>
+<dt>
+<code>precision = 0.25</code>:</dt>
+<dd>
+<p>default value of <code>precision</code> argument of <code>refine</code>. Targets RMSE of log L and log LR estimates.</p>
+</dd>
+<dt>
+<code>nRealizations=1000</code>:</dt>
+<dd>
+<p>default value of <code>nRealizations</code> argument of <code>add_simulation</code>. Number of realizations for each empirical distribution.</p>
+</dd>
+<dt>
+<code>mixmodGaussianModel="Gaussian_pk_Lk_Ck"</code>:</dt>
+<dd>
+<p>default models used in clustering by <code>Rmixmod</code>. Run <code>Rmixmod::mixmodGaussianModel()</code> for a list of possible models, and see the statistical documentation (Mixmod Team 2016) for explanations about them.</p>
+</dd>
+<dt>
+<code>global_strategy_args</code>:</dt>
+<dd>
+<p>list of arguments for <code>Rmixmod::mixmodStrategy()</code>.</p>
+</dd>
+<dt>
+<code>seq_nbCluster= function(projdata, nr=nrow(projdata)) {seq(ceiling(nr^0.31))}</code>:</dt>
+<dd>
+<p>function to control the value of <code>nbCluster</code> used in clustering by <code>Rmixmod</code> (see Details for discussion of this default).</p>
+</dd>
+<dt>
+<code>maxnbCluster = function(projdata) {...} </code>:</dt>
+<dd>
+<p>function to control the maximum number of clusters (see Details).</p>
+</dd>
+<dt>
+<code>example_maxtime=2.5</code>:</dt>
+<dd>
+<p>Used in the documentation to control whether the longer examples should be run. 
+The approximate running time of given examples (or some very rough approximation for it) on one author's laptop is compared to this value.</p>
+</dd> 
+<dt><code>nb_cores</code></dt>
+<dd>
+<p>Number of cores for parallel computations (see Details for implementation of these).</p>
+</dd>
+<dt><code>gof_nstats_fn</code></dt>
+<dd>
+<p>See <code>goftest</code>.</p>
+</dd>
+</dl>
+<p>and possibly other undocumented values for development purposes.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<p>The set of the number of clusters tried (<code>nbCluster</code> argument in <code>Rmixmod</code>) is controlled by two options: <code>seq_nbCluster</code> and <code>maxnbCluster</code>. The second is used to correct the first, using the dimensions of the <code>projdata</code> locally used for clustering, which typically differs from the dimensions of the user-level <code>data</code> (if projections have been applied, in particular). The default upper value of the <code>nbCluster</code> range is derived from the value <code class="reqn">n^{0.3}</code> recommended in the <code>mixmod</code> statistical documentation (Mixmod Team, 2016), but modified based on different considerations. First, that recommendation may be suitable for a large input of points in low dimension, but may request estimation of too many clustering parameters as the dimension of data points increases, justifying the correction according to<code>maxnbCluster</code>. Conversely, for large number of points, experience shows that the maximum value derived from such rules is practically always selected by AIC, supporting a rule specifying a higher number of points (such as the currently retained default <code class="reqn">n^{0.31}</code>).
+</p>
+<p><code>Infusion</code> can perform parallel computations if several cores are available and requested though <code>Infusion.options(nb_cores=.)</code>. If the <code>doSNOW</code> back-end is attached (by explicit request from the user), it will be used; otherwise, <code>pbapply</code> will be used. Both provide progress bars, but <code>doSNOW</code> may provide more efficient load-balancing. The character shown in the progress bar is <code>'P'</code> for parallel via <code>doSNOW</code> backend, <code>'p'</code> for parallel via <code>pbapply</code> functions, and <code>'s'</code> for serial via <code>pbapply</code> functions. In addition, <code>add_simulation</code> can parallelise at two levels: at an outer level over parameter point, or at an inner level over simulation replicates for each parameter point. The progress bar of the outer computation is shown, but the character shown in the progress bar is <code>'N'</code> if the inner computation is parallel via the <code>doSNOW</code> backend, and <code>'n'</code> if it is parallel via <code>pbapply</code> functions. So, one should see either <code>'P'</code> or <code>'N'</code> when using <code>doSNOW</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>For <code>Infusion.getOption</code>, the current value set for option <code>x</code>, or
+<code>NULL</code> if the option is unset.
+</p>
+<p>For <code>Infusion.options()</code>, a list of all set options.  For
+<code>Infusion.options(name)</code>, a list of length one containing the set value,
+or <code>NULL</code> if it is unset.  For uses setting one or more options,
+a list with the previous values of the options changed (returned
+invisibly).
+</p>
+
+
+<h3>References</h3>
+
+<p>Mixmod Team (2016). Mixmod Statistical Documentation. Université de Franche-Comté,
+Besançon, France. Version: February 10, 2016 retrieved from <a href="https://www.mixmod.org">https://www.mixmod.org</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  Infusion.options()
+  Infusion.getOption("LRthreshold")
+  ## Not run: 
+  Infusion.options(LRthreshold=- qchisq(0.99,df=1)/2)
+  
+## End(Not run)
+</code></pre>
+
+
+</div>

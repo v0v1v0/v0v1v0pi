@@ -1,0 +1,158 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>inspect_character</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Validate character vectors</h2>
+
+<h3>Description</h3>
+
+<p><code>inspect_character</code> checks if an object is a character vector.
+This can be useful to validate inputs in user-defined functions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">inspect_character(x, allow_nas = TRUE, warning_nas = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An arbitrary object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allow_nas</code></td>
+<td>
+<p>Logical value. If <code>TRUE</code> then <code>NA</code> and <code>NaN</code> values in <code>x</code>
+are allowed. If <code>FALSE</code>, execution is stopped and an error message is thrown
+in case there are <code>NA</code> or <code>NaN</code> values in <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warning_nas</code></td>
+<td>
+<p>Logical value. If <code>TRUE</code> then the presence of <code>NA</code> or
+<code>NaN</code> values in <code>x</code> generates a warning message. <code>NA</code> and <code>NaN</code> values pass
+silently otherwise (if <code>allow_nas</code> is set to <code>TRUE</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>inspect_character</code> conducts a series of tests to check if <code>x</code> is a
+character vector. Namely, <code>inspect_character</code> checks if:
+</p>
+
+<ul>
+<li> <p><code>x</code> is <code>NULL</code> or empty.
+</p>
+</li>
+<li> <p><code>x</code> is an atomic vector.
+</p>
+</li>
+<li>
+<p> The <code>typeof</code> <code>x</code> is character.
+</p>
+</li>
+<li>
+<p> There are <code>NA</code> or <code>NaN</code> values in <code>x</code>.
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p><code>inspect_character</code> does not return any output. There are three
+possible outcomes:
+</p>
+
+<ul>
+<li>
+<p> The call is silent if:
+</p>
+
+<ul>
+<li> <p><code>x</code> is a character vector and there are no <code>NA</code> or <code>NaN</code> values in <code>x</code>.
+</p>
+</li>
+<li> <p><code>x</code> is a character vector, there are some <code>NA</code> or <code>NaN</code> values in <code>x</code>,
+<code>allow_nas</code> is set to <code>TRUE</code> and <code>warning_nas</code> is set to <code>FALSE</code>.
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p> An informative warning message is thrown if <code>x</code> is a character vector,
+there are some <code>NA</code> or <code>NaN</code> values in <code>x</code> and both <code>allow_nas</code> and
+<code>warning_nas</code> are set to <code>TRUE</code>.
+</p>
+</li>
+<li>
+<p> An informative error message is thrown if:
+</p>
+
+<ul>
+<li> <p><code>x</code> is not a character vector.
+</p>
+</li>
+<li> <p><code>x</code> is a character vector, there are some <code>NA</code> or <code>NaN</code> values in <code>x</code>
+and <code>allow_nas</code> is set to <code>FALSE</code>.
+</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3>See Also</h3>
+
+
+<ul>
+<li> <p><code>inspect_character_match</code> to validate character
+vectors with predefined allowed values.
+</p>
+</li>
+<li> <p><code>inspect_true_or_false</code> to check if an object is a
+non-missing logical value.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Calls that pass silently:
+x1 &lt;- "Kass"
+x2 &lt;- c("Kass", "Raftery")
+x3 &lt;- c("Kass", "Raftery", NA)
+x4 &lt;- letters
+inspect_character(x1)
+inspect_character(x2)
+inspect_character(x3)
+inspect_character(x4)
+
+# Call that throws an informative warning message
+y &lt;- c("Kass", "Raftery", NA)
+try(inspect_character(y, warning_nas = TRUE))
+
+# Calls that throw informative error messages
+try(inspect_character(y, allow_nas = FALSE))
+mylist &lt;- list(
+  NULL, character(0), 1,
+  c(1, 2), factor(c(1, 2)), list(c(1, 2)), NaN, NA
+)
+try(inspect_character(mylist[[1]]))
+try(inspect_character(mylist[[2]]))
+try(inspect_character(mylist[[3]]))
+try(inspect_character(mylist[[4]]))
+try(inspect_character(mylist[[5]]))
+try(inspect_character(mylist[[6]]))
+try(inspect_character(mylist[[7]]))
+try(inspect_character(mylist[[8]]))
+</code></pre>
+
+
+</div>

@@ -1,0 +1,156 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ir_variance_region</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Computes the variance of a spectrum in an <code>ir</code> object in a given region</h2>
+
+<h3>Description</h3>
+
+<p><code>ir_variance_region</code> takes a spectrum <code>x</code> and, depending on the
+arguments computes the following summary:
+</p>
+
+<dl>
+<dt>if <code>subtract_smoothed = FALSE</code>
+</dt>
+<dd>
+<p>it computes the variance of the
+intensity values for each spectrum in <code>x</code>. If in addition <code>range</code>
+is not <code>NULL</code>, it computes the variance only for the region(s)
+represented by <code>range</code>.</p>
+</dd>
+<dt>if <code>subtract_smoothed = TRUE</code>
+</dt>
+<dd>
+<p>it smoothes <code>x</code>, subtracts
+the smoothed <code>x</code> from the unsmoothed <code>x</code> and computes the
+variance of the difference intensity values. If in addition <code>range</code> is
+not <code>NULL</code>, it computes the variance only for the region(s)
+represented by <code>range</code>.</p>
+</dd>
+</dl>
+<h3>Usage</h3>
+
+<pre><code class="language-R">ir_variance_region(
+  x,
+  subtract_smoothed = FALSE,
+  do_normalize = FALSE,
+  normalize_method,
+  ...,
+  range = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class <code>ir</code>. These are the spectra for
+which to compute the variance.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subtract_smoothed</code></td>
+<td>
+<p>A logical value. If <code>subtract_smoothed = TRUE</code>,
+<code>x</code> is copied, the copy smoothed using <code>ir_smooth</code> with
+<code>method = "sg"</code> and subtracted from <code>x</code> before the variance of the
+intensity values from <code>x</code> is computed. This allows e.g. to estimate the
+noise level in a specific region of spectra. If
+<code>subtract_smoothed = FALSE</code> (the default), nothing is subtracted from
+<code>x</code> before computing the variance of the intensity values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>do_normalize</code></td>
+<td>
+<p>A logical value. If set to <code>TRUE</code>, the spectra in
+<code>x</code> are normalized after subtraction of a smoothed version, else no
+normalization is performed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>normalize_method</code></td>
+<td>
+<p>See <code>ir_normalize()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arguments passed to <code>ir_smooth()</code> (except for
+<code>method</code> which is always set to <code>"sg"</code> if <code>subtract_smoothed</code> is
+<code>TRUE</code>). If <code>subtract_smoothed = FALSE</code>, these arguments will be
+ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>range</code></td>
+<td>
+<p>See <code>ir_clip()</code>. This is the range for which the
+variance of the intensity values will be computed.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>x</code> with two additional columns:
+</p>
+
+<dl>
+<dt>variance</dt>
+<dd>
+<p>A numeric vector with the computed variances of the
+intensity values for the respective spectra.</p>
+</dd>
+<dt>n_variance</dt>
+<dd>
+<p>An integer vector with the number of intensity values
+used during computing the variance.</p>
+</dd>
+</dl>
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Whole spectra variance
+x1 &lt;-
+   ir::ir_sample_data %&gt;%
+   ir::ir_variance_region(
+      subtract_smoothed = FALSE,
+      do_normalize = TRUE,
+      normalize_method = "area",
+      range = NULL
+   )
+
+# Spectra variance, but only from a specific region
+range &lt;- data.frame(start = 2700, end = 2800)
+
+x2 &lt;-
+   ir::ir_sample_data %&gt;%
+   ir::ir_normalize(method = "area") %&gt;%
+   ir::ir_variance_region(
+      subtract_smoothed = FALSE,
+      do_normalize = TRUE,
+      normalize_method = "area",
+      range = range
+   )
+
+# Spectra variance after subtracting a smoothed version of the spectra and
+# only from a specific region
+x3 &lt;-
+   ir::ir_sample_data %&gt;%
+   ir::ir_variance_region(
+      subtract_smoothed = TRUE,
+      do_normalize = FALSE,
+      range = range,
+      p = 3, n = 31, ts = 1, m = 0
+   )
+
+</code></pre>
+
+
+</div>

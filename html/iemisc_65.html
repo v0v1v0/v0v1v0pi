@@ -1,0 +1,220 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>kin_visc_water</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Kinematic Viscosity for liquid Water</h2>
+
+<h3>Description</h3>
+
+<p>This function solves for the kinematic viscosity of water using only
+the water density and the dynamic viscosity.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">kin_visc_water(
+  rho,
+  mu,
+  rho_units = c("kg/m^3", "lbm/ft^3", "slug/ft^3"),
+  mu_units = c("Pa*s or kg/m/s", "lbf*s/ft^2", "slug/ft/s")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+<p>numeric vector that contains the water density</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu</code></td>
+<td>
+<p>numeric vector that contains the water dynamic viscosity</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho_units</code></td>
+<td>
+<p>character vector that contains the unit for the density of
+water [options are kg/m^3, lbm/ft^3, or slug/ft^3]</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu_units</code></td>
+<td>
+<p>character vector that contains the unit for the dynamic
+viscosity of water [options are Pa*s or kg/m/s, lbf*s/ft^2, or slug/ft/s]</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The simplified equation is expressed as
+</p>
+<p style="text-align: center;"><code class="reqn">\\nu = \frac{\\mu}{\\rho}</code>
+</p>
+
+
+<dl>
+<dt><em>\nu</em></dt>
+<dd>
+<p>Water Kinematic Viscosity (m^2/s or ft^2/s)</p>
+</dd>
+<dt><em>\rho</em></dt>
+<dd>
+<p>Water Density (mass divided by volume), slug/ft^3</p>
+</dd>
+<dt><em>\mu</em></dt>
+<dd>
+<p>Water Dynamic viscosity, slug/ft/s</p>
+</dd>
+</dl>
+<h3>Value</h3>
+
+<p>the kinematic viscosity as a numeric vector. The units are not
+returned.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Note: 1 lbf = 1 slug * 1 ft/sec^2, thus 1 slug = 1 lbf * sec^2 / 1 ft
+(Reference 2)
+</p>
+<p>Thus, lbm/ft^3 = lbf*s^2/ft/ft^3
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Irucka Embry
+</p>
+
+
+<h3>Source</h3>
+
+
+<ol>
+<li>
+<p> r - How to not run an example using roxygen2? - Stack Overflow answered and edited by samkart on Jul 9 2017. (Also see the additional comments in response to the answer.) See <a href="https://stackoverflow.com/questions/12038160/how-to-not-run-an-example-using-roxygen2">https://stackoverflow.com/questions/12038160/how-to-not-run-an-example-using-roxygen2</a>.
+</p>
+</li>
+<li>
+<p> devtools - Issues in R package after CRAN asked to replace dontrun by donttest - Stack Overflow answered by Hong Ooi on Sep 1 2020. (Also see the additional comments in response to the answer.) See <a href="https://stackoverflow.com/questions/63693563/issues-in-r-package-after-cran-asked-to-replace-dontrun-by-donttest">https://stackoverflow.com/questions/63693563/issues-in-r-package-after-cran-asked-to-replace-dontrun-by-donttest</a>.
+</p>
+</li>
+</ol>
+<h3>References</h3>
+
+
+<ol>
+<li>
+<p> Ven Te Chow, Ph.D., <em>Open-Channel Hydraulics</em>, McGraw-Hill Classic Textbook Reissue, New York City, New York: McGraw-Hill Book Company, 1988, pages 7-8.
+</p>
+</li>
+<li>
+<p> Professor S.A. Kinnas, Commonly used units in CE319F (Elementary Fluid Mechanics), The University of Texas at Austin Department of Civil, Architectural and Environmental Engineering, <a href="https://www.caee.utexas.edu/prof/kinnas/319LAB/notes13/units_ce319f_kinnas.pdf">https://www.caee.utexas.edu/prof/kinnas/319LAB/notes13/units_ce319f_kinnas.pdf</a>.
+</p>
+</li>
+</ol>
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example 1
+
+
+# See Source 1 and Source 2
+
+library(iemisc)
+
+try(kin_visc_water(mu = 34, rho = 0, rho_units = "kg/m^3", mu_units = "Pa*s or kg/m/s"))
+
+
+
+
+
+# Example 2 (from the Reference)
+
+install.load::load_package("iemisc", "units")
+
+import::from(fpCompare, "%==%")
+
+
+# For water at 68 F (20 C), mu = 2.09 * 10 ^ -8 slug/ft/s and rho = 1.937 slug/ft^3
+
+kin_visc_water(mu = 2.09 * 10 ^ -8, rho = 1.937, rho_units =
+"slug/ft^3", mu_units = "slug/ft/s")
+
+# convert the units
+
+rho &lt;- set_units(1.937, slug/ft^3)
+
+mu &lt;- set_units(2.09 * 10 ^ -8, slug/ft/s)
+
+mu1 &lt;- set_units(mu, kg/m/s)
+
+rho1 &lt;- set_units(rho, "kg/m^3")
+
+kin_visc_water(mu = mu1, rho = rho1, rho_units = "kg/m^3", mu_units =
+"Pa*s or kg/m/s")
+
+mu2 &lt;- set_units(mu, lbf*s/ft^2)
+
+rho2 &lt;- set_units(rho, lb/ft^3)
+
+kin_visc_water(mu = mu2, rho = rho2, rho_units = "lbm/ft^3", mu_units =
+"lbf*s/ft^2")
+
+
+# compare the results of part 1 and part 3 (they should be equivalent)
+
+kin_visc_water(mu = 2.09 * 10 ^ -8, rho = 1.937, rho_units = "slug/ft^3",
+mu_units = "slug/ft/s") %==% kin_visc_water(mu = mu2, rho = rho2, rho_units =
+"lbm/ft^3", mu_units = "lbf*s/ft^2")
+
+
+
+
+
+# Example 2 - Example from the hydraulics package
+
+install.load::load_package("iemisc", "units")
+
+import::from(fpCompare, "%==%")
+
+
+nu &lt;- hydraulics::kvisc(T = 55, units = "Eng", ret_units = TRUE); nu
+
+nus &lt;- hydraulics::dvisc(T = 55, units = "Eng", ret_units = TRUE) /
+hydraulics::dens(T = 55, units = "Eng", ret_units = TRUE); nus
+
+
+# compare the results of nu and nus (they should be equivalent)
+
+drop_units(nu) %==% drop_units(nus)
+
+
+nu2 &lt;- dyn_visc_water(Temp = 55, units = "Eng", Eng_units = "lbf*s/ft^2") /
+density_water(Temp = 55, units = "Eng", Eng_units = "slug/ft^3"); nu2
+
+nus2 &lt;- kin_visc_water(mu = dyn_visc_water(Temp = 55, units = "Eng", Eng_units =
+"lbf*s/ft^2"), rho = density_water(Temp = 55, units = "Eng", Eng_units = "slug/ft^3"),
+rho_units = "lbm/ft^3", mu_units = "lbf*s/ft^2"); nus2
+
+# compare the results of nu2 and nus2 (they should be equivalent)
+
+nu2 %==% nus2
+
+
+
+
+</code></pre>
+
+
+</div>

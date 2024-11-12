@@ -1,0 +1,210 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ispls.cv</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Cross-validation for ispls</h2>
+
+<h3>Description</h3>
+
+<p>Performs K-fold cross validation for the integrative sparse partial least squares over a grid of values for the regularization parameter mu1 and mu2.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ispls.cv(x, y, L, K, mu1, mu2, eps = 1e-04, kappa = 0.05,
+  pen1 = "homogeneity", pen2 = "magnitude", scale.x = TRUE,
+  scale.y = TRUE, maxstep = 50, submaxstep = 10)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>list of data matrices, L datasets of explanatory variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>list of data matrices, L datasets of dependent variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L</code></td>
+<td>
+<p>numeric, number of datasets.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>numeric, number of cross-validation folds. Default is 5.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu1</code></td>
+<td>
+<p>numeric, the feasible set of sparsity penalty parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu2</code></td>
+<td>
+<p>numeric, the feasible set of contrasted penalty parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>numeric, the threshold at which the algorithm terminates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kappa</code></td>
+<td>
+<p>numeric, 0 &lt; kappa &lt; 0.5 and the parameter reduces the effect of the concave part of objective function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pen1</code></td>
+<td>
+<p>character, "homogeneity" or "heterogeneity" type of the sparsity structure. If not specified, the default is homogeneity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pen2</code></td>
+<td>
+<p>character, "magnitude" or "sign" based contrasted penalty. If not specified, the default is magnitude.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale.x</code></td>
+<td>
+<p>character, "TRUE" or "FALSE", whether or not to scale the variables x. The default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale.y</code></td>
+<td>
+<p>character, "TRUE" or "FALSE", whether or not to scale the variables y. The default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxstep</code></td>
+<td>
+<p>numeric, maximum iteration steps. The default value is 50.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>submaxstep</code></td>
+<td>
+<p>numeric, maximum iteration steps in the sub-iterations. The default value is 10.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An 'ispls.cv' object that contains the list of the following items.
+</p>
+
+<ul>
+<li>
+<p>x: list of data matrices, L datasets of explanatory variables with centered columns. If scale.x is TRUE, the columns of L datasets are standardized to have mean 0 and standard deviation 1.
+</p>
+</li>
+<li>
+<p>y: list of data matrices, L datasets of dependent variables with centered columns. If scale.y is TRUE, the columns of L datasets are standardized to have mean 0 and standard deviation 1.
+</p>
+</li>
+<li>
+<p>mu1: the sparsity penalty parameter selected from the feasible set of parameter mu1 provided by users.
+</p>
+</li>
+<li>
+<p>mu2: the contrasted penalty parameter selected from the feasible set of parameter mu2 provided by users.
+</p>
+</li>
+<li>
+<p>fold: The fold assignments for cross-validation for each observation.
+</p>
+</li>
+<li>
+<p>betahat: the estimated regression coefficients with selected tuning parameters mu1 and mu2.
+</p>
+</li>
+<li>
+<p>loading: the estimated first direction vector with selected tuning parameters mu1 and mu2.
+</p>
+</li>
+<li>
+<p>variable: the screening results of variables x.
+</p>
+</li>
+<li>
+<p>meanx: list of numeric vectors, column mean of the original datasets x.
+</p>
+</li>
+<li>
+<p>normx: list of numeric vectors, column standard deviation of the original datasets x.
+</p>
+</li>
+<li>
+<p>meany: list of numeric vectors, column mean of the original datasets y.
+</p>
+</li>
+<li>
+<p>normy: list of numeric vectors, column standard deviation of the original datasets y.
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+
+<ul><li>
+<p>Liang W, Ma S, Zhang Q, et al. Integrative sparse partial least squares[J]. Statistics in Medicine, 2021, 40(9): 2239-2256.
+</p>
+</li></ul>
+<h3>See Also</h3>
+
+<p>See Also as <code>ispls</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Load a list with 3 data sets
+library(iSFun)
+data("simData.pls")
+x &lt;- simData.pls$x
+y &lt;- simData.pls$y
+L &lt;- length(x)
+mu1 &lt;- c(0.04, 0.05)
+mu2 &lt;- 0.25
+
+res_homo_m &lt;- ispls.cv(x = x, y = y, L = L, K = 5, mu1 = mu1, mu2 = mu2, eps = 1e-2,
+                       kappa = 0.05, pen1 = "homogeneity", pen2 = "magnitude",
+                       scale.x = TRUE, scale.y = TRUE, maxstep = 50, submaxstep = 10)
+
+res_homo_s &lt;- ispls.cv(x = x, y = y, L = L, K = 5, mu1 = mu1, mu2 = mu2, eps = 1e-2,
+                       kappa = 0.05, pen1 = "homogeneity", pen2 = "sign",
+                       scale.x = TRUE, scale.y = TRUE, maxstep = 50, submaxstep = 10)
+
+res_hete_m &lt;- ispls.cv(x = x, y = y, L = L, K = 5, mu1 = mu1, mu2 = mu2, eps = 1e-2,
+                       kappa = 0.05, pen1 = "heterogeneity", pen2 = "magnitude",
+                       scale.x = TRUE, scale.y = TRUE, maxstep = 50, submaxstep = 10)
+
+res_hete_s &lt;- ispls.cv(x = x, y = y, L = L, K = 5, mu1 = mu1, mu2 = mu2, eps = 1e-2,
+                       kappa = 0.05, pen1 = "heterogeneity", pen2 = "sign",
+                       scale.x = TRUE, scale.y = TRUE, maxstep = 50, submaxstep = 10)
+
+</code></pre>
+
+
+</div>

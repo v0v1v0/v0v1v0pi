@@ -1,0 +1,108 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>stop_ds_difference</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compare differences between two data sets</h2>
+
+<h3>Description</h3>
+
+<p>This function is intended to be used as <code>stop_fun</code> inside of
+<code>impute_iterative()</code>. It compares the difference of two (numeric) data sets
+and return <code>ds</code>, if difference is small enough (less than <code>stop_args$eps</code>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">stop_ds_difference(
+  ds,
+  ds_old,
+  info_list,
+  stop_args = list(eps = 1e-06, p = 1, sum_diffs = TRUE, na_rm = TRUE),
+  res_stop_fun = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ds</code></td>
+<td>
+<p>A numeric data set</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ds_old</code></td>
+<td>
+<p>A numeric data set</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>info_list</code></td>
+<td>
+<p><code>info_list</code> used inside of <code>impute_iterative()</code>. Only the
+list element <code>nr_iterations</code> is used/needed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stop_args</code></td>
+<td>
+<p>A list with following named components (missing elements
+will be replaced by default ones):
+</p>
+
+<ul>
+<li> <p><code>eps</code> Threshold value for the difference (default = 1e-6).
+</p>
+</li>
+<li> <p><code>p</code> Exponent used for the calculation of differences similar to
+Minkowski distance. For <code>p = 1</code> (default) the absolute differences are
+used. For <code>p = 2</code> The quadratic differences are summed and the square
+root of this sum is compared with <code>stop_eps</code>.
+</p>
+</li>
+<li> <p><code>sum_diffs</code> Should differences be summed (default) or averaged
+(<code>sum_diffs = FALSE</code>)?
+</p>
+</li>
+<li> <p><code>na_rm</code> Should <code>NA</code>-values be removed (default) when calculating the
+sum/average? If <code>na_rm = FALSE</code> and there are <code>NA</code>s, the function
+returns <code>FALSE</code>.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>res_stop_fun</code></td>
+<td>
+<p>Only needed to be a valid stop function. Internally,
+this argument is ignored at the moment.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>list(stop_iter = FALSE)</code>, if the difference is too big. Otherwise
+<code>ds</code> with number of iterations (<code>nr_iterations</code>) as attribute.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(123)
+ds1 &lt;- data.frame(X = rnorm(10), Y = rnorm(10))
+ds2 &lt;- data.frame(X = rnorm(10), Y = rnorm(10))
+all.equal(
+  stop_ds_difference(ds1, ds1, list(nr_iterations = 3)),
+  structure(ds1, nr_iterations = 3)
+)
+stop_ds_difference(ds1, ds2, list(nr_iterations = 42))
+</code></pre>
+
+
+</div>

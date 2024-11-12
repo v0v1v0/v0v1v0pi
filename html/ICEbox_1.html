@@ -1,0 +1,163 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>clusterICE</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Clustering of ICE and d-ICE curves by kmeans.
+</h2>
+
+<h3>Description</h3>
+
+<p>Clustering if ICE and d-ICE curves by kmeans. All curves are centered to have mean 0
+and then kmeans is applied to the curves with the specified number of clusters.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">clusterICE(ice_obj, nClusters, plot = TRUE, plot_margin = 0.05, 
+           colorvec, plot_pdp = FALSE, x_quantile = FALSE, 
+           avg_lwd = 3, centered = FALSE, 
+           plot_legend = FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ice_obj</code></td>
+<td>
+
+<p>Object of class <code>ice</code> or <code>dice</code> to cluster.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nClusters</code></td>
+<td>
+
+<p>Number of clusters to find.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+
+<p>If <code>TRUE</code>, plots the clusters.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_margin</code></td>
+<td>
+
+<p>Extra margin to pass to <code>ylim</code> as a fraction of the range of cluster centers.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colorvec</code></td>
+<td>
+
+<p>Optional vector of colors to use for each cluster.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_pdp</code></td>
+<td>
+
+<p>If <code>TRUE</code>, the PDP (<code>ice</code> object) or d-PDP (<code>dice</code> object) 
+is plotted with a dotted black line and highlighted in yellow.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x_quantile</code></td>
+<td>
+
+<p>If <code>TRUE</code>, the plot is drawn with the x-axis taken to be <code>quantile(gridpts)</code>. If <code>FALSE</code>,
+the predictor's original scale is used.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>avg_lwd</code></td>
+<td>
+
+<p>Average line width to use when plotting the cluster means.  Line width is proportional to the cluster's
+size.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>centered</code></td>
+<td>
+
+<p>If <code>TRUE</code>, all cluster means are shifted to be to be 0 at the minimum value of the predictor.
+If <code>FALSE</code>, the original cluster means are used. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_legend</code></td>
+<td>
+
+<p>If <code>TRUE</code> a legend mapping line colors to the proportion of the data in each cluster is 
+added to the plot.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments for plotting.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The ouput of the <code>kmeans</code> call (a list of class <code>kmeans</code>).
+</p>
+
+
+<h3>See Also</h3>
+
+<p>ice, dice
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+require(ICEbox)
+require(randomForest)
+require(MASS) #has Boston Housing data, Pima
+
+data(Boston) #Boston Housing data
+X = Boston
+y = X$medv
+X$medv = NULL
+
+## build a RF:
+bh_rf = randomForest(X, y)
+
+## Create an 'ice' object for the predictor "age":
+bh.ice = ice(object = bh_rf, X = X, y = y, predictor = "age",
+            frac_to_build = .1) 
+
+## cluster the curves into 2 groups.
+clusterICE(bh.ice, nClusters = 2, plot_legend = TRUE)
+
+## cluster the curves into 3 groups, start all at 0.
+clusterICE(bh.ice, nClusters = 3, plot_legend = TRUE, center = TRUE)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

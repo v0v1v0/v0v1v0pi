@@ -1,0 +1,213 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ica.elm_train</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Training of ICA based ELM model for time series forecasting</h2>
+
+<h3>Description</h3>
+
+<p>An Extreme Learning Machine is trained by utilizing the concept of
+Independent Component Analysis.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ica.elm_train(train_data, lags, comps = lags, bias = TRUE, actfun = "sig")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>train_data</code></td>
+<td>
+<p>A univariate time series data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lags</code></td>
+<td>
+<p>Number of lags to be considered.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comps</code></td>
+<td>
+<p>Number of independent components to be considered. Corresponds
+to number of hidden nodes. Defaults to maximum value, i.e., <code>lags</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bias</code></td>
+<td>
+<p>Whether to include bias term while computing output weights.
+Defaults to <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>actfun</code></td>
+<td>
+<p>Activation function for the hidden layer. Defaults to
+<code>sig</code>. See <code style="white-space: pre;">⁠Activation functions⁠</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>An Extreme Learning Machine (ELM) is trained wherein the weights connecting
+the input layer and hidden layer are obtained using Independent Component
+Analysis (ICA), instead of being chosen randomly. The number of hidden
+nodes is determined by the number of independent components.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list containing the trained ICA-ELM model with the following
+components.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>inp_weights</code></td>
+<td>
+<p>Weights connecting the input layer to hidden layer,
+obtained from the unmixing matrix <code class="reqn">W</code> of ICA. The
+columns represent the hidden nodes while rows represent
+input nodes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>out_weights</code></td>
+<td>
+<p>Weights connecting the hidden layer to output layer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitted.values</code></td>
+<td>
+<p>Fitted values of the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>residuals</code></td>
+<td>
+<p>Residuals of the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h.out</code></td>
+<td>
+<p>A data frame containing the hidden layer outputs (activation
+function applied) with columns representing hidden nodes and
+rows representing observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>The univariate <code>ts</code> data used for training the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lags</code></td>
+<td>
+<p>Number of lags used during training.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comps</code></td>
+<td>
+<p>Number of independent components considered for training. It
+determines the number of hidden nodes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bias</code></td>
+<td>
+<p>Whether bias node was included during training.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>actfun</code></td>
+<td>
+<p>Activation function for the hidden layer.
+See <code style="white-space: pre;">⁠Activation functions⁠</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Activation functions</h3>
+
+<p>The activation function for the hidden layer must be one of the following.
+</p>
+
+<dl>
+<dt><code>sig</code></dt>
+<dd>
+<p>Sigmoid function: <code class="reqn">(1 + e^{-x})^{-1}</code></p>
+</dd>
+<dt><code>radbas</code></dt>
+<dd>
+<p>Radial basis function: <code class="reqn">e^{-x^2}</code></p>
+</dd>
+<dt><code>hardlim</code></dt>
+<dd>
+<p>Hard-limit function: <code class="reqn">\begin{cases} 1, &amp; if\:x
+        \geq 0 \\ 0, &amp; if\:x&lt;0 \end{cases}</code></p>
+</dd>
+<dt><code>hardlims</code></dt>
+<dd>
+<p>Symmetric hard-limit function: <code class="reqn">\begin{cases}1,
+              &amp; if\:x \geq 0 \\ -1, &amp; if\:x&lt;0 \end{cases}</code></p>
+</dd>
+<dt><code>satlins</code></dt>
+<dd>
+<p>Symmetric saturating linear function: <code class="reqn">
+        \begin{cases}1, &amp; if\:x \geq 1 \\ x, &amp; if\:-1&lt;x&lt;1 \\ -1, &amp; if\:x
+        \leq -1 \end{cases}</code></p>
+</dd>
+<dt><code>tansig</code></dt>
+<dd>
+<p>Tan-sigmoid function: <code class="reqn">2(1 + e^{-2x})^{-1}-1</code></p>
+</dd>
+<dt><code>tribas</code></dt>
+<dd>
+<p>Triangular basis function: <code class="reqn">\begin{cases} 1-|x|,
+        &amp; if \: -1 \leq x \leq 1 \\ 0, &amp; otherwise \end{cases}</code></p>
+</dd>
+<dt><code>poslin</code></dt>
+<dd>
+<p>Postive linear function: <code class="reqn">\begin{cases} x,
+        &amp; if\: x \geq 0 \\ 0, &amp; otherwise \end{cases}</code></p>
+</dd>
+</dl>
+<h3>References</h3>
+
+<p>Huang, G. B., Zhu, Q. Y., &amp; Siew, C. K. (2006). Extreme learning
+machine: theory and applications. Neurocomputing, 70(1-3), 489-501.
+<a href="doi:10.1016/j.neucom.2005.12.126">doi:10.1016/j.neucom.2005.12.126</a>.
+</p>
+<p>Hyvarinen, A. (1999). Fast and robust fixed-point algorithms for independent
+component analysis. IEEE transactions on Neural Networks, 10(3), 626-634.
+<a href="doi:10.1109/72.761722">doi:10.1109/72.761722</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ica.elm_forecast()</code> for forecasting from trained ICA based ELM
+model.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">train_set &lt;- head(price, 12*12)
+ica.model &lt;- ica.elm_train(train_data = train_set, lags = 12)
+</code></pre>
+
+
+</div>

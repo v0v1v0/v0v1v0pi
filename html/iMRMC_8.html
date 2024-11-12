@@ -1,0 +1,128 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>doIMRMC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>MRMC analysis for arbitrary design dataset</h2>
+
+<h3>Description</h3>
+
+<p>Execute a Multi-Reader, Multi-Case (MRMC) analysis
+of ROC data from imaging studies where clinicians (readers) evaluate patient
+images (cases). This function is a wrapper that executes 
+<code>doAUCmrmc</code> and formats the output to generally match the output of 
+<code>doIMRMC</code> version 1.2.5.
+An overview of this software, including references presenting
+details on the methods, can be found <a href="https://zenodo.org/record/8383591">HERE</a>
+or as an entry in the FDA/CDRH Regulatory Science Tool Catalog
+<a href="https://www.fda.gov/medical-devices/science-and-research-medical-devices/imrmc-software-do-multi-reader-multi-case-statistical-analysis-reader-studies">HERE</a>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">doIMRMC(data)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>an iMRMC formatted data frame, see dfMRMC_example</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>Unlike the legacy <code>doIMRMC_java</code>, the 'varDecomp' results no 
+longer scale the covariance by a factor of 2. This scaling is needed when 
+calculating the total variance of the difference in modalities. The user 
+must scale this covariance by 2 manually now to achieve the total variance
+of the difference in modalities result.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The MRMC analysis results, below is a quick summary:
+</p>
+
+<ul>
+<li> <p><code>perReader, data.frame</code> 
+The performance results for each combination of reader and pair of modalities.
+Key variables of this data frame are AUCA, AUCB, AUCAminusAUCB
+and the corresponding variances.
+When the modalities differ, the variance is understood to be the covariance between the modalities.
+
+</p>
+</li>
+<li> <p><code>Ustat, data.frame</code>
+Reader-averaged performance results for each pair of modalities.
+The analysis results are based on U-statistics.
+Key variables of this data frame are AUCA, AUCB, 
+AUCAminusAUCB and the corresponding variances, 
+confidence intervals, degrees of freedom, and p-values.
+When the modalities differ, the variance is understood to be the covariance between the modalities.
+
+</p>
+</li>
+<li> <p><code>MLEstat, data.frame</code>
+Reader-average performance results for each pair of modalities.
+The analysis results are based on V-statistics, which 
+approximates the true distribution with
+the empirical distribution. The empirical distribution equals 
+the nonparametric MLE
+estimate of the true distribution, which is also equivalent 
+to the ideal bootstrap estimate.
+Key variables of this data frame are AUCA, AUCB, 
+AUCAminusAUCB and the corresponding
+variances, confidence intervals, degrees of freedom, and p-values.
+When the modalities differ, the variance is understood to be the covariance between the modalities.
+
+</p>
+</li>
+<li> <p><code>varDecomp, list</code>
+list of data frames of the coefficient and components of 
+variance. The analysis includes variance decomposition based off both the 
+BDG and BCK MRMC methods, and Ustat and MLE statistical methods. 
+Each MRMC and statistical method combination is contained within this 
+list of lists. 
+
+</p>
+</li>
+<li> <p><code>ROC, list</code>
+each object of this list is an object containing an ROC curve.
+There is an ROC curve for every combination of reader and modality.
+For every modality, there are also four average ROC curves. 
+These are discussed in Chen2014_Br-J-Radiol_v87p20140016.
+The diagonal average averages the reader-specific ROC curves 
+along y = -x + b for b in (0,1).
+The horizontal average averages the reader specific ROC curves 
+along y = b for b in (0,1).
+The vertical average averages the reader specific ROC curves 
+along x = b for b in (0,1).
+The pooled average ignores readerID and pools all the scores 
+together to create one ROC curve.
+</p>
+</li>
+<li> <p><code>full, list</code>
+This returns the same result as <code>doAUCmrmc</code>.
+
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Create a sample configuration file
+config &lt;- sim.gRoeMetz.config()
+# Simulate an MRMC ROC data set
+dFrame.imrmc &lt;- sim.gRoeMetz(config)
+# Analyze the MRMC ROC data
+result &lt;- doIMRMC(dFrame.imrmc)
+
+</code></pre>
+
+
+</div>

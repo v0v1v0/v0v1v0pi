@@ -1,0 +1,270 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>impute_iterative</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Iterative imputation</h2>
+
+<h3>Description</h3>
+
+<p>Iterative imputation of a data set
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">impute_iterative(
+  ds,
+  model_spec_parsnip = linear_reg(),
+  model_fun_unsupervised = NULL,
+  predict_fun_unsupervised = NULL,
+  max_iter = 10,
+  stop_fun = NULL,
+  initial_imputation_fun = NULL,
+  cols_used_for_imputation = "only_complete",
+  cols_order = seq_len(ncol(ds)),
+  rows_used_for_imputation = "only_complete",
+  rows_order = seq_len(nrow(ds)),
+  update_model = "every_iteration",
+  update_ds_model = "every_iteration",
+  stop_fun_args = NULL,
+  M = is.na(ds),
+  model_arg = NULL,
+  warn_incomplete_imputation = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ds</code></td>
+<td>
+<p>The data set to be imputed. Must be a data frame with column names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model_spec_parsnip</code></td>
+<td>
+<p>The model type used for supervised imputation (see
+(<code>impute_supervised()</code> for details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model_fun_unsupervised</code></td>
+<td>
+<p>An unsupervised model function (see
+<code>impute_unsupervised()</code> for details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predict_fun_unsupervised</code></td>
+<td>
+<p>A predict function for unsupervised
+imputation (see <code>impute_unsupervised()</code> for details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_iter</code></td>
+<td>
+<p>Maximum number of iterations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stop_fun</code></td>
+<td>
+<p>A stopping function (see details below) or <code>NULL</code>. If <code>NULL</code>,
+iterations are only stopped after <code>max_iter</code> is reached.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial_imputation_fun</code></td>
+<td>
+<p>This function will do the initial imputation of
+the missing values. If <code>NULL</code>, no initial imputation is done. Some common
+choices like mean imputation are implemented in the package missMethods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cols_used_for_imputation</code></td>
+<td>
+<p>Which columns should be used to impute other
+columns? Possible choices: "only_complete", "already_imputed", "all"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cols_order</code></td>
+<td>
+<p>Ordering of the columns for imputation. This can be a
+vector with indices or an <code>order_option</code> from <code>order_cols()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rows_used_for_imputation</code></td>
+<td>
+<p>Which rows should be used to impute other
+rows? Possible choices: "only_complete", "partly_complete",
+"complete_in_k", "already_imputed", "all_except_i", "all"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rows_order</code></td>
+<td>
+<p>Ordering of the rows for imputation. This can be a vector
+with indices or an <code>order_option</code> from <code>order_rows()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>update_model</code></td>
+<td>
+<p>How often should the model for imputation be updated?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>update_ds_model</code></td>
+<td>
+<p>How often should the data set for the inner model be
+updated?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stop_fun_args</code></td>
+<td>
+<p>Further arguments passed on to <code>stop_fun</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>M</code></td>
+<td>
+<p>Missing data indicator matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model_arg</code></td>
+<td>
+<p>Further arguments for <code>model_fun_unsupervised</code> (see
+<code>impute_unsupervised()</code> for details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn_incomplete_imputation</code></td>
+<td>
+<p>Should a warning be given, if the
+returned data set still contains <code>NA</code>?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments passed on to <code>stats::predict()</code> or
+<code>predict_fun_unsupervised</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function impute a data set in an iterative way. Internally, either
+<code>impute_supervised()</code> or <code>impute_unsupervised()</code> is used, depending on the
+values of <code>model_spec_parsnip</code>, <code>model_fun_unsupervised</code> and
+<code>predict_fun_unsupervised</code>. If you want to use a supervised inner method,
+<code>model_spec_parsnip</code> must be specified and <code>model_fun_unsupervised</code> and
+<code>predict_fun_unsupervised</code> must both be <code>NULL</code>. For an unsupervised inner
+method, <code>model_fun_unsupervised</code> and <code>predict_fun_unsupervised</code> must be
+specified and <code>model_spec_parsnip</code> must be <code>NULL</code>. Some arguments of this
+function are only meaningful for <code>impute_supervised()</code> or
+<code>impute_unsupervised()</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>an imputed data set (or a return value of <code>stop_fun</code>)
+</p>
+
+
+<h3>stop_fun</h3>
+
+<p>The <code>stop_fun</code> should take the arguments
+</p>
+
+<ul>
+<li> <p><code>ds</code> (the data set imputed in the current iteration)
+</p>
+</li>
+<li> <p><code>ds_old</code> (the data set imputed in the last iteration)
+</p>
+</li>
+<li>
+<p> a list (with named elements <code>M</code>, <code>nr_iterations</code>, <code>max_iter</code>)
+</p>
+</li>
+<li> <p><code>stop_fun_args</code>
+</p>
+</li>
+<li> <p><code>res_stop_fun</code> (the return value of <code>stop_fun</code> from the last iteration.
+Initial value for the first iteration: <code>list(stop_iter = FALSE)</code>)
+in this order.
+</p>
+</li>
+</ul>
+<p>To allow for a next iteration, the <code>stop_fun</code> must return a list which
+contains the named element <code>stop_iter = FALSE</code>. The simple return
+<code>list(stop_iter = FALSE)</code> will allow the iteration to continue. However,
+the list can include more information which are handed over to <code>stop_fun</code>
+in the next iteration. For example, the return value
+<code>list(stop_iter = FALSE, last_eps = 0.3)</code> would also lead to another
+iteration. If <code>stop_fun</code> does not return a list or the list does not
+contain  <code>stop_iter = FALSE</code> the iteration is stopped and the return value
+of <code>stop_fun</code> is returned as result of <code>impute_iterative()</code>. Therefore,
+this return value should normally include the imputed data set <code>ds</code> or
+<code>ds_old</code>.
+</p>
+<p>An example for a <code>stop_fun</code> is <code>stop_ds_difference()</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+
+<ul>
+<li> <p><code>impute_supervised()</code> and <code>impute_unsupervised()</code> as the workhorses for
+the imputation.
+</p>
+</li>
+<li> <p><code>stop_ds_difference()</code> as an example of a stop function.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(123)
+# simple example
+ds_mis &lt;- missMethods::delete_MCAR(
+  data.frame(X = rnorm(20), Y = rnorm(20)), 0.2, 1
+)
+impute_iterative(ds_mis, max_iter = 2)
+# using pre-imputation
+ds_mis &lt;- missMethods::delete_MCAR(
+  data.frame(X = rnorm(20), Y = rnorm(20)), 0.2
+)
+impute_iterative(
+  ds_mis,
+  max_iter = 2, initial_imputation_fun = missMethods::impute_mean
+)
+# example using stop_ds_difference() as stop_fun
+ds_mis &lt;- missMethods::delete_MCAR(
+  data.frame(X = rnorm(20), Y = rnorm(20)), 0.2
+)
+ds_imp &lt;- impute_iterative(
+  ds_mis,
+  initial_imputation_fun = missMethods::impute_mean,
+  stop_fun = stop_ds_difference, stop_fun_args = list(eps = 0.5)
+)
+attr(ds_imp, "nr_iterations")
+</code></pre>
+
+
+</div>

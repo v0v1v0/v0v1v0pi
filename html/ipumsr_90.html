@@ -1,0 +1,166 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>remove_from_extract.micro_extract</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Remove values from an existing extract definition for an IPUMS microdata
+project</h2>
+
+<h3>Description</h3>
+
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental"><img src="../help/figures/lifecycle-experimental.svg" alt="[Experimental]"></a>
+</p>
+<p>Remove existing values from an IPUMS microdata extract definition. All
+fields are optional, and if omitted, will be unchanged.
+</p>
+<p>This function is marked as experimental because it is typically not the best
+option for maintaining reproducible extract definitions and may be retired
+in the future. For reproducibility, users should strive to build extract
+definitions with <code>define_extract_micro()</code>.
+</p>
+<p>If you have a complicated extract definition to revise, but do not have
+the original extract definition code that created it, we suggest that you
+save the revised extract as a JSON file with <code>save_extract_as_json()</code>. This
+will create a stable version of the extract definition that
+can be used in the future as needed.
+</p>
+<p>To add new values to an IPUMS microdata extract definition, see
+<code>add_to_extract()</code>.
+</p>
+<p>Learn more about the IPUMS API in <code>vignette("ipums-api")</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'micro_extract'
+remove_from_extract(
+  extract,
+  samples = NULL,
+  variables = NULL,
+  time_use_variables = NULL,
+  sample_members = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>extract</code></td>
+<td>
+<p>An <code>ipums_extract</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>samples</code></td>
+<td>
+<p>Character vector of sample names to remove from the extract
+definition.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variables</code></td>
+<td>
+<p>Names of the variables to remove from the extract
+definition. All variable-specific fields for the indicated variables
+will also be removed. For removing values from variable-specific fields
+while retaining the variable, see examples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time_use_variables</code></td>
+<td>
+<p>Names of the time use variables to remove from the
+extract definition. All time use variable-specific fields for the indicated
+time use variables will also be removed. For removing time use
+variable-specific fields while retaining the time use variable, see
+examples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sample_members</code></td>
+<td>
+<p>Sample members to remove from the extract definition.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Ignored</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If the supplied extract definition comes from
+a previously submitted extract request, this function will reset the
+definition to an unsubmitted state.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A modified <code>micro_extract</code> object
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>add_to_extract()</code> to add values
+to an extract definition.
+</p>
+<p><code>submit_extract()</code> to submit an extract request.
+</p>
+<p><code>download_extract()</code> to download extract data files.
+</p>
+<p><code>define_extract_micro()</code> to create a new extract
+definition from scratch.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">usa_extract &lt;- define_extract_micro(
+  collection = "usa",
+  description = "USA example",
+  samples = c("us2013a", "us2014a"),
+  variables = list(
+    var_spec("AGE", data_quality_flags = TRUE),
+    var_spec("SEX", case_selections = "1"),
+    "RACE"
+  )
+)
+
+# Providing names of samples or variables will remove them and
+# all of their associated specifications from the extract:
+remove_from_extract(
+  usa_extract,
+  samples = "us2014a",
+  variables = c("AGE", "RACE")
+)
+
+# To remove detailed specifications from a variable or time use variable,
+# indicate the specifications to remove within `var_spec()` or
+# `tu_var_spec()`. The named variable will be retained in the extract, but
+# modified by removing the indicated specifications.
+remove_from_extract(
+  usa_extract,
+  variables = var_spec("SEX", case_selections = "1")
+)
+
+# To make multiple modifications, use a list of `var_spec()` objects.
+remove_from_extract(
+  usa_extract,
+  variables = list(
+    var_spec("SEX", case_selections = "1"),
+    var_spec("AGE")
+  )
+)
+</code></pre>
+
+
+</div>

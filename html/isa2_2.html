@@ -1,0 +1,129 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>generate.seeds</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generate seed vectors for the Iterative Signature Algorithm</h2>
+
+<h3>Description</h3>
+
+<p>Generate random input seeds for the ISA.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">generate.seeds (length, count = 100, method = c("uni"), sparsity=2)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>length</code></td>
+<td>
+<p>The length of the seeds, should be the number of rows in
+your input data for row seeds and the number of columns for column
+seeds.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>count</code></td>
+<td>
+<p>The number of seeds to gnerate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>The method for generating the seeds. Currently only
+<code>"uni"</code> is supported, that picks the 1 elements in each seed
+uniformly randomly.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sparsity</code></td>
+<td>
+<p>A numeric scalar, an integer number giving the number
+of non-zero values in each seed vector. It will be recycled to have
+the same length as the number of seeds.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function can generate a 0/1 matrix whose columns are the seeds of
+the ISA. The result can be use as the <code>row.seeds</code> (or
+<code>col.seeds</code>) argument of the <code>isa.iterate</code> function.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A numeric matrix with 0/1 values.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Gabor Csardi <a href="mailto:Gabor.Csardi@unil.ch">Gabor.Csardi@unil.ch</a> </p>
+
+
+<h3>References</h3>
+
+<p>Bergmann S, Ihmels J, Barkai N: Iterative signature algorithm for the
+analysis of large-scale gene expression data <em>Phys Rev E Stat
+Nonlin Soft Matter Phys.</em> 2003 Mar;67(3 Pt 1):031902. Epub 2003 Mar 11.
+</p>
+<p>Ihmels J, Friedlander G, Bergmann S, Sarig O, Ziv Y, Barkai N:
+Revealing modular organization in the yeast transcriptional network
+<em>Nat Genet.</em> 2002 Aug;31(4):370-7. Epub 2002 Jul 22
+</p>
+<p>Ihmels J, Bergmann S, Barkai N:
+Defining transcription modules using large-scale gene expression data
+<em>Bioinformatics</em> 2004 Sep 1;20(13):1993-2003. Epub 2004 Mar 25.
+</p>
+
+
+<h3>See Also</h3>
+
+ <p>isa2-package for a short introduction on the Iterative
+Signature Algorithm. See <code>isa</code> for an easy way of running
+ISA.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Just to get always the same result
+set.seed(24)
+
+## Create some random seeds with different sparseness
+data &lt;- isa.in.silico()
+sparsity &lt;- rep( c(1,5,25,125), length=100)
+row.seeds &lt;- generate.seeds(length=nrow(data[[1]]), count=100,
+                            sparsity=sparsity)
+
+## Do ISA with the seeds
+normed.data &lt;- isa.normalize(data[[1]])
+isaresult &lt;- isa.iterate(normed.data, thr.row=1, thr.col=1,
+                         row.seeds=row.seeds)
+
+## Add the sparsity to the seed data
+isaresult$seeddata$sparsity &lt;- sparsity
+
+## Check which ones leed to higher robustness scores
+rob &lt;- robustness(normed.data, isaresult$rows, isaresult$columns)
+tapply(rob, sparsity, mean)
+## About the same
+
+## How many unique modules did we find for the different sparsity
+isaresult.unique &lt;- isa.unique(normed.data, isaresult)
+tapply(seq_len(ncol(isaresult.unique$rows)),
+       isaresult.unique$seeddata$sparsity, length)
+## We usually find more modules with sparser seeds
+</code></pre>
+
+
+</div>

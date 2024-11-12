@@ -1,0 +1,318 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sensrobust</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Verifying Optimality of The Robust Designs</h2>
+
+<h3>Description</h3>
+
+<p>It plots the sensitivity (derivative) function of the
+robust criterion
+at a given approximate (continuous) design and also
+calculates its efficiency lower bound (ELB) with respect
+to the optimality criterion.
+For an approximate (continuous) design, when the design space is one or two-dimensional,
+the user can visually verify the optimality of the design by observing the
+sensitivity plot. Furthermore, the proximity of the design to the optimal design
+can be measured by the  ELB without knowing the latter.
+See, for more details, Masoudi et al. (2017).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sensrobust(
+  formula,
+  predvars,
+  parvars,
+  family = gaussian(),
+  x,
+  w,
+  lx,
+  ux,
+  prob,
+  parset,
+  fimfunc = NULL,
+  sens.control = list(),
+  calculate_criterion = TRUE,
+  plot_3d = c("lattice", "rgl"),
+  plot_sens = TRUE,
+  npar = dim(parset)[2],
+  silent = FALSE,
+  crtfunc = NULL,
+  sensfunc = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>A linear or nonlinear model <code>formula</code>.
+A symbolic description of the model consists of predictors and the unknown model parameters.
+Will be coerced to a <code>formula</code> if necessary.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predvars</code></td>
+<td>
+<p>A vector of characters. Denotes the predictors in the <code>formula</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parvars</code></td>
+<td>
+<p>A vector of characters. Denotes the unknown parameters in the <code>formula</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>A description of the response distribution and the link function to be used in the model.
+This can be a family function, a call to a family function or a character string naming the family.
+Every family function has a link argument allowing to specify the link function to be applied on the response variable.
+If not specified, default links are used. For details see <code>family</code>.
+By default, a linear gaussian model <code>gaussian()</code> is applied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Vector of the design (support) points. See 'Details' of <code>sensminimax</code> for models with more than one predictors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>Vector of the corresponding design weights for <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lx</code></td>
+<td>
+<p>Vector of lower bounds for the predictors. Should be in the same order as <code>predvars</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ux</code></td>
+<td>
+<p>Vector of upper bounds for the predictors. Should be in the same order as <code>predvars</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob</code></td>
+<td>
+<p>A vector of the probability measure <code class="reqn">\pi</code> associated with each row of <code>parset</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parset</code></td>
+<td>
+<p>A matrix that provides the vector of initial estimates for the model parameters, i.e. support of <code class="reqn">\pi</code>.
+Every row is one vector  (<code>nrow(parset) == length(prob)</code>). See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fimfunc</code></td>
+<td>
+<p>A function. Returns the FIM as a <code>matrix</code>. Required when <code>formula</code> is missing. See 'Details' of <code>minimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sens.control</code></td>
+<td>
+<p>Control Parameters for Calculating the ELB. For details, see <code>sens.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>calculate_criterion</code></td>
+<td>
+<p>Calculate the optimality criterion? See 'Details' of <code>sensminimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_3d</code></td>
+<td>
+<p>Which package should be used to plot the sensitivity (derivative) function for models with two predictors.
+Either <code>"rgl"</code> or <code>"lattice"</code> (default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_sens</code></td>
+<td>
+<p>Plot the sensitivity (derivative) function? Defaults to <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>npar</code></td>
+<td>
+<p>Number of model parameters.  Used when <code>fimfunc</code> is given instead of <code>formula</code> to specify the number of model parameters.
+If not given, the sensitivity plot may be shifted below the y-axis.
+When <code>NULL</code>, it is set to <code>dim(parset)[2]</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>silent</code></td>
+<td>
+<p>Do not print anything? Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>crtfunc</code></td>
+<td>
+<p>(Optional) a function that specifies an arbitrary criterion. It must have especial arguments and output. See 'Details' of <code>minimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sensfunc</code></td>
+<td>
+<p>(Optional) a function that specifies the sensitivity function for <code>crtfunc</code>. See 'Details' of <code>minimax</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Let <code class="reqn">\Theta</code>  be the set initial estimates for the model parameters and <code class="reqn">\pi</code> be a probability measure having support in  <code class="reqn">\Theta</code>.
+A design <code class="reqn">\xi^*</code> is robust with respect to  <code class="reqn">\pi</code>
+if the following inequality holds for all <code class="reqn">\boldsymbol{x} \in \chi</code>:
+</p>
+<p style="text-align: center;"><code class="reqn">c(\boldsymbol{x}, \pi, \xi^*) = \int_{\pi} tr M^{-1}(\xi^*, \theta)I(\boldsymbol{x}, \theta)\pi(\theta) d(\theta)-p \leq 0,</code>
+</p>
+
+<p>with equality at all support points of <code class="reqn">\xi^*</code>.
+Here, <code class="reqn">p</code> is the number of model parameters.
+</p>
+<p>ELB is a measure of  proximity of a design to the optimal design without knowing the latter.
+Given a design, let <code class="reqn">\epsilon</code> be the global maximum
+of the sensitivity (derivative) function over <code class="reqn">x \in \chi</code>.
+ELB is given by </p>
+<p style="text-align: center;"><code class="reqn">ELB = p/(p + \epsilon),</code>
+</p>
+
+<p>where <code class="reqn">p</code> is the number of model parameters. Obviously,
+calculating ELB requires finding <code class="reqn">\epsilon</code> and
+another optimization problem to be solved.
+The tuning parameters of this optimization can be regulated via the argument  <code>sens.minimax.control</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>an object of class <code>sensminimax</code> that is a list with the following elements:
+</p>
+
+<dl>
+<dt><code>type</code></dt>
+<dd>
+<p>Argument <code>type</code> that is required for print methods.</p>
+</dd>
+<dt><code>optima</code></dt>
+<dd>
+<p>A <code>matrix</code> that stores all the local optima over the parameter space.
+The cost  (criterion) values are stored in a column named <code>Criterion_Value</code>.
+The last column (<code>Answering_Set</code>)
+shows if the optimum belongs to the answering set (1) or not (0). See 'Details' of <code>sens.minimax.control</code>.
+Only applicable for minimax or standardized maximin designs.</p>
+</dd>
+<dt><code>mu</code></dt>
+<dd>
+<p>Probability measure on the answering set.
+Corresponds to the rows of <code>optima</code> for which the associated row in column <code>Answering_Set</code> is equal to 1.
+Only applicable for minimax or standardized maximin designs.</p>
+</dd>
+<dt><code>max_deriv</code></dt>
+<dd>
+<p>Global maximum of the sensitivity (derivative) function (<code class="reqn">\epsilon</code> in 'Details').</p>
+</dd>
+<dt><code>ELB</code></dt>
+<dd>
+<p>D-efficiency lower bound. Can not be larger than 1. If negative, see 'Note' in <code>sensminimax</code> or  <code>sens.minimax.control</code>.</p>
+</dd>
+<dt><code>merge_tol</code></dt>
+<dd>
+<p>Merging tolerance to create the answering set from the set of all local optima. See 'Details' in <code>sens.minimax.control</code>.
+Only applicable for minimax or standardized maximin designs.</p>
+</dd>
+<dt><code>crtval</code></dt>
+<dd>
+<p>Criterion value. Compare it with the column <code>Crtiterion_Value</code> in <code>optima</code> for minimax and standardized maximin designs.</p>
+</dd>
+<dt><code>time</code></dt>
+<dd>
+<p>Used CPU time (rough approximation).</p>
+</dd>
+</dl>
+<h3>Note</h3>
+
+<p>Theoretically, ELB can not be larger than 1. But if so, it may have one of the following reasons:
+</p>
+
+<ul>
+<li> <p><code>max_deriv</code> is not a GLOBAL maximum.  Please increase  the value of the parameter <code>maxeval</code> in <code>sens.minimax.control</code> to find the global maximum.
+</p>
+</li>
+<li>
+<p> The sensitivity function is shifted below the y-axis because
+the number of model parameters has not been specified correctly (less value given).
+Please specify the correct number of model parameters via the argument <code>npar</code>.
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>bayes</code> <code>sensbayes</code> <code>robust</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Verifying a robust design for the two-parameter logistic model
+sensrobust(formula = ~1/(1 + exp(-b *(x - a))),
+           predvars = c("x"),
+           parvars = c("a", "b"),
+           family = binomial(),
+           prob = rep(1/4, 4),
+           parset = matrix(c(0.5, 1.5, 0.5, 1.5, 4.0, 4.0, 5.0, 5.0), 4, 2),
+           x = c(0.260, 1, 1.739), w = c(0.275, 0.449, 0.275),
+           lx = -5, ux = 5)
+
+
+###################################
+# user-defined optimality criterion
+##################################
+# When the model is defined by the formula interface
+# Checking the A-optimality  for the 2PL model.
+# the criterion function must have argument x, w fimfunc and the parameters defined in 'parvars'.
+# use 'fimfunc' as a function of the design points x,  design weights w and
+#  the 'parvars' parameters whenever needed.
+Aopt &lt;-function(x, w, a, b, fimfunc){
+  sum(diag(solve(fimfunc(x = x, w = w, a = a, b = b))))
+}
+## the sensitivtiy function
+# xi_x is a design that put all its mass on x in the definition of the sensitivity function
+# x is a vector of design points
+Aopt_sens &lt;- function(xi_x, x, w, a, b, fimfunc){
+  fim &lt;- fimfunc(x = x, w = w, a = a, b = b)
+  M_inv &lt;- solve(fim)
+  M_x &lt;- fimfunc(x = xi_x, w = 1, a  = a, b = b)
+  sum(diag(M_inv %*% M_x %*%  M_inv)) - sum(diag(M_inv))
+}
+
+sensrobust(formula = ~1/(1 + exp(-b * (x-a))), predvars = "x",
+           parvars = c("a", "b"), family = "binomial",
+           crtfunc = Aopt,
+           sensfunc = Aopt_sens,
+           lx = -3, ux = 3,
+           prob = c(.25, .5, .25),
+           parset = matrix(c(-2, 0, 2, 1.25, 1.25, 1.25), 3, 2),
+           x = c(-2.469, 0, 2.469), w = c(.317, .365, .317))
+# not optimal. the optimal design has four points. see the last example in ?robust
+</code></pre>
+
+
+</div>

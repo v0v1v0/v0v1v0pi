@@ -1,0 +1,436 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>peakfit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Finite mixture modelling of geochronological datasets</h2>
+
+<h3>Description</h3>
+
+<p>Implements the discrete mixture modelling algorithms of Galbraith
+and Laslett (1993) and applies them to fission track and other
+geochronological datasets.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">peakfit(x, ...)
+
+## Default S3 method:
+peakfit(x, k = "auto", sigdig = 2, oerr = 3, log = TRUE, np = 3, ...)
+
+## S3 method for class 'fissiontracks'
+peakfit(
+  x,
+  k = 1,
+  exterr = FALSE,
+  sigdig = 2,
+  log = TRUE,
+  oerr = 3,
+  np = 3,
+  ...
+)
+
+## S3 method for class 'UPb'
+peakfit(
+  x,
+  k = 1,
+  type = 4,
+  cutoff.76 = 1100,
+  cutoff.disc = discfilter(),
+  common.Pb = 0,
+  exterr = FALSE,
+  sigdig = 2,
+  log = TRUE,
+  oerr = 3,
+  np = 3,
+  ...
+)
+
+## S3 method for class 'PbPb'
+peakfit(
+  x,
+  k = 1,
+  exterr = FALSE,
+  sigdig = 2,
+  log = TRUE,
+  common.Pb = 0,
+  oerr = 3,
+  np = 3,
+  ...
+)
+
+## S3 method for class 'ArAr'
+peakfit(
+  x,
+  k = 1,
+  exterr = FALSE,
+  sigdig = 2,
+  log = TRUE,
+  i2i = FALSE,
+  oerr = 3,
+  np = 3,
+  ...
+)
+
+## S3 method for class 'ThPb'
+peakfit(
+  x,
+  k = 1,
+  exterr = FALSE,
+  sigdig = 2,
+  log = TRUE,
+  i2i = FALSE,
+  oerr = 3,
+  np = 3,
+  ...
+)
+
+## S3 method for class 'KCa'
+peakfit(
+  x,
+  k = 1,
+  exterr = FALSE,
+  sigdig = 2,
+  log = TRUE,
+  i2i = FALSE,
+  oerr = 3,
+  np = 3,
+  ...
+)
+
+## S3 method for class 'ReOs'
+peakfit(
+  x,
+  k = 1,
+  exterr = FALSE,
+  sigdig = 2,
+  log = TRUE,
+  i2i = TRUE,
+  oerr = 3,
+  np = 3,
+  ...
+)
+
+## S3 method for class 'SmNd'
+peakfit(
+  x,
+  k = 1,
+  exterr = FALSE,
+  sigdig = 2,
+  log = TRUE,
+  i2i = TRUE,
+  oerr = 3,
+  np = 3,
+  ...
+)
+
+## S3 method for class 'RbSr'
+peakfit(
+  x,
+  k = 1,
+  exterr = FALSE,
+  sigdig = 2,
+  log = TRUE,
+  i2i = TRUE,
+  oerr = 3,
+  np = 3,
+  ...
+)
+
+## S3 method for class 'LuHf'
+peakfit(
+  x,
+  k = 1,
+  exterr = FALSE,
+  sigdig = 2,
+  log = TRUE,
+  i2i = TRUE,
+  oerr = 3,
+  np = 3,
+  ...
+)
+
+## S3 method for class 'ThU'
+peakfit(
+  x,
+  k = 1,
+  exterr = FALSE,
+  sigdig = 2,
+  log = TRUE,
+  oerr = 3,
+  Th0i = 0,
+  np = 3,
+  ...
+)
+
+## S3 method for class 'UThHe'
+peakfit(x, k = 1, sigdig = 2, log = TRUE, oerr = 3, np = 3, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>either an <code>[nx2]</code> matrix with measurements and their
+standard errors, or an object of class <code>fissiontracks</code>,
+<code>UPb</code>, <code>PbPb</code>, <code>ThPb</code>, <code>ArAr</code>, <code>KCa</code>,
+<code>ReOs</code>, <code>SmNd</code>, <code>RbSr</code>, <code>LuHf</code>, <code>ThU</code>
+or <code>UThHe</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>optional arguments (not used)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>the number of discrete age components to be
+sought. Setting this parameter to <code>'auto'</code> automatically
+selects the optimal number of components (up to a maximum of 5)
+using the Bayes Information Criterion (BIC).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigdig</code></td>
+<td>
+<p>number of significant digits to be used for any
+legend in which the peak fitting results are to be displayed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>oerr</code></td>
+<td>
+<p>indicates whether the analytical uncertainties of the
+output are reported in the plot legend as:
+</p>
+<p><code>1</code>: 1<code class="reqn">\sigma</code> absolute uncertainties.
+</p>
+<p><code>2</code>: 2<code class="reqn">\sigma</code> absolute uncertainties.
+</p>
+<p><code>3</code>: absolute (1-<code class="reqn">\alpha</code>)% confidence intervals, where
+<code class="reqn">\alpha</code> equales the value that is stored in
+<code>settings('alpha')</code>.
+</p>
+<p><code>4</code>: 1<code class="reqn">\sigma</code> relative uncertainties (<code class="reqn">\%</code>).
+</p>
+<p><code>5</code>: 2<code class="reqn">\sigma</code> relative uncertainties (<code class="reqn">\%</code>).
+</p>
+<p><code>6</code>: relative (1-<code class="reqn">\alpha</code>)% confidence intervals, where
+<code class="reqn">\alpha</code> equales the value that is stored in
+<code>settings('alpha')</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>take the logs of the data before applying the mixture
+model?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>np</code></td>
+<td>
+<p>number of parameters for the minimum age model. Must be
+either 3 or 4.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exterr</code></td>
+<td>
+<p>propagate the external sources of uncertainty into
+the component age errors?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>scalar indicating whether to plot the
+<code class="reqn">^{207}</code>Pb/<code class="reqn">^{235}</code>U age (<code>type</code>=1), the
+<code class="reqn">^{206}</code>Pb/<code class="reqn">^{238}</code>U age (<code>type</code>=2), the
+<code class="reqn">^{207}</code>Pb/<code class="reqn">^{206}</code>Pb age (<code>type</code>=3), the
+<code class="reqn">^{207}</code>Pb/<code class="reqn">^{206}</code>Pb-<code class="reqn">^{206}</code>Pb/<code class="reqn">^{238}</code>U age
+(<code>type</code>=4), the concordia_age (<code>type</code>=5), or the
+<code class="reqn">^{208}</code>Pb/<code class="reqn">^{232}</code>Th age (<code>type</code>=6).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cutoff.76</code></td>
+<td>
+<p>the age (in Ma) below which the
+<code class="reqn">^{206}</code>Pb/<code class="reqn">^{238}</code>U and above which the
+<code class="reqn">^{207}</code>Pb/<code class="reqn">^{206}</code>Pb age is used. This parameter is
+only used if <code>type=4</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cutoff.disc</code></td>
+<td>
+<p>discordance cutoff filter. This is an object of
+class <code>discfilter</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>common.Pb</code></td>
+<td>
+<p>common lead correction:
+</p>
+<p><code>0</code>:none
+</p>
+<p><code>1</code>: use the Pb-composition stored in
+</p>
+<p><code>settings('iratio','Pb206Pb204')</code> (if <code>x</code> has class
+<code>UPb</code> and <code>x$format&lt;4</code>);
+</p>
+<p><code>settings('iratio','Pb206Pb204')</code> and
+<code>settings('iratio','Pb207Pb204')</code> (if <code>x</code> has class
+<code>PbPb</code> or <code>x</code> has class <code>UPb</code> and
+<code>3&lt;x$format&lt;7</code>); or
+</p>
+<p><code>settings('iratio','Pb206Pb208')</code> and
+<code>settings('iratio','Pb207Pb208')</code> (if <code>x</code> has class
+<code>UPb</code> and <code>x$format=7</code> or <code>8</code>).
+</p>
+<p><code>2</code>: use the isochron intercept as the initial Pb-composition
+</p>
+<p><code>3</code>: use the Stacey-Kramers two-stage model to infer the
+initial Pb-composition (only applicable if <code>x</code> has class
+<code>UPb</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>i2i</code></td>
+<td>
+<p>‘isochron to intercept’: calculates the initial (aka
+‘inherited’, ‘excess’, or ‘common’)
+<code class="reqn">^{40}</code>Ar/<code class="reqn">^{36}</code>Ar, <code class="reqn">^{40}</code>Ca/<code class="reqn">^{44}</code>Ca,
+<code class="reqn">^{207}</code>Pb/<code class="reqn">^{204}</code>Pb, <code class="reqn">^{87}</code>Sr/<code class="reqn">^{86}</code>Sr,
+<code class="reqn">^{143}</code>Nd/<code class="reqn">^{144}</code>Nd, <code class="reqn">^{187}</code>Os/<code class="reqn">^{188}</code>Os,
+<code class="reqn">^{230}</code>Th/<code class="reqn">^{232}</code>Th, <code class="reqn">^{176}</code>Hf/<code class="reqn">^{177}</code>Hf or
+<code class="reqn">^{204}</code>Pb/<code class="reqn">^{208}</code>Pb ratio from an isochron
+fit. Setting <code>i2i</code> to <code>FALSE</code> uses the default values
+stored in <code>settings('iratio',...)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Th0i</code></td>
+<td>
+<p>initial <code class="reqn">^{230}</code>Th correction.
+</p>
+<p><code>0</code>: no correction
+</p>
+<p><code>1</code>: project the data along an isochron fit
+</p>
+<p><code>2</code>: if <code>x$format</code> is <code>1</code> or <code>2</code>, correct the
+data using the measured present day <code class="reqn">^{230}</code>Th/<code class="reqn">^{238}</code>U,
+<code class="reqn">^{232}</code>Th/<code class="reqn">^{238}</code>U and <code class="reqn">^{234}</code>U/<code class="reqn">^{238}</code>U
+activity ratios in the detritus. If <code>x$format</code> is <code>3</code> or
+<code>4</code>, correct the data using the measured
+<code class="reqn">^{238}</code>U/<code class="reqn">^{232}</code>Th activity ratio of the whole rock, as
+stored in <code>x</code> by the <code>read.data()</code> function.
+</p>
+<p><code>3</code>: correct the data using an assumed initial
+<code class="reqn">^{230}</code>Th/<code class="reqn">^{232}</code>Th-ratio for the detritus (only relevant
+if <code>x$format</code> is <code>1</code> or <code>2</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Consider a dataset of <code class="reqn">n</code> dates <code class="reqn">\{t_1, t_2, ..., t_n\}</code>
+with analytical uncertainties <code class="reqn">\{s[t_1], s[t_2], ...,
+s[t_n]\}</code>.  Define <code class="reqn">z_i = \log(t_i)</code> and <code class="reqn">s[z_i] =
+s[t_i]/t_i</code>.  Suppose that these <code class="reqn">n</code> values are derived from a
+mixture of <code class="reqn">k&gt;2</code> populations with means
+<code class="reqn">\{\mu_1,...,\mu_k\}</code>. Such a <em>discrete mixture</em> may be
+mathematically described by <code class="reqn">P(z_i|\mu,\omega) = \sum_{j=1}^k
+\pi_j N(z_i | \mu_j, s[z_j]^2 )</code> where <code class="reqn">\pi_j</code> is the
+proportion of the population that belongs to the <code class="reqn">j^{th}</code>
+component, and <code class="reqn">\pi_k=1-\sum_{j=1}^{k-1}\pi_j</code>. This equation
+can be solved by the method of maximum likelihood (Galbraith and
+Laslett, 1993).  <code>IsoplotR</code> implements the Bayes Information
+Criterion (BIC) as a means of automatically choosing <code class="reqn">k</code>. This
+option should be used with caution, as the number of peaks steadily
+rises with sample size (<code class="reqn">n</code>).  If one is mainly interested in
+the youngest age component, then it is more productive to use an
+alternative parameterisation, in which all grains are assumed to
+come from one of two components, whereby the first component is a
+single discrete age peak (<code class="reqn">\exp(m)</code>, say) and the second
+component is a continuous distribution (as descibed by the
+<code>central</code> age model), but truncated at this discrete
+value. <code>IsoplotR</code> uses a normal likelihood function
+(section 6.11 of Galbraith, 2005) for the minimum age model.
+This may result in some inaccuracy for young and/or uranium-poor
+fission track samples.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a list with the following items:
+</p>
+
+<dl>
+<dt>peaks</dt>
+<dd>
+<p>a <code>2 x k</code> matrix with the following rows:
+</p>
+<p><code>t</code>: the ages of the <code>k</code> peaks
+</p>
+<p><code>s[t]</code>: the standard errors of <code>t</code>
+</p>
+</dd>
+<dt>props</dt>
+<dd>
+<p>a <code>2 x k</code> matrix with the following rows:
+</p>
+<p><code>p</code>: the proportions of the <code>k</code> peaks
+</p>
+<p><code>s[p]</code>: the standard errors of <code>p</code>
+</p>
+</dd>
+<dt>L</dt>
+<dd>
+<p>the log-likelihood of the fit</p>
+</dd>
+<dt>legend</dt>
+<dd>
+<p>a vector of text expressions to be used in a figure
+legend</p>
+</dd>
+</dl>
+<h3>References</h3>
+
+<p>Galbraith, R.F. and Laslett, G.M., 1993. Statistical models for
+mixed fission track ages. Nuclear Tracks and Radiation
+Measurements, 21(4), pp.459-470.
+</p>
+<p>Galbraith, R.F. 2005, Statistics for fission track
+analysis. Chapman and Hall/CRC, 229p.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>radialplot</code>, <code>central</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">attach(examples)
+peakfit(FT1,k=2)
+
+peakfit(LudwigMixture$x,k='min')
+</code></pre>
+
+
+</div>

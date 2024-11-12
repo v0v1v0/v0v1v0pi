@@ -1,0 +1,175 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>spatial_response</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate spatial response or dependence figures.</h2>
+
+<h3>Description</h3>
+
+<p>Calculate spatially marginal, independence, and SHAP-based
+response figures. They can help to diagnose both how and where the species
+responses to environmental variables.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">spatial_response(
+  model,
+  var_occ,
+  variables,
+  shap_nsim = 0,
+  seed = 10L,
+  visualize = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>(<code>isolation_forest</code>). It could
+be the item <code>model</code> of <code>POIsotree</code> made by function <code>isotree_po</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var_occ</code></td>
+<td>
+<p>(<code>data.frame</code>, <code>tibble</code>) The <code>data.frame</code> style table that
+include values of environmental variables at occurrence locations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variables</code></td>
+<td>
+<p>(<code>stars</code>) The <code>stars</code> of environmental variables.
+It should have multiple <code>attributes</code> instead of <code>dims</code>.
+If you have <code>raster</code> object instead, you
+could use <code>st_as_stars</code> to convert it to <code>stars</code> or use
+<code>read_stars</code> directly read source data as a <code>stars</code>.
+You also could use item <code>variables</code> of <code>POIsotree</code> made by function
+<code>isotree_po</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shap_nsim</code></td>
+<td>
+<p>(<code>integer</code>) The number of Monte Carlo repetitions in SHAP
+method to use for estimating each Shapley value. See details in documentation
+of function <code>explain</code> in package <code>fastshap</code>. Set it to 0 if you
+don't want to make SHAP-based spatial dependence. When the number of variables
+is large, a smaller shap_nsim could be used. Be cautious that making
+SHAP-based spatial dependence will be slow because of Monte-Carlo
+computation for all pixels. But it is worth the time because it is much more
+informative. See details in documentation of function <code>explain</code>
+in package <code>fastshap</code>. The default is 0. Usually a value 10 - 20 is enough.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>(<code>integer</code>) The seed for any random progress. The default is <code>10L</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>visualize</code></td>
+<td>
+<p>(<code>logical</code>) if <code>TRUE</code>, plot the response curves.
+The default is <code>FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The values show how each environmental variable affects the modeling
+prediction in space. These maps could help to answer questions of where in
+terms of environmental response. Compared to marginal dependence or
+independent dependence maps, SHAP-based maps are way more informative because
+SHAP-based dependence explain the contribution of each variable to final result.
+</p>
+
+
+<h3>Value</h3>
+
+<p>(<code>SpatialResponse</code>) A list of
+</p>
+
+<ul>
+<li>
+<p>spatial_marginal_response (<code>list</code>) A list of <code>stars</code> object of spatially
+marginal response of all variables
+</p>
+</li>
+<li>
+<p>spatial_independent_response (<code>list</code>) A list of <code>stars</code> object of spatially
+independent response of all variables
+</p>
+</li>
+<li>
+<p>spatial_shap_dependence (<code>list</code>) A list of <code>stars</code> object of spatially
+SHAP-based response of all variables
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>plot.SpatialResponse</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Using a pseudo presence-only occurrence dataset of
+# virtual species provided in this package
+library(dplyr)
+library(sf)
+library(stars)
+library(itsdm)
+
+# Prepare data
+data("occ_virtual_species")
+obs_df &lt;- occ_virtual_species %&gt;% filter(usage == "train")
+eval_df &lt;- occ_virtual_species %&gt;% filter(usage == "eval")
+x_col &lt;- "x"
+y_col &lt;- "y"
+obs_col &lt;- "observation"
+
+# Format the observations
+obs_train_eval &lt;- format_observation(
+  obs_df = obs_df, eval_df = eval_df,
+  x_col = x_col, y_col = y_col, obs_col = obs_col,
+  obs_type = "presence_only")
+
+env_vars &lt;- system.file(
+  'extdata/bioclim_tanzania_10min.tif',
+  package = 'itsdm') %&gt;% read_stars() %&gt;%
+  slice('band', c(1, 5, 12))
+
+# With imperfect_presence mode,
+mod &lt;- isotree_po(
+  obs_mode = "imperfect_presence",
+  obs = obs_train_eval$obs,
+  obs_ind_eval = obs_train_eval$eval,
+  variables = env_vars, ntrees = 20,
+  sample_size = 0.8, ndim = 1L,
+  seed = 123L, nthreads = 1,
+  response = FALSE,
+  spatial_response = FALSE,
+  check_variable = FALSE)
+
+spatial_responses &lt;- spatial_response(
+  model = mod$model,
+  var_occ = mod$vars_train,
+  variables = mod$variables,
+  shap_nsim = 1)
+plot(spatial_responses)
+#'
+</code></pre>
+
+
+</div>

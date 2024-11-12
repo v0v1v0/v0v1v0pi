@@ -1,0 +1,128 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>FindMaxRepeatDel</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Return the number of repeat units in which a deletion is embedded</h2>
+
+<h3>Description</h3>
+
+<p>Return the number of repeat units in which a deletion is embedded
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">FindMaxRepeatDel(context, rep.unit.seq, pos)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>context</code></td>
+<td>
+<p>A string that embeds <code>rep.unit.seq</code> at position
+<code>pos</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rep.unit.seq</code></td>
+<td>
+<p>A substring of <code>context</code> at <code>pos</code>
+to <code>pos + nchar(rep.unit.seq) - 1</code>, which is the repeat
+unit sequence.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pos</code></td>
+<td>
+<p>The position of <code>rep.unit.seq</code> in <code>context</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function is primarily for internal use, but we export it
+to document the underlying logic.
+</p>
+<p>For example <code>FindMaxRepeatDel("xyaczt", "ac", 3)</code>
+returns 0.
+</p>
+<p>If
+<code>substr(context, pos, pos + nchar(rep.unit.seq) - 1) != rep.unit.seq</code>
+then stop.
+</p>
+<p>If this functions returns 0, then it is necessary to
+look for microhomology using the function
+<code>FindDelMH</code>.
+</p>
+<p><strong>Warning</strong><br>
+This function depends on the variant caller having 
+"aligned" the deletion within the context of the
+repeat.
+</p>
+<p>For example, a deletion of <code>CAG</code> in the repeat
+</p>
+<pre>
+GTCAGCAGCATGT
+</pre>
+<p>can have 3 "aligned" representations as follows:
+</p>
+<pre>
+CT---CAGCAGGT
+CTCAG---CAGGT
+CTCAGCAG---GT
+</pre>
+<p>In these cases this function will return 2. (Please
+not that the return value does not include the
+<code>rep.uni.seq</code> in the count.)
+</p>
+<p>However, the same deletion can also have an "unaligned" representation, such as
+</p>
+<pre>
+CTCAGC---AGGT
+</pre>
+<p>(a deletion of <code>AGC</code>).
+</p>
+<p>In this case this function will return 1 (a deletion of <code>AGC</code>
+in a 2-element repeat of <code>AGC</code>).
+</p>
+
+
+<h3>Value</h3>
+
+<p>The number of repeat units in which <code>rep.unit.seq</code> is
+embedded, not including
+the input <code>rep.unit.seq</code> in the count.
+</p>
+
+
+<h3>ID classification</h3>
+
+<p>See <a href="https://github.com/steverozen/ICAMS/blob/master/data-raw/PCAWG7_indel_classification_2021_09_03.xlsx">https://github.com/steverozen/ICAMS/blob/master/data-raw/PCAWG7_indel_classification_2021_09_03.xlsx</a>
+for additional information on ID (small insertion and deletion) mutation
+classification.
+</p>
+<p>See the documentation for <code>Canonicalize1Del</code> which first handles
+deletions in homopolymers, then handles deletions in simple repeats with
+longer repeat units, (e.g. <code>CACACACA</code>, see
+<code>FindMaxRepeatDel</code>), and if the deletion is not in a simple
+repeat, looks for microhomology (see <code>FindDelMH</code>).
+</p>
+<p>See the code for unexported function <code>CanonicalizeID</code>
+and the functions it calls for handling of insertions.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">FindMaxRepeatDel("xyACACzt", "AC", 3) # 1
+FindMaxRepeatDel("xyACACzt", "CA", 4) # 0
+
+</code></pre>
+
+
+</div>

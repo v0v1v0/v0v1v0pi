@@ -1,0 +1,121 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>INCAindex</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> INCA index</h2>
+
+<h3>Description</h3>
+
+<p><code>INCAindex</code> helps to estimate the number of clusters in a dataset.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">INCAindex(d, pert_clus)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p> a distance matrix or a  <code>dist</code> object with distance information between units.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pert_clus</code></td>
+<td>
+<p> an n-vector that indicates which group each unit belongs to. Note that the expected values of <code>pert</code> are numbers  greater than or equal to 1 (for instance 1,2,3,4..., k). The default value indicates the presence of only one group in data.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns an object of class <code>incaix</code> which is a list containing the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>well_class</code></td>
+<td>
+<p>a vector indicating the number of well classified units.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Ni_cluster</code></td>
+<td>
+<p>a vector indicating each cluster size.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Total</code></td>
+<td>
+<p>percentage of objects well classified in the partition defined by <code>pert_clus</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>For a correct geometrical interpretation it is convenient to verify whether the distance matrix d is Euclidean.
+It admits the associated methods summary and plot. The first simply returns the percentage of well-classified units and the second offers a barchart with the percentages of well classified units for each group in the given partition.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>  Itziar Irigoien <a href="mailto:itziar.irigoien@ehu.eus">itziar.irigoien@ehu.eus</a>; Konputazio Zientziak eta Adimen Artifiziala, Euskal Herriko Unibertsitatea (UPV/EHU), Donostia, Spain.
+</p>
+<p>Conchita Arenas <a href="mailto:carenas@ub.edu">carenas@ub.edu</a>; Departament d'Estadistica, Universitat de Barcelona, Barcelona, Spain.
+</p>
+
+
+<h3>References</h3>
+
+<p> Arenas, C. and Cuadras, C.M. (2002). Some recent statistical methods based on distances.<em> Contributions to Science</em>, <b>2</b>, 183–191.
+</p>
+<p>Irigoien, I. and  Arenas, C. (2008). INCA: New statistic for estimating the number of clusters and identifying atypical units.
+<em>Statistics in Medicine</em>, <b>27</b>(15), 2948–2973.</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>estW</code>, <code>INCAtest</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#generate 3 clusters, each of them with 20 objects in dimension 5.
+mu1 &lt;- sample(1:10, 5, replace=TRUE)
+x1 &lt;- matrix(rnorm(20*5, mean = mu1, sd = 1),ncol=5, byrow=TRUE)
+mu2 &lt;- sample(1:10, 5, replace=TRUE)
+x2 &lt;- matrix(rnorm(20*5, mean = mu2, sd = 1),ncol=5, byrow=TRUE)
+mu3 &lt;- sample(1:10, 5, replace=TRUE)
+x3 &lt;- matrix(rnorm(20*5, mean = mu3, sd = 1),ncol=5, byrow=TRUE)
+x &lt;- rbind(x1,x2,x3)
+
+# Euclidean distance between units.
+d &lt;- dist(x)
+
+# given the right partition, calculate the percentage of well classified objects.
+partition &lt;- c(rep(1,20), rep(2,20), rep(3,20))
+INCAindex(d, partition)
+
+
+# In order to estimate the number of cluster in data, try several 
+#  partitions and compare the results
+library(cluster)
+T &lt;- rep(NA, 5)
+for (l in 2:5){
+	part &lt;- pam(d,l)$clustering
+	T[l] &lt;- INCAindex(d,part)$Total
+}
+
+plot(T, type="b",xlab="Number of clusters", ylab="INCA", xlim=c(1.5, 5.5))
+</code></pre>
+
+
+</div>

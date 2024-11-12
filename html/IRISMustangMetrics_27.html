@@ -1,0 +1,181 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getSingleValueMetrics</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Retrieve measurements from the MUSTANG BSS </h2>
+
+<h3>Description</h3>
+
+<p>The <code>getSingleValueMetrics</code> method of the <code>IrisClient</code> makes a request of the MUSTANG database
+and returns a dataframe containing metrics that are stored as single values, e.g. sample_max, sample_min, etc..
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getSingleValueMetrics(obj, network, station, location, channel, 
+                           starttime, endtime, metricName, constraint, url)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+<p> an <code>IrisClient</code> object </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>network</code></td>
+<td>
+<p> a character string with the two letter seismic network code </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>station</code></td>
+<td>
+<p> a character string with the station code </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>location</code></td>
+<td>
+<p> a character string with the location code </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>channel</code></td>
+<td>
+<p> a character string with the three letter channel code </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>starttime</code></td>
+<td>
+<p> a POSIXct class specifying the starttime (GMT) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>endtime</code></td>
+<td>
+<p> a POSIXct class specifying the endtime (GMT) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>metricName</code></td>
+<td>
+<p> a character string containing one or more comma separated metric names </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constraint</code></td>
+<td>
+<p> a character string containing value constraints </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>url</code></td>
+<td>
+<p> optional url of the MUSTANG measurements service </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A blank location code should be specified as <code>location="--"</code>; Using <code>location=""</code> will return all location codes.
+</p>
+<p>The default MUSTANG measurement service when <code>url</code> is not specified is:
+</p>
+<p><code>http://service.iris.edu/mustang/measurements/1/query?</code>
+</p>
+<p>Data returned from MUSTANG are converted into an <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> dataframe.
+</p>
+<p>The optional <code>constraint</code> parameter is used to add constraints to the query as defined
+in the <a href="http://service.iris.edu/mustang/measurements/1">MUSTANG measurements web service documentation</a>.
+Any string passed in with the 
+<code>constraint</code> parameter will be appended to the request url following an ampersand.
+</p>
+<p>Error returns from the BSS will stop evaluation and generate an error message.
+</p>
+<p>Most MUSTANG metrics are single valued and can be retrieved with <code>getSingleValueMetrics()</code>. Examples
+of multi-valued metrics that cannot be returned with this function include "asl_coherence", "orientation_check",
+and "transfer_function".
+</p>
+<p><code>getMustangMetrics()</code> is a similar function that will return values for all metrics, not just single valued ones. It is the 
+preferred method of retrieving MUSTANG metric values.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A dataframe with the following columns:
+</p>
+<pre>
+~metricName~, value, snclq, starttime, endtime, loadtime
+</pre>
+<p>The <code>loadtime</code> column contains the time at which this record was loaded into the database.
+</p>
+<p>The dataframe rows will be sorted by increasing starttime.
+</p>
+<p>The structure of this dataframe is appropriate for use with the <span class="pkg">ggplot2</span> plotting package.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The database was originally populated with a version of this package
+that always assigned quality to be 'B'. Later versions obtained the
+quality from the miniSEED packet (typically 'M').  Because of this
+it is possible to have duplicate entries that only differ in the Q
+part of their snclq.  To avoid double counting, when the webservice return
+contains two records whose only difference is the quality code portion of
+the of the snclq, only the record with the later loaddate will be used
+in the dataframe.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>createBssUrl</code>,
+<code>getPsdMetrics</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  ## Not run: 
+# Open a connection to IRIS DMC webservices (including the BSS)
+iris &lt;- new("IrisClient", debug=TRUE)
+
+starttime &lt;- as.POSIXct("2013-06-01", tz="GMT")
+endtime &lt;- starttime + 30*24*3600
+metricName &lt;- "sample_max,sample_min,sample_mean"
+
+# Get the measurement dataframe
+juneStats &lt;- getSingleValueMetrics(iris,"IU","ANMO","00","BHZ",
+                                        starttime,endtime,metricName)
+
+head(juneStats)
+
+# Simple ggplot2 plot
+#library(ggplot2)
+#p &lt;- ggplot(juneStats, aes(x=starttime,y=value, color=as.factor(metricName))) +
+#     geom_step()
+
+#print(p)
+  
+## End(Not run)
+</code></pre>
+
+
+</div>

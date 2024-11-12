@@ -1,0 +1,116 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>checkSpreadEquivalence</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Checking the Equivalence of Two Spreads</h2>
+
+<h3>Description</h3>
+
+<p>This function checks the equivalence of two <code>(t-1)</code>-spreads of <code>PG(n-1,2)</code> by comparing their sorted bitstring representations.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">checkSpreadEquivalence(spread1, spread2)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>spread1</code></td>
+<td>
+<p>A <code>(t-1)</code>-spread of <code>PG(n-1,2)</code> stored as a three dimensional binary array (see Details and Examples).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spread2</code></td>
+<td>
+<p>A <code>(t-1)</code>-spread of <code>PG(n-1,2)</code> stored as a three dimensional binary array (see Details and Examples).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This code checks if two <code>(t-1)</code>-spreads of <code>PG(n-1,2)</code> are equivalent using the bitstring representation of Spencer et al. (2019). Both input spreads should be formatted as 3-dimensional arrays, for example, <code>spread1[i,j,k]</code> indicates whether or not the <code>i</code>th basic factor is present in the <code>j</code>th effect of the <code>k</code>th flat of spread1.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A Boolean indicating whether or not the two spreads are equivalent.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Neil Spencer, Pritam Ranjan, Franklin Mendivil</p>
+
+
+<h3>References</h3>
+
+<p>Spencer, N.A., Ranjan, P., and Mendivil, F., (2019), "Isomorphism Check for <code class="reqn">2^n</code> Factorial Designs with Randomization Restrictions", Journal of Statistical Theory and Practice, 13(60),1-24 [https://doi.org/10.1007/s42519-019-0064-5]
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>checkSpreadIsomorphism</code> for checking the isomorphism of spreads.<br><code>checkStarEquivalence</code> for checking the equivalence of two stars.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Example 1: two non-equivalent 1-spreads of PG(3,2)
+data(spreadn4t2a)
+data(spreadn4t2b)
+
+# test their equivalence
+(test1 &lt;- checkSpreadEquivalence(spreadn4t2a, spreadn4t2b))
+
+
+# direct instantiation of a spread
+spreadn4t2c &lt;- array(NA, c(4,3,5))
+
+spreadn4t2c[,1,1] &lt;- c(0, 0, 0, 1)
+spreadn4t2c[,2,1] &lt;- c(0, 1, 1, 0)
+spreadn4t2c[,3,1] &lt;- c(0, 1, 1, 1)
+spreadn4t2c[,1,2] &lt;- c(0, 0, 1, 0)
+spreadn4t2c[,2,2] &lt;- c(1, 1, 0, 0)
+spreadn4t2c[,3,2] &lt;- c(1, 1, 1, 0)
+spreadn4t2c[,1,3] &lt;- c(0, 1, 0, 0)
+spreadn4t2c[,2,3] &lt;- c(1, 0, 1, 1)
+spreadn4t2c[,3,3] &lt;- c(1, 1, 1, 1)
+spreadn4t2c[,1,4] &lt;- c(1, 0, 0, 0)
+spreadn4t2c[,2,4] &lt;- c(0, 1, 0, 1)
+spreadn4t2c[,3,4] &lt;- c(1, 1, 0, 1)
+spreadn4t2c[,1,5] &lt;- c(0, 0, 1, 1)
+spreadn4t2c[,2,5] &lt;- c(1, 0, 1, 0)
+spreadn4t2c[,3,5] &lt;- c(1, 0, 0, 1)
+
+(test2 &lt;- checkSpreadEquivalence(spreadn4t2a, spreadn4t2c))
+
+
+
+
+
+## Example 2: two equivalent 2-spreads of PG(5,2)
+data(spreadn6t3a)
+
+# permute the flats and flat order of spreadn6t3a to create a 
+# second equivalent spread equiv_spreadn6t3a.
+
+equiv_spreadn6t3a &lt;- spreadn6t3a
+dims &lt;- dim(equiv_spreadn6t3a)
+for(i in 1:(dims[3])){
+   equiv_spreadn6t3a[,,i] &lt;- equiv_spreadn6t3a[,sample(1:dims[2], dims[2]),i]
+}
+equiv_spreadn6t3a &lt;- equiv_spreadn6t3a[,,sample(1:dims[3], dims[3])]
+
+(test3 &lt;- checkSpreadEquivalence(spreadn6t3a, equiv_spreadn6t3a))
+</code></pre>
+
+
+</div>

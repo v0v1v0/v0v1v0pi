@@ -1,0 +1,287 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>read_ipums_micro_yield</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Read data from an IPUMS microdata extract in yields</h2>
+
+<h3>Description</h3>
+
+<p>Read a microdata dataset downloaded from the IPUMS extract system into an
+object that can read and operate on a group ("yield") of lines at a time.
+Use these functions to read a file that is too large to store in memory at
+a single time. They represent a more flexible implementation of
+<code>read_ipums_micro_chunked()</code> using R6.
+</p>
+<p>Two files are required to load IPUMS microdata extracts:
+</p>
+
+<ul>
+<li>
+<p> A <a href="https://ddialliance.org/learn/what-is-ddi">DDI codebook</a> file
+(.xml) used to parse the extract's data file
+</p>
+</li>
+<li>
+<p> A data file (either .dat.gz or .csv.gz)
+</p>
+</li>
+</ul>
+<p>See <em>Downloading IPUMS files</em> below for more information about downloading
+these files.
+</p>
+<p><code>read_ipums_micro_yield()</code> and <code>read_ipums_micro_list_yield()</code> differ
+in their handling of extracts that contain multiple record types.
+See <em>Data structures</em> below.
+</p>
+<p>Note that these functions only support fixed-width (.dat) data files.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">read_ipums_micro_yield(
+  ddi,
+  vars = NULL,
+  data_file = NULL,
+  verbose = TRUE,
+  var_attrs = c("val_labels", "var_label", "var_desc"),
+  lower_vars = FALSE
+)
+
+read_ipums_micro_list_yield(
+  ddi,
+  vars = NULL,
+  data_file = NULL,
+  verbose = TRUE,
+  var_attrs = c("val_labels", "var_label", "var_desc"),
+  lower_vars = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ddi</code></td>
+<td>
+<p>Either a path to a DDI .xml file downloaded from
+<a href="https://www.ipums.org/">IPUMS</a>, or an
+ipums_ddi object parsed by <code>read_ipums_ddi()</code>. See
+<em>Downloading IPUMS files</em> below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vars</code></td>
+<td>
+<p>Names of variables to include in the output. Accepts a
+vector of names or a tidyselect selection.
+If <code>NULL</code>, includes all variables in the file.
+</p>
+<p>For hierarchical data, the <code>RECTYPE</code> variable is always included even if
+unspecified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_file</code></td>
+<td>
+<p>Path to the data (.gz) file associated with
+the provided <code>ddi</code> file. By default, looks for the data file in the same
+directory as the DDI file. If the data file has been moved, specify
+its location here.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Logical indicating whether to display IPUMS conditions and
+progress information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var_attrs</code></td>
+<td>
+<p>Variable attributes from the DDI to add to the columns of
+the output data. Defaults to all available attributes.
+See <code>set_ipums_var_attributes()</code> for more details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower_vars</code></td>
+<td>
+<p>If reading a DDI from a file,
+a logical indicating whether to convert variable names to lowercase.
+Defaults to <code>FALSE</code> for consistency with IPUMS conventions.
+</p>
+<p>This argument will be ignored if argument <code>ddi</code> is
+an ipums_ddi object. Use <code>read_ipums_ddi()</code> to convert variable
+names to lowercase when reading a DDI file.
+</p>
+<p>If <code>lower_vars = TRUE</code> and <code>vars</code> is specified, <code>vars</code> should reference the
+lowercase column names.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A HipYield R6 object (see Details section)
+</p>
+
+
+<h3>Methods summary:</h3>
+
+<p>These functions return a HipYield R6 object with the following methods:
+</p>
+
+<ul>
+<li> <p><code>yield(n = 10000)</code> reads the next "yield" from the
+data.
+</p>
+<p>For <code>read_ipums_micro_yield()</code>, returns a <code>tibble</code>
+with up to <code>n</code> rows.
+</p>
+<p>For <code>read_ipums_micro_list_yield()</code>, returns a list of tibbles with a
+total of up to <code>n</code> rows across list elements.
+</p>
+<p>If fewer than <code>n</code> rows are left in the data, returns all remaining rows.
+If no rows are left in the data, returns <code>NULL</code>.
+</p>
+</li>
+<li> <p><code>reset()</code> resets the data so that the next yield will read data from the
+start.
+</p>
+</li>
+<li> <p><code>is_done()</code> returns a logical indicating whether all rows in the file
+have been read.
+</p>
+</li>
+<li> <p><code>cur_pos</code> contains the next row number that will be read (1-indexed).
+</p>
+</li>
+</ul>
+<h3>Data structures</h3>
+
+<p>Files from IPUMS projects that contain data for multiple types of records
+(e.g. household records and person records) may be either rectangular
+or hierarchical.
+</p>
+<p>Rectangular data are transformed such that each row of data
+represents only one type of record. For instance, each row will represent
+a person record, and all household-level information for that person will
+be included in the same row.
+</p>
+<p>Hierarchical data have records of
+different types interspersed in a single file. For instance, a household
+record will be included in its own row followed by the person records
+associated with that household.
+</p>
+<p>Hierarchical data can be read in two different formats:
+</p>
+
+<ul>
+<li> <p><code>read_ipums_micro_yield()</code> produces an object that yields data as a
+<code>tibble</code> whose rows
+represent single records, regardless of record type. Variables that do
+not apply to a particular record type will be filled with <code>NA</code> in rows of
+that record type. For instance, a person-specific variable will be missing
+in all rows associated with household records.
+</p>
+</li>
+<li> <p><code>read_ipums_micro_list_yield()</code> produces an object that yields data as a
+list of <code>tibble</code> objects, where each list element contains
+only one record type. Each list element is named with its corresponding
+record type. In this case, when using <code>yield()</code>, <code>n</code> refers to
+the total number of rows <em>across</em> record types, rather than in each
+record type.
+</p>
+</li>
+</ul>
+<h3>Downloading IPUMS files</h3>
+
+<p>You must download both the DDI codebook and the data file from the IPUMS
+extract system to load the data into R. <code style="white-space: pre;">⁠read_ipums_micro_*()⁠</code> functions
+assume that the data file and codebook share a common base file name and
+are present in the same directory. If this is not the case, provide a
+separate path to the data file with the <code>data_file</code> argument.
+</p>
+<p>If using the IPUMS extract interface:
+</p>
+
+<ul>
+<li>
+<p> Download the data file by clicking <strong>Download .dat</strong> under
+<strong>Download Data</strong>.
+</p>
+</li>
+<li>
+<p> Download the DDI codebook by right clicking on the <strong>DDI</strong> link in the
+<strong>Codebook</strong> column of the extract interface and selecting <strong>Save as...</strong>
+(on Safari, you may have to select <strong>Download Linked File as...</strong>).
+Be sure that the codebook is downloaded in .xml format.
+</p>
+</li>
+</ul>
+<p>If using the IPUMS API:
+</p>
+
+<ul><li>
+<p> For supported collections, use <code>download_extract()</code> to download a completed
+extract via the IPUMS API. This automatically downloads both the DDI
+codebook and the data file from the extract and
+returns the path to the codebook file.
+</p>
+</li></ul>
+<h3>See Also</h3>
+
+<p><code>read_ipums_micro_chunked()</code> to read data from large IPUMS
+microdata extracts in chunks.
+</p>
+<p><code>read_ipums_micro()</code> to read data from an IPUMS microdata extract.
+</p>
+<p><code>read_ipums_ddi()</code> to read metadata associated with an IPUMS microdata
+extract.
+</p>
+<p><code>read_ipums_sf()</code> to read spatial data from an IPUMS extract.
+</p>
+<p><code>ipums_list_files()</code> to list files in an IPUMS extract.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Create an IpumsLongYield object
+long_yield &lt;- read_ipums_micro_yield(ipums_example("cps_00157.xml"))
+
+# Yield the first 10 rows of the data
+long_yield$yield(10)
+
+# Yield the next 20 rows of the data
+long_yield$yield(20)
+
+# Check the current position after yielding 30 rows
+long_yield$cur_pos
+
+# Reset to the beginning of the file
+long_yield$reset()
+
+# Use a loop to flexibly process the data in pieces. Count all Minnesotans:
+total_mn &lt;- 0
+
+while (!long_yield$is_done()) {
+  cur_data &lt;- long_yield$yield(1000)
+  total_mn &lt;- total_mn + sum(as_factor(cur_data$STATEFIP) == "Minnesota")
+}
+
+total_mn
+
+# Can also read hierarchical data as list:
+list_yield &lt;- read_ipums_micro_list_yield(ipums_example("cps_00159.xml"))
+
+# Yield size is based on total rows for all list elements
+list_yield$yield(10)
+</code></pre>
+
+
+</div>

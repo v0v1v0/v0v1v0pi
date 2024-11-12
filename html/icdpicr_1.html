@@ -1,0 +1,263 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cat_trauma</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Categorize trauma data</h2>
+
+<h3>Description</h3>
+
+<p>This function adds Abbreviated Injury Scores (AIS), Injury Severity Scores (ISS), and other descriptors of injury to a dataframe.
+For each observation this function will
+</p>
+
+<ol>
+<li>
+<p> assign a severity (AIS) and ISS body region values to each valid ICD-9 or ICD-10 injury diagnosis code,
+</p>
+</li>
+<li>
+<p> add variables for maximum severity of each body region,
+</p>
+</li>
+<li>
+<p> calculate ISS, "New ISS", maximum AIS, and a regression-based mortality prediction,
+</p>
+</li>
+<li>
+<p> select first 4 e-codes/mechanism codes and categorize major mechanism, minor mechanism, and intent
+</p>
+</li>
+</ol>
+<h3>Usage</h3>
+
+<pre><code class="language-R">cat_trauma(df, dx_pre, icd10, i10_iss_method, calc_method = 1, verbose = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>A dataframe in wide format containing ICD-9 and/or ICD-10 diagnosis codes with a common column name prefix.
+Diagnosis codes should be character strings and may have a decimal or not.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dx_pre</code></td>
+<td>
+<p>Prefix for diagnosis code column names (example: dx1, dx2, etc.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>icd10</code></td>
+<td>
+<p>Should ICD-10 codes be included? Must be one of: TRUE, FALSE, "cm", or "base".
+</p>
+
+<ul>
+<li>
+<p> TRUE - ICD-10 codes will be processed by the program
+</p>
+</li>
+<li>
+<p> FALSE - Any ICD-10 codes in the data will be ignored.
+</p>
+</li>
+<li>
+<p> "cm" - ICD-10-CM codes will be processed by the program
+</p>
+</li>
+<li>
+<p> "base" - Basic ICD-10 (international) codes will be processed by the program
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>i10_iss_method</code></td>
+<td>
+<p>Method for calculating ISS from ICD-10 codes. Ignored if icd10 = FALSE. Must be one of:
+</p>
+
+<ul>
+<li>
+<p> "roc_max_NIS" Table derived empirically from National Inpatient Sample (NIS) maximizing area under an ROC curve. For ICD10 codes not in NIS the mapping based on TQIP data will be used as a backup. This option is recommended if the user's data are similar to NIS data.
+</p>
+</li>
+<li>
+<p> "roc_max_TQIP" Table derived empirically from the Trauma Quality Improvement Program (TQIP) data maximizing area under an ROC curve. For ICD-10 codes not in TQIP the mapping based on NIS data will be used as a backup. This option is recommended if the user's data are similar to TQIP data.
+</p>
+</li>
+<li>
+<p> "roc_max_NIS_only" Table derived as for "roc_max_NIS", but injury ICD-10 codes not in the NIS dataset will be ignored
+</p>
+</li>
+<li>
+<p> "roc_max_TQIP_only" Table derived as for "roc_max_TQIP", but injury ICD-10 codes not in the TQIP dataset will be ignored.
+</p>
+</li>
+<li>
+<p> "gem_max" Table derived by mapping ICD-10-CM to ICD-9-CM using the CMS general equivalence mapping tables and then to AIS and ISS using the ICDPIC table inherited from the Stata version.  Mapping conflicts handled by taking the max AIS.
+</p>
+</li>
+<li>
+<p> "gem_min" Same as "gem_max" except that mapping conflicts are handled by taking the min AIS.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>calc_method</code></td>
+<td>
+<p>ISS calculation method:
+Method 1 (default) will assign an ISS of 75 if any AIS is 6.
+Method 2 will change any AIS = 6 to 5 and then calculate ISS normally.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Should updates be printed to the console? TRUE or FALSE (default). This can be helpful for long running computations.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Data should be in wide format:
+</p>
+
+<table>
+<tr>
+<td style="text-align: right;">
+ID    </td>
+<td style="text-align: right;"> dx1    </td>
+<td style="text-align: right;"> dx2   </td>
+<td style="text-align: right;"> dx3    </td>
+<td style="text-align: right;"> etc. </td>
+</tr>
+<tr>
+<td style="text-align: right;">
+31416 </td>
+<td style="text-align: right;"> 800.1  </td>
+<td style="text-align: right;"> 959.9 </td>
+<td style="text-align: right;"> E910.9 </td>
+<td style="text-align: right;">      </td>
+</tr>
+<tr>
+<td style="text-align: right;">
+31417 </td>
+<td style="text-align: right;"> 800.24 </td>
+<td style="text-align: right;"> 410.0 </td>
+<td style="text-align: right;">        </td>
+<td style="text-align: right;">
+</td>
+</tr>
+</table>
+<p>Codes for AIS severity:
+</p>
+
+<ul>
+<li>
+<p> 1 = Minor
+</p>
+</li>
+<li>
+<p> 2 = Moderate
+</p>
+</li>
+<li>
+<p> 3 = Serious
+</p>
+</li>
+<li>
+<p> 4 = Severe
+</p>
+</li>
+<li>
+<p> 5 = Critical
+</p>
+</li>
+<li>
+<p> 6 = Unsurvivable
+</p>
+</li>
+<li>
+<p> 9 = Unknown
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>A dataframe identical to the dataframe passed to the function with the following additional variables
+added:
+</p>
+
+<ul>
+<li>
+<p> sev_1-sev_n: AIS severity for diagnosis codes 1..n
+</p>
+</li>
+<li>
+<p> issbr_1-issbr_n: ISS body region for diagnosis codes 1..n
+</p>
+</li>
+<li>
+<p> mxaisbr1-mxaisbr6: maximum AIS severity for each of the 6 ISS body regions
+</p>
+</li>
+<li>
+<p> maxais: maximum AIS severity over all ISS body regions
+</p>
+</li>
+<li>
+<p> riss: computed injury severity score
+</p>
+</li>
+<li>
+<p> niss: new injury severity score
+</p>
+</li>
+<li>
+<p> ecode_1-ecode_4: first 4 mechanism/E-Codes (including ICD-10 if requested) found in each row of data
+</p>
+</li>
+<li>
+<p> mechmaj1-mechmaj4: CDC external cause of injury major mechanism for each E-Code captured
+</p>
+</li>
+<li>
+<p> mechmin1-mechmin4: CDC external cause of injury minor mechanism for each E-Code captured
+</p>
+</li>
+<li>
+<p> intent1-intent4: intent for each E-Code captured
+</p>
+</li>
+<li>
+<p> lowmech: lowest CDC external cause of injury major mechanism for all E-Codes captured
+</p>
+</li>
+<li>
+<p> Pmort: The model predicted probability of mortality (only added if using ICD-10 codes with one of the roc_max methods)
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">df_in &lt;- read.table(header = TRUE, text = "
+    ident    dx1     dx2     dx3
+    31416   800.1   959.9   E910.9
+    31417   800.24  410.0   NA
+")
+df_out &lt;- cat_trauma(df_in, "dx", icd10 = FALSE)
+
+</code></pre>
+
+
+</div>

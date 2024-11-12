@@ -1,0 +1,130 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>CIARkalman</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Maximum Likelihood Estimation of the CIAR Model via Kalman Recursions</h2>
+
+<h3>Description</h3>
+
+<p>Maximum Likelihood Estimation of the CIAR model parameters phiR and phiI. The estimation procedure uses the Kalman Filter to find the maximum of the likelihood.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">CIARkalman(
+  y,
+  t,
+  delta = 0,
+  zero.mean = TRUE,
+  standardized = TRUE,
+  c = 1,
+  niter = 10,
+  seed = 1234
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Array with the time series observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t</code></td>
+<td>
+<p>Array with the irregular observational times.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta</code></td>
+<td>
+<p>Array with the measurements error standard deviations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zero.mean</code></td>
+<td>
+<p>logical; if TRUE, the array y has zero mean; if FALSE, y has a mean different from zero.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>standardized</code></td>
+<td>
+<p>logical; if TRUE, the array y is standardized; if FALSE, y contains the raw time series.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c</code></td>
+<td>
+<p>Nuisance parameter corresponding to the variance of the imaginary part.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>niter</code></td>
+<td>
+<p>Number of iterations in which the function nlminb will be repeated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>a single value, interpreted as the seed of the random process.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with the following components:
+</p>
+
+<ul>
+<li>
+<p>phiR MLE of the Real part of the coefficient of CIAR model (phiR).
+</p>
+</li>
+<li>
+<p>phiI MLE of the Imaginary part of the coefficient of the CIAR model (phiI).
+</p>
+</li>
+<li>
+<p>ll Value of the negative log likelihood evaluated in phiR and phiI.
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+<p>Elorrieta, F, Eyheramendy, S, Palma, W (2019).
+“Discrete-time autoregressive model for unequally spaced time-series observations.”
+<em>A&amp;A</em>, <b>627</b>, A120.
+doi: <a href="https://doi.org/10.1051/0004-6361/201935560">10.1051/0004-6361/201935560</a>, <a href="https://doi.org/10.1051/0004-6361/201935560">https://doi.org/10.1051/0004-6361/201935560</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>gentime</code>, <code>CIARsample</code>, <code>CIARphikalman</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">n=100
+set.seed(6714)
+st&lt;-gentime(n)
+x=CIARsample(n=n,phiR=0.9,phiI=0,st=st,c=1)
+y=x$y
+y1=y/sd(y)
+ciar=CIARkalman(y=y1,t=st)
+ciar
+Mod(complex(real=ciar$phiR,imaginary=ciar$phiI))
+</code></pre>
+
+
+</div>

@@ -1,0 +1,152 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>selection_language</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>tidyselect selection language in ipumsr</h2>
+
+<h3>Description</h3>
+
+<p>Slightly modified implementation of tidyselect
+selection language in ipumsr.
+</p>
+
+
+<h4>Syntax</h4>
+
+<p>In general, the selection language in ipumsr operates the same as in
+tidyselect.
+</p>
+<p>Where applicable, variables can be selected with:
+</p>
+
+<ul>
+<li>
+<p> A character vector of variable names (<code>c("var1", "var2")</code>)
+</p>
+</li>
+<li>
+<p> A bare vector of variable names (<code>c(var1, var2)</code>)
+</p>
+</li>
+<li>
+<p> A selection helper from tidyselect (<code>starts_with("var")</code>). See below for
+a list of helpers.
+</p>
+</li>
+</ul>
+<h4>Primary differences</h4>
+
+
+<ul>
+<li>
+<p> tidyselect selection is generally intended for use with column variables
+in data.frame-like objects. In contrast, ipumsr allows selection language
+syntax in other cases as well (for instance, when selecting files
+from within a .zip archive). ipumsr functions will indicate whether they
+support the selection language.
+</p>
+</li>
+<li>
+<p> Selection with <code>where()</code> is not consistently
+supported.
+</p>
+</li>
+</ul>
+<h4>Selection helpers (from tidyselect)</h4>
+
+
+<ul>
+<li> <p><code>var1</code>:<code>var10</code>: variables lying between <code>var1</code> on the left and <code>var10</code>
+on the right.
+</p>
+</li>
+<li> <p><code>starts_with("a")</code>: names that start with <code>"a"</code>
+</p>
+</li>
+<li> <p><code>ends_with("z")</code>: names that end with <code>"z"</code>
+</p>
+</li>
+<li> <p><code>contains("b")</code>: names that contain <code>"b"</code>
+</p>
+</li>
+<li> <p><code>matches("x.y")</code>: names that match regular expression <code>x.y</code>
+</p>
+</li>
+<li> <p><code>num_range(x, 1:4)</code>: names following the pattern <code style="white-space: pre;">⁠x1, x2, ..., x4⁠</code>
+</p>
+</li>
+<li> <p><code>all_of(vars)</code>/<code>any_of(vars)</code>: matches names stored in the character vector
+<code>vars</code>. <code>all_of(vars)</code> will error if the variables aren't present;
+<code>any_of(vars)</code> will match just the variables that exist.
+</p>
+</li>
+<li> <p><code>everything()</code>: all variables
+</p>
+</li>
+<li> <p><code>last_col()</code>: furthest column to the right
+</p>
+</li>
+</ul>
+<p>Operators for combining those selections:
+</p>
+
+<ul>
+<li> <p><code>!selection</code>: only variables that don't match <code>selection</code>
+</p>
+</li>
+<li> <p><code>selection1 &amp; selection2</code>: only variables included in both <code>selection1</code>
+and <code>selection2</code>
+</p>
+</li>
+<li> <p><code>selection1 | selection2</code>: all variables that match either <code>selection1</code> or
+<code>selection2</code>
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">cps_file &lt;- ipums_example("cps_00157.xml")
+
+# Load 3 variables by name
+read_ipums_micro(
+  cps_file,
+  vars = c("YEAR", "MONTH", "PERNUM"),
+  verbose = FALSE
+)
+
+# "Bare" variables are supported
+read_ipums_micro(
+  cps_file,
+  vars = c(YEAR, MONTH, PERNUM),
+  verbose = FALSE
+)
+
+# Standard tidyselect selectors are also supported
+read_ipums_micro(cps_file, vars = starts_with("ASEC"), verbose = FALSE)
+
+# Selection methods can be combined
+read_ipums_micro(
+  cps_file,
+  vars = c(YEAR, MONTH, contains("INC")),
+  verbose = FALSE
+)
+
+read_ipums_micro(
+  cps_file,
+  vars = starts_with("S") &amp; ends_with("P"),
+  verbose = FALSE
+)
+
+# Other selection arguments also support this syntax.
+# For instance, load a particular file based on a tidyselect match:
+read_nhgis(
+  ipums_example("nhgis0731_csv.zip"),
+  file_select = contains("nominal_state"),
+  verbose = FALSE
+)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,180 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ptReg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>The Preliminary Test Estimator</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates the preliminary test. When the error has a normal
+distribution, the test statistic is given by
+</p>
+<p style="text-align: center;"><code class="reqn">\hat{\beta}^{PT}=\hat{\beta}^{U} - (\hat{\beta}^{U} - \hat{\beta}^{R}) I(\mathcal{L} \le F_{q,n-p}(\alpha))</code>
+</p>
+
+<p>and, if the error has a non-normal distribution, is given by
+</p>
+<p style="text-align: center;"><code class="reqn">\hat{\beta}^{PT}=\hat{\beta}^{U} - (\hat{\beta}^{U} - \hat{\beta}^{R}) I(\mathcal{L} \le \chi^2_{q}(\alpha))</code>
+</p>
+
+<p>where <code class="reqn">I(A)</code> denotes an indicator function and
+</p>
+
+<ul>
+<li> <p><code class="reqn">\hat{\beta}^{U}</code> is the unrestricted estimator; See <code>unrReg</code>.
+</p>
+</li>
+<li> <p><code class="reqn">\hat{\beta}^{R}</code> is the restricted estimator; See <code>resReg</code>.
+</p>
+</li>
+<li> <p><code class="reqn">\mathcal{L}</code> is the test statistic. See <code>teststat</code>;
+</p>
+</li>
+<li> <p><code class="reqn">F_{q,n-p}(\alpha)</code> is the upper <code class="reqn">\alpha</code> level critical value of <code class="reqn">F</code>-distribution with <code class="reqn">(q,n-p)</code> degrees of freedom, calculated using <code>qf</code>;
+</p>
+</li>
+<li> <p><code class="reqn">\chi^2_{q}(\alpha)</code>is the upper <code class="reqn">\alpha</code> level critical value of <code class="reqn">\chi^2</code>-distribution with <code class="reqn">q</code> degree of freedom, calculated using <code>qchisq</code>;
+</p>
+</li>
+<li> <p><code class="reqn">\alpha</code>: the significance level.
+</p>
+</li>
+</ul>
+<h3>Usage</h3>
+
+<pre><code class="language-R">ptReg(X, y, H, h, alpha, is_error_normal = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>Matrix with input observations, of dimension <code>n</code> x <code>p</code>;
+each row is an observation vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Vector with response observations of size <code>n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>H</code></td>
+<td>
+<p>A given <code>q</code> x <code>p</code> matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>A given <code>q</code> x <code>1</code> vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>A given significance level.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>is_error_normal</code></td>
+<td>
+<p>logical value indicating whether the errors follow
+a normal distribution. If <code>is_error_normal</code> is <code>TRUE</code>,
+the distribution of the test statistics for the null hypothesis
+is F distribution (<code>FDist</code>).
+On the other hand, if the errors have a non-normal distribution,
+the asymptotic distribution of the test statistics is <code class="reqn">\chi^2</code>
+distribution (<code>Chisquare</code>).
+By default, <code>is_error_normal</code> is set to <code>FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The corresponding estimator of <code class="reqn">\sigma^2</code> is
+</p>
+<p style="text-align: center;"><code class="reqn">s^2 = \frac{1}{n-p}(y-X\hat{\beta}^{PT})^{\top}(y - X\hat{\beta}^{PT}).</code>
+</p>
+
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>preliminaryTest</code> is a list containing at least the following components:
+</p>
+
+<dl>
+<dt><code>coef</code></dt>
+<dd>
+<p>A named vector of coefficients.</p>
+</dd>
+<dt><code>residuals</code></dt>
+<dd>
+<p>The residuals, that is, the response values minus fitted values.</p>
+</dd>
+<dt><code>s2</code></dt>
+<dd>
+<p>The estimated variance.</p>
+</dd>
+<dt><code>fitted.values</code></dt>
+<dd>
+<p>The fitted values.</p>
+</dd>
+</dl>
+<h3>References</h3>
+
+<p>Saleh, A. K. Md. Ehsanes. (2006). <em>Theory of Preliminary Test and Stein‐Type Estimation With Applications</em>, Wiley.
+</p>
+<p>Kaciranlar, S., Akdeniz, S. S. F., Styan, G. P. &amp; Werner, H. J. (1999). A new biased
+estimators in linear regression and detailed
+analysis of the widely-analysed dataset on
+portland cement. <em>Sankhya, Series B</em>, 61(3), 443-459.
+</p>
+<p>Kibria, B. M. Golam (2005). Applications of Some Improved Estimators in Linear Regression,
+<em>Journal of Modern Applied Statistical Methods</em>, 5(2), 367- 380.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">n_obs &lt;- 100
+p_vars &lt;- 5
+beta &lt;- c(2, 1, 3, 0, 5)
+simulated_data &lt;- simdata(n = n_obs, p = p_vars, beta)
+X &lt;- simulated_data$X
+y &lt;- simulated_data$y
+p &lt;- ncol(X)
+# H beta = h
+H &lt;- matrix(c(1, 1, -1, 0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 1, 0), nrow = 3, ncol = p, byrow = TRUE)
+h &lt;- rep(0, nrow(H))
+ptReg(X, y, H, h, alpha = 0.05)
+
+# H beta != h
+p &lt;- ncol(X)
+H &lt;- matrix(c(1, 1, -1, 0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 1, 0), nrow = 3, ncol = p, byrow = TRUE)
+h &lt;- rep(1, nrow(H))
+ptReg(X, y, H, h, alpha = 0.05)
+
+data(cement)
+X &lt;- as.matrix(cbind(1, cement[, 1:4]))
+y &lt;- cement$y
+# Based on Kaciranlar et al. (1999)
+H &lt;- matrix(c(0, 1, -1, 1, 0), nrow = 1, ncol = 5, byrow = TRUE)
+h &lt;- rep(0, nrow(H))
+ptReg(X, y, H, h, alpha = 0.05)
+# Based on Kibria (2005)
+H &lt;- matrix(c(0, 1, -1, 1, 0, 0, 0, 1, -1, -1, 0, 1, -1, 0, -1), nrow = 3, ncol = 5, byrow = TRUE)
+h &lt;- rep(0, nrow(H))
+ptReg(X, y, H, h, alpha = 0.05)
+
+</code></pre>
+
+
+</div>

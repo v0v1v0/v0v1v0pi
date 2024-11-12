@@ -1,0 +1,216 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>inverseRegex</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Reverse Engineers a Regular Expression Pattern to Represent the Input Object.</h2>
+
+<h3>Description</h3>
+
+<p>Deconstructs the input into collections of letters, digits, punctuation, and
+spaces that represent a regex pattern consistent with that input.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">inverseRegex(
+  x,
+  numbersToKeep = c(2, 3, 4, 5, 10),
+  combineCases = FALSE,
+  combineAlphanumeric = FALSE,
+  combinePunctuation = FALSE,
+  combineSpace = FALSE,
+  sep = "",
+  escapePunctuation = FALSE,
+  enclose = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Object to derive a regex pattern for.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numbersToKeep</code></td>
+<td>
+<p>Set of numbers giving the length for which elements
+repeated that many times should be counted explicitly
+(e.g. "[[:digit:]]{5}"). Repeat sequences not included in numbersToKeep
+will be coded with a "+" (e.g. "[[:digit:]]+"). Defaults to c(2, 3, 4, 5, 10).
+Set to NULL to have all runs coded as "+" and set to <code>2:maxCharacters</code>
+to have the length specified for all repeated values. If one is included then
+all unique patterns with be counted as "{1}"; if it is not then the "{1}"
+is left off.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>combineCases</code></td>
+<td>
+<p>Logical indicating whether to treat upper and lower case
+letters as a single entity. Defaults to FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>combineAlphanumeric</code></td>
+<td>
+<p>Logical indicating whether to treat alphabetic
+characters and digits as a single entity. Defaults to FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>combinePunctuation</code></td>
+<td>
+<p>Logical indicating whether to treat all punctuation
+characters as a single entity. Defaults to FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>combineSpace</code></td>
+<td>
+<p>Logical indicating whether to treat all space characters
+as a single entity. Defaults to FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep</code></td>
+<td>
+<p>Value used to separate the regex patterns. Defaults to an empty
+string.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>escapePunctuation</code></td>
+<td>
+<p>Logical indicating whether to escape any punctuation
+characters. Defaults to FALSE. Set to TRUE if you want to use the returned
+value as an argument to grep.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>enclose</code></td>
+<td>
+<p>Logical indicating whether to surround each returned value
+with <code>'^'</code> and <code>'$'</code>. Defaults to FALSE.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The fundamental use of inverseRegex applies only to strings. Inputs of a class
+other than character are treated as follows: 
+</p>
+
+<ul>
+<li>
+<p> Integer: Converted using <code>as.character()</code>.
+</p>
+</li>
+<li>
+<p> Factor: Converted using <code>as.character()</code>.
+</p>
+</li>
+<li>
+<p> Logical: Left as is. Converting to character would not provide any
+simplification.
+</p>
+</li>
+<li>
+<p> Numeric: Converted to character by applying <code>format(..., nsmall = 1)</code>
+element by element. NA values will be returned as NA_character_, whilst
+<code>NaN</code>, <code>Inf</code>, and <code>-Inf</code> will be returned as literal
+strings: <code>"NaN"</code>, <code>"Inf"</code>, and <code>"-Inf"</code>.
+</p>
+</li>
+<li>
+<p> Date: Converted using <code>as.character()</code>.
+</p>
+</li>
+<li>
+<p> POSIXct: Converted using <code>as.character()</code>.
+</p>
+</li>
+<li>
+<p> Data frame: Each column is assessed individually and the results
+combined together so that the output is a data frame of regex patterns
+with the same dimensions as the input. The columns of class other than
+character will each be converted as described previously, with one
+exception: Unlike above where numerics are passed to
+<code>format(..., nsmall = 1)</code> element by element, here the entire
+column is passed to <code>trimws(format(...))</code>. This will lead to a
+common number of digits to the right of the decimal point and a variable
+number of digits with no padding on the left side.
+</p>
+</li>
+<li>
+<p> Matrix: Creates a matrix of regex patterns with the same dimensions
+as the input. If the matrix has a mode of numeric then it will first
+be passed to <code>trimws(format(...))</code>.
+</p>
+</li>
+<li>
+<p> Tibble: Same as a data frame except the returned object is a tibble.
+Requires the tibble package to be installed.
+</p>
+</li>
+<li>
+<p> Anything else: Not supported; an error will be thrown.
+</p>
+</li>
+</ul>
+<p>If these conversion methods are not appropriate then you can do the conversion
+yourself so that the input is dispatched directly to inverseRegex.character.
+</p>
+<p>The regex patterns are identified using the constructs "[:digit:]", "[:upper:]",
+"[:lower:]", "[:alpha:]", "[:alnum:]", "[:punct:]", and "[:space:]" as described
+in <code>?regex</code>. This will allow for non-ASCII characters to be identified, to
+the extent supported by <code>grep</code>. Any characters not identified by these
+search patterns will be left as is. Note that for characters from unicameral
+alphabets the combineCases argument will need to be set to TRUE otherwise they
+will not be detected by "lower" and "upper".
+</p>
+<p>NA values in the input will remain as NA values in the output.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A set of regex patterns that match the input data. These patterns will
+either be character vectors or the same class as the input object if it was
+a matrix, data frame, or tibble.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jasper Watson
+</p>
+
+
+<h3>See Also</h3>
+
+<p>occurrencesLessThan, regex
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">inverseRegex('Hello World!')
+
+table(inverseRegex(c(rep('HELLO', 10), 'HELL0')))
+
+unique(inverseRegex(iris, numbersToKeep = 1:10))
+
+inverseRegex(c(1, NA, 3.45, NaN, Inf, -Inf))
+
+</code></pre>
+
+
+</div>

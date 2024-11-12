@@ -1,0 +1,127 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>find_terms</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Find all model terms</h2>
+
+<h3>Description</h3>
+
+<p>Returns a list with the names of all terms, including response
+value and random effects, "as is". This means, on-the-fly tranformations
+or arithmetic expressions like <code>log()</code>, <code>I()</code>, <code>as.factor()</code> etc. are
+preserved.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">find_terms(x, ...)
+
+## Default S3 method:
+find_terms(x, flatten = FALSE, as_term_labels = FALSE, verbose = TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A fitted model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Currently not used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>flatten</code></td>
+<td>
+<p>Logical, if <code>TRUE</code>, the values are returned
+as character vector, not as list. Duplicated values are removed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>as_term_labels</code></td>
+<td>
+<p>Logical, if <code>TRUE</code>, extracts model formula and tries to
+access the <code>"term.labels"</code> attribute. This should better mimic the <code>terms()</code>
+behaviour even for those models that do not have such a method, but may be
+insufficient, e.g. for mixed models.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Toggle warnings.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with (depending on the model) following elements (character
+vectors):
+</p>
+
+<ul>
+<li> <p><code>response</code>, the name of the response variable
+</p>
+</li>
+<li> <p><code>conditional</code>, the names of the predictor variables from the <em>conditional</em>
+model (as opposed to the zero-inflated part of a model)
+</p>
+</li>
+<li> <p><code>random</code>, the names of the random effects (grouping factors)
+</p>
+</li>
+<li> <p><code>zero_inflated</code>, the names of the predictor variables from the <em>zero-inflated</em> part of the model
+</p>
+</li>
+<li> <p><code>zero_inflated_random</code>, the names of the random effects (grouping factors)
+</p>
+</li>
+<li> <p><code>dispersion</code>, the name of the dispersion terms
+</p>
+</li>
+<li> <p><code>instruments</code>, the names of instrumental variables
+</p>
+</li>
+</ul>
+<p>Returns <code>NULL</code> if no terms could be found (for instance, due to
+problems in accessing the formula).
+</p>
+
+
+<h3>Note</h3>
+
+<p>The difference to <code>find_variables()</code> is that <code>find_terms()</code>
+may return a variable multiple times in case of multiple transformations
+(see examples below), while <code>find_variables()</code> returns each variable
+name only once.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(sleepstudy, package = "lme4")
+m &lt;- suppressWarnings(lme4::lmer(
+  log(Reaction) ~ Days + I(Days^2) + (1 + Days + exp(Days) | Subject),
+  data = sleepstudy
+))
+
+find_terms(m)
+
+# sometimes, it is necessary to retrieve terms from "term.labels" attribute
+m &lt;- lm(mpg ~ hp * (am + cyl), data = mtcars)
+find_terms(m, as_term_labels = TRUE)
+
+</code></pre>
+
+
+</div>

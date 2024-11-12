@@ -1,0 +1,533 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cox_cure_net</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Regularized Cox Cure Rate Model</h2>
+
+<h3>Description</h3>
+
+<p>For right-censored data, fit a regularized Cox cure rate model through
+elastic-net penalty following Masud et al. (2018), and Zou and Hastie
+(2005).  For right-censored data with uncertain event status,
+fit the regularized Cox cure model proposed by Wang et al. (2020).  Without
+regularization, the model reduces to the regular Cox cure rate model (Kuk
+and Chen, 1992; Sy and Taylor, 2000)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cox_cure_net(
+  surv_formula,
+  cure_formula,
+  time,
+  event,
+  data,
+  subset,
+  contrasts = NULL,
+  surv_lambda = NULL,
+  surv_alpha = 1,
+  surv_nlambda = 10,
+  surv_lambda_min_ratio = 0.1,
+  surv_l1_penalty_factor = NULL,
+  cure_lambda = NULL,
+  cure_alpha = 1,
+  cure_nlambda = 10,
+  cure_lambda_min_ratio = 0.1,
+  cure_l1_penalty_factor = NULL,
+  cv_nfolds = 0,
+  surv_start = NULL,
+  cure_start = NULL,
+  surv_offset = NULL,
+  cure_offset = NULL,
+  surv_standardize = TRUE,
+  cure_standardize = TRUE,
+  em_max_iter = 200,
+  em_rel_tol = 1e-05,
+  surv_max_iter = 10,
+  surv_rel_tol = 1e-05,
+  cure_max_iter = 10,
+  cure_rel_tol = 1e-05,
+  tail_completion = c("zero", "exp", "zero-tau"),
+  tail_tau = NULL,
+  pmin = 1e-05,
+  early_stop = TRUE,
+  verbose = FALSE,
+  ...
+)
+
+cox_cure_net.fit(
+  surv_x,
+  cure_x,
+  time,
+  event,
+  cure_intercept = TRUE,
+  surv_lambda = NULL,
+  surv_alpha = 1,
+  surv_nlambda = 10,
+  surv_lambda_min_ratio = 0.1,
+  surv_l1_penalty_factor = NULL,
+  cure_lambda = NULL,
+  cure_alpha = 1,
+  cure_nlambda = 10,
+  cure_lambda_min_ratio = 0.1,
+  cure_l1_penalty_factor = NULL,
+  cv_nfolds = 0,
+  surv_start = NULL,
+  cure_start = NULL,
+  surv_offset = NULL,
+  cure_offset = NULL,
+  surv_standardize = TRUE,
+  cure_standardize = TRUE,
+  em_max_iter = 200,
+  em_rel_tol = 1e-05,
+  surv_max_iter = 10,
+  surv_rel_tol = 1e-05,
+  cure_max_iter = 10,
+  cure_rel_tol = 1e-05,
+  tail_completion = c("zero", "exp", "zero-tau"),
+  tail_tau = NULL,
+  pmin = 1e-05,
+  early_stop = TRUE,
+  verbose = FALSE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>surv_formula</code></td>
+<td>
+<p>A formula object starting with <code>~</code> for the model
+formula in survival model part.  For Cox model, no intercept term is
+included even if an intercept is specified or implied in the model
+formula.  A model formula with an intercept term only is not allowed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cure_formula</code></td>
+<td>
+<p>A formula object starting with <code>~</code> for the model
+formula in incidence model part.  For logistic model, an intercept term
+is included by default and can be excluded by adding <code>+ 0</code> or
+<code>- 1</code> to the model formula.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time</code></td>
+<td>
+<p>A numeric vector for the observed survival times.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event</code></td>
+<td>
+<p>A numeric vector for the event indicators.  <code>NA</code>'s are
+allowed and represent uncertain event status.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>An optional data frame, list, or environment that contains the
+covariates and response variables (<code>time</code> and <code>event</code>),
+included in the model. If they are not found in data, the variables are
+taken from the environment of the specified formula, usually the
+environment from which this function is called.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+<p>An optional logical vector specifying a subset of observations
+to be used in the fitting process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>contrasts</code></td>
+<td>
+<p>An optional list, whose entries are values (numeric
+matrices or character strings naming functions) to be used as
+replacement values for the contrasts replacement function and whose
+names are the names of columns of data containing factors.  See
+<code>contrasts.arg</code> of <code>model.matrix.default</code> for
+details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv_lambda, cure_lambda</code></td>
+<td>
+<p>A numeric vector consists of nonnegative
+values representing the tuning parameter sequence for the survival model
+part or the incidence model part.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv_alpha, cure_alpha</code></td>
+<td>
+<p>A number between 0 and 1 for tuning the elastic
+net penalty for the survival model part or the incidence model part.  If
+it is one, the elastic penalty will reduce to the well-known lasso
+penalty.  If it is zero, the ridge penalty will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv_nlambda, cure_nlambda</code></td>
+<td>
+<p>A positive number specifying the number of
+<code>surv_lambda</code> or <code>cure_lambda</code> if <code>surv_lambda</code> or
+<code>cure_lambda</code> is not specified, respectively.  The default value is
+10.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv_lambda_min_ratio, cure_lambda_min_ratio</code></td>
+<td>
+<p>The ratio of the minimum
+<code>surv_lambda</code> (or <code>cure_lambda</code>) to the large enough
+<code>surv_lambda</code> (or codecure_lambda) that produces all-zero
+estimates on log scale.  The default value is <code>1e-1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv_l1_penalty_factor, cure_l1_penalty_factor</code></td>
+<td>
+<p>A numeric vector that
+consists of nonnegative penalty factors (or weights) on L1-norm for the
+coefficient estimate vector in the survival model part or the incidence
+model part.  The penalty is applied to the coefficient estimate divided
+by the specified weights.  The specified weights are re-scaled
+internally so that their summation equals the length of coefficients.
+If <code>NULL</code> is specified, the weights are all set to be one.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cv_nfolds</code></td>
+<td>
+<p>An non-negative integer specifying number of folds in
+cross-validation (CV).  The default value is <code>0</code> and the CV
+procedure is not enabled.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv_start</code></td>
+<td>
+<p>An optional numeric vector representing the
+starting values for the survival model component or the incidence model
+component.  If <code>surv_start = NULL</code> is specified, the starting
+values will be obtained from fitting a regular Cox to events only.
+Similarly, if <code>cure_start = NULL</code> is specified, the starting values
+will be obtained from fitting a regular logistic model to the
+non-missing event indicators.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cure_start</code></td>
+<td>
+<p>An optional numeric vector representing the
+starting values for the survival model component or the incidence model
+component.  If <code>surv_start = NULL</code> is specified, the starting
+values will be obtained from fitting a regular Cox to events only.
+Similarly, if <code>cure_start = NULL</code> is specified, the starting values
+will be obtained from fitting a regular logistic model to the
+non-missing event indicators.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv_offset</code></td>
+<td>
+<p>An optional numeric vector representing the
+offset term in the survival model compoent or the incidence model
+component.  The function will internally try to find values of the
+specified variable in the <code>data</code> first.  Alternatively, one or more
+<code>offset</code> terms can be specified in the formula (by
+<code>stats::offset()</code>).  If more than one offset terms are specified,
+their sum will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cure_offset</code></td>
+<td>
+<p>An optional numeric vector representing the
+offset term in the survival model compoent or the incidence model
+component.  The function will internally try to find values of the
+specified variable in the <code>data</code> first.  Alternatively, one or more
+<code>offset</code> terms can be specified in the formula (by
+<code>stats::offset()</code>).  If more than one offset terms are specified,
+their sum will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv_standardize, cure_standardize</code></td>
+<td>
+<p>A logical value specifying whether
+to standardize the covariates for the survival model part or the
+incidence model part.  If <code>FALSE</code>, the covariates will be
+standardized internally to have mean zero and standard deviation one.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>em_max_iter</code></td>
+<td>
+<p>A positive integer specifying the maximum iteration
+number of the EM algorithm.  The default value is <code>200</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>em_rel_tol</code></td>
+<td>
+<p>A positive number specifying the tolerance that determines
+the convergence of the EM algorithm in terms of the convergence of the
+covariate coefficient estimates.  The tolerance is compared with the
+relative change between estimates from two consecutive iterations, which
+is measured by ratio of the L1-norm of their difference to the sum of
+their L1-norm.  The default value is <code>1e-5</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv_max_iter, cure_max_iter</code></td>
+<td>
+<p>A positive integer specifying the maximum
+iteration number of the M-step routine related to the survival model
+component or the incidence model component.  The default value is
+<code>10</code> to encourage faster convergence.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv_rel_tol</code></td>
+<td>
+<p>A positive number specifying the tolerance
+that determines the convergence of the M-step related to the survival
+model component or the incidence model component in terms of the
+convergence of the covariate coefficient estimates.  The tolerance is
+compared with the relative change between estimates from two consecutive
+iterations, which is measured by ratio of the L1-norm of their
+difference to the sum of their L1-norm.  The default value is
+<code>1e-5</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cure_rel_tol</code></td>
+<td>
+<p>A positive number specifying the tolerance
+that determines the convergence of the M-step related to the survival
+model component or the incidence model component in terms of the
+convergence of the covariate coefficient estimates.  The tolerance is
+compared with the relative change between estimates from two consecutive
+iterations, which is measured by ratio of the L1-norm of their
+difference to the sum of their L1-norm.  The default value is
+<code>1e-5</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tail_completion</code></td>
+<td>
+<p>A character string specifying the tail completion
+method for conditional survival function.  The available methods are
+<code>"zero"</code> for zero-tail completion after the largest event times (Sy
+and Taylor, 2000), <code>"exp"</code> for exponential-tail completion (Peng,
+2003), and <code>"zero-tau"</code> for zero-tail completion after a specified
+<code>tail_tau</code>.  The default method is the zero-tail completion
+proposed by Sy and Taylor (2000).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tail_tau</code></td>
+<td>
+<p>A numeric number specifying the time of zero-tail
+completion.  It will be used only if <code>tail_completion =
+"zero-tau"</code>.  A reasonable choice must be a time point between the
+largest event time and the largest survival time.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pmin</code></td>
+<td>
+<p>A numeric number specifying the minimum value of probabilities
+for sake of numerical stability.  The default value is <code>1e-5</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>early_stop</code></td>
+<td>
+<p>A logical value specifying whether to stop the iteration
+once the negative log-likelihood unexpectedly increases, which may
+suggest convergence on likelihood, or indicate numerical issues or
+implementation bugs.  The default value is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>A logical value.  If <code>TRUE</code>, a verbose information will
+be given along iterations for tracing the convergence.  The default
+value is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments for future usage.  A warning will be thrown if
+any invalid argument is specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv_x</code></td>
+<td>
+<p>A numeric matrix for the design matrix of the survival model
+component.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cure_x</code></td>
+<td>
+<p>A numeric matrix for the design matrix of the cure rate model
+component.  The design matrix should exclude an intercept term unless we
+want to fit a model only including the intercept term.  In that case, we
+need further set <code>cure_intercept = FALSE</code> to not standardize the
+intercept term.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cure_intercept</code></td>
+<td>
+<p>A logical value specifying whether to add an intercept
+term to the cure rate model component.  If <code>TRUE</code> by default, an
+intercept term is included.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The model estimation procedure follows expectation maximization (EM)
+algorithm.  Variable selection procedure through regularization by elastic
+net penalty is developed based on cyclic coordinate descent and
+majorization-minimization (MM) algorithm.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>cox_cure_net</code> object for regular Cox cure rate model or
+<code>cox_cure_net_uncer</code> object for Cox cure rate model with uncertain
+events.
+</p>
+
+
+<h3>References</h3>
+
+<p>Kuk, A. Y. C., &amp; Chen, C. (1992). A mixture model combining logistic
+regression with proportional hazards regression. <em>Biometrika</em>, 79(3),
+531–541.
+</p>
+<p>Masud, A., Tu, W., &amp; Yu, Z. (2018). Variable selection for mixture and
+promotion time cure rate models. <em>Statistical methods in medical
+research</em>, 27(7), 2185–2199.
+</p>
+<p>Peng, Y. (2003). Estimating baseline distribution in proportional hazards
+cure models. <em>Computational Statistics &amp; Data Analysis</em>, 42(1-2),
+187–201.
+</p>
+<p>Sy, J. P., &amp; Taylor, J. M. (2000). Estimation in a Cox proportional hazards
+cure model. <em>Biometrics</em>, 56(1), 227–236.
+</p>
+<p>Wang, W., Luo, C., Aseltine, R. H., Wang, F., Yan, J., &amp; Chen, K. (2020).
+Suicide Risk Modeling with Uncertain Diagnostic Records. <em>arXiv
+preprint arXiv:2009.02597</em>.
+</p>
+<p>Zou, H., &amp; Hastie, T. (2005). Regularization and variable selection via the
+elastic net. <em>Journal of the Royal Statistical Society</em>: Series B
+(Statistical Methodology), 67(2), 301–320.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>cox_cure</code> for regular Cox cure rate model.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(intsurv)
+
+### regularized Cox cure rate model ==================================
+## simulate a toy right-censored data with a cure fraction
+set.seed(123)
+n_obs &lt;- 100
+p &lt;- 10
+x_mat &lt;- matrix(rnorm(n_obs * p), nrow = n_obs, ncol = p)
+colnames(x_mat) &lt;- paste0("x", seq_len(p))
+surv_beta &lt;- c(rep(0, p - 5), rep(1, 5))
+cure_beta &lt;- c(rep(1, 2), rep(0, p - 2))
+dat &lt;- simData4cure(nSubject = n_obs, lambda_censor = 0.01,
+                    max_censor = 10, survMat = x_mat,
+                    survCoef = surv_beta, cureCoef = cure_beta,
+                    b0 = 0.5, p1 = 1, p2 = 1, p3 = 1)
+
+## model-fitting from given design matrices
+fit1 &lt;- cox_cure_net.fit(x_mat, x_mat, dat$obs_time, dat$obs_event,
+                         surv_nlambda = 10, cure_nlambda = 10,
+                         surv_alpha = 0.8, cure_alpha = 0.8)
+
+## model-fitting from given model formula
+fm &lt;- paste(paste0("x", seq_len(p)), collapse = " + ")
+surv_fm &lt;- as.formula(sprintf("~ %s", fm))
+cure_fm &lt;- surv_fm
+fit2 &lt;- cox_cure_net(surv_fm, cure_fm, data = dat,
+                     time = obs_time, event = obs_event,
+                     surv_alpha = 0.5, cure_alpha = 0.5)
+
+## summary of BIC's
+BIC(fit1)
+BIC(fit2)
+
+## list of coefficient estimates based on BIC
+coef(fit1)
+coef(fit2)
+
+
+### regularized Cox cure model with uncertain event status ===========
+## simulate a toy data
+set.seed(123)
+n_obs &lt;- 100
+p &lt;- 10
+x_mat &lt;- matrix(rnorm(n_obs * p), nrow = n_obs, ncol = p)
+colnames(x_mat) &lt;- paste0("x", seq_len(p))
+surv_beta &lt;- c(rep(0, p - 5), rep(1, 5))
+cure_beta &lt;- c(rep(1, 2), rep(0, p - 2))
+dat &lt;- simData4cure(nSubject = n_obs, lambda_censor = 0.01,
+                    max_censor = 10, survMat = x_mat,
+                    survCoef = surv_beta, cureCoef = cure_beta,
+                    b0 = 0.5, p1 = 0.95, p2 = 0.95, p3 = 0.95)
+
+## model-fitting from given design matrices
+fit1 &lt;- cox_cure_net.fit(x_mat, x_mat, dat$obs_time, dat$obs_event,
+                         surv_nlambda = 5, cure_nlambda = 5,
+                         surv_alpha = 0.8, cure_alpha = 0.8)
+
+## model-fitting from given model formula
+fm &lt;- paste(paste0("x", seq_len(p)), collapse = " + ")
+surv_fm &lt;- as.formula(sprintf("~ %s", fm))
+cure_fm &lt;- surv_fm
+fit2 &lt;- cox_cure_net(surv_fm, cure_fm, data = dat,
+                     time = obs_time, event = obs_event,
+                     surv_nlambda = 5, cure_nlambda = 5,
+                     surv_alpha = 0.5, cure_alpha = 0.5)
+
+## summary of BIC's
+BIC(fit1)
+BIC(fit2)
+
+## list of coefficient estimates based on BIC
+coef(fit1)
+coef(fit2)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,138 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>tsls.wfit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Fit instrumental variables model via two-stage least squares, with weights.
+</h2>
+
+<h3>Description</h3>
+
+<p>Fits linear first- and second-stage models using weighted linear regression.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">tsls.wfit(X, Y, Z, weights, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+
+<p>Matrix of covariates and treatment, including constant if intercept is desired.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+
+<p>Vector outcome.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Z</code></td>
+<td>
+
+<p>Matrix of covariates and instrument, including constant if intercept is desired.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+
+<p>Observation weights.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Additional arguments to <code>lm.wfit</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with the second stage model fit,
+as returned by <code>lm.wfit</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Peter Aronow &lt;peter.aronow@yale.edu&gt;, Dean Eckles &lt;dean@deaneckles.com&gt;, Kyle Peyton &lt;kyle.peyton@yale.edu&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Peter M. Aronow and Allison Carnegie. (2013). Beyond LATE: Estimation of the average treatment effect with an instrumental variable. <em>Political Analysis</em>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>lm.wfit</code>.
+</p>
+<p><code>compliance.score</code> for calculating compliance scores used in example. 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Load example dataset, see help(FoxDebate) for details
+data(FoxDebate)
+
+# Estimate compliance scores with covariates, assuming (default) 
+#   case of two-sided non-compliance.
+covmat &lt;- with(FoxDebate, cbind(partyid, pnintst, watchnat, educad, readnews, gender, 
+                                income, white))
+
+cscoreout &lt;- with(FoxDebate, compliance.score(D = watchpro, Z = conditn,
+                              W = covmat))
+
+# Extract vector of estimated compliance scores
+cscore &lt;- cscoreout$C.score
+
+# Winsorising as described in Aronow and Carnegie (2013)
+N &lt;- length(FoxDebate[, "infopro"])
+alpha &lt;- 0.275
+qcscore &lt;- quantile(cscore, 1 / (N^alpha))
+cscore[cscore &lt; qcscore] &lt;- qcscore
+
+# IPW reweighting step Aronow and Carnegie (2013) use for missing data
+Ymis &lt;- is.na(FoxDebate[,"infopro"])
+
+IPWweight &lt;- 1 / (1 - predict(glm(Ymis ~ covmat, family = binomial(link = "probit")), 
+                              type = "response"))
+IPWweight[Ymis] &lt;- 0
+
+# Compute LATE via 2SLS with IPW weights. This replicates 
+#   Table 2 Column 1 in Aronow and Carnegie (2013)
+outputTSLS &lt;- with(FoxDebate, tsls.wfit(X = cbind(1, covmat, watchpro), Y = infopro, 
+                        Z = cbind(1, covmat, conditn), weights = IPWweight))
+round(outputTSLS$coefficients, 2)
+
+# Compute ATE via 2SLS with (IPW weights / compliance scores). This
+#   replicates Table 2 Column 2 in Aronow and Carnegie (2013)
+outputICSW &lt;- with(FoxDebate, tsls.wfit(cbind(1, watchpro, covmat), infopro, 
+                        cbind(1, conditn, covmat), w = IPWweight / cscore))
+round(outputICSW$coefficients, 2) 
+
+</code></pre>
+
+
+</div>

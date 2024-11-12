@@ -1,0 +1,180 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sim_reference</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate an ideal population</h2>
+
+<h3>Description</h3>
+
+<p>Simulates an ideal population using the reference model from Tokars (2018).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sim_reference(
+  init_pop_size,
+  vaccinations,
+  cases_novac,
+  ve,
+  lag,
+  deterministic,
+  seed = sample.int(.Machine$integer.max, 1)
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>init_pop_size</code></td>
+<td>
+<p>Integer initial population size</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vaccinations</code></td>
+<td>
+<p>Integer vector number of vaccinations at every timepoint</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cases_novac</code></td>
+<td>
+<p>Integer vector number of cases at every timepoint</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ve</code></td>
+<td>
+<p>Vaccine effectiveness (proportion)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lag</code></td>
+<td>
+<p>Integer lag period measured in timepoints</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>deterministic</code></td>
+<td>
+<p>Boolean whether to make the simulation deterministic</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>Integer seed to use</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A tibble with the following columns:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>timepoint</code></td>
+<td>
+<p>Index of timepoint</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vaccinations</code></td>
+<td>
+<p>Expected number of vaccinations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cases_novac</code></td>
+<td>
+<p>Expected number of cases in absence of vaccination</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ve</code></td>
+<td>
+<p>Expected vaccine effectiveness</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pflu</code></td>
+<td>
+<p>Flu incidence</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cases</code></td>
+<td>
+<p>Actual number of cases</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>popn</code></td>
+<td>
+<p>Non-cases in absence of vaccination</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pvac</code></td>
+<td>
+<p>Proportion of starting population vaccinated</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>Number vaccinated at that time</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>Non-vaccinated non-cases</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>Vaccinated non-cases lagging</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>E</code></td>
+<td>
+<p>Non-vaccinated cases</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Tokars JI, Rolfes MA, Foppa IM, Reed C. An evaluation and update
+of methods for estimating the number of influenza cases averted by
+vaccination in the United States. Vaccine. 2018;36(48):7331–7337.
+doi:10.1016/j.vaccine.2018.10.026
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Population from Tokars (2018)
+nsam &lt;- 1e6L
+ndays &lt;- 304L
+pop_tok &lt;- sim_reference(
+  init_pop_size = nsam,
+  vaccinations = generate_counts(nsam, ndays, 0.55, mean = 100, sd = 50),
+  cases_novac = generate_counts(nsam, ndays, 0.12, mean = 190, sd = 35),
+  ve = 0.48,
+  lag = 14,
+  deterministic = TRUE
+)
+head(pop_tok)
+sum(pop_tok$avert)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,179 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>preprocess</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Data preprocessing for protein quantification
+</h2>
+
+<h3>Description</h3>
+
+<p>Prepares a long-format input including removing low-intensity ions and performing median normalization.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">preprocess(quant_table,
+           primary_id = "PG.ProteinGroups",
+           secondary_id = c("EG.ModifiedSequence", "FG.Charge", "F.FrgIon", "F.Charge"),
+           sample_id = "R.Condition",
+           intensity_col = "F.PeakArea",
+           median_normalization = TRUE,
+           log2_intensity_cutoff = 0,
+           pdf_out = "qc-plots.pdf",
+           pdf_width = 12,
+           pdf_height = 8,
+           intensity_col_sep = NULL,
+           intensity_col_id = NULL,
+           na_string = "0")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>quant_table</code></td>
+<td>
+
+<p>A long-format table with a primary column of protein identification, secondary columns of fragment ions, a column of sample names, and a column for quantitative intensities.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>primary_id</code></td>
+<td>
+<p>Unique values in this column form the list of proteins to be quantified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>secondary_id</code></td>
+<td>
+<p>A concatenation of these columns determines the fragment ions used for quantification.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sample_id</code></td>
+<td>
+<p>Unique values in this column form the list of samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intensity_col</code></td>
+<td>
+<p>The column for intensities.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>median_normalization</code></td>
+<td>
+<p>A logical value. The default <code>TRUE</code> value is to perform median normalization.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log2_intensity_cutoff</code></td>
+<td>
+<p>Entries lower than this value in log2 space are ignored. Plot a histogram of all intensities to set this parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pdf_out</code></td>
+<td>
+<p>A character string specifying the name of the PDF output. A <code>NULL</code> value will suppress the PDF output.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pdf_width</code></td>
+<td>
+<p>Width of the pdf output in inches.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pdf_height</code></td>
+<td>
+<p>Height of the pdf output in inches.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intensity_col_sep</code></td>
+<td>
+<p>A separator character when entries in the intensity column contain multiple values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intensity_col_id</code></td>
+<td>
+<p>The column for identities of multiple quantitative values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na_string</code></td>
+<td>
+<p>The value considered as NA.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>When entries in the intensity column contain multiple values, this function will replicate entries in other column and the <code>secondary_id</code> will be appended with corresponding entries in <code>intensity_col_id</code> when it is provided. Otherwise, integer values 1, 2, 3, etc... will be used.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame is returned with following components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>protein_list</code></td>
+<td>
+<p>A vector of proteins.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sample_list</code></td>
+<td>
+<p>A vector of samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>A vector of fragment ions to be used for quantification.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quant</code></td>
+<td>
+<p>A vector of log2 intensities.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Thang V. Pham
+</p>
+
+
+<h3>References</h3>
+
+<p>Pham TV, Henneman AA, Jimenez CR. iq: an R package to estimate relative protein
+abundances from ion quantification in DIA-MS-based proteomics. <em>Bioinformatics</em> 2020 Apr 15;36(8):2611-2613.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data("spikeins")
+head(spikeins)
+# This example set of spike-in proteins has been 'median-normalized'.
+norm_data &lt;- iq::preprocess(spikeins, median_normalization = FALSE, pdf_out = NULL)
+
+</code></pre>
+
+
+</div>

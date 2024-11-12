@@ -1,0 +1,451 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>isotree_po</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Build Isolation forest species distribution model and explain the
+the model and outputs.</h2>
+
+<h3>Description</h3>
+
+<p>Call Isolation forest and its variations to do
+species distribution modeling and optionally call a collection of other
+functions to do model explanation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">isotree_po(
+  obs_mode = "imperfect_presence",
+  obs,
+  obs_ind_eval = NULL,
+  variables,
+  categ_vars = NULL,
+  contamination = 0.1,
+  ntrees = 100L,
+  sample_size = 1,
+  ndim = 1L,
+  seed = 10L,
+  ...,
+  offset = 0,
+  response = TRUE,
+  spatial_response = TRUE,
+  check_variable = TRUE,
+  visualize = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obs_mode</code></td>
+<td>
+<p>(<code>string</code>) The mode of observations for training. It should
+be one of <code>c("perfect_presence", "imperfect_presence", "presence_absence")</code>.
+"perfect_presence" means presence-only occurrences without
+errors/uncertainties/bias, which should be rare in reality.
+"Imperfect_presence" means presence-only occurrences with
+errors/uncertainties/bias, which should be a most common case.
+"presence_absence" means presence-absence observations regardless quality.
+See details to learn how to set it. The default is "imperfect_presence".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>obs</code></td>
+<td>
+<p>(<code>sf</code>) The <code>sf</code> of observation for training. It is recommended to
+call function <code>format_observation</code> to format the
+occurrence (<code>obs</code>) before passing it here.
+Otherwise, make sure there is a column named "observation" for observation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>obs_ind_eval</code></td>
+<td>
+<p>(<code>sf</code> or <code>NULL</code>) Optional <code>sf</code> of observations for
+independent test. It is recommended to call function
+<code>format_observation</code> to format the occurrence (<code>obs</code>)
+before passing it here. Otherwise, make sure there is a column named
+"observation" for observation.
+If <code>NULL</code>, no independent test set will be used. The default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variables</code></td>
+<td>
+<p>(<code>RasterStack</code> or <code>stars</code>) The stack of environmental variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>categ_vars</code></td>
+<td>
+<p>(<code>vector</code> of <code>character</code> or <code>NULL</code>) The names of categorical
+variables. Must be the same as the names in <code>variables</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>contamination</code></td>
+<td>
+<p>(<code>numeric</code>) The percentage of abnormal cases within a
+dataset. Because <code>iForest</code> is an outlier detection algorithm. It picks up
+abnormal cases (much fewer) from normal cases. This argument is used to set
+how many abnormal cases should be there if the users have the power to control.
+See details for how to set it. The value should be less than 0.5. Here we
+constrain it in (0, 0.3]. The default value is 0.1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ntrees</code></td>
+<td>
+<p>(<code>integer</code>) The number of trees for the isolation forest. It must
+be integer, which you could use function <code>as.integer</code> to convert to.
+The default is <code>100L</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sample_size</code></td>
+<td>
+<p>(<code>numeric</code>) It should be a rate for sampling size in <code style="white-space: pre;">⁠[0, 1]⁠</code>.
+The default is <code>1.0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ndim</code></td>
+<td>
+<p>(<code>integer</code>) ExtensionLevel for isolation forest. It must
+be integer, which you could use function <code>as.integer</code> to convert
+to. Also, it must be no smaller than the dimension of environmental variables.
+When it is 1, the model is a traditional isolation forest, otherwise the model
+is an extended isolation forest. The default is 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>(<code>integer</code>) The random seed used in the modeling. It should be an
+integer. The default is <code>10L</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments that <code>isolation.forest</code> needs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+<p>(<code>numeric</code>) The offset to adjust fitted suitability. The default
+is zero. Highly recommend to leave it as default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>response</code></td>
+<td>
+<p>(<code>logical</code>) If <code>TRUE</code>, generate response curves.
+The default is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spatial_response</code></td>
+<td>
+<p>(<code>logical</code>) If <code>TRUE</code>, generate spatial response maps.
+The default is <code>TRUE</code> because it might be slow. NOTE that here SHAP-based map
+is not generated because it is slow. If you want it be mapped, you could call
+function <code>spatial_response</code> to make it.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>check_variable</code></td>
+<td>
+<p>(<code>logical</code>) If <code>TRUE</code>, check the variable importance.
+The default is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>visualize</code></td>
+<td>
+<p>(<code>logical</code>) If <code>TRUE</code>, generate the essential figures
+related to the model. The default is <code>FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For "perfect_presence", a user-defined number (<code>contamination</code>) of samples
+will be taken from background to let <code>iForest</code> function normally.
+</p>
+<p>If "imperfect_presence", no further actions is required.
+</p>
+<p>If the <b>obs_mode</b> is "presence_absence", a <code>contamination</code> percent
+of absences will be randomly selected and work together with all presences
+to train the model.
+</p>
+<p>NOTE: <b>obs_mode</b> and <b>mode</b> only works for <code>obs</code>. <code>obs_ind_eval</code>
+will follow its own structure.
+</p>
+<p>Please read details of algorithm <code>isolation.forest</code> on
+<a href="https://github.com/david-cortes/isotree">https://github.com/david-cortes/isotree</a>, and
+the R documentation of function <code>isolation.forest</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>(<code>POIsotree</code>) A list of
+</p>
+
+<ul>
+<li>
+<p>model (<code>isolation.forest</code>) The threshold set in
+function inputs
+</p>
+</li>
+<li>
+<p>variables (<code>stars</code>) The formatted image stack of
+environmental variables
+</p>
+</li>
+<li>
+<p>observation (<code>sf</code>) A <code>sf</code> of training occurrence
+dataset
+</p>
+</li>
+<li>
+<p>background_samples (<code>sf</code>) A <code>sf</code> of background points
+for training dataset evaluation or SHAP dependence plot
+</p>
+</li>
+<li>
+<p>independent_test (<code>sf</code> or <code>NULL</code>) A <code>sf</code> of test
+occurrence dataset
+</p>
+</li>
+<li>
+<p>background_samples_test (<code>sf</code> or <code>NULL</code>) A <code>sf</code> of
+background points for test dataset evaluation or SHAP dependence plot
+</p>
+</li>
+<li>
+<p>vars_train (<code>data.frame</code>) A <code>data.frame</code> with values of each
+environmental variables for training occurrence
+</p>
+</li>
+<li>
+<p>pred_train (<code>data.frame</code>) A <code>data.frame</code> with values of
+prediction for training occurrence
+</p>
+</li>
+<li>
+<p>eval_train (<code>POEvaluation</code>) A list of presence-only evaluation metrics
+based on training dataset. See details of <code>POEvaluation</code> in
+<code>evaluate_po</code>
+</p>
+</li>
+<li>
+<p>var_test (<code>data.frame</code> or <code>NULL</code>) A <code>data.frame</code> with values of each
+environmental variables for test occurrence
+</p>
+</li>
+<li>
+<p>pred_test (<code>data.frame</code> or <code>NULL</code>) A <code>data.frame</code> with values of
+prediction for test occurrence
+</p>
+</li>
+<li>
+<p>eval_test (<code>POEvaluation</code> or <code>NULL</code>) A list of presence-only evaluation metrics
+based on test dataset.
+See details of <code>POEvaluation</code> in <code>evaluate_po</code>
+</p>
+</li>
+<li>
+<p>prediction (<code>stars</code>) The predicted environmental suitability
+</p>
+</li>
+<li>
+<p>marginal_responses (<code>MarginalResponse</code> or <code>NULL</code>) A list of marginal response
+values of each environmental variables.
+See details in <code>marginal_response</code>
+</p>
+</li>
+<li>
+<p>offset (<code>numeric</code>) The offset value set as inputs.
+</p>
+</li>
+<li>
+<p>independent_responses (<code>IndependentResponse</code> or <code>NULL</code>) A list of independent
+response values of each environmental variables.
+See details in <code>independent_response</code>
+</p>
+</li>
+<li>
+<p>shap_dependences (<code>ShapDependence</code> or <code>NULL</code>) A list of variable
+dependence values of each environmental variables.
+See details in <code>shap_dependence</code>
+</p>
+</li>
+<li>
+<p>spatial_responses (<code>SpatialResponse</code> or <code>NULL</code>) A list of spatial variable
+dependence values of each environmental variables.
+See details in <code>shap_dependence</code>
+</p>
+</li>
+<li>
+<p>variable_analysis (<code>VariableAnalysis</code> or <code>NULL</code>) A list of variable importance
+analysis based on multiple metrics.
+See details in <code>variable_analysis</code></p>
+</li>
+</ul>
+<h3>References</h3>
+
+
+<ul>
+<li>
+<p>Liu, Fei
+Tony, Kai Ming Ting, and Zhi-Hua Zhou. "Isolation forest."
+<em>2008 eighth ieee international conference on data mining</em>.IEEE, 2008.
+<a href="https://doi.org/10.1109/ICDM.2008.17">doi:10.1109/ICDM.2008.17</a>
+</p>
+</li>
+<li>
+<p>Liu, Fei Tony, Kai Ming
+Ting, and Zhi-Hua Zhou. "Isolation-based anomaly detection."
+<em>ACM Transactions on Knowledge Discovery from Data (TKDD)</em> 6.1 (2012): 1-39.
+<a href="https://doi.org/10.1145/2133360.2133363">doi:10.1145/2133360.2133363</a>
+</p>
+</li>
+<li>
+<p>Liu, Fei Tony,
+Kai Ming Ting, and Zhi-Hua Zhou. "On detecting clustered anomalies using
+SCiForest." <em>Joint European Conference on Machine Learning and
+Knowledge Discovery in Databases</em>. Springer, Berlin, Heidelberg, 2010.
+<a href="https://doi.org/10.1007/978-3-642-15883-4_18">doi:10.1007/978-3-642-15883-4_18</a>
+</p>
+</li>
+<li>
+<p>Ha
+riri, Sahand, Matias Carrasco Kind, and Robert J. Brunner. "Extended
+isolation forest." <em>IEEE Transactions on Knowledge and Data Engineering (2019)</em>.
+<a href="https://doi.org/10.1109/TKDE.2019.2947676">doi:10.1109/TKDE.2019.2947676</a>
+</p>
+</li>
+<li>
+<p><a href="https://github.com/david-cortes/isotree">https://github.com/david-cortes/isotree</a>
+</p>
+</li>
+<li>
+<p>References of related feature such as response curves and variable importance
+will be listed under their own functions
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>evaluate_po</code>, <code>marginal_response</code>,
+<code>independent_response</code>, <code>shap_dependence</code>,
+<code>spatial_response</code>, <code>variable_analysis</code>,
+<code>isolation.forest</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+########### Presence-absence mode #################
+library(dplyr)
+library(sf)
+library(stars)
+library(itsdm)
+
+# Load example dataset
+data("occ_virtual_species")
+obs_df &lt;- occ_virtual_species %&gt;% filter(usage == "train")
+eval_df &lt;- occ_virtual_species %&gt;% filter(usage == "eval")
+x_col &lt;- "x"
+y_col &lt;- "y"
+obs_col &lt;- "observation"
+obs_type &lt;- "presence_absence"
+
+# Format the observations
+obs_train_eval &lt;- format_observation(
+  obs_df = obs_df, eval_df = eval_df,
+  x_col = x_col, y_col = y_col, obs_col = obs_col,
+  obs_type = obs_type)
+
+# Load variables
+env_vars &lt;- system.file(
+  'extdata/bioclim_tanzania_10min.tif',
+  package = 'itsdm') %&gt;% read_stars() %&gt;%
+  slice('band', c(1, 5, 12))
+
+# Modeling
+mod_virtual_species &lt;- isotree_po(
+  obs_mode = "presence_absence",
+  obs = obs_train_eval$obs,
+  obs_ind_eval = obs_train_eval$eval,
+  variables = env_vars, ntrees = 10,
+  sample_size = 0.6, ndim = 1L,
+  seed = 123L, nthreads = 1)
+
+# Check results
+## Evaluation based on training dataset
+print(mod_virtual_species$eval_train)
+plot(mod_virtual_species$eval_train)
+
+## Response curves
+plot(mod_virtual_species$marginal_responses)
+plot(mod_virtual_species$independent_responses,
+     target_var = c('bio1', 'bio5'))
+plot(mod_virtual_species$shap_dependence)
+
+## Relationships between target var and related var
+plot(mod_virtual_species$shap_dependence,
+     target_var = c('bio1', 'bio5'),
+     related_var = 'bio12', smooth_span = 0)
+
+# Variable importance
+mod_virtual_species$variable_analysis
+plot(mod_virtual_species$variable_analysis)
+
+########### Presence-absence mode ##################
+# Load example dataset
+data("occ_virtual_species")
+obs_df &lt;- occ_virtual_species %&gt;% filter(usage == "train")
+eval_df &lt;- occ_virtual_species %&gt;% filter(usage == "eval")
+x_col &lt;- "x"
+y_col &lt;- "y"
+obs_col &lt;- "observation"
+
+# Format the observations
+obs_train_eval &lt;- format_observation(
+  obs_df = obs_df, eval_df = eval_df,
+  x_col = x_col, y_col = y_col, obs_col = obs_col,
+  obs_type = "presence_only")
+
+# Modeling with perfect_presence mode
+mod_perfect_pres &lt;- isotree_po(
+  obs_mode = "perfect_presence",
+  obs = obs_train_eval$obs,
+  obs_ind_eval = obs_train_eval$eval,
+  variables = env_vars, ntrees = 10,
+  sample_size = 0.6, ndim = 1L,
+  seed = 123L, nthreads = 1)
+
+# Modeling with imperfect_presence mode
+mod_imperfect_pres &lt;- isotree_po(
+  obs_mode = "imperfect_presence",
+  obs = obs_train_eval$obs,
+  obs_ind_eval = obs_train_eval$eval,
+  variables = env_vars, ntrees = 10,
+  sample_size = 0.6, ndim = 1L,
+  seed = 123L, nthreads = 1)
+
+
+</code></pre>
+
+
+</div>

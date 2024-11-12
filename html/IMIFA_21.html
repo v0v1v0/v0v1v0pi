@@ -1,0 +1,225 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mgpControl</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Control settings for the MGP prior and AGS for infinite factor models</h2>
+
+<h3>Description</h3>
+
+<p>Supplies a list of arguments for use in <code>mcmc_IMIFA</code> pertaining to the use of the multiplicative gamma process (MGP) shrinkage prior and adaptive Gibbs sampler (AGS) for use with the infinite factor models <code>"IFA"</code>, <code>"MIFA"</code>, <code>"OMIFA"</code>, and <code>"IMIFA"</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mgpControl(alpha.d1 = 2.1,
+           alpha.d2 = 3.1,
+           phi.hyper = c(3, 2),
+           sigma.hyper = c(3, 2),
+           active.crit = c("BD", "SC"),
+           prop = switch(active.crit, BD=0.7, SC=0.99),
+           eps = 0.1,
+           adapt = TRUE,
+           forceQg = FALSE,
+           cluster.shrink = TRUE,
+           truncated = FALSE,
+           b0 = 0.1,
+           b1 = 5e-05,
+           beta.d1 = 1,
+           beta.d2 = 1,
+           start.AGS = 2L,
+           stop.AGS = Inf,
+           delta0g = FALSE,
+           ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>alpha.d1</code></td>
+<td>
+<p>Shape hyperparameter of the column shrinkage on the first column of the loadings according to the MGP shrinkage prior. Passed to <code>MGP_check</code> to ensure validity. Defaults to <code>2.1</code>. For <code>"MIFA"</code> models, see <code>delta0g</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha.d2</code></td>
+<td>
+<p>Shape hyperparameter of the column shrinkage on the subsequent columns of the loadings according to the MGP shrinkage prior. Passed to <code>MGP_check</code> to ensure validity. Defaults to <code>3.1</code>. For <code>"MIFA"</code> models, see <code>delta0g</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phi.hyper</code></td>
+<td>
+<p>A vector of length 2 giving the shape and rate hyperparameters for the gamma prior on the local shrinkage parameters. Passed to <code>MGP_check</code> to ensure validity. Defaults to <code>c(3, 2)</code>. It is suggested that the rate be &lt;= shape minus 1 to induce local shrinkage, though the cumulative shrinkage property is unaffected by these hyperparameters. Excessively small values may lead to critical numerical issues and should thus be avoided; indeed it is <em>suggested</em> that the shape be &gt;=1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma.hyper</code></td>
+<td>
+<p>A vector of length 2 giving the shape and rate hyperparameters for the gamma prior on the cluster shrinkage parameters. Passed to <code>MGP_check</code> to ensure validity. Defaults to <code>c(3, 2)</code>. Again, it is <em>suggested</em> that the shape be &gt;= 1. Only relevant for the <code>"IMIFA"</code>, <code>"OMIFA"</code>, and <code>"MIFA"</code> methods when <code>isTRUE(cluster.shrink)</code>. Additionally, for the <code>"MIFA"</code> method when <code>delta0g=TRUE</code>, <code>sigma.hyper</code> can be supplied as a matrix with two rows and appropriate dimension or as a list of length <code>length(range.G)</code> of vectors of length 2 or matrices with two rows and appropriate dimensions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>active.crit</code></td>
+<td>
+<p>A character string indicating which criterion to use to determine the number of active factors during adaptive Gibbs sampling (i.e. only relevant when <code>adapt=TRUE</code>). This is <code>"BD"</code> by default, for the truncation criterion of Bhattacharya and Dunson (2011). The option <code>"SC"</code> is provided for the criterion of Schiavon and Canale (2020) but is currently <strong>only</strong> available when <code>method="IFA"</code> and is liable to be slightly slower (though more accurate).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prop</code></td>
+<td>
+<p>Only relevant when <code>adapt=TRUE</code> and both the meaning and default behaviour change according to the value of <code>active.crit</code>:
+</p>
+
+<dl>
+<dt><code>active.crit="BD"</code></dt>
+<dd>
+<p>Proportion of loadings elements within the neighbourhood <code>eps</code> of zero necessary to consider a loadings column redundant. Defaults to <code>floor(0.7 * P)/P</code>, where <code>P</code> is the number of variables in the data set. However, if the data set is univariate or bivariate, the default is <code>0.5</code> (see Note).</p>
+</dd>
+<dt><code>active.crit="SC"</code></dt>
+<dd>
+<p>Minimum proportion of variance which must be explained after truncating a loadings column. The smallest number of factors for which the proportion of variance explained exceeds <code>prop</code> are retained at each iteration. Defaults to <code>0.99</code>, unless the data set is univariate or bivariate, in which case the default is <code>0.5</code> (see Note).</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>Only relevant when <code>adapt=TRUE</code> and <code>active.crit="BD"</code>. Neighbourhood epsilon of zero within which a loadings entry is considered negligible according to <code>prop</code>. Defaults to <code>0.1</code>. Must be positive.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adapt</code></td>
+<td>
+<p>A logical value indicating whether adaptation of the number of cluster-specific factors is to take place when the MGP prior is employed. Defaults to <code>TRUE</code>. Specifying <code>FALSE</code> and supplying <code>range.Q</code> within <code>mcmc_IMIFA</code> provides a means to either approximate the infinite factor model with a fixed, high truncation level, or to use the MGP prior in a finite-factor context, however this is NOT recommended for the <code>"OMIFA"</code> and <code>"IMIFA"</code> methods. Note that users who specify <code>adapt=FALSE</code> here can later recover the (cluster-specific) numbers of non-redundant factors by supplying <code>adapt=TRUE</code> to <code>get_IMIFA_results</code> provided the relevant parameters are stored via <code>storeControl</code> (<code>load.switch</code> for <code>active.crit="BD"</code>; <code>load.switch</code> and <code>score.switch</code> for <code>active.crit="SC"</code>), though this is not required. Generally, invoking <code>adapt</code> <em>during sampling</em> will reduce the computational burden significantly.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>forceQg</code></td>
+<td>
+<p>A logical indicating whether the upper limit on the number of cluster-specific factors <code>Q</code> is also cluster-specific. This upper limit is determined the number of observations in the given cluster. Defaults to <code>FALSE</code>: when <code>TRUE</code>, the number of factors in each cluster is kept below the number of observations in each cluster, in addition to the bound defined by <code>range.Q</code>. Only relevant for the <code>"IMIFA"</code>, <code>"OMIFA"</code>, and <code>"MIFA"</code> methods, and only invoked when <code>adapt</code> is <code>TRUE</code>. May be useful for low-dimensional data sets for which identifiable solutions are desired. It is also advisable that the number of latent factors not exceed the associated <code>Ledermann</code> bound, or the stricter bound <code>floor((P - 1)/2)</code>, but these restrictions are not enforced by <code>forceQg</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster.shrink</code></td>
+<td>
+<p>A logical value indicating whether to place the prior specified by <code>sigma.hyper</code> on the cluster shrinkage parameters. Defaults to <code>TRUE</code>. Specifying <code>FALSE</code> is equivalent to fixing all cluster shrinkage parameters to <code>1</code>. Only relevant for the <code>"IMIFA"</code>, <code>"OMIFA"</code>, and <code>"MIFA"</code> methods. If invoked, the posterior mean cluster shrinkage factors will be reported.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>truncated</code></td>
+<td>
+<p>A logical value indicating whether the version of the MGP prior based on left-truncated gamma distributions is invoked (see Zhang et al. reference below and additional relevant documentation in <code>ltrgamma</code> and <code>MGP_check</code>). Defaults to <code>FALSE</code>. Note that, when <code>TRUE</code>, the expected shrinkage factors for the first loadings column are not affected and the conditions needed to pass <code>MGP_check</code> for the parameters associated with subsequent columns are much less strict. Moreover, more desirable shrinkage properties are easily obtained, at the expense of slightly longer run times.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b0, b1</code></td>
+<td>
+<p>Intercept &amp; slope parameters for the exponentially decaying adaptation probability:
+</p>
+<p><code>p(iter) = 1/exp(b0 + b1 * (iter - start.AGS))</code>.
+</p>
+<p>Defaults to <code>0.1</code> &amp; <code>0.00005</code>, respectively. Must be non-negative and strictly positive, respectively, to ensure diminishing adaptation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta.d1</code></td>
+<td>
+<p>Rate hyperparameter of the column shrinkage on the first column of the loadings according to the MGP shrinkage prior. Passed to <code>MGP_check</code> to ensure validity. Defaults to <code>1</code>. For <code>"MIFA"</code> models, see <code>delta0g</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta.d2</code></td>
+<td>
+<p>Rate hyperparameter of the column shrinkage on the subsequent columns of the loadings according to the MGP shrinkage prior. Passed to <code>MGP_check</code> to ensure validity. Defaults to <code>1</code>. For <code>"MIFA"</code> models, see <code>delta0g</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start.AGS</code></td>
+<td>
+<p>The iteration at which adaptation under the AGS is to begin. Defaults to <code>burnin</code> for the <code>"IFA"</code> and <code>"MIFA"</code> methods, defaults to <code>2</code> for the <code>"OMIFA"</code> and <code>"IMIFA"</code> methods, and defaults to <code>2</code> for all methods if the data set is univariate or bivariate. Cannot exceed <code>burnin</code>; thus defaults to the same value as <code>burnin</code> if necessary.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stop.AGS</code></td>
+<td>
+<p>The iteration at which adaptation under the AGS is to stop completely. Defaults to <code>Inf</code>, such that the AGS is never explicitly forced to stop (thereby overriding the diminishing adaptation probability after <code>stop.AGS</code>). Must be greater than <code>start.AGS</code>. The diminishing adaptation probability prior to <code>stop.AGS</code> is still governed by the arguments <code>b0</code> and <code>b1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta0g</code></td>
+<td>
+<p>Logical indicating whether the <code>alpha.d1</code>, <code>alpha.d2</code>, <code>beta.d1</code>, <code>beta.d2</code>, and <code>sigma.hyper</code> hyperparameters can be cluster-specific (i.e., matrices of appropriate dimension for <code>sigma.hyper</code>, vectors of appropriate length for the other hyperparameters, or a list of length <code>length(range.G)</code> of such items). Defaults to <code>FALSE</code>. Only relevant for the <code>"MIFA"</code> method and only allowed when <code>z.list</code> is supplied within <code>mcmc_IMIFA</code>. See <strong>Examples</strong> below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Catches unused arguments.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A named list in which the names are the names of the arguments related to the MGP and AGS and the values are the values supplied to the arguments.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Certain supplied arguments will be subject to further checks by <code>MGP_check</code> to ensure the cumulative shrinkage property of the MGP prior holds according to the given parameterisation.
+</p>
+<p>The adaptive Gibbs sampler (AGS) monitors the <code>prop</code> of loadings elements within the neighbourhood <code>eps</code> of 0 and discards columns or simulates new columns on this basis. However, if at any stage the number of group-specific latent factors reaches zero, the decision to add columns is instead based on a simple binary trial with probability <code>1-prop</code>, as there are no loadings entries to monitor.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Keefe Murphy - &lt;<a href="mailto:keefe.murphy@mu.ie">keefe.murphy@mu.ie</a>&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Murphy, K., Viroli, C., and Gormley, I. C. (2020) Infinite mixtures of infinite factor analysers, <em>Bayesian Analysis</em>, 15(3): 937-963. &lt;<a href="https://doi.org/10.1214/19-BA1179">doi:10.1214/19-BA1179</a>&gt;.
+</p>
+<p>Durante, D. (2017). A note on the multiplicative gamma process, <em>Statistics &amp; Probability Letters</em>, 122: 198-204.
+</p>
+<p>Bhattacharya, A. and Dunson, D. B. (2011) Sparse Bayesian infinite factor models, <em>Biometrika</em>, 98(2): 291-306.
+</p>
+<p>Schiavon, L. and Canale, A. (2020) On the truncation criteria in infinite factor models, <em>Stat</em>, 9:e298.
+</p>
+<p>Zhang, X., Dunson, D. B., and Carin, L. (2011) Tree-structured infinite sparse factor model. In Getoor, L. and Scheffer, T. (Eds.), <em>Proceedings of the 28th International Conference on Machine Learning (ICML 2011)</em>, June 28-July 2, 2011, Bellevue, WA, USA, pp. 785-792. Madison, WI, USA: Omnipress.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>mcmc_IMIFA</code>, <code>Ledermann</code>, <code>MGP_check</code>, <code>ltrgamma</code>, <code>mixfaControl</code>, <code>bnpControl</code>, <code>storeControl</code>, <code>get_IMIFA_results</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">mgpctrl &lt;- mgpControl(phi.hyper=c(2.5, 1), eps=1e-02, truncated=TRUE)
+
+# data(olive)
+# sim   &lt;- mcmc_IMIFA(olive, "IMIFA", n.iters=5000, MGP=mgpctrl)
+
+# Alternatively specify these arguments directly
+# sim   &lt;- mcmc_IMIFA(olive, "IMIFA", n.iters=5000,
+#                     phi.hyper=c(2.5, 1), eps=1e-02, truncated=TRUE)
+
+# Use delta0g for a MIFA model with supplied cluster labels
+# sim2  &lt;- mcmc_IMIFA(olive, n.iters=5000, method="MIFA", range.G=3,
+#                     z.list=olive$area, delta0g=TRUE, alpha.d1=4:2, alpha.d2=5:3
+#                     sigma.hyper=matrix(c(4:6, rep(2, 3)), nrow=2, byrow=TRUE))
+</code></pre>
+
+
+</div>

@@ -1,0 +1,201 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ichimoku</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>ichimoku</h2>
+
+<h3>Description</h3>
+
+<p>Create an ichimoku object containing values for all components of the
+Ichimoku Kinko Hyo cloud chart. The object encapsulates a date-time
+index, OHLC pricing data, candle direction, the cloud lines Tenkan-sen,
+Kijun-sen, Senkou span A, Senkou span B and Chikou span, as well as
+values for the cloud top and cloud base.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ichimoku(x, ticker, periods = c(9L, 26L, 52L), keep.data = FALSE, ...)
+
+## S3 method for class 'ichimoku'
+ichimoku(x, ticker, periods = c(9L, 26L, 52L), keep.data = FALSE, ...)
+
+## S3 method for class 'xts'
+ichimoku(x, ticker, periods = c(9L, 26L, 52L), keep.data = FALSE, ...)
+
+## S3 method for class 'data.frame'
+ichimoku(x, ticker, periods = c(9L, 26L, 52L), keep.data = FALSE, ...)
+
+## S3 method for class 'matrix'
+ichimoku(x, ticker, periods = c(9L, 26L, 52L), keep.data = FALSE, ...)
+
+## Default S3 method:
+ichimoku(x, ticker, periods = c(9L, 26L, 52L), keep.data = FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a data.frame or other compatible object, which includes xts,
+data.table, tibble, and matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ticker</code></td>
+<td>
+<p>(optional) specify a ticker to identify the instrument,
+otherwise this is set to the name of the input object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>periods</code></td>
+<td>
+<p>[default c(9L, 26L, 52L)] a vector defining the length of
+periods used for the cloud. This parameter shoud not normally be modified
+as using other values would be invalid in the context of traditional
+ichimoku analysis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep.data</code></td>
+<td>
+<p>[default FALSE] set to TRUE to retain additional data
+present in the input object as additional columns and/or attributes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments, for instance ‘holidays’, passed along
+to <code>tradingDays</code> for calculating the future cloud on daily
+data.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Calling an ichimoku object automatically invokes its print method,
+which by default produces a printout of the data to the console as well
+as a plot of the cloud chart to the graphical device.
+</p>
+<p>For further options, use <code>plot()</code> on the returned ichimoku object to
+pass further arguments for customising the chart. Use <code>iplot()</code> for
+interactive charting.
+</p>
+<p>Where an ichimoku object is passed to <code>ichimoku()</code>, the ichimoku
+object is re-calculated using the OHLC pricing data contained within.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An ichimoku object with S3 classes of ‘ichimoku’, ‘xts’
+and ‘zoo’.
+</p>
+
+
+<h3>Ichimoku Object Specification</h3>
+
+<p>Index:
+</p>
+
+<ul><li> <p><code>index(object)</code>: date-time index [POSIXct]
+</p>
+</li></ul>
+<p>Columns [numeric]:
+</p>
+
+<ul>
+<li> <p><code>object$open</code>: opening price
+</p>
+</li>
+<li> <p><code>$high</code>: high price
+</p>
+</li>
+<li> <p><code>$low</code>: low price
+</p>
+</li>
+<li> <p><code>$close</code>: closing price
+</p>
+</li>
+<li> <p><code>$cd</code>: candle direction (-1 = down, 0 = flat, 1 = up)
+</p>
+</li>
+<li> <p><code>$tenkan</code>: Tenkan-sen
+</p>
+</li>
+<li> <p><code>$kijun</code>: Kijun-sen
+</p>
+</li>
+<li> <p><code>$senkouA</code>: Senkou span A
+</p>
+</li>
+<li> <p><code>$senkouB</code>: Senkou span B
+</p>
+</li>
+<li> <p><code>$chikou</code>: Chikou span
+</p>
+</li>
+<li> <p><code>$cloudT</code>: cloud Top (max of senkouA, senkouB)
+</p>
+</li>
+<li> <p><code>$cloudB</code>: cloud Base (min of senkouA, senkouB)
+</p>
+</li>
+</ul>
+<p>Attributes:
+</p>
+
+<ul>
+<li> <p><code>attributes(object)$periods</code>: parameters used to calculate
+the cloud [integer vector of length 3]
+</p>
+</li>
+<li> <p><code>$periodicity</code>: periodicity of the data in seconds
+[numeric]
+</p>
+</li>
+<li> <p><code>$ticker</code>: instrument identifier [character]
+</p>
+</li>
+</ul>
+<h3>Further Details</h3>
+
+<p><code>ichimoku()</code> requires OHLC (or else HLC) price data as input to
+calculate the cloud chart values.
+</p>
+<p>If only single series price data is supplied, a <em>pseudo</em> OHLC series
+is generated and a <em>pseudo</em> cloud chart is returned.
+</p>
+<p>A faster technical utility version of this function is available in
+<code>.ichimoku</code> for use when the data is already in the required
+format.
+</p>
+<p>Please refer to the reference vignette by calling:
+<code>vignette("reference", package = "ichimoku")</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">TKR &lt;- sample_ohlc_data
+
+cloud &lt;- ichimoku(TKR)
+cloud
+
+kumo &lt;- ichimoku(TKR, ticker = "TKR Co.", periods = c(9, 26, 52), keep.data = TRUE)
+summary(kumo)
+print(kumo, plot = FALSE, rows = 10)
+plot(kumo, theme = "solarized", type = "bar", custom = "volume")
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,128 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getMetricsXml</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Retrieve measurements XML from the MUSTANG BSS </h2>
+
+<h3>Description</h3>
+
+<p>The <code>getMetricsXml</code> method makes a request of the MUSTANG BSS (Backend Storage System)
+and returns a character string with the response XML.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getMetricsXml(obj, network, station, location, channel, 
+                   starttime, endtime, metricName, url)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+<p> an <code>IrisClient</code> object </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>network</code></td>
+<td>
+<p> a character string with the two letter seismic network code </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>station</code></td>
+<td>
+<p> a character string with the station code </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>location</code></td>
+<td>
+<p> a character string with the location code </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>channel</code></td>
+<td>
+<p> a character string with the three letter channel code </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>starttime</code></td>
+<td>
+<p> a POSIXct class specifying the starttime (GMT) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>endtime</code></td>
+<td>
+<p> a POSIXct class specifying the endtime (GMT) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>metricName</code></td>
+<td>
+<p> a character string identifying the name of the metric stored in the BSS </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>url</code></td>
+<td>
+<p> optional url of the BSS measurements service </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The default BSS measurement service when <code>url</code> is not specified is:
+</p>
+<p><code>http://service.iris.edu/mustang/measurements/1/query?</code>
+</p>
+<p>This method returns raw XML which is not that useful by itself.  Users should instead use the
+getBssMetricList method which calls this function and returns a list <code>_Metric</code> objects.
+</p>
+<p>Error returns from the BSS will stop evaluation and throw an error message.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A character string with the XML response from the BSS is returned.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>getBssMetricList</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Open a connection to IRIS DMC webservices (including the BSS)
+iris &lt;- new("IrisClient", debug=TRUE)
+
+starttime &lt;- as.POSIXct("2012-01-24", tz="GMT")
+endtime &lt;- as.POSIXct("2012-01-25", tz="GMT")
+
+# Get the measurement XML
+xml &lt;- tryCatch(getMetricsXml(iris,"AK","PIN","","BHZ",
+                          starttime,endtime,metricName="sample_mean",
+                          url="http://service.iris.edu/mustang/measurements/1/query?"),
+                error= function(e) {message(e)}) 
+</code></pre>
+
+
+</div>

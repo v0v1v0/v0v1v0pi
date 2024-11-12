@@ -1,0 +1,358 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>BEMM.3PL</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Calibrating 3PL model via Bayesian Expectation-Maximization-Maximization (BEMM) algorithm.
+</h2>
+
+<h3>Description</h3>
+
+<p>This function can estimate the item parameters of the 3PL model via Bayesian Expectation-Maximization-Maximization (BEMM) algorithm proposed by Guo &amp; Zheng(2019) and Zheng, Meng, Guo, &amp; Liu (2018). Both Bayesan modal estimates and maximum likelihood estimates are available. In addition, the examinees' ability and a few model fits information can be also obtained through this function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">BEMM.3PL(data, PriorA = c(0, 0.25), PriorB = c(0, 4), PriorC = c(4, 16), 
+	InitialA = NA, InitialB = NA, InitialC = NA, 
+	Tol = 0.0001, max.ECycle = 2000L, max.MCycle = 100L, 
+	n.decimal = 3L, n.Quadpts = 31L, Theta.lim = c(-6, 6), 
+	Missing = -9, ParConstraint = FALSE, BiasSE=FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>A <code>matrix</code> or <code>data.frame</code> consists of dichotomous data (1 for correct and 0 for wrong response), with missing data coded as in Missing (by default, Missing=-9). Each row of data represents a examinne' responses, and each column represents an item.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PriorA</code></td>
+<td>
+<p>The user specified <strong>logarithmic normal distribution</strong> prior for item discrimation (<em>a</em>) parameters in the 3PL and 4PL models. Can be:
+</p>
+	
+<ul>
+<li>
+<p> A <code>numeric</code> with two hyperparameters mean and variance of logarithmic normal distribution for all <em>a</em> parameters. By default, PriorA=c(0,0.25), which means a log normal prior of mean=0 and variance=0.25 will be used for all item discrimation parameters.
+</p>
+</li>
+<li>
+<p> A <code>NA</code>, refers to no priors will be used, so maximum likelihood estimates for item discrimation parameter will be obtained.
+</p>
+</li>
+<li>
+<p> A <code>matrix</code> with two columns, and each row of matrix consists of two hyperparameters of log normal prior (mean and variance) for single item <em>a</em> parameter.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PriorB</code></td>
+<td>
+
+<p>The user specified <strong>normal distribution</strong> prior for item difficulty (<em>b</em>) parameters in the 3PL and 4PL models. Can be:
+</p>
+	
+<ul>
+<li>
+<p> A <code>numeric</code> with two hyperparameters mean and variance of normal distribution for all <em>b</em> parameters. By default, PriorB=c(0,4), which means a normal prior of mean=0 and variance=4 will be used for all item difficulty parameters.
+</p>
+</li>
+<li>
+<p> A <code>NA</code>, refers to no priors will be used, so maximum likelihood estimates for item difficulty parameter will be obtained.
+</p>
+</li>
+<li>
+<p> A <code>matrix</code> with two columns, and each row of matrix consists of two hyperparameters of normal prior (mean and variance) for single item <em>b</em> parameter.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PriorC</code></td>
+<td>
+
+<p>The user specified <strong>Beta(x,y) distribution</strong> prior for item guessing (<em>c</em>) parameters in the 3PL and 4PL models. Can be:
+</p>
+	
+<ul>
+<li>
+<p> A <code>numeric</code> with two hyperparameters x and y of Beta distribution for all <em>c</em> parameters. By default, PriorC=c(4,16), which means a Beta prior of mean=4/(4+16)=0.2 and variance=0.008 will be used for all item guessing parameters.
+</p>
+</li>
+<li>
+<p> A <code>NA</code>, refers to no priors will be used, so maximum likelihood estimates for item guessing parameter will be obtained.
+</p>
+</li>
+<li>
+<p> A <code>matrix</code> with two columns, and each row of matrix consists of two hyperparameters of Beta prior (x and y) for single item <em>c</em> parameter.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>InitialA</code></td>
+<td>
+
+<p>The user specified starting values for item discrimation (<em>a</em>) parameters in the 3PL and 4PL models. Can be:
+</p>
+	
+<ul>
+<li>
+<p> A <code>NA</code> (default), refers to no specified starting values for <em>a</em> parameter.
+</p>
+</li>
+<li>
+<p> A single number (<code>numeric</code>), refers to set this number to be the starting values of <em>a</em> for all items.
+</p>
+</li>
+<li>
+<p> A <code>numeric</code> consists of starting values for each <em>a</em> parameter.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>InitialB</code></td>
+<td>
+
+<p>The user specified starting values for item difficulty (<em>b</em>) parameters in the 3PL and 4PL models. Can be:
+</p>
+	
+<ul>
+<li>
+<p> A <code>NA</code> (default), refers to no specified starting values for <em>b</em> parameter.
+</p>
+</li>
+<li>
+<p> A single number (<code>numeric</code>), refers to set this number to be the starting values of <em>b</em> for all items.
+</p>
+</li>
+<li>
+<p> A <code>numeric</code> consists of starting values for each <em>b</em> parameter.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>InitialC</code></td>
+<td>
+
+<p>The user specified starting values for item guessing (<em>c</em>) parameters in the 3PL and 4PL models. Can be:
+</p>
+	
+<ul>
+<li>
+<p> A <code>NA</code> (default), refers to no specified starting values for <em>c</em> parameter.
+</p>
+</li>
+<li>
+<p> A single number (<code>numeric</code>), refers to set this number to be the starting values of <em>c</em> for all items.
+</p>
+</li>
+<li>
+<p> A <code>numeric</code> consists of starting values for each <em>c</em> parameter.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Tol</code></td>
+<td>
+
+<p>A single number (<code>numeric</code>), refers to convergence threshold for E-step cycles; defaults are 0.0001.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.ECycle</code></td>
+<td>
+
+<p>A single <code>integer</code>, refers to maximum number of E-step cycles; defaults are 2000L.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.MCycle</code></td>
+<td>
+
+<p>A single <code>integer</code>, refers to maximum number of M-step cycles; defaults are 100L.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.Quadpts</code></td>
+<td>
+
+<p>A single <code>integer</code>, refers to number of quadrature points per dimension (must be larger than 5); defaults are 31L.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.decimal</code></td>
+<td>
+
+<p>A single <code>integer</code>, refers to number of decimal places when outputs results.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Theta.lim</code></td>
+<td>
+
+<p>A <code>numeric</code> with two number, refers to the range of integration grid for each dimension; default is c(-6, 6).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Missing</code></td>
+<td>
+
+<p>A single number (<code>numeric</code>) to indicate which elements are missing; default is -9. The Missing cannot be 0 or 1.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ParConstraint</code></td>
+<td>
+
+<p>A logical value to indicate whether estimates parametes in a reasonable range; default is FALSE. If ParConstraint=TRUE: <em>a</em> in [0.001, 6], <em>b</em> in [-6, 6], <em>c</em> in [0.0001, 0.5].
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>BiasSE</code></td>
+<td>
+
+<p>A logical value to determine whether directly estimating SEs from inversed Hession matrix rather than USEM method, default is FALSE.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Three parameter logistic (3PL) model proposed by Birnbaum(1968):
+</p>
+<p style="text-align: center;"><code class="reqn">P(x = 1|\theta, a, b, c) = c + (1 - c) / (1 + exp(-D * a * (\theta - b))),</code>
+</p>
+
+<p>where x=1 is the correct response, <em>theta</em> is examinne's ability; <em>a</em>, <em>b</em> and <em>c</em> are the item discrimination, difficulty and guessing parameter, respectively; D is the scaling constant 1.702.
+These parameter labels are <strong>capitalized</strong> in program for emphasis.  
+</p>
+
+
+<h3>Value</h3>
+
+<p>This function will return a list includes following:
+</p>
+
+<dl>
+<dt>Est.ItemPars</dt>
+<dd>
+<p>A <code>dataframe</code> consists of the estimates of <em>a</em>, <em>b</em> and <em>c</em> parameters and corresponding estimated standard errors.</p>
+</dd>
+<dt>Est.Theta</dt>
+<dd>
+<p>A <code>dataframe</code> consists of the estimates of <em>theta</em> and corresponding estimated standard errors (EAP method).</p>
+</dd>
+<dt>Loglikelihood</dt>
+<dd>
+<p>The loglikelihood.</p>
+</dd>
+<dt>Iteration</dt>
+<dd>
+<p>The number of iterations.</p>
+</dd>
+<dt>EM.Map</dt>
+<dd>
+<p>The parameter estimation history of iterations.</p>
+</dd>
+<dt>fits.test</dt>
+<dd>
+<p>The model fits information includes G2 test, AIC, BIC and RMSEA.</p>
+</dd>
+<dt>Elapsed.time</dt>
+<dd>
+<p>The running time of the program.</p>
+</dd>
+<dt>InitialValues</dt>
+<dd>
+<p>The initial values of item parameters.</p>
+</dd>
+</dl>
+<h3>References</h3>
+
+<p>Birnbaum, A. (1968). <em>Some latent trait models and their use in inferring an examinee's ability</em>. In F. M. Lord &amp; M. R. Novick (Eds.), Statistical theories of mental test scores (pp. 395-479). MA: Adison-Wesley.
+</p>
+<p>Guo, S., &amp; Zheng, C. (2019). The Bayesian Expectation-Maximization-Maximization for the 3PLM. <em>Frontiers in Psychology</em>, <em>10</em>(1175), 1-11. <a href="https://doi.org/10.3389/fpsyg.2019.01175">doi:10.3389/fpsyg.2019.01175</a>
+</p>
+<p>Zheng, C., Meng, X., Guo, S., &amp; Liu, Z. (2018). Expectation-Maximization-Maximization: A feasible MLE algorithm for the three-parameter logistic model based on a mixture modeling reformulation. <em>Frontiers in Psychology</em>, <em>8</em>(2302), 1-10. <a href="https://doi.org/10.3389/fpsyg.2017.02302">doi:10.3389/fpsyg.2017.02302</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">###Example: A brief simulation study###
+
+#generate true values and response matrix
+set.seed(10)
+library(IRTBEMM)
+I=500    #set the number of examinees is 500
+J=10      #set the number of items is 10
+true.a=runif(J,0.4,2)      #simulate true discrimination parameters
+true.b=rnorm(J,0,1)     #simulate true difficulty parameters
+true.c=rbeta(J,2,8)       #simulate true guessing parameters
+true.th=rnorm(I,0,1)      #simulate true theta parameters
+true.par=list(A=true.a, B=true.b, C=true.c)   #make a list
+response=matrix(NA,I,J)       #Create a array to save response data
+for (i in 1:I){
+  #calucate the probability of 3PL
+  P=Prob.model(X=true.th[i], Model='3PL', Par.est0=true.par, D=1.702)  
+  response[i,]=rbinom(J,1,P)   #simulate the response
+}
+
+#To save example running time, we set the Tol to 0.1
+#Obtain the Bayesian modal estimation (BME) using default priors
+
+#Estimate model via BEMM algorithm
+bme.res=BEMM.3PL(response, Tol=0.1) 
+
+bme.res$Est.ItemPars       #show item estimates
+bme.res$Est.Theta          #show ability estimates
+bme.res$Loglikelihood      #show log-likelihood
+bme.res$EM.Map             #show EM iteration history
+bme.res$fits.test 		   #show model fits information
+
+
+#Obtain the maximum likelihood estimation (MLE) by setting Prior=NA
+
+#Estimate model via EMM algorithm
+mle.res=BEMM.3PL(response, PriorA=NA, PriorB=NA, PriorC=NA, Tol=0.1) 
+
+mle.res$Est.ItemPars       #show item estimates
+mle.res$Est.Theta          #show ability estimates
+mle.res$Loglikelihood      #show log-likelihood
+mle.res$EM.Map             #show EM iteration history
+mle.res$fits.test 		   #show model fits information
+
+
+</code></pre>
+
+
+</div>

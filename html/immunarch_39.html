@@ -1,0 +1,108 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>geneUsage</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Main function for estimation of V-gene and J-gene statistics</h2>
+
+<h3>Description</h3>
+
+<p>An utility function to analyse the immune receptor gene usage
+(IGHD, IGHJ, IDHV, IGIJ, IGKJ, IGKV, IGLJ, IGLV, TRAJ, TRAV, TRBD, etc.)
+and statistics. For gene details run <code>gene_stats()</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">geneUsage(
+  .data,
+  .gene = c("hs.trbv", "HomoSapiens.TRBJ", "macmul.IGHV"),
+  .quant = c(NA, "count"),
+  .ambig = c("inc", "exc", "maj"),
+  .type = c("segment", "allele", "family"),
+  .norm = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>.data</code></td>
+<td>
+<p>The data to be processed. Can be data.frame,
+data.table, or a list of these objects.
+</p>
+<p>Every object must have columns in the immunarch compatible format.
+immunarch_data_format
+</p>
+<p>Competent users may provide advanced data representations:
+DBI database connections, Apache Spark DataFrame from copy_to or a list
+of these objects. They are supported with the same limitations as basic objects.
+</p>
+<p>Note: each connection must represent a separate repertoire.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.gene</code></td>
+<td>
+<p>A character vector of length one with the name of the gene you want
+to analyse of the specific species. If you provide a vector of different length, only the first element
+will be used. The string should also contain the species of interest, for example, valid ".gene" arguments
+are "hs.trbv", "HomoSapiens.TRBJ" or "macmul.IGHV". For details run <code>gene_stats()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.quant</code></td>
+<td>
+<p>Selects the column with data to evaluate.
+Pass NA if you want to compute gene statistics at the clonotype level without re-weighting.
+Pass "count" to use the "Clones" column to weight genes by abundance of their corresponding clonotypes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.ambig</code></td>
+<td>
+<p>An option to handle ambiguous gene assigments, e.g., "TRAV1,TRAV2".
+</p>
+<p>- Pass "inc" to include all possible gene segments, so "TRAV1,TRAV2" is counted as a different gene segment.
+</p>
+<p>- Pass "exc" to exclude all ambiguous gene assignments, so "TRAV1,TRAV2" is excluded from the resultant gene table.
+</p>
+<p>We recommend to turn it on by passing "inc" (turned on by default).
+You can exclude data for the cases where
+there is no clear match for gene, include it for every supplied gene,
+or pick only first from the set. Set it to "exc", "inc" or "maj", respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.type</code></td>
+<td>
+<p>Set the type of data to evaluate: "segment", "allele", or "family".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.norm</code></td>
+<td>
+<p>If TRUE then return proportions of genes. If FALSE then return counts of genes.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A data frame with rows corresponding to gene segments and columns corresponding to the input samples.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(immdata)
+gu &lt;- geneUsage(immdata$data)
+vis(gu)
+</code></pre>
+
+
+</div>

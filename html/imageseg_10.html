@@ -1,0 +1,170 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>u_net</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create a U-Net architecture</h2>
+
+<h3>Description</h3>
+
+<p>Create a U-Net architecture
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">u_net(
+  net_h,
+  net_w,
+  grayscale = FALSE,
+  layers_per_block = 2,
+  blocks = 4,
+  n_class = 1,
+  filters = 16,
+  dropout = 0,
+  batch_normalization = TRUE,
+  kernel_initializer = "he_normal"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>net_h</code></td>
+<td>
+<p>Input layer height.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>net_w</code></td>
+<td>
+<p>Input layer width.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grayscale</code></td>
+<td>
+<p>Defines input layer color channels - 1 if 'TRUE', 3 if 'FALSE'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>layers_per_block</code></td>
+<td>
+<p>Number of convolutional layers per block (can be 2 or 3)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>blocks</code></td>
+<td>
+<p>Number of blocks in the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_class</code></td>
+<td>
+<p>Number of classes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filters</code></td>
+<td>
+<p>Integer, the dimensionality of the output space (i.e. the number of output filters in the convolution).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dropout</code></td>
+<td>
+<p>Dropout rate (between 0 and 1).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>batch_normalization</code></td>
+<td>
+<p>Should batch normalization be used in the block?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kernel_initializer</code></td>
+<td>
+<p>Initializer for the kernel weights matrix.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function creates a U-Net model architecture according to user input. It allows flexibility regarding input, output and the hidden layers. 
+See the package vignette for examples.
+</p>
+<p>The function was adapted and slightly modified from the <code>u_net()</code> function in the platypus package (<a href="https://github.com/maju116/platypus/blob/master/R/u_net.R">https://github.com/maju116/platypus/blob/master/R/u_net.R</a>).
+</p>
+<p>Differences compared to platypus implementation:
+</p>
+
+<ul>
+<li>
+<p> added argument: layers_per_block (can be 2 or 3) 
+</p>
+</li>
+<li>
+<p> kernel size in layer_conv_2d_transpose is 2, not 3.
+</p>
+</li>
+<li>
+<p> dropout layers are only included if user specifies dropout &gt; 0
+</p>
+</li>
+<li>
+<p> n_class = 1 by default (sufficient for binary classification used for vegetation model, e.g. sky or not sky)
+</p>
+</li>
+<li>
+<p> automatic choice of activation of output layer: "sigmoid" if n_class = 1, otherwise "softmax"
+</p>
+</li>
+<li>
+<p> allows non-square input images (e.g. 160x256 used in understory vegetation density model)
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>U-Net model.
+</p>
+<p>A keras model as returned by <code>keras_model</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# U-Net model for 256x256 pixel RGB input images with a single output class
+# this model was used for canopy density
+
+model &lt;- u_net(net_h = 256, 
+net_w = 256, 
+grayscale = FALSE,
+filters = 32,
+blocks = 4,
+layers_per_block = 2
+)
+
+# several arguments above were not necessary because they were kept at their default. 
+# Below is the same model, but shorter:
+
+model &lt;- u_net(net_h = 256, 
+net_w = 256, 
+filters = 32
+)
+
+model
+
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,106 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>IV_PILE</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimate an IV-optimal individualized treatment rule</h2>
+
+<h3>Description</h3>
+
+<p><code>IV_PILE</code> estimates an IV-optimal individualized treatment
+rule given a dataset with estimated partial identification intervals
+for each instance.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">IV_PILE(dt, kernel = "linear", C = 1, sig = 1/(ncol(dt) - 5))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dt</code></td>
+<td>
+<p>A dataframe whose first column is a binary IV 'Z', followed
+by q columns of observed covariates, a binary
+treatment indicator 'A', a binary outcome 'Y',
+lower endpoint of the partial identification interval 'L',
+and upper endpoint of the partial identification interval 'U'.
+The dataset has q+5 columns in total.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kernel</code></td>
+<td>
+<p>The kernel used in the weighted SVM algorithm. The user
+may choose between 'linear' (linear kernel) and
+'radial' (Gaussian RBF kernel).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C</code></td>
+<td>
+<p>Cost of violating the constraint. This is the parameter C in
+the Lagrange formulation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sig</code></td>
+<td>
+<p>Sigma in the Gaussian RBF kernel. Default is set to
+1/dimension of covariates, i.e., 1/q. This parameter
+is not relevant for linear kernel.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of the type <code>wsvm</code>, inheriting from <code>svm</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# It is necessary to install the package locClass in order
+# to run the following code.
+
+attach(dt_Rouse)
+# Construct an IV out of differential distance to two-year versus
+# four-year college. Z = 1 if the subject lives not farther from
+# a 4-year college compared to a 2-year college.
+Z = (dist4yr &lt;= dist2yr) + 0
+
+# Treatment A = 1 if the subject attends a 4-year college and 0
+# otherwise.
+A = 1 - twoyr
+
+# Outcome Y = 1 if the subject obtained a bachelor's degree
+Y = (educ86 &gt;= 16) + 0
+
+# Prepare the dataset
+dt = data.frame(Z, female, black, hispanic, bytest, dadsome,
+     dadcoll, momsome, momcoll, fincome, fincmiss, A, Y)
+
+# Estimate the Balke-Pearl bound by estimating each constituent
+# conditional probability p(Y = y, A = a | Z, X) with a multinomial
+# regression.
+dt_with_BP_bound_multinom = estimate_BP_bound(dt, method = 'multinom')
+
+# Estimate the IV-optimal individualized treatment rule using a
+# linear kernel, under the putative IV and the Balke-Pearl bound.
+
+
+iv_itr_BP_linear = IV_PILE(dt_with_BP_bound_multinom, kernel = 'linear')
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

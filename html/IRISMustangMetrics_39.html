@@ -1,0 +1,123 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sampleRateRespMetric</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Sample rate consistency between miniSEED and metadata</h2>
+
+<h3>Description</h3>
+
+<p>The sampleRateRespMetric() function compares the miniSEED sample rate with  
+the sample rate derived from the 
+high-frequency corner of the channel's amplitude response.  
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sampleRateRespMetric(st,
+                 resp_pct=15,
+	         norm_freq=NULL,
+                 evalresp=NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>st</code></td>
+<td>
+<p>a <code>Stream</code> object containing a seismic signal</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resp_pct</code></td>
+<td>
+<p>percentage by which the miniSEED and response-derived sample rates must agree to be considered a match</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>norm_freq</code></td>
+<td>
+<p>the normalization frequency at which the stationXML InstrumentSensitivity or dataless Stage 0 Sensitivity is valid, optional</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>evalresp</code></td>
+<td>
+<p>dataframe of freq, amp, phase information matching output of <code>getEvalresp</code>, optional</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Next the function retrieves the instrument response that corresponds with the start of the miniSEED time series, 
+from frequencies one decade below the <code>norm_freq</code> through one decade above the miniSEED sampling frequency.  
+The difference of the amplitude values,normalized for frequency spacing, are then scanned to find the first steep 
+rolloff. The frequency associated with the maximum difference in the rolloff is stored as the empirical Nyquist 
+frequency and multiplied by two to give the empirical response-derived sample rate.  The function then compares 
+this sample rate with the miniSEED sample rate to see whether both rates agree within <code>resp_pct</code> percent.
+The default percentage of 15
+there is significant variations across instruments. If norm_freq or evalresp values are not provided, the code will
+retrieve values from IRIS web services.
+</p>
+<p>The sampleRateMetric function calculates and returns the following metrics:
+</p>
+
+<dl>
+<dt>
+<b>sample_rate_resp</b> – "agreement between daily miniSEED and response-derived sample rates"</dt>
+<dd>
+<p>A 
+boolean measurement that returns 0 if miniSEED and Response-derived  sample rates agree within 15%, or 
+1 if they disagree. Response-derived sample rates assume that the high-frequency amplitude rolloff is ~85% 
+of the Nyquist frequency.</p>
+</dd>
+</dl>
+<h3>Value</h3>
+
+<p>A list of lists is returned containing:
+</p>
+ 
+<ul><li>
+<p><code>m1</code> = list of <code>sample_rate_resp</code> metric objects
+</p>
+</li></ul>
+<h3>Author(s)</h3>
+
+<p>Mary Templeton <a href="mailto:mary.templeton@earthscope.org">mary.templeton@earthscope.org</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>SingleValueMetric</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  ## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+starttime &lt;- as.POSIXct("2019-08-01",tz="GMT")
+endtime &lt;- as.POSIXct("2019-08-02",tz="GMT")
+
+# Get channel-level metadata, sample rate and normalizaton frequency
+meta &lt;- IRISSeismic::getChannel(iris, "IU","ANMO","00","BHZ",starttime,endtime)
+norm_freq &lt;- meta$scalefreq
+  
+# Get the waveform
+st &lt;- IRISSeismic::getDataselect(iris,"IU","ANMO","00","BHZ",starttime,endtime)
+
+# Calculate the sample rate metrics
+list1 &lt;- sampleRateRespMetric(st,resp_pct=15,norm_freq)
+  
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,622 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>run.umap</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Run UMAP on PCA Data (Computes a manifold approximation and projection)</h2>
+
+<h3>Description</h3>
+
+<p>This function takes an object of class iCellR and runs UMAP on PCA data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">run.umap(
+  x = NULL,
+  my.seed = 0,
+  dims = 1:10,
+  n_neighbors = 15,
+  n_components = 2,
+  metric = "euclidean",
+  n_epochs = NULL,
+  learning_rate = 1,
+  scale = FALSE,
+  init = "spectral",
+  init_sdev = NULL,
+  spread = 1,
+  min_dist = 0.01,
+  set_op_mix_ratio = 1,
+  local_connectivity = 1,
+  bandwidth = 1,
+  repulsion_strength = 1,
+  negative_sample_rate = 5,
+  a = NULL,
+  b = NULL,
+  nn_method = NULL,
+  n_trees = 50,
+  search_k = 2 * n_neighbors * n_trees,
+  approx_pow = FALSE,
+  y = NULL,
+  target_n_neighbors = n_neighbors,
+  target_metric = "euclidean",
+  target_weight = 0.5,
+  pca = NULL,
+  pca_center = TRUE,
+  pcg_rand = TRUE,
+  fast_sgd = FALSE,
+  ret_model = FALSE,
+  ret_nn = FALSE,
+  n_threads = 1,
+  n_sgd_threads = 0,
+  grain_size = 1,
+  tmpdir = tempdir(),
+  verbose = getOption("verbose", TRUE)
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class iCellR.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>my.seed</code></td>
+<td>
+<p>seed number, default = 0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dims</code></td>
+<td>
+<p>PC dimentions to be used for UMAP analysis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_neighbors</code></td>
+<td>
+<p>The size of local neighborhood (in terms of number of
+neighboring sample points) used for manifold approximation. Larger values
+result in more global views of the manifold, while smaller values result in
+more local data being preserved. In general values should be in the range
+<code>2</code> to <code>100</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_components</code></td>
+<td>
+<p>The dimension of the space to embed into. This defaults
+to <code>2</code> to provide easy visualization, but can reasonably be set to any
+integer value in the range <code>2</code> to <code>100</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>metric</code></td>
+<td>
+<p>Type of distance metric to use to find nearest neighbors. One
+of:
+</p>
+
+<ul>
+<li> <p><code>"euclidean"</code> (the default)
+</p>
+</li>
+<li> <p><code>"cosine"</code>
+</p>
+</li>
+<li> <p><code>"manhattan"</code>
+</p>
+</li>
+<li> <p><code>"hamming"</code>
+</p>
+</li>
+<li> <p><code>"categorical"</code> (see below)
+</p>
+</li>
+</ul>
+<p>Only applies if <code>nn_method = "annoy"</code> (for <code>nn_method = "fnn"</code>, the
+distance metric is always "euclidean").
+</p>
+<p>If <code>X</code> is a data frame or matrix, then multiple metrics can be
+specified, by passing a list to this argument, where the name of each item in
+the list is one of the metric names above. The value of each list item should
+be a vector giving the names or integer ids of the columns to be included in
+a calculation, e.g. <code>metric = list(euclidean = 1:4, manhattan = 5:10)</code>.
+</p>
+<p>Each metric calculation results in a separate fuzzy simplicial set, which are
+intersected together to produce the final set. Metric names can be repeated.
+Because non-numeric columns are removed from the data frame, it is safer to
+use column names than integer ids.
+</p>
+<p>Factor columns can also be used by specifying the metric name
+<code>"categorical"</code>. Factor columns are treated different from numeric
+columns and although multiple factor columns can be specified in a vector,
+each factor column specified is processed individually. If you specify
+a non-factor column, it will be coerced to a factor.
+</p>
+<p>For a given data block, you may override the <code>pca</code> and <code>pca_center</code>
+arguments for that block, by providing a list with one unnamed item
+containing the column names or ids, and then any of the <code>pca</code> or
+<code>pca_center</code> overrides as named items, e.g. <code>metric =
+list(euclidean = 1:4, manhattan = list(5:10, pca_center = FALSE))</code>. This
+exists to allow mixed binary and real-valued data to be included and to have
+PCA applied to both, but with centering applied only to the real-valued data
+(it is typical not to apply centering to binary data before PCA is applied).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_epochs</code></td>
+<td>
+<p>Number of epochs to use during the optimization of the
+embedded coordinates. By default, this value is set to <code>500</code> for datasets
+containing 10,000 vertices or less, and <code>200</code> otherwise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>learning_rate</code></td>
+<td>
+<p>Initial learning rate used in optimization of the
+coordinates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p>Scaling to apply to <code>X</code> if it is a data frame or matrix:
+</p>
+
+<ul>
+<li>
+<p><code>"none"</code> or <code>FALSE</code> or <code>NULL</code> No scaling.
+</p>
+</li>
+<li>
+<p><code>"Z"</code> or <code>"scale"</code> or <code>TRUE</code> Scale each column to
+zero mean and variance 1.
+</p>
+</li>
+<li>
+<p><code>"maxabs"</code> Center each column to mean 0, then divide each
+element by the maximum absolute value over the entire matrix.
+</p>
+</li>
+<li>
+<p><code>"range"</code> Range scale the entire matrix, so the smallest
+element is 0 and the largest is 1.
+</p>
+</li>
+<li>
+<p><code>"colrange"</code> Scale each column in the range (0,1).
+</p>
+</li>
+</ul>
+<p>For UMAP, the default is <code>"none"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init</code></td>
+<td>
+<p>Type of initialization for the coordinates. Options are:
+</p>
+
+<ul>
+<li> <p><code>"spectral"</code> Spectral embedding using the normalized Laplacian
+of the fuzzy 1-skeleton, with Gaussian noise added.
+</p>
+</li>
+<li> <p><code>"normlaplacian"</code>. Spectral embedding using the normalized
+Laplacian of the fuzzy 1-skeleton, without noise.
+</p>
+</li>
+<li> <p><code>"random"</code>. Coordinates assigned using a uniform random
+distribution between -10 and 10.
+</p>
+</li>
+<li> <p><code>"lvrandom"</code>. Coordinates assigned using a Gaussian
+distribution with standard deviation 1e-4, as used in LargeVis
+(Tang et al., 2016) and t-SNE.
+</p>
+</li>
+<li> <p><code>"laplacian"</code>. Spectral embedding using the Laplacian Eigenmap
+(Belkin and Niyogi, 2002).
+</p>
+</li>
+<li> <p><code>"pca"</code>. The first two principal components from PCA of
+<code>X</code> if <code>X</code> is a data frame, and from a 2-dimensional classical
+MDS if <code>X</code> is of class <code>"dist"</code>.
+</p>
+</li>
+<li> <p><code>"spca"</code>. Like <code>"pca"</code>, but each dimension is then scaled
+so the standard deviation is 1e-4, to give a distribution similar to that
+used in t-SNE. This is an alias for <code>init = "pca", init_sdev =
+   1e-4</code>.
+</p>
+</li>
+<li> <p><code>"agspectral"</code> An "approximate global" modification of
+<code>"spectral"</code> which all edges in the graph to a value of 1, and then
+sets a random number of edges (<code>negative_sample_rate</code> edges per
+vertex) to 0.1, to approximate the effect of non-local affinities.
+</p>
+</li>
+<li>
+<p> A matrix of initial coordinates.
+</p>
+</li>
+</ul>
+<p>For spectral initializations, (<code>"spectral"</code>, <code>"normlaplacian"</code>,
+<code>"laplacian"</code>), if more than one connected component is identified,
+each connected component is initialized separately and the results are
+merged. If <code>verbose = TRUE</code> the number of connected components are
+logged to the console. The existence of multiple connected components
+implies that a global view of the data cannot be attained with this
+initialization. Either a PCA-based initialization or increasing the value of
+<code>n_neighbors</code> may be more appropriate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init_sdev</code></td>
+<td>
+<p>If non-<code>NULL</code>, scales each dimension of the initialized
+coordinates (including any user-supplied matrix) to this standard
+deviation. By default no scaling is carried out, except when <code>init =
+"spca"</code>, in which case the value is <code>0.0001</code>. Scaling the input may
+help if the unscaled versions result in initial coordinates with large
+inter-point distances or outliers. This usually results in small gradients
+during optimization and very little progress being made to the layout.
+Shrinking the initial embedding by rescaling can help under these
+circumstances. Scaling the result of <code>init = "pca"</code> is usually
+recommended and <code>init = "spca"</code> as an alias for <code>init = "pca",
+init_sdev = 1e-4</code> but for the spectral initializations the scaled versions
+usually aren't necessary unless you are using a large value of
+<code>n_neighbors</code> (e.g. <code>n_neighbors = 150</code> or higher).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spread</code></td>
+<td>
+<p>The effective scale of embedded points. In combination with
+<code>min_dist</code>, this determines how clustered/clumped the embedded points
+are.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_dist</code></td>
+<td>
+<p>The effective minimum distance between embedded points.
+Smaller values will result in a more clustered/clumped embedding where
+nearby points on the manifold are drawn closer together, while larger
+values will result on a more even dispersal of points. The value should be
+set relative to the <code>spread</code> value, which determines the scale at
+which embedded points will be spread out.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>set_op_mix_ratio</code></td>
+<td>
+<p>Interpolate between (fuzzy) union and intersection as
+the set operation used to combine local fuzzy simplicial sets to obtain a
+global fuzzy simplicial sets. Both fuzzy set operations use the product
+t-norm. The value of this parameter should be between <code>0.0</code> and
+<code>1.0</code>; a value of <code>1.0</code> will use a pure fuzzy union, while
+<code>0.0</code> will use a pure fuzzy intersection.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>local_connectivity</code></td>
+<td>
+<p>The local connectivity required – i.e. the number
+of nearest neighbors that should be assumed to be connected at a local
+level. The higher this value the more connected the manifold becomes
+locally. In practice this should be not more than the local intrinsic
+dimension of the manifold.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bandwidth</code></td>
+<td>
+<p>The effective bandwidth of the kernel if we view the
+algorithm as similar to Laplacian Eigenmaps. Larger values induce more
+connectivity and a more global view of the data, smaller values concentrate
+more locally.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>repulsion_strength</code></td>
+<td>
+<p>Weighting applied to negative samples in low
+dimensional embedding optimization. Values higher than one will result in
+greater weight being given to negative samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>negative_sample_rate</code></td>
+<td>
+<p>The number of negative edge/1-simplex samples to
+use per positive edge/1-simplex sample in optimizing the low dimensional
+embedding.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+<p>More specific parameters controlling the embedding. If <code>NULL</code>
+these values are set automatically as determined by <code>min_dist</code> and
+<code>spread</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>More specific parameters controlling the embedding. If <code>NULL</code>
+these values are set automatically as determined by <code>min_dist</code> and
+<code>spread</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nn_method</code></td>
+<td>
+<p>Method for finding nearest neighbors. Options are:
+</p>
+
+<ul>
+<li> <p><code>"fnn"</code>. Use exact nearest neighbors via the
+<a href="https://cran.r-project.org/package=FNN">FNN</a> package.
+</p>
+</li>
+<li> <p><code>"annoy"</code> Use approximate nearest neighbors via the
+<a href="https://cran.r-project.org/package=RcppAnnoy">RcppAnnoy</a> package.
+</p>
+</li>
+</ul>
+<p>By default, if <code>X</code> has less than 4,096 vertices, the exact nearest
+neighbors are found. Otherwise, approximate nearest neighbors are used.
+You may also pass precalculated nearest neighbor data to this argument. It
+must be a list consisting of two elements:
+</p>
+
+<ul>
+<li> <p><code>"idx"</code>. A <code>n_vertices x n_neighbors</code> matrix
+containing the integer indexes of the nearest neighbors in <code>X</code>. Each
+vertex is considered to be its own nearest neighbor, i.e.
+<code>idx[, 1] == 1:n_vertices</code>.
+</p>
+</li>
+<li> <p><code>"dist"</code>. A <code>n_vertices x n_neighbors</code> matrix
+containing the distances of the nearest neighbors.
+</p>
+</li>
+</ul>
+<p>Multiple nearest neighbor data (e.g. from two different precomputed
+metrics) can be passed by passing a list containing the nearest neighbor
+data lists as items.
+The <code>n_neighbors</code> parameter is ignored when using precomputed
+nearest neighbor data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_trees</code></td>
+<td>
+<p>Number of trees to build when constructing the nearest
+neighbor index. The more trees specified, the larger the index, but the
+better the results. With <code>search_k</code>, determines the accuracy of the
+Annoy nearest neighbor search. Only used if the <code>nn_method</code> is
+<code>"annoy"</code>. Sensible values are between <code>10</code> to <code>100</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>search_k</code></td>
+<td>
+<p>Number of nodes to search during the neighbor retrieval. The
+larger k, the more the accurate results, but the longer the search takes.
+With <code>n_trees</code>, determines the accuracy of the Annoy nearest neighbor
+search. Only used if the <code>nn_method</code> is <code>"annoy"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>approx_pow</code></td>
+<td>
+<p>If <code>TRUE</code>, use an approximation to the power function
+in the UMAP gradient, from
+<a href="https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/">https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/</a>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Optional target data for supervised dimension reduction. Can be a
+vector, matrix or data frame. Use the <code>target_metric</code> parameter to
+specify the metrics to use, using the same syntax as <code>metric</code>. Usually
+either a single numeric or factor column is used, but more complex formats
+are possible. The following types are allowed:
+</p>
+
+<ul>
+<li>
+<p> Factor columns with the same length as <code>X</code>. <code>NA</code> is
+allowed for any observation with an unknown level, in which case
+UMAP operates as a form of semi-supervised learning. Each column is
+treated separately.
+</p>
+</li>
+<li>
+<p> Numeric data. <code>NA</code> is <em>not</em> allowed in this case. Use the
+parameter <code>target_n_neighbors</code> to set the number of neighbors used
+with <code>y</code>. If unset, <code>n_neighbors</code> is used. Unlike factors,
+numeric columns are grouped into one block unless <code>target_metric</code>
+specifies otherwise. For example, if you wish columns <code>a</code> and
+<code>b</code> to be treated separately, specify
+<code>target_metric = list(euclidean = "a", euclidean = "b")</code>. Otherwise,
+the data will be effectively treated as a matrix with two columns.
+</p>
+</li>
+<li>
+<p> Nearest neighbor data, consisting of a list of two matrices,
+<code>idx</code> and <code>dist</code>. These represent the precalculated nearest
+neighbor indices and distances, respectively. This
+is the same format as that expected for precalculated data in
+<code>nn_method</code>. This format assumes that the underlying data was a
+numeric vector. Any user-supplied value of the <code>target_n_neighbors</code>
+parameter is ignored in this case, because the the number of columns in
+the matrices is used for the value. Multiple nearest neighbor data using
+different metrics can be supplied by passing a list of these lists.
+</p>
+</li>
+</ul>
+<p>Unlike <code>X</code>, all factor columns included in <code>y</code> are automatically
+used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target_n_neighbors</code></td>
+<td>
+<p>Number of nearest neighbors to use to construct the
+target simplicial set. Default value is <code>n_neighbors</code>. Applies only if
+<code>y</code> is non-<code>NULL</code> and <code>numeric</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target_metric</code></td>
+<td>
+<p>The metric used to measure distance for <code>y</code> if
+using supervised dimension reduction. Used only if <code>y</code> is numeric.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target_weight</code></td>
+<td>
+<p>Weighting factor between data topology and target
+topology. A value of 0.0 weights entirely on data, a value of 1.0 weights
+entirely on target. The default of 0.5 balances the weighting equally
+between data and target. Only applies if <code>y</code> is non-<code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pca</code></td>
+<td>
+<p>If set to a positive integer value, reduce data to this number of
+columns using PCA. Doesn't applied if the distance <code>metric</code> is
+<code>"hamming"</code>, or the dimensions of the data is larger than the
+number specified (i.e. number of rows and columns must be larger than the
+value of this parameter). If you have &gt; 100 columns in a data frame or
+matrix, reducing the number of columns in this way may substantially
+increase the performance of the nearest neighbor search at the cost of a
+potential decrease in accuracy. In many t-SNE applications, a value of 50
+is recommended, although there's no guarantee that this is appropriate for
+all settings.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pca_center</code></td>
+<td>
+<p>If <code>TRUE</code>, center the columns of <code>X</code> before
+carrying out PCA. For binary data, it's recommended to set this to
+<code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pcg_rand</code></td>
+<td>
+<p>If <code>TRUE</code>, use the PCG random number generator (O'Neill,
+2014) during optimization. Otherwise, use the faster (but probably less
+statistically good) Tausworthe "taus88" generator. The default is
+<code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fast_sgd</code></td>
+<td>
+<p>If <code>TRUE</code>, then the following combination of parameters
+is set: <code>pcg_rand = TRUE</code>, <code>n_sgd_threads = "auto"</code> and
+<code>approx_pow = TRUE</code>. The default is <code>FALSE</code>. Setting this to
+<code>TRUE</code> will speed up the stochastic optimization phase, but give a
+potentially less accurate embedding, and which will not be exactly
+reproducible even with a fixed seed. For visualization, <code>fast_sgd =
+TRUE</code> will give perfectly good results. For more generic dimensionality
+reduction, it's safer to leave <code>fast_sgd = FALSE</code>. If <code>fast_sgd =
+TRUE</code>, then user-supplied values of <code>pcg_rand</code>, <code>n_sgd_threads</code>,
+and <code>approx_pow</code> are ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ret_model</code></td>
+<td>
+<p>If <code>TRUE</code>, then return extra data that can be used to
+add new data to an existing embedding via <code>umap_transform</code>. The
+embedded coordinates are returned as the list item <code>embedding</code>. If
+<code>FALSE</code>, just return the coordinates. This parameter can be used in
+conjunction with <code>ret_nn</code>. Note that some settings are incompatible
+with the production of a UMAP model: external neighbor data (passed via a
+list to <code>nn_method</code>), and factor columns that were included
+via the <code>metric</code> parameter. In the latter case, the model produced is
+based only on the numeric data. A transformation using new data is
+possible, but the factor columns in the new data are ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ret_nn</code></td>
+<td>
+<p>If <code>TRUE</code>, then in addition to the embedding, also return
+nearest neighbor data that can be used as input to <code>nn_method</code> to
+avoid the overhead of repeatedly calculating the nearest neighbors when
+manipulating unrelated parameters (e.g. <code>min_dist</code>, <code>n_epochs</code>,
+<code>init</code>). See the "Value" section for the names of the list items. If
+<code>FALSE</code>, just return the coordinates. Note that the nearest neighbors
+could be sensitive to data scaling, so be wary of reusing nearest neighbor
+data if modifying the <code>scale</code> parameter. This parameter can be used in
+conjunction with <code>ret_model</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_threads</code></td>
+<td>
+<p>Number of threads to use.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_sgd_threads</code></td>
+<td>
+<p>Number of threads to use during stochastic gradient
+descent. If set to &gt; 1, then results will not be reproducible, even if
+'set.seed' is called with a fixed seed before running. Set to
+<code>"auto"</code> go use the same value as <code>n_threads</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grain_size</code></td>
+<td>
+<p>Minimum batch size for multithreading. If the number of
+items to process in a thread falls below this number, then no threads will
+be used. Used in conjunction with <code>n_threads</code> and
+<code>n_sgd_threads</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tmpdir</code></td>
+<td>
+<p>Temporary directory to store nearest neighbor indexes during
+nearest neighbor search. Default is <code>tempdir</code>. The index is
+only written to disk if <code>n_threads &gt; 1</code> and
+<code>nn_method = "annoy"</code>; otherwise, this parameter is ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>If <code>TRUE</code>, log details to the console.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class iCellR.
+</p>
+
+
+</div>

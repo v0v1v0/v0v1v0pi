@@ -1,0 +1,216 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>density_water</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Density of Saturated Liquid Water</h2>
+
+<h3>Description</h3>
+
+<p>This function solves for the density of water using only the temperature of
+the water in either units of degrees Celsius, degrees Fahrenheit, or Kelvin.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">density_water(
+  Temp,
+  units = c("SI", "Eng", "Absolute"),
+  Eng_units = c("slug/ft^3", "lbm/ft^3")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Temp</code></td>
+<td>
+<p>numeric vector that contains the temperature (degrees Celsius,
+degrees Fahrenheit, or Kelvin)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>units</code></td>
+<td>
+<p>character vector that contains the system of units [options are
+<code>SI</code> for International System of Units, <code>Eng</code> for English units
+(United States Customary System in the United States and Imperial Units in
+the United Kingdom), or <code>Absolute</code> for Absolute Units]</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Eng_units</code></td>
+<td>
+<p>character vector that contains the unit for the density of
+water [options are slug/ft^3 or lbm/ft^3]</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The simplified equation is expressed as
+</p>
+<p style="text-align: center;"><code class="reqn">\frac{\\rho^{t}}{\\rho_c} = 1 + b_1 \times \\tau^{1/3} + b_2 \times \\tau^{2/3} + b_3 \times \\tau^{5/3} + b_4 \times \\tau^{16/3} + b_5 \times \\tau^{43/3} + b_6 \times \\tau^{110/3}</code>
+</p>
+
+<p>where </p>
+<p style="text-align: center;"><code class="reqn">\\rho_c = 322 \frac{kg}{m^3}</code>
+</p>
+
+<p>where </p>
+<p style="text-align: center;"><code class="reqn">\\tau = 1 - \\theta</code>
+</p>
+
+<p>where </p>
+<p style="text-align: center;"><code class="reqn">\\theta = \frac{T}{T_c}</code>
+</p>
+
+<p>where </p>
+<p style="text-align: center;"><code class="reqn">T_c = 647.096 K</code>
+</p>
+
+<p>with
+</p>
+<p style="text-align: center;"><code class="reqn">b_1 = 1.99274064</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">b_2 = 1.09965342</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">b_3 = -0.510839303</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">b_4 = -1.75493479</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">b_5 = -45.5170352</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">b_6 = -6.74694450 * 10 ^ 5</code>
+</p>
+
+
+<dl>
+<dt><em>\rho' = rho^t in the equation</em></dt>
+<dd>
+<p>Water Density (mass divided by volume) [kg/m^3, slug/ft^3, or lbm/ft^3]</p>
+</dd>
+<dt><em>\rho_c</em></dt>
+<dd>
+<p>Water Density at the critical point, kg/m^3</p>
+</dd>
+<dt><em>T</em></dt>
+<dd>
+<p>the water temperature, Kelvin</p>
+</dd>
+<dt><em>T_c</em></dt>
+<dd>
+<p>the critical water temperature, Kelvin</p>
+</dd>
+</dl>
+<h3>Value</h3>
+
+<p>the density as a numeric vector. The units are not returned.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Note: 1 lbf = 1 slug * 1 ft/sec^2, thus 1 slug = 1 lbf * sec^2 / 1 ft
+(Reference 2)
+</p>
+<p>Thus, lbm/ft^3 = lbf*s^2/ft/ft^3
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Irucka Embry
+</p>
+
+
+<h3>References</h3>
+
+<p>IAPWS SR1-86 (1992). "Revised Supplementary Release on Saturation Properties of Ordinary Water Substance". September 1992, <a href="http://www.iapws.org/relguide/Supp-sat.html">http://www.iapws.org/relguide/Supp-sat.html</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example 1 (Compare to reference standard in Reference paper)
+
+library(iemisc)
+
+273.16 # K
+
+373.1243 # K
+
+647.096 # K
+
+Temp &lt;- c(273.16, 373.1243, 647.096)
+
+round::round_r3(density_water(Temp, units = "Absolute"), d = 3)
+
+
+# Reference standard
+
+999.789 # kg/m^3
+958.365 # kg/m^3
+322 # kg/m^3
+
+
+
+
+
+# Example 2 - Example from the hydraulics package
+
+library(iemisc)
+
+rho &lt;- hydraulics::dens(T = 25, units = "SI"); rho
+
+rho2 &lt;- density_water(Temp = 25, units = "SI"); rho2
+
+
+
+
+
+# Example 3 - compare with densityH2Ov from aiRthermo
+
+install.load::load_package("iemisc", "units")
+
+Temp &lt;- 180
+
+# create a numeric vector with the units of degrees Celsius
+T_C &lt;- set_units(Temp, "degree_C")
+T_C
+
+# create a numeric vector to convert from degrees Celsius to Kelvin
+T_K &lt;- T_C
+T_K
+
+# create a numeric vector with the units of Kelvin
+units(T_K) &lt;- make_units(K)
+
+pre &lt;- aiRthermo::saturation_pressure_H2O(drop_units(T_K))
+pre
+
+rho_h2o &lt;- aiRthermo::densityH2Ov(pre, drop_units(T_K), consts =
+aiRthermo::export_constants()); rho_h2o
+
+# Should not be the same as aiRthermo deals with water vapor rather than
+# saturated liquid water
+
+density_water(Temp = drop_units(T_K), units = "Absolute")
+
+
+
+
+
+</code></pre>
+
+
+</div>

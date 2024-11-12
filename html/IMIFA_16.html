@@ -1,0 +1,88 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>is.posi_def</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Check Positive-(Semi)definiteness of a matrix</h2>
+
+<h3>Description</h3>
+
+<p>Tests whether all eigenvalues of a symmetric matrix are positive (or strictly non-negative) to check for positive-definiteness and positive-semidefiniteness, respectively. If the supplied matrix doesn't satisfy the test, the nearest matrix which does can optionally be returned.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">is.posi_def(x,
+            tol = NULL,
+            semi = FALSE,
+            make = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A matrix, assumed to be real and symmetric.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>Tolerance for singular values and for absolute eigenvalues - only those with values larger than tol are considered non-zero.
+</p>
+<p>(default: tol = <code>max(dim(x))*max(E)*.Machine$double.eps</code>, where <code>E</code> is the vector of absolute eigenvalues).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>semi</code></td>
+<td>
+<p>Logical switch to test for positive-semidefiniteness when <code>TRUE</code> or positive-definiteness when <code>FALSE</code> (the default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>make</code></td>
+<td>
+<p>Logical switch to return the nearest matrix which satisfies the test - if the test has been passed, this is of course just <code>x</code> itself, otherwise the nearest positive-(semi)definite matrix. Note that for reasons due to finite precision arithmetic, finding the nearest positive-definite and nearest positive-semidefinite matrices are effectively equivalent tasks.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>If <code>isTRUE(make)</code>, a list with two components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>check</code></td>
+<td>
+<p>A logical value indicating whether the matrix satisfies the test.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X.new</code></td>
+<td>
+<p>The nearest matrix which satisfies the test (which may just be the input matrix itself.)</p>
+</td>
+</tr>
+</table>
+<p>Otherwise, only the logical value indicating whether the matrix satisfies the test is returned.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x    &lt;- cov(matrix(rnorm(100), nrow=10, ncol=10))
+is.posi_def(x)                                           #FALSE
+is.posi_def(x, semi=TRUE)                                #TRUE
+
+Xnew &lt;- is.posi_def(x, semi=FALSE, make=TRUE)$X.new
+identical(x, Xnew)                                       #FALSE
+identical(x, is.posi_def(x, semi=TRUE, make=TRUE)$X.new) #TRUE
+</code></pre>
+
+
+</div>

@@ -1,0 +1,116 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>qip_index</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate Quality of Item Pool Index</h2>
+
+<h3>Description</h3>
+
+<p>The QIP Index can take values between 0 and 1 and indicates an
+item pool’s level of efficiency. A value of 1 signifies an optimum item
+pool for that examinee group. If one adds redundant items to an item pool
+that cannot be used by the CAT algorithm, the QIP Index will not increase
+or will increase minimally. In this sense, the QIP Index is an indicator of
+the item pools’ deficiency, instead of redundancy. However, if an exposure
+control mechanism is within test specifications, the QIP index can measure
+whether the redundancy in the item pool supports the exposure control
+method. See Gonulates (2019) for details.
+</p>
+<p>Note that this function will best work with Rasch or 1PL models. It
+will not work with polytomous items.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">qip_index(cat_sim_output, summary_func = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>cat_sim_output</code></td>
+<td>
+<p>This is a list object containing elements that are
+<code>cat_output</code> class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>summary_func</code></td>
+<td>
+<p>A string representing the function that will be applied
+to individual QIP values for a simulee. The default is <code>NULL</code>, where
+all QIP values of each administered item of a simulee will be returned.
+Other possible values are: <code>"mean"</code>, <code>"median"</code>, <code>"min"</code>,
+<code>"max"</code>. See examples for demonstrations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments that will be passed to the
+<code>summary_func</code>. For example, if <code>summary_func = "quantile"</code>,
+probability of the 25th quantile can be specified using the argument
+<code>prob = .25</code>. See examples for demonstrations.
+</p>
+<p>Since <code>...</code> will be passed to <code>sapply</code> function,
+<code>simplify = FALSE</code> can be passed to function to get results as list
+elements.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A vector or matrix of QIP values or the summary statistics of QIP
+values.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Emre Gonulates
+</p>
+
+
+<h3>References</h3>
+
+<p>Gönülateş, E. (2019). Quality of Item Pool (QIP) Index: A Novel Approach to
+Evaluating CAT Item Pool Adequacy. Educational and Psychological Measurement,
+79(6), 1133–1155. &lt;doi:10.1177/0013164419842215&gt;
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+cd &lt;- create_cat_design(ip = generate_ip(n = 30), next_item_rule = 'mfi',
+                        termination_rule = 'max_item',
+                        termination_par = list(max_item = 10))
+cat_output &lt;- cat_sim(true_ability = rnorm(10), cd = cd)
+
+qip_index(cat_output)
+
+# Return result as list elements
+qip_index(cat_output, simplify = FALSE)
+
+# Summarize QIP values:
+qip_index(cat_output, summary_func = "mean")
+qip_index(cat_output, summary_func = "median")
+qip_index(cat_output, summary_func = "min")
+qip_index(cat_output, summary_func = "max")
+qip_index(cat_output, summary_func = "quantile", prob = .25)
+qip_index(cat_output, summary_func = "quantile", prob = c(.25, .5, .75))
+
+qip_index(cat_output, summary_func = "quantile", prob = c(.25, .5, .75),
+          simplify = FALSE)
+
+
+
+</code></pre>
+
+
+</div>

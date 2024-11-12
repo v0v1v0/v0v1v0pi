@@ -1,0 +1,532 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>irtfit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Traditional IRT item fit statistics</h2>
+
+<h3>Description</h3>
+
+<p>This function computes traditional IRT item fit statistics (i.e., <code class="reqn">\chi^{2}</code> fit statistic (e.g., Bock, 1960; Yen, 1981),
+loglikelihood ratio <code class="reqn">\chi^{2}</code> fit statistic (<code class="reqn">G^{2}</code>; McKinley &amp; Mills, 1985), and infit and outfit statistics (Ames et al., 2015)) and returns
+contingency tables to compute the <code class="reqn">\chi^{2}</code> and <code class="reqn">G^{2}</code> fit statistics. Note that caution is needed in interpreting the infit and
+outfit statistics for non-Rasch models. The saved object of this function, especially the object of contingency tables,
+is used in the function of <code>plot.irtfit</code> to draw a raw and standardized residual plots (Hambleton et al., 1991).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">irtfit(x, ...)
+
+## Default S3 method:
+irtfit(
+  x,
+  score,
+  data,
+  group.method = c("equal.width", "equal.freq"),
+  n.width = 10,
+  loc.theta = "average",
+  range.score = NULL,
+  D = 1,
+  alpha = 0.05,
+  missing = NA,
+  overSR = 2,
+  min.collapse = 1,
+  pcm.loc = NULL,
+  ...
+)
+
+## S3 method for class 'est_item'
+irtfit(
+  x,
+  group.method = c("equal.width", "equal.freq"),
+  n.width = 10,
+  loc.theta = "average",
+  range.score = NULL,
+  alpha = 0.05,
+  missing = NA,
+  overSR = 2,
+  min.collapse = 1,
+  pcm.loc = NULL,
+  ...
+)
+
+## S3 method for class 'est_irt'
+irtfit(
+  x,
+  score,
+  group.method = c("equal.width", "equal.freq"),
+  n.width = 10,
+  loc.theta = "average",
+  range.score = NULL,
+  alpha = 0.05,
+  missing = NA,
+  overSR = 2,
+  min.collapse = 1,
+  pcm.loc = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A data frame containing the item metadata (e.g., item parameters, number of categories, models ...), an object of class <code>est_item</code>
+obtained from the function <code>est_item</code>, or an object of class <code>est_irt</code> obtained from the function <code>est_irt</code>.
+The data frame of item metadata can be easily obtained using the function <code>shape_df</code>. See below for more detail.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments passed to or from other methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>score</code></td>
+<td>
+<p>A vector of examinees' ability estimates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A matrix containing examinees' response data for the items in the argument <code>x</code>. A row and column indicate
+the examinees and items, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group.method</code></td>
+<td>
+<p>A character string indicating how to group examinees along the ability scale for computing the <code class="reqn">\chi^{2}</code> and <code class="reqn">G^{2}</code> fit statistics.
+Available methods are "equal.width" for grouping examinees by dividing the ability scale into intervals of equal width and "equal.freq"
+for grouping examinees by dividing the ability scale into intervals with equal frequencies of examinees. However, "equal.freq" does not
+always guarantee exactly the same frequency of examinees for all groups. Default is "equal.width". To divide the ability scale, the range
+of ability scale and the number of divided groups must be specified in the arguments of <code>range.score</code> and <code>n.width</code>, respectively.
+See below for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.width</code></td>
+<td>
+<p>An integer value to specify the number of divided groups along the ability scale. Default is 10. See below for more detail.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loc.theta</code></td>
+<td>
+<p>A character string to indicate the location of ability point at each group (or interval) where the expected probabilities
+of score categories are calculated using the IRT models. Available locations are "average" for computing the expected probability
+at the average point of examinees' ability estimates in each group and "middle" for computing the expected probability at the midpoint of each group.
+Default is "average".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>range.score</code></td>
+<td>
+<p>A vector of two numeric values to restrict the range of ability scale. All ability estimates less than
+the first value are transformed to the first value. All ability estimates greater than the second value are transformed to the second value.
+If NULL, the minimum and maximum values of ability estimates in the argument <code>score</code> is used as the range of ability scale. Note that
+selection of grouping method in the argument <code>group.method</code> has nothing to do with the range of ability scale. Default is NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>A scaling factor in IRT models to make the logistic function as close as possible to the normal ogive function (if set to 1.7).
+Default is 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>A numeric value to specify significance <code class="reqn">\alpha</code>-level of the hypothesis test for the <code class="reqn">\chi^{2}</code> and <code class="reqn">G^{2}</code> fit statistics.
+Default is .05.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>missing</code></td>
+<td>
+<p>A value indicating missing values in the response data set. Default is NA.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overSR</code></td>
+<td>
+<p>A numeric value to specify a criterion to find ability groups (or intervals) which have standardized residuals
+greater than the specified value. Default is 2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.collapse</code></td>
+<td>
+<p>An integer value to indicate the minimum frequency of cells to be collapsed when computing the <code class="reqn">\chi^{2}</code> and <code class="reqn">G^{2}</code>
+fit statistics. Neighboring interval groups will be collapsed to avoid expected interval frequencies less than the specified minimum cell frequency.
+Default is 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pcm.loc</code></td>
+<td>
+<p>A vector of integer values indicating the locations of partial credit model (PCM) items whose slope parameters are fixed</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A specific form of a data frame should be used for the argument <code>x</code>. The first column should have item IDs,
+the second column should contain unique score category numbers of the items, and the third column should include IRT models being fit to the items.
+The available IRT models are "1PLM", "2PLM", "3PLM", and "DRM" for dichotomous item data, and "GRM" and "GPCM" for polytomous item data.
+Note that "DRM" covers all dichotomous IRT models (i.e, "1PLM", "2PLM", and "3PLM") and "GRM" and "GPCM" represent the graded
+response model and (generalized) partial credit model, respectively. The next columns should include the item parameters of the fitted IRT models.
+For dichotomous items, the fourth, fifth, and sixth columns represent the item discrimination (or slope), item difficulty, and
+item guessing parameters, respectively. When "1PLM" and "2PLM" are specified in the third column, NAs should be inserted in the sixth column
+for the item guessing parameters. For polytomous items, the item discrimination (or slope) parameters should be included in the
+fourth column and the item difficulty (or threshold) parameters of category boundaries should be contained from the fifth to the last columns.
+When the number of unique score categories differs between items, the empty cells of item parameters should be filled with NAs.
+In the <span class="pkg">irtQ</span> package, the item difficulty (or threshold) parameters of category boundaries for GPCM are expressed as
+the item location (or overall difficulty) parameter subtracted by the threshold parameter for unique score categories of the item.
+Note that when an GPCM item has <em>K</em> unique score categories, <em>K-1</em> item difficulty parameters are necessary because
+the item difficulty parameter for the first category boundary is always 0. For example, if an GPCM item has five score categories,
+four item difficulty parameters should be specified. An example of a data frame with a single-format test is as follows:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+  ITEM1  </td>
+<td style="text-align: right;"> 2 </td>
+<td style="text-align: left;"> 1PLM </td>
+<td style="text-align: right;"> 1.000 </td>
+<td style="text-align: right;">  1.461 </td>
+<td style="text-align: right;">         NA </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ITEM2  </td>
+<td style="text-align: right;"> 2 </td>
+<td style="text-align: left;"> 2PLM </td>
+<td style="text-align: right;"> 1.921 </td>
+<td style="text-align: right;"> -1.049 </td>
+<td style="text-align: right;">         NA </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ITEM3  </td>
+<td style="text-align: right;"> 2 </td>
+<td style="text-align: left;"> 3PLM </td>
+<td style="text-align: right;"> 1.736 </td>
+<td style="text-align: right;">  1.501 </td>
+<td style="text-align: right;">  0.203 </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ITEM4  </td>
+<td style="text-align: right;"> 2 </td>
+<td style="text-align: left;"> 3PLM </td>
+<td style="text-align: right;"> 0.835 </td>
+<td style="text-align: right;"> -1.049 </td>
+<td style="text-align: right;">  0.182 </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ITEM5  </td>
+<td style="text-align: right;"> 2 </td>
+<td style="text-align: left;"> DRM </td>
+<td style="text-align: right;"> 0.926 </td>
+<td style="text-align: right;">  0.394 </td>
+<td style="text-align: right;">  0.099
+</td>
+</tr>
+</table>
+<p>And an example of a data frame for a mixed-format test is as follows:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+  ITEM1  </td>
+<td style="text-align: right;"> 2 </td>
+<td style="text-align: left;"> 1PLM </td>
+<td style="text-align: right;"> 1.000 </td>
+<td style="text-align: right;">  1.461 </td>
+<td style="text-align: right;">         NA </td>
+<td style="text-align: right;">         NA </td>
+<td style="text-align: right;">         NA</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ITEM2  </td>
+<td style="text-align: right;"> 2 </td>
+<td style="text-align: left;"> 2PLM </td>
+<td style="text-align: right;"> 1.921 </td>
+<td style="text-align: right;"> -1.049 </td>
+<td style="text-align: right;">         NA </td>
+<td style="text-align: right;">         NA </td>
+<td style="text-align: right;">         NA</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ITEM3  </td>
+<td style="text-align: right;"> 2 </td>
+<td style="text-align: left;"> 3PLM </td>
+<td style="text-align: right;"> 0.926 </td>
+<td style="text-align: right;">  0.394 </td>
+<td style="text-align: right;">  0.099 </td>
+<td style="text-align: right;">         NA </td>
+<td style="text-align: right;">         NA</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ITEM4  </td>
+<td style="text-align: right;"> 2 </td>
+<td style="text-align: left;"> DRM </td>
+<td style="text-align: right;"> 1.052 </td>
+<td style="text-align: right;"> -0.407 </td>
+<td style="text-align: right;">  0.201 </td>
+<td style="text-align: right;">         NA </td>
+<td style="text-align: right;">         NA</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ITEM5  </td>
+<td style="text-align: right;"> 4 </td>
+<td style="text-align: left;"> GRM  </td>
+<td style="text-align: right;"> 1.913 </td>
+<td style="text-align: right;"> -1.869 </td>
+<td style="text-align: right;"> -1.238 </td>
+<td style="text-align: right;"> -0.714 </td>
+<td style="text-align: right;">         NA </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ITEM6  </td>
+<td style="text-align: right;"> 5 </td>
+<td style="text-align: left;"> GRM  </td>
+<td style="text-align: right;"> 1.278 </td>
+<td style="text-align: right;"> -0.724 </td>
+<td style="text-align: right;"> -0.068 </td>
+<td style="text-align: right;">  0.568 </td>
+<td style="text-align: right;">  1.072</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ITEM7  </td>
+<td style="text-align: right;"> 4 </td>
+<td style="text-align: left;"> GPCM  </td>
+<td style="text-align: right;"> 1.137 </td>
+<td style="text-align: right;"> -0.374 </td>
+<td style="text-align: right;">  0.215 </td>
+<td style="text-align: right;">  0.848 </td>
+<td style="text-align: right;">         NA </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ITEM8  </td>
+<td style="text-align: right;"> 5 </td>
+<td style="text-align: left;"> GPCM  </td>
+<td style="text-align: right;"> 1.233 </td>
+<td style="text-align: right;"> -2.078 </td>
+<td style="text-align: right;"> -1.347 </td>
+<td style="text-align: right;"> -0.705 </td>
+<td style="text-align: right;"> -0.116
+</td>
+</tr>
+</table>
+<p>See <code>IRT Models</code> section in the page of <code>irtQ-package</code> for more detail about the IRT models used in the <span class="pkg">irtQ</span> package.
+An easier way to create a data frame for the argument <code>x</code> is by using the function <code>shape_df</code>.
+</p>
+<p>To calculate the <code class="reqn">\chi^{2}</code> and <code class="reqn">G^{2}</code> fit statistics, two methods are used in the argument <code>group.method</code> to divide the ability scale
+into several groups. If <code>group.method = "equal.width"</code>, the examinees are grouped based on equal length of intervals.
+If <code>group.method = "equal.freq"</code>, the examinees are grouped so that all groups have equal frequencies. However, the grouping method
+of "equal.freq" does guarantee that every group has the exactly same frequency of examinees. This is because the examinees are divided by
+the same size of quantile.
+</p>
+<p>When dividing the ability scale into intervals to compute the <code class="reqn">\chi^{2}</code> and <code class="reqn">G^{2}</code> fit statistics, the intervals should be wide enough not to include
+too small number of examinees. On the other hand, the interval should be narrow enough to include homogeneous examinees in terms of ability
+(Hambleton et al, 1991). Thus, if you want to divide the ability scale into other than ten groups, you need to specify the number of groups
+in the argument <code>n.width</code>. Yen (1981) fixed the number of groups to 10, whereas Bock (1960) allowed for any number of groups.
+</p>
+<p>Regarding degrees of freedom (<em>df</em>), the <code class="reqn">\chi^{2}</code> is assumed to be distributed approximately as a chi-square with <em>df</em> equal to
+the number of groups less the number of the IRT model parameters (Ames et al., 2015) whereas the <code class="reqn">G^{2}</code> is assumed to be distributed approximately
+as a chi-square with <em>df</em> equal to the number of groups (Ames et al., 2015; Muraki &amp; Bock, 2003)
+</p>
+<p>Note that if "DRM" is specified for an item in the item metadata set, the item is considered as "3PLM" to compute degrees of freedom of
+the <code class="reqn">\chi^{2}</code> fit statistic.
+</p>
+
+
+<h3>Value</h3>
+
+<p>This function returns an object of class <code>irtfit</code>. Within this object, several internal objects are contained such as:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>fit_stat</code></td>
+<td>
+<p>A data frame containing the results of three IRT fit statistics (i.e., <code class="reqn">\chi^{2}</code> and <code class="reqn">G^{2}</code>, infit, outfit statistics) across
+all evaluated items. In the data frame, the columns indicate item's ID, <code class="reqn">\chi^{2}</code> fit statistic, <code class="reqn">G^{2}</code> fit statistic, degrees of freedom for the <code class="reqn">\chi^{2}</code>,
+degrees of freedom for the <code class="reqn">G^{2}</code>, critical value for the <code class="reqn">\chi^{2}</code>, critical value for the <code class="reqn">G^{2}</code>, p-value for the <code class="reqn">\chi^{2}</code>,
+p-value for the <code class="reqn">G^{2}</code>, outfit statistic, infit statistic, the number of examinees used to compute the five fit statistics, and the proportion of
+ability groups (or intervals), before collapsing the cells, that have standardized residuals greater than the specified criterion in the argument <code>overSR</code>,
+respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>contingency.fitstat</code></td>
+<td>
+<p>A list of contingency tables used to compute the <code class="reqn">\chi^{2}</code> and <code class="reqn">G^{2}</code> fit statistics for all items.
+Note that the collapsing cell strategy is implemented to these contingency tables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>contingency.plot</code></td>
+<td>
+<p>A list of contingency tables used to draw a raw and standardized residual plots (Hambleton et al., 1991) in the function of
+<code>plot.irtfit</code>. Note that the collapsing cell strategy is <em>not</em> implemented to these contingency tables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>individual.info</code></td>
+<td>
+<p>A list of data frames including individual residual and variance values. Those information are used to compute
+infit and outfit statistics.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>item_df</code></td>
+<td>
+<p>The item metadata specified in the argument <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ancillary</code></td>
+<td>
+<p>A list of ancillary information used in the item fit analysis.</p>
+</td>
+</tr>
+</table>
+<h3>Methods (by class)</h3>
+
+
+<ul>
+<li> <p><code>irtfit(default)</code>: Default method to compute the traditional IRT item fit statistics for a data frame <code>x</code> containing the item metadata.
+</p>
+</li>
+<li> <p><code>irtfit(est_item)</code>: An object created by the function <code>est_item</code>.
+</p>
+</li>
+<li> <p><code>irtfit(est_irt)</code>: An object created by the function <code>est_irt</code>.
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Hwanggyu Lim <a href="mailto:hglim83@gmail.com">hglim83@gmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Ames, A. J., &amp; Penfield, R. D. (2015). An NCME Instructional Module on Item-Fit Statistics for Item Response Theory Models.
+<em>Educational Measurement: Issues and Practice, 34</em>(3), 39-48.
+</p>
+<p>Bock, R.D. (1960), <em>Methods and applications of optimal scaling</em>. Chapel Hill, NC: L.L. Thurstone Psychometric Laboratory.
+</p>
+<p>Hambleton, R. K., Swaminathan, H., &amp; Rogers, H. J. (1991).<em>Fundamentals of item response theory</em>. Newbury Park, CA: Sage.
+</p>
+<p>McKinley, R., &amp; Mills, C. (1985). A comparison of several goodness-of-fit statistics.
+<em>Applied Psychological Measurement, 9</em>, 49-57.
+</p>
+<p>Muraki, E. &amp; Bock, R. D. (2003). PARSCALE 4: IRT item analysis and test scoring for rating
+scale data [Computer Program]. Chicago, IL: Scientific Software International. URL http://www.ssicentral.com
+</p>
+<p>Wells, C. S., &amp; Bolt, D. M. (2008). Investigation of a nonparametric procedure for assessing goodness-of-fit in
+item response theory. <em>Applied Measurement in Education, 21</em>(1), 22-40.
+</p>
+<p>Yen, W. M. (1981). Using simulation results to choose a latent trait model. <em>Applied Psychological Measurement, 5</em>, 245-262.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot.irtfit</code>, <code>shape_df</code>, <code>est_item</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## example 1
+## use the simulated CAT data
+# find the location of items that have more than 10,000 responses
+over10000 &lt;- which(colSums(simCAT_MX$res.dat, na.rm = TRUE) &gt; 10000)
+
+# select the items that have more than 10,000 responses
+x &lt;- simCAT_MX$item.prm[over10000, ]
+
+# select the response data for the items
+data &lt;- simCAT_MX$res.dat[, over10000]
+
+# select the examinees' abilities
+score &lt;- simCAT_MX$score
+
+# compute fit statistics
+fit1 &lt;- irtfit(
+  x = x, score = score, data = data, group.method = "equal.width",
+  n.width = 10, loc.theta = "average", range.score = NULL, D = 1, alpha = 0.05,
+  missing = NA, overSR = 2
+)
+
+# fit statistics
+fit1$fit_stat
+
+# contingency tables
+fit1$contingency.fitstat
+
+
+## example 2
+## import the "-prm.txt" output file from flexMIRT
+flex_sam &lt;- system.file("extdata", "flexmirt_sample-prm.txt", package = "irtQ")
+
+# select the first two dichotomous items and last polytomous item
+x &lt;- bring.flexmirt(file = flex_sam, "par")$Group1$full_df[c(1:2, 55), ]
+
+# generate examinees' abilities from N(0, 1)
+set.seed(10)
+score &lt;- rnorm(1000, mean = 0, sd = 1)
+
+# simulate the response data
+data &lt;- simdat(x = x, theta = score, D = 1)
+
+# compute fit statistics
+fit2 &lt;- irtfit(
+  x = x, score = score, data = data, group.method = "equal.freq",
+  n.width = 11, loc.theta = "average", range.score = c(-4, 4), D = 1, alpha = 0.05
+)
+
+# fit statistics
+fit2$fit_stat
+
+# contingency tables
+fit2$contingency.fitstat
+
+# residual plots for the first item (dichotomous item)
+plot(x = fit2, item.loc = 1, type = "both", ci.method = "wald",
+     show.table = TRUE, ylim.sr.adjust = TRUE)
+
+# residual plots for the third item (polytomous item)
+plot(x = fit2, item.loc = 3, type = "both", ci.method = "wald",
+     show.table = FALSE, ylim.sr.adjust = TRUE)
+
+
+</code></pre>
+
+
+</div>

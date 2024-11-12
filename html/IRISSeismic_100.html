@@ -1,0 +1,81 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>multiplyBy</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Multiplication by a constant</h2>
+
+<h3>Description</h3>
+
+<p>The <code>multiplyBy</code> methods of <code>Trace</code> and <code>Stream</code> objects return like objects
+where all <code>@data</code> slots have been multiplied by a constant.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">multiplyBy(x, y)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>a <code>Trace</code> or <code>Stream</code> object
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+
+<p>a numeric multiplier
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A new <code>Trace</code> or <code>Stream</code> object is returned.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+starttime &lt;- as.POSIXct("2011-01-24", tz="GMT")
+endtime &lt;- as.POSIXct("2011-01-25", tz="GMT")
+
+# Get the waveform
+stRaw &lt;- getDataselect(iris,"AK","PIN","","BHZ",starttime,endtime)
+
+# obtain an instrument sensitivity value with getChannel metadata)
+c &lt;- getChannel(iris, "AK","PIN","","BHZ",starttime, endtime)
+sensitivityValue &lt;- c$scale
+
+# convert raw data
+st &lt;- multiplyBy(stRaw, 1/sensitivityValue)
+rmsVariance(st)
+
+# plot trace
+plot(st, ylab=c$scaleunits)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

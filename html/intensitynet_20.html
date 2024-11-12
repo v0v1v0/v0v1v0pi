@@ -1,0 +1,94 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>intensitynet</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Constructor of the class intensitynet.</h2>
+
+<h3>Description</h3>
+
+<p>This constructor creates an intensitynet object using an adjacency matrix, the
+coordinates of the nodes and the coordinates of the events.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">intensitynet(
+  adjacency_mtx,
+  node_coords,
+  event_data,
+  graph_type = c("undirected", "directed", "mixed"),
+  event_correction = 5
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>adjacency_mtx</code></td>
+<td>
+<p>Network adjacency matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>node_coords</code></td>
+<td>
+<p>Nodes latitude and longitude matrix (coordinates)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event_data</code></td>
+<td>
+<p>DataFrame with event latitude and longitude coordinates (mandatory columns) and optional attributes related to the events</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>graph_type</code></td>
+<td>
+<p>Network type: 'undirected' (default), 'directed' or 'mixed'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event_correction</code></td>
+<td>
+<p>Value that determines how far can be an event to be considered part of a segment (default 5). 
+This value highly depends on the given coordinate system</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>intensitynet class object containing: graph = &lt;igraph&gt;, events = &lt;matrix&gt;, graph_type = c('directed', 'undirected', 'mixed'), 
+distances = &lt;matrix&gt;, event_correction = &lt;integer&gt;, events_related = &lt;boolean&gt;
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(spatstat)
+data(chicago)
+chicago_df &lt;- as.data.frame(chicago[["data"]]) # Get as dataframe the data from Chicago
+
+# Get the adjacency matrix. One way is to create an igraph object from the edge coordinates.
+edges &lt;- cbind(chicago[["domain"]][["from"]], chicago[["domain"]][["to"]])
+chicago_net &lt;- igraph::graph_from_edgelist(edges)
+
+# And then use the igraph function 'as_adjacency_matrix'
+chicago_adj_mtx &lt;- as.matrix(igraph::as_adjacency_matrix(chicago_net))
+chicago_node_coords &lt;- data.frame(xcoord = chicago[["domain"]][["vertices"]][["x"]], 
+                                 ycoord = chicago[["domain"]][["vertices"]][["y"]])
+                                  
+# Create the intensitynet object, in this case will be undirected 
+intnet_chicago &lt;- intensitynet(chicago_adj_mtx, 
+                               node_coords = chicago_node_coords, 
+                               event_data = chicago_df)
+
+</code></pre>
+
+
+</div>

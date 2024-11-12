@@ -1,0 +1,238 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fit_VAR_t</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit Student's t VAR model to time series with missing values and/or outliers</h2>
+
+<h3>Description</h3>
+
+<p>Estimate the parameters of a Student's t vector autoregressive
+model 
+</p>
+<p style="text-align: center;"><code class="reqn">y_t = \phi_0 + \sum_{i=1}^p \Phi_i * y_{t-i} + \epsilon_t</code>
+</p>
+
+<p>to fit the given time series with missing values. 
+If the time series does not contain missing values, the 
+maximum likelihood (ML) estimation is done via the iterative
+EM algorithm until converge is achieved.
+With missing values, the stochastic EM algorithm is employed 
+for the estimation (currently the maximum number of iterations
+will be executed without attempting to check early converge).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fit_VAR_t(
+  Y,
+  p = 1,
+  omit_missing = FALSE,
+  parallel_max_cores = max(1, parallel::detectCores() - 1),
+  verbose = FALSE,
+  return_iterates = FALSE,
+  initial = NULL,
+  L = 10,
+  maxiter = 50,
+  ptol = 0.001,
+  partition_groups = TRUE,
+  K = round(maxiter/3)
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>Time series object coercible to either a numeric matrix (e.g., <code>zoo</code> or <code>xts</code>) with missing values denoted by <code>NA</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>Positive integer indicating the order of the VAR model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>omit_missing</code></td>
+<td>
+<p>Logical value indicating whether to use the omit-variable method, i.e., 
+excluding the variables with missing data from the analysis (default is <code>FALSE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel_max_cores</code></td>
+<td>
+<p>Positive integer indicating the maximum numer of cores used in the parallel computing, 
+only valid when <code>partition_groups</code> = <code>TRUE</code> (default is <code class="reqn">1</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Logical value indicating whether to report in console the information of each iteration.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return_iterates</code></td>
+<td>
+<p>Logical value indicating whether to return the parameter estimates at each iteration (default is <code>FALSE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial</code></td>
+<td>
+<p>List with the initial values of the parameters of the VAR model, which may contain some or all of the following elements:
+</p>
+<ul>
+<li>
+<p><code>nu</code> (<code class="reqn">\nu</code>) - a positive number as the degrees of freedom,
+</p>
+</li>
+<li>
+<p><code>phi0</code> (<code class="reqn">\phi_0</code>) - a numerical vector of length <code>ncol(Y)</code> as the interception of VAR model,
+</p>
+</li>
+<li>
+<p><code>Phii</code> (<code class="reqn">\Phi_i</code>) - a list of <code>p</code> matrices of dimension <code>ncol(Y)</code> as the autoregressive coefficient matrices,
+</p>
+</li>
+<li>
+<p><code>scatter</code> (<code class="reqn">\Sigma</code>) - a positive definite of dimension <code>ncol(Y)</code> as the scatter matrix.</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L</code></td>
+<td>
+<p>Positive integer with the number of Markov chains (default is <code class="reqn">10</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+<p>Positive integer with the number of maximum iterations (default is <code class="reqn">100</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ptol</code></td>
+<td>
+<p>Non-negative number with the tolerance to determine the convergence of the (stochastic) EM method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>partition_groups</code></td>
+<td>
+<p>Logical value indicating whether to partition <code>Y</code> into groups (default is <code>TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>Positive integer indicating the values of the step sizes in the stochastic EM method.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with the following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>nu</code></td>
+<td>
+<p>The estimate for <code class="reqn">\nu</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phi0</code></td>
+<td>
+<p>The estimate for <code class="reqn">\phi_0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Phii</code></td>
+<td>
+<p>The estimate for <code class="reqn">\Phi_i</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scatter</code></td>
+<td>
+<p>The estimate for scatter matrix, i.e., <code class="reqn">\Sigma</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>converged</code></td>
+<td>
+<p>A logical value indicating whether the method has converged.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter_usage</code></td>
+<td>
+<p>A number indicating how many iteration has been used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>elapsed_times</code></td>
+<td>
+<p>A numerical vector indicating how much is comsumed in each iteration.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>elapsed_time</code></td>
+<td>
+<p>A number indicating how much time is comsumed overall.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>elapsed_time_per_iter</code></td>
+<td>
+<p>A number indicating how much time is comsumed for each iteration in average.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterates_record</code></td>
+<td>
+<p>A list as the records of parameter estimates of each iteration, only returned when <code>return_iterates</code> = <code>TRUE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Rui Zhou and Daniel P. Palomar
+</p>
+
+
+<h3>References</h3>
+
+<p>R. Zhou, J. Liu, S. Kumar, and D. P. Palomar, "Student’s t VAR Modeling with Missing Data via 
+Stochastic EM and Gibbs Sampling," IEEE Trans. on Signal Processing, vol. 68, pp. 6198-6211, Oct. 2020.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>fit_AR1_t</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(imputeFin)
+data(ts_VAR_t)
+fitted &lt;- fit_VAR_t(Y = ts_VAR_t$Y, p = 2, parallel_max_cores = 2)
+
+
+</code></pre>
+
+
+</div>

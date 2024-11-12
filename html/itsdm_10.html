@@ -1,0 +1,156 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>independent_response</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate independent responses of each variables.</h2>
+
+<h3>Description</h3>
+
+<p>Calculate the independent responses of each variables
+within the model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">independent_response(model, var_occ, variables, si = 1000, visualize = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>(Any predictive model). It is <code>isolation_forest</code> here. It could
+be the item <code>model</code> of <code>POIsotree</code> made by function <code>isotree_po</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var_occ</code></td>
+<td>
+<p>(<code>data.frame</code>, <code>tibble</code>) The <code>data.frame</code> style table that
+include values of environmental variables at occurrence locations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variables</code></td>
+<td>
+<p>(<code>stars</code>) The <code>stars</code> of environmental variables.
+It should have multiple <code>attributes</code> instead of <code>dims</code>.
+If you have <code>raster</code> object instead, you
+could use <code>st_as_stars</code> to convert it to <code>stars</code> or use
+<code>read_stars</code> directly read source data as a <code>stars</code>.
+You also could use item <code>variables</code> of <code>POIsotree</code> made by function
+<code>isotree_po</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>si</code></td>
+<td>
+<p>(<code>integer</code>) The number of samples to generate response curves.
+If it is too small, the response curves might be biased.
+The default value is <code>1000</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>visualize</code></td>
+<td>
+<p>(<code>logical</code>) if <code>TRUE</code>, plot the response curves.
+The default is <code>FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The values show how each environmental variable independently
+affects the modeling prediction. They show how the predicted result
+only using this variable changes as it is varied.
+</p>
+
+
+<h3>Value</h3>
+
+<p>(<code>IndependentResponse</code>) A list of
+</p>
+
+<ul>
+<li>
+<p>responses_cont (<code>list</code>) A list of response values of continuous
+variables
+</p>
+</li>
+<li>
+<p>responses_cat (<code>list</code>) A list of response values of categorical
+variables
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+
+<ul><li>
+<p>Elith, Jane,
+et al. "The evaluation strip: a new and robust method for plotting predicted
+responses from species distribution models." <em>Ecological modelling</em>
+186.3 (2005): 280-289.<a href="https://doi.org/10.1016/j.ecolmodel.2004.12.007">doi:10.1016/j.ecolmodel.2004.12.007</a>
+</p>
+</li></ul>
+<h3>See Also</h3>
+
+<p><code>plot.IndependentResponse</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Using a pseudo presence-only occurrence dataset of
+# virtual species provided in this package
+library(dplyr)
+library(sf)
+library(stars)
+library(itsdm)
+
+data("occ_virtual_species")
+obs_df &lt;- occ_virtual_species %&gt;% filter(usage == "train")
+eval_df &lt;- occ_virtual_species %&gt;% filter(usage == "eval")
+x_col &lt;- "x"
+y_col &lt;- "y"
+obs_col &lt;- "observation"
+
+# Format the observations
+obs_train_eval &lt;- format_observation(
+  obs_df = obs_df, eval_df = eval_df,
+  x_col = x_col, y_col = y_col, obs_col = obs_col,
+  obs_type = "presence_only")
+
+env_vars &lt;- system.file(
+  'extdata/bioclim_tanzania_10min.tif',
+  package = 'itsdm') %&gt;% read_stars() %&gt;%
+  slice('band', c(1, 5, 12, 16))
+
+# With imperfect_presence mode,
+mod &lt;- isotree_po(
+  obs_mode = "imperfect_presence",
+  obs = obs_train_eval$obs,
+  obs_ind_eval = obs_train_eval$eval,
+  variables = env_vars, ntrees = 10,
+  sample_size = 0.8, ndim = 2L,
+  seed = 123L, nthreads = 1,
+  response = FALSE,
+  spatial_response = FALSE,
+  check_variable = FALSE)
+
+independent_responses &lt;- independent_response(
+  model = mod$model,
+  var_occ = mod$vars_train,
+  variables = mod$variables)
+plot(independent_responses)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,208 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>DistSim</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generates a vector  of independent  processes,   and calculates the set of close points 
+and the mean distance  for each point in  the first  process</h2>
+
+<h3>Description</h3>
+
+<p>This function generates   a vector  of two (or three) independent homogeneous or nonhomogeneous 
+processes  conditionally on the first one,  by simulating the second (and  the third) process  using a parametric model 
+(Poisson processes or  Neyman-Scott  cluster processes).  
+</p>
+<p>It also calculates the set of close points  and the  mean distance in the generated vector, for each point <code class="reqn">t_{x_i}</code> 
+in the first process. 
+</p>
+<p><code>DistSimfix</code> allows to  fix a seed in the  generation process.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">DistSim(posx, NumProcess=2, type = "Poisson", lambdaMarg = NULL, 
+	lambdaParent = NULL, lambdaNumP=NULL, dist = "normal", sigmaC = 1, 
+	minC = -1, maxC = 1, PA = FALSE,info=FALSE,...)
+
+DistSimfix(posx, NumProcess=2, type = "Poisson", lambdaMarg = NULL, 
+	lambdaParent = NULL,lambdaNumP=NULL, dist = "normal", sigmaC = 1, 
+	minC = -1, maxC = 1, PA = FALSE,info=FALSE,fixed.seed=1,...)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>posx</code></td>
+<td>
+<p>Numeric vector. Position of the occurrence points in the first process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>NumProcess</code></td>
+<td>
+<p>Optional. Integer equal to 2 or 3,  the number of processes in the vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Optional. Label "Poisson" or "PoissonCluster". Type of point processes to be generated. 
+Up to now, only two types are available: Poisson processes ("Poisson") and Neyman-Scott cluster 
+processes  ("PoissonCluster").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambdaMarg</code></td>
+<td>
+<p>Two-column matrix. Only used when <em>type="Poisson"</em>. Each column
+is the intensity  <code class="reqn">\lambda (t)</code> used  to generate the processes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambdaParent</code></td>
+<td>
+<p>Numeric vector. Only used when <em>type="PoissonCluster"</em>. Intensity values  
+of the Poisson process used to generate the  centres of the clusters of the Neyman-Scott process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambdaNumP</code></td>
+<td>
+<p>Numeric vector (length <code class="reqn">\le 2</code>). Only used when <em>type="PoissonCluster"</em>. 
+Mean values of the number of sons in each  process. If its length is 1 and <code>NumProcess=2</code>,
+the same value is used for both	processes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist</code></td>
+<td>
+<p>Optional. Label "normal" or "uniform". Only used when <em>type="PoissonCluster"</em>.   
+Distribution  used to generate the  point distances in each cluster.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigmaC</code></td>
+<td>
+<p>Optional. Numeric vector.  Only used when <em>type="PoissonCluster"</em> and  <em>dist="normal"</em>.
+Standard deviation of the normal distribution.   If its length	is  1 and <code>NumProcess=2</code>,
+the same value is used for both processes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minC</code></td>
+<td>
+<p>Optional. Numeric vector. Only used when <em>type="PoissonCluster"</em> and  <em>dist="uniform"</em>.
+Lower bounds of the  Uniform distribution.  If its length is 1 and <code>NumProcess=2</code>,
+the same value is used for both processes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxC</code></td>
+<td>
+<p>Optional. Numeric vector. Only used when <em>type="PoissonCluster"</em> and  <em>dist="uniform"</em>.
+Upper bounds of the  Uniform distribution. If its length is 1 and <code>NumProcess=2</code>,
+the same value is used for both processes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PA</code></td>
+<td>
+<p>Optional. Logical flag. If it is TRUE, the close point relation  is
+broadened by including the previous and the following points to the overlapping intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>info</code></td>
+<td>
+<p>Optional. Logical flag. If it is TRUE,  information about the generated points is shown  
+on the screen and dotcharts  and bivariate charts of the  occurrence points of the three processes 
+are displayed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed.seed</code></td>
+<td>
+<p>Optional. Only available in <code>DistSimfix</code>. Integer value used to set the seed 
+in random generation procedures.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments to be passes to  the functions <code>plot</code> and <code>dotchart</code> if  argument
+<code>info=T</code>. </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function is  mainly used  in the application of a parametric bootstrap approach   to  generate  a pair of independent
+processes with the same marginal distributions than the observed ones. To that aim, the first process is fixed and the others are generated using a parametric model.
+These processes are used for example to build  a test to assess the independecne
+between two or three processes, see <code>TestIndNH</code>.
+</p>
+<p>Two types of processes (Poisson, "Poisson", and Neyman-Scott cluster 
+processes,"PoissonCluster")  can be generated. Generation of nonhomogeneous Poisson processes is done using the inversion algorithm, see 
+<code>simNHPc</code>. For generation of Neyman-Scott processes, see <code>IndNHNeyScot</code>.
+</p>
+<p>The function  also calculates the set of close points and the  mean distance 
+for each point <code class="reqn">t_{x_i}</code> in the first process, in the  new generated vector of processes.
+</p>
+<p>The lenght of the period where the processes are generated is  determined by the length of 
+the argument <code>lambdaParent</code> or the number of rows of <code>lambdaMarg</code>. Homogenous  processes  are  generated if the intensity vectors in  <code>lambdaParent</code> or in
+<code>lambdaMarg</code> are  constant (that is if  all the values in the vector are equal).
+</p>
+<p>If a seed  must be fixed in the  generation process, function <code>DistSimfix</code>  has to be used.
+The functions <code>DistSim</code> and <code>DistSimfix</code> are  similar, the difference is that the first one uses a 
+random seed  to generate the processes, while the second one uses a seed  set by the argument <code>fixed.seed</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>DistTri</code></td>
+<td>
+<p>Vector of the mean distances of each point <code class="reqn">t_{x_i}</code>  calculated in the generated processes.</p>
+</td>
+</tr></table>
+<h3>References</h3>
+
+<p>Abaurrea, J. Asin, J. and Cebrian, A.C. (2015). A Bootstrap Test of Independence Between Three Temporal Nonhomogeneous Poisson Processes 
+and its Application to Heat Wave Modeling. <em>Environmental and Ecological Statistics</em>, 22(1), 127-144.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>TestIndNH</code>, <code>DistObs</code>,  <code>IndNHNeyScot</code>,  
+<code>simNHPc</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+#Calculation of the distances in a vector of  three independent Poisson processes   
+#conditionally to the first one
+
+set.seed(123)
+lambdax&lt;-runif(200, 0.01,0.15)
+posaux&lt;-simNHPc(lambda=lambdax, fixed.seed=123)$posNH
+
+set.seed(124)
+lambday&lt;-runif(200, 0.005,0.1)
+set.seed(125)
+lambdaz&lt;-runif(200, 0.005,0.2)
+
+DistSimfix(posx=posaux, type = "Poisson", lambdaMarg = cbind(lambday,lambdaz), 
+	fixed.seed=123, info=TRUE)
+#DistSim(posx=posaux, type = "Poisson", lambdaMarg = cbind(lambday,lambdaz))
+
+</code></pre>
+
+
+</div>

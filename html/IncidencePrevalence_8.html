@@ -1,0 +1,157 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>estimateIncidence</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Collect population incidence estimates</h2>
+
+<h3>Description</h3>
+
+<p>Collect population incidence estimates
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">estimateIncidence(
+  cdm,
+  denominatorTable,
+  outcomeTable,
+  denominatorCohortId = NULL,
+  outcomeCohortId = NULL,
+  interval = "years",
+  completeDatabaseIntervals = TRUE,
+  outcomeWashout = Inf,
+  repeatedEvents = FALSE,
+  minCellCount = 5,
+  strata = list(),
+  includeOverallStrata = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>cdm</code></td>
+<td>
+<p>A CDM reference object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>denominatorTable</code></td>
+<td>
+<p>A cohort table with a set of denominator cohorts
+(for example, created using the <code>generateDenominatorCohortSet()</code>
+function).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outcomeTable</code></td>
+<td>
+<p>A cohort table in the cdm reference containing
+a set of outcome cohorts.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>denominatorCohortId</code></td>
+<td>
+<p>The cohort definition ids of the denominator
+cohorts of interest. If NULL all cohorts will be considered in the
+analysis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outcomeCohortId</code></td>
+<td>
+<p>The cohort definition ids of the outcome
+cohorts of interest. If NULL all cohorts will be considered in the
+analysis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interval</code></td>
+<td>
+<p>Time intervals over which incidence is estimated. Can
+be "weeks", "months", "quarters", "years", or "overall". ISO weeks will
+be used for weeks. Calendar months, quarters, or years can be used, or an
+overall estimate for the entire time period observed (from earliest cohort
+start to last cohort end) can also be estimated. If more than one option is
+chosen then results will be estimated for each chosen interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>completeDatabaseIntervals</code></td>
+<td>
+<p>TRUE/ FALSE. Where TRUE, incidence will
+only be estimated for those intervals where the denominator cohort
+captures all the interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outcomeWashout</code></td>
+<td>
+<p>The number of days used for a 'washout' period
+between the end of one outcome and an individual starting to contribute
+time at risk. If Inf, no time can be contributed after an event has
+occurred.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>repeatedEvents</code></td>
+<td>
+<p>TRUE/ FALSE. If TRUE, an individual will be able to
+contribute multiple events during the study period (time while they are
+present in an outcome cohort and any subsequent washout will be
+excluded). If FALSE, an individual will only contribute time up to their
+first event.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minCellCount</code></td>
+<td>
+<p>The minimum number of events to reported, below which
+results will be obscured. If 0, all results will be reported.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>strata</code></td>
+<td>
+<p>Variables added to the denominator cohort table for which to
+stratify estimates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>includeOverallStrata</code></td>
+<td>
+<p>Whether to include an overall result as well as
+strata specific results (when strata has been specified).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Incidence estimates
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+cdm &lt;- mockIncidencePrevalenceRef(sampleSize = 1000)
+cdm &lt;- generateDenominatorCohortSet(
+  cdm = cdm, name = "denominator",
+  cohortDateRange = c(as.Date("2008-01-01"), as.Date("2018-01-01"))
+)
+inc &lt;- estimateIncidence(
+  cdm = cdm,
+  denominatorTable = "denominator",
+  outcomeTable = "outcome"
+)
+
+</code></pre>
+
+
+</div>

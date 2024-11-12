@@ -1,0 +1,212 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iCoxph</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Integrative Cox Model for Uncertain Event Times</h2>
+
+<h3>Description</h3>
+
+<p>Fit an integrative Cox model proposed by Wang et al. (2020) for
+right-censored survival data with uncertain event times due to imperfect
+data integration.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iCoxph(
+  formula,
+  data,
+  subset,
+  na.action,
+  contrasts = NULL,
+  start = iCoxph.start(),
+  control = iCoxph.control(),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p><code>Survi</code> object specifying the covariates and response
+variable in the model, such as <code>Survi(ID, time, event) ~ x1 + x2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>An optional data frame, list, or environment that contains the
+covariates and response variables included in the model. If not found in
+data, the variables are taken from <code>environment(formula)</code>, usually
+the environment from which this function is called.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+<p>An optional logical vector specifying a subset of observations
+to be used in the fitting process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+<p>An optional function that indicates what should the
+procedure do if the data contains <code>NA</code>s.  The default is set by the
+na.action setting of <code>options</code>.  The "factory-fresh"
+default is <code>na.omit</code>.  Other possible values include
+<code>na.fail</code>, <code>na.exclude</code>, and
+<code>na.pass</code>.  <code>help(na.fail)</code> for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>contrasts</code></td>
+<td>
+<p>An optional list, whose entries are values (numeric
+matrices or character strings naming functions) to be used as
+replacement values for the contrasts replacement function and whose
+names are the names of columns of data containing factors.  See
+<code>contrasts.arg</code> of <code>model.matrix.default</code> for
+details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start</code></td>
+<td>
+<p>A list returned by function <code>iCoxph.start</code>
+specifying starting values of the parameters to be estimated in the
+model. Please refer to the arguments of <code>iCoxph.start</code> for
+the available parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>A list returned by function <code>iCoxph.control</code>
+specifying control parameters for the model estimation procedure.
+Please refer to the arguments of <code>iCoxph.control</code> for the
+available parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments for future usage.  A warning will be thrown if
+any invalid argument is specified.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An <code>iCoxph-class</code> object, whose slots include
+</p>
+
+<ul>
+<li> <p><code>call</code>: Function call.
+</p>
+</li>
+<li> <p><code>formula</code>: Formula used in the model fitting.
+</p>
+</li>
+<li> <p><code>data</code>: A processed data frame used for model fitting.
+</p>
+</li>
+<li> <p><code>nObs</code>: Number of observation.
+</p>
+</li>
+<li> <p><code>estimates</code>:
+</p>
+
+<ul>
+<li> <p><code>beta</code>: Coefficient estimates.
+</p>
+</li>
+<li> <p><code>pi</code>: Estimated parameters in prior multinomial
+distribution indicating the probabilities of corresponding
+record being true.
+</p>
+</li>
+<li> <p><code>baseline</code>: A data frame that contains estimated
+baseline hazard function with columns named <code>time</code> and
+<code>h0</code>.
+</p>
+</li>
+</ul>
+</li>
+<li> <p><code>start</code>: The initial guesses <code>beta_mat</code> and
+<code>pi_mat</code> specified for the parameters to be estimated,
+and the set of initial guess <code>beta_start</code> and <code>pi_start</code>
+that resulted in the largest objective function, i.e.,
+the observed-data likelihood function.
+</p>
+</li>
+<li> <p><code>control</code>: The control list specified for model fitting.
+</p>
+</li>
+<li> <p><code>na.action</code>: The procedure specified to deal with
+missing values in the covariate.
+</p>
+</li>
+<li> <p><code>xlevels</code>: A list that records the levels in
+each factor variable.
+</p>
+</li>
+<li> <p><code>contrasts</code>: Contrasts specified and used for each
+factor variable.
+</p>
+</li>
+<li> <p><code>convergeCode</code>: <code>code</code> returned by function
+<code>nlm</code>, which is an integer indicating why the
+optimization process terminated. <code>help(nlm)</code> for details.
+</p>
+</li>
+<li> <p><code>logL</code>: A numeric vector containing the observed-data
+log-likelihood over iterations.
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+<p>Wang, W., Aseltine, R. H., Chen, K., &amp; Yan, J. (2020). Integrative Survival
+Analysis with Uncertain Event Times in Application to A Suicide Risk
+Study. <em>Annals of Applied Statistics</em>, 14(1), 51–73.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>iCoxph.start</code> and <code>iCoxph.control</code>, respectively,
+for starting and controlling iCoxph fitting;
+<code>summary,iCoxph-method</code> for summary of fitted model;
+<code>coef,iCoxph-method</code> for estimated covariate coefficients;
+<code>bootSe</code> for SE estimates from bootstrap methods.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(intsurv)
+## generate simulated survival data with uncertain records
+set.seed(123)
+simuDat &lt;- simData4iCoxph(nSubject = 200)
+## fit the integertive Cox model
+fit &lt;- iCoxph(Survi(ID, time, event) ~ x1 + x2 + x3 + x4,
+              data = simuDat, start = iCoxph.start(methods = "nearest"),
+              control = iCoxph.control(tol_beta = 1e-5))
+## estimated covariate coefficients
+coef(fit)
+## get SE estimates by bootstrap
+fit &lt;- bootSe(fit, B = 30)
+## summary of the fitted model
+summary(fit)
+</code></pre>
+
+
+</div>

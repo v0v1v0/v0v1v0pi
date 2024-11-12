@@ -1,0 +1,109 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dim_reduce</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Remove environmental variables that have high correlation with others.</h2>
+
+<h3>Description</h3>
+
+<p>Select environmental variables that have pairwise Pearson
+correlation lower than a user-defined threshold.
+NOTE that it only works on numeric variables, does not work on
+categorical variables.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dim_reduce(
+  img_stack = NULL,
+  threshold = 0.5,
+  preferred_vars = NULL,
+  samples = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>img_stack</code></td>
+<td>
+<p>(<code>stars</code> or <code>RasterStack</code>)
+The image stack to work on.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>(<code>numeric</code>) The threshold number of Pearson
+correlation that indicates two variables are strongly correlated.
+The default is 0.5.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>preferred_vars</code></td>
+<td>
+<p>(<code>vector</code> of <code>character</code>) The preferred
+variables <b>in order</b> in dimension reduction. The preferred variables
+will move to the beginning before the reduction. So make sure they are
+placed in order. Furthermore, setting preferred_vars does not guarantee
+they can survive. For example, one preferred variable that is placed later
+has strong correlation with former preferred variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>samples</code></td>
+<td>
+<p>(<code>sf</code> or <code>sp</code>) The samples to reduce
+dimension.
+If not <code>NULL</code>, it can take <code>sf</code>, <code>sfc</code>,
+<code>SpatialPointsDataFrame</code>, <code>SpatialPoints</code>, etc.
+If <code>NULL</code>, the whole raster stack would be used.
+The default is <code>NULL</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>(<code>ReducedImageStack</code>) A list of
+</p>
+
+<ul>
+<li>
+<p>threshold (<code>numeric</code>) The threshold set in function inputs
+</p>
+</li>
+<li>
+<p>img_reduced (<code>stars</code>) The image stack after dimension reduction
+</p>
+</li>
+<li>
+<p>cors_original (<code>data.frame</code>) A table of Pearson
+correlations between all variables.
+</p>
+</li>
+<li>
+<p>cors_reduced (<code>data.frame</code>) A table of Pearson
+correlations between variables after dimension reduction.</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(sf)
+library(itsdm)
+library(stars)
+library(dplyr)
+env_vars &lt;- system.file(
+  'extdata/bioclim_tanzania_10min.tif',
+  package = 'itsdm') %&gt;% read_stars()
+img_reduced &lt;- dim_reduce(env_vars, threshold = 0.7,
+  preferred_vars = c('bio1', 'bio12'))
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,236 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ica</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+ICA via FastICA, Infomax, or JADE
+</h2>
+
+<h3>Description</h3>
+
+<p>Computes ICA decomposition using Hyvarinen's (1999) FastICA algorithm, Bell and Sejnowski's (1995) Information-Maximization (Infomax) algorithm, or Cardoso and Souloumiac's (1993, 1996) Joint Approximate Diagonalization of Eigenmatrices (JADE) algorithm.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ica(X, nc, method = c("fast", "imax", "jade"), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+
+<p>Data matrix with <code>n</code> rows (samples) and <code>p</code> columns (variables).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nc</code></td>
+<td>
+
+<p>Number of components to extract.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>Method for decomposition.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Additional arguments to be passed to other ICA functions (see Details).  
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><b>ICA Model</b>
+The ICA model can be written as <code>X = tcrossprod(S, M) + E</code>, where <code>S</code> contains the source signals, <code>M</code> is the mixing matrix, and <code>E</code> contains the noise signals. Columns of <code>X</code> are assumed to have zero mean. The goal is to find the unmixing matrix <code>W</code> such that columns of <code>S = tcrossprod(X, W)</code> are independent as possible.
+</p>
+<p><b>Whitening</b>
+Without loss of generality, we can write <code>M = P %*% R</code> where <code>P</code> is a tall matrix and <code>R</code> is an orthogonal rotation matrix. Letting <code>Q</code> denote the pseudoinverse of <code>P</code>, we can whiten the data using <code>Y = tcrossprod(X, Q)</code>. The goal is to find the orthongal rotation matrix <code>R</code> such that the source signal estimates <code>S = Y %*% R</code> are as independent as possible. Note that <code>W = crossprod(R, Q)</code>.
+</p>
+<p><b>Method</b>
+This is a wrapper function for the functions <code>icafast</code>, <code>icaimax</code>, or <code>icajade</code>. See the corresponding function for details on the method, as well as the available arguments (handled by the <code>...</code> argument).
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>S</code></td>
+<td>
+<p>Matrix of source signal estimates (<code>S = Y %*% R</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>M</code></td>
+<td>
+<p>Estimated mixing matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>W</code></td>
+<td>
+<p>Estimated unmixing matrix (<code>W = crossprod(R, Q)</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>Whitened data matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q</code></td>
+<td>
+<p>Whitening matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+<p>Orthogonal rotation matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vafs</code></td>
+<td>
+<p>Variance-accounted-for by each component.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter</code></td>
+<td>
+<p>Number of algorithm iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>converged</code></td>
+<td>
+<p>Logical indicating if algorithm converged.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments (if <code>method = "fast"</code> or <code>method = "imax"</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Nathaniel E. Helwig &lt;helwig@umn.edu&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Bell, A.J. &amp; Sejnowski, T.J. (1995). An information-maximization approach to blind separation and blind deconvolution. <em>Neural Computation, 7</em>(6), 1129-1159. <a href="https://doi.org/10.1162/neco.1995.7.6.1129">doi:10.1162/neco.1995.7.6.1129</a>
+</p>
+<p>Cardoso, J.F., &amp; Souloumiac, A. (1993). Blind beamforming for non-Gaussian signals. <em>IEE Proceedings-F, 140</em>(6), 362-370. <a href="https://doi.org/10.1049/ip-f-2.1993.0054">doi:10.1049/ip-f-2.1993.0054</a>
+</p>
+<p>Cardoso, J.F., &amp; Souloumiac, A. (1996). Jacobi angles for simultaneous diagonalization. <em>SIAM Journal on Matrix Analysis and Applications, 17</em>(1), 161-164. <a href="https://doi.org/10.1137/S0895479893259546">doi:10.1137/S0895479893259546</a>
+</p>
+<p>Helwig, N.E. &amp; Hong, S. (2013). A critique of Tensor Probabilistic Independent Component Analysis: Implications and recommendations for multi-subject fMRI data analysis. <em>Journal of Neuroscience Methods, 213</em>(2), 263-273. <a href="https://doi.org/10.1016/j.jneumeth.2012.12.009">doi:10.1016/j.jneumeth.2012.12.009</a>
+</p>
+<p>Hyvarinen, A. (1999). Fast and robust fixed-point algorithms for independent component analysis. <em>IEEE Transactions on Neural Networks, 10</em>(3), 626-634. <a href="https://doi.org/10.1109/72.761722">doi:10.1109/72.761722</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>icafast</code> for ICA via FastICA
+</p>
+<p><code>icaimax</code> for ICA via Infomax
+</p>
+<p><code>icajade</code> for ICA via JADE
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##########   EXAMPLE 1   ##########
+
+# generate noiseless data (p == r)
+set.seed(123)
+nobs &lt;- 1000
+Amat &lt;- cbind(icasamp("a", "rnd", nobs), icasamp("b", "rnd", nobs))
+Bmat &lt;- matrix(2 * runif(4), nrow = 2, ncol = 2)
+Xmat &lt;- tcrossprod(Amat, Bmat)
+
+# ICA via different algorithms
+imod.fast &lt;- ica(Xmat, nc = 2)
+imod.imax &lt;- ica(Xmat, nc = 2, method = "imax")
+imod.jade &lt;- ica(Xmat, nc = 2, method = "jade")
+
+# compare mixing matrix recovery
+acy(Bmat, imod.fast$M)
+acy(Bmat, imod.imax$M)
+acy(Bmat, imod.jade$M)
+
+# compare source signal recovery
+cor(Amat, imod.fast$S)
+cor(Amat, imod.imax$S)
+cor(Amat, imod.jade$S)
+
+
+##########   EXAMPLE 2   ##########
+
+# generate noiseless data (p != r)
+set.seed(123)
+nobs &lt;- 1000
+Amat &lt;- cbind(icasamp("a", "rnd", nobs), icasamp("b", "rnd", nobs))
+Bmat &lt;- matrix(2 * runif(200), nrow = 100, ncol = 2)
+Xmat &lt;- tcrossprod(Amat, Bmat)
+
+# ICA via different algorithms
+imod.fast &lt;- ica(Xmat, nc = 2)
+imod.imax &lt;- ica(Xmat, nc = 2, method = "imax")
+imod.jade &lt;- ica(Xmat, nc = 2, method = "jade")
+
+# compare source signal recovery
+cor(Amat, imod.fast$S)
+cor(Amat, imod.imax$S)
+cor(Amat, imod.jade$S)
+
+
+##########   EXAMPLE 3   ##########
+
+# generate noisy data (p != r)
+set.seed(123)
+nobs &lt;- 1000
+Amat &lt;- cbind(icasamp("a", "rnd", nobs), icasamp("b", "rnd", nobs))
+Bmat &lt;- matrix(2 * runif(200), 100, 2)
+Emat &lt;- matrix(rnorm(10^5), nrow = 1000, ncol = 100)
+Xmat &lt;- tcrossprod(Amat,Bmat) + Emat
+
+# ICA via different algorithms
+imod.fast &lt;- ica(Xmat, nc = 2)
+imod.imax &lt;- ica(Xmat, nc = 2, method = "imax")
+imod.jade &lt;- ica(Xmat, nc = 2, method = "jade")
+
+# compare source signal recovery
+cor(Amat, imod.fast$S)
+cor(Amat, imod.imax$S)
+cor(Amat, imod.jade$S)
+
+</code></pre>
+
+
+</div>

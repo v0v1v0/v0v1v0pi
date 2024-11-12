@@ -1,0 +1,170 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iv.diagnosis</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Diagnostics of instrumental variable analysis</h2>
+
+<h3>Description</h3>
+
+<p>Diagnostics of instrumental variable analysis
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iv.diagnosis(Y, D, Z, X)
+
+iv.diagnosis.plot(output, bias.ratio = TRUE, base_size = 15, text_size = 5)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>A numeric vector of outcomes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>A vector of endogenous variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Z</code></td>
+<td>
+<p>A vector of instruments.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>A vector, matrix or data frame of (exogenous) covariates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output</code></td>
+<td>
+<p>Output from <code>iv.diagnosis</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bias.ratio</code></td>
+<td>
+<p>Add bias ratios (text) to the plot?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>base_size</code></td>
+<td>
+<p>size of the axis labels</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>text_size</code></td>
+<td>
+<p>size of the text (bias ratios)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a list or data frame
+</p>
+
+<dl>
+<dt>x.mean1</dt>
+<dd>
+<p>Mean of X under Z = 1 (reported if Z is binary)</p>
+</dd>
+<dt>x.mean0</dt>
+<dd>
+<p>Mean of X under Z = 0 (reported if Z is binary)</p>
+</dd>
+<dt>coef</dt>
+<dd>
+<p>OLS coefficient of X ~ Z (reported if Z is not binary)</p>
+</dd>
+<dt>se</dt>
+<dd>
+<p>Standard error of OLS coefficient (reported if Z is not binary)</p>
+</dd>
+<dt>p.val</dt>
+<dd>
+<p>p-value of the independence of Z and X (Fisher's test if both are binary, logistic regression if Z is binary, linear regression if Z is continuous)</p>
+</dd>
+<dt>stand.diff</dt>
+<dd>
+<p>Standardized difference (reported if Z is binary)</p>
+</dd>
+<dt>bias.ratio</dt>
+<dd>
+<p>Bias ratio</p>
+</dd>
+<dt>bias.amplify</dt>
+<dd>
+<p>Amplification of bias ratio</p>
+</dd>
+<dt>bias.ols</dt>
+<dd>
+<p>Bias of OLS</p>
+</dd>
+<dt>bias.2sls</dt>
+<dd>
+<p>Bias of two stage least squares)</p>
+</dd>
+</dl>
+<h3>Functions</h3>
+
+
+<ul><li> <p><code>iv.diagnosis.plot()</code>: IV diagnostic plot
+</p>
+</li></ul>
+<h3>Author(s)</h3>
+
+<p>Qingyuan Zhao
+</p>
+
+
+<h3>References</h3>
+
+
+<ul>
+<li>
+<p>Baiocchi, M., Cheng, J., &amp; Small, D. S. (2014). Instrumental variable methods for causal inference. Statistics in Medicine, 33(13), 2297-2340.
+</p>
+</li>
+<li>
+<p>Jackson, J. W., &amp; Swanson, S. A. (2015). Toward a clearer portrayal of confounding bias in instrumental variable applications. Epidemiology, 26(4), 498.
+</p>
+</li>
+<li>
+<p>Zhao, Q., &amp; Small, D. S. (2018). Graphical diagnosis of confounding bias in instrumental variable analysis. Epidemiology, 29(4), e29–e31.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">n &lt;- 10000
+Z &lt;- rbinom(n, 1, 0.5)
+X &lt;- data.frame(matrix(c(rnorm(n), rbinom(n * 5, 1, 0.5)), n))
+D &lt;- rbinom(n, 1, plogis(Z + X[, 1] + X[, 2] + X[, 3]))
+Y &lt;- D + X[, 1] + X[, 2] + rnorm(n)
+print(output &lt;- iv.diagnosis(Y, D, Z, X))
+iv.diagnosis.plot(output)
+
+Z &lt;- rnorm(n)
+D &lt;- rbinom(n, 1, plogis(Z + X[, 1] + X[, 2] + X[, 3]))
+Y &lt;- D + X[, 1] + X[, 2] + rnorm(n)
+print(output &lt;- iv.diagnosis(Y, D, Z, X)) ## stand.diff is not reported
+iv.diagnosis.plot(output)
+
+</code></pre>
+
+
+</div>

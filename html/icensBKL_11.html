@@ -1,0 +1,83 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>icsurv2cdf</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Conversion of icsurv objects in a data.frame
+</h2>
+
+<h3>Description</h3>
+
+<p>Convert an object of class <code>icsurv</code> (created by several functions
+of the package <code>Icens</code> to a two-column <code>data.frame</code> that can
+be easily used to plot the fitted distribution function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">icsurv2cdf(fit)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>fit</code></td>
+<td>
+<p>an object of class <code>icsurv</code>, typically obtained by one
+of the functions   <code>EM</code>,
+<code>PGM</code>,
+<code>VEM</code>,
+<code>ISDM</code>,
+<code>EMICM</code> of the package <code>Icens</code>.
+</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p>A <code>data.frame</code> with columns labeled <code>time</code> and <code>cdf</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Arnošt Komárek <a href="mailto:arnost.komarek@mff.cuni.cz">arnost.komarek@mff.cuni.cz</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>EM</code>,
+<code>PGM</code>,
+<code>VEM</code>,
+<code>ISDM</code>,
+<code>EMICM</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">### Distribution function of the emergence of tooth 44 on boys
+### (this example: only a subset of boys)
+data("tandmob", package="icensBKL")
+Boys &lt;- subset(tandmob, fGENDER=="boy")
+Sboy &lt;- Surv(Boys$L44, Boys$R44, type="interval2")
+
+Aboy &lt;- subset(Boys, select=c("L44", "R44"))
+Aboy$L44[is.na(Aboy$L44)] &lt;- 0
+Aboy$R44[is.na(Aboy$R44)] &lt;- 20    ## 20 = infinity in this case
+fitB.NPMLE &lt;- EMICM(Aboy)
+print(fitB.NPMLE)
+plot(fitB.NPMLE)
+
+fitB.NPMLE &lt;- icsurv2cdf(fitB.NPMLE)
+print(fitB.NPMLE)
+plot(fitB.NPMLE$time, fitB.NPMLE$cdf, type="l", xlim=c(6, 13), ylim=c(0, 1),
+     xlab="Age (years)", ylab="Proportion emerged")
+</code></pre>
+
+
+</div>

@@ -1,0 +1,111 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ReductionDamage</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimate of the damage reduction</h2>
+
+<h3>Description</h3>
+
+<p>Function to estimate of the damage reduction
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ReductionDamage(ResultSolutionSource,LossSource,EffectivenessOfSolution)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ResultSolutionSource</code></td>
+<td>
+<p>Output of the SolutionSource function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LossSource</code></td>
+<td>
+<p>Loss Source data. Sources of loss refers to the number of
+individuals per observation that cause damage to the system.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>EffectivenessOfSolution</code></td>
+<td>
+<p>Output of the EffectivenessOfSolution function.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The function returns the estimate of the reduction in damage.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Germano Leao Demolin-Leite (Instituto de Ciencias Agrarias da UFMG) <br>
+Alcinei Mistico Azevedo (Instituto de Ciencias Agrarias da UFMG)
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>EffectivenessOfSolution</code> ,  <code>SolutionSource</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("DataLossSource")
+ChisqTest_Distribution(DataLossSource)
+
+data("DataSolutionSource")
+ChisqTest_Distribution(DataSolutionSource)
+
+data("DataDefoliation")
+data("DataDamage")
+
+DataResult&lt;-cbind(DataDefoliation,DataDamage$D.L.S.2,DataDefoliation,
+DataDamage$D.L.S.4,DataDefoliation)
+ResultLossSource&lt;-LossSource(DataLoss = DataLossSource,DataResult =DataResult,
+Cols=c(1,3,5),verbose=TRUE)
+
+EOS&lt;-EffectivenessOfSolution(DataLossSource =DataLossSource,
+                            DataSolutionSource =DataSolutionSource,
+                            ResultLossSource = ResultLossSource)
+
+EOS
+#Put: y and y
+# ID&lt;-SelectEffectivenessOfSolution(EOS)
+ID&lt;-c(FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,
+FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE)
+ResultSolutionSource&lt;-SolutionSource(SolutionData =DataSolutionSource,Production =DataResult,
+                                    EffectivenessOfSolution =EOS ,Id = ID,Verbose = TRUE  )
+ResultSolutionSource
+
+# Put: y,n,y,n,y,n and y
+# ReductionAbundance(ResultSolutionSource,ResultLossSource,
+#                  EffectivenessOfSolution=EOS)
+
+###################################################
+EOSDamage&lt;-EffectivenessOfSolution(DataLossSource =DataDamage,
+                                  DataSolutionSource =DataSolutionSource,
+                                  ResultLossSource = NULL)
+
+
+EOSDamage
+
+# Put: y, n and y
+#ReductionDamage(ResultSolutionSource,LossSource=DataDamage,
+#                EffectivenessOfSolution=EOSDamage)
+
+</code></pre>
+
+
+</div>

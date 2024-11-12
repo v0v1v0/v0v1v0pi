@@ -1,0 +1,141 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>KIALS</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Estimating the Pair of Factor Numbers via Eigenvalue Ratios Corresponding to IALS
+</h2>
+
+<h3>Description</h3>
+
+<p>The function is to estimate the pair of factor numbers via eigenvalue ratios corresponding to IALS method. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">KIALS(X, W1 = NULL, W2 = NULL, kmax, max_iter = 100, ep = 1e-06)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+
+<p>Input an array with <code class="reqn">T \times p_1 \times p_2</code>, where <code class="reqn">T</code> is the sample size, <code class="reqn">p_1</code> is the the row dimension of each matrix observation and <code class="reqn">p_2</code> is the the column dimension of each matrix observation.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>W1</code></td>
+<td>
+
+<p>The initial value for the row factor loading matrix. The default is NULL, with an initial estimate chosen from <code class="reqn">\alpha</code>-PCA if not provided.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>W2</code></td>
+<td>
+
+<p>The initial value for the column factor loading matrix. The default is NULL, with an initial estimate chosen from <code class="reqn">\alpha</code>-PCA if not provided.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kmax</code></td>
+<td>
+
+<p>The user-supplied maximum factor numbers. Here it means the upper bound of the number of row factors and column factors.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_iter</code></td>
+<td>
+
+<p>The maximum number of iterations for the algorithm, default is 100. See in <code>IALS</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ep</code></td>
+<td>
+
+<p>The stopping criterion in the iteration algorithm, default is <code class="reqn">10^{-6} \times Tp_1 p_2</code>. See in <code>IALS</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>In detail, we first set <code class="reqn">k_{\max}</code> is a predetermined upper bound for <code class="reqn">k_1,k_2</code> and thus by <code>IALS</code> method, we can obtain the estimate of <code class="reqn">\bold{F}_t</code>, denote as <code class="reqn">\hat{\bold{F}}_t</code>, which is of dimension <code class="reqn">k_{\max}\times k_{\max}</code>. Then the dimensions <code class="reqn">k_1</code> and <code class="reqn">k_2</code> are further determined as follows:
+</p>
+<p style="text-align: center;"><code class="reqn">\hat{k}_{1}=\arg\max_{j \leq k_{\max}}\frac{\lambda_{j}\left(\dfrac{1}{T}\sum_{t=1}^{T}\hat{\bold{F}}_t\hat{\bold{F}}_t^\top\right)}{\lambda_{j+1}\left(\frac{1}{T}\sum_{t=1}^{T}\hat{\bold{F}}_t\hat{\bold{F}}_t^\top\right)},</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\hat{k}_{2}=\arg\max_{j \leq k_{\max}}\frac{\lambda_{j}\left(\dfrac{1}{T}\sum_{t=1}^{T}\hat{\bold{F}}_t^\top\hat{\bold{F}}_t\right)}{\lambda_{j+1}\left(\frac{1}{T}\sum_{t=1}^{T}\hat{\bold{F}}_t^\top\hat{\bold{F}}_t\right)}.</code>
+</p>
+
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code><code class="reqn">k_1</code></code></td>
+<td>
+<p>The estimated row factor number.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code><code class="reqn">k_2</code></code></td>
+<td>
+<p>The estimated column factor number.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Yong He, Ran Zhao, Wen-Xin Zhou.
+</p>
+
+
+<h3>References</h3>
+
+<p>He, Y., Zhao, R., &amp; Zhou, W. X. (2023). Iterative Alternating Least Square Estimation for Large-dimensional Matrix Factor Model. &lt;arXiv:2301.00360&gt;.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(11111)
+T=20;p1=20;p2=20
+k1=3;k2=3
+
+R=matrix(runif(p1*k1,min=-1,max=1),p1,k1)
+C=matrix(runif(p2*k2,min=-1,max=1),p2,k2)
+
+X=E=array(0,c(T,p1,p2))
+F=array(0,c(T,k1,k2))
+
+for(t in 1:T){
+  F[t,,]=matrix(rnorm(k1*k2),k1,k2)
+  E[t,,]=matrix(rnorm(p1*p2),p1,p2)
+}
+
+for(t in 1:T){
+X[t,,]=R%*%F[t,,]%*%t(C)+E[t,,]
+}
+
+kmax=8
+K=KIALS(X, W1 = NULL, W2 = NULL, kmax, max_iter = 100, ep = 1e-06);K
+</code></pre>
+
+
+</div>

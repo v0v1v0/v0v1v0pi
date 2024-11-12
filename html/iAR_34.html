@@ -1,0 +1,139 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>IARloglik</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Maximum Likelihood Estimation of the IAR Model</h2>
+
+<h3>Description</h3>
+
+<p>Maximum Likelihood Estimation of the IAR Model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">IARloglik(y, st, delta = 0, zero.mean = TRUE, standardized = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Array with the time series observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>st</code></td>
+<td>
+<p>Array with the irregular observational times.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta</code></td>
+<td>
+<p>Array with the measurements error standard deviations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zero.mean</code></td>
+<td>
+<p>logical; if TRUE, the array y has zero mean; if FALSE, y has a mean different from zero.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>standardized</code></td>
+<td>
+<p>logical; if TRUE, the array y is standardized; if FALSE, y contains the raw time series.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with the following components:
+</p>
+
+<ul>
+<li>
+<p>phi MLE of the phi parameter of the IAR model.
+</p>
+</li>
+<li>
+<p>ll Value of the negative log likelihood evaluated in phi.
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+<p>Eyheramendy S, Elorrieta F, Palma W (2018).
+“An irregular discrete time series model to identify residuals with autocorrelation in astronomical light curves.”
+<em>Monthly Notices of the Royal Astronomical Society</em>, <b>481</b>(4), 4311–4322.
+ISSN 0035-8711, doi: <a href="https://doi.org/10.1093/mnras/sty2487">10.1093/mnras/sty2487</a>, <a href="https://academic.oup.com/mnras/article-pdf/481/4/4311/25906473/sty2487.pdf">https://academic.oup.com/mnras/article-pdf/481/4/4311/25906473/sty2487.pdf</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>gentime</code>, <code>IARsample</code>, <code>arima</code>, <code>IARphiloglik</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#Generating IAR sample
+set.seed(6714)
+st&lt;-gentime(n=100)
+y&lt;-IARsample(phi=0.99,st=st,n=100)
+y&lt;-y$series
+#Compute Phi
+phi=IARloglik(y=y,st=st)$phi
+print(phi)
+#Compute the standard deviation of innovations
+n=length(y)
+d=c(0,diff(st))
+phi1=phi**d
+yhat=phi1*as.vector(c(0,y[1:(n-1)]))
+plot(st,y,type='l')
+lines(st,yhat,col='red')
+sigma=var(y)
+nu=c(sigma,sigma*(1-phi1**(2))[-1])
+tau&lt;-nu/sigma
+sigmahat&lt;-mean(c((y-yhat)**2/tau))
+nuhat&lt;-sigmahat*(1-phi1**(2))
+nuhat2&lt;-sqrt(nuhat)
+#Equally spaced models
+require(arfima)
+fit2&lt;-arfima(y,order=c(1,0,0))
+fit&lt;-arima(y,order=c(1,0,0),include.mean=FALSE)
+syarf&lt;-tacvfARFIMA(phi=fit2$modes[[1]]$phi,dfrac=fit2$modes[[1]]$dfrac,
+sigma2=fit2$modes[[1]]$sigma,maxlag=20)[1]
+syar&lt;-fit$sigma/(1-fit$coef[1]**2)
+print(sigmahat)
+print(syar)
+print(syarf)
+carf&lt;-fit2$modes[[1]]$sigma/syarf
+car&lt;-(1-fit$coef[1]**2)
+ciar&lt;-(1-phi1**(2))
+#Compute the standard deviation of innovations (regular case)
+sigma=var(y)
+nuhat3=sqrt(sigma*ciar)
+searf&lt;-sqrt(sigma*carf)
+sear&lt;-sqrt(sigma*car)
+#Plot the standard deviation of innovations
+plot(st[-1], nuhat3[-1], t="n", axes=FALSE,xlab='Time',ylab='Standard Deviation of Innovations')
+axis(1)
+axis(2)
+segments(x0=st[-1], y0=nuhat3[-1], y1=0, col=8)
+points(st, nuhat3, pch=20, col=1, bg=1)
+abline(h=sd(y),col='red',lwd=2)
+abline(h=sear,col='blue',lwd=2)
+abline(h=searf,col='green',lwd=2)
+abline(h=mean(nuhat3[-1]),col='black',lwd=2)
+</code></pre>
+
+
+</div>

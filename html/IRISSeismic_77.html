@@ -1,0 +1,146 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>McNamaraPSD</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Power Spectral Density</h2>
+
+<h3>Description</h3>
+
+<p>The McNamaraPSD() function implements the spectral density algorithm specified in
+the "Data Preparation and Processing" section of
+<a href="http://pubs.usgs.gov/of/2005/1438/pdf/OFR-1438.pdf">Seismic Noise Analysis System Using Power Spectral Density Probability Density Functions</a>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">McNamaraPSD(tr, loFreq=.005, hiFreq=10, alignFreq=0.1, binned=TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>tr</code></td>
+<td>
+<p>a <code>Trace</code> object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loFreq</code></td>
+<td>
+<p>optional lo end of frequency binning range</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hiFreq</code></td>
+<td>
+<p>optional hi end of frequency binning range</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alignFreq</code></td>
+<td>
+<p>optional alignment frequency for determining frequency bins</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>binned</code></td>
+<td>
+<p>logical determining whether the return spectrum is binned</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This PSD algorithm is designed to be used on one to three hour segments of seismic data and will return a <code>PSD</code> object
+containing the (potentially binned) spectrum for that segment. See the <code>psdList</code> function for
+automatic segmenting of longer <code>Stream</code> objects.
+</p>
+<p>The McNamara PSD algorithm is similar to MATLAB's pwelch() function and has the following steps:
+</p>
+
+<ol>
+<li>
+<p>Calculate averaged spectrum
+</p>
+
+<pre>
+# Truncate incoming segment of trace data to nearest power of 2 samples.
+# Divide each truncated segment into 13 chunks with 75% overlap. The first
+# chunk begins at 0/16 and ends at 4/16.  The 13'th chunk begins at 12/16
+# and ends at 16/16.  The chunks overlap like this:
+#   
+#   1---5---9---3---
+#    2---6---0---
+#     3---7---1---
+#      4---8---2---
+# 
+# Deman, detrend and taper the chunk.
+# Calculate the 'one-sided' spectrum for the chunk.
+#
+# Average together all 13 spectra to get an averaged spectrum.
+</pre>
+</li>
+<li>
+<p>Create smoothed version of spectrum with binning
+</p>
+<p>When <code>binned=TRUE</code>, McNamara style binning is 
+turned on and a smoothed spectrum is returned that contains many fewer points than the full spectrum.
+When these arguments are not specified, binning is automatically turned off and the full spectrum is returned.
+</p>
+<p>Frequencies for binning are generated at 1/8 octave intervals aligned to <code>alignFreq</code>.
+The power (dB) associated with each frequency bin is calculated by averaging over an entire octave
+centered on that frequency.
+</p>
+<p><b>Note:</b> The spectra returned by McNamaraPSD() have not had instrument correction applied.
+Use <code>getEvalresp</code> to get instrument correction values for specific frequencies.
+</p>
+</li>
+<li>
+<p>convert binned spectra to decibels
+</p>
+</li>
+</ol>
+<h3>Value</h3>
+
+<p>An <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> <code>list</code> object with the following named elements:
+</p>
+<pre>
+freq, spec, snclq, starttime, endtime
+</pre>
+<p>Elements <code>freq</code> and <code>spec</code> are numeric vectors while <code>snclq</code>, <code>starttime</code>
+and <code>endtime</code> are single values.
+</p>
+
+
+<h3>Note</h3>
+
+<p>During the binning process, an arithmetic mean is used to average together power levels in decibels.
+This is equivalent to averaging of power levels before conversion to dB using a geometric mean.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="http://pubs.usgs.gov/of/2005/1438/pdf/OFR-1438.pdf">Seismic Noise Analysis System Using Power Spectral Density Probability Density Functions</a> (McNamara and Boaz 2005)
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>McNamaraBins</code>,
+<code>psdList</code>
+</p>
+
+
+</div>

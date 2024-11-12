@@ -1,0 +1,253 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>isat.ivreg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Indicator saturation modeling on an ivreg object</h2>
+
+<h3>Description</h3>
+
+<p><code>isat.ivreg</code> conducts indicator saturation model selection on an ivreg
+object returned by <code>ivreg::ivreg()</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'ivreg'
+isat(
+  y,
+  iis = TRUE,
+  sis = FALSE,
+  tis = FALSE,
+  uis = FALSE,
+  blocks = NULL,
+  ratio.threshold = 0.8,
+  max.block.size = 30,
+  t.pval = 1/NROW(data),
+  wald.pval = t.pval,
+  do.pet = FALSE,
+  ar.LjungB = NULL,
+  arch.LjungB = NULL,
+  normality.JarqueB = NULL,
+  info.method = c("sc", "aic", "hq"),
+  include.1cut = FALSE,
+  include.empty = FALSE,
+  max.paths = NULL,
+  parallel.options = NULL,
+  turbo = FALSE,
+  tol = 1e-07,
+  max.regs = NULL,
+  print.searchinfo = TRUE,
+  plot = NULL,
+  alarm = FALSE,
+  overid = NULL,
+  weak = NULL,
+  fast = FALSE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>An object of class <code>"ivreg"</code>, as returned by
+<code>ivreg::ivreg()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iis</code></td>
+<td>
+<p>logical. If <code>TRUE</code>, impulse indicator saturation is performed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sis</code></td>
+<td>
+<p>logical. If <code>TRUE</code>, step indicator saturation is performed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tis</code></td>
+<td>
+<p>logical. If <code>TRUE</code>, trend indicator saturation is performed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>uis</code></td>
+<td>
+<p>a matrix of regressors, or a list of matrices. If a list, the
+matrices must have named columns that should not overlap with column names
+of any other matrices in the list.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>blocks</code></td>
+<td>
+<p><code>NULL</code> (default), an integer (the number of blocks) or a user-specified <code>list</code> that indicates how blocks should be put together. If <code>NULL</code>, then the number of blocks is determined automatically</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ratio.threshold</code></td>
+<td>
+<p>Minimum ratio of variables in each block to total observations to determine the block size, default=0.8. Only relevant if blocks = <code>NULL</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.block.size</code></td>
+<td>
+<p>Maximum size of block of variables to be selected over, default=30. Block size used is the maximum of given by either the ratio.threshold and max.block.size </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t.pval</code></td>
+<td>
+<p>numeric value between 0 and 1. The significance level used for the two-sided regressor significance t-tests</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wald.pval</code></td>
+<td>
+<p>numeric value between 0 and 1. The significance level used for the Parsimonious Encompassing Tests (PETs)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>do.pet</code></td>
+<td>
+<p>logical. If <code>TRUE</code>, then a Parsimonious Encompassing Test (PET) against the GUM is undertaken at each regressor removal for the joint significance of all the deleted regressors along the current path. If FALSE (default), then a PET is not undertaken at each regressor removal. By default, the numeric value is the same as that of <code>t.pval</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ar.LjungB</code></td>
+<td>
+<p>a two-item list with names <code>lag</code> and <code>pval</code>, or NULL (default). In the former case <code>lag</code> contains the order of the Ljung and Box (1979) test for serial correlation in the standardised residuals, and <code>pval</code> contains the significance level. If <code>lag=NULL</code> (default), then the order used is that of the estimated 'arx' object. If <code>ar.Ljungb=NULL</code>, then the standardised residuals are not checked for serial correlation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>arch.LjungB</code></td>
+<td>
+<p>a two-item list with names <code>lag</code> and <code>pval</code>, or NULL (default). In the former case, <code>lag</code> contains the order of the Ljung and Box (1979) test for serial correlation in the squared standardised residuals, and <code>pval</code> contains the significance level. If <code>lag=NULL</code> (default), then the order used is that of the estimated 'arx' object. If <code>arch.Ljungb=NULL</code>, then the standardised residuals are not checked for ARCH</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>normality.JarqueB</code></td>
+<td>
+<p><code>NULL</code> (the default) or a value between 0 and 1. In the latter case, a test for non-normality is conducted using a significance level equal to <code>normality.JarqueB</code>. If <code>NULL</code>, then no test for non-normality is conducted</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>info.method</code></td>
+<td>
+<p>character string, "sc" (default), "aic" or "hq", which determines the information criterion to be used when selecting among terminal models. The abbreviations are short for the Schwarz or Bayesian information criterion (sc), the Akaike information criterion (aic) and the Hannan-Quinn (hq) information criterion</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include.1cut</code></td>
+<td>
+<p>logical. If <code>TRUE</code>, then the 1-cut model is included among the terminal models, if it passes the diagnostic tests, even if it is not equal to one of the terminals. If FALSE (default), then the 1-cut model is not included (unless it is one of the terminals)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include.empty</code></td>
+<td>
+<p>logical. If <code>TRUE</code>, then an empty model is included among the terminal models, if it passes the diagnostic tests, even if it is not equal to one of the terminals. If FALSE (default), then the empty model is not included (unless it is one of the terminals)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.paths</code></td>
+<td>
+<p><code>NULL</code> (default) or an integer indicating the maximum number of paths to search</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel.options</code></td>
+<td>
+<p><code>NULL</code> or an integer, i.e. the number of cores/threads to be used for parallel computing (implemented w/<code>makeCluster</code> and <code>parLapply</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>turbo</code></td>
+<td>
+<p>logical. If <code>TRUE</code>, then (parts of) paths are not searched twice (or more) unnecessarily, thus yielding a significant potential for speed-gain. However, the checking of whether the search has arrived at a point it has already been comes with a slight computational overhead. Accordingly, if <code>turbo=TRUE</code>, then the total search time might in fact be higher than if <code>turbo=FALSE</code>. This happens if estimation is very fast, say, less than quarter of a second. Hence the default is <code>FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>numeric value (default = 1e-07). The tolerance for detecting linear dependencies in the columns of the regressors (see <code>qr</code> function). Only used if LAPACK is FALSE (default)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.regs</code></td>
+<td>
+<p>integer. The maximum number of regressions along a deletion path. It is not recommended that this is altered</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print.searchinfo</code></td>
+<td>
+<p>logical. If <code>TRUE</code> (default), then a print is returned whenever simiplification along a new path is started, and whenever regressors are dropped due to exact multicolinearity</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>NULL or logical. If <code>TRUE</code>, then the fitted values and the residuals of the final model are plotted after model selection. If NULL (default), then the value set by <code>options</code> determines whether a plot is produced or not.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alarm</code></td>
+<td>
+<p>logical. If <code>TRUE</code>, then a sound is emitted (in order to alert the user) when the model selection ends</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overid</code></td>
+<td>
+<p><code>NULL</code> if no Sargan test of overidentifying restrictions
+should be used as a diagnostic check for model selection or a numeric value
+between 0 and 1. In the latter case, the test is conducted using this value
+as the significance level.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weak</code></td>
+<td>
+<p><code>NULL</code> if no weak instrument F-test on the first stage
+should be used as a diagnostic check for model selection or a numeric value
+between 0 and 1. In the latter case, the test is conducted using this value
+as the significance level.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fast</code></td>
+<td>
+<p>A logical value indicating whether to speed up the 2SLS
+estimation but providing less details. Requires <code>overid == NULL</code> and
+<code>weak == NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments passed to or from other methods.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a list of class <code>"ivisat"</code> with two named elements.
+<code>$selection</code> stores the selection results from
+<code>isat</code> (including paths, terminal models, and best
+specification). <code>$final</code> stores the <code>ivreg</code> model
+object of the best specification or <code>NULL</code> if the GUM does not pass
+all diagnostics.
+</p>
+
+
+</div>

@@ -1,0 +1,123 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>isnilmm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Function for ISNI computation when the outcome follows LMM.</h2>
+
+<h3>Description</h3>
+
+<p>Calculate the ISNI when the regression outcome is subject to missingness and follows linear mixed-effects models (LMMs)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">isnilmm(formula, data, random, id, weights, subset, predprobobs,
+  misni = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>an object of class "Formula": a symbolic description of the models to be fitted for the outcome and missingness status variable.
+The details of model specification are given under "Details".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>the name of data frame containing all the variables in the model and all the observations including those intended to be collected 
+but became missing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random</code></td>
+<td>
+<p>an object of class "formula": an one-sided linear formula description of the random-effects part of the model to be fitted 
+for the outcome</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>the name of the level-2 clustering variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>frequency weights to be assigned to each <code>id</code>. when supplied, indicates differential weights are used; otherwise each <code>id</code> is weighted equally.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+<p>an optional vector specifying a subset of observations to be used in the fitting process for the outcome model and the missingness mechanism model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predprobobs</code></td>
+<td>
+<p>Null if using buil-in multinomial transitional logistic model to obtain predicted probabilities of being observed;
+otherwise user supply the name of the variable in <code>data</code> that gives these probabilities for all the observations in the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>misni</code></td>
+<td>
+<p>FALSE if using the default approach to computing ISNI with a scalar nonignorability parameter; 
+TRUE when computing ISNI with multiple nonignorability parameters.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The ISNI analysis is based on a joint selection model and requires specifying two model equations: the complete-data model and the missing data mechanism model.
+To specify the variables in the models that are required for computing the ISNI measures, we make use of the  <code>R</code> package "Formula"  designed for handling model
+equations with multiple responses    and multiple sets of predictors . At a minimum, the user should supply a single-equation 
+in the typical form:  <code>response</code> ~ <code>Xterms</code> where <code>response</code> is the (numeric or factor) vector for the outcome of interest and <code>Xterms</code> 
+is a series of terms, separated by + operators, which specify a linear predictor for response. With the signle-equation specification, the <code>isniglm</code> function 
+will by default use the utility function <code>definemissingstatus</code> provided in the package to generate the 
+missingness status variables at the current and prior visits and then use <code>Xterms</code> as the observed missingness predictors for fitting a first-order transitional missing data model. 
+It is important to sort within-<code>id</code> observations  by time so that the missingness status variables can be defined correctly in this default setting.  The <code>isnimgm</code> then computes the MAR estimates and conducts ISNI computation
+to evaluate the rate of change of model estimates in the neighborhood of the MAR model where the missingness probability is allowed to depend on the unobserved value 
+of <code>response</code>,   even after  conditioning on the other  missingness predictors. 
+</p>
+<p>The above single-equation formula specification uses the same set of predictors for the outcome model and the missingness mechanism model for computing ISNI. 
+To use different sets of predictors, one can explicitly specifiy a two-equation formula as: <code>response</code> | <code>miss + missprior</code> ~ <code>Xterms</code> |  <code>Sterms</code>,
+which specifies the formula  for the complete-data model as <code>response</code> ~ <code>Xterms</code> and that for the missing data mechanism model as <code>miss + missprior</code> ~ <code>Sterms</code>, 
+where <code>Xterms</code> and the observed predictors for missingness <code>Sterms</code> can be different, <code>miss</code> and <code>missprior</code> are the variable names in <code>data</code> denoting the missingness status at the 
+current and prior visits, respectively.  
+</p>
+<p>For <code>isnilmm</code>, <code>response</code> ~ <code>Xterms</code> specfied the fixed-effect part of the linear mixed-effects model for the outcome. The random-effect part of the model is
+specified as a one-sided formula via the argument <code>random</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Hui Xie and Yi Qian (2012) Measuring the impact of nonignorability in panel data with non-monotone nonresponse., Journal of Applied Econometrics 27: 129-159. <br>
+Hui Xie, Gao,W, Xing, B., Heitjan, D, Hedeker, D and Yuan, C. (2018) Measuring the Impact of Nonignorable Missingness Using the R packaeg isni, Computer Methods and Programs in Biomedicine 164 207-220.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(qolef)
+ymodel= y | g+ gp~   as.factor(time)*group+perf+sever
+
+##Random intercept model
+result=isnilmm(ymodel, random=~1, id=id,  data=qolef)
+summary(result)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,131 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>autoplot.riskfactor</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Automatically create a ggplot for objects obtained from rating_factors()</h2>
+
+<h3>Description</h3>
+
+<p>Takes an object produced by <code>rating_factors()</code>, and plots the
+available input.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'riskfactor'
+autoplot(
+  object,
+  risk_factors = NULL,
+  ncol = 1,
+  labels = TRUE,
+  dec.mark = ",",
+  ylab = "rate",
+  fill = NULL,
+  color = NULL,
+  linetype = FALSE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>riskfactor object produced by <code>rating_factors()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>risk_factors</code></td>
+<td>
+<p>character vector to define which factors are included.
+Defaults to all risk factors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncol</code></td>
+<td>
+<p>number of columns in output (default is 1)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>labels</code></td>
+<td>
+<p>show labels with the exposure (default is TRUE)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dec.mark</code></td>
+<td>
+<p>control the format of the decimal point, as well as the mark
+between intervals before the decimal point, choose either "," (default) or
+"."</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>modify label for the y-axis</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fill</code></td>
+<td>
+<p>color to fill histogram</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>color</code></td>
+<td>
+<p>color to plot line colors of histogram (default is "skyblue")</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>linetype</code></td>
+<td>
+<p>use different linetypes (default is FALSE)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other plotting parameters to affect the plot</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a ggplot2 object
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Martin Haringa
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(dplyr)
+df &lt;- MTPL2 |&gt;
+  mutate(across(c(area), as.factor)) |&gt;
+  mutate(across(c(area), ~biggest_reference(., exposure)))
+
+mod1 &lt;- glm(nclaims ~ area + premium, offset = log(exposure),
+ family = poisson(), data = df)
+mod2 &lt;- glm(nclaims ~ area, offset = log(exposure), family = poisson(),
+ data = df)
+
+x &lt;- rating_factors(mod1, mod2, model_data = df, exposure = exposure)
+autoplot(x)
+
+</code></pre>
+
+
+</div>

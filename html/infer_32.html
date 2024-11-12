@@ -1,0 +1,177 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>shade_confidence_interval</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Add information about confidence interval</h2>
+
+<h3>Description</h3>
+
+<p><code>shade_confidence_interval()</code> plots a confidence interval region on top of
+<code>visualize()</code> output. The output is a ggplot2 layer that can be added with
+<code>+</code>. The function has a shorter alias, <code>shade_ci()</code>.
+</p>
+<p>Learn more in <code>vignette("infer")</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">shade_confidence_interval(
+  endpoints,
+  color = "mediumaquamarine",
+  fill = "turquoise",
+  ...
+)
+
+shade_ci(endpoints, color = "mediumaquamarine", fill = "turquoise", ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>endpoints</code></td>
+<td>
+<p>The lower and upper bounds of the interval to be plotted.
+Likely, this will be the output of <code>get_confidence_interval()</code>.
+For <code>calculate()</code>-based workflows, this will be a 2-element vector
+or a <code style="white-space: pre;">⁠1 x 2⁠</code> data frame containing the lower and upper values to be plotted.
+For <code>fit()</code>-based workflows, a <code style="white-space: pre;">⁠(p + 1) x 3⁠</code> data frame
+with columns <code>term</code>, <code>lower_ci</code>, and <code>upper_ci</code>, giving the upper and
+lower bounds for each regression term. For use in visualizations of
+<code>assume()</code> output, this must be the output of <code>get_confidence_interval()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>color</code></td>
+<td>
+<p>A character or hex string specifying the color of the
+end points as a vertical lines on the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fill</code></td>
+<td>
+<p>A character or hex string specifying the color to shade the
+confidence interval. If <code>NULL</code> then no shading is actually done.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments passed along to ggplot2 functions.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>If added to an existing infer visualization, a ggplot2
+object displaying the supplied intervals on top of its corresponding
+distribution. Otherwise, an <code>infer_layer</code> list.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other visualization functions: 
+<code>shade_p_value()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># find the point estimate---mean number of hours worked per week
+point_estimate &lt;- gss %&gt;%
+  specify(response = hours) %&gt;%
+  calculate(stat = "mean")
+
+# ...and a bootstrap distribution
+boot_dist &lt;- gss %&gt;%
+  # ...we're interested in the number of hours worked per week
+  specify(response = hours) %&gt;%
+  # generating data points
+  generate(reps = 1000, type = "bootstrap") %&gt;%
+  # finding the distribution from the generated data
+  calculate(stat = "mean")
+
+# find a confidence interval around the point estimate
+ci &lt;- boot_dist %&gt;%
+  get_confidence_interval(point_estimate = point_estimate,
+                          # at the 95% confidence level
+                          level = .95,
+                          # using the standard error method
+                          type = "se")
+
+
+# and plot it!
+boot_dist %&gt;%
+  visualize() +
+  shade_confidence_interval(ci)
+
+# or just plot the bounds
+boot_dist %&gt;%
+  visualize() +
+  shade_confidence_interval(ci, fill = NULL)
+
+# you can shade confidence intervals on top of
+# theoretical distributions, too---the theoretical
+# distribution will be recentered and rescaled to
+# align with the confidence interval
+sampling_dist &lt;- gss %&gt;%
+  specify(response = hours) %&gt;%
+  assume(distribution = "t")
+
+visualize(sampling_dist) +
+  shade_confidence_interval(ci)
+
+
+# to visualize distributions of coefficients for multiple
+# explanatory variables, use a `fit()`-based workflow
+
+# fit 1000 linear models with the `hours` variable permuted
+null_fits &lt;- gss %&gt;%
+ specify(hours ~ age + college) %&gt;%
+ hypothesize(null = "independence") %&gt;%
+ generate(reps = 1000, type = "permute") %&gt;%
+ fit()
+
+null_fits
+
+# fit a linear model to the observed data
+obs_fit &lt;- gss %&gt;%
+  specify(hours ~ age + college) %&gt;%
+  fit()
+
+obs_fit
+
+# get confidence intervals for each term
+conf_ints &lt;-
+  get_confidence_interval(
+    null_fits,
+    point_estimate = obs_fit,
+    level = .95
+  )
+
+# visualize distributions of coefficients
+# generated under the null
+visualize(null_fits)
+
+# add a confidence interval shading layer to juxtapose
+# the null fits with the observed fit for each term
+visualize(null_fits) +
+  shade_confidence_interval(conf_ints)
+
+
+# more in-depth explanation of how to use the infer package
+## Not run: 
+vignette("infer")
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

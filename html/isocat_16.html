@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>makeQuantileSimulationSurface</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create quantile-simulation surfaces</h2>
+
+<h3>Description</h3>
+
+<p>Converts normalized probability surfaces (e.g. one layer output of
+isotopeAssignmentModel function) to quantile surfaces.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">makeQuantileSimulationSurface(
+  probabilitySurface,
+  ValidationQuantiles,
+  rename = FALSE,
+  rescale = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>probabilitySurface</code></td>
+<td>
+<p>Normalized probability surface RasterLayer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ValidationQuantiles</code></td>
+<td>
+<p>Vector of quantile values from known-origin individuals, against which to compare each value within the probability surface. Each value must be between 0 and 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rename</code></td>
+<td>
+<p>Character value to append to raster name (e.g. "_quantileSimulation"). Defaults to FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rescale</code></td>
+<td>
+<p>If rescale = TRUE, returns surface showing proportion of times each surface cell value fell within the validation quantiles distribution. If rescale = FALSE, returns discrete number of times the cell fell within the distribution.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns RasterLayer rescaled to quantile values.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Generate example probability surfaces.
+library(isocat)
+myiso &lt;- raster::rasterFromXYZ(isoscape)
+myiso_sd &lt;- raster::rasterFromXYZ(isoscape_sd)
+df &lt;- data.frame(
+         ID = c(-100, -80, -50),
+         isotopeValue = c(-100, -80, -50),
+         SD_indv = rep(5, 3)
+         )
+assignmentModels &lt;- isotopeAssignmentModel(
+         ID = df$ID,
+         isotopeValue = df$isotopeValue,
+         SD_indv = df$SD_indv,
+         precip_raster = myiso,
+         precip_SD_raster = myiso_sd
+         )
+
+# Example known-origin quantile data.
+q &lt;- rweibull(20000, 6, .98)
+q &lt;- sample( q[ q &gt;=0 &amp; q &lt;= 1 ], 10000, replace = TRUE)
+hist(q)
+
+# Convert to quantile surfaces.
+quantileSimulation_surface &lt;-  raster::stack(
+                  lapply(
+                            unstack(assignmentModels),
+                            makeQuantileSimulationSurface,
+                            ValidationQuantiles = q)
+                        )
+plot(quantileSimulation_surface)
+
+</code></pre>
+
+
+</div>

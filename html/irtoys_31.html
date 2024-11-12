@@ -1,0 +1,162 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sca</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Linear transformation of the IRT scale</h2>
+
+<h3>Description</h3>
+
+<p>Linearly transform a set of IRT parameters to bring them to the scale of
+another set of parameters. Four methods are implemented: Mean/Mean,
+Mean/Sigma, Lord-Stocking, and Haebara.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sca(
+  old.ip,
+  new.ip,
+  old.items,
+  new.items,
+  old.qu = NULL,
+  new.qu = NULL,
+  method = "MS",
+  bec = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>old.ip</code></td>
+<td>
+<p>A set of parameters that are already on the desired scale</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>new.ip</code></td>
+<td>
+<p>A set of parameters that must be placed on the same scale as
+<code>old.ip</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>old.items</code></td>
+<td>
+<p>A vector of indexes pointing to those items in
+<code>old.ip</code> that are common to both sets of parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>new.items</code></td>
+<td>
+<p>The indexes of the same items in <code>new.ip</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>old.qu</code></td>
+<td>
+<p>A quadrature object for <code>old.ip</code>, typically produced by
+the same program that estimated <code>old.ip</code>. Only needed if
+<code>method="LS"</code> or <code>method="HB"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>new.qu</code></td>
+<td>
+<p>A quadrature object for <code>new.ip</code>, typically produced by
+the same program that estimated <code>new.ip</code>. Only needed if
+<code>method="HB"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>One of "MM" (Mean/Mean), "MS" (Mean/Sigma), "SL"
+(Stocking-Lord), or "HB" (Haebara). Default is "MS"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bec</code></td>
+<td>
+<p>Use back-equating correction? When TRUE, the Stocking-Lord or
+Hebaera procedures will be adjusted for back-equating (see Hebaera, 1980).
+Ignored when method is MM or MS. Default is FALSE.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list of: </p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>slope</code></td>
+<td>
+<p>The slope of the linear transformation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intercept</code></td>
+<td>
+<p>The intercept of the linear transformation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scaled.ip</code></td>
+<td>
+<p>The parameters in <code>new.ip</code> tranformed to a scale that
+is compatible with <code>old.ip</code></p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Ivailo Partchev and Tamaki Hattori
+</p>
+
+
+<h3>References</h3>
+
+<p>Kolen, M.J. &amp; R.L. Brennan (1995) Test Equating: Methods and
+Practices. Springer.
+</p>
+<p>Haebara, T. (1980) Equating logistic ability scales by
+a weighted lest squares method. Japanese Psychological Research, 22,
+p.144–149
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Not run: 
+# a small simulation to demonstrate transformation to a common scale
+# fake 50 2PL items
+pa &lt;- cbind(runif(50,.8,2), runif(50,-2.4,2.4), rep(0,50))
+# simulate responses with  two samples of different ability levels
+r.1 &lt;- sim(ip=pa[1:30,],  x=rnorm(1000,-.5))
+r.2 &lt;- sim(ip=pa[21:50,], x=rnorm(1000,.5))
+# estimate item parameters
+p.1 &lt;- est(r.1, engine="ltm")
+p.2 &lt;- est(r.2, engine="ltm")
+# plot difficulties to show difference in scale
+plot(c(-3,3), c(-3,3), ty="n", xlab="True",ylab="Estimated",
+   main="Achieving common scale")
+text(pa[1:30,2],  p.1$est[,2], 1:30)
+text(pa[21:50,2], p.2$est[,2], 21:50, co=2)
+# scale with the default Mean/Sigma method
+pa.sc = sca(old.ip=p.1$est, new.ip=p.2$est, old.items=21:30, new.items=1:10)
+# add difficulties of scaled items to plot
+text(pa[21:50,2], pa.sc$scaled.ip[,2], 21:50, co=3)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

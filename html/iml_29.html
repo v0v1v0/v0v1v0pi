@@ -1,0 +1,259 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Shapley</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Prediction explanations with game theory</h2>
+
+<h3>Description</h3>
+
+<p><code>Shapley</code> computes feature contributions for single predictions with the
+Shapley value, an approach from cooperative game theory. The features values
+of an instance cooperate to achieve the prediction. The Shapley value fairly
+distributes the difference of the instance's prediction and the datasets
+average prediction among the features.
+</p>
+
+
+<h3>Details</h3>
+
+<p>For more details on the algorithm see
+<a href="https://christophm.github.io/interpretable-ml-book/shapley.html">https://christophm.github.io/interpretable-ml-book/shapley.html</a>
+</p>
+
+
+<h3>Super class</h3>
+
+<p><code>iml::InterpretationMethod</code> -&gt; <code>Shapley</code>
+</p>
+
+
+<h3>Public fields</h3>
+
+<div class="r6-fields">
+
+<dl>
+<dt><code>x.interest</code></dt>
+<dd>
+<p>data.frame<br>
+Single row with the instance to be explained.</p>
+</dd>
+<dt><code>y.hat.interest</code></dt>
+<dd>
+<p>numeric<br>
+Predicted value for instance of interest.</p>
+</dd>
+<dt><code>y.hat.average</code></dt>
+<dd>
+<p><code>numeric(1)</code><br>
+Average predicted value for data <code>X</code>.</p>
+</dd>
+<dt><code>sample.size</code></dt>
+<dd>
+<p><code>numeric(1)</code><br>
+The number of times coalitions/marginals are
+sampled from data X. The higher the more accurate the explanations
+become.</p>
+</dd>
+</dl>
+</div>
+
+
+<h3>Methods</h3>
+
+
+
+<h4>Public methods</h4>
+
+
+<ul>
+<li> <p><a href="#method-Shapley-new"><code>Shapley$new()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-Shapley-explain"><code>Shapley$explain()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-Shapley-clone"><code>Shapley$clone()</code></a>
+</p>
+</li>
+</ul>
+<details open><summary>Inherited methods</summary><ul>
+<li><span class="pkg-link" data-pkg="iml" data-topic="InterpretationMethod" data-id="plot"><a href="../../iml/html/InterpretationMethod.html#method-InterpretationMethod-plot"><code>iml::InterpretationMethod$plot()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="iml" data-topic="InterpretationMethod" data-id="print"><a href="../../iml/html/InterpretationMethod.html#method-InterpretationMethod-print"><code>iml::InterpretationMethod$print()</code></a></span></li>
+</ul></details><hr>
+<a id="method-Shapley-new"></a>
+
+
+
+<h4>Method <code>new()</code>
+</h4>
+
+<p>Create a Shapley object
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>Shapley$new(predictor, x.interest = NULL, sample.size = 100)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>predictor</code></dt>
+<dd>
+<p>Predictor<br>
+The object (created with <code>Predictor$new()</code>) holding the machine
+learning model and the data.</p>
+</dd>
+<dt><code>x.interest</code></dt>
+<dd>
+<p>data.frame<br>
+Single row with the instance to be explained.</p>
+</dd>
+<dt><code>sample.size</code></dt>
+<dd>
+<p><code>numeric(1)</code><br>
+The number of Monte Carlo samples for estimating the Shapley value.</p>
+</dd>
+</dl>
+</div>
+
+
+
+<h5>Returns</h5>
+
+<p>data.frame<br>
+data.frame with the Shapley values (phi) per feature.
+</p>
+
+
+<hr>
+<a id="method-Shapley-explain"></a>
+
+
+
+<h4>Method <code>explain()</code>
+</h4>
+
+<p>Set a new data point which to explain.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>Shapley$explain(x.interest)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>x.interest</code></dt>
+<dd>
+<p>data.frame<br>
+Single row with the instance to be explained.</p>
+</dd>
+</dl>
+</div>
+
+
+<hr>
+<a id="method-Shapley-clone"></a>
+
+
+
+<h4>Method <code>clone()</code>
+</h4>
+
+<p>The objects of this class are cloneable with this method.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>Shapley$clone(deep = FALSE)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>deep</code></dt>
+<dd>
+<p>Whether to make a deep clone.</p>
+</dd>
+</dl>
+</div>
+
+
+
+
+<h3>References</h3>
+
+<p>Strumbelj, E., Kononenko, I. (2014). Explaining prediction models and
+individual predictions with feature contributions. Knowledge and Information
+Systems, 41(3), 647-665. https://doi.org/10.1007/s10115-013-0679-x
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Shapley
+</p>
+<p>A different way to explain predictions: LocalModel
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library("rpart")
+# First we fit a machine learning model on the Boston housing data
+data("Boston", package = "MASS")
+rf &lt;- rpart(medv ~ ., data = Boston)
+X &lt;- Boston[-which(names(Boston) == "medv")]
+mod &lt;- Predictor$new(rf, data = X)
+
+# Then we explain the first instance of the dataset with the Shapley method:
+x.interest &lt;- X[1, ]
+shapley &lt;- Shapley$new(mod, x.interest = x.interest)
+shapley
+
+# Look at the results in a table
+shapley$results
+# Or as a plot
+plot(shapley)
+
+# Explain another instance
+shapley$explain(X[2, ])
+plot(shapley)
+## Not run: 
+# Shapley() also works with multiclass classification
+rf &lt;- rpart(Species ~ ., data = iris)
+X &lt;- iris[-which(names(iris) == "Species")]
+mod &lt;- Predictor$new(rf, data = X, type = "prob")
+
+# Then we explain the first instance of the dataset with the Shapley() method:
+shapley &lt;- Shapley$new(mod, x.interest = X[1, ])
+shapley$results
+plot(shapley)
+
+# You can also focus on one class
+mod &lt;- Predictor$new(rf, data = X, type = "prob", class = "setosa")
+shapley &lt;- Shapley$new(mod, x.interest = X[1, ])
+shapley$results
+plot(shapley)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,110 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>InfiniumClust</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Tumor sample clustering from Infinium 450k array data  
+</h2>
+
+<h3>Description</h3>
+
+<p>Clustering of tumor samples into subtypes accounting for tumor purity. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">InfiniumClust(tumor.data, purity, K, maxiter = 100, tol = 0.001)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>tumor.data</code></td>
+<td>
+<p>numeric matrix of beta values for tumor samlpes. The rownames of tumor.data
+should be probe names of Infinium 450k array, and colnames should be names of tumor samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>purity</code></td>
+<td>
+<p>purities for tumor samples. Could be estimated by <code>getPurity</code>, or user specified 
+purities from other tools.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>the number of clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+<p>the maximum number of iterations allowed. Default is 100.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>tolerance for convergence of EM iterations. Default is 0.001.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>An EM based statistical method for subtype classification based on DNA methylation data, while adjusting for tumor purity. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>InfiniumClust returns a list consisting oflikelihood <code>tol.ll</code> and membership matrix <code>Z</code>.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>tol.ll</code></td>
+<td>
+<p>total log-likelihood of converged EM algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Z</code></td>
+<td>
+<p>the membership matrix, where row corresponds to tumor samples and column corresponds to K clusters.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Xiaoqi Zheng <a href="mailto:xqzheng@shnu.edu.cn">xqzheng@shnu.edu.cn</a> and Hao Wu <a href="mailto:hao.wu@emory.edu">hao.wu@emory.edu</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>W. Zhang, H. Feng, H. Wu and X. Zheng (2016). Tumor purity improves cancer subtype classification from DNA methylation data. Submitted. 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## load example data
+data(beta.emp)
+normal.data &lt;- beta.emp[,1:21]
+tumor.data &lt;- beta.emp[,22:31]
+
+## estimate tumor purity
+purity &lt;- getPurity(tumor.data = tumor.data,tumor.type= "LUAD")
+
+## cluster tumor samples accounting for tumor purity
+out &lt;- InfiniumClust(tumor.data,purity,K=3, maxiter=5, tol=0.001)
+</code></pre>
+
+
+</div>

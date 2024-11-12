@@ -1,0 +1,206 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ispls</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Integrative sparse partial least squares</h2>
+
+<h3>Description</h3>
+
+<p>This function provides a penalty-based integrative sparse partial least squares method to handle the multiple datasets with high dimensions generated under similar protocols, which consists of two built-in penalty items for selecting the important variables for users to choose, and two contrasted penalty functions for eliminating the diffierence (magnitude or sign) between estimators within each group.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ispls(x, y, L, mu1, mu2, eps = 1e-04, kappa = 0.05,
+  pen1 = "homogeneity", pen2 = "magnitude", scale.x = TRUE,
+  scale.y = TRUE, maxstep = 50, submaxstep = 10, trace = FALSE,
+  draw = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>list of data matrices, L datasets of explanatory variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>list of data matrices, L datasets of dependent variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L</code></td>
+<td>
+<p>numeric, number of datasets.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu1</code></td>
+<td>
+<p>numeric, sparsity penalty parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu2</code></td>
+<td>
+<p>numeric, contrasted penalty parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>numeric, the threshold at which the algorithm terminates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kappa</code></td>
+<td>
+<p>numeric, 0 &lt; kappa &lt; 0.5 and the parameter reduces the effect of the concave part of objective function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pen1</code></td>
+<td>
+<p>character, "homogeneity" or "heterogeneity" type of the sparsity structure. If not specified, the default is homogeneity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pen2</code></td>
+<td>
+<p>character, "magnitude" or "sign" based contrasted penalty. If not specified, the default is magnitude.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale.x</code></td>
+<td>
+<p>character, "TRUE" or "FALSE", whether or not to scale the variables x. The default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale.y</code></td>
+<td>
+<p>character, "TRUE" or "FALSE", whether or not to scale the variables y. The default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxstep</code></td>
+<td>
+<p>numeric, maximum iteration steps. The default value is 50.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>submaxstep</code></td>
+<td>
+<p>numeric, maximum iteration steps in the sub-iterations. The default value is 10.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trace</code></td>
+<td>
+<p>character, "TRUE" or "FALSE". If TRUE, prints out its screening results of variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>draw</code></td>
+<td>
+<p>character, "TRUE" or "FALSE". If TRUE, plot the convergence path of loadings.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An 'ispls' object that contains the list of the following items.
+</p>
+
+<ul>
+<li>
+<p>x: list of data matrices, L datasets of explanatory variables with centered columns. If scale.x is TRUE, the columns of L datasets are standardized to have mean 0 and standard deviation 1.
+</p>
+</li>
+<li>
+<p>y: list of data matrices, L datasets of dependent variables with centered columns. If scale.y is TRUE, the columns of L datasets are standardized to have mean 0 and standard deviation 1.
+</p>
+</li>
+<li>
+<p>betahat: the estimated regression coefficients.
+</p>
+</li>
+<li>
+<p>loading: the estimated first direction vector.
+</p>
+</li>
+<li>
+<p>variable: the screening results of variables x.
+</p>
+</li>
+<li>
+<p>meanx: list of numeric vectors, column mean of the original datasets x.
+</p>
+</li>
+<li>
+<p>normx: list of numeric vectors, column standard deviation of the original datasets x.
+</p>
+</li>
+<li>
+<p>meany: list of numeric vectors, column mean of the original datasets y.
+</p>
+</li>
+<li>
+<p>normy: list of numeric vectors, column standard deviation of the original datasets y.
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+
+<ul><li>
+<p>Liang W, Ma S, Zhang Q, et al. Integrative sparse partial least squares[J]. Statistics in Medicine, 2021, 40(9): 2239-2256.
+</p>
+</li></ul>
+<h3>See Also</h3>
+
+<p>See Also as <code>preview.pls</code>, <code>ispls.cv</code>, <code>meta.spls</code>, <code>spls</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Load a list with 3 data sets
+library(iSFun)
+data("simData.pls")
+x &lt;- simData.pls$x
+y &lt;- simData.pls$y
+L &lt;- length(x)
+
+prev_pls &lt;- preview.pls(x, y, L, scale.x = TRUE, scale.y = TRUE)
+res_homo_m &lt;- ispls(x = x, y = y, L = L, mu1 = 0.05, mu2 = 0.25,
+                    eps = 5e-2, trace = TRUE, draw = TRUE)
+
+
+res_homo_s &lt;- ispls(x = x, y = y, L = L, mu1 = 0.05, mu2 = 0.25,
+                    eps = 5e-2, kappa = 0.05, pen1 = "homogeneity",
+                    pen2 = "sign", scale.x = TRUE, scale.y = TRUE,
+                    maxstep = 50, submaxstep = 10, trace = FALSE, draw = FALSE)
+
+res_hete_m &lt;- ispls(x = x, y = y, L = L, mu1 = 0.05, mu2 = 0.25,
+                    eps = 5e-2, kappa = 0.05, pen1 = "heterogeneity",
+                    pen2 = "magnitude", scale.x = TRUE, scale.y = TRUE,
+                    maxstep = 50, submaxstep = 10, trace = FALSE, draw = FALSE)
+
+res_hete_s &lt;- ispls(x = x, y = y, L = L, mu1 = 0.05, mu2 = 0.25,
+                    eps = 5e-2, kappa = 0.05, pen1 = "heterogeneity",
+                    pen2 = "sign", scale.x = TRUE, scale.y = TRUE,
+                    maxstep = 50, submaxstep = 10, trace = FALSE, draw = FALSE)
+
+</code></pre>
+
+
+</div>

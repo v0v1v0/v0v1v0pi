@@ -1,0 +1,107 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>set_ipums_var_attributes</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Add IPUMS variable attributes to a data frame</h2>
+
+<h3>Description</h3>
+
+<p>Add variable attributes from an ipums_ddi object to a data frame.
+These provide contextual information about the variables
+and values contained in the data columns.
+</p>
+<p>Most ipumsr data-reading functions automatically add these attributes.
+However, some data processing operations may remove attributes, or you
+may wish to store data in an external database that does not support
+these attributes. In these cases, use this function to manually attach
+this information.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">set_ipums_var_attributes(
+  data,
+  var_info,
+  var_attrs = c("val_labels", "var_label", "var_desc")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p><code>tibble</code> or data frame</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var_info</code></td>
+<td>
+<p>An ipums_ddi object or a data frame containing
+variable information. Variable information can be obtained by calling
+<code>ipums_var_info()</code> on an <code>ipums_ddi</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var_attrs</code></td>
+<td>
+<p>Variable attributes from the DDI to add to the columns of
+the output data. Defaults to all available attributes.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Attribute <code>val_labels</code> adds the <code>haven_labelled</code> class
+and the corresponding value labels for applicable variables. For more
+about the <code>haven_labelled</code> class, see
+<code>vignette("semantics", package = "haven")</code>.
+</p>
+<p>Attribute <code>var_label</code> adds a short summary of the variable's
+contents to the <code>"label"</code> attribute. This label is viewable in the
+RStudio Viewer.
+</p>
+<p>Attribute <code>var_desc</code> adds a longer description of the variable's
+contents to the <code>"var_desc"</code> attribute, when available.
+</p>
+<p>Variable information is attached to the data by column name. If column
+names in <code>data</code> do not match those found in <code>var_info</code>, attributes
+will not be added.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>data</code>, with variable attributes attached
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">ddi_file &lt;- ipums_example("cps_00157.xml")
+
+# Load metadata into `ipums_ddi` object
+ddi &lt;- read_ipums_ddi(ddi_file)
+
+# Load data
+cps &lt;- read_ipums_micro(ddi)
+
+# Data includes variable metadata:
+ipums_var_desc(cps$INCTOT)
+
+# Some operations remove attributes, even if they do not alter the data:
+cps$INCTOT &lt;- ifelse(TRUE, cps$INCTOT, NA)
+ipums_var_desc(cps$INCTOT)
+
+# We can reattach metadata from the separate `ipums_ddi` object:
+cps &lt;- set_ipums_var_attributes(cps, ddi)
+ipums_var_desc(cps$INCTOT)
+</code></pre>
+
+
+</div>

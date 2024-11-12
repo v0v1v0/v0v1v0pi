@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.inbagg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Predictions from an Inbagg Object</h2>
+
+<h3>Description</h3>
+
+<p>Predicts the class membership of new observations through indirect
+bagging.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'inbagg'
+predict(object, newdata, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>object of class <code>inbagg</code>, see <code>inbagg</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p>data frame to be classified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional argumends corresponding to the predictive models.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Predictions of class memberships are calculated. i.e. values of the
+intermediate variables are predicted following <code>pFUN</code> and classified following <code>cFUN</code>,
+see <code>inbagg</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The vector of predicted classes is returned.
+</p>
+
+
+<h3>References</h3>
+
+<p>David J. Hand, Hua Gui Li, Niall M. Adams (2001),
+Supervised classification with structured class definitions.
+<em>Computational Statistics &amp; Data Analysis</em> <b>36</b>, 
+209–225.
+</p>
+<p>Andrea Peters, Berthold Lausen, Georg Michelson and Olaf Gefeller (2003),
+Diagnosis of glaucoma by indirect classifiers.
+<em>Methods of Information in Medicine</em> <b>1</b>, 99-103.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>inbagg</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library("MASS")
+library("rpart")
+y &lt;- as.factor(sample(1:2, 100, replace = TRUE))
+W &lt;- mvrnorm(n = 200, mu = rep(0, 3), Sigma = diag(3)) 
+X &lt;- mvrnorm(n = 200, mu = rep(2, 3), Sigma = diag(3))
+colnames(W) &lt;- c("w1", "w2", "w3")
+colnames(X) &lt;- c("x1", "x2", "x3")
+DATA &lt;- data.frame(y, W, X)
+
+pFUN &lt;- list(list(formula = w1~x1+x2, model = lm),
+list(model = rpart))
+
+RES &lt;- inbagg(y~w1+w2+w3~x1+x2+x3, data = DATA, pFUN = pFUN)
+predict(RES, newdata = X)
+</code></pre>
+
+
+</div>

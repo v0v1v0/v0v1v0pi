@@ -1,0 +1,143 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot.bru_prediction</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot prediction using ggplot2</h2>
+
+<h3>Description</h3>
+
+<p>Generates a base ggplot2 using <code>ggplot()</code> and adds a geom for input <code>x</code> using gg.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'bru_prediction'
+plot(x, y = NULL, ...)
+
+## S3 method for class 'prediction'
+plot(x, y = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a prediction object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Ignored argument but required for S3 compatibility.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arguments passed on to <code>gg.prediction()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Requires the <code>ggplot2</code> package.
+</p>
+
+
+<h3>Value</h3>
+
+<p>an object of class <code>gg</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+if (bru_safe_inla() &amp;&amp;
+    require(sn, quietly = TRUE) &amp;&amp;
+    require(ggplot2, quietly = TRUE)) {
+  # Generate some data
+
+  input.df &lt;- data.frame(x = cos(1:10))
+  input.df &lt;- within(input.df, y &lt;- 5 + 2 * cos(1:10) + rnorm(10, mean = 0, sd = 0.1))
+
+  # Fit a model with fixed effect 'x' and intercept 'Intercept'
+
+  fit &lt;- bru(y ~ x, family = "gaussian", data = input.df)
+
+  # Predict posterior statistics of 'x'
+
+  xpost &lt;- predict(fit, NULL, formula = ~x_latent)
+
+  # The statistics include mean, standard deviation, the 2.5% quantile, the median,
+  # the 97.5% quantile, minimum and maximum sample drawn from the posterior as well as
+  # the coefficient of variation and the variance.
+
+  xpost
+
+  # For a single variable like 'x' the default plotting method invoked by gg() will
+  # show these statisics in a fashion similar to a box plot:
+  ggplot() +
+    gg(xpost)
+
+
+  # The predict function can also be used to simultaneously estimate posteriors
+  # of multiple variables:
+
+  xipost &lt;- predict(fit,
+    newdata = NULL,
+    formula = ~ c(
+      Intercept = Intercept_latent,
+      x = x_latent
+    )
+  )
+  xipost
+
+  # If we still want a plot in the previous style we have to set the bar parameter to TRUE
+
+  p1 &lt;- ggplot() +
+    gg(xipost, bar = TRUE)
+  p1
+
+  # Note that gg also understands the posterior estimates generated while running INLA
+
+  p2 &lt;- ggplot() +
+    gg(fit$summary.fixed, bar = TRUE)
+  multiplot(p1, p2)
+
+  # By default, if the prediction has more than one row, gg will plot the column 'mean' against
+  # the row index. This is for instance usefuul for predicting and plotting function
+  # but not very meaningful given the above example:
+
+  ggplot() +
+    gg(xipost)
+
+  # For ease of use we can also type
+
+  plot(xipost)
+
+  # This type of plot will show a ribbon around the mean, which viszualizes the upper and lower
+  # quantiles mentioned above (2.5 and 97.5%). Plotting the ribbon can be turned of using the
+  # \code{ribbon} parameter
+
+  ggplot() +
+    gg(xipost, ribbon = FALSE)
+
+  # Much like the other geomes produced by gg we can adjust the plot using ggplot2 style
+  # commands, for instance
+
+  ggplot() +
+    gg(xipost) +
+    gg(xipost, mapping = aes(y = median), ribbon = FALSE, color = "red")
+}
+
+</code></pre>
+
+
+</div>

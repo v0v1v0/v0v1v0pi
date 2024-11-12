@@ -1,0 +1,98 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ser</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Non-Standard Evaluation Metrics</h2>
+
+<h3>Description</h3>
+
+<p>Obtains the squared error of predictions for a given subset of relevance
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ser(trues, preds, phi.trues = NULL, ph = NULL, t = 0)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>trues</code></td>
+<td>
+<p>Target values from a test set of a given data set. Should be a vector and have the same size as the variable preds</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>preds</code></td>
+<td>
+<p>Predicted values given a certain test set of a given data set. Should be a vector and have the same size as the variable preds</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phi.trues</code></td>
+<td>
+<p>Relevance of the values in the parameter trues. Use ??phi() for more information. Defaults to NULL</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ph</code></td>
+<td>
+<p>The relevance function providing the data points where the pairs of values-relevance are known. Default is NULL</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t</code></td>
+<td>
+<p>Relevance cut-off. Default is 0.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Squared Error-Relevance Metric (SER)
+</p>
+
+
+<h3>Value</h3>
+
+<p>Squared error for for cases where the relevance of the true value is greater than t (SERA)
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(IRon)
+library(rpart)
+
+if(requireNamespace("rpart")) {
+
+   data(accel)
+
+   form &lt;- acceleration ~ .
+
+   ind &lt;- sample(1:nrow(accel),0.75*nrow(accel))
+
+   train &lt;- accel[ind,]
+   test &lt;- accel[-ind,]
+
+   ph &lt;- phi.control(accel$acceleration)
+
+   m &lt;- rpart::rpart(form, train)
+   preds &lt;- as.vector(predict(m,test))
+
+   trues &lt;- test$acceleration
+   phi.trues &lt;- phi(test$acceleration,ph)
+
+   ser(trues,preds,phi.trues)
+
+}
+
+</code></pre>
+
+
+</div>

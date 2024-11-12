@@ -1,0 +1,96 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>RooksNeighCt</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Define a subset of grid locations with non-overlapping rook neighborhoods</h2>
+
+<h3>Description</h3>
+
+<p>This function prunes the data frame returned by the
+<code>PatternDetect</code> function such that it includes only rook's
+neighborhoods that do not overlap. Pruning is done by sequential removal of
+observations that are too near one another and as a result are overlapping.
+Locations that are the most highly connected are removed first.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">RooksNeighCt(vfdf)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>vfdf</code></td>
+<td>
+<p>A data frame as returned by <code>PatternDetect</code></p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>The reason for this function's existence is to facilitate probabilistic
+calculations regarding whether certain patterns are occurring more or less
+often that would be expected by chance. If rook's neighborhoods in which
+patterns are observed overlap, then the assumption of probabilistic
+independence is necessarily incorrect. Thus, overlap invalidates any
+calculation of the probability of occurrence of a particular pattern if that
+calculation assumes independence. The pruning actions of this function enable
+the user to more safely assume probabilistic independence.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame similar to vfdf except that it includes only grid
+locations with speed estimates in all four adjacent grid locations in their
+rook's neighborhood. An additional column called IndPatternCt is appended
+which contains NA values for locations that are overlapping other locations
+and ones for all non-overlapping locations that have speed estimates in all
+four adjacent cells.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# creating convergence/divergence patterns
+Mat1 &lt;- matrix(rep(0,9*9), nrow = 9)
+Mat1[3, c(4, 6)] &lt;- 1
+Mat1[7, c(4, 6)] &lt;- 1
+Mat1[c(4, 6), 3] &lt;- 1
+Mat1[c(4, 6), 7] &lt;- 1
+Mat1
+
+Mat2 &lt;- matrix(rep(0,9*9), nrow = 9)
+Mat2[2, c(4, 6)] &lt;- 1
+Mat2[8, c(4, 6)] &lt;- 1
+Mat2[c(4, 6), 2] &lt;- 1
+Mat2[c(4, 6), 8] &lt;- 1
+Mat2
+
+Mat1 &lt;- cbind(Mat1, Mat1)
+Mat1 &lt;- rbind(Mat1, Mat1)
+
+Mat2 &lt;- cbind(Mat2, Mat2)
+Mat2 &lt;- rbind(Mat2, Mat2)
+
+# rasterizing
+rast1 &lt;- terra::rast(Mat1)
+terra::plot(rast1)
+rast2 &lt;- terra::rast(Mat2)
+terra::plot(rast2)
+
+# Detecting a divergence
+(VFdf1 &lt;- DispField(rast1, rast2, factv1 = 3, facth1 = 3, restricted = TRUE))
+(patdf1 &lt;- PatternDetect(VFdf1))
+(subdf1 &lt;- RooksNeighCt(patdf1))
+# The last call should print a data table with four rows, each with a one under
+# the column header of IndPatternCt
+</code></pre>
+
+
+</div>

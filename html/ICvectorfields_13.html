@@ -1,0 +1,76 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>RastStackData</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Creating a raster stack from formatted datasets</h2>
+
+<h3>Description</h3>
+
+<p>This function converts the data that accompany the ICvectorfields R package
+to a raster stack. The raster stack is the only accepted data input format
+for the following ICvectorfields functions: <code>DispFieldST</code>,
+<code>DispFieldSTbb</code>, <code>DispFieldSTall</code>,
+<code>DispFieldSTbball</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">RastStackData(inputdf)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>inputdf</code></td>
+<td>
+<p>a data frame object in which the first column is longitude (or
+x coordinate), the second column is latitude (or y coordinate), and all of
+the subsequent columns represent a measure of population abundance or
+density at a unique instance of time. Each row of the input data frame,
+therefore, represents a unique spatial location, which should be on an
+evenly spaced grid. Note, however, that not all grid locations need to have
+observations; some grid locations can have values of NA or can be missing
+entirely.</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>Once a raster stack has been created, individual layers can be subsetted
+using rasterstack[[index]], where index is an integer index for the third
+dimension of the raster stack.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The function returns a raster stack constructed using inputdf. Each
+layer in the stack corresponds to a column of the input dataset (after the
+first two columns, which are longitude and latitude). The extent of all of
+the rasters in the stack is constructed using the minimum and maximum
+longitudes and latitudes.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# creating random data in the correct data format
+xyzdf &lt;- expand.grid(x = c(1:3), y = c(1:3))
+xyzdf$z1 &lt;- runif(9)
+xyzdf$z2 &lt;- runif(9)
+xyzdf$z3 &lt;- runif(9)
+
+zstack &lt;- RastStackData(xyzdf)
+
+dim(zstack)
+terra::plot(zstack[[1]])
+terra::plot(zstack[[2]])
+terra::plot(zstack[[3]])
+</code></pre>
+
+
+</div>

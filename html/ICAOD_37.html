@@ -1,0 +1,261 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sensbayescomp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Verifying Optimality of Bayesian Compound DP-optimal Designs</h2>
+
+<h3>Description</h3>
+
+<p>This function plot the sensitivity (derivative) function given an approximate (continuous) design and calculate the efficiency lower bound (ELB) for Bayesian DP-optimal designs.
+Let <code class="reqn">\boldsymbol{x}</code> belongs to <code class="reqn">\chi</code> that denotes the design space.
+Based on the general equivalence theorem, generally, a design <code class="reqn">\xi^*</code> is optimal if and only if the value of its sensitivity (derivative) function
+be non-positive for all <code class="reqn">\boldsymbol{x}</code> in <code class="reqn">\chi</code> and it only reaches zero
+when <code class="reqn">\boldsymbol{x}</code> belong to the support of <code class="reqn">\xi^*</code> (be equal to one of the design point).
+Therefore, the user can look at the sensitivity plot and the ELB and decide whether the
+design is optimal or close enough to the true optimal design (ELB tells us that without knowing the latter).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sensbayescomp(
+  formula,
+  predvars,
+  parvars,
+  family = gaussian(),
+  x,
+  w,
+  lx,
+  ux,
+  fimfunc = NULL,
+  prior = list(),
+  prob,
+  alpha,
+  sens.control = list(),
+  sens.bayes.control = list(),
+  crt.bayes.control = list(),
+  plot_3d = c("lattice", "rgl"),
+  plot_sens = TRUE,
+  npar = NULL,
+  calculate_criterion = TRUE,
+  silent = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>A linear or nonlinear model <code>formula</code>.
+A symbolic description of the model consists of predictors and the unknown model parameters.
+Will be coerced to a <code>formula</code> if necessary.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predvars</code></td>
+<td>
+<p>A vector of characters. Denotes the predictors in the <code>formula</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parvars</code></td>
+<td>
+<p>A vector of characters. Denotes the unknown parameters in the <code>formula</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>A description of the response distribution and the link function to be used in the model.
+This can be a family function, a call to a family function or a character string naming the family.
+Every family function has a link argument allowing to specify the link function to be applied on the response variable.
+If not specified, default links are used. For details see <code>family</code>.
+By default, a linear gaussian model <code>gaussian()</code> is applied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A vector of candidate design (support) points.
+When is not set to <code>NULL</code> (default),
+the algorithm only finds the optimal weights for the candidate points in  <code>x</code>.
+Should be set when the user has a finite number of candidate design points  and the purpose
+is to find the optimal weight for each of them (when zero, they will be excluded from the design).
+For design points with more than one dimension, see 'Details' of <code>sensminimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>Vector of the corresponding design weights for <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lx</code></td>
+<td>
+<p>Vector of lower bounds for the predictors. Should be in the same order as <code>predvars</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ux</code></td>
+<td>
+<p>Vector of upper bounds for the predictors. Should be in the same order as <code>predvars</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fimfunc</code></td>
+<td>
+<p>A function. Returns the FIM as a <code>matrix</code>. Required when <code>formula</code> is missing. See 'Details' of <code>minimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior</code></td>
+<td>
+<p>An object of class <code>cprior</code>. User can also use one of the functions
+<code>uniform</code>, <code>normal</code>,
+<code>skewnormal</code> or <code>student</code>  to create the  prior. See 'Details' of <code>bayes</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob</code></td>
+<td>
+<p>Either <code>formula</code> or a <code>function</code>. When function, its argument are <code>x</code> and <code>param</code>, and they are the same as the arguments in <code>fimfunc</code>.
+<code>prob</code> as a function takes the design points and vector of parameters and returns the probability of success at each design points.
+See 'Examples'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>A value between 0 and 1.
+Compound or combined DP-criterion  is the product of the efficiencies of a design  with respect to D- and average P- optimality, weighted by <code>alpha</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sens.control</code></td>
+<td>
+<p>Control Parameters for Calculating the ELB. For details, see <code>sens.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sens.bayes.control</code></td>
+<td>
+<p>A list. Control parameters to verify the general equivalence theorem. For details, see <code>sens.bayes.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>crt.bayes.control</code></td>
+<td>
+<p>A list. Control parameters to approximate the integral in  the Bayesian criterion at a given design over the parameter space.
+For details, see <code>crt.bayes.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_3d</code></td>
+<td>
+<p>Which package should be used to plot the sensitivity (derivative) function for two-dimensional design space. Defaults to <code>"lattice"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_sens</code></td>
+<td>
+<p>Plot the sensitivity (derivative) function? Defaults to <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>npar</code></td>
+<td>
+<p>Number of model parameters.  Used when <code>fimfunc</code> is given instead of <code>formula</code> to specify the number of model parameters.
+If not specified correctly, the sensitivity (derivative) plot may be shifted below the y-axis.
+When <code>NULL</code> (default), it will be set to <code>length(parvars)</code> or
+<code>prior$npar</code> when <code>missing(formula)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>calculate_criterion</code></td>
+<td>
+<p>Calculate the optimality criterion? See 'Details' of <code>sensminimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>silent</code></td>
+<td>
+<p>Do not print anything? Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Depending on the complexity of the problem at hand, sometimes, the CPU time can be considerably reduced
+by choosing a set of  less conservative values for the tuning parameters <code>tol</code> and <code>maxEval</code> in
+the function <code>sens.bayes.control</code> when its  <code>method</code> component is equal to <code>"cubature"</code>.
+Similarly, this applies  when <code>sens.bayes.control$method = "quadrature"</code>.
+In general, if the CPU time matters, the user should find an appropriate speed-accuracy trade-off  for her/his own problem.
+See 'Examples' for more details.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The default values of the tuning parameters in <code>sens.bayes.control</code> are set in a way that
+having accurate plots for the sensitivity (derivative) function
+and calculating the ELB to a high precision  to be the primary goals,
+although the process may take too long. The user should choose a set of less conservative values
+via the argument <code>sens.bayes.control</code> when the CPU-time is too long or matters.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>bayescomp</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##########################################
+# Verifing the DP-optimality of a design
+# The logistic model with two predictors
+##########################################
+
+# The design points and corresponding weights are as follows:
+# Point1     Point2     Point3     Point4     Point5     Point6     Point7
+# 0.07410  -0.31953   -1.00000     1.00000  -1.00000     1.00000    0.30193
+# -1.00000  1.00000   -1.00000     1.00000   -0.08251   -1.00000    1.00000
+# Weight1   Weight2    Weight3    Weight4    Weight5    Weight6    Weight7
+# 0.020      0.275      0.224      0.131      0.092      0.156      0.103
+
+# It should be given to the function as two seperate vectors:
+x1 &lt;- c(0.07409639, -0.3195265, -1, 1, -1, 1, 0.3019317, -1, 1, -1, 1, -0.08251169, -1, 1)
+w1 &lt;- c(0.01992863, 0.2745394, 0.2236575, 0.1312331, 0.09161503, 0.1561454, 0.1028811)
+
+
+p &lt;- c(1, -2, 1, -1)
+
+## Not run: 
+sensbayescomp(formula = ~exp(b0+b1*x1+b2*x2+b3*x1*x2)/(1+exp(b0+b1*x1+b2*x2+b3*x1*x2)),
+              predvars = c("x1", "x2"),
+              parvars = c("b0", "b1", "b2", "b3"),
+              family = binomial(),
+              x = x1, w = w1,
+              lx = c(-1, -1), ux = c(1, 1),
+              prior = uniform(p -1.5, p + 1.5),
+              prob = ~1-1/(1+exp(b0 + b1 * x1 + b2 * x2 + b3 * x1 * x2)),
+              alpha = .5, plot_3d = "rgl",
+              sens.bayes.control = list(cubature = list(tol = 1e-3, maxEval = 1000)))
+
+## End(Not run)
+
+
+
+
+
+</code></pre>
+
+
+</div>

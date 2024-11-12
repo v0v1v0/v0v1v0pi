@@ -1,0 +1,118 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>agenbagFilters</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Performs algorithms from Agenbag et al. (2003)</h2>
+
+<h3>Description</h3>
+
+<p>This function performs two (gradient) calculation approaches for
+SST, as outlined in the paper by Agenbag et al. (2003).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">agenbagFilters(X, algorithm = c(1, 2), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>A numeric <code>matrix</code> used as main input.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algorithm</code></td>
+<td>
+<p><code>integer</code> specifying the type of method that will be
+used. See Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Not used.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Section 2.2.4 of the paper by Agenbag et al. (2003) introduces the following
+two methods:
+</p>
+
+<dl>
+<dt><strong>Method 1: </strong></dt>
+<dd>
+<p>Based on the equation
+</p>
+<p style="text-align: center;"><code class="reqn">Y_{i,j}=\sqrt{(X_{i+1,j}-X_{i-1,j})^2 +(X_{i,j+1}-X_{i,j-1})^2}</code>
+</p>
+</dd>
+</dl>
+<p>where <code class="reqn">Y_{i,j}</code> represents the output value for each <code class="reqn">X_{i,j}</code> pixel value
+of a given <code class="reqn">X</code> matrix.
+</p>
+<dl>
+<dt><strong>Method 2: </strong></dt>
+<dd>
+<p>the standard deviation in a 3x3 pixel area centered on
+position <code class="reqn">(i,j)</code>.</p>
+</dd>
+</dl>
+<p>As outlined in the original study, this method conducts searches within a
+1-pixel vicinity of each point. For method 1, it only returns a value for
+points where none of the four involved values are NA. Conversely, for method
+2, the standard deviation calculation is performed only for points where at
+least 3 non-NA values are found in the 3x3 neighborhood.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>agenbagFilters</code> returns a <code>matrix</code> object with the same
+dimensions of <code>X</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Agenbag, J.J., A.J. Richardson, H. Demarcq, P. Freon, S. Weeks,
+and F.A. Shillington. "Estimating Environmental Preferences of South African
+Pelagic Fish Species Using Catch Size- and Remote Sensing Data". Progress in
+Oceanography 59, No 2-3 (October 2003): 275-300.
+(<a href="https://doi.org/10.1016/j.pocean.2003.07.004">doi:10.1016/j.pocean.2003.07.004</a>).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(wbImage)
+
+# Agenbag, method 1
+agenbag1 &lt;- agenbagFilters(X = wbImage, algorithm = 1)
+
+# Agenbag, method 2
+agenbag2 &lt;- agenbagFilters(X = wbImage, algorithm = 2)
+
+# Plotting results
+par(mfrow = c(3, 1), mar = rep(0, 4))
+
+# Original
+image(wbImage, axes = FALSE, col = gray.colors(n = 1e3))
+
+# Calculated
+cols &lt;- hcl.colors(n = 1e3, palette = "YlOrRd", rev = TRUE)
+image(agenbag1, axes = FALSE, col = cols)
+image(agenbag2, axes = FALSE, col = cols)
+</code></pre>
+
+
+</div>

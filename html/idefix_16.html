@@ -1,0 +1,241 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>SeqCEA</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Sequential Coordinate Exchange algorithm for MNL model.</h2>
+
+<h3>Description</h3>
+
+<p>Selects the choice set that minimizes the DB-error when added to an initial
+design, given (updated) parameter values.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">SeqCEA(
+  des = NULL,
+  lvls,
+  coding,
+  c.lvls = NULL,
+  n.alts,
+  par.draws,
+  prior.covar,
+  alt.cte = NULL,
+  no.choice = NULL,
+  weights = NULL,
+  parallel = TRUE,
+  reduce = TRUE,
+  n.cs = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>des</code></td>
+<td>
+<p>A design matrix in which each row is a profile. If alternative
+specific constants are present, those should be included as the first
+column(s) of the design. Can be generated with <code>Modfed</code> or
+<code>CEA</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lvls</code></td>
+<td>
+<p>A numeric vector which contains for each attribute the number
+of levels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coding</code></td>
+<td>
+<p>Type of coding that needs to be used for each attribute.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c.lvls</code></td>
+<td>
+<p>A list containing numeric vectors with the attribute levels for
+each continuous attribute. The default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.alts</code></td>
+<td>
+<p>Numeric value indicating the number of alternatives per choice
+set.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>par.draws</code></td>
+<td>
+<p>A matrix or a list, depending on <code>alt.cte</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior.covar</code></td>
+<td>
+<p>Covariance matrix of the prior distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alt.cte</code></td>
+<td>
+<p>A binary vector indicating for each alternative whether an
+alternative specific constant is desired. The default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>no.choice</code></td>
+<td>
+<p>An integer indicating the no choice alternative. The default
+is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>A vector containing the weights of the draws. Default is
+<code>NULL</code>. See also <code>ImpsampMNL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>Logical value indicating whether computations should be done
+over multiple cores.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reduce</code></td>
+<td>
+<p>Logical value indicating whether the candidate set should be
+reduced or not.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.cs</code></td>
+<td>
+<p>An integer indicating the number of possible random choice sets to
+consider in the search for the next best choice set possible. The default is
+<code>NULL</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This algorithm is ideally used in an adaptive context. The algorithm will
+select the next DB-efficient choice set given parameter values and possible
+previously generated choice sets. In an adaptive context these parameter
+values are updated after each observed response.
+</p>
+<p>Previously generated choice sets, which together form an initial design, can
+be provided in <code>des</code>. When no design is provided, the algorithm will
+select the most efficient choice set based on the fisher information of the
+prior covariance matrix <code>prior.covar</code>.
+</p>
+<p>If <code>alt.cte = NULL</code>, <code>par.draws</code> should be a matrix in which each
+row is a sample from the multivariate parameter distribution. In case that
+<code>alt.cte</code> is not <code>NULL</code>, a list containing two matrices should be
+provided to <code>par.draws</code>. The first matrix containing the parameter draws
+for the alternative specific parameters. The second matrix containing the
+draws for the rest of the parameters.
+</p>
+<p>The list of potential choice sets is created by selecting randomly a level for
+each attribute in an alternative/profile. <code>n.cs</code> controls the number of
+potential choice sets to consider. The default is <code>
+NULL</code>, which means that the number of possible choice sets is the product of
+attribute levels considered in the experiment. For instance, an experiment
+with 3 attribute and 3 levels each will consider 3^3 = 27 possible choice sets.
+</p>
+<p>The <code>weights</code> argument can be used when the <code>par.draws</code> have
+weights. This is for example the case when parameter values are updated using
+<code>ImpsampMNL</code>.
+</p>
+<p>When <code>parallel</code> is <code>TRUE</code>, <code>detectCores</code> will
+be used to decide upon the number of available cores. That number minus 1
+cores will be used to search for the optimal choice set. For small problems
+(6 parameters), <code>parallel = TRUE</code> can be slower. For larger problems the
+computation time will decrease significantly.
+</p>
+<p><em>Note:</em> this function is faster than <code>SeqMOD</code>, but
+the output is not as stable. This happens because this function
+makes a random search to get the choice set, whereas
+<code>SeqMOD</code> makes an exhaustive search.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>set</code></td>
+<td>
+<p>A matrix representing a DB efficient choice set.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>error</code></td>
+<td>
+<p>A numeric value indicating the DB-error of the whole
+design.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Traets F, Sanchez G, Vandebroek M (2020).
+“Generating Optimal Designs for Discrete Choice Experiments in R: The idefix Package.”
+<em>Journal of Statistical Software</em>, <b>96</b>(3).
+</p>
+<p>Yu J, Goos P, Vandebroek M (2011).
+“Individually adapted sequential Bayesian conjoint-choice designs in the presence of consumer heterogeneity.”
+<a href="https://www.sciencedirect.com/science/article/pii/S0167811611000668">https://www.sciencedirect.com/science/article/pii/S0167811611000668</a>.
+</p>
+<p>Meyer RK, Nachtsheim CJ (1995).
+“The Coordinate-Exchange Algorithm for Constructing Exact Optimal Experimental Designs.”
+<em>Technometrics</em>, <b>37</b>(1), 60–69.
+ISSN 00401706, <a href="https://www.jstor.org/stable/1269153">https://www.jstor.org/stable/1269153</a>.
+</p>
+<p>Kessels R, Jones B, Goos P, Vandebroek M (2009).
+“An Efficient Algorithm for Constructing Bayesian Optimal Choice Designs.”
+<em>Journal of Business &amp; Economic Statistics</em>, <b>27</b>(2), 279–291.
+ISSN 07350015.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># DB efficient choice set, given a design and parameter draws. 
+# 3 attributes with 3 levels each
+m &lt;- c(0.3, 0.2, -0.3, -0.2, 1.1, 2.4) # mean (total = 6 parameters).
+pc &lt;- diag(length(m)) # covariance matrix
+set.seed(123)
+sample &lt;- MASS::mvrnorm(n = 10, mu = m, Sigma = pc)
+# Initial design.
+des &lt;- example_design
+# Efficient choice set to add.
+SeqCEA(des = des, lvls = c(3, 3, 3), coding = c("D", "D", "D"), n.alts = 2,
+       par.draws = sample, prior.covar = pc, parallel = FALSE)
+
+# DB efficient choice set, given parameter draws. 
+# with alternative specific constants 
+des &lt;- example_design2
+ac &lt;- c(1, 1, 0) # Alternative specific constants.
+m &lt;- c(0.3, 0.2, -0.3, -0.2, 1.1, 2.4, 1.8, 1.2) # mean
+pc &lt;- diag(length(m)) # covariance matrix
+pos &lt;- MASS::mvrnorm(n = 10, mu = m, Sigma = pc)
+sample &lt;- list(pos[ , 1:2], pos[ , 3:8])
+# Efficient choice set.
+SeqCEA(des = des, lvls = c(3, 3, 3), coding = c("D", "D", "D"), n.alts = 3, 
+      par.draws = sample, alt.cte = ac, prior.covar = pc, parallel = FALSE)
+</code></pre>
+
+
+</div>

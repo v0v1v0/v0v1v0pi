@@ -1,0 +1,308 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>initialize_plane</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Initialize and navigate in the plane of possible fits
+</h2>
+
+<h3>Description</h3>
+
+<p>Initialize and navigate in the plane of possible fits to detect subsequences (of different lengths) in a long time series that are similar (in terms of DTW distance) to a query pattern: Initialize the plane of possible fits as <code>.planedtw</code> object. Increment and decrement the time series observations and respective DTW calculation. Reverse the time order to increment or decrement observations at the other end of the time horizon. Refresh the DTW calculation without changing the time series. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">initialize_plane(Q, C, dist_method = c("norm1", "norm2", "norm2_square"),
+                 step_pattern = c("symmetric2", "symmetric1"), ws = NULL)
+
+
+## S3 method for class 'planedtw'
+increment(x, newObs, direction = c("C", "Q"), ...)
+
+## S3 method for class 'planedtw'
+decrement(x, direction = c("C", "Q", "both"), 
+          refresh_dtw = FALSE, nC = NULL, nQ = NULL, ...)
+
+## S3 method for class 'planedtw'
+refresh(x, ...)
+
+## S3 method for class 'planedtw'
+reverse(x, ...)
+
+is.planedtw(x)  
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Q</code></td>
+<td>
+
+<p>a time series (vector or matrix for multivariate time series) 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C</code></td>
+<td>
+
+<p>a time series (vector or matrix for multivariate time series) 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist_method</code></td>
+<td>
+
+<p>character, describes the method of distance measure. See also <code>dtw</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>step_pattern</code></td>
+<td>
+
+<p>character, describes the step pattern. See also <code>dtw</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ws</code></td>
+<td>
+
+<p>integer, describes the window size for the sakoe chiba window. If NULL, then no window is applied. (default = NULL)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>object of class planedtw (output from <code>initialize_plane</code>)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newObs</code></td>
+<td>
+
+<p>a time series (vector or matrix for multivariate time series). If <code>Q</code> and <code>C</code> are vectors, newObs must be a vector. If <code>Q</code> and <code>C</code> are matrices with <code>nc</code> columns, then <code>newObs</code> must also have <code>nc</code> columns. See details for the correct time order of <code>newObs</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>direction</code></td>
+<td>
+
+<p>character, gives the direction of increment or decrement. <code>decrement()</code> is a wrapper for <code>dtw_partial</code> and the <code>direction</code> parameter is translated to the respective <code>partial_Q</code> and <code>partial_C</code> parameters.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>refresh_dtw</code></td>
+<td>
+
+<p>logical (default = FALSE), after decrementing the time series, should the DTW calculation be refreshed, or not.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nC</code></td>
+<td>
+
+<p>integer, default = NULL, if not NULL, then <code>decrement</code> subsets the time series <code>C</code> to the range of <code>1:nC</code>, drops invalid interim calculation results, and refreshes if <code>refresh_dtw = TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nQ</code></td>
+<td>
+
+<p>analog to <code>nC</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional arguments (currently not used)
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>All functions are wrapper functions for <code>idtw2vec</code> and <code>dtw_partial</code>. 
+</p>
+
+<ul>
+<li>
+<p><code>initialize_plane</code> calculates the DTW distance between Q and C and saves the last column and row of the global cost matrix. It returns an object of class <code>planedtw</code> that contains all necessary information to incrementally update the DTW calculation with new observations. Also for decrementing the calcultions for skipping some observations at the end.
+
+</p>
+</li>
+<li>
+<p><code>increment</code> updates the DTW calculation by appending new observations to C or Q (depends on the parameter <code>direction</code>) and calculating DTW by recycling previous results represented by <code>gcm_lc_new</code> and <code>gcm_lr_new</code>. A wrapper for <code>idtw2vec</code>
+
+</p>
+</li>
+<li>
+<p><code>decrement</code> is a wrapper for <code>dtw_partial</code> and also returns a <code>planedtw</code> object.
+
+</p>
+</li>
+<li>
+<p><code>refresh</code> serves to recalculate the <code>gcm_lc_new</code> and <code>gcm_lr_new</code> from scratch, if these objects are <code>NULL</code> (e.g. after decrementing with <code>refresh_dtw = FALSE</code>).
+
+</p>
+</li>
+<li>
+<p><code>reverse</code> reverses the order of Q and C, and refreshes the calculation for the new order. This is useful for appending observations to Q or C at the other end, the beginning. For incrementing in the reverse order also apply the function <code>increment</code>. Then the time series in the parameter <code>newObs</code> also needs to be in reverse order. 
+Assent et al. (2009) proved that the DTW distance is reversible for the step pattern "symmetric1", so <code>dtw(Q, C) = dtw(rev(Q), rev(C))</code>. Also see examples. For the step pattern "symmetric2" DTW is not exactly reversible, but empirical studies showed that the difference is realtive small. For further details please see the appendix A of the vignette "IncDTW: An R Package for Incremental Calculation of Dynamic Time Warping" on  <a href="https://CRAN.R-project.org/package=IncDTW">CRAN</a>.
+
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>distance</code></td>
+<td>
+<p>the DTW distance</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>normalized_distance</code></td>
+<td>
+<p>the DTW distance devided by the sum of the lengths of Q and C (see also <code>dtw</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gcm_lc_new</code></td>
+<td>
+<p>the last column of the new global cost matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gcm_lr_new</code></td>
+<td>
+<p>the last row of the new global cost matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q</code></td>
+<td>
+<p>the time series</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C</code></td>
+<td>
+<p>the time series</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>list of input parameters and the lengths of the time series</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+
+<ul>
+<li>
+<p> Leodolter, M.; Pland, C.; Brändle, N; <em>IncDTW: An R Package for Incremental Calculation of Dynamic Time Warping</em>. Journal of Statistical Software, 99(9), 1-23. doi: <a href="https://doi.org/10.18637/jss.v099.i09">10.18637/jss.v099.i09</a>
+</p>
+</li>
+<li>
+<p> Assent, Ira, et al. "Anticipatory DTW for efficient similarity search in time series databases." Proceedings of the VLDB Endowment 2.1 (2009): 826-837.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+
+#--- 1. example: Increment too far and take a step back:
+rw &lt;- function(nn) cumsum(rnorm(nn))
+Q &lt;- sin(1:100)
+C &lt;- Q[1:90] + rnorm(90, 0, 0.1)
+WS &lt;- 40
+
+
+# start with the initial calculation
+x &lt;- initialize_plane(Q, C, ws = WS)
+
+# Then the incremental calculation for new observations
+y1 &lt;- Q[91:95] + rnorm(5, 0, 0.1)# new observations
+x &lt;- increment(x, newObs = y1)
+
+# Again new observations -&gt; just increment x
+y2 &lt;- c(Q[96:100] + rnorm(5, 0, 0.1), rw(10))# new observations
+x &lt;- increment(x, newObs = y2)
+
+# Compare the results with the calculation from scratch
+from_scratch &lt;- dtw2vec(Q, c(C, y1, y2) , ws = WS)$normalized_distance
+x$normalized_distance - from_scratch
+plot(x)
+
+# The plot shows alignments of high costs at the end 
+# =&gt; attempt a decremtal step to find better partial matching
+x &lt;- decrement(x, direction = "C", refresh_dtw = TRUE)
+x
+plot(x)
+
+
+#--- 2. example: First increment, then reverse increment
+rw &lt;- function(nn) cumsum(rnorm(nn))
+Q &lt;- rw(100)
+C &lt;- Q[11:90] + rnorm(80, 0, 0.1)
+WS &lt;- 40
+
+# initial calculation
+x &lt;- initialize_plane(Q, C, ws = WS)
+plot(x)
+
+# incremental calculation for new observations that 
+# are appened at the end of C
+y1 &lt;- Q[91:100] + rnorm(10, 0, 0.1)
+x &lt;- increment(x, newObs = y1)
+
+# reverse the order of Q and C
+x &lt;- reverse(x)
+
+# append new observations at the beginning: the new
+# obervations must be in the same order as Q and C 
+# =&gt; so newObs must be in reverse order, so y2 is 
+# defined as Q from 10 to 6 (plus noise).
+y2 &lt;- Q[10:6] + rnorm(5, 0, 0.1)
+x &lt;- increment(x, newObs = y2)
+
+# another incremental step in the reverse direction
+y3 &lt;- Q[5:1] + rnorm(5, 0, 0.1)
+x &lt;- increment(x, newObs = y3)
+
+# compare with calculations from scratch, and plot x
+from_scratch &lt;- dtw2vec(rev(Q), rev(c(rev(y3), rev(y2), C, y1)),
+                        ws = WS)$distance
+x$distance - from_scratch
+print(x)
+plot(x)
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

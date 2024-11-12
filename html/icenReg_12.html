@@ -1,0 +1,83 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>imputeCens</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Impute Interval Censored Data from icenReg Regression Model</h2>
+
+<h3>Description</h3>
+
+<p>Imputes censored responses from data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">imputeCens(fit, newdata = NULL, imputeType = "fullSample", samples = 5)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fit</code></td>
+<td>
+<p>icenReg model fit</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p><code>data.frame</code> containing covariates and censored intervals. If blank, will use data from model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>imputeType</code></td>
+<td>
+<p>type of imputation. See details for options</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>samples</code></td>
+<td>
+<p>Number of imputations (ignored if <code>imputeType = "median"</code>)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If <code>newdata</code> is left blank, will provide estimates for original data set. 
+</p>
+<p>There are several options for how to impute. <code>imputeType = 'median'</code> 
+imputes the median time, conditional on the response interval, covariates and 
+regression parameters at the MLE. To get random imputations without accounting
+for error in the estimated parameters <code>imputeType ='fixedParSample'</code> takes a 
+random sample of the response variable, conditional on the response interval, 
+covariates and estimated parameters at the MLE. Finally, 
+<code>imputeType = 'fullSample'</code> first takes a random sample of the coefficients,
+(assuming asymptotic normality) and then takes a random sample 
+of the response variable, conditional on the response interval, 
+covariates, and the random sample of the coefficients.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Clifford Anderson-Bergman
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">simdata &lt;- simIC_weib(n = 500)
+
+fit &lt;- ic_par(cbind(l, u) ~ x1 + x2,
+              data = simdata)
+
+imputedValues &lt;- imputeCens(fit)
+</code></pre>
+
+
+</div>

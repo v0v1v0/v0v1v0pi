@@ -1,0 +1,117 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>idmc_transform_daily</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Transform displacement event data to daily data</h2>
+
+<h3>Description</h3>
+
+<p><code>idmc_transform_daily()</code> transforms event data from the IDMC API (accessed
+through <code>idmc_get_data()</code>). For each event, identified by an <code>event_id</code>,
+potentially duplicated data is filtered out. If there are <code style="white-space: pre;">⁠Recommended figure⁠</code>
+rows based on the <code>role</code> column, then only those are kept. If there are no
+recommended figures, then only the latest update to the <code>event_id</code> data is
+kept, using <code>created_at</code> to find latest updates.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">idmc_transform_daily(
+  df,
+  min_date = as.Date("2018-01-01"),
+  max_date = Sys.Date(),
+  filter_min_date = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>Event displacement data frame, generated from <code>idmc_get_data()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_date</code></td>
+<td>
+<p>Date to backfill displacement data to. By default, <code>min_date</code>
+is set the first day of 2018. Only a few observations of the IDMC data
+are from before 2018, spanning back to 2011.
+If <code>NULL</code>, no backfilling is done, and the first reported
+case in the IDMC database is taken as the earliest.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_date</code></td>
+<td>
+<p>Date to extrapolate all data to, filling with <code>0</code>. If the
+The latest date in the data frame is used if later than <code>max_date</code>.
+If <code>NULL</code>, no extrapolation is done.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filter_min_date</code></td>
+<td>
+<p>If <code>TRUE</code>, the default, filters the data to only
+contain data from <code>min_date</code> onward. Ensures that the few countries with
+observations from 2011 but nothing until 2018 do not skew results.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The data for each event is spread out between
+the start and end date, with the total displacement uniformly distributed
+across all days. For each country and displacement type (conflict, disaster,
+or other), all displacement on a day is summed up to create a total
+daily displacement figure.
+</p>
+<p>By default, data is backfilled for all countries and displacement types to
+the first reported date in the IDMC dataset. Data is always infilled with 0
+between start and end dates.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Data frame of daily displacement with the following columns:
+</p>
+
+<dl>
+<dt>iso3</dt>
+<dd>
+<p>Country ISO3 code.</p>
+</dd>
+<dt>country</dt>
+<dd>
+<p>Country or area name.</p>
+</dd>
+<dt>displacement_type</dt>
+<dd>
+<p>Type of displacement.</p>
+</dd>
+<dt>date</dt>
+<dd>
+<p>Date.</p>
+</dd>
+<dt>displacement_daily</dt>
+<dd>
+<p>Daily level of displacement.</p>
+</dd>
+</dl>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+idmc_get_data() %&gt;%
+  idmc_transform_daily()
+
+</code></pre>
+
+
+</div>

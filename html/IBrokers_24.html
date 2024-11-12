@@ -1,0 +1,173 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>eWrapper</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> eWrapper Closure For Message Processing </h2>
+
+<h3>Description</h3>
+
+<p>Create an eWrapper closure to allow for custom
+incoming message management.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">eWrapper(debug = FALSE, errfile=stderr())
+
+eWrapper.data(n)
+
+eWrapper.MktData.CSV(n=1)
+eWrapper.RealTimeBars.CSV(n=1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>debug</code></td>
+<td>
+<p> should debugging be enabled </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>errfile</code></td>
+<td>
+<p> where error messages are directed (stderr) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p> number of contracts being watched </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><span class="pkg">IBrokers</span> implements an eWrapper scheme similar
+to that provided by the official Java API.
+</p>
+<p>The general idea is that each real-time data
+capture function must manage all incoming signals
+correctly, while allowing for the end user to
+create custom handlers for each specific event.
+</p>
+<p>Internal to the <code>reqRealTimeBars</code>, 
+<code>reqMktData</code>, and <code>reqMktDepth</code>
+functions is a single call to the CALLBACK routine
+passed to it.  By default this is <code>twsCALLBACK</code> (see also).
+A standard argument to this callback is an
+eventWrapper — which is an instance of eWrapper.
+</p>
+<p>eWrapper is an <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> closure that contains a list
+of functions to manage all incoming message type, as
+found in <code>.twsIncomingMSG</code>.  Each message has a corresponding
+function in the eWrapper designed
+to handle the particular details of each incoming message type.
+</p>
+<p>There is also an embedded environment in which data
+can be saved and retrieved via a handful of accessor functions mimicking
+the standard <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> tools.
+</p>
+<p>The data environment is <code>.Data</code>, with accessor
+methods <code>get.Data</code>, <code>assign.Data</code>, and <code>remove.Data</code>.
+</p>
+<p>These methods can be called from the closure object <code>eWrapper$get.Data</code>,
+<code>eWrapper$assign.Data</code>, etc.
+</p>
+<p>The basic eWrapper call simply produces a visually informative
+display of the incoming stream.  E.g. bidSize data would be represented
+with a <em>bidSize</em> label, instead of the internal TWS code(s) returned
+by the TWS.
+</p>
+<p>By creating an instance of an eWrapper, accomplished by calling
+it as a function call, one can then modify any or all the particular
+methods embedded in the object.
+</p>
+<p>This allows for rapid customization, as well as a built in assurance
+that all incoming messages will be handled appropriately without
+additional programmer time and resources.
+</p>
+<p>An example of this ability to modify the object is given in
+the <code>eWrapper.MktData.CSV</code> code. This object produces
+output deisgned to be space efficient, as well as easily read back into
+any R session as a standard CSV file.
+</p>
+<p>Setting <code>debug=NULL</code> will cause empty function objects
+to be created within the eWrapper object returned.  This object
+can be treated as a template to implement only the methods
+that are needed.  By default, all functions silently return
+the entire message they would normally parse.  This includes
+<em>empty</em> functions created by setting debug to NULL.
+</p>
+<p><code>eWrapper.data()</code> allows for data states to be maintained
+from call to call, as an xts history of updates/messages is stored
+within the object.  This is designed to minimize calling overhead by
+removing unneeded function calls from each message parsed.
+</p>
+<p>Additional, but creating methods that update the internal environment
+of the eWrapper object, it is possible to maintain a snapshot of
+last k values for any field of interest.  This is directly applicable to
+implementing an automated strategy from within a custom <code>twsCALLBACK</code>
+method.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of functions [and optionally data] to be used for the <code>eventWrapper</code> argument
+to <code>reqMktData</code> and <code>reqMktDepth</code>
+</p>
+
+
+<h3>Note</h3>
+
+ 
+<p>It is possible to also attach data to the closure object, allowing for
+a single in-memory object to contain current top of book data. This is
+exemplified in the <code>eWrapper.MktData.CSV</code> code, and can be extended
+in the user's own direction.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Jeffrey A. Ryan </p>
+
+
+<h3>See Also</h3>
+
+ <p><code>twsCALLBACK</code>, <code>processMsg</code>  </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">myWrapper &lt;- eWrapper()
+
+str(myWrapper)
+
+# remove tickPrice action
+myWrapper$tickPrice &lt;- function(msg, timestamp, file, ...) {}
+
+# add new tickPrice action
+myWrapper$tickPrice &lt;- function(msg, timestamp, file, ...) { cat("tickPrice",msg) }
+
+# add new data into the object, and retrieve
+myWrapper$assign.Data("myData", 1010)
+myWrapper$get.Data("myData")
+
+## Not run: 
+tws &lt;- twsConnect()
+reqMktData(tws, twsSTK("SBUX"))
+reqMktData(tws, twsSTK("SBUX"), eventWrapper=myWrapper)
+twsDisconnect(tws)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

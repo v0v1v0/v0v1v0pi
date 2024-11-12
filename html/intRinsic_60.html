@@ -1,0 +1,247 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>twonn</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+<code>TWO-NN</code> estimator</h2>
+
+<h3>Description</h3>
+
+<p>The function can fit the two-nearest neighbor estimator within the maximum
+likelihood and the Bayesian frameworks. Also, one can obtain the estimates
+using least squares estimation, depending on the specification of the
+argument <code>method</code>. This model has been originally presented in
+<a href="https://www.nature.com/articles/s41598-017-11873-y">Facco et al., 2017</a>
+. See also <a href="https://www.nature.com/articles/s41598-022-20991-1">Denti et al., 2022</a>
+for more details.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">twonn(
+  X = NULL,
+  dist_mat = NULL,
+  mus = NULL,
+  method = c("mle", "linfit", "bayes"),
+  alpha = 0.95,
+  c_trimmed = 0.01,
+  unbiased = TRUE,
+  a_d = 0.001,
+  b_d = 0.001,
+  ...
+)
+
+## S3 method for class 'twonn_bayes'
+print(x, ...)
+
+## S3 method for class 'twonn_bayes'
+summary(object, ...)
+
+## S3 method for class 'summary.twonn_bayes'
+print(x, ...)
+
+## S3 method for class 'twonn_bayes'
+plot(x, plot_low = 0.001, plot_upp = NULL, by = 0.05, ...)
+
+## S3 method for class 'twonn_linfit'
+print(x, ...)
+
+## S3 method for class 'twonn_linfit'
+summary(object, ...)
+
+## S3 method for class 'summary.twonn_linfit'
+print(x, ...)
+
+## S3 method for class 'twonn_linfit'
+plot(x, ...)
+
+## S3 method for class 'twonn_mle'
+print(x, ...)
+
+## S3 method for class 'twonn_mle'
+summary(object, ...)
+
+## S3 method for class 'summary.twonn_mle'
+print(x, ...)
+
+## S3 method for class 'twonn_mle'
+plot(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>data matrix with <code>n</code> observations and <code>D</code> variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist_mat</code></td>
+<td>
+<p>distance matrix computed between the <code>n</code> observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mus</code></td>
+<td>
+<p>vector of second to first NN distance ratios.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>chosen estimation method. It can be
+</p>
+
+<dl>
+<dt><code>"mle"</code></dt>
+<dd>
+<p>for maximum likelihood estimator;</p>
+</dd>
+<dt><code>"linfit"</code></dt>
+<dd>
+<p>for estimation via the least squares approach;</p>
+</dd>
+<dt><code>"bayes"</code></dt>
+<dd>
+<p>for estimation with the Bayesian approach.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>the confidence level (for <code>mle</code> and least squares fit) or
+posterior probability in the credible interval (<code>bayes</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c_trimmed</code></td>
+<td>
+<p>the proportion of trimmed observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unbiased</code></td>
+<td>
+<p>logical, applicable when <code>method = "mle"</code>.
+If <code>TRUE</code>, the MLE is corrected to ensure unbiasedness.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a_d</code></td>
+<td>
+<p>shape parameter of the Gamma prior on the parameter <code>d</code>,
+applicable when <code>method = "bayes"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b_d</code></td>
+<td>
+<p>rate parameter of the Gamma prior on the parameter <code>d</code>,
+applicable when <code>method = "bayes"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>object of class <code>twonn_mle</code>, the output of the
+<code>twonn</code> function when <code>method = "mle"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>object of class <code>twonn_mle</code>, obtained from the function
+<code>twonn_mle()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_low</code></td>
+<td>
+<p>lower bound of the interval on which the posterior density
+is plotted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_upp</code></td>
+<td>
+<p>upper bound of the interval on which the posterior density
+is plotted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>by</code></td>
+<td>
+<p>step-size at which the sequence spanning the interval is
+incremented.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>list characterized by a class type that depends on the <code>method</code>
+chosen. Regardless of the <code>method</code>, the output list always contains the
+object <code>est</code>, which provides the estimated intrinsic dimension along
+with uncertainty quantification. The remaining objects vary with the
+estimation method. In particular, if
+</p>
+
+<dl>
+<dt><code>method = "mle"</code></dt>
+<dd>
+<p>the output reports the MLE and the relative
+confidence interval;</p>
+</dd>
+<dt><code>method = "linfit"</code></dt>
+<dd>
+<p>the output includes the <code>lm()</code> object used for the computation;</p>
+</dd>
+<dt><code>method = "bayes"</code></dt>
+<dd>
+<p>the output contains the (1 + <code>alpha</code>) / 2 and (1 - <code>alpha</code>) / 2 quantiles, mean, mode, and median of the posterior distribution of <code>d</code>.</p>
+</dd>
+</dl>
+<h3>References</h3>
+
+<p>Facco E, D'Errico M, Rodriguez A, Laio A (2017). "Estimating the intrinsic
+dimension of datasets by a minimal neighborhood information."
+Scientific Reports, 7(1).
+ISSN 20452322, <a href="https://doi.org/10.1038/s41598-017-11873-y">doi:10.1038/s41598-017-11873-y</a>.
+</p>
+<p>Denti F, Doimo D, Laio A, Mira A (2022). "The generalized ratios intrinsic
+dimension estimator."
+Scientific Reports, 12(20005).
+ISSN  20452322, <a href="https://doi.org/10.1038/s41598-022-20991-1">doi:10.1038/s41598-022-20991-1</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># dataset with 1000 observations and id = 2
+X &lt;- replicate(2,rnorm(1000))
+twonn(X)
+# dataset with 1000 observations and id = 3
+Y &lt;- replicate(3,runif(1000))
+#  Bayesian and least squares estimate from distance matrix
+dm &lt;- as.matrix(dist(Y,method = "manhattan"))
+twonn(dist_mat = dm,method = "bayes")
+twonn(dist_mat = dm,method = "linfit")
+
+</code></pre>
+
+
+</div>

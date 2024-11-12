@@ -1,0 +1,113 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>summarise_loading</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Summarise mechanical loading variables</h2>
+
+<h3>Description</h3>
+
+<p>Creates a summary table of the selected mechanical loading variables
+including the number of peaks, the minimum, maximum, mean and standard
+deviation values of these peaks and also the number of peaks inside a
+given magnitude range. The summaries can be displayed by day or as a
+daily average.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">summarise_loading(
+  data,
+  variable,
+  vector,
+  daily_average = TRUE,
+  ranges_acc = NULL,
+  ranges_grf = NULL,
+  ranges_lr = NULL,
+  save_summary = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>An <code>impactr_peaks</code> object, as obtained with
+find_peaks() and/or
+predict_loading().</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variable</code></td>
+<td>
+<p>A character vector indicating the variable to summarise.
+Can be either "acc" (for the acceleration peaks), "grf" (for the ground
+reaction force peaks), "lr" (for the loading rate peaks) or "all" (for
+all variables).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vector</code></td>
+<td>
+<p>A character string indicating which vector to use to create
+the summaries. Can be "resultant", "vertical" or "all".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>daily_average</code></td>
+<td>
+<p>Create a daily average summary? Can be <code>TRUE</code>
+(default) or <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ranges_acc, ranges_grf, ranges_lr</code></td>
+<td>
+<p>A numeric vector to specify ranges in
+which to count the peaks. <em>E.g.</em>, If <code>ranges_acc = c(1, 2, 3)</code>,
+it will summarise the number of acceleration peaks from 1 to 2<em>g</em>,
+from 2 to 3<em>g</em> and above 3<em>g</em>. Set to <code>NULL</code> (default) if
+no summary by range will be provided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>save_summary</code></td>
+<td>
+<p>Indicates whether or not to save the summary to a csv
+file(s). Defaults to <code>FALSE</code>. Provide a valid path to a directory
+as a character string to save all generated summaries.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A tibble (or a list of tibbles) with the requested summaries.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Ensure that {accdata} package is available before running the example.
+# If it is not, run install_accdata() to install the required package.
+if (requireNamespace("accdata", quietly = TRUE)) {
+  data &lt;- import_dataset("daily_acc_3d")
+  data &lt;- remove_nonwear(data)
+  data &lt;- filter_acc(data)
+  data &lt;- find_peaks(data, vector = "vertical")
+  summarise_loading(
+    data,
+    variable = "acc", vector = "vertical",
+    ranges_acc = 1:5
+  )
+}
+
+</code></pre>
+
+
+</div>

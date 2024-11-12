@@ -1,0 +1,59 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>orbi_flag_weak_isotopocules</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Flag weak isotopocules</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>orbi_filter_weak_isotopocules()</code> flags isotopocules that are not detected in a minimum of <code>min_percent</code> of scans. This function evaluates weak isotopocules within each "filename", "block", "segment" and "injection" (if these columns exist), in addition to any groupings already defined before calling this function using dplyr's <code>group_by()</code>. It restores the original groupings in the returned data frame.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">orbi_flag_weak_isotopocules(dataset, min_percent)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dataset</code></td>
+<td>
+<p>A simplified IsoX data frame to be processed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_percent</code></td>
+<td>
+<p>A number between 0 and 90. Isotopocule must be observed in at least this percentage of scans (please note: the percentage is defined relative to the most commonly observed isotopocule of each compound)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The input <code>dataset</code> is expected to have at least these 8 columns: <code>filename</code>, <code>scan.no</code>, <code>time.min</code>, <code>compound</code>, <code>isotopocule</code>, <code>ions.incremental</code>, <code>tic</code>, <code>it.ms</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame with new column <code>is_weak_isotopocule</code> that flags weak isotopocules.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">fpath &lt;- system.file("extdata", "testfile_flow.isox", package = "isoorbi")
+df &lt;- orbi_read_isox(file = fpath) |&gt;
+      orbi_simplify_isox() |&gt;
+      orbi_flag_weak_isotopocules(min_percent = 2)
+
+</code></pre>
+
+
+</div>

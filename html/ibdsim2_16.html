@@ -1,0 +1,214 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ibdsim</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>IBD simulation</h2>
+
+<h3>Description</h3>
+
+<p>This is the main function of the package, simulating the recombination
+process in each meioses of a pedigree. The output summarises the IBD segments
+between all or a subset of individuals.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ibdsim(
+  x,
+  N = 1,
+  ids = labels(x),
+  map = "decode",
+  model = c("chi", "haldane"),
+  skipRecomb = NULL,
+  simplify1 = TRUE,
+  seed = NULL,
+  verbose = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A <code>pedtools::ped()</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>A positive integer indicating the number of simulations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ids</code></td>
+<td>
+<p>A subset of pedigree members whose IBD sharing should be analysed.
+If NULL, all members are included.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>map</code></td>
+<td>
+<p>The genetic map to be used in the simulations: Allowed values are:
+</p>
+
+<ul>
+<li>
+<p> a <code>genomeMap</code> object, typically produced by <code>loadMap()</code>
+</p>
+</li>
+<li>
+<p> a single <code>chromMap</code> object, for instance as produced by <code>uniformMap()</code>
+</p>
+</li>
+<li>
+<p> a character, which is passed on to <code>loadMap()</code> with default parameters.
+Currently the only valid option is "decode19" (or abbreviations of this).
+</p>
+</li>
+</ul>
+<p>Default: "decode19".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>Either "chi" or "haldane", indicating the statistical model for
+recombination (see details). Default: "chi".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>skipRecomb</code></td>
+<td>
+<p>A vector of ID labels indicating individuals whose meioses
+should be simulated without recombination. (Each child will then receive a
+random strand of each chromosome.) The default action is to skip
+recombination in founders who are uninformative for IBD sharing in the
+<code>ids</code> individuals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>simplify1</code></td>
+<td>
+<p>A logical, by default TRUE, removing the outer list layer
+when N = 1. See Value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>An integer to be passed on to <code>set.seed()</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>A logical.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Each simulation starts by unique alleles (labelled 1, 2, ...) being
+distributed to the pedigree founders. In each meiosis, homologue chromosomes
+are made to recombine according to the value of <code>model</code>:
+</p>
+
+<ul>
+<li> <p><code>model = "haldane"</code>: In this model, crossover events are modelled as a
+Poisson process along each chromosome.
+</p>
+</li>
+<li> <p><code>model = "chi"</code> (default): This uses a renewal process along the
+four-strand bundle, with waiting times following a chi square distribution.
+</p>
+</li>
+</ul>
+<p>Recombination rates along each chromosome are determined by the <code>map</code>
+parameter. The default value ("decode19") loads a thinned version of the
+recombination map of the human genome published by Halldorsson et al (2019).
+</p>
+<p>In many applications, the fine-scale default map is not necessary, and should
+be replaced by simpler maps with constant recombination rates. See
+<code>uniformMap()</code> and <code>loadMap()</code> for ways to produce such maps.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of <code>N</code> objects of class <code>genomeSim</code>.
+</p>
+<p>If N = 1 the outer list layer is removed by default, which is typically
+desired in interactive use (especially when piping). To enforce a list
+output, add <code>simplify1 = FALSE</code>.
+</p>
+<p>A <code>genomeSim</code> object is essentially a numerical matrix describing the
+allele flow through the pedigree in a single simulated. Each row
+corresponds to a chromosomal segment. The first 3 columns (chrom, startMB,
+endMB) describe the physical location of the segment. Next, the genetic
+coordinates (startCM, endCM), which are computed from <code>map</code> by averaging
+the male and female values. Then follow the allele columns, two for each
+individual in <code>ids</code>, suffixed by ":p" and ":m" signifying the paternal and
+maternal alleles, respectively.
+</p>
+<p>If <code>ids</code> has length 1, a column named <code>Aut</code> is added, whose entries are 1
+for autozygous segments and 0 otherwise.
+</p>
+<p>If <code>ids</code> has length 2, two columns are added:
+</p>
+
+<ul>
+<li> <p><code>IBD</code> : The IBD status of each segment (= number of alleles shared
+identical by descent). For a given segment, the IBD status is either 0, 1,
+2 or NA. If either individual is autozygous in a segment, the IBD status is
+reported as NA. With inbred individuals the <code>Sigma</code> column (see below) is
+more informative than the <code>IBD</code> column.
+</p>
+</li>
+<li> <p><code>Sigma</code> : The condensed identity ("Jacquard") state of each segment,
+given as an integer in the range 1-9. The numbers correspond to the
+standard ordering of the condensed states. In particular, for non-inbred
+individuals, the states 9, 8, 7 correspond to IBD status 0, 1, 2
+respectively.
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+<p>Halldorsson et al. <em>Characterizing mutagenic effects of
+recombination through a sequence-level genetic map.</em> Science 363, no. 6425
+(2019).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+### Example 1: Half siblings ###
+
+hs = halfSibPed()
+sim = ibdsim(hs, map = uniformMap(M = 1), seed = 10)
+sim
+
+# Plot haplotypes
+haploDraw(hs, sim)
+
+#' ### Example 2: Full sib mating ###
+
+x = fullSibMating(1)
+sim = ibdsim(x, ids = 5:6, map = uniformMap(M = 10), seed = 1)
+head(sim)
+
+# All 9 identity states are present
+stopifnot(setequal(sim[, 'Sigma'], 1:9))
+
+</code></pre>
+
+
+</div>

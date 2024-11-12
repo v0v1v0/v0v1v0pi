@@ -1,0 +1,165 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>selepe</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>QC for Atmospheric Pressure (PP)</h2>
+
+<h3>Description</h3>
+
+<p>This function will centralize temperature-like QC routines. It will create a file in the folder QC
+with an additional 0/1 column where "1" means test failed.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">selepe(
+  element = "PP",
+  large = 15000,
+  small = 8000,
+  maxjump = 2000,
+  maxseq = 3,
+  margina = 0.999,
+  level = 5,
+  window = 30,
+  roundmax = 10,
+  blockmanymonth = 15,
+  blockmanyyear = 180,
+  blocksizeround = 20,
+  qjump = 0.999,
+  tjump = 1.5,
+  inisia = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>element</code></td>
+<td>
+<p>two-letters ECA&amp;D code for the element (PP for sea level pressure)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>large</code></td>
+<td>
+<p>value above which the observation is considered physically impossible for the region</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>small</code></td>
+<td>
+<p>value below which the observation is considered physically impossible for the region</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxjump</code></td>
+<td>
+<p>forcing for jumps2() in absolute mode (in the same units of the variable). Passed on to jumps2(). See ?jumps2 for further details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxseq</code></td>
+<td>
+<p>maximum number of consecutive repeated values, for flat function (11.1,11.1,11.1 would be 3 consecutive values)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>margina</code></td>
+<td>
+<p>tolerance margin, expressed as quantile of the differences, FUNCTION: newfriki(). Passed on to newfriki(). See ?newfriki for details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+<p>number of IQRs for IQR outliers</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>window</code></td>
+<td>
+<p>window, in days, for IQR outliers</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>roundmax</code></td>
+<td>
+<p>maximum number of consecutive decimal part value, for flat function (10.0, 11.0, 12.0 would be 3 consecutive values)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>blockmanymonth</code></td>
+<td>
+<p>maximum number of equal values in a month, FUNCTION: toomany()</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>blockmanyyear</code></td>
+<td>
+<p>maximum number of equal values in a year, FUNCTION: toomany()</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>blocksizeround</code></td>
+<td>
+<p>maximum number of values in a month with the same decimal, for rounding function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qjump</code></td>
+<td>
+<p>quantile for jumps2() in quantile mode. Passed on to jumps2(). See ?jumps2 for further details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tjump</code></td>
+<td>
+<p>factor to multiply the quantile value for jumps2(). Passed on to jumps2(). See ?jumps2 for further details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inisia</code></td>
+<td>
+<p>a logical flag. If it is TRUE inithome() will be called</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>results of QC for PP
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#Set a temporal working directory:
+wd &lt;- tempdir()
+wd0 &lt;- setwd(wd)
+#Create subdirectory where raw data files have to be located
+dir.create(file.path(wd, 'raw'))
+options("homefolder"='./'); options("blend"=FALSE)
+#Extract the ECA&amp;D data and station files from the example data folder
+path2pplist&lt;-system.file("extdata", "ECA_blend_source_pp.txt", package = "INQC")
+pplist&lt;-readr::read_lines_raw(path2pplist)
+readr::write_lines(pplist,'ECA_blend_source_pp.txt')
+path2ppdata&lt;-system.file("extdata", "PP_SOUID132729.txt", package = "INQC")
+ppdata&lt;-readr::read_lines_raw(path2ppdata)
+readr::write_lines(ppdata, file=paste(wd,'/raw/PP_SOUID132729.txt',sep=''))
+#Perform QC of Atmospheric Pressure data
+selepe(inisia=TRUE)
+#Remove some temporary files
+list = list.files(pattern = "Rfwf")
+file.remove(list)
+#Return to user's working directory:
+setwd(wd0)
+#The QC results can be found in the directory:
+print(wd)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,129 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sim.epidemic</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulation of an epidemic in space and time</h2>
+
+<h3>Description</h3>
+
+<p>A function which simulates the spatial spread of infections through time given the reproductive number (<code>R</code>),
+a function describing the spatial transmission kernel (<code>trans.kern.func</code>), and the mean and standard deviation
+of the generation time distribution (<code>gen.t.mean</code> and <code>gen.t.sd</code>) for the infecting pathogen. The function returns
+the location (<code>x</code>, <code>y</code>) and time (<code>t</code>) for each case of infection in the simulation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sim.epidemic(
+  R,
+  gen.t.mean,
+  gen.t.sd,
+  trans.kern.func,
+  tot.generations = 10,
+  min.cases = 0,
+  max.try = 1000
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+<p>a scalar or a vector of length <code>tot.generations</code> providing the reproductive number for the epidemic.
+If scalar, the R value is constant. If a vector, the R value varies according to each generation in the vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gen.t.mean</code></td>
+<td>
+<p>mean of generation time</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gen.t.sd</code></td>
+<td>
+<p>standard deviation of the generation time (assumed to be normally distributed)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trans.kern.func</code></td>
+<td>
+<p>a function for the transmission kernel that takes <code>n</code> as an arguement.
+Function and associated parameters must be given in a list object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tot.generations</code></td>
+<td>
+<p>the total number of generations in the epidemic, where the index case (x,y,t = [0,0,0]) is considered generation zero (default = 10)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.cases</code></td>
+<td>
+<p>the minimum number of cases in the epidemic (default = 0)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.try</code></td>
+<td>
+<p>maximum number of tries to acheive the minimum number of cases (default = 1000)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a numerical matrix with three columns giving the coordinates <code>x</code> and <code>y</code>, and time <code>t</code> of simulated cases
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>John Giles, Justin Lessler, and Henrik Salje
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+     
+set.seed(1)
+
+dist.func &lt;- alist(n=1, a=1/100, rexp(n, a)) # Exponential transmission kernel with mean = sd = 100
+
+# Simulate epidemic with constant R value
+a &lt;- sim.epidemic(R=1.5,
+             gen.t.mean=7,
+             gen.t.sd=2,
+             tot.generations=15,
+             min.cases=100,
+             trans.kern.func=dist.func)
+
+sim.plot(a)
+
+# Simulate an epidemic with variable R value
+r1 &lt;- 2
+r2 &lt;- 0.25
+tg &lt;- 25
+R &lt;- seq(r1, r2, (r2 -r1)/(tg - 1))
+
+b &lt;- sim.epidemic(R=R,
+             gen.t.mean=7,
+             gen.t.sd=2,
+             tot.generations=tg,
+             min.cases=100,
+             trans.kern.func=dist.func)
+
+sim.plot(b)
+
+
+</code></pre>
+
+
+</div>

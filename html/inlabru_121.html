@@ -1,0 +1,360 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>component</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Latent model component construction</h2>
+
+<h3>Description</h3>
+
+<p>Similar to <code>glm()</code>, <code>gam()</code> and <code>inla()</code>, <code>bru()</code> models can be constructed via
+a formula-like syntax, where each latent effect is specified. However, in
+addition to the parts of the syntax compatible with <code>INLA::inla</code>, <code>bru</code>
+components offer additional functionality which facilitates modelling, and
+the predictor expression can be specified separately, allowing more complex
+and non-linear predictors to be defined. The formula syntax is just a way to
+allow all model components to be defined in a single line of code, but the
+definitions can optionally be split up into separate component definitions.
+See Details for more information.
+</p>
+<p>The <code>component</code> methods all rely on the <code>component.character()</code> method, that
+defines a model component with a given label/name. The user usually
+doesn't need to call these methods directly, but can instead supply a
+formula expression that can be interpreted by the <code>component_list.formula()</code>
+method, called inside <code>bru()</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">component(...)
+
+## S3 method for class 'character'
+component(
+  object,
+  main = NULL,
+  weights = NULL,
+  ...,
+  model = NULL,
+  mapper = NULL,
+  main_layer = NULL,
+  main_selector = NULL,
+  n = NULL,
+  values = NULL,
+  season.length = NULL,
+  copy = NULL,
+  weights_layer = NULL,
+  weights_selector = NULL,
+  group = 1L,
+  group_mapper = NULL,
+  group_layer = NULL,
+  group_selector = NULL,
+  ngroup = NULL,
+  control.group = NULL,
+  replicate = 1L,
+  replicate_mapper = NULL,
+  replicate_layer = NULL,
+  replicate_selector = NULL,
+  nrep = NULL,
+  marginal = NULL,
+  A.msk = deprecated(),
+  .envir = parent.frame(),
+  envir_extra = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Parameters passed on to other methods</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>A character label for the component</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p><code>main</code> takes an R expression that evaluates to where the latent variables
+should be evaluated (coordinates, indices, continuous scalar (for rw2 etc)).
+Arguments starting with weights, group, replicate behave similarly to main,
+but for the corresponding features of <code>INLA::f()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights, weights_layer, weights_selector</code></td>
+<td>
+<p>Optional specification of effect scaling weights.
+Same syntax as for <code>main</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>Either one of "const" (same as "offset"), "factor_full",
+"factor_contrast", "linear",
+"fixed", or a model name or
+object accepted by INLA's <code>f</code> function. If set to NULL, then "linear" is used
+for vector inputs, and "fixed" for matrix input (converted internally to
+an iid model with fixed precision)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mapper</code></td>
+<td>
+<p>Information about how to do the mapping from the values evaluated in <code>main</code>,
+and to the latent variables. Auto-detects spde model objects in model and
+extracts the mesh object to use as the mapper, and auto-generates mappers
+for indexed models. (Default: NULL, for auto-determination)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main_layer, main_selector</code></td>
+<td>
+<p>The <code style="white-space: pre;">⁠_layer⁠</code> input should evaluate to a numeric index or character name or
+vector of which
+layer/variable to extract from a covariate data object given in <code>main</code>.
+(Default: NULL if <code style="white-space: pre;">⁠_selector⁠</code> is given. Otherwise the effect component name,
+if it exists in the covariate object, and otherwise the first column of
+the covariate data frame)
+</p>
+<p>The <code style="white-space: pre;">⁠_selector⁠</code> value should be a character name of a variable
+whose contents determines which layer to extract from a covariate for each
+data point. (Default: NULL)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>The number of latent variables in the model. Should be auto-detected
+for most or all models (Default: NULL, for auto-detection).
+An error is given if it can't figure it out by itself.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>values</code></td>
+<td>
+<p>Specifies for what covariate/index values INLA should build
+the latent model. Normally generated internally based on the mapping details.
+(Default: NULL, for auto-determination)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>season.length</code></td>
+<td>
+<p>Passed on to <code>INLA::f()</code> for model <code>"seasonal"</code>
+(TODO: check if this parameter is still fully handled)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>copy</code></td>
+<td>
+<p>character; label of other component that this component should
+be a copy of. If the <code>fixed = FALSE</code>, a scaling constant is estimated, via a
+hyperparameter. If <code>fixed = TRUE</code>, the component scaling is fixed, by
+default to 1; for fixed scaling, it's more efficient to express the scaling
+in the predictor expression instead of making a copy component.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group, group_mapper, group_layer, group_selector, ngroup</code></td>
+<td>
+<p>Optional specification of kronecker/group model indexing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control.group</code></td>
+<td>
+<p><code>list</code> of kronecker/group model parameters, currently
+passed directly on to <code>INLA::f</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>replicate, replicate_mapper, replicate_layer, replicate_selector, nrep</code></td>
+<td>
+<p>Optional specification of indices for an independent
+replication model. Same syntax as for <code>main</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>marginal</code></td>
+<td>
+<p>May specify a <code>bru_mapper_marginal()</code> mapper,
+that is applied before scaling by <code>weights</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>A.msk</code></td>
+<td>
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated"><img src="../help/figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a> and has no effect.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.envir</code></td>
+<td>
+<p>Evaluation environment</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>envir_extra</code></td>
+<td>
+<p>TODO: check/fix this parameter.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>As shorthand, <code>bru()</code> will understand basic additive formulae describing fixed effect
+models. For instance, the
+components specification <code>y ~ x</code> will define the linear combination of an
+effect named <code>x</code> and an intercept to
+the response <code>y</code> with respect to the likelihood family stated when calling <code>bru()</code>. Mathematically,
+the linear predictor <code class="reqn">\eta</code> would be written down as
+</p>
+<p style="text-align: center;"><code class="reqn">\eta = \beta * x + c,</code>
+</p>
+
+<p>where:
+</p>
+
+<dl>
+<dt><code class="reqn">c</code></dt>
+<dd>
+<p>is the <em>intercept</em></p>
+</dd>
+<dt><code class="reqn">x</code></dt>
+<dd>
+<p>is a <em>covariate</em></p>
+</dd>
+<dt><code class="reqn">\beta</code></dt>
+<dd>
+<p>is a <em>latent variable</em> associated with <code class="reqn">x</code> and</p>
+</dd>
+<dt><code class="reqn">\psi = \beta * x</code></dt>
+<dd>
+<p> is called the <em>effect</em> of <code class="reqn">x</code></p>
+</dd>
+</dl>
+<p>A problem that arises when using this kind of R formula is that it does not
+clearly reflect the mathematical
+formula. For instance, when providing the formula to inla, the resulting
+object will refer to the random
+effect <code class="reqn">\psi = \beta * x </code> as <code>x</code>.
+Hence, it is not clear when <code>x</code> refers to the covariate
+or the effect of the covariate.
+</p>
+<p>The <code>component.character</code> method is inlabru's equivalent to INLA's
+<code>f</code> function but adds functionality that is unique to inlabru.
+</p>
+<p>Deprecated parameters:
+</p>
+
+<ul>
+<li>
+<p> map: Use <code>main</code> instead.
+</p>
+</li>
+<li>
+<p> mesh: Use <code>mapper</code> instead.
+</p>
+</li>
+</ul>
+<h3>Naming random effects</h3>
+
+<p>In INLA, the <code>f()</code> notation is used to define more complex models, but
+a simple linear effect model can also be expressed as
+</p>
+<ul><li>
+<p><code>formula = y ~ f(x, model = "linear")</code>,</p>
+</li></ul>
+<p>where <code>f()</code> is the inla specific function to set up random effects of all kinds. The underlying
+predictor would again be <code class="reqn">\eta = \beta * x + c</code> but the result of fitting the model would state
+<code>x</code> as the random effect's name. bru allows rewriting this formula in order to explicitly state
+the name of the random effect and the name of the associated covariate. This is achieved by replacing <code>f</code>
+with an arbitrary name that we wish to assign to the effect, e.g.
+</p>
+<ul><li>
+<p><code>components = y ~ psi(x, model = "linear")</code>.</p>
+</li></ul>
+<p>Being able to discriminate between <code class="reqn">x</code> and <code class="reqn">\psi</code> is relevant because of two functionalities
+bru offers. The formula parameters of both <code>bru()</code> and the prediction method predict.bru
+are interpreted in the mathematical sense. For instance, <code>predict</code> may be used to analyze the
+analytical combination of the covariate <code class="reqn">x</code> and the intercept using
+</p>
+<ul><li>
+<p><code style="white-space: pre;">⁠predict(fit, data.frame(x=2)), ~ exp(psi + Intercept)⁠</code>.</p>
+</li></ul>
+<p>which corresponds to the mathematical expression e <sup>β + c</sup>.
+</p>
+<p>On the other hand, predict may be used to only look at a transformation of
+the latent variable <code class="reqn">\beta_\psi</code>
+</p>
+<ul><li>
+<p><code>predict(fit, NULL, ~ exp(psi_latent))</code>.</p>
+</li></ul>
+<p>which corresponds to the mathematical expression e <sup>β</sup>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Fabian E. Bachl <a href="mailto:bachlfab@gmail.com">bachlfab@gmail.com</a> and
+Finn Lindgren <a href="mailto:Finn.Lindgren@gmail.com">Finn.Lindgren@gmail.com</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other component constructors: 
+<code>component_list()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># As an example, let us create a linear component. Here, the component is
+# called "myLinearEffectOfX" while the covariate the component acts on is
+# called "x". Note that a list of components is returned because the
+# formula may define multiple components
+
+cmp &lt;- component_list(~ myLinearEffectOfX(main = x, model = "linear"))
+summary(cmp)
+# Equivalent shortcuts:
+cmp &lt;- component_list(~ myLinearEffectOfX(x, model = "linear"))
+cmp &lt;- component_list(~ myLinearEffectOfX(x))
+# Individual component
+cmp &lt;- component("myLinearEffectOfX", main = x, model = "linear")
+summary(cmp)
+
+if (bru_safe_inla(quietly = TRUE)) {
+  # As an example, let us create a linear component. Here, the component is
+  # called "myEffectOfX" while the covariate the component acts on is called "x":
+
+  cmp &lt;- component("myEffectOfX", main = x, model = "linear")
+  summary(cmp)
+
+  # A more complicated component:
+  cmp &lt;- component("myEffectOfX",
+    main = x,
+    model = INLA::inla.spde2.matern(fm_mesh_1d(1:10))
+  )
+
+  # Compound fixed effect component, where x and z are in the input data.
+  # The formula will be passed on to MatrixModels::model.Matrix:
+  cmp &lt;- component("eff", ~ -1 + x:z, model = "fixed")
+  summary(cmp)
+}
+
+
+</code></pre>
+
+
+</div>

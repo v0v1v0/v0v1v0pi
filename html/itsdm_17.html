@@ -1,0 +1,91 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot.EnvironmentalOutlier</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Exhibit suspicious outliers in an observation dataset.</h2>
+
+<h3>Description</h3>
+
+<p>Display observations and potential outliers diagnosed by
+function <code>suspicious_env_outliers</code> in a dataset.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'EnvironmentalOutlier'
+plot(x, overlay_raster = NULL, pts_alpha = 0.5, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>(<code>EnvironmentalOutlier</code>) The PAConversion object to plot.
+It could be the return of function <code>suspicious_env_outliers</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overlay_raster</code></td>
+<td>
+<p>(<code>RasterLayer</code> or <code>stars</code>) The environmental raster to plot
+together with points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pts_alpha</code></td>
+<td>
+<p>(<code>numeric</code>) The <code>alpha</code> used by <code>geom_sf</code> to show points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Not used.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A <code>ggplot2</code> figure of outliers distribution among all observations.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>suspicious_env_outliers</code>, <code>print.EnvironmentalOutlier</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(dplyr)
+library(sf)
+library(stars)
+library(itsdm)
+
+data("occ_virtual_species")
+env_vars &lt;- system.file(
+  'extdata/bioclim_tanzania_10min.tif',
+  package = 'itsdm') %&gt;% read_stars() %&gt;%
+  slice('band', c(1, 5, 12, 16))
+
+occ_outliers &lt;- suspicious_env_outliers(
+  occ = occ_virtual_species, variables = env_vars,
+  z_outlier = 3.5, outliers_print = 4L)
+
+plot(occ_outliers)
+plot(occ_outliers,
+  overlay_raster = env_vars %&gt;% slice('band', 1))
+
+
+</code></pre>
+
+
+</div>

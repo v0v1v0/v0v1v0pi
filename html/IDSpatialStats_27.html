@@ -1,0 +1,130 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get.theta</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generalized version of <code>get.theta</code>
+</h2>
+
+<h3>Description</h3>
+
+<p>Generalized version of the <code>get.theta</code> function that takes in an arbitrary function and
+returns the odds that a point within a particular range of a point of interest shares the relationship
+specified by the passed in function with that point.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get.theta(posmat, fun, r = 1, r.low = rep(0, length(r)), data.frame = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>posmat</code></td>
+<td>
+<p>a matrix with columns x, y and any other named columns
+columns needed by fun</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fun</code></td>
+<td>
+<p>a function that takes in two rows of posmat and returns:
+</p>
+
+<ol>
+<li>
+<p>  for pairs that are (potentially) related
+</p>
+</li>
+<li>
+<p> for pairs that are unrelated
+</p>
+</li>
+<li>
+<p> for pairs that should be ignored all together</p>
+</li>
+</ol>
+<p>Note that names from <code>posmat</code> are not preserved in calls to <code>fun</code>, so the columns of the matrix should be
+referenced numerically
+so this is not available to the fun</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>the series of spatial distances (or there maximums) we are
+interested in</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r.low</code></td>
+<td>
+<p>the low end of each range, 0 by default</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.frame</code></td>
+<td>
+<p>logical indicating whether to return results as a data frame (default = TRUE)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>theta value for each distance range that we look at. Where:
+</p>
+<p style="text-align: center;"><code class="reqn"> \theta(d_1,d_2) = \frac{\sum \boldsymbol{1} d_{ij} \in [d_1,d_2)) \boldsymbol{1} (f(i,j)=1) }{\sum \sum \boldsymbol{1} d_{ij} \in [d_1,d_2)) \boldsymbol{1} (f(i,j)=2) }</code>
+</p>
+
+
+
+<h3>Author(s)</h3>
+
+<p>Justin Lessler and Henrik Salje
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other get.theta: 
+<code>get.theta.bootstrap()</code>,
+<code>get.theta.ci()</code>,
+<code>get.theta.permute()</code>,
+<code>get.theta.typed()</code>,
+<code>get.theta.typed.bootstrap()</code>,
+<code>get.theta.typed.permute()</code>
+</p>
+<p>Other spatialtau: 
+<code>get.pi()</code>,
+<code>get.tau()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+data(DengueSimR02)
+
+r.max&lt;-seq(20,1000,20)
+r.min&lt;-seq(0,980,20)
+
+sero.type.func&lt;-function(a,b,tlimit=20){
+  if(a[5]==b[5]&amp;(abs(a[3]-b[3])&lt;=tlimit)){rc=1}
+  else{rc=2}
+  return(rc)
+}
+
+sero.theta&lt;-get.theta(DengueSimR02,sero.type.func,r=r.max,r.low=r.min)
+
+
+</code></pre>
+
+
+</div>

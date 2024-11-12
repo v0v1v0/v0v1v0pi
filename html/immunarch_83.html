@@ -1,0 +1,91 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>repClonalFamily</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Builds a phylogenetic tree using the sequences of a clonal lineage</h2>
+
+<h3>Description</h3>
+
+<p>This function uses the PHYLIP package to make phylogenetic analysis.
+For making trees it uses maximum parsimony methods.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">repClonalFamily(.data, .vis_groups, .threads, .nofail)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>.data</code></td>
+<td>
+<p>The data to be processed, output of repAlignLineage() function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.vis_groups</code></td>
+<td>
+<p>Groups for visualization, used to annotate specific clones on chart
+and display them in different colors. This is a named list, where names are for the chart legend,
+and list items are clone IDs that belong to the groups. It's not necessary to assign groups to
+all clonotypes; unassigned ones will be displayed on the chart as "Clonotype" category.
+It's also possible to assign multiple clonotypes to the same group by providing nested lists
+or vectors of clone IDs instead of single clone IDs.
+Example: .vis_groups = list(A = 817, B = 201, C = list(303, 42))</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.threads</code></td>
+<td>
+<p>Number of threads to use.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.nofail</code></td>
+<td>
+<p>Returns NA instead of stopping if PHYLIP is not installed.
+Used to avoid raising errors in examples on computers where PHYLIP is not installed.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Dataframe or list of dataframes (if input is a list with multiple samples).
+The dataframe has these columns:
+* Cluster: cluster name
+* Germline.Input: germline sequence, like it was in the input; not aligned
+* Germline.Output: germline sequence, parsed from PHYLIP dnapars function output;
+it contains difference of germline from the common ancestor; "." characters mean
+matching letters
+* Common.Ancestor: common ancestor sequence, parsed from PHYLIP dnapars function output
+* Trunk.Length: mean trunk length, representing the distance between the most recent
+common ancestor and germline sequence as a measure of the maturity of a lineage
+* Tree: output tree in "phylo" format, loaded from by PHYLIP dnapars function output
+* TreeStats: nested dataframe containing data about tree nodes, needed for visualization
+* Sequences: nested dataframe containing all sequences for this combination of cluster
+and germline; it contains regions from original sequences, saved for
+repSomaticHypermutation() calculation, and also data needed for visualizations
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(bcrdata)
+bcr_data &lt;- bcrdata$data
+
+bcr_data %&gt;%
+  seqCluster(seqDist(bcr_data), .fixed_threshold = 3) %&gt;%
+  repGermline(.threads = 1) %&gt;%
+  repAlignLineage(.min_lineage_sequences = 2, .align_threads = 2, .nofail = TRUE) %&gt;%
+  repClonalFamily(.threads = 1, .nofail = TRUE)
+</code></pre>
+
+
+</div>

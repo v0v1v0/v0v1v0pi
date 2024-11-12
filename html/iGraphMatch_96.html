@@ -1,0 +1,133 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>graph_match_percolation</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Percolation Graph Matching Methods</h2>
+
+<h3>Description</h3>
+
+<p>Percolation Graph Matching Methods
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">graph_match_percolation(
+  A,
+  B,
+  seeds,
+  similarity = NULL,
+  r = 2,
+  ExpandWhenStuck = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>A matrix, igraph object, or list of either.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>A matrix, igraph object, or list of either.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seeds</code></td>
+<td>
+<p>A vector of integers or logicals, a matrix or a data frame. If
+the seed pairs have the same indices in both graphs then seeds can be a
+vector. If not, seeds must be  a matrix
+or a data frame, with the first column being the indices of <code class="reqn">G_1</code> and
+the second column being the corresponding indices of <code class="reqn">G_2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>similarity</code></td>
+<td>
+<p>A matrix. An <code>n-by-n</code> matrix containing vertex similarities.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>A number. Threshold of neighboring pair scores.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ExpandWhenStuck</code></td>
+<td>
+<p>A logical. TRUE if expand the seed set when Percolation algorithm
+stops before matching all the vertices.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>graph_match_percolation</code> returns an object of class "<code>graphMatch</code>" which is a
+list containing the following components:
+</p>
+
+<dl>
+<dt>corr_A</dt>
+<dd>
+<p>matching correspondence in <code class="reqn">G_1</code></p>
+</dd>
+<dt>corr_B</dt>
+<dd>
+<p>matching correspondence in <code class="reqn">G_2</code></p>
+</dd>
+<dt>match_order</dt>
+<dd>
+<p>the order of vertices getting matched</p>
+</dd>
+<dt>seeds</dt>
+<dd>
+<p>a vector of logicals indicating if the corresponding vertex is a seed</p>
+</dd>
+</dl>
+<h3>References</h3>
+
+<p>L. Yartseva and M. Grossglauser (2013), <em>On the performance
+of percolation graph matching</em>. COSN, Boston, MA, USA, pages 119–130.
+</p>
+<p>E. Kazemi, S. H. Hassani, and M. Grossglauser (2015),
+<em>Growing a graph matching from a handful of seeds</em>. Proc. of the VLDB
+Endowment, 8(10):1010–1021.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># match G_1 &amp; G_2 using percolation graph matching method
+cgnp_pair &lt;- sample_correlated_gnp_pair(n = 20, corr =  0.5, p =  0.8)
+g1 &lt;- cgnp_pair$graph1
+g2 &lt;- cgnp_pair$graph2
+seeds &lt;- 1:10 &lt;= 3
+GM_perco &lt;- gm(g1, g2, seeds, method = "percolation", r = 2, ExpandWhenStuck = FALSE)
+GM_perco
+
+# matching accuracy with the true alignment being the identity
+mean(GM_perco$corr_A == GM_perco$corr_B)
+GM_perco$match_order
+
+summary(GM_perco, g1, g2, true_label = 1:20)
+plot(g1[], g2[], GM_perco)
+
+# expand when stuck
+GM_exp &lt;- gm(g1, g2, seeds, method = "percolation", r = 4, ExpandWhenStuck = TRUE)
+GM_exp
+
+
+</code></pre>
+
+
+</div>

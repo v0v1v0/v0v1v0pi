@@ -1,0 +1,148 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>estimate_peak</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimate the peak date of an incidence curve</h2>
+
+<h3>Description</h3>
+
+<p>This function can be used to estimate the peak of an epidemic curve using
+bootstrapped samples of the available data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">estimate_peak(x, n = 100L, alpha = 0.05, first_only = TRUE, progress = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An incidence2 object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p><code>integer</code>.
+</p>
+<p>The number of bootstrap datasets to be generated; defaults to 100.
+</p>
+<p><code style="white-space: pre;">⁠[double]⁠</code> vectors will be converted via <code>as.integer(n)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p><code>numeric</code>.
+</p>
+<p>The type 1 error chosen for the confidence interval; defaults to 0.05.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>first_only</code></td>
+<td>
+<p><code>bool</code>.
+</p>
+<p>Should only the first peak (by date) be kept.
+</p>
+<p>Defaults to <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>progress</code></td>
+<td>
+<p><code>bool</code>.
+</p>
+<p>Should a progress bar be displayed (default = TRUE)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Input dates are resampled with replacement to form bootstrapped datasets;
+the peak is reported for each, resulting in a distribution of peak times.
+When there are ties for peak incidence, only the first date is reported.
+</p>
+<p>Note that the bootstrapping approach used for estimating the peak time makes
+the following assumptions:
+</p>
+
+<ul>
+<li>
+<p> the total number of event is known (no uncertainty on total incidence)
+</p>
+</li>
+<li>
+<p> dates with no events (zero incidence) will never be in bootstrapped
+datasets
+</p>
+</li>
+<li>
+<p> the reporting is assumed to be constant over time, i.e. every case is
+equally likely to be reported
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>A data frame with the the following columns:
+</p>
+
+<ul>
+<li> <p><code>observed_date</code>: the date of peak incidence of the original dataset.
+</p>
+</li>
+<li> <p><code>observed_count</code>: the peak incidence of the original dataset.
+</p>
+</li>
+<li> <p><code>estimated</code>: the median peak time of the bootstrap datasets.
+</p>
+</li>
+<li> <p><code>lower_ci/upper_ci</code>: the confidence interval based on bootstrap datasets.
+</p>
+</li>
+<li> <p><code>bootstrap_peaks</code>: a nested tibble containing the the peak times of the
+bootstrapped datasets.
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Thibaut Jombart and Tim Taylor, with inputs on caveats from Michael Höhle.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>bootstrap_incidence()</code> for the bootstrapping underlying this approach and
+<code>keep_peaks()</code> to get the peaks in a single
+incidence2 object.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+if (requireNamespace("outbreaks", quietly = TRUE)) {
+
+  # load data and create incidence
+  data(fluH7N9_china_2013, package = "outbreaks")
+  i &lt;- incidence(fluH7N9_china_2013, date_index = "date_of_onset")
+
+  # find 95% CI for peak time using bootstrap
+  estimate_peak(i)
+}
+
+
+</code></pre>
+
+
+</div>

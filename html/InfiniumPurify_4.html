@@ -1,0 +1,95 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getPurity</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Estimate the tumor purity for 450K methylation data 
+</h2>
+
+<h3>Description</h3>
+
+<p>Estimate the percentage of tumor cells in cancer samples which are mixtures of cancer and normal cells.added a sentence
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getPurity(tumor.data,normal.data = NULL,tumor.type = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>tumor.data</code></td>
+<td>
+<p>numeric vector/matrix of beta values for tumor samlpes. The names/rownames of tumor.data
+should be probe names of Infinium 450k array, and colnames should be names of tumor samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>normal.data</code></td>
+<td>
+<p>numeric matrix of beta values for normal samlpes. The rownames of normal.data
+should be probe names of Infinium 450k array, and colnames should be names of normal samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tumor.type</code></td>
+<td>
+<p>cancer type (in abbreviation) of tumor and normal samlpes. Options are "LUAD", "BRCA" and so
+on. See <code>CancerTypeAbbr</code> for detail.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Arguments normal.data and tumor.type could be null. If either the number of tumor samples or number of normal smaples is less than 20, the tumor.type argument should be specified according to <code>CancerTypeAbbr</code>. If the numbers of tumor and normal samples are both more than 20, tumor.type could be null. In such case, getPurity first identify 1000 iDMCs by Wilcox rank-sum test, then tumor purity for each sample is estimated as the density mode of adjusted methylation levels of iDMCs. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>A vector of tumor purities for each tumor sample. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Xiaoqi Zheng <a href="mailto:xqzheng@shnu.edu.cn">xqzheng@shnu.edu.cn</a>.
+</p>
+
+
+<h3>References</h3>
+
+<p>N. Zhang, H.J. Wu, W. Zhang, J. Wang, H. Wu and X. Zheng (2015) Predicting tumor purity from methylation
+microarray data. <em>Bioinformatics</em> <b>31(21)</b>, 3401-3405. 
+</p>
+<p>X. Zheng, N. Zhang, H.J. Wu and H. Wu, Estimating and accounting for tumor purity in the analysis of DNA methylation data from cancer studies. <em>Genome biology</em>, accepted. 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## load example data
+data(beta.emp)
+
+normal.data &lt;- beta.emp[,1:21]
+tumor.data &lt;- beta.emp[,22:61]
+
+## call purity for single tumor sample 
+purity &lt;- getPurity(tumor.data = tumor.data[,1],normal.data = NULL,tumor.type= "LUAD")
+
+## call purity for less than 20 tumor samples
+purity &lt;- getPurity(tumor.data = tumor.data[,1:10],normal.data = NULL,tumor.type= "LUAD")
+
+## call purity for more than 20 tumor samples with matched normal samples
+purity &lt;- getPurity(tumor.data = tumor.data[,1:40],normal.data = normal.data)
+</code></pre>
+
+
+</div>

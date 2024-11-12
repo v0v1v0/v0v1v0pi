@@ -1,0 +1,106 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pruneSingleRule</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+internal
+</h2>
+
+<h3>Description</h3>
+
+<p>internal
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pruneSingleRule(rule, X, target, maxDecay, typeDecay)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>rule</code></td>
+<td>
+
+
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+
+
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target</code></td>
+<td>
+
+
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxDecay</code></td>
+<td>
+
+
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>typeDecay</code></td>
+<td>
+
+
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a pruned rule and its metrics. 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##---- Should be DIRECTLY executable !! ----
+##-- ==&gt;  Define data, use random,
+##--	or do  help(data=index)  for the standard data sets.
+
+## The function is currently defined as
+function (rule, X, target, maxDecay, typeDecay) 
+{
+    newRuleMetric &lt;- measureRule(rule["condition"], X, target)
+    errOrig &lt;- as.numeric(newRuleMetric["err"])
+    ruleV &lt;- unlist(strsplit(rule["condition"], split = " &amp; "))
+    pred &lt;- rule["pred"]
+    if (length(ruleV) == 1) 
+        return(newRuleMetric)
+    for (i in length(ruleV):1) {
+        restRule &lt;- ruleV[-i]
+        restRule &lt;- paste(restRule, collapse = " &amp; ")
+        metricTmp &lt;- measureRule(restRule, X, target, pred)
+        errNew &lt;- as.numeric(metricTmp["err"])
+        if (typeDecay == 1) {
+            decay &lt;- (errNew - errOrig)/max(errOrig, 1e-06)
+        }
+        else {
+            decay &lt;- (errNew - errOrig)
+        }
+        if (decay &lt;= maxDecay) {
+            ruleV &lt;- ruleV[-i]
+            newRuleMetric &lt;- metricTmp
+            if (length(ruleV) &lt;= 1) 
+                break
+        }
+    }
+    return(newRuleMetric)
+  }
+</code></pre>
+
+
+</div>

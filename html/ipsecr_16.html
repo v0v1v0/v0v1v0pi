@@ -1,0 +1,173 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.ipsecr</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> SECR Model Predictions </h2>
+
+<h3>Description</h3>
+
+<p>Evaluate a spatially explicit capture–recapture model. That is, compute the ‘real’ parameters corresponding to the ‘beta’ parameters of a fitted model for arbitrary levels of any variables in the linear predictor.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">
+## S3 method for class 'ipsecr'
+predict(object, newdata = NULL, type = c("response", "link"), 
+    se.fit = TRUE, alpha = 0.05, savenew = FALSE, ...)
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+ <p><code>ipsecr</code> object output from <code>ipsecr.fit</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p> optional dataframe of values at which to evaluate model </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p> character; type of prediction required. The default ("response") provides estimates of the ‘real’ parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se.fit</code></td>
+<td>
+<p> logical for whether output should include SE and confidence intervals </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p> alpha level for confidence intervals </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>savenew</code></td>
+<td>
+<p> logical for whether newdata should be saved </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> other arguments passed to <code>newdata</code> </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The variables in the various linear predictors are described in
+<a href="https://www.otago.ac.nz/density/pdfs/secr-models.pdf">secr-models.pdf</a> and listed for the particular model in the
+<code>vars</code> component of <code>object</code>.
+</p>
+<p>Optional <code>newdata</code> should be a dataframe with a column for each of
+the variables in the model (see ‘vars’ component of <code>object</code>).  If
+<code>newdata</code> is missing then a dataframe is constructed automatically.
+</p>
+<p>Default <code>newdata</code> are for a naive animal on the first occasion;
+numeric covariates are set to zero and factor covariates to their base
+(first) level. The argument ‘all.levels’ may be passed 
+to <code>newdata</code>; if TRUE then the default newdata includes 
+all factor levels.
+</p>
+<p><code>realnames</code> may be used to select a subset of parameters.
+</p>
+<p>Standard errors for parameters on the response (real) scale are by the
+delta method (Lebreton et al. 1992), and confidence intervals are
+backtransformed from the link scale.
+</p>
+<p>The value of <code>newdata</code> is optionally saved as an attribute.
+</p>
+
+
+<h3>Value</h3>
+
+<p>When <code>se.fit</code> = FALSE, a dataframe identical to <code>newdata</code> except for the addition of one column for each ‘real’ parameter. Otherwise, a list with one component for each row in <code>newdata</code>. Each component is a dataframe with one row for each ‘real’ parameter (density, g0, sigma, b) and columns as below
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+link        </td>
+<td style="text-align: left;"> link function </td>
+</tr>
+<tr>
+<td style="text-align: left;"> 
+estimate    </td>
+<td style="text-align: left;"> estimate of real parameter </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+SE.estimate </td>
+<td style="text-align: left;"> standard error of the estimate </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+lcl         </td>
+<td style="text-align: left;"> lower 100(1--alpha)% confidence limit </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+ucl         </td>
+<td style="text-align: left;"> upper 100(1--alpha)% confidence limit </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+</td>
+</tr>
+</table>
+<p>When <code>newdata</code> has only one row, the structure of the list is
+‘dissolved’ and the return value is one data frame.
+</p>
+<p>For <code>detectpar</code>, a list with the estimated values of detection
+parameters (e.g., g0 and sigma if detectfn = "halfnormal"). In the case
+of multi-session data the result is a list of lists (one list per
+session).
+</p>
+
+
+<h3>Note</h3>
+
+<p><code>predictDsurface</code> should be used for predicting density at many
+points from a model with spatial variation. This deals automatically
+with scaling of x- and y-coordinates, and is much faster than
+predict.ipsecr. The resulting Dsurface object has its own plot method.
+</p>
+<p>The argument ‘scaled’ was removed from both predict methods in version 2.10 as the scaleg0 and scalesigma features had been superceded by other parameterisations.
+</p>
+
+
+<h3>References</h3>
+
+ 
+<p>Lebreton, J.-D., Burnham, K. P., Clobert, J. and Anderson, D. R. (1992) Modeling survival and testing biological hypotheses using marked animals: a unified approach with case studies. <em>Ecological Monographs</em> <b>62</b>, 67–118. </p>
+
+
+<h3>See Also</h3>
+
+ <p><code>ipsecr.fit</code>, <code>predictDsurface</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+predict (ipsecrdemo)
+
+</code></pre>
+
+
+</div>

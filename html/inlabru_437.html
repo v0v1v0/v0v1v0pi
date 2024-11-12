@@ -1,0 +1,136 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Poisson3_1D</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>1-Dimensional NonHomogeneous Poisson example.</h2>
+
+<h3>Description</h3>
+
+<p>Point data and count data, together with intensity function and expected counts for
+a multimodal nonhomogeneous 1-dimensional Poisson process example. Counts are given for two
+different gridded data interval widths.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">data(Poisson3_1D)
+</code></pre>
+
+
+<h3>Format</h3>
+
+<p>The data contain the following <code>R</code> objects:
+</p>
+
+<dl>
+<dt>
+<code>lambda3_1D</code>:</dt>
+<dd>
+<p> A function defining the intensity function of a
+nonhomogeneous Poisson process. Note that this function is only defined on
+the interval (0,55).</p>
+</dd>
+<dt><code>E_nc3a</code></dt>
+<dd>
+<p> The expected counts of gridded data for the wider bins (10 bins).</p>
+</dd>
+<dt><code>E_nc3b</code></dt>
+<dd>
+<p> The expected counts of gridded data for the wider bins (20 bins).</p>
+</dd>
+<dt><code>pts3</code></dt>
+<dd>
+<p> The locations of the observed points (a data frame with one column, named <code>x</code>).</p>
+</dd>
+<dt><code>countdata3a</code></dt>
+<dd>
+<p> A data frame with three columns, containing the count data for the
+10-interval case:</p>
+</dd>
+<dt><code>countdata3b</code></dt>
+<dd>
+<p> A data frame with three columns, containing the count data for the
+20-interval case:</p>
+</dd>
+</dl>
+<dl>
+<dt><code>x</code></dt>
+<dd>
+<p> The grid cell midpoint.</p>
+</dd>
+<dt><code>count</code></dt>
+<dd>
+<p> The number of detections in the cell.</p>
+</dd>
+<dt><code>exposure</code></dt>
+<dd>
+<p> The width of the cell.</p>
+</dd>
+</dl>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+if (require("ggplot2", quietly = TRUE)) {
+  data(Poisson3_1D)
+  # first the plots for the 10-bin case:
+  p1a &lt;- ggplot(countdata3a) +
+    geom_point(data = countdata3a, aes(x = x, y = count), col = "blue") +
+    ylim(0, max(countdata3a$count, E_nc3a)) +
+    geom_point(
+      data = countdata3a, aes(x = x), y = 0, shape = "+",
+      col = "blue", cex = 4
+    ) +
+    geom_point(
+      data = data.frame(x = countdata3a$x, y = E_nc3a),
+      aes(x = x), y = E_nc3a, shape = "_", cex = 5
+    ) +
+    xlab(expression(bold(s))) +
+    ylab("count")
+  ss &lt;- seq(0, 55, length.out = 200)
+  lambda &lt;- lambda3_1D(ss)
+  p2a &lt;- ggplot() +
+    geom_line(
+      data = data.frame(x = ss, y = lambda), aes(x = x, y = y),
+      col = "blue"
+    ) +
+    ylim(0, max(lambda)) +
+    geom_point(data = pts3, aes(x = x), y = 0.2, shape = "|", cex = 4) +
+    xlab(expression(bold(s))) +
+    ylab(expression(lambda(bold(s))))
+  multiplot(p1a, p2a, cols = 1)
+
+  # Then the plots for the 20-bin case:
+  p1a &lt;- ggplot(countdata3b) +
+    geom_point(data = countdata3b, aes(x = x, y = count), col = "blue") +
+    ylim(0, max(countdata3b$count, E_nc3b)) +
+    geom_point(
+      data = countdata3b, aes(x = x), y = 0, shape = "+",
+      col = "blue", cex = 4
+    ) +
+    geom_point(
+      data = data.frame(x = countdata3b$x, y = E_nc3b),
+      aes(x = x), y = E_nc3b, shape = "_", cex = 5
+    ) +
+    xlab(expression(bold(s))) +
+    ylab("count")
+  ss &lt;- seq(0, 55, length.out = 200)
+  lambda &lt;- lambda3_1D(ss)
+  p2a &lt;- ggplot() +
+    geom_line(
+      data = data.frame(x = ss, y = lambda), aes(x = x, y = y),
+      col = "blue"
+    ) +
+    ylim(0, max(lambda)) +
+    geom_point(data = pts3, aes(x = x), y = 0.2, shape = "|", cex = 4) +
+    xlab(expression(bold(s))) +
+    ylab(expression(lambda(bold(s))))
+  multiplot(p1a, p2a, cols = 1)
+}
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,167 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>read.lift</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Parse a dictionary in XML LIFT (Lexicon Interchange FormaT) vocabulary
+and turn it into a set of data.frame</h2>
+
+<h3>Description</h3>
+
+<p>The dictionary is turned into a list of up to four data frame: "entries", "senses", "examples" and "relations".
+The data frame are pointing to each other through IDs, following a relational data model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">read.lift(file, vernacular.languages, analysis.languages = "en",
+  get.entry = TRUE, get.sense = TRUE, get.example = TRUE,
+  get.relation = TRUE, entry.fields = available.entry.fields(),
+  sense.fields = available.sense.fields(),
+  example.fields = available.example.fields(),
+  relation.fields = available.relation.fields(), simplify = FALSE,
+  sep = ";")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>: a length-one character vector containing the path to a LIFT XML document.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vernacular.languages</code></td>
+<td>
+<p>character vector: the code of the vernacular language.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>analysis.languages</code></td>
+<td>
+<p>character vector: code of the object language used in the glosses and analyses.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>get.entry</code></td>
+<td>
+<p>logical length-1 vector: include the entries table in the result?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>get.sense</code></td>
+<td>
+<p>logical length-1 vector: include the senses table in the result?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>get.example</code></td>
+<td>
+<p>logical length-1 vector: include the examples table in the result?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>get.relation</code></td>
+<td>
+<p>logical length-1 vector: include the relations table in the result?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>entry.fields</code></td>
+<td>
+<p>character vector: names of the fields to be included in the entries table. See available.entry.fields() for the complete list of the available fields.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sense.fields</code></td>
+<td>
+<p>character vector: names of the fields to be included in the senses table. See available.sense.fields() for the complete list of the available fields.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>example.fields</code></td>
+<td>
+<p>character vector: names of the fields to be included in the examples table. See available.example.fields() for the complete list of the available fields.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>relation.fields</code></td>
+<td>
+<p>character vector: names of the fields to be included in the relations table. See available.relation.fields() for the complete list of the available fields.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>simplify</code></td>
+<td>
+<p>logical length-1 vector: if true, columns containing only empty values are removed from all data frame.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep</code></td>
+<td>
+<p>character vector: the character used to join multiple notes in the same language.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>"Field" in this document denote a piece of information in LIFT, such as the "gloss"
+in a sense or "citation form" of an entry. A field may correspond to several columns in the resulting data frame,
+since fields are multilingual. "gloss" is an analysis field, thus if two
+analysis.languages are declared, for instance "en" and "fr", then two columns
+will be present, gloss.en and gloss.fr, in the senses data frame.
+The "citation form" field, on the other hand, is an vernacular language field, thus if
+several vernacular fields are declared, several form columns will be present in the entries data frame.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a list with up to four slots named "entries", "senses", "examples" and "relations",
+each slot containing a data.frame
+</p>
+
+
+<h3>References</h3>
+
+<p>http://code.google.com/p/lift-standard
+</p>
+
+
+<h3>See Also</h3>
+
+<p>write.CLDF for serialization
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">path &lt;- system.file("exampleData", "tuwariDictionary.lift", package="interlineaR")
+dictionary &lt;- read.lift(path, vernacular.languages="tww")
+
+# Reduce the size of the data frames by filtering to columns actually containing something...
+dictionary &lt;- read.lift(path, vernacular.languages="tww", simplify=TRUE)
+
+# Get information in the different analysis languages used in the document (english and tok pisin)
+dictionary &lt;- read.lift(path, vernacular.languages="tww", analysis.languages=c("en", "tpi"))
+
+# Restrict to entries and senses dataframe, and explicitly ask for some fields:
+dictionary &lt;- read.lift(
+  path,
+  vernacular.languages="tww",
+  get.example=FALSE,
+  get.relation=FALSE,
+  entry.fields=c("lexical-unit", "morph-type"),
+  sense.fields=c("grammatical-info.value", "gloss", "definition",
+  "semantic-domain-ddp4", "grammatical-info.traits")
+)
+
+</code></pre>
+
+
+</div>

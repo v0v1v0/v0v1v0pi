@@ -1,0 +1,219 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>na.interp1</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>na.interp1</h2>
+
+<h3>Description</h3>
+
+<p>This function combines pracma's <code>interp1</code>
+constant interpolation method with zoo's <code>na.approx</code> linear
+interpolation method. Here, <code>x = x</code> rather than
+<code>x = index(object)</code> in na.approx. Here, <code>y = y</code> rather than
+<code>y = object</code> in na.approx. Also, here, <code>xi</code> is used instead
+of <code>xout</code> in na.approx. The Arguments list was obtained from both
+interp1 and na.approx.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">na.interp1(x, y, xi = x, ..., na.rm = TRUE, maxgap = Inf)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>numeric vector; points on the x-axis; at least two points
+required; will be sorted if necessary.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>numeric vector; values of the assumed underlying function;
+<code>x</code> and <code>y</code> must be of the same length.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xi</code></td>
+<td>
+<p>numeric vector; points at which to compute the
+interpolation; all points must lie between <code>min(x)</code> and
+<code>max(x)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments passed to methods. The <code>n</code>
+argument of <code>approx</code> is currently not supported.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.rm</code></td>
+<td>
+<p>logical. If the result of the (<code>spline</code>)
+interpolation still results in <code>NA</code>s, should these be removed?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxgap</code></td>
+<td>
+<p>maximum number of consecutive <code>NA</code>s to fill. Any
+longer gaps will be left unchanged. Note that all methods listed
+above can accept <code>maxgap</code> as it is ultimately passed to the
+default method.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Numeric vector representing values at points <code>xi</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Hans Werner Borchers (pracma interp1), Felix Andrews
+(zoo na.approx), Irucka Embry
+</p>
+
+
+<h3>Source</h3>
+
+
+<ol>
+<li>
+<p> zoo's na.approx.R - modified on Fri Aug 6 00:26:22 2010 UTC by felix. See <a href="https://r-forge.r-project.org/scm/viewvc.php/pkg/zoo/R/na.approx.R?view=markup&amp;revision=781&amp;root=zoo">https://r-forge.r-project.org/scm/viewvc.php/pkg/zoo/R/na.approx.R?view=markup&amp;revision=781&amp;root=zoo</a>.
+</p>
+</li>
+<li>
+<p> pracma interp1 function definition - R package pracma created and maintained by Hans Werner Borchers. See <code>interp1</code>.
+</p>
+</li>
+</ol>
+<h3>See Also</h3>
+
+<p><code>na.approx</code>, <code>interp1</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# zoo time series example
+
+install.load::load_package("iemisc", "data.table")
+
+zoo1 &lt;- structure(c(1.6, 1.7, 1.7, 1.7, 1.7, 1.7, 1.6, 1.7, 1.7, 1.7,
+1.7, 1.7, 2, 2.1, 2.1, NA, NA, 2.1, 2.1, NA, 2.3, NA, 2, 2.1), .Dim = c(12L,
+2L), .Dimnames = list(NULL, c("V1", "V2")), index = structure(c(1395242100,
+1395243000, 1395243900, 1395244800, 1395245700, 1395256500, 1395257400,
+1395258300, 1395259200, 1395260100, 1395261000, 1395261900), class =
+c("POSIXct", "POSIXt"), tzone = "GMT"), class = "zoo")
+
+zoo1 &lt;- as.data.frame(zoo1) # to data.frame from zoo
+
+zoo1[, "Time"] &lt;- as.POSIXct(rownames(zoo1)) # create column named Time as a
+# POSIXct class
+
+zoo1 &lt;- setDT(zoo1) # create data.table out of data.frame
+
+setcolorder(zoo1, c(3, 1, 2)) # set the column order as the 3rd column
+# followed by the 2nd and 1st columns
+
+zoo1 &lt;- setDF(zoo1) # return to data.frame
+
+rowsinterps1 &lt;- which(is.na(zoo1$V2 == TRUE))
+
+# index of rows of zoo1 that have NA (to be interpolated)
+xi &lt;- as.numeric(zoo1[which(is.na(zoo1$V2 == TRUE)), 1])
+
+# the Date-Times for V2 to be interpolated in numeric format
+interps1 &lt;- na.interp1(as.numeric(zoo1$Time), zoo1$V2, xi = xi,
+na.rm = FALSE, maxgap = 1)
+
+# the interpolated values where only gap sizes of 1 are filled
+zoo1[rowsinterps1, 3] &lt;- interps1
+
+# replace the NAs in V2 with the interpolated V2 values
+zoo1
+
+
+
+
+
+
+# data frame time series example
+
+library(iemisc)
+
+df1 &lt;- structure(list(Time = structure(c(1395242100, 1395243000, 1395243900,
+ 1395244800, 1395245700, 1395256500, 1395257400, 1395258300, 1395259200,
+ 1395260100, 1395261000, 1395261900), class = c("POSIXct", "POSIXt"),
+ tzone = "GMT"), V1 = c(1.6, 1.7, 1.7, 1.7, 1.7, 1.7, 1.6, 1.7, 1.7, 1.7,
+ 1.7, 1.7), V2 = c(2, 2.1, 2.1, NA, NA, 2.1, 2.1, NA, 2.3, NA, 2, 2.1)),
+ .Names = c("Time", "V1", "V2"), row.names = c(NA, -12L),
+ class = "data.frame")
+
+rowsinterps1 &lt;- which(is.na(df1$V2 == TRUE))
+
+# index of rows of df1 that have NA (to be interpolated)
+xi &lt;- as.numeric(df1[which(is.na(df1$V2 == TRUE)), 1])
+
+# the Date-Times for V2 to be interpolated in numeric format
+interps1 &lt;- na.interp1(as.numeric(df1$Time), df1$V2, xi = xi,
+ na.rm = FALSE, maxgap = 1)
+
+# the interpolated values where only gap sizes of 1 are filled
+df1[rowsinterps1, 3] &lt;- interps1
+
+# replace the NAs in V2 with the interpolated V2 values
+df1
+
+
+
+
+
+
+# data.table time series example
+
+install.load::load_package("iemisc", "data.table")
+
+dt1 &lt;- structure(list(Time = structure(c(1395242100, 1395243000, 1395243900,
+ 1395244800, 1395245700, 1395256500, 1395257400, 1395258300, 1395259200,
+ 1395260100, 1395261000, 1395261900), class = c("POSIXct", "POSIXt"),
+ tzone = "GMT"), V1 = c(1.6, 1.7, 1.7, 1.7, 1.7, 1.7, 1.6, 1.7, 1.7, 1.7,
+ 1.7, 1.7), V2 = c(2, 2.1, 2.1, NA, NA, 2.1, 2.1, NA, 2.3, NA, 2, 2.1)),
+ .Names = c("Time", "V1", "V2"), row.names = c(NA, -12L), class =
+ c("data.table", "data.frame"), sorted = "Time")
+
+rowsinterps2 &lt;- which(is.na(dt1[, 3, with = FALSE] == TRUE))
+
+# index of rows of x that have NA (to be interpolated)
+xi &lt;- as.numeric(dt1[rowsinterps2, Time])
+
+# the Date-Times for V2 to be interpolated in numeric format
+interps2 &lt;- dt1[, na.interp1(as.numeric(Time), V2, xi = xi,
+ na.rm = FALSE, maxgap = 1)]
+
+# the interpolated values where only gap sizes of 1 are filled
+dt1[rowsinterps2, `:=` (V2 = interps2)]
+
+# replace the NAs in V2 with the interpolated V2 values
+dt1
+
+
+
+
+</code></pre>
+
+
+</div>

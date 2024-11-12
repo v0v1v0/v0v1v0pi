@@ -1,0 +1,79 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dispersion</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate the dispersion of the residuals</h2>
+
+<h3>Description</h3>
+
+<p>Calculate the dispersion of the residuals
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dispersion(model)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A fitted regression model (using gam, or bam).</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p>Numeric value: dispersion of the residuals.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other Functions for model inspection: 
+<code>fvisgam()</code>,
+<code>gamtabs()</code>,
+<code>inspect_random()</code>,
+<code>plot_data()</code>,
+<code>plot_parametric()</code>,
+<code>plot_smooth()</code>,
+<code>plot_topo()</code>,
+<code>pvisgam()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">trial &lt;- function(f=.95){
+    x &lt;- rep(1-f,101)
+    x[round(runif(1,1,50)):length(x)] &lt;- f
+    return(rbinom(101,1,x))
+}
+set.seed(123)
+dat &lt;- data.frame(Time=rep( seq(0,1,length=101),100),
+    y = unlist(replicate(100, trial(f=1), simplify=FALSE)),
+    stringsAsFactors=FALSE)
+# under dispersion:
+gam1 &lt;- gam(y ~ s(Time), data=dat, family=binomial)
+summary(gam1)
+dispersion(gam1)
+# but not here:
+gam2 &lt;- gam(y ~ 1, data=dat, family=binomial)
+summary(gam2)
+dispersion(gam2)
+# and not here:
+dat &lt;- data.frame(Time=rep( seq(0,1,length=101),100),
+    y = unlist(replicate(100, trial(f=.75), simplify=FALSE)),
+    stringsAsFactors=FALSE)
+gam3 &lt;- gam(y ~ s(Time), data=dat, family=binomial)
+summary(gam3)
+dispersion(gam3)
+
+</code></pre>
+
+
+</div>

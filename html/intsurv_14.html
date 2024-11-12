@@ -1,0 +1,437 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cox_cure</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Cox Cure Rate Model</h2>
+
+<h3>Description</h3>
+
+<p>For right-censored data, fit a regular Cox cure rate model (Kuk and Chen,
+1992; Sy and Taylor, 2000) via an EM algorithm.  For right-censored data
+with uncertain event status, fit the Cox cure model proposed by Wang et
+al. (2020).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cox_cure(
+  surv_formula,
+  cure_formula,
+  time,
+  event,
+  data,
+  subset,
+  contrasts = NULL,
+  bootstrap = 0,
+  firth = FALSE,
+  surv_start = NULL,
+  cure_start = NULL,
+  surv_offset = NULL,
+  cure_offset = NULL,
+  em_max_iter = 200,
+  em_rel_tol = 1e-05,
+  surv_max_iter = 30,
+  surv_rel_tol = 1e-05,
+  cure_max_iter = 30,
+  cure_rel_tol = 1e-05,
+  tail_completion = c("zero", "exp", "zero-tau"),
+  tail_tau = NULL,
+  pmin = 1e-05,
+  early_stop = TRUE,
+  verbose = FALSE,
+  ...
+)
+
+cox_cure.fit(
+  surv_x,
+  cure_x,
+  time,
+  event,
+  cure_intercept = TRUE,
+  bootstrap = 0,
+  firth = FALSE,
+  surv_start = NULL,
+  cure_start = NULL,
+  surv_offset = NULL,
+  cure_offset = NULL,
+  surv_standardize = TRUE,
+  cure_standardize = TRUE,
+  em_max_iter = 200,
+  em_rel_tol = 1e-05,
+  surv_max_iter = 30,
+  surv_rel_tol = 1e-05,
+  cure_max_iter = 30,
+  cure_rel_tol = 1e-05,
+  tail_completion = c("zero", "exp", "zero-tau"),
+  tail_tau = NULL,
+  pmin = 1e-05,
+  early_stop = TRUE,
+  verbose = FALSE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>surv_formula</code></td>
+<td>
+<p>A formula object starting with <code>~</code> for the model
+formula in survival model part.  For Cox model, no intercept term is
+included even if an intercept is specified or implied in the model
+formula.  A model formula with an intercept term only is not allowed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cure_formula</code></td>
+<td>
+<p>A formula object starting with <code>~</code> for the model
+formula in incidence model part.  For logistic model, an intercept term
+is included by default and can be excluded by adding <code>+ 0</code> or
+<code>- 1</code> to the model formula.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time</code></td>
+<td>
+<p>A numeric vector for the observed survival times.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event</code></td>
+<td>
+<p>A numeric vector for the event indicators.  <code>NA</code>'s are
+allowed and represent uncertain event status.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>An optional data frame, list, or environment that contains the
+covariates and response variables (<code>time</code> and <code>event</code>),
+included in the model. If they are not found in data, the variables are
+taken from the environment of the specified formula, usually the
+environment from which this function is called.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+<p>An optional logical vector specifying a subset of observations
+to be used in the fitting process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>contrasts</code></td>
+<td>
+<p>An optional list, whose entries are values (numeric
+matrices or character strings naming functions) to be used as
+replacement values for the contrasts replacement function and whose
+names are the names of columns of data containing factors.  See
+<code>contrasts.arg</code> of <code>model.matrix.default</code> for
+details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bootstrap</code></td>
+<td>
+<p>An integer representing the number of bootstrap samples for
+estimating standard errors of the coefficient estimates.  The bootstrap
+procedure will not run with <code>bootstrap = 0</code> by default.  If
+<code>bootstrap &gt; 0</code>, the specified number of bootstrap samples will be
+used in estimating standard errors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>firth</code></td>
+<td>
+<p>A logical value indicating whether to use Firth's
+bias-reduction method (Firth, 1993) in the logistic model component.
+The default value is <code>FALSE</code> for fitting a regular logistic model.
+Notice that this argument is experimental and only available for regular
+Cox cure rate model currently.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv_start, cure_start</code></td>
+<td>
+<p>An optional numeric vector representing the
+starting values for the survival model component or the incidence model
+component.  If <code>surv_start = NULL</code> is specified, the starting
+values will be obtained from fitting a regular Cox to events only.
+Similarly, if <code>cure_start = NULL</code> is specified, the starting values
+will be obtained from fitting a regular logistic model to the
+non-missing event indicators.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv_offset, cure_offset</code></td>
+<td>
+<p>An optional numeric vector representing the
+offset term in the survival model compoent or the incidence model
+component.  The function will internally try to find values of the
+specified variable in the <code>data</code> first.  Alternatively, one or more
+<code>offset</code> terms can be specified in the formula (by
+<code>stats::offset()</code>).  If more than one offset terms are specified,
+their sum will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>em_max_iter</code></td>
+<td>
+<p>A positive integer specifying the maximum iteration
+number of the EM algorithm.  The default value is <code>200</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>em_rel_tol</code></td>
+<td>
+<p>A positive number specifying the tolerance that determines
+the convergence of the EM algorithm in terms of the convergence of the
+covariate coefficient estimates.  The tolerance is compared with the
+relative change between estimates from two consecutive iterations, which
+is measured by ratio of the L1-norm of their difference to the sum of
+their L1-norm.  The default value is <code>1e-5</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv_max_iter, cure_max_iter</code></td>
+<td>
+<p>A positive integer specifying the maximum
+iteration number of the M-step routine related to the survival model
+component or the incidence model component.  The default value is
+<code>200</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv_rel_tol, cure_rel_tol</code></td>
+<td>
+<p>A positive number specifying the tolerance
+that determines the convergence of the M-step related to the survival
+model component or the incidence model component in terms of the
+convergence of the covariate coefficient estimates.  The tolerance is
+compared with the relative change between estimates from two consecutive
+iterations, which is measured by ratio of the L1-norm of their
+difference to the sum of their L1-norm.  The default value is
+<code>1e-5</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tail_completion</code></td>
+<td>
+<p>A character string specifying the tail completion
+method for conditional survival function.  The available methods are
+<code>"zero"</code> for zero-tail completion after the largest event times (Sy
+and Taylor, 2000), <code>"exp"</code> for exponential-tail completion (Peng,
+2003), and <code>"zero-tau"</code> for zero-tail completion after a specified
+<code>tail_tau</code>.  The default method is the zero-tail completion
+proposed by Sy and Taylor (2000).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tail_tau</code></td>
+<td>
+<p>A numeric number specifying the time of zero-tail
+completion.  It will be used only if <code>tail_completion =
+"zero-tau"</code>.  A reasonable choice must be a time point between the
+largest event time and the largest survival time.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pmin</code></td>
+<td>
+<p>A numeric number specifying the minimum value of probabilities
+for sake of numerical stability.  The default value is <code>1e-5</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>early_stop</code></td>
+<td>
+<p>A logical value specifying whether to stop the iteration
+once the negative log-likelihood unexpectedly increases, which may
+suggest convergence on likelihood, or indicate numerical issues or
+implementation bugs.  The default value is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>A logical value.  If <code>TRUE</code>, a verbose information will
+be given along iterations for tracing the convergence.  The default
+value is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments for future usage.  A warning will be thrown if
+any invalid argument is specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv_x</code></td>
+<td>
+<p>A numeric matrix for the design matrix of the survival model
+component.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cure_x</code></td>
+<td>
+<p>A numeric matrix for the design matrix of the cure rate model
+component.  The design matrix should exclude an intercept term unless we
+want to fit a model only including the intercept term.  In that case, we
+need further set <code>cure_intercept = FALSE</code> to not standardize the
+intercept term.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cure_intercept</code></td>
+<td>
+<p>A logical value specifying whether to add an intercept
+term to the cure rate model component.  If <code>TRUE</code> by default, an
+intercept term is included.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surv_standardize</code></td>
+<td>
+<p>A logical value specifying whether to standardize
+the covariates for the survival model part.  If <code>FALSE</code>, the
+covariates will be standardized internally to have mean zero and
+standard deviation one.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cure_standardize</code></td>
+<td>
+<p>A logical value specifying whether to standardize
+the covariates for the cure rate model part.  If <code>TRUE</code> (by
+default), the covariates will be standardized internally to have mean
+zero and standard deviation one.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>cox_cure</code> object for regular Cox cure rate model or
+<code>cox_cure_uncer</code> object for Cox cure rate model with uncertain events.
+</p>
+
+
+<h3>References</h3>
+
+<p>Firth, D. (1993). Bias reduction of maximum likelihood
+estimates. <em>Biometrika</em>, 80(1), 27–38.
+</p>
+<p>Kuk, A. Y. C., &amp; Chen, C. (1992). A mixture model combining logistic
+regression with proportional hazards regression. <em>Biometrika</em>, 79(3),
+531–541.
+</p>
+<p>Peng, Y. (2003). Estimating baseline distribution in proportional hazards
+cure models. <em>Computational Statistics &amp; Data Analysis</em>, 42(1-2),
+187–201.
+</p>
+<p>Sy, J. P., &amp; Taylor, J. M. (2000). Estimation in a Cox proportional hazards
+cure model. <em>Biometrics</em>, 56(1), 227–236.
+</p>
+<p>Wang, W., Luo, C., Aseltine, R. H., Wang, F., Yan, J., &amp; Chen, K. (2020).
+Suicide Risk Modeling with Uncertain Diagnostic Records. <em>arXiv
+preprint arXiv:2009.02597</em>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>cox_cure_net</code> for regularized Cox cure rate model with
+elastic-net penalty.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(intsurv)
+
+### regular Cox cure rate model ======================================
+## 1. simulate right-censored data with a cure fraction
+set.seed(123)
+n_obs &lt;- 2e2
+p &lt;- 5
+x_mat &lt;- matrix(rnorm(n_obs * p), nrow = n_obs, ncol = p)
+colnames(x_mat) &lt;- paste0("x", seq_len(p))
+cure_beta &lt;- rep(0.5, p)
+b0 &lt;- - 1
+expit &lt;- binomial()$linkinv
+ncure_prob &lt;- expit(as.numeric(b0 + x_mat %*% cure_beta))
+is_cure &lt;- 1 - rbinom(n_obs, size = 1, prob = ncure_prob)
+surv_beta &lt;- rep(0.5, p)
+risk_score &lt;- as.numeric(x_mat %*% surv_beta)
+event_time &lt;- rexp(n_obs, exp(as.numeric(x_mat %*% surv_beta)))
+censor_time &lt;- 10
+event &lt;- ifelse(event_time &lt; censor_time &amp; ! is_cure, 1, 0)
+obs_time &lt;- ifelse(event &gt; 0, event_time, censor_time)
+
+## model-fitting from given design matrices
+fit1 &lt;- cox_cure.fit(x_mat, x_mat, obs_time, event, bootstrap = 30)
+summary(fit1)
+
+## coefficient estimates from both model parts
+coef(fit1)
+
+## or a particular part
+coef(fit1, "surv")
+coef(fit1, "cure")
+
+## weighted concordance index (C-index)
+fit1$model$c_index
+## which also can be computed as follows
+cIndex(time = obs_time, event = event,
+       risk_score = fit1$fitted$surv_xBeta,
+       weight = ifelse(event &gt; 0, 1, fit1$fitted$susceptible_prob))
+
+## 2. create a toy dataset
+toy_dat &lt;- data.frame(time = obs_time, status = event)
+toy_dat$group &lt;- cut(abs(x_mat[, 1L]), breaks = c(0, 0.5, 1, 3, Inf),
+                     labels = LETTERS[1:4])
+toy_dat &lt;- cbind(toy_dat, as.data.frame(x_mat[, - 1L, drop = FALSE]))
+
+## model-fitting from given model formula
+fit2 &lt;- cox_cure(~ x3 + x4 + group, ~ group + x3 + offset(x2),
+                 time = time, event = status, surv_offset = x2,
+                 data = toy_dat, subset = group != "D", bootstrap = 30)
+summary(fit2)
+
+## get BIC's
+BIC(fit1)
+BIC(fit2)
+BIC(fit1, fit2)
+
+
+### Cox cure rate model with uncertain event status ==================
+## simulate sample data
+sim_dat &lt;- simData4cure(nSubject = 200, max_censor = 10, lambda_censor = 0.1,
+                        survMat = x_mat, cureMat = x_mat, b0 = 1)
+table(sim_dat$case)
+table(sim_dat$obs_event, useNA = "ifany")
+
+## use formula
+fit3 &lt;- cox_cure(~ x1 + x2 + x3, ~ z1 + z2 + z3,
+                 time = obs_time, event = obs_event, data = sim_dat)
+summary(fit3)
+
+## use design matrix
+fit4 &lt;- cox_cure.fit(x_mat, x_mat, time = sim_dat$obs_time,
+                     event = sim_dat$obs_event)
+summary(fit4)
+
+## get BIC's
+BIC(fit3, fit4)
+</code></pre>
+
+
+</div>

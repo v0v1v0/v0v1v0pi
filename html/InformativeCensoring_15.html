@@ -1,0 +1,130 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ImputeStat</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>S3 generic to fit model(s) to risk score/gamma Imputed objects</h2>
+
+<h3>Description</h3>
+
+<p>S3 generic to fit model(s) to risk score/gamma Imputed objects
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'GammaImputedData'
+ImputeStat(
+  object,
+  method = c("Cox", "weibull", "exponential")[1],
+  formula = NULL,
+  ...
+)
+
+## S3 method for class 'GammaImputedSet'
+ImputeStat(
+  object,
+  method = c("Cox", "weibull", "exponential")[1],
+  formula = NULL,
+  ...,
+  parallel = c("no", "multicore", "snow")[1],
+  ncpus = 1L,
+  cl = NULL
+)
+
+ImputeStat(
+  object,
+  method = c("logrank", "Wilcoxon", "Cox", "weibull", "exponential")[1],
+  formula,
+  ...
+)
+
+## S3 method for class 'ScoreImputedSet'
+ImputeStat(
+  object,
+  method = c("logrank", "Wilcoxon", "Cox")[1],
+  formula = NULL,
+  ...,
+  parallel = c("no", "multicore", "snow")[1],
+  ncpus = 1L,
+  cl = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>A <code>ScoreImputedData</code>, <code>ScoreImputedSet</code>, <code>GammaImputedData</code> or <code>GammaImputedSet</code> object 
+to fit the model to</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>The type of statistical model to fit. There are three methods which can be performed when using
+Risk Score imputation   <br>
+"logrank": a logrank test using <code>survival::survdiff</code> <br>
+"Wilcoxon": Peto &amp; Peto modification of the Gehan-Wilcoxon test using <code>survival::survdiff</code>
+with <code>rho=1</code> <br>
+"Cox": Fit a cox model using <code>survival::coxph</code>  <br></p>
+<p>For gamma imputation the model can be "Cox" (using <code>survival::coxph</code>), 
+"weibull" or "exponential" both using <code>survival::coxph</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>The model formula to fit.
+If no formula argument is used, then object$default.formula will be used.
+For risk score imputation this is <code>~ treatment.group</code> and for gamma imputation
+this is the formula used when fitting the Cox model
+</p>
+<p>For <code>method="Cox"</code>, additional covariates can be included by explictily giving a 
+formula argument. For logrank/Wilcoxon only additional strata terms can be
+included. 
+</p>
+<p>In all cases only the right hand side of the formula is required
+The survival object on the left hand side is created automatically
+E.g. for a Cox model could use formula=~arm + covar1. The cluster and tt options cannot be used
+See the vignettes for further details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments which are passed into the model fit function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>The type of parallel operation to be used (if any), can be used for <code>GammaImputedSet</code> and <code>ScoreImputedSet</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncpus</code></td>
+<td>
+<p>integer: number of processes to be used in parallel operation: typically one would chose this to be
+the number of available CPUs, can be used for <code>GammaImputedSet</code> and <code>ScoreImputedSet</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cl</code></td>
+<td>
+<p>An optional parallel or snow cluster for use if <code>parallel="snow"</code>. If not supplied, a
+cluster on the local machine is created for the duration of the call, can be used for <code>GammaImputedSet</code> and <code>ScoreImputedSet</code>.</p>
+</td>
+</tr>
+</table>
+<h3>See Also</h3>
+
+<p><code>ScoreStat.object</code> <code>ScoreImputedData.object</code>
+</p>
+
+
+</div>

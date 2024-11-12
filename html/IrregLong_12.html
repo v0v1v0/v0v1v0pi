@@ -1,0 +1,121 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>outputation</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create an outputted dataset for use with multiple outputation.</h2>
+
+<h3>Description</h3>
+
+<p>Multiple outputation is a procedure whereby excess observations are repeatedly randomly sampled and discarded. The method was originally developed to handle clustered data where cluster size is informative, for example when studying pups in a litter. In this case, analysis that ignores cluster size results in larger litters being over-represented in a marginal analysis. Multiple outputation circumvents this problem by randomly selecting one observation per cluster. Multiple outputation has been further adapted to handle longitudinal data subject to irregular observation; here the probability of being retained on any given outputation is inversely proportional to the visit intensity. This function creates a single outputted dataset.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">outputation(data, weights, singleobs, id, time, keep.first)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>the original dataset on which multiple outputation is to be performed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>the weights to be used in the outputation, i.e. the inverse of the probability that a given observation will be selected in creating an outputted dataset. Ignored if singleobs=TRUE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>singleobs</code></td>
+<td>
+<p>logical variable indicating whether a single observation should be retained for each subject</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>character string indicating which column of the data identifies subjects</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time</code></td>
+<td>
+<p>character string indicating which column of the data contains the time at which the visit occurred</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep.first</code></td>
+<td>
+<p>logical variable indicating whether the first observation should be retained with probability 1. This is useful if the data consists of an observation at baseline followed by follow-up at stochastic time points.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>the outputted dataset.
+</p>
+
+
+<h3>References</h3>
+
+
+<ul>
+<li>
+<p> Hoffman E, Sen P, Weinberg C. Within-cluster resampling. Biometrika 2001; 88:1121-1134
+</p>
+</li>
+<li>
+<p> Follmann D, Proschan M, Leifer E. Multiple outputation: inference for complex clustered data by averaging analyses from independent data. Biometrics 2003; 59:420-429
+</p>
+</li>
+<li>
+<p> Pullenayegum EM. Multiple outputation for the analysis of longitudinal data subject to irregular observation. Statistics in Medicine (in press).</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p>Other mo: 
+<code>mo()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(nlme)
+data(Phenobarb)
+library(survival)
+library(data.table)
+library(geeM)
+Phenobarb$event &lt;- 1-as.numeric(is.na(Phenobarb$conc))
+data &lt;- Phenobarb
+data &lt;- data[data$event==1,]
+data$id &lt;- as.numeric(data$Subject)
+data &lt;- data[data$time&lt;16*24,]
+i &lt;- iiw.weights(Surv(time.lag,time,event)~I(conc.lag&gt;0 &amp; conc.lag&lt;=20) +
+I(conc.lag&gt;20 &amp; conc.lag&lt;=30) + I(conc.lag&gt;30)+ cluster(id),
+id="id",time="time",event="event",data=data,
+invariant="id",lagvars=c("time","conc"),maxfu=16*24,lagfirst=0,first=TRUE)
+data$weight &lt;- i$iiw.weight
+head(data)
+data.output1 &lt;-   outputation(data,data$weight,singleobs=FALSE,
+id="id",time="time",keep.first=FALSE)
+head(data.output1)
+data.output2 &lt;-   outputation(data,data$weight,singleobs=FALSE,
+id="id",time="time",keep.first=FALSE)
+head(data.output2)
+data.output3 &lt;-   outputation(data,data$weight,singleobs=FALSE,
+id="id",time="time",keep.first=FALSE)
+head(data.output3)
+# Note that the outputted dataset varies with each command run; outputation is done at random
+</code></pre>
+
+
+</div>

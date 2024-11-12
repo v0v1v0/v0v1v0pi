@@ -1,0 +1,255 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>icc_corr</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Intraclass correlation coefficients (ICCs) for oneway and twoway models – corrected version 
+of icc{irr}</h2>
+
+<h3>Description</h3>
+
+<p>Computes single score or average score ICCs as an index of interrater reliability of 
+quantitative data. Additionally, F-test and confidence interval are computed. icc_corr{irrNA}
+corrects 3 errors of Matthias Gamer's function icc (version 0.84.1).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">icc_corr(
+  ratings,
+  model = c("oneway", "twoway"),
+  type = c("consistency", "agreement"),
+  unit = c("single", "average"),
+  r0 = 0,
+  conf.level = 0.95
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ratings</code></td>
+<td>
+<p>n*m matrix or dataframe, n subjects m raters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>a character string specifying if a "oneway" model (default) with row effects random, 
+or a "twoway" model with column and row effects random should be applied. You can specify just 
+the initial letter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>a character string specifying if "consistency" (default) or "agreement" between 
+raters should be estimated. If a '"oneway"' model is used, only "consistency" could be computed. 
+You can specify just the initial letter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unit</code></td>
+<td>
+<p>a character string specifying the unit of analysis: Must be one of "single" (default) 
+or "average". You can specify just the initial letter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r0</code></td>
+<td>
+<p>specification of the null hypothesis r <code class="reqn">\le</code> r0. Note that a one sided test 
+(H1: r &gt; r0) is performed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf.level</code></td>
+<td>
+<p>confidence level of the interval.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>By this ICC-function three bugs are corrected that were found in the function 
+icc of the irr package (version 0.84.1): <br>
+Due to the first bug the p-values of ICC(A,1) and ICC(A,k) are computed wrongly: 
+McGraw &amp; Wong (1996) use the variable "v" both for the computation of the CIs and for the 
+computation of the p-values. But "v" takes different values in these calculations. In the 
+implementation of icc{irr} (version 0.84.1) this fact is missed. <br>
+The second correction only affects the rare case of the residual mean square (of the twoway 
+model) being zero, i.e. the case that the variance in the data may be explained completely 
+by the two factors (Raters and Objects). In this case the F-value for determining all four
+twoway p-values is not correctly computet by icc.<br>
+The third correction addresses the problems arising in the rare cases of (a) no part or (b) 
+nearly no part of variance may be explained by both factors.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with class '"icclist"' containing the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>$subjects</code></td>
+<td>
+<p>the number of subjects examined.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$raters</code></td>
+<td>
+<p>the number of raters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$model</code></td>
+<td>
+<p>a character string describing the selected model for the analysis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$type</code></td>
+<td>
+<p>a character string describing the selected type of interrater reliability.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$unit</code></td>
+<td>
+<p>a character string describing the unit of analysis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$icc.name</code></td>
+<td>
+<p>a character string specifying the name of ICC according to McGraw &amp; Wong (1996).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$value</code></td>
+<td>
+<p>the intraclass correlation coefficient.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$r0</code></td>
+<td>
+<p>the specified null hypothesis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$Fvalue</code></td>
+<td>
+<p>the value of the F-statistic.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$df1</code></td>
+<td>
+<p>the numerator degrees of freedom.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$df2</code></td>
+<td>
+<p>the denominator degrees of freedom.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$p.value</code></td>
+<td>
+<p>the p-value for a two-sided test.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$conf.level</code></td>
+<td>
+<p>the confidence level for the interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$lbound</code></td>
+<td>
+<p>the lower bound of the confidence interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>$ubound</code></td>
+<td>
+<p>the upper bound of the confidence interval.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Matthias Gamer, Markus Brueckl
+</p>
+
+
+<h3>References</h3>
+
+<p>McGraw, K.O., &amp; Wong, S.P. (1996). Forming inferences about some intraclass 
+correlation coefficients. Psychological Methods, 1, 30–46.
+</p>
+<p>Shrout, P.E., &amp; Fleiss, J.L. (1979), Intraclass correlation: 
+uses in assessing rater reliability. Psychological Bulletin, 86, 420–428.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>icc</code>, <code>iccNA</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example 1:
+data(EbelFILL)
+# EbelFILL is a rather arbitrary data set:
+EbelFILL
+# If twoway agreement ICCs are computed (e.g. the single 
+# measure) with icc{irr}, the 2nd df of F and thus the 
+# p-value is erroneous (please install and load the irr 
+# package):
+#icc(EbelFILL, model="twoway", type="agreement")
+# icc_corr calculates correctly: 
+icc_corr(EbelFILL, model="twoway", type="agreement")
+# 
+# Example 2:
+data(Consist)
+# Consist exhibits a perfect consistency and 
+# a moderate absolute agreement between raters:
+Consist
+# If twoway ICCs are computed with icc{irr}, the F-value is smaller
+# than zero (!) and thus the p-value is enourmously erroneous:
+#icc(Consist, model="twoway", type="consistency", unit="average")
+# icc_corr calculates correctly: 
+icc_corr(Consist, model="twoway", type="consistency", unit="average")
+#
+# Example 3:
+data(Indep)
+# Indep exhibits zero variance between the raters just as 
+# well as between the objects:
+Indep
+# Errors occur, if twoway agreement ICCs are computed with icc{irr}:
+# ICC(A,k) just as well as its CI-bounds are (falsely) positive 
+# and greater than 1...
+#icc(Indep, model="twoway", type="agreement", unit="average")
+# ...but must be -Inf, just as icc_corr shows:
+icc_corr(Indep, model="twoway", type="agreement", unit="average")
+# ICC(A,1): 2nd df of F and thus the p-value are NaN
+#icc(Indep, model="twoway", type="agreement")
+# icc_corr calculates correlctly:
+icc_corr(Indep, model="twoway", type="agreement")
+</code></pre>
+
+
+</div>

@@ -1,0 +1,194 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dniche</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Calculate niche difference between species
+</h2>
+
+<h3>Description</h3>
+
+<p>Calculate niche difference between species based on each environmental variable, directly output the matrix or save the result matrix as big.matrix.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dniche(env, comm,
+       method = c("ab.overlap", "niche.value", "prefer.overlap"),
+       nworker = 4, memory.G = 50, out.dist = FALSE,
+       bigmemo = TRUE, nd.wd = getwd(), nd.spname.file="nd.names.csv",
+       detail.file="ND.res.rda")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>env</code></td>
+<td>
+<p>matrix or data.frame, each row is a sample, each column is an environmental factor which may be important to represent the niche, thus rownames are sample IDs, and colnames are environmental factor names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comm</code></td>
+<td>
+<p>matrix or data.frame, each row is a sample, each column is a spcies (OTU or ASV), thus rownames are sample IDs, colnames are species/OTU/ASV IDs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>methods to calculate niche difference. ab.overlap means to calculate from overlapp based on observed abundances along an environment gradient. niche.value means to calculate the difference from abundance weighted mean of each environment factor for each species. prefer.overlap is similar to ab.overlap, but the observed abundances of each species are divided by total abundance sum of the species before calculating overlapping.  If list multiple methods as a vector, only the first element will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nworker</code></td>
+<td>
+<p>integer, for parallel computing. Either a character vector of host names on which to run the worker copies of R, or a positive integer (in which case that number of copies is run on localhost). default is 4, means 4 threads will be run.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>memory.G</code></td>
+<td>
+<p>numeric, to set the memory size as you need, so that calculation of large tree will not be limited by physical memory. unit is Gb. default is 50Gb.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>out.dist</code></td>
+<td>
+<p>logic, if TRUE, the output niche difference matrix of each environment factor will be a distance object, otherwise will be a matrix in the output list.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bigmemo</code></td>
+<td>
+<p>logic, if TRUE, big.matrix in R package bigmemory will be used to save each niche differnece matrix as a big matrix on hard disk.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nd.wd</code></td>
+<td>
+<p>folder path, when bigmemo is TRUE, where the big matrixes are saved.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nd.spname.file</code></td>
+<td>
+<p>character, name of the file saving taxa IDs, which should be in exactly the same order as in the row names (and column names) of the big niche difference matrix, if bigmemo is TRUE. it should be a .csv file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>detail.file</code></td>
+<td>
+<p>character, name of the file saving all output information in R data format. it should be a .rda file.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The method niche.value is to calculate niche difference as the absolute difference of niche values between each pair of species. The niche value of a species is calculated as abundance-weighted mean of each environmental factor as previously reported (Stegen et al 2012 ISME J). In the method ab.overlap, the abundance of each species along the gradient of an environment factor is estimated using the density function using Gaussian kernel with 512 points. Then, the niche difference between two species is calculated as the sum of absolute abundance difference at each point divided by the sum of the higher abundance at each point, like Ruzicka dissimilarity (weighted Jaccard). It is like 1 - niche overlap based on abundance profile overlap, thus called ab.overlap. The method prefer.overlap is very similar to ab.overlap, just one modification, i.e. the observed abundance of each species in each sample is divied by the total abundance of the species across all sample, to normalize the profile, before calcuating niche difference.
+</p>
+<p>Bigmemory (Kane et al 2013) is used to deal with large datasets.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The output is a list object, with several elements.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>bigmemo</code></td>
+<td>
+<p>logic, to show whether big.matrix is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nd</code></td>
+<td>
+<p>if bigmemo is FALSE, this is a list of matrixes or distance objects showing the niche difference matrix based on each environment factor. if bigmemo is TRUE, this is a list of big matrix file names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nd.wd</code></td>
+<td>
+<p>only appear when bigmemo is TRUE, shows the folder path where the big matrixes are saved.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>names</code></td>
+<td>
+<p>only appear when bigmemo is TRUE, shows species (OTU or ASV) IDs, in the same order as rownames and colnames in the niche difference matrixes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>The method used.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Version 4: 2022.5.29, if nd.wd does not exist, creat a folder as nd.wd.
+Version 3: 2020.9.1, add nd.spname.file and detail.file; remove setwd; change dontrun to donttest and revise save.wd in help doc.
+Version 2: 2020.8.18, add example.
+Version 1: 2020.5.15
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Daliang Ning
+</p>
+
+
+<h3>References</h3>
+
+<p>Stegen, J.C., Lin, X., Konopka, A.E. &amp; Fredrickson, J.K. (2012). Stochastic and deterministic assembly processes in subsurface microbial communities. ISME J, 6, 1653-1664.
+</p>
+<p>Ning, D., Yuan, M., Wu, L., Zhang, Y., Guo, X., Zhou, X. et al. (2020). A quantitative framework reveals ecological drivers of grassland microbial community assembly in response to warming. Nature Communications, 11, 4717.
+</p>
+<p>Kane, M.J., Emerson, J., Weston, S. (2013). Scalable Strategies for Computing with Massive Data. Journal of Statistical Software, 55(14), 1-19. URL http://www.jstatsoft.org/v55/i14/.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ps.bin</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("example.data")
+comm=example.data$comm
+env=example.data$env
+
+# if data is small, you do not need to use big.memory
+niche.dif=dniche(env = env, comm = comm, method = "niche.value",
+                 nworker = 1,out.dist=FALSE,bigmemo=FALSE,nd.wd = NULL)
+
+# if data is large, you need to use big.memory
+# since big.memory need to specify a certain folder,
+# it is set as 'not test'.
+# but you may test the code on your computer after change the path for 'save.wd'.
+
+  wd0=getwd()
+  save.wd=paste0(tempdir(),"/dnichewd")
+  # please change to the folder you want to save the big niche difference matrix.
+  
+  nworker=2 # parallel computing thread number
+  niche.dif=dniche(env = env, comm = comm,
+                   method = "niche.value", nworker = nworker,
+                   out.dist=FALSE,bigmemo=TRUE,nd.wd = save.wd)
+  setwd(wd0)
+
+</code></pre>
+
+
+</div>

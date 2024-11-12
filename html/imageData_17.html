@@ -1,0 +1,207 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>importExcel</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Imports an Excel imaging file and allows some renaming of variables</h2>
+
+<h3>Description</h3>
+
+<p>Uses <code>readxl</code> to import a sheet of imaging data produced by the 
+Lemna Tec Scanalyzer. Basically, the data consists of imaging data obtained from a 
+set of pots or carts over time. There should be a column, which by default is called 
+<code>Snapshot.ID.Tag</code>, containing a unique identifier for each cart and a column, 
+which by default is labelled <code>Snapshot.Time.Stamp</code>, containing 
+the time of imaging for each observation in a row of the sheet. Also, if 
+<code>startTime</code> is not <code>NULL</code>, <code>calcTimes</code> is called to 
+calculate, or recalculate if already present, <code>timeAfterStart</code> from 
+<code>imageTimes</code> by subtracting a supplied <code>startTime</code>. 
+</p>
+<p>Using <code>cameraType</code>, <code>keepCameraType</code>, <code>labsCamerasViews</code> and 
+<code>prefix2suffix</code>, some flexibility is provided for renaming the columns with 
+imaging data. For example, if the column names are prefixed with 'RGB_SV1', 'RGB_SV2' 
+or 'RGB_TV', the 'RGB_' can be removed and the 'SV1', 'SV2' or 'TV' become suffices. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">importExcel(file, sheet="raw data", sep = ",", 
+            cartId = "Snapshot.ID.Tag", 
+            imageTimes = "Snapshot.Time.Stamp", 
+            timeAfterStart = "Time.after.Planting..d.", 
+            cameraType = "RGB", keepCameraType = FALSE, 
+            labsCamerasViews = NULL, prefix2suffix = TRUE, 
+            startTime = NULL,
+            timeFormat = "%Y-%m-%d %H:%M", 
+            imagetimesPlot = TRUE, ...)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>A <code>character</code> giving the path and name of the file containing 
+the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sheet</code></td>
+<td>
+<p>A <code>character</code> giving the name of the sheet containing 
+the data, that must include columns whose names are as specified by <code>cartId</code>, 
+which uniquely indexes the carts in the experiment, and 
+<code>imageTimes</code>, which reflects the time of the imaging from 
+which a particular data value was obtained. It is also assumed that a 
+column whose name is specified by <code>timeAfterStart</code> is in the sheet or that 
+it will be calculated from <code>imageTimes</code> using the value of 
+<code>startTime</code> supplied in the function call.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep</code></td>
+<td>
+<p>A <code>character</code> giving the separator used in a <code>csv</code> file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cartId</code></td>
+<td>
+<p>A <code>character</code> giving the name of the column that contains
+the unique Id for each cart. Note that in importing data into R, spaces 
+and nonalphanumeric characters in names are converted to full stops.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>imageTimes</code></td>
+<td>
+<p>A <code>character</code> giving the name of the column that contains
+the time that each cart was imaged. Note that in importing data into R, spaces 
+and nonalphanumeric characters in names are converted to full stops.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timeAfterStart</code></td>
+<td>
+<p>A <code>character</code> giving the name of the column that 
+contains or is to contain the difference between <code>imageTimes</code> and 
+<code>startTime</code>. The function <code>calcTimes</code> is called to calculate the
+differences. For example, it might contain the number of days after 
+planting. Note that in importing data into R, spaces 
+and nonalphanumeric characters in names are converted to full stops.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cameraType</code></td>
+<td>
+<p>A <code>character</code> string nominating the abbreviation used for the 
+cameraType. A warning will be given if no variable names include this cameraType.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keepCameraType</code></td>
+<td>
+<p>A <code>logical</code> specifying whether to retain the <code>cameraType</code> in the 
+variables names. It will be the start of the prefix or suffix and separated from 
+the remander of the prefix or suffix by an underscore (_).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>labsCamerasViews</code></td>
+<td>
+<p>A named <code>character</code> whose elements are new labels for the 
+camera-view combinations and the name of each element is the old label for the 
+camera-view combination in the data being imported. If <code>labsCamerasViews</code> 
+is <code>NULL</code>, all column names beginning with <code>cameraType</code> are classed as 
+imaging variables and the unique prefixes amongst them determined. If no imaging 
+variables are found then no changes are made. Note that if you want to include a 
+recognisable <code>cameraType</code> in a camier-view label, it should be at the start 
+of the the label in <code>labsCamerasViews</code> and separated from the rest of the 
+label by an underscore (_).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prefix2suffix</code></td>
+<td>
+<p>A <code>logical</code> specifying whether the variables names with prefixed 
+camera-view labels are to have those prefixes transferred to become suffices. 
+The prefix is assumed to be all the characters up to the first full stop (.) in the 
+variable name and must contain <code>cameraType</code> to be moved. It is generally 
+assumed that the characters up to the first underscore (_) are the camera type 
+and this is removed if <code>keepCameraType</code> is <code>FALSE</code>. If there is no 
+underscore (_), the whole prefix is moved. If <code>labsCamerasViews</code> is 
+<code>NULL</code>, all column names beginning with <code>cameraType</code> are classed as 
+imaging variables and the unique prefixes amongst them determined. 
+If no imaging variables are found then no changes are made.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>startTime</code></td>
+<td>
+<p>A <code>character</code> giving the time of planting, in the <code>POSIXct</code> 
+format timeFormat, to be subtracted from <code>imageTimes</code> 
+in recalculating <code>timeAfterStart</code>. If <code>startTime</code> is 
+<code>NULL</code> then <code>timeAfterStart</code> is not recalculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timeFormat</code></td>
+<td>
+<p>A <code>character</code> giving the <code>POSIXct</code> format of characters 
+containing times, in particular <code>imageTimes</code> and <code>startTime</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>imagetimesPlot</code></td>
+<td>
+<p>A <code>logical</code> indicating whether a plot of the imaging times against 
+the recalculated <code>Time.After.Planting..d.</code>. It aids in checking 
+<code>Time.After.Planting..d.</code> and what occurred in imaging the plants.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>... </code></td>
+<td>
+<p>allows for arguments to be passed to <code>imagetimesPlot</code>. However, if 
+<code>intervals</code> is passed an error will occur; use timeAfterStart instead.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A <code>data.frame</code> containing the data.</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Chris Brien</p>
+
+
+<h3>See Also</h3>
+
+<p><code>as.POSIXct</code>, <code>calcTimes</code>, <code>imagetimesPlot</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+raw.0169.dat &lt;- importExcel(file = "0169 analysis_20140603.xlsx", 
+                            startTime = "2013-05-23 8:00 AM")
+
+camview.labels &lt;- c("SF0", "SL0", "SU0", "TV0")
+names(camview.labels) &lt;- c("RGB_Side_Far_0", "RGB_Side_Lower_0", 
+                           "RGB_Side_Upper_0", "RGB_TV_0")
+raw.19.dat &lt;- suppressWarnings(importExcel(file = "./data/raw19datarow.csv",
+                                           cartId = "Snapshot.ID.Tags",
+                                           startTime = "06/10/2017 0:00 AM",
+                                           timeFormat = "%d/%m/%Y %H:M", 
+                                           labsCamerasViews = camview.labels, 
+                                           imagetimesPlot = FALSE))
+
+## End(Not run)</code></pre>
+
+
+</div>

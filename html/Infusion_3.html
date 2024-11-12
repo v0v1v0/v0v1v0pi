@@ -1,0 +1,160 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>add_reftable</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Create or augment a list of simulated distributions of summary statistics 
+</h2>
+
+<h3>Description</h3>
+
+<p><code>add_reftable</code> creates or augments a reference table of simulations, and formats the results appropriately for further use. The user does not have to think about this return format. Instead, s-he only has to think about the very simple return format of the function given as its <code>Simulate</code> argument. The primary role of his function is to wrap the call(s) of the function specified by <code>Simulate</code>. Depending on the arguments, parallel or serial computation is performed. 
+</p>
+<p>When parallelization is implied, it is performed by by default a “socket” cluster, available on all operating systems. Special care is then needed to ensure that all required packages are loaded in the called processes, and that all required variables and functions are passed therein: check the <code>packages</code> and <code>env</code> arguments. For socket clusters, <code>foreach</code> or <code>pbapply</code> is called depending whether the <code>doSNOW</code> package is attached (<code>doSNOW</code> allows more efficient load balancing than <code>pbapply</code>). 
+</p>
+<p>Alternatively, if the simulation function cannot be called directly by the R code, simulated samples can be added using the <code>newsimuls</code> argument. Finally, a generic data frame of simulated samples can be reformatted as a reference table by using only the <code>reftable</code> argument.
+</p>
+<p><code>add_simulation</code> is a wrapper for <code>add_reftable</code>, suitable when <code>nRealizations</code>&gt;1. It is now distinctly documented: the distinct features of <code>add_simulation</code> were conceived for the first workflow implemented in <code>Infusion</code> but are somewhat obsolete now.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">add_reftable(reftable=NULL, Simulate, parsTable=par.grid, par.grid=NULL, 
+             nRealizations = 1L, newsimuls = NULL, 
+             verbose = interactive(), nb_cores = NULL, packages = NULL, 
+             env = NULL, control.Simulate=NULL, cluster_args=list(), 
+             cl_seed=NULL, constr_crits=NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>reftable</code></td>
+<td>
+
+<p>Data frame: a reference table. Each row contains parameters value of a simulated realization of the data-generating process, and the simulated summary statistics.  
+As parameters should be told apart from statistics by <span class="pkg">Infusion</span> functions, information about parameter names should be attached to the <code>reftable</code> <b>*if*</b> it is not available otherwise. Thus if no <code>parsTable</code> is provided, the <code>reftable</code> should have an attribute <code>"LOWER"</code> (a named vectors giving lower bounds for the parameters which will vary in the analysis, as in the return value of the function).  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Simulate</code></td>
+<td>
+
+<p>An *R* function, or the name (as a character string) of an *R* function used to generate summary statistics for samples form a data-generating process. When an external simulation program is called, <code>Simulate</code> must therefore be an R function wrapping the call to the external program. Two function APIs are handled:<br><code> * </code><b>If the function has a <code>parsTable</code> argument</b>, it must return a <b>*data frame*</b> of summary statistics, each line of which contains the vector of summary statistics for one realization of the data-generating process. The <code>parsTable</code> argument of <code>add_reftable</code> will be passed to <code>Simulate</code> and lines of the output data frame must be ordered, as in the input <code>parsTable</code> as these two data frames will be bound together.<br><code> * </code><code>Otherwise</code>, the <code>Simulate</code> function must return a <b>*vector*</b> of summary statistics with named vector members, and it must have <b>one argument for each element</b> of the parameter vector (i.e. of each column of a matching <code>parsTable</code>).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parsTable, par.grid</code></td>
+<td>
+
+<p>A data frame of which each line is the vector of parameters needed by <code>Simulate</code> for each simulation of the data-generating process. <code>par.grid</code> is an alias for <code>parsTable</code>; the latter argument may be preferred in order not to suggest that the parameter values should form a regular grid.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nRealizations</code></td>
+<td>
+
+<p>The number of simulated samples of summary statistics, for each parameter vector (each row of <code>parsTable</code>). If not 1, theold wrkflow is assumed and <code>add_simulation</code> is called.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newsimuls</code></td>
+<td>
+
+<p>If the function used to generate empirical distributions cannot be called by R, then <code>newsimuls</code> can be used to provide these distributions. See Details for the structure of this argument.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nb_cores</code></td>
+<td>
+<p>Number of cores for parallel simulation; <code>NULL</code> or integer value, acting as a shortcut for <code>cluster_args$spec</code>. This is effective only if the simulation function is called separately for each row of <code>parsTable</code>. Otherwise, if the simulation function is called once one the whole <code>parsTable</code>, parallelisation could be controlled only through that function's own arguments.   
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster_args</code></td>
+<td>
+<p>A list of arguments, passed to <code>makeCluster</code>. May contain a non-null <code>spec</code> element, in which case the distinct <code>nb_cores</code> argument and the global <span class="pkg">Infusion</span> option <code>nb_cores</code> are ignored. A typical usage would thus be <code>control_args=list(spec=&lt;number of 'children'&gt;)</code>. Additional elements <code>outfile="log.txt"</code> may be useful to collect output from the nodes, and <code>type="FORK"</code> may be used to force a fork cluster on linux(-alikes) (otherwise a socket cluster is set up as this is the default effect of <code>parallel::makeCluster</code>). Do <b>*not*</b> use a structured list with an <code>add_reftable</code> element as is possible for <code>refine</code> (see Details of <code>refine</code> documentation).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>Whether to print some information or not.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments passed to <code>Simulate</code>, beyond the parameter vector. These arguments should be constant through all the simulation workflow. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control.Simulate</code></td>
+<td>
+<p>A list, used as an exclusive alternative to “...” to pass additional arguments to <code>Simulate</code>, beyond the parameter vector. The list must contain the same elements as would otherwise go in the “...” (if <code>control.Simulate</code> is left NULL, a default value is constructed from the ...).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>packages</code></td>
+<td>
+<p>For parallel evaluation: Names of additional libraries to be loaded on the cores, necessary for <code>Simulate</code> evaluation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>env</code></td>
+<td>
+<p>For parallel evaluation: an environment containing additional objects to be exported on the cores, necessary for <code>Simulate</code> evaluation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cl_seed</code></td>
+<td>
+
+<p>(all parallel contexts:) Integer, or NULL. If an integer, it is used to initialize <code>"L'Ecuyer-CMRG"</code> random-number generator. If <code>cl_seed</code> is <code>NULL</code>, the default generator is selected on each node, where its seed is not controlled. Providing the seed allows repeatable results for given parallelization settings, but may not allow identical results across different settings. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constr_crits</code></td>
+<td>
+<p>NULL, or quoted expression specifying a constraints on parameters, beyond the ones defined by the ranges over each parameter: see <code>constr_crits</code> for details. However, if sampled parameters were generated by <code>init_reftable(., constr_crits=...)</code>, there is no need to apply the constraints again through <code>add_reftable</code>; and given the choice, it is better to apply them when calling <code>init_reftable</code>, as this allows a better control of the size of the reference table.  
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>newsimuls</code> argument should have the same structure as the return value of the function itself, except that <code>newsimuls</code> may include only a subset of the attributes returned by the function. It is thus a data frame; its required attributes are <code>LOWER</code> and <code>UPPER</code> which are named vectors giving bounds for the parameters which are variable in the whole analysis (note that the names identify these parameters in the case this information is not available otherwise from the arguments). The values in these vectors may be incorrect in the sense of failing to bound the parameters in the <code>newsimuls</code>, as the actual bounds are then corrected using parameter values in <code>newsimuls</code> and attributes from <code>reftable</code>.  
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data.frame (with additional attributes) is returned. 
+</p>
+<p>The value has the following attributes: <code>LOWER</code> and <code>UPPER</code> which are each a vector of per-parameter minima and maxima deduced from any <code>newsimuls</code> argument, and optionally any of the arguments <code>Simulate, control.Simulate, packages, env, parsTable</code> and  <code>reftable</code> (all corresponding to input arguments when provided, except that the actual <code>Simulate</code> function is returned even if it was input as a name).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## see main documentation page for the package for other typical usage
+</code></pre>
+
+
+</div>

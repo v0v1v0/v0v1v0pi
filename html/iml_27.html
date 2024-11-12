@@ -1,0 +1,289 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Predictor</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Predictor object</h2>
+
+<h3>Description</h3>
+
+<p>A <code>Predictor</code> object holds any machine learning model (<code>mlr</code>, <code>caret</code>,
+<code>randomForest</code>, ...) and the data to be used for analyzing the model. The
+interpretation methods in the <code>iml</code> package need the machine learning model
+to be wrapped in a <code>Predictor</code> object.
+</p>
+
+
+<h3>Details</h3>
+
+<p>A Predictor object is a container for the prediction model and the data.
+This ensures that the machine learning model can be analyzed in a robust way.
+</p>
+<p>Note: In case of classification, the model should return one column per class
+with the class probability.
+</p>
+
+
+<h3>Public fields</h3>
+
+<div class="r6-fields">
+
+<dl>
+<dt><code>data</code></dt>
+<dd>
+<p>data.frame<br>
+Data object with the data for the model interpretation.</p>
+</dd>
+<dt><code>model</code></dt>
+<dd>
+<p>(any)<br>
+The machine learning model.</p>
+</dd>
+<dt><code>batch.size</code></dt>
+<dd>
+<p><code>numeric(1)</code><br>
+The number of rows to be input the model for prediction at once.</p>
+</dd>
+<dt><code>class</code></dt>
+<dd>
+<p><code>character(1)</code><br>
+The class column to be returned.</p>
+</dd>
+<dt><code>prediction.colnames</code></dt>
+<dd>
+<p>character<br>
+The column names of the predictions.</p>
+</dd>
+<dt><code>prediction.function</code></dt>
+<dd>
+<p>function<br>
+The function to predict newdata.</p>
+</dd>
+<dt><code>task</code></dt>
+<dd>
+<p><code>character(1)</code><br>
+The inferred prediction task: <code>"classification"</code> or <code>"regression"</code>.</p>
+</dd>
+</dl>
+</div>
+
+
+<h3>Methods</h3>
+
+
+
+<h4>Public methods</h4>
+
+
+<ul>
+<li> <p><a href="#method-Predictor-new"><code>Predictor$new()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-Predictor-predict"><code>Predictor$predict()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-Predictor-print"><code>Predictor$print()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-Predictor-clone"><code>Predictor$clone()</code></a>
+</p>
+</li>
+</ul>
+<hr>
+<a id="method-Predictor-new"></a>
+
+
+
+<h4>Method <code>new()</code>
+</h4>
+
+<p>Create a Predictor object
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>Predictor$new(
+  model = NULL,
+  data = NULL,
+  predict.function = NULL,
+  y = NULL,
+  class = NULL,
+  type = NULL,
+  batch.size = 1000
+)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>model</code></dt>
+<dd>
+<p>any<br>
+The machine learning model. Recommended are models from <code>mlr</code> and
+<code>caret</code>. Other machine learning with a S3 predict functions work as
+well, but less robust (e.g. <code>randomForest</code>).</p>
+</dd>
+<dt><code>data</code></dt>
+<dd>
+<p>data.frame<br>
+The data to be used for analyzing the prediction model. Allowed column
+classes are: numeric, factor, integer, ordered and character
+For some models the data can be extracted automatically.
+<code>Predictor$new()</code> throws an error when it can't extract the data
+automatically.</p>
+</dd>
+<dt><code>predict.function</code></dt>
+<dd>
+<p>function<br>
+The function to predict newdata. Only needed if <code>model</code> is not a model
+from <code>mlr</code> or <code>caret</code> package. The first argument of <code>predict.fun</code> has to
+be the model, the second the <code>newdata</code>:
+</p>
+<div class="sourceCode"><pre>function(model, newdata)
+</pre></div>
+</dd>
+<dt><code>y</code></dt>
+<dd>
+<p><code>character(1)</code> | numeric | factor<br> The target vector or
+(preferably) the name of the target column in the <code>data</code> argument.
+Predictor tries to infer the target automatically from the model.</p>
+</dd>
+<dt><code>class</code></dt>
+<dd>
+<p><code>character(1)</code><br>
+The class column to be returned. You should use the column name of the
+predicted class, e.g. <code>class="setosa"</code>.</p>
+</dd>
+<dt><code>type</code></dt>
+<dd>
+<p><code>character(1)</code>)<br>
+This argument is passed to the prediction
+function of the model. For regression models you usually don't have to
+provide the type argument. The classic use case is to say <code>type="prob"</code>
+for classification models. Consult the documentation of the machine
+learning package you use to find which type options you have. If both
+<code>predict.fun</code> and <code>type</code> are used, then type is passed as an argument
+to <code>predict.fun</code>.</p>
+</dd>
+<dt><code>batch.size</code></dt>
+<dd>
+<p><code>numeric(1)</code><br>
+The maximum number of rows to be input the model for prediction at once.
+Currently only respected for FeatureImp, Partial and Interaction.</p>
+</dd>
+</dl>
+</div>
+
+
+<hr>
+<a id="method-Predictor-predict"></a>
+
+
+
+<h4>Method <code>predict()</code>
+</h4>
+
+<p>Predict new data with the machine learning model.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>Predictor$predict(newdata)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>newdata</code></dt>
+<dd>
+<p>data.frame<br>
+Data to predict on.</p>
+</dd>
+</dl>
+</div>
+
+
+<hr>
+<a id="method-Predictor-print"></a>
+
+
+
+<h4>Method <code>print()</code>
+</h4>
+
+<p>Print the Predictor object.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>Predictor$print()</pre></div>
+
+
+<hr>
+<a id="method-Predictor-clone"></a>
+
+
+
+<h4>Method <code>clone()</code>
+</h4>
+
+<p>The objects of this class are cloneable with this method.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>Predictor$clone(deep = FALSE)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>deep</code></dt>
+<dd>
+<p>Whether to make a deep clone.</p>
+</dd>
+</dl>
+</div>
+
+
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library("mlr")
+task &lt;- makeClassifTask(data = iris, target = "Species")
+learner &lt;- makeLearner("classif.rpart", minsplit = 7, predict.type = "prob")
+mod.mlr &lt;- train(learner, task)
+mod &lt;- Predictor$new(mod.mlr, data = iris)
+mod$predict(iris[1:5, ])
+
+mod &lt;- Predictor$new(mod.mlr, data = iris, class = "setosa")
+mod$predict(iris[1:5, ])
+
+library("randomForest")
+rf &lt;- randomForest(Species ~ ., data = iris, ntree = 20)
+
+
+mod &lt;- Predictor$new(rf, data = iris, type = "prob")
+mod$predict(iris[50:55, ])
+
+# Feature importance needs the target vector, which needs to be supplied:
+mod &lt;- Predictor$new(rf, data = iris, y = "Species", type = "prob")
+</code></pre>
+
+
+</div>

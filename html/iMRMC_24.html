@@ -1,0 +1,276 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>limitsOfAgreement</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>MRMC Analysis of Limits of Agreement using ANOVA</h2>
+
+<h3>Description</h3>
+
+<p>These four functions calculate four types of Limits of Agreement using ANOVA: 
+Within-Reader Within-Modality(WRWM), Between-Reader Within-Modality(BRWM),
+Within-Reader Between-Modality(WRBM), and Between-Reader Between-Modality(BRBM). 
+The 95% confidence interval of the mean difference is also provided. If the study is fully crossed, the ANOVA 
+methods are realized either by applying <code>stats::aov</code> or by matrix multiplication. Otherwise, the SS in ANOVA are
+computed as residual sums of squares of linear models. See details below about the model structure
+and these references.
+</p>
+
+<ul>
+<li>
+<p> S. Wen and B. D. Gallas,
+“Three-Way Mixed Effect ANOVA to Estimate MRMC Limits of Agreement,”
+<em>Statistics in Biopharmaceutical Research</em>, <strong>14</strong>, pp. 532–541, 2022,
+<a href="https://doi.org/10.1080/19466315.2022.2063169">doi:10.1080/19466315.2022.2063169</a>.
+</p>
+</li>
+<li>
+<p> S. Wen and B. D. Gallas,
+“Expanding to Arbitrary Study Designs: ANOVA to Estimate Limits of Agreement for MRMC Studies,”
+<em>arXiv</em>, 2023, <a href="https://doi.org/10.48550/ARXIV.2312.16097">doi:10.48550/ARXIV.2312.16097</a>.
+</p>
+</li>
+</ul>
+<h3>Usage</h3>
+
+<pre><code class="language-R">laWRBM(
+  df,
+  modalitiesToCompare = c("testA", "testB"),
+  keyColumns = c("readerID", "caseID", "modalityID", "score"),
+  if.aov = TRUE,
+  type = 1,
+  reader.first = TRUE
+)
+
+laBRWM(
+  df,
+  modality = c("testA"),
+  keyColumns = c("readerID", "caseID", "modalityID", "score"),
+  if.aov = TRUE,
+  type = 1,
+  reader.first = TRUE
+)
+
+laWRWM(
+  df,
+  replicatesToCompare = c("testA", "testB"),
+  keyColumns = c("readerID", "caseID", "modalityID", "score"),
+  if.aov = TRUE,
+  type = 1,
+  reader.first = TRUE
+)
+
+laBRBM(
+  df,
+  modalitiesToCompare = c("testA", "testB"),
+  keyColumns = c("readerID", "caseID", "modalityID", "score"),
+  if.aov = TRUE,
+  type = 1,
+  reader.first = TRUE,
+  is.sparseQR = T
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>Data frame of observations, one per row. Columns identify random effects, fixed effects,
+and the observation. Namely,
+</p>
+
+<dl>
+<dt>readerID</dt>
+<dd>
+<p>The factor corresponding to the different readers in the study.
+The readerID is treated as a random effect.</p>
+</dd>
+<dt>caseID</dt>
+<dd>
+<p>The factor corresponding to the different cases in the study.
+The caseID is treated as a random effect.</p>
+</dd>
+<dt>modalityID</dt>
+<dd>
+<p>The factor corresponding to the different modalities in the study.
+The modalityID is treated as a fixed effect.</p>
+</dd>
+<dt>score</dt>
+<dd>
+<p>The number (observation) given by the reader to the case for the modality indicated.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modalitiesToCompare</code></td>
+<td>
+<p>The factors identifying the modalities to compare. It should be length 2.
+Default = <code>c("testA","testB")</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keyColumns</code></td>
+<td>
+<p>Identify the factors corresponding to the readerID (random effect), caseID (random effect),
+modalityID (fixed effect), and score (observation).
+Default = <code>c("readerID", "caseID", "modalityID", "score")</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>if.aov</code></td>
+<td>
+<p>Boolean value to determine whether to use the 'stats::aov' function or to
+calculate the ANOVA statistics explicitly. 'stats::aov' is only appropriate
+for fully-crossed study only. This flag permits head-to-head comparisons of
+the output from 'stats::aov' and the explicit calculations.
+Default = <code>TRUE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Identify how SS are computed in ANOVA for unbalanced study designs.
+The possible values are c(1,2,3), corresponding to the approaches
+introduced in the SAS package(Langsrud2003_Stat-Comput_v13p163).
+</p>
+<p>Default <code>type= 1</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reader.first</code></td>
+<td>
+<p>Boolean value to determine whether reader effect is added to the model before the case effect. 
+Default <code>reader.first = TRUE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modality</code></td>
+<td>
+<p>The factor identifying the modality for laBRWM. It should be length 1.
+Default = <code>modality = c("testA")</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>replicatesToCompare</code></td>
+<td>
+<p>The factors identifying the replicates to compare for <code>laWRWM</code>. It should be length 2.
+Default = <code>c("testA","testB")</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>is.sparseQR</code></td>
+<td>
+<p>Boolean value to determine whether the 'base::qr' function assumes the input
+data is sparse or not. 
+Default = <code>TRUE</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Suppose the score from a reader j for case k under modality <code class="reqn">i</code> is<code class="reqn">X_{ijk}</code>, then the difference score from the
+same reader for the same case under two different modalities is <code class="reqn">Y_{jk} = X_{1jk} - X_{2jk}</code>.
+</p>
+
+<ul>
+<li>
+<p><code>laWRBM</code> use two-way random effect ANOVA to analyze the difference scores <code class="reqn">Y_{jk}</code>. The model
+is <code class="reqn">Y_{jk}=\mu + R_j + C_k + \epsilon_{jk}</code>, where <code class="reqn">R_j</code> and <code class="reqn">C_k</code> are random effects for readers
+and cases. The variances of mean and individual observations are expressed as linear combinations of the MS
+given by ANOVA.
+</p>
+</li>
+<li>
+<p><code>laBRWM</code> use two-way random effect ANOVA to analyze the scores <code class="reqn">X_{jk}</code> for a single modality. 
+The model is <code class="reqn">X_{jk}=\mu + R_j + C_k + \epsilon_{jk}</code>, where <code class="reqn">R_j</code> and <code class="reqn">C_k</code> are random effects 
+for readers and cases. The variances of mean and individual observations are expressed as linear combinations 
+of the MS given by ANOVA.
+</p>
+</li>
+<li>
+<p><code>laWRWM</code> use two-way random effect ANOVA to analyze the difference scores <code class="reqn">Y_{jk}</code> from the same 
+reader for the same cases under the same modality with different replicates <code class="reqn">Y_{jk} = X_{jk1} - X_{jk2}</code>. 
+The model is <code class="reqn">Y_{jk}=\mu + R_j + C_k + \epsilon_{jk}</code>, where <code class="reqn">R_j</code> and <code class="reqn">C_k</code> are random effects for 
+readers and cases. The variances of mean and individual observations are expressed as  linear combinations of 
+the MS given by ANOVA.
+</p>
+</li>
+<li>
+<p><code>laBRBM</code> use three-way mixed effect ANOVA to analyze the scores <code class="reqn">X_{ijk}</code>. The model is given by
+<code class="reqn">X_{ijk}=\mu + R_j + C_k + m_i + RC_{jk} + mR_{ij} + mC_{ik} + \epsilon_{ijk}</code>, where <code class="reqn">R_j</code> and
+<code class="reqn">C_k</code> are random effects for readers and cases, <code class="reqn">m_i</code> is a fixed effect for modality, and the other terms
+are interaction terms. The variances of mean and individual observations are expressed as linear combinations
+of the MS given by ANOVA.
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>A list of two dataframes.
+</p>
+<p>The first dataframe is <code>limits.of.agreement</code>. It has one row. Each column is as follows:
+</p>
+
+<dl>
+<dt>meanDiff</dt>
+<dd>
+<p>The mean difference score.</p>
+</dd>
+<dt>var.MeanDiff</dt>
+<dd>
+<p>The variance of the mean difference score.</p>
+</dd>
+<dt>var.1obs</dt>
+<dd>
+<p>The variance of the difference score.</p>
+</dd>
+<dt>ci95meanDiff.bot</dt>
+<dd>
+<p>Lower bound of 95% CI for the mean difference score. <code>meanDiff+
+  1.96*sqrt(var.MeanDiff)</code></p>
+</dd>
+<dt>ci95meanDiff.top</dt>
+<dd>
+<p>Upper bound of 95% CI for the mean difference score. <code>meanDiff-
+  1.96*sqrt(var.MeanDiff)</code></p>
+</dd>
+<dt>la.bot</dt>
+<dd>
+<p>Lower Limit of Agreement for the difference score. <code>meanDiff+1.96*sqrt(var.1obs)</code></p>
+</dd>
+<dt>la.top</dt>
+<dd>
+<p>Upper Limit of Agreement for the difference score. <code>meanDiff-1.96*sqrt(var.1obs)</code></p>
+</dd>
+</dl>
+<p>The second dataframe is <code>two.way.ANOVA</code> or <code>three.way.ANOVA</code> shows the degrees of freedom, 
+sums of squares, and estimates of variance components for each source of variation
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Initialize the simulation configuration parameters
+config &lt;- sim.NormalIG.Hierarchical.config(modalityID = c("testA", "testB"))
+
+# Initizlize the seed and stream of the random number generator
+init.lecuyerRNG()
+
+# Simulate an MRMC ROC data set
+dFrame &lt;- sim.NormalIG.Hierarchical(config)
+
+# Compute Limits of Agreement
+laWRBM_result &lt;- laWRBM(dFrame)
+print(laWRBM_result)
+laBRBM_result &lt;- laBRBM(dFrame)
+print(laBRBM_result)
+
+</code></pre>
+
+
+</div>

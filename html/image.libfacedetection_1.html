@@ -1,0 +1,62 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>image_detect_faces</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Detect faces in images using the libfacedetection CNN</h2>
+
+<h3>Description</h3>
+
+<p>Detect faces in images using using a convolutional neural network available from <a href="https://github.com/ShiqiYu/libfacedetection">https://github.com/ShiqiYu/libfacedetection</a>. 
+The function can be used to detect faces of minimal size 10x10 pixels.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">image_detect_faces(x)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an object of class magick-image with rgb colors. Or an rgb integer array with pixel values in the 0-255 range.</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p>A list with elements nr and detections.<br>
+Element nr indicates the number of faces found. <br> 
+The data frame detections indicates the locations of these. This data.frame has columns x, y, width and height 
+as well as a columns called confidence. The values of x and y are the top left of the start of the box. This data frame also has the x and y locations of 5 face landmarks (eyes, nose and mouth ends).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(magick)
+path &lt;- system.file(package="image.libfacedetection", "images", "handshake.jpg")
+x &lt;- image_read(path)
+x
+faces &lt;- image_detect_faces(x)
+faces
+plot(faces, x, border = "red", lwd = 7, col = "white", landmarks = TRUE)
+
+
+##
+## You can also directly pass on the RGB array in BGR format 
+## without the need of having magick
+##
+tensor &lt;- image_data(x, channels = "rgb")
+tensor &lt;- as.integer(tensor)
+faces  &lt;- image_detect_faces(tensor)
+str(faces)
+plot(faces, x)
+</code></pre>
+
+
+</div>

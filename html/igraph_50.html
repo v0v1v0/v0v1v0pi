@@ -1,0 +1,152 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>which_multiple</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Find the multiple or loop edges in a graph</h2>
+
+<h3>Description</h3>
+
+<p>A loop edge is an edge from a vertex to itself. An edge is a multiple edge
+if it has exactly the same head and tail vertices as another edge. A graph
+without multiple and loop edges is called a simple graph.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">which_multiple(graph, eids = E(graph))
+
+any_multiple(graph)
+
+count_multiple(graph, eids = E(graph))
+
+which_loop(graph, eids = E(graph))
+
+any_loop(graph)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>The input graph.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eids</code></td>
+<td>
+<p>The edges to which the query is restricted. By default this is
+all edges in the graph.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>any_loop()</code> decides whether the graph has any loop edges.
+</p>
+<p><code>which_loop()</code> decides whether the edges of the graph are loop edges.
+</p>
+<p><code>any_multiple()</code> decides whether the graph has any multiple edges.
+</p>
+<p><code>which_multiple()</code> decides whether the edges of the graph are multiple
+edges.
+</p>
+<p><code>count_multiple()</code> counts the multiplicity of each edge of a graph.
+</p>
+<p>Note that the semantics for <code>which_multiple()</code> and <code>count_multiple()</code> is
+different. <code>which_multiple()</code> gives <code>TRUE</code> for all occurrences of a
+multiple edge except for one. I.e. if there are three <code>i-j</code> edges in the
+graph then <code>which_multiple()</code> returns <code>TRUE</code> for only two of them while
+<code>count_multiple()</code> returns ‘3’ for all three.
+</p>
+<p>See the examples for getting rid of multiple edges while keeping their
+original multiplicity as an edge attribute.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>any_loop()</code> and <code>any_multiple()</code> return a logical scalar.
+<code>which_loop()</code> and <code>which_multiple()</code> return a logical vector.
+<code>count_multiple()</code> returns a numeric vector.
+</p>
+
+
+<h3>Related documentation in the C library</h3>
+
+<p><a href="https://igraph.org/c/html/latest/igraph-Structural.html#igraph_is_multiple"><code>igraph_is_multiple()</code></a>, <a href="https://igraph.org/c/html/latest/igraph-Structural.html#igraph_has_multiple"><code>igraph_has_multiple()</code></a>, <a href="https://igraph.org/c/html/latest/igraph-Structural.html#igraph_count_multiple"><code>igraph_count_multiple()</code></a>, <a href="https://igraph.org/c/html/latest/igraph-Structural.html#igraph_is_loop"><code>igraph_is_loop()</code></a>, <a href="https://igraph.org/c/html/latest/igraph-Structural.html#igraph_has_loop"><code>igraph_has_loop()</code></a>.</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Gabor Csardi <a href="mailto:csardi.gabor@gmail.com">csardi.gabor@gmail.com</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>simplify()</code> to eliminate loop and multiple edges.
+</p>
+<p>Other structural.properties: 
+<code>bfs()</code>,
+<code>component_distribution()</code>,
+<code>connect()</code>,
+<code>constraint()</code>,
+<code>coreness()</code>,
+<code>degree()</code>,
+<code>dfs()</code>,
+<code>distance_table()</code>,
+<code>edge_density()</code>,
+<code>feedback_arc_set()</code>,
+<code>girth()</code>,
+<code>is_acyclic()</code>,
+<code>is_dag()</code>,
+<code>is_matching()</code>,
+<code>k_shortest_paths()</code>,
+<code>knn()</code>,
+<code>reciprocity()</code>,
+<code>subcomponent()</code>,
+<code>subgraph()</code>,
+<code>topo_sort()</code>,
+<code>transitivity()</code>,
+<code>unfold_tree()</code>,
+<code>which_mutual()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Loops
+g &lt;- make_graph(c(1, 1, 2, 2, 3, 3, 4, 5))
+any_loop(g)
+which_loop(g)
+
+# Multiple edges
+g &lt;- sample_pa(10, m = 3, algorithm = "bag")
+any_multiple(g)
+which_multiple(g)
+count_multiple(g)
+which_multiple(simplify(g))
+all(count_multiple(simplify(g)) == 1)
+
+# Direction of the edge is important
+which_multiple(make_graph(c(1, 2, 2, 1)))
+which_multiple(make_graph(c(1, 2, 2, 1), dir = FALSE))
+
+# Remove multiple edges but keep multiplicity
+g &lt;- sample_pa(10, m = 3, algorithm = "bag")
+E(g)$weight &lt;- count_multiple(g)
+g &lt;- simplify(g, edge.attr.comb = list(weight = "min"))
+any(which_multiple(g))
+E(g)$weight
+
+</code></pre>
+
+
+</div>

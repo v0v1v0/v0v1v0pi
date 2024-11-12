@@ -1,0 +1,139 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>clustering</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Posterior similarity matrix and partition estimation</h2>
+
+<h3>Description</h3>
+
+<p>The function computes the posterior similarity (coclustering) matrix (psm)
+and estimates a representative partition of the observations from the MCMC
+output. The user can provide the desired number of clusters or estimate a
+optimal clustering solution by minimizing a loss function on the space
+of the partitions.
+In the latter case, the function uses the package <code>salso</code>
+(<a href="https://cran.r-project.org/package=salso">Dahl et al., 2021</a>),
+that the user needs to load.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">clustering(
+  object,
+  clustering_method = c("dendrogram", "salso"),
+  K = 2,
+  nCores = 1,
+  ...
+)
+
+## S3 method for class 'hidalgo_psm'
+print(x, ...)
+
+## S3 method for class 'hidalgo_psm'
+plot(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>object of class <code>Hidalgo</code>, the output of the
+<code>Hidalgo</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clustering_method</code></td>
+<td>
+<p>character indicating the method to use to perform
+clustering. It can be
+</p>
+
+<dl>
+<dt>"dendrogram"</dt>
+<dd>
+<p>thresholding the adjacency dendrogram with a given
+number (<code>K</code>);</p>
+</dd>
+<dt>"salso"</dt>
+<dd>
+<p>estimation via minimization of several partition
+estimation criteria.
+The default loss function is the variation of information.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>number of clusters to recover by thresholding the
+dendrogram obtained from the psm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nCores</code></td>
+<td>
+<p>parameter for the <code>salso</code> function: the number of CPU
+cores to use. A value of zero indicates to use all cores on the system.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>object of class <code>hidalgo_psm</code>, obtained from the function
+<code>clustering()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>list containing the posterior similarity matrix (<code>psm</code>) and
+the estimated partition <code>clust</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>D. B. Dahl, D. J. Johnson, and P. Müller (2022),
+"Search Algorithms and Loss Functions for Bayesian Clustering",
+Journal of Computational and Graphical Statistics,
+<a href="https://doi.org/10.1080/10618600.2022.2069779">doi:10.1080/10618600.2022.2069779</a>.
+</p>
+<p>David B. Dahl, Devin J. Johnson and Peter Müller (2022). "salso: Search
+Algorithms and Loss Functions for Bayesian Clustering".
+R package version
+0.3.0. <a href="https://CRAN.R-project.org/package=salso">https://CRAN.R-project.org/package=salso</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>Hidalgo</code>, <code>salso</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(salso)
+X            &lt;- replicate(5,rnorm(500))
+X[1:250,1:2] &lt;- 0
+h_out        &lt;- Hidalgo(X)
+clustering(h_out)
+
+</code></pre>
+
+
+</div>

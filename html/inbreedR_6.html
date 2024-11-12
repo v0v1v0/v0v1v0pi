@@ -1,0 +1,177 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>g2_snps</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimating g2 from larger datasets, such as SNPs</h2>
+
+<h3>Description</h3>
+
+<p>Estimating g2 from larger datasets, such as SNPs
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">g2_snps(genotypes, nperm = 0, nboot = 0, boot_over = "inds", CI = 0.95,
+  parallel = FALSE, ncores = NULL, verbose = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>genotypes</code></td>
+<td>
+<p><code>data.frame</code> with individuals in rows and loci in columns,
+containing genotypes coded as 0 (homozygote), 1 (heterozygote) and NA (missing)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nperm</code></td>
+<td>
+<p>number or permutations for to estimate a p-value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nboot</code></td>
+<td>
+<p>number of bootstraps to estimate a confidence interval</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot_over</code></td>
+<td>
+<p>Bootstrap over individuals by specifying "inds" and over loci with "loci". Defaults to "ind".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CI</code></td>
+<td>
+<p>confidence interval (default to 0.95)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>Default is FALSE. If TRUE, bootstrapping and permutation tests are parallelized</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncores</code></td>
+<td>
+<p>Specify number of cores to use for parallelization. By default,
+all available cores are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>If FALSE, nothing will be printed to show the status of bootstraps and permutations.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Calculates g2 from SNP datasets. Use convert_raw to convert raw genotypes (with 2 columns per locus) into
+the required format
+</p>
+
+
+<h3>Value</h3>
+
+<p>g2_snps returns an object of class "inbreed".
+The functions 'print' and 'plot' are used to print a summary and to plot the distribution of bootstrapped g2 values and CI.
+</p>
+<p>An 'inbreed' object from <code>g2_snps</code> is a list containing the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>function call.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>g2</code></td>
+<td>
+<p>g2 value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p_val</code></td>
+<td>
+<p>p value from permutation test</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>g2_permut</code></td>
+<td>
+<p>g2 values from permuted genotypes</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>g2_boot</code></td>
+<td>
+<p>g2 values from bootstrap samples</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CI_boot</code></td>
+<td>
+<p>confidence interval from bootstrap distribution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se_boot</code></td>
+<td>
+<p>standard error of g2 from bootstraps</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nobs</code></td>
+<td>
+<p>number of observations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nloc</code></td>
+<td>
+<p>number of markers</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Martin A. Stoffel (martin.adam.stoffel@gmail.com) &amp;
+Mareike Esser (messer@techfak.uni-bielefeld.de)
+</p>
+
+
+<h3>References</h3>
+
+<p>Hoffman, J.I., Simpson, F., David, P., Rijks, J.M., Kuiken, T., Thorne, M.A.S., Lacey, R.C. &amp; Dasmahapatra, K.K. (2014) High-throughput sequencing reveals inbreeding depression in a natural population.
+Proceedings of the National Academy of Sciences of the United States of America, 111: 3775-3780. Doi: 10.1073/pnas.1318945111
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># load SNP genotypes in 0 (homozygous), 1 (heterozygous), NA (missing) format.
+# low number of bootstraps and permutations for computational reasons.
+data(mouse_snps)
+(g2_mouse &lt;- g2_snps(mouse_snps, nperm = 10, nboot = 10, CI = 0.95, boot_over = "loci"))
+
+# parallelized version for more bootstraps or permutations
+## Not run: 
+(g2_mouse &lt;- g2_snps(mouse_snps, nperm = 1000, nboot = 1000, 
+                     CI = 0.95, parallel = TRUE, ncores = 4))
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

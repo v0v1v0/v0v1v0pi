@@ -1,0 +1,132 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>twoLocusJacquard</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Estimating two-locus Jacquard coefficients
+</h2>
+
+<h3>Description</h3>
+
+<p>Estimates by simulation the two-locus version of Jacquard's condensed identity coefficients for a pairwise relationship.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">twoLocusJacquard(x, ind1, ind2, rho=NULL, cM=NULL, Nsim, verbose=TRUE,...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>A pedigree in the form of a <code>linkdat</code> object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ind1, ind2</code></td>
+<td>
+
+<p>Numeric ID labels of the two individuals.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+
+<p>NULL, or a number in the interval [0, 0.5]: the recombination fraction between the two loci. If non-NULL, it is converted to centiMorgan using Haldanes map function: <code>cM = -50*log(1-2*rho)</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cM</code></td>
+<td>
+
+<p>NULL, or a non-negative number: the distance in centiMorgan between the two loci. The numeric <code>Inf</code> is allowed, and corresponds to unlinked loci.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Nsim</code></td>
+<td>
+
+<p>The number of simulations to be performed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>A logical.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Further arguments to be passed on to <code>IBDsim</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>As in the case of IBD coefficients (see <code>twoLocusIBD</code>), we can generalise Jacquard's identity coefficients to two loci: Given any pair of individuals, and any pair of autosomal loci, we define the two-locus Jacquard coefficient <code class="reqn">\Delta[i,j]</code> (where <code class="reqn">1 \le i,j \le 9</code>) by
+</p>
+<p style="text-align: center;"><code class="reqn">\Delta[i,j] = Pr(Jacquard state \Sigma[i] at locus 1, and state \Sigma[j] at locus 2).</code>
+</p>
+
+
+
+<h3>Value</h3>
+
+<p>A numerical 9*9 matrix. The entry in row <code class="reqn">a</code> and column <code class="reqn">b</code> is the estimate of <code class="reqn">\Delta[a-1, b-1]</code> defined above. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Magnus Dehli Vigeland
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>jacquard</code>, <code>oneLocusIBD</code>, <code>twoLocusIBD</code>, <code>oneLocusJacquard</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">### Siblings whose parents are full siblings.
+x = fullSibMating(generations=2)
+Nsim = 100 # (increase to improve accuracy) 
+
+# Estimate of the 9 identity coefficients
+j_est = oneLocusJacquard(x, ind1=5, ind2=6, Nsim=Nsim, seed=123)
+
+### Two-locus Jacquard coefficients
+# Completely linked loci
+rho = 0 
+j2_linked = twoLocusJacquard(x, ind1=5, ind2=6, rho=rho, Nsim=Nsim, seed=123)
+stopifnot(identical(diag(j2_linked), j_est))
+
+# Completely unlinked
+rho = 0.5
+j2_unlinked = twoLocusJacquard(x, ind1=5, ind2=6, rho=rho, Nsim=Nsim, seed=123)
+stopifnot(identical(j2_unlinked, outer(j_est, j_est)))
+</code></pre>
+
+
+</div>

@@ -1,0 +1,124 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mergeUpDownTimes</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Determine overlaps in two sets of upDownTimes.</h2>
+
+<h3>Description</h3>
+
+<p>The <code>mergeUpDownTimes</code> function determines the overlaps in two sets of times representing up/down (on/off) periods for a single
+or a set of channels.  This function can be used to determine overall station up/down periods.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mergeUpDownTimes(udt1, udt2, bothOn)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>udt1</code></td>
+<td>
+<p>vector of <code>POSIXct</code> times representing up/down transitions</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>udt2</code></td>
+<td>
+<p>vector of <code>POSIXct</code> times representing up/down transitions</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bothOn</code></td>
+<td>
+<p>logical specifying whether overlaps are determined with <code>AND</code> or <code>OR</code>
+(default=FALSE: <code>udt1 OR udt2</code>)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>When <code>bothOn=FALSE</code>, the default, this function returns the times of transitions from "either to neither" and back.
+When <code>bothOn=TRUE</code>, this function returns the times of transitions from "both to either" and back.
+</p>
+<p>If an empty vector is passed in for <code>udt1</code> or <code>udt2</code> then the other vector is returned unchanged.  This can be useful
+when merging the upDownTimes for multiple channels.  See the example below.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A vector of <code>POSIXct</code> datetimes associated with on/off transitions.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The vector of times in <code>udt1</code> and <code>udt2</code> has no information on the values of <code>min_signal</code> or <code>min_gap</code> that
+were used to generate the timeseries.  It is up to the user to make sure that the incoming vectors are appropriate for comparison.
+See <code>getUpDownTimes</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>See Also</h3>
+
+
+<p><code>getUpDownTimes</code>,
+<code>plotUpDownTimes</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+# Three Streams, each with different upDownTimes
+starttime &lt;- as.POSIXct("2012-07-01", tz="GMT")
+endtime &lt;- as.POSIXct("2012-07-02", tz="GMT")
+stE &lt;- getDataselect(iris,"IU","XMAS","10","BHE",starttime,endtime)
+stN &lt;- getDataselect(iris,"IU","XMAS","10","BHN",starttime,endtime)
+stZ &lt;- getDataselect(iris,"IU","XMAS","10","BHZ",starttime,endtime)
+udtE &lt;- getUpDownTimes(stE)
+udtN &lt;- getUpDownTimes(stN)
+udtZ &lt;- getUpDownTimes(stZ)
+
+udtAll &lt;- c()
+udtAny &lt;- c()
+for (udt in list(udtE, udtN, udtZ)) {
+  udtAll &lt;- mergeUpDownTimes(udtAll,udt,bothOn=TRUE)
+  udtAny &lt;- mergeUpDownTimes(udtAny,udt,bothOn=FALSE)
+}
+
+# 5 rows
+layout(matrix(seq(5)))
+
+# Plot the results
+par(mar=c(3,4,3,2)) # adjust margins
+plotUpDownTimes(udtE); title("BHE")
+plotUpDownTimes(udtN); title("BHN")
+plotUpDownTimes(udtZ); title("BHZ")
+plotUpDownTimes(udtAll); title("ALL channels up")
+plotUpDownTimes(udtAny); title("ANY channel up")
+
+# Restore default layout
+layout(1)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

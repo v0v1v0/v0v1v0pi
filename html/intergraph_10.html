@@ -1,0 +1,117 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>asNetwork</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Convert objects to class "network"</h2>
+
+<h3>Description</h3>
+
+<p>Convert objects to class "network"
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">asNetwork(x, ...)
+
+## S3 method for class 'data.frame'
+asNetwork(x, directed = TRUE, vertices = NULL, ...)
+
+## S3 method for class 'igraph'
+asNetwork(x, amap = attrmap(), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an R object to be coerced, see Details for the description of
+available methods</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments from/to other methods</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>directed</code></td>
+<td>
+<p>logical, whether the created network should be directed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vertices</code></td>
+<td>
+<p>NULL or data frame, optional data frame containing vertex
+attributes</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>amap</code></td>
+<td>
+<p>data.frame with attribute copy/rename rules, see
+<code>attrmap</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This is a generic function which dispatches on argument <code>x</code>.  It creates
+objects of class "network" from other R objects.
+</p>
+<p>The method for data frames is inspired by the similar function in package
+<span class="pkg">igraph</span>: <code>graph.data.frame</code>.  It assumes that first
+two columns of <code>x</code> constitute an edgelist.  The remaining columns are
+interpreted as edge attributes. Optional argument <code>vertices</code> allows for
+including vertex attributes.  The first column is assumed to vertex id, the
+same that is used in the edge list. The remaining colums are interpreted as
+vertex attributes.
+</p>
+<p>The method for objects of class "igraph" takes the network of that class and
+converts it to data frames using <code>asDF</code>. The network is recreated
+in class "network" using <code>asNetwork.data.frame</code>. The function currently
+does not support bipartite "igraph" networks.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Object of class "network".
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>graph.data.frame</code>
+</p>
+<p><code>asIgraph</code> for conversion in the other direction.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># require package 'network' as 'asNetwork' generic is defined there
+if(require(network, quietly=TRUE))
+{
+  ### demonstrating method for data frames
+  l &lt;- asDF(exNetwork)
+  g &lt;- asNetwork( l$edges, vertices=l$vertexes)
+  stopifnot(all.equal(g, exNetwork))
+
+  ### method for igraph objects
+  ig &lt;- asNetwork(exIgraph)
+  identical( as.numeric(as.matrix(g, "adjacency")),
+            as.numeric(as.matrix(ig, "adjacency")))
+}
+
+</code></pre>
+
+
+</div>

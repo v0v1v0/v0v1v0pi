@@ -1,0 +1,133 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>start_event</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Determine the starting point for each time series.</h2>
+
+<h3>Description</h3>
+
+<p>Determine the starting point for each time series.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">start_event(
+  data,
+  column = "Time",
+  event = "Event",
+  label = "start.event",
+  label.event = NULL,
+  order = TRUE,
+  newcode = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A data frame.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>column</code></td>
+<td>
+<p>Test string, name of the column that describes the order 
+withing the time series. Default is 'Time'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event</code></td>
+<td>
+<p>A text string or vector indicating the columns that define the 
+unique time series. Default is 'Event'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label</code></td>
+<td>
+<p>The name of the new column with the start point of each time 
+series. Default is 'start.event'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>label.event</code></td>
+<td>
+<p>In case <code>event</code> is not a single column, providing a 
+text string will add a column with this name that defines unique time 
+series. Default is NULL (no new column for time series is created).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>order</code></td>
+<td>
+<p>Logical: whether or not to order each time series. 
+Default is TRUE, maybe set to FALSE with large data frames that are already ordered.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newcode</code></td>
+<td>
+<p>Logical: whether or not to use the new (and hopefully faster) code.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Data frame.
+</p>
+
+
+<h3>Note</h3>
+
+<p>When working with large data frames, it may be worth installing the package 
+<code>data.table</code>. Although not required for the package, the function 
+<code>start_event</code> will check if <code>data.table</code> is available and will 
+use it's much faster function <code>rbindlist</code>. This speeds up the function 
+<code>start_event</code>. Run the command 
+<code>install.packages('data.table', repos='http://cran.us.r-project.org')</code> 
+in the command window for installing the package <code>data.table</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jacolien van Rij
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other functions for model criticism: 
+<code>acf_n_plots()</code>,
+<code>acf_plot()</code>,
+<code>acf_resid()</code>,
+<code>derive_timeseries()</code>,
+<code>resid_gam()</code>,
+<code>start_value_rho()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(simdat)
+head(simdat)
+simdat &lt;- simdat[sample(1:nrow(simdat)),]
+simdat$Condition &lt;- relevel(factor(simdat$Condition), ref="0")
+contrasts(simdat$Condition) &lt;- "contr.poly"
+contrasts(simdat$Condition)
+test &lt;- start_event(simdat, event=c('Subject', 'Trial'), label.event='Event') 
+contrasts(test$Condition)
+head(test)
+test &lt;- start_event(simdat, event="Subject")
+test &lt;- start_event(simdat, event=c('Subject', 'Trial'))
+</code></pre>
+
+
+</div>

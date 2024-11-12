@@ -1,0 +1,150 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>right_ev</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compute the standardized left and right eigenvectors via iteration</h2>
+
+<h3>Description</h3>
+
+<p>Compute the standardized left and right eigenvectors via iteration
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">right_ev(ipm, ...)
+
+## S3 method for class 'simple_di_det_ipm'
+right_ev(ipm, iterations = 100, tolerance = 1e-10, ...)
+
+## S3 method for class 'simple_di_stoch_kern_ipm'
+right_ev(ipm, burn_in = 0.25, ...)
+
+## S3 method for class 'simple_di_stoch_param_ipm'
+right_ev(ipm, burn_in = 0.25, ...)
+
+## S3 method for class 'general_di_det_ipm'
+right_ev(ipm, iterations = 100, tolerance = 1e-10, ...)
+
+## S3 method for class 'general_di_stoch_kern_ipm'
+right_ev(ipm, burn_in = 0.25, ...)
+
+## S3 method for class 'general_di_stoch_param_ipm'
+right_ev(ipm, burn_in = 0.25, ...)
+
+left_ev(ipm, ...)
+
+## S3 method for class 'simple_di_det_ipm'
+left_ev(ipm, iterations = 100, tolerance = 1e-10, ...)
+
+## S3 method for class 'simple_di_stoch_kern_ipm'
+left_ev(ipm, iterations = 10000, burn_in = 0.25, kernel_seq = NULL, ...)
+
+## S3 method for class 'general_di_det_ipm'
+left_ev(ipm, iterations = 100, tolerance = 1e-10, ...)
+
+## S3 method for class 'general_di_stoch_kern_ipm'
+left_ev(ipm, iterations = 10000, burn_in = 0.25, kernel_seq = NULL, ...)
+
+## S3 method for class 'general_di_stoch_param_ipm'
+left_ev(ipm, iterations = 10000, burn_in = 0.25, kernel_seq = NULL, ...)
+
+## S3 method for class 'simple_di_stoch_param_ipm'
+left_ev(ipm, iterations = 10000, burn_in = 0.25, kernel_seq = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ipm</code></td>
+<td>
+<p>Output from <code>make_ipm()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments passed to methods</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterations</code></td>
+<td>
+<p>The number of times to iterate the model to reach
+convergence. Default is 100.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tolerance</code></td>
+<td>
+<p>Tolerance to evaluate convergence to asymptotic dynamics.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>burn_in</code></td>
+<td>
+<p>The proportion of early iterations to discard from the
+stochastic simulation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kernel_seq</code></td>
+<td>
+<p>The sequece of parameter set indices used to select kernels
+during the iteration procedure. If <code>NULL</code>, will use the sequence stored
+in the <code>ipm</code> object. Should usually be left as <code>NULL</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list of named numeric vector(s) corresponding to the stable trait distribution
+function (<code>right_ev</code>) or the reproductive values for each trait (<code>left_ev</code>).
+</p>
+
+
+<h3><strong>Deterministic eigenvectors</strong></h3>
+
+<p>For <code>right_ev</code>, if the model has already been iterated and has
+converged to asymptotic dynamics, then it will just extract the final
+population state and return that in a named list. Each element of the list
+is a vector with length <code>&gt;= 1</code> and corresponds each state variable's
+portion of the eigenvector.
+If the model has been iterated, but has not yet converged to asymptotic dynamics,
+<code>right_ev</code> will try to iterate it further using the final population state
+as the starting point. The default number of iterations is 100, and can be
+adjusted using the <code>iterations</code> argument.
+If the model hasn't been iterated, then <code>right_ev</code> will try iterating it
+for <code>iterations</code> number of time steps and check for convergence. In the
+latter two cases, if the model still has not converged to asymptotic dynamics,
+it will return <code>NA</code> with a warning.
+</p>
+<p>For <code>left_ev</code>, the transpose iteration (<em>sensu</em> Ellner &amp; Rees 2006,
+Appendix A) is worked out based on the <code>state_start</code> and <code>state_end</code>
+in the model's <code>proto_ipm</code> object. The model is then iterated for
+<code>iterations</code> times to produce a standardized left eigenvector.
+</p>
+
+
+<h3><strong>Stochastic eigenvectors</strong></h3>
+
+<p><code>left_ev</code> and <code>right_ev</code> return different things for stochastic models.
+<code>right_ev</code> returns the trait distribution through time from the stochastic
+simulation (i.e. <code>ipm$pop_state</code>), and normalizes it such that the
+distribution at each time step integrates to 1 (if it is not already).
+It then discards the first <code>burn_in * iterations</code> time steps of the
+simulation to eliminate transient dynamics. See Ellner, Childs, &amp; Rees 2016,
+Chapter 7.5 for more details.
+</p>
+<p><code>left_ev</code> returns a similar result as <code>right_ev</code>, except the trait
+distributions are the result of left multiplying the kernel and trait
+distribution. See Ellner, Childs, &amp; Rees 2016, Chapter 7.5 for more
+details.
+</p>
+
+
+</div>

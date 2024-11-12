@@ -1,0 +1,159 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ICSKAT_fit_null</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>ICSKAT_fit_null.R</h2>
+
+<h3>Description</h3>
+
+<p>Fit the null model (cubic basis spline for baseline cumulative hazard and coefficients
+for non-genetic coefficiens) for interval-censored skat.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ICSKAT_fit_null(
+  init_beta,
+  left_dmat,
+  right_dmat,
+  obs_ind,
+  tpos_ind,
+  lt,
+  rt,
+  runOnce = FALSE,
+  checkpoint = FALSE,
+  eps = 10^(-6)
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>init_beta</code></td>
+<td>
+<p>(p+nknots+2)*1 vector of coefficients to initialize the Newton-Raphson.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>left_dmat</code></td>
+<td>
+<p>n*(p+nknots+2) design matrix for left end of interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>right_dmat</code></td>
+<td>
+<p>n*(p+nknots+2) design matrix for right end of interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>obs_ind</code></td>
+<td>
+<p>n*1 vector of whether the event was observed before last follow-up.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tpos_ind</code></td>
+<td>
+<p>n*1 vector of whether the event was observed after follow-up started (t&gt;0).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lt</code></td>
+<td>
+<p>n*1 vector of left interval times.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rt</code></td>
+<td>
+<p>n*1 vector of right interval times.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>runOnce</code></td>
+<td>
+<p>Boolean tells the function to just go through the loop once instead of converging (to get quantites for bootstrapping).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>checkpoint</code></td>
+<td>
+<p>Boolean tells the function to print when each iteration completes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>Stop when the L2 norm of the difference in model coefficients reaches this limit.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with the elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>beta_fit</code></td>
+<td>
+<p>(p+nknots+2)*1 vector of fitted coefficients under null model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter</code></td>
+<td>
+<p>Number of iterations needed to converge.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Itt</code></td>
+<td>
+<p>Fisher information matrix for the fitted coefficients.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diff_beta</code></td>
+<td>
+<p>Difference between beta_fit and previous iteration of the vector, can be checked for errors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>err</code></td>
+<td>
+<p>Value is 0 if no errors and 1 if Itt is singular, can't perform fit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>errMsg</code></td>
+<td>
+<p>Empty string if err=0, explains error if there is one.</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(2)
+xMat &lt;- matrix(data=rnorm(200), nrow=100)
+bhFunInv &lt;- function(x) {x}
+obsTimes &lt;- 1:5
+etaVec &lt;- rep(0, 100)
+outcomeDat &lt;- gen_IC_data(bhFunInv = bhFunInv, obsTimes = obsTimes, windowHalf = 0.1,
+probMiss = 0.1, etaVec = etaVec)
+lt &lt;- outcomeDat$leftTimes
+rt &lt;- outcomeDat$rightTimes
+tpos_ind &lt;- as.numeric(lt &gt; 0)
+obs_ind &lt;- as.numeric(rt != Inf)
+dmats &lt;- make_IC_dmat(xMat, lt, rt, obs_ind, tpos_ind)
+ICSKAT_fit_null(init_beta = rep(0, 5), left_dmat = dmats$left_dmat,
+right_dmat=dmats$right_dmat, obs_ind = obs_ind, tpos_ind = tpos_ind, lt = lt, rt = rt)
+
+</code></pre>
+
+
+</div>

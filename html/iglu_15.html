@@ -1,0 +1,104 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cv_measures</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate Coefficient of Variation subtypes</h2>
+
+<h3>Description</h3>
+
+<p>The function cv_measures produces CV subtype values in a tibble object.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cv_measures(data, dt0 = NULL, inter_gap = 45, tz = "" )
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>DataFrame object with column names "id", "time", and "gl". Should only be data for 1 subject. In case multiple subject ids are detected, a warning is produced and only 1st subject is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dt0</code></td>
+<td>
+<p>The time frequency for interpolation in minutes, the default will match the CGM meter's frequency (e.g. 5 min for Dexcom).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inter_gap</code></td>
+<td>
+<p>The maximum allowable gap (in minutes) for interpolation. The values will not be interpolated between the glucose measurements that are more than inter_gap minutes apart. The default value is 45 min.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tz</code></td>
+<td>
+<p>A character string specifying the time zone to be used. System-specific (see <code>as.POSIXct</code>), but " " is the current time zone, and "GMT" is UTC (Universal Time, Coordinated). Invalid values are most commonly treated as UTC, on some platforms with a warning.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A tibble object with 1 row for each subject, a column for subject id and
+a column for each cv subtype values is returned.
+</p>
+<p>Missing values will be linearly interpolated when close enough to non-missing values.
+</p>
+
+<ol>
+<li>
+<p> CVmean:
+</p>
+<p>Calculated by first taking the coefficient of variation of each day's glucose measurements,
+then taking the mean of all the coefficient of variation. That is, for x
+days we compute cv_1 ... cv_x daily coefficient of variations and calculate
+<code class="reqn">1/x * \sum [(cv_i)]</code>
+</p>
+</li>
+<li>
+<p> CVsd:
+</p>
+<p>Calculated by first taking the coefficient of variation of each day's glucose measurements,
+then taking the standard deviation of all the coefficient of variations. That is, for d
+days we compute cv_1 ... cv_d daily coefficient of variations and calculate SD([cv_1, cv_2, ... cv_d])
+</p>
+</li>
+</ol>
+<h3>Value</h3>
+
+<p>When a data.frame object is passed, then a tibble object with
+three columns: subject id and corresponding CV subtype values is returned.
+</p>
+
+
+<h3>References</h3>
+
+<p>Umpierrez, et.al. (2018) Glycemic Variability: How to Measure and Its Clinical
+Implication for Type 2 Diabetes
+<em>The American Journal of Medical Sciences</em> <strong>356</strong> .518-527,
+<a href="https://doi.org/10.1016/j.amjms.2018.09.010">doi:10.1016/j.amjms.2018.09.010</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(example_data_1_subject)
+cv_measures(example_data_1_subject)
+
+data(example_data_5_subject)
+cv_measures(example_data_5_subject)
+
+</code></pre>
+
+
+</div>

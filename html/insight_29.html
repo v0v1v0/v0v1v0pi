@@ -1,0 +1,158 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>find_parameters</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Find names of model parameters</h2>
+
+<h3>Description</h3>
+
+<p>Returns the names of model parameters, like they typically
+appear in the <code>summary()</code> output. For Bayesian models, the parameter
+names equal the column names of the posterior samples after coercion
+from <code>as.data.frame()</code>. See the documentation for your object's class:
+</p>
+
+<ul>
+<li> <p>Bayesian models (<strong>rstanarm</strong>, <strong>brms</strong>, <strong>MCMCglmm</strong>, ...)
+</p>
+</li>
+<li> <p>Generalized additive models (<strong>mgcv</strong>, <strong>VGAM</strong>, ...)
+</p>
+</li>
+<li> <p>Marginal effects models (<strong>mfx</strong>)
+</p>
+</li>
+<li> <p>Estimated marginal means (<strong>emmeans</strong>)
+</p>
+</li>
+<li> <p>Mixed models (<strong>lme4</strong>, <strong>glmmTMB</strong>, <strong>GLMMadaptive</strong>, ...)
+</p>
+</li>
+<li> <p>Zero-inflated and hurdle models (<strong>pscl</strong>, ...)
+</p>
+</li>
+<li> <p>Models with special components (<strong>betareg</strong>, <strong>MuMIn</strong>, ...)
+</p>
+</li>
+</ul>
+<h3>Usage</h3>
+
+<pre><code class="language-R">find_parameters(x, ...)
+
+## Default S3 method:
+find_parameters(x, flatten = FALSE, verbose = TRUE, ...)
+
+## S3 method for class 'pgmm'
+find_parameters(x, component = c("conditional", "all"), flatten = FALSE, ...)
+
+## S3 method for class 'nls'
+find_parameters(
+  x,
+  component = c("all", "conditional", "nonlinear"),
+  flatten = FALSE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A fitted model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Currently not used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>flatten</code></td>
+<td>
+<p>Logical, if <code>TRUE</code>, the values are returned
+as character vector, not as list. Duplicated values are removed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Toggle messages and warnings.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>component</code></td>
+<td>
+<p>Should all predictor variables, predictor variables for the
+conditional model, the zero-inflated part of the model, the dispersion
+term or the instrumental variables be returned? Applies to models
+with zero-inflated and/or dispersion formula, or to models with instrumental
+variable (so called fixed-effects regressions). May be abbreviated. Note that the
+<em>conditional</em> component is also called <em>count</em> or <em>mean</em>
+component, depending on the model.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list of parameter names. For simple models, only one list-element,
+<code>conditional</code>, is returned.
+</p>
+
+
+<h3>Model components</h3>
+
+<p>Possible values for the <code>component</code> argument depend on the model class.
+Following are valid options:
+</p>
+
+<ul>
+<li> <p><code>"all"</code>: returns all model components, applies to all models, but will only
+have an effect for models with more than just the conditional model component.
+</p>
+</li>
+<li> <p><code>"conditional"</code>: only returns the conditional component, i.e. "fixed effects"
+terms from the model. Will only have an effect for models with more than
+just the conditional model component.
+</p>
+</li>
+<li> <p><code>"smooth_terms"</code>: returns smooth terms, only applies to GAMs (or similar
+models that may contain smooth terms).
+</p>
+</li>
+<li> <p><code>"zero_inflated"</code> (or <code>"zi"</code>): returns the zero-inflation component.
+</p>
+</li>
+<li> <p><code>"dispersion"</code>: returns the dispersion model component. This is common
+for models with zero-inflation or that can model the dispersion parameter.
+</p>
+</li>
+<li> <p><code>"instruments"</code>: for instrumental-variable or some fixed effects regression,
+returns the instruments.
+</p>
+</li>
+<li> <p><code>"location"</code>: returns location parameters such as <code>conditional</code>,
+<code>zero_inflated</code>, <code>smooth_terms</code>, or <code>instruments</code> (everything that are
+fixed or random effects - depending on the <code>effects</code> argument - but no
+auxiliary parameters).
+</p>
+</li>
+<li> <p><code>"distributional"</code> (or <code>"auxiliary"</code>): components like <code>sigma</code>, <code>dispersion</code>,
+<code>beta</code> or <code>precision</code> (and other auxiliary parameters) are returned.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(mtcars)
+m &lt;- lm(mpg ~ wt + cyl + vs, data = mtcars)
+find_parameters(m)
+</code></pre>
+
+
+</div>

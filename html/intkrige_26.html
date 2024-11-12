@@ -1,0 +1,246 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>intkrige</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Algorithmic implementation of interval valued kriging.</h2>
+
+<h3>Description</h3>
+
+<p>Function to implement the interval valued extension of ordinary and
+simple kriging. Includes all necessary input checks and error handling.
+Essentially acts as a switch function between the R and c++ versions
+of the algorithm.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">intkrige(
+  locations,
+  newdata,
+  models,
+  formulas = list(center ~ 1, radius ~ 1),
+  eta = 0.75,
+  A = c(1, 1, 0),
+  trend = NULL,
+  thresh = 100,
+  tolq = 0.001,
+  maxq = 100,
+  tolp = 0.001,
+  maxp = 100,
+  r = 1,
+  useR = TRUE,
+  fast = FALSE,
+  weights = FALSE,
+  cores = 1
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>locations</code></td>
+<td>
+<p>An object of class intsp, specifying the prediction
+locations with an interval-valued response.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p>An object of class SpatialPointsDataFrame or
+SpatialPixelsDataFrame specifying the locations at which to predict
+intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>models</code></td>
+<td>
+<p>A list of variogram models of class vgm (see vgm)
+When specified, the third model represents the center/radius interaction.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formulas</code></td>
+<td>
+<p>A list of two formulas specifying the centering and scaling
+of the center and radius respectively. Limitations to these
+formulas are specified in the details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eta</code></td>
+<td>
+<p>A growth/shrink parameter for penalty term.
+For simple kriging: eta &gt; 1. For ordinary kriging: eta &lt; 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>vector of length three representing the weights
+of the generalized L2 distance: the vector of three contains the weights for
+the center, radius, and center/radius respectively.
+A = c(1, 1, 0) assumes the regular L2 distance calculation for intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trend</code></td>
+<td>
+<p>If null, use ordinary kriging. When specified, represents the
+known mean of the stationary process and is an indication to use
+simple kriging.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thresh</code></td>
+<td>
+<p>Let n = length(locations). When abs(lam_i) &lt; 1/(n*thresh),
+this lambda value is set to 0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tolq</code></td>
+<td>
+<p>For a set penalty term, convergence is satisfied if
+max(abs(lamUp-lam)) &lt; tolq.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxq</code></td>
+<td>
+<p>For a set penalty term, the max number of iterations
+allowed for convergence.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tolp</code></td>
+<td>
+<p>When abs(sum(abs(lam)) - 1) &lt; tolp, consider the
+constraints satisfied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxp</code></td>
+<td>
+<p>Maximum number of allowed iterations to satisfy
+equation constraints.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>The starting value of the penalty term. Must be relatively large to
+ensure that the initial solution stays within the feasible region.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>useR</code></td>
+<td>
+<p>If TRUE, use the R version of the algorithm.
+If FALSE, use the rcppArmadillo version.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fast</code></td>
+<td>
+<p>(Simple kriging only). If TRUE, allows lambdas to converge to 0
+and subsets matrices accordingly. When FALSE, runs simple kriging using a
+barrier penalty at 0. Fast = TRUE is orders of magnitude faster than the
+full implementation. However, it is not recommended when input
+measurements are sparse as it is known to have convergence issues
+in these cases.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>If TRUE, return the vector kriging weights for each prediction.
+If false, simply return the predicted output.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>An integer (for parallel computing): specify the number
+of cores that will be devoted to the computation.
+Note that the argument 'all' will
+use all available cores minus one.
+Parallel processing is only relevant if you are predicting
+for more than one location.
+Note there is no parallel option when useR = FALSE.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The formulas argument is current fairly limited in its use. For example
+the center argument can accept no transformations of the dependent
+variable. Similarly, the radius argument can accept no variable arguments
+as independent variables. The idea behind this limited use of formulas is
+that any transformations should be applied to the entire interval prior
+to input into interval-valued kriging. This ensures that input into the
+interval-valued kriging algorithm are well-defined intervals with
+properly ordered upper and lower endpoints. The transformation that
+are allowed within this function are linear shifts of the center, and
+linear scaling of the radius.
+Note that the scaling term for the radius can contain a division parameter
+but it must be encapsulated in parenthesis and included on the right hand
+side of the multiplication parameter.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A matrix with 4 columns where rows correspond to the prediction
+locations and columns correspond to:
+</p>
+<p>- center prediction
+</p>
+<p>- radius predictions
+</p>
+<p>- kriging prediction variance
+</p>
+<p>- warning column for non-convergent optimization problem
+(0 - no warning, 1 - warning)
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># First, define the location and elevation of interest.
+# (In this case we pick coordinates of Utah State University)
+templocs &lt;- data.frame(lat = 41.745, long = -111.810, ELEVATION = 1456)
+sp::coordinates(templocs) &lt;- c("long", "lat")
+sp::proj4string(templocs) &lt;- "+proj=longlat +ellps=WGS84
++datum=WGS84 +no_defs +towgs84=0,0,0"
+
+# Load the Utah Snow Load Data
+data(utsnow)
+utsnow.sp &lt;- utsnow
+
+# Convert to an 'intsp' object that inherits a SpatialPointsDataFrame
+sp::coordinates(utsnow.sp) &lt;- c("LONGITUDE", "LATITUDE")
+sp::proj4string(utsnow.sp) &lt;- sp::proj4string(templocs)
+interval(utsnow.sp) &lt;- c("minDL", "maxDL")
+# Define the formulas we will use to define the intervals.
+temp_formulas &lt;- list(center ~ ELEVATION,
+                     radius*(ELEVATION/median(ELEVATION)) ~ 1)
+
+# Define, fit and check the variogram fits.
+varios &lt;- intvariogram(utsnow.sp,
+                       formulas = temp_formulas)
+varioFit &lt;- fit.intvariogram(varios, models = gstat::vgm(c("Sph", "Sph", "Gau")))
+preds &lt;- intkrige::intkrige(locations = utsnow.sp,
+newdata = templocs,
+models = varioFit,
+formulas = temp_formulas)
+
+</code></pre>
+
+
+</div>

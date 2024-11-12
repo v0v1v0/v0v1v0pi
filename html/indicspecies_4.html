@@ -1,0 +1,144 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>combinespecies</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Combines species from a community table</h2>
+
+<h3>Description</h3>
+
+<p>Creates species combinations to be used in indicator value analyses.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">combinespecies(
+  X,
+  min.order = 1,
+  max.order = 3,
+  min.occ = 1,
+  FUN = min,
+  verbose = FALSE,
+  add.names = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>A community data table with sites in rows and species in columns. This table can contain either presence-absence or abundance data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.order</code></td>
+<td>
+<p>Minimum number of species conforming species combinations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.order</code></td>
+<td>
+<p>Maximum number of species conforming species combinations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.occ</code></td>
+<td>
+<p>Threshold for minimum occurrence. Combinations with lower values are not kept.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FUN</code></td>
+<td>
+<p>Function to be calculated for all species forming the species combination. Accepted values are <code>min</code>, <code>max</code>, <code>sum</code> and <code>mean</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>If TRUE, prints the results of each step.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add.names</code></td>
+<td>
+<p>If TRUE, adds the names of the species combinations to the output matrix. Species combination names are lists of species concatenated using character '+'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments for function <code>FUN</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function allows creating a data table where rows are sites and columns are combinations of species. Values for a given column of this matrix are derived from the abundance values of the species forming the corresponding combination. In particular, the abundance value for a given combination in a given site is equal to the value returned by function 'FUN' (normally the minimum) among the site values of all species forming the combination. The matrix 'XC' returned by this function can be used in functions <code>strassoc</code> and <code>signassoc</code>. Alternatively, <code>indicators</code> and related functions provide a more elaborated way to explore the indicator value of the simultaneous occurrence of sets of species (i.e. species combinations).
+</p>
+
+
+<h3>Value</h3>
+
+<p>An list with:
+</p>
+
+<ul>
+<li>
+<p>XC - A matrix containing the abundance/occurrence of each species combination.
+</p>
+</li>
+<li>
+<p>C - A binary matrix describing the set of species forming each combination ('0' means that the species is not included, and '1' means that the species is included).
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Miquel De Cáceres Ainsa, EMF-CREAF
+</p>
+
+
+<h3>References</h3>
+
+<p>De Cáceres, M., Legendre, P., Wiser, S.K. and Brotons, L. 2012. Using species combinations in indicator analyses. Methods in Ecology and Evolution 3(6): 973-982.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>indicators</code>, <code>strassoc</code>, <code>signassoc</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(stats)
+
+## Loads species data
+data(wetland) 
+
+## Create species combinations
+Y &lt;- combinespecies(X=wetland, max.order=3, min.occ=5, verbose=TRUE)
+
+## Creates three site groups using kmeans
+wetkm &lt;- kmeans(wetland, centers=3) 
+
+## Calculate indicator value of species combinations for each of the three site groups
+strassoc(Y$XC, cluster=wetkm$cluster,func="IndVal.g") 
+
+## Calculate point biserial correlation value of species combinations 
+## for each of the three site groups
+strassoc(Y$XC, cluster=wetkm$cluster,func="r.g") 
+
+</code></pre>
+
+
+</div>

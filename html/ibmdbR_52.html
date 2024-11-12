@@ -1,0 +1,172 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>idaMerge</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Merge IDA data frames</h2>
+
+<h3>Description</h3>
+
+<p>This function merges two IDA data frames(that is, two objects of the class <code>ida.data.frame</code>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">idaMerge(x, y, by=intersect(x@cols, y@cols), by.x=by, by.y=by, 
+    all=FALSE, all.x=all, all.y=all, sort=TRUE,   
+    suffixes=c("_x", "_y"), table=NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>The first <code>ida.data.frame</code> object to be merged.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>The second <code>ida.data.frame</code> object to be merged.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>by</code></td>
+<td>
+<p>Specification of the common columns; see the
+<em>Details</em> section.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>by.x</code></td>
+<td>
+<p>Specification of the common columns; see the
+<em>Details</em> section.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>by.y</code></td>
+<td>
+<p>Specification of the common columns; see the
+<em>Details</em> section.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>all</code></td>
+<td>
+<p>Whether non-matching columns of <code>x</code> and <code>y</code> are to be appended to the result. 
+If set to FALSE, only columns common to both <code>x</code> and <code>y</code> are included in the output.
+This parameter overrides the <code>all.x</code> and <code>all.y</code> parameters.
+In SQL database terminology, specifying <code>all=FALSE</code> results in 
+an inner join that is equivalent to a natural join, and specifying 
+<code>all=TRUE</code> results in a full outer join. 
+In a full outer join, the columns that 
+are common to both <code>x</code> and <code>y</code> are followed by the remaining 
+columns in <code>x</code>, which are followed by the remaining columns in <code>y</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>all.x</code></td>
+<td>
+<p>If columns from only one of the IDA data frames being merged are to be included in the output, 
+set its corresponding parameter to TRUE and the other parameter to FALSE.
+In SQL database terminology, specifying <code>all.x=TRUE</code> and <code>all.y=FALSE</code> results in a left outer join, 
+and specifying <code>all.x=FALSE</code> and <code>all.y=TRUE</code> results in a right outer join. 
+</p>
+<p>If <code>TRUE</code>, then extra rows are added to the
+output, one for each row in <code>x</code> that has no matching row in
+<code>y</code>. These rows have a value of <code>NA</code> in those columns
+that are typically filled with values from <code>y</code>. The default is
+<code>FALSE</code>, so that only rows with data from both <code>x</code> and
+<code>y</code> are included in the output.
+</p>
+<p>If <code>all.x</code> is true, all the non matching cases of <code>x</code> are
+also appended to the result, with a value of <code>NA</code> filled in the
+corresponding columns of <code>y</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>all.y</code></td>
+<td>
+<p>Analogous to <code>all.x</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sort</code></td>
+<td>
+<p>This parameter is ignored. The output is never sorted regardless of the setting of this parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>suffixes</code></td>
+<td>
+
+<p>Two 2-character strings, each of which specifies a suffix that is
+used when generating column names.
+By specifying different suffixes, you can ensure that each column 
+can be uniquely attributed to either <code>x</code> or <code>y</code>. 
+Note that a dot (.) is not a valid character for a column name.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>table</code></td>
+<td>
+<p>Name of the output IDA data frame. </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function merges two IDA data frames on the columns that they have in common.
+The rows in the two data frames that match on the specified columns
+are extracted, and joined together. If there is more than one match,
+all possible matches contribute one row each. For the precise meaning
+of ‘match’.
+</p>
+<p>If <code>by</code> or both <code>by.x</code> and <code>by.y</code> are of length 0 (a
+length zero vector or <code>NULL</code>), the result, <code>r</code>, is the
+Cartesian product of <code>x</code> and <code>y</code>, that is, a <em>cross join</em>. 
+</p>
+<p>If non-merged columns of the data frames have identical names and are to be included in the output, 
+suffixes are appended to the names of the corresponding columns in the output to make their names unique. 
+</p>
+<p>Note that this function creates, in the current database, a view that corresponds to the output object. 
+Within the current session, this view can be accessed using the same IDA data frame object. 
+However, it is persistent and, after it is no longer needed, it must be dropped manually. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>ida.data.frame</code> object.   
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ida.data.frame</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+
+idf &lt;- ida.data.frame('IRIS')
+
+#Perform a self-join
+idf2 &lt;- idaMerge(idf,idf,by="ID")
+
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

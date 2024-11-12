@@ -1,0 +1,238 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>TestIndNH</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Parametric bootstrap  test  of independence between point processes</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates a parametric bootstrap test (PaB)  to study the independence 
+between  two or three homogeneous or nonhomogeneous point processes in time.
+The statistic  is based on the close point  sets of the points in the first process.  Currently, it is implemented for Poisson processes and for Neyman-Scott cluster 
+processes.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">TestIndNH(posx, posy, posz=NULL,  alpha = 0.05, nsim = 100, PA = FALSE, cores = 1, 
+	type = "Poisson", lambdaMarg = NULL,   lambdaParent = NULL, lambdaNumP = NULL, 
+	dist = "normal", sigmaC = 1, minC = -1, maxC = 1,fixed.seed=NULL)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>posx</code></td>
+<td>
+<p>Numeric vector. Position of the occurrence points in the first process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>posy</code></td>
+<td>
+<p>Numeric vector. Position of the occurrence points in the second process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>posz</code></td>
+<td>
+<p>Numeric vector. Position of the occurrence points in the third process.  By default is null,
+and only two processes are tested.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>Optional. Significance level  used to obtain  a decision (reject-no reject)  based on the  test p-value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>Optional. Positive integer. Number of simulations to calculate the  test.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PA</code></td>
+<td>
+<p>Optional. Logical flag. If it is TRUE, the close point relation  is
+broadened by including the previous and the following points to the overlapping
+intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>Optional. Number of cores of the computer to be used in the calculations. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Optional. Label "Poisson" or "PoissonCluster". Type of point processes to be generated in 
+the parametric bootstrap. Up to now, only two types are available: Poisson processes ("Poisson") and Neyman-Scott cluster processes  ("PoissonCluster").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambdaMarg</code></td>
+<td>
+<p>Matrix of positive values and dimension <code class="reqn">T \times N_P</code> with <code class="reqn">N_P</code>=1 or 2.
+Only used if <em>type="Poisson"</em>. Each column is the  intensity vector to generate the  processes <code class="reqn">N_y</code> and <code class="reqn">N_z</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambdaParent</code></td>
+<td>
+<p>Numeric vector. Only used if <em>type="PoissonCluster"</em>. Intensity vector of the  process 
+used to generate the  centers of the clusters of the Neyman-Scott process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambdaNumP</code></td>
+<td>
+<p>Numeric vector with 1 or 2 values. Only used if <em>type="PoissonCluster"</em>.
+Mean values of the number of 	sons of  the  processes to be generated. If its length	is equal to 1 and 
+there are three processes, the same value is used  to generate <code class="reqn">N_y</code> and <code class="reqn">N_z</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist</code></td>
+<td>
+<p>Optional. Label "normal" or "uniform".  Only used if <em>type="PoissonCluster"</em>.
+Distribution  used to generate the  point  distances to the centre in each cluster.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigmaC</code></td>
+<td>
+<p>Optional. Numeric vector with 1 or 2 values.  Only used if <em>type="PoissonCluster"</em>
+and <em>dist='normal'</em>. Standard deviation of the normal distribution.   If its length is equal to 1, 
+the same value is used in both processes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minC</code></td>
+<td>
+<p>Optional. Numeric vector with 1 or 2 values. Only used if <em>type="PoissonCluster"</em> and <em>dist='uniform'</em>. 
+Lower bounds of the  Uniform distribution.  If its length is equal to 1 and there are three processes, the same value is used  
+to generate <code class="reqn">N_y</code> and <code class="reqn">N_z</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxC</code></td>
+<td>
+<p>Optional. Numeric vector with 1 or 2 values. Only used if <em>type="PoissonCluster"</em> and <em>dist='uniform'</em>. 
+Upper bounds of the  Uniform distribution.  If its length is equal to 1 and there are three processes, the same value is used  
+to generate <code class="reqn">N_y</code> and <code class="reqn">N_z</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed.seed</code></td>
+<td>
+<p>Optional. An integer or NULL. If it is an integer, that is the value used to set the seed 
+in random generation processes. It it is NULL, a random seed is used.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+ 
+<p>The underlying idea  of the test is to compare, for  each  point in  the first process, the behavior  of its  set of close points 
+in the  vector of observed   processes <code class="reqn">(N_x, N_y, N_z)</code>, and in  new  vectors of  independent processes with the
+observed  marginal distribution. The new independent vectors are obtained using a parametric bootstrap approach, 
+see Abaurrea et al. (2015): the process <code class="reqn">N_x</code> is fixed and  second and third processes are   generated using a parametric model with  intensities  <code class="reqn">\lambda_y</code> and <code class="reqn">\lambda_z</code>. 
+Currently, it is implemented for Poisson processes and for Neyman-Scott cluster  processes.
+If the observed  behavior is significantly different,  independence is rejected. 
+</p>
+<p>The test statistic is  the one used in <code>TestIndLS</code>, but the p-value is obtained using a  
+Monte Carlo approach if the intensities <code class="reqn">\lambda_y(t)</code> and <code class="reqn">\lambda_z(t)</code> 
+are known, or a parametric bootstrap if they have  been estimated. The test <code>TestIndLS</code> 
+can only be applied to  homogeneous  processes, but it does not require any assumption about
+the distribution of the marginal processes.
+</p>
+<p>It is noteworthy that  when the test is applied, it is being assumed that the processes  follow a parametric model 
+with the given intensities. If necessary,  validation of that assumption should be previously carried out.
+</p>
+<p>The lenght of the  observed period is  determined by the length of  the intensity vector <code class="reqn">\lambda</code>, that
+is <em>lambdaParent</em> (if  <em>type="PoissonCluster"</em>)  or the  first  element of the dimension of <em>lambdaMarg</em> (if 
+<em>type="PoissonC"</em>. It can be applied to homogeneous processes, using an intensity vector  (<code>lambda</code>) 
+with equal values.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with elements:   
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>pv</code></td>
+<td>
+<p>P-value of the independence test.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reject </code></td>
+<td>
+<p>Binary variable indicating if the test is rejected (1) or not (0) at an  alpha significance level.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>est</code></td>
+<td>
+<p>Sample of the KS statistics. The first value corresponds to the observed processes and the others to the generated processes.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Abaurrea, J. Asin, J. and Cebrian, A.C. (2015). A Bootstrap Test of Independence Between Three Temporal Nonhomogeneous Poisson Processes 
+and its Application to Heat Wave Modeling. <em>Environmental and Ecological Statistics</em>.</p>
+
+
+<h3>See Also</h3>
+
+<p><code>TestIndLS</code>,<code>CondTest</code>, <code>DutilleulPlot</code>,
+<code>DistSim</code>, <code>DistObs</code>, <code>uniongentri</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#Test applied to 3  independent NHPP
+set.seed(123)
+lambdax&lt;-runif(150, 0.01,0.1)
+set.seed(124)
+lambday&lt;-runif(150, 0.02,0.1)
+set.seed(125)
+lambdaz&lt;-runif(150, 0.015,0.1)
+posx&lt;-simNHPc(lambdax, fixed.seed=123)$posNH
+posy&lt;-simNHPc(lambday, fixed.seed=124)$posNH
+posz&lt;-simNHPc(lambdaz, fixed.seed=125)$posNH
+
+aux&lt;-TestIndNH(posx, posy, posz, nsim=50, type='Poisson', 
+	lambdaMarg=cbind(lambday,lambdaz), fixed.seed=321)
+aux$pv
+
+
+#Test applied to 3 dependent NS cluster processes with 2 cores
+#set.seed(123)
+#lambdaParent&lt;-runif(500,0,0.1)
+#DepPro&lt;-DepNHNeyScot(lambdaParent=lambdaParent, d=3, lambdaNumP = 3, 
+#	 dist = "normal", sigmaC = 1, fixed.seed=123,cores=2)
+#posx&lt;-DepPro$PP1
+#posy&lt;-DepPro$PP2
+#posz&lt;-DepPro$PP3
+#aux&lt;-TestIndNH(posx, posy, posz, cores=1, type='PoissonCluster',
+#	lambdaParent = lambdaParent, lambdaNumP = 3, 
+#	dist = "normal", sigmaC = 1, fixed.seed=123, nsim=200)
+#aux$pv
+
+
+</code></pre>
+
+
+</div>

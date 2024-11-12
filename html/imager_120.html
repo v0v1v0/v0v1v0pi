@@ -1,0 +1,84 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>hough_line</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Hough transform for lines</h2>
+
+<h3>Description</h3>
+
+<p>Two algorithms are used, depending on the input: if the input is a pixset then the classical Hough transform is used. If the input is an image, then a faster gradient-based heuristic is used. 
+The method returns either an image (the votes), or a data.frame. In both cases the parameterisation used is the Hesse normal form (theta,rho), where a line is represented as the set of values such that cos(theta)*x + sin(theta)*y = rho. Here theta is an angle and rho is a distance.
+The image form returns a histogram of scores in (rho,theta) space, where good candidates for lines have high scores. The data.frame form may be more convenient for further processing in R: each line represents a pair (rho,theta) along with its score. 
+If the 'shift' argument is true, then the image is assumed to start at x=1,y=1 (more convenient for plotting in R). If false, the image begins at x=0,y=0 and in both cases the origin is at the top left.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">hough_line(im, ntheta = 100, data.frame = FALSE, shift = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>im</code></td>
+<td>
+<p>an image or pixset</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ntheta</code></td>
+<td>
+<p>number of bins along theta (default 100)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.frame</code></td>
+<td>
+<p>return a data.frame? (default FALSE)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shift</code></td>
+<td>
+<p>if TRUE, image is considered to begin at (x=1,y=1).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>either an image or a data.frame
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Simon Barthelme
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+#Find the lines along the boundary of a square
+px &lt;- px.square(30,80,80) %&gt;% boundary
+plot(px)
+#Hough transform
+hough_line(px,ntheta=200) %&gt;% plot
+
+df &lt;- hough_line(px,ntheta=800,data.frame=TRUE)
+#Plot lines with the highest score
+plot(px)
+with(subset(df,score &gt; quantile(score,.9995)),nfline(theta,rho,col="red"))
+
+plot(boats)
+df &lt;- hough_line(boats,ntheta=800,data=TRUE)
+</code></pre>
+
+
+</div>

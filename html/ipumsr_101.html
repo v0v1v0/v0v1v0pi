@@ -1,0 +1,122 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ds_spec</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create dataset and time series table specifications for IPUMS NHGIS extract
+requests</h2>
+
+<h3>Description</h3>
+
+<p>Provide specifications for individual datasets and time series
+tables when defining an IPUMS NHGIS extract request.
+</p>
+<p>Use <code>get_metadata_nhgis()</code> to identify available values for dataset and
+time series table specification parameters.
+</p>
+<p>Learn more about NHGIS extract definitions in
+<code>vignette("ipums-api-nhgis")</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ds_spec(
+  name,
+  data_tables = NULL,
+  geog_levels = NULL,
+  years = NULL,
+  breakdown_values = NULL
+)
+
+tst_spec(name, geog_levels = NULL, years = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>name</code></td>
+<td>
+<p>Name of the dataset or time series table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_tables</code></td>
+<td>
+<p>Vector of summary tables to retrieve for the given
+dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>geog_levels</code></td>
+<td>
+<p>Geographic levels (e.g. <code>"county"</code> or <code>"state"</code>)
+at which to obtain data for the given dataset or time series table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>years</code></td>
+<td>
+<p>Years for which to obtain the data for the given dataset or time
+series table.
+</p>
+<p>For time series tables, all years are selected by default. For datasets,
+use <code>"*"</code> to select all available years. Use
+<code>get_metadata_nhgis()</code> to determine if a dataset allows year selection.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>breakdown_values</code></td>
+<td>
+<p><a href="https://www.nhgis.org/frequently-asked-questions-faq#breakdowns">Breakdown values</a>
+to apply to the given dataset.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>In general, <code>data_tables</code> and <code>geog_levels</code> are required for all
+dataset specifications, and <code>geog_levels</code> are required for all
+time series table specifications.
+</p>
+<p>However, it is possible to make a temporary specification for an incomplete
+dataset or time series table by omitting these values. This supports the
+syntax used when modifying an existing extract (see
+<code>add_to_extract()</code> or
+<code>remove_from_extract()</code>).
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>ds_spec</code> or <code>tst_spec</code> object.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">dataset &lt;- ds_spec(
+  "2013_2017_ACS5a",
+  data_tables = c("B00001", "B01002"),
+  geog_levels = "state"
+)
+
+tst &lt;- tst_spec(
+  "CW5",
+  geog_levels = c("county", "tract"),
+  years = "1990"
+)
+
+# Use variable specifications in an extract definition:
+define_extract_nhgis(
+  description = "Example extract",
+  datasets = dataset,
+  time_series_tables = tst
+)
+</code></pre>
+
+
+</div>

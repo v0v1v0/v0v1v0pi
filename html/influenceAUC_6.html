@@ -1,0 +1,101 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>LAUC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Local Influence Approaches On AUC</h2>
+
+<h3>Description</h3>
+
+<p>Apply local influence approaches in terms of slope and curvature on the AUC to quantify the impacts of all observations simultaneously.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">LAUC(score, binary, threshold = 0.2, name = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>score</code></td>
+<td>
+<p>A vector containing the predictions (continuous scores) assigned by classifiers; Must be numeric.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>binary</code></td>
+<td>
+<p>A vector containing the true class labels 1: positive and 0: negative. Must have the same dimensions as 'score.'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>A numeric value determining the threshold to distinguish influential observations from normal ones; Must lie between 0 and 1; Defaults to 0.2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name</code></td>
+<td>
+<p>A vector comprising the appellations for observations; Must have the same dimensions as 'score.'</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The influence functions on the AUC focus on the deletion diagnostics; however, such approaches may encounter the masking effect. Rather than dealing with single observations
+once at a time, local influence methods address this issue by finding the weighted direction of all observations accompanied by the greatest (magnitude) slope and curvature. From the explicit formula based on
+the slope, local influence methods may face the imbalanced data effect. To thoroughly investigate the potential observation in binary classification, we suggest end-users to apply <code>ICLC</code> and <code>IAUC</code> as well.
+For a complete discussion of these functions, please see the reference.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of objects including (1) 'output': a list of results with 'AUC' (numeric), 'Slope' (a list of dataframes) and 'Curvature' (a list of dataframes)); (2) 'rdata': a dataframe of essential results for visualization
+(3) 'threshold': a used numeric value to distinguish influential observations from normal ones.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Bo-Shiang Ke and Yuan-chin Ivan Chang
+</p>
+
+
+<h3>References</h3>
+
+<p>Ke, B. S., Chiang, A. J., &amp; Chang, Y. C. I. (2018). Influence Analysis for the Area Under the Receiver Operating Characteristic Curve. Journal of biopharmaceutical statistics, 28(4), 722-734.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ICLC</code>, <code>IAUC</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(ROCR)
+data("ROCR.simple")
+# print out LAUC results directly
+LAUC(ROCR.simple$predictions,ROCR.simple$labels)
+
+data(mtcars)
+glmfit &lt;- glm(vs ~ wt + disp, family = binomial, data = mtcars)
+prob &lt;- as.vector(predict(glmfit, newdata = mtcars, type = "response"))
+output &lt;- LAUC(prob, mtcars$vs, name = rownames(mtcars))
+# Show results
+print(output)
+# Visualize results
+plot(output)
+</code></pre>
+
+
+</div>

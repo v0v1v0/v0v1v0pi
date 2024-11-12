@@ -1,0 +1,149 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>model_params</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimate model parameters</h2>
+
+<h3>Description</h3>
+
+<p>Model estimated parameters for fitting double logistic curve.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">model_params(
+  DT,
+  returns = NULL,
+  id = "id",
+  year = "yr",
+  xmidS = NULL,
+  xmidA = NULL,
+  scalS = NULL,
+  scalA = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>DT</code></td>
+<td>
+<p>data.table of NDVI time series. Also optionally starting estimates. See Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>returns</code></td>
+<td>
+<p>either 'models' or 'columns'. 'models' will return a data.table of model outcomes by id and year. 'columns' will append model estimate parameters to the input DT.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>id column. default is 'id'. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>year</code></td>
+<td>
+<p>year column name. default is 'yr'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xmidS</code></td>
+<td>
+<p>starting estimates. see Details. - "spring inflection point"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xmidA</code></td>
+<td>
+<p>starting estimates. see Details. - "fall inflection point"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scalS</code></td>
+<td>
+<p>starting estimates. see Details. - "scale parameter for spring green-up portion of the NDVI curve"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scalA</code></td>
+<td>
+<p>starting estimates. see Details. - "scale parameter for fall dry-down portion of the NDVI curve"</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Arguments <code>xmidS</code>, <code>xmidA</code>, <code>scalS</code>, <code>scalA</code> allow users to provide either group level or global starting estimates to be used for all models.
+</p>
+<p>Either: a character indicating the column name which stores a group level starting parameter (possibly created by <code>model_start</code> OR a numeric value used as a global value for all models. See <code>nls</code> for more details on starting parameters.
+</p>
+<p>Default value for the year column is 'yr'. If you only have one year of data, set to NULL.
+</p>
+<p>The id argument is used to split between sampling units. This may be a point id, polygon id, pixel id, etc. depending on your analysis. This should match the id provided to filtering functions.
+</p>
+<p>Formula and arguments <code>xmidS</code>, <code>xmidA</code>, <code>scalS</code>, <code>scalA</code> following this from Bischoff et al. (2012).
+</p>
+<p style="text-align: center;"><code class="reqn">fitted = \frac{1}{1 + \exp{\frac{xmidS - t}{scalS}}} - \frac{1}{1 + \exp{\frac{xmidA - t}{scalA}}}</code>
+</p>
+
+
+
+<h3>Value</h3>
+
+<p>data.table of model estimated parameters for double logistic model. If any rows are NULL, <code>nls</code> could not fit a model given starting parameters to the data provided.
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://www.journals.uchicago.edu/doi/abs/10.1086/667590">https://www.journals.uchicago.edu/doi/abs/10.1086/667590</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other model: 
+<code>model_ndvi()</code>,
+<code>model_start()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Load data.table
+library(data.table)
+
+# Read in example data
+ndvi &lt;- fread(system.file("extdata", "sampled-ndvi-MODIS-MOD13Q1.csv", package = "irg"))
+
+# Filter and scale NDVI time series
+filter_ndvi(ndvi)
+scale_doy(ndvi)
+scale_ndvi(ndvi)
+
+# Guess starting parameters for xmidS and xmidA
+model_start(ndvi)
+
+# Double logistic model parameters
+#   given global starting parameters for scalS, scalA
+#   and output of model_start for xmidS, xmidA
+mods &lt;- model_params(
+  ndvi,
+  returns = 'models',
+  xmidS = 'xmidS_start',
+  xmidA = 'xmidA_start',
+  scalS = 0.05,
+  scalA = 0.01
+)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,58 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iRNGStream</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Iterators that support parallel RNG</h2>
+
+<h3>Description</h3>
+
+<p>The <code>iRNGStream</code> function creates an infinite iterator that calls
+<code>nextRNGStream</code> repeatedly, and <code>iRNGSubStream</code> creates an
+infinite iterator that calls <code>nextRNGSubStream</code> repeatedly.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iRNGStream(seed)
+iRNGSubStream(seed)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>Either a single number to be passed to <code>set.seed</code> or a vector
+to be passed to <code>nextRNGStream</code> or <code>nextRNGSubStream</code>.</p>
+</td>
+</tr></table>
+<h3>See Also</h3>
+
+<p><code>set.seed</code>, <code>nextRNGStream</code>,
+<code>nextRNGSubStream</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">it &lt;- iRNGStream(313)
+print(nextElem(it))
+print(nextElem(it))
+
+## Not run: 
+library(foreach)
+foreach(1:3, rseed=iRNGSubStream(1970), .combine='c') %dopar% {
+  RNGkind("L'Ecuyer-CMRG") # would be better to initialize workers only once
+  assign('.Random.seed', rseed, pos=.GlobalEnv)
+  runif(1)
+}
+
+## End(Not run)
+</code></pre>
+
+
+</div>

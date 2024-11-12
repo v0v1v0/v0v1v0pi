@@ -1,0 +1,144 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>itcLiDARallo</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Individual Tree Crowns segmentation with LiDAR data and crown diameter-height relationship</h2>
+
+<h3>Description</h3>
+
+<p>The ITC delineation approach finds local maxima within a rasterized canopy height model (CHM), designates these as tree tops, then uses a decision tree method to grow individual crowns around the local maxima. The approach goes through the following steps: (1) a low-pass filter is applied to the rasterized CHM to smooth the surface and reduce the number of local maxima; (2) local maxima are located using a moving window with size that adapts inside a user defined range (minimum and maximum size) according the pixel height; a pixel of the CHM is labelled as local maxima if its z value is greater than all other z values in the window, and with z greater than some minimum height above-ground; (3) each local maximum is labelled as an 'initial region' around which a tree crown can grow; the heights of the four neighboring pixels are extracted from the CHM and these pixels are added to the region if their vertical distance from the local maximum is less than some user-defined percentage of the local-maximum height, and less than some user-defined maximum difference; this procedure is repeated for all the neighbors of cells now included in the region, and so on iteratively until no further pixels are added to the region; (4) from each region that had been identified the first-return ALS points are extracted (having first removed low elevation points), (5) a 2D convex hull is applied to these points, and the resulting polygons becomes the final ITCs.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">itcLiDARallo(
+  X = NULL,
+  Y = NULL,
+  Z = NULL,
+  epsg = NULL,
+  resolution = 0.5,
+  TRESHSeed = 0.55,
+  TRESHCrown = 0.6,
+  HeightThreshold = 2,
+  lut = NULL,
+  cw = 1
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>A column vector of x coordinates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>A column vector of y coordinates (it must have the same length as X).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Z</code></td>
+<td>
+<p>A column vector of z coordinates (it must have the same length as X). Z must be normalized respect to the ground.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>epsg</code></td>
+<td>
+<p>The EPSG code of the reference system of the X,Y coordinates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resolution</code></td>
+<td>
+<p>The resolution of the raster on which the first segmentation is carried out.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TRESHSeed</code></td>
+<td>
+<p>Growing threshold 1. It should be between 0 and 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TRESHCrown</code></td>
+<td>
+<p>Growing threshold 2. It should be between 0 and 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>HeightThreshold</code></td>
+<td>
+<p>Minimum height of the trees.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lut</code></td>
+<td>
+<p>Look up table. It should be made of two colums. The first column indicate the height in meters and the second the crown diameter in meters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cw</code></td>
+<td>
+<p>Weighting exponent used to increase the contrast in the CHM used to detect the local maxima (default cw=1).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of the class SpatVector containing the delineated ITCs. The informaion for each ITC contained in the data frame are the X and Y coordinates position of the tree, the tree height in meters (Height_m) and its crown area in square meters (CA_m2).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Michele Dalponte
+</p>
+
+
+<h3>References</h3>
+
+<p>D. A. Coomes, M. Dalponte, T. Jucker, G. P. Asner, L. F. Banin, D. F.R.P. Burslem, S. L. Lewis, R. Nilus, O. L. Phillips, M.-H. Phua, L. Qie, "Area-based vs tree-centric approaches to mapping forest carbon in Southeast Asian forests from airborne laser scanning data," Remote Sensing of Environment, Vol. 194, Issue 1, pp. 77-88, June 2017.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+data(lasData)
+
+##Creation of the look-up-table
+
+lut&lt;-matrix(6,2,data=NA)
+lut&lt;-data.frame(lut)
+names(lut)&lt;-c("H","CD")
+
+lut$H&lt;-c(2,10,15,20,25,30)
+lut$CD&lt;-c(0.5,1,2,3,4,5)
+
+## function takes a while to run
+se&lt;-itcLiDARallo(lasData$X,lasData$Y,lasData$Z,epsg=32632,lut=lut)
+summary(se)
+plot(se,axes=T)
+
+## If we want to seperate the height of the trees by grayscales:
+
+plot(se,col=gray((max(se$Height_m)-se$Height_m)/(max(se$Height_m)-min(se$Height_m))),axes=T)
+
+## to save the data use rgdal function called writeOGR. For more help see rgdal package.
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

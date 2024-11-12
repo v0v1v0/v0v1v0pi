@@ -1,0 +1,241 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Queue</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>A Class containing a producer and consumer</h2>
+
+<h3>Description</h3>
+
+<p>Creates a Queue object for inter-process communication.
+Its members <code>producer</code> and <code>consumer</code> are the main entry points for
+sending and receiving messages respectively.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">queue(
+  source = defaultSource()$new(),
+  producer = Producer$new(source),
+  consumer = Consumer$new(source)
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>source</code></td>
+<td>
+<p>The source for reading and writing the queue</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>producer</code></td>
+<td>
+<p>The producer for the source</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>consumer</code></td>
+<td>
+<p>The consumer of the source</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function creates a queue object for communication between different R processes,
+including forks of the same process.  By default, it uses <code>txtq</code> backage as its backend.
+Technically, the information is sent through temporary files, created in a new directory
+inside the session-specific temporary folder (see <code>tempfile</code>).
+This requires that the new directory is writeable, this is normally the case but
+if <code>Sys.umask</code> forbids writing, the communication fails with an error.
+</p>
+
+
+<h3>Public fields</h3>
+
+<div class="r6-fields">
+
+<dl>
+<dt><code>producer</code></dt>
+<dd>
+<p>A Producer object</p>
+</dd>
+<dt><code>consumer</code></dt>
+<dd>
+<p>a Consumer object.</p>
+</dd>
+</dl>
+</div>
+
+
+<h3>Methods</h3>
+
+
+
+<h4>Public methods</h4>
+
+
+<ul>
+<li> <p><a href="#method-Queue-new"><code>Queue$new()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-Queue-destroy"><code>Queue$destroy()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-Queue-clone"><code>Queue$clone()</code></a>
+</p>
+</li>
+</ul>
+<hr>
+<a id="method-Queue-new"></a>
+
+
+
+<h4>Method <code>new()</code>
+</h4>
+
+<p>Create a Queue object
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>Queue$new(source, prod, cons)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>source</code></dt>
+<dd>
+<p>The source to use for communication.</p>
+</dd>
+<dt><code>prod</code></dt>
+<dd>
+<p>A Producer object.</p>
+</dd>
+<dt><code>cons</code></dt>
+<dd>
+<p>A Consumer object.</p>
+</dd>
+</dl>
+</div>
+
+
+<hr>
+<a id="method-Queue-destroy"></a>
+
+
+
+<h4>Method <code>destroy()</code>
+</h4>
+
+<p>clean up object after use.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>Queue$destroy()</pre></div>
+
+
+<hr>
+<a id="method-Queue-clone"></a>
+
+
+
+<h4>Method <code>clone()</code>
+</h4>
+
+<p>The objects of this class are cloneable with this method.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>Queue$clone(deep = FALSE)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>deep</code></dt>
+<dd>
+<p>Whether to make a deep clone.</p>
+</dd>
+</dl>
+</div>
+
+
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+library(parallel)
+library(future)
+library(promises)
+plan(multisession)
+
+q &lt;- queue()
+
+# communicate from main session to child
+fut &lt;- future({
+  for(i in 1:1000){
+    Sys.sleep(.1)
+    q$consumer$consume()
+  }
+})
+
+q$producer$fireEval(stop("Stop that child"))
+cat(try(value(fut)))
+
+# Communicate from child to main session
+j &lt;- 0
+fut &lt;- future({
+  for(i in 1:10){
+    Sys.sleep(.2)
+
+    # set j in the main thread substituting i into the expression
+    q$producer$fireEval(j &lt;- i, env=list(i=i))
+  }
+})
+
+while(j &lt; 10){
+ q$consumer$consume() # collect and execute assignments
+ cat("j = ", j, "\n")
+ Sys.sleep(.1)
+}
+
+fut &lt;- future({
+  for(i in 1:10){
+    Sys.sleep(.2)
+
+    # set j in the main thread substituting i into the expression
+    q$producer$fireEval(print(i), env=list(i=i))
+  }
+})
+
+q$consumer$start() # execute `comsume` at regular intervals
+
+# clean up
+q$destroy()
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

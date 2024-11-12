@@ -1,0 +1,242 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ivDiag</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Omnibus Function for IV Estimation and Diagnostics</h2>
+
+<h3>Description</h3>
+
+<p>Conducts various estimation and diagnostic procedure for instrumental variable designs in one shot.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ivDiag(data, Y, D, Z, controls = NULL, FE = NULL, cl = NULL, weights = NULL,
+  bootstrap = TRUE, run.AR = TRUE,
+  nboots = 1000, parallel = TRUE, cores = NULL, 
+  seed = 94305, prec = 4, debug = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>name of a dataframe.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>a string indicating the outcome variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>a string indicating the treatment variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Z</code></td>
+<td>
+<p>a vector of strings indicating the instrumental variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>controls</code></td>
+<td>
+<p>a vector of strings indicating the control variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FE</code></td>
+<td>
+<p>a vector of strings indicating the fixed effects variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cl</code></td>
+<td>
+<p>a string indicating the clustering variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>a string indicating the variable that stores weights.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bootstrap</code></td>
+<td>
+<p>whether to turn on bootstrap (TRUE by default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>run.AR</code></td>
+<td>
+<p>whether to run AR test (TRUE by default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nboots</code></td>
+<td>
+<p>a numeric value indicating the number of bootstrap runs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>a logical flag controlling parallel computing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>setting the number of cores.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prec</code></td>
+<td>
+<p>precision of CI in string (4 by default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>setting seed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>debug</code></td>
+<td>
+<p>for debugging purposes.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>est_ols</code></td>
+<td>
+<p>results from an OLS regression.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>est_2sls</code></td>
+<td>
+<p>results from a 2SLS regression.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>AR</code></td>
+<td>
+<p>results from an Anderson-Rubin test</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>F_stat</code></td>
+<td>
+<p>various F statistics.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+<p>Pearson correlation coefficient between the treatment and predicted treatment from the first stage regression (all covariates are partialled out).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tF</code></td>
+<td>
+<p>results from the tF procedure based on Lee et al. (2022)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>est_rf</code></td>
+<td>
+<p>results from the first stage regression.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>est_fs</code></td>
+<td>
+<p>results from the reduced form regression.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p_iv</code></td>
+<td>
+<p>the number of instruments.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>the number of observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N_cl</code></td>
+<td>
+<p> the number of clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>the degree of freedom left from the 2SLS regression</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nvalues</code></td>
+<td>
+<p>the unique values the outcome Y, the treatment D, and each instrument in Z in the 2SLS regression.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Apoorva Lal; Yiqing Xu
+</p>
+
+
+<h3>References</h3>
+
+<p>Lal, Apoorva, Mackenzie William Lockhart, Yiqing Xu, and Ziwen Zu. 2023. "How Much Should We Trust Instrumental Variable Estimates in Political Science? Practical Advice Based on 67 Replicated Studies." Available at: <a href="https://yiqingxu.org/papers/english/2021_iv/LLXZ.pdf">https://yiqingxu.org/papers/english/2021_iv/LLXZ.pdf</a>
+</p>
+<p>Lee, David S, Justin McCrary, Marcelo J Moreira, and Jack Porter. 2022. "Valid t-Ratio Inference for IV." American Economic Review 112 (10): 3260–90.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot_coef</code>
+<code>eff_F</code>
+<code>AR_test</code>
+<code>tF</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(ivDiag)
+g &lt;- ivDiag(data = rueda, Y = "e_vote_buying", D = "lm_pob_mesa", 
+    Z = "lz_pob_mesa_f", controls = c("lpopulation", "lpotencial"), 
+    cl = "muni_code", bootstrap = FALSE, run.AR = FALSE)
+plot_coef(g)
+library(testthat)    
+test_that("Check ivDiag output", {
+  expect_equal(as.numeric(g$est_2sls[1,1]), -0.9835)
+})
+</code></pre>
+
+
+</div>

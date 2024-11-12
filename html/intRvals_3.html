@@ -1,0 +1,280 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>estinterval</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimate interval model accounting for missed arrival observations</h2>
+
+<h3>Description</h3>
+
+<p>Estimate interval mean and variance accounting for missed arrival observations,
+by fitting the probability density function intervalpdf to the interval data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">estinterval(
+  data,
+  mu = median(data),
+  sigma = sd(data)/2,
+  p = 0.2,
+  N = 5L,
+  fun = "gamma",
+  trunc = c(0, Inf),
+  fpp = (if (fpp.method == "fixed") 0 else 0.1),
+  fpp.method = "auto",
+  p.method = "auto",
+  conf.level = 0.9,
+  group = NA,
+  sigma.within = NA,
+  iter = 10,
+  tol = 0.001,
+  silent = F,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A numeric list of intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu</code></td>
+<td>
+<p>Start value for the numeric optimization for the mean arrival interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>Start value for the numeric optimization for the standard deviation of the arrival interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>Start value for the numeric optimization for the probability to not observe an arrival.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>Maximum number of missed observations to be taken into account (default N=5).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fun</code></td>
+<td>
+<p>Assumed distribution for the intervals, one of "<code>normal</code>" or "<code>gamma</code>", corresponding
+to the Normal and GammaDist distributions</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trunc</code></td>
+<td>
+<p>Use a truncated probability density function with range <code>trunc</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fpp</code></td>
+<td>
+<p>Baseline proportion of intervals distributed as a random poisson process with mean arrival interval <code>mu</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fpp.method</code></td>
+<td>
+<p>A string equal to 'fixed' or 'auto'. When 'auto' <code>fpp</code> is optimized as a free model parameter,
+in which case <code>fpp</code> is taken as start value in the optimisation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.method</code></td>
+<td>
+<p>A string equal to 'fixed' or 'auto'. When 'auto' <code>p</code> is optimized as a free model parameter,
+in which case <code>p</code> is taken as start value in the optimisation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf.level</code></td>
+<td>
+<p>Confidence level for deviance test that checks whether model with nonzero missed event probability
+<code>p</code> significantly outperforms a model without a missed event probability (<code>p=0</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group</code></td>
+<td>
+<p>optional vector of equal length as data, indicating the group or subject in which the interval was observed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma.within</code></td>
+<td>
+<p>optional within-subject standard deviation. When equal to default 'NA', assumes
+no additional between-subject effect, with <code>sigma.within</code> equal to <code>sigma</code>. When equal to 'auto'
+an estimate is provided by iteratively calling partition</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter</code></td>
+<td>
+<p>maximum number of iterations in numerical iteration for <code>sigma.within</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>tolerance in the iteration, when <code>sigma.within</code> changes less than this value in one iteration step, the optimization is considered converged.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>silent</code></td>
+<td>
+<p>logical. When <code>TRUE</code> print no information to console</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments to be passed to optim</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The probability density function for observed intervals intervalpdf
+is fit to <code>data</code> by maximization of the
+associated log-likelihood using optim.
+</p>
+<p>Within-group variation <code>sigma.within</code> may be separated from the total variation <code>sigma</code> in an iterative fit of intervalpdf on the interval data.
+In the iteration partition is used to (1) determine which intervals according to the fit are a fundamental interval at a confidence level <code>conf.level</code>,
+and (2) to partition the within-group variation from the total variation in interval length.
+</p>
+<p>Within- and between-group variation is estimated on the subset of fundamental intervals with repeated measures only.
+As the set of fundamental interval depends on the precise value of <code>sigma.within</code>, the fit of intervalpdf and the subsequent estimation of
+<code>sigma.within</code> using partition is iterated until both converge to a stable solution. Parameters <code>tol</code>
+and <code>iter</code> set the threshold for convergence and the maximum number of iterations.
+</p>
+<p>We note that an exponential interval model can be fitted by setting <code>fpp=1</code> and <code>fpp.method=fixed</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>This function returns an object of class <code>intRvals</code>, which is a list containing the following:
+</p>
+
+<dl>
+<dt><code>data</code></dt>
+<dd>
+<p>the interval data</p>
+</dd>
+<dt><code>mu</code></dt>
+<dd>
+<p>the modelled mean interval</p>
+</dd>
+<dt><code>mu.se</code></dt>
+<dd>
+<p>the modelled mean interval standard error</p>
+</dd>
+<dt><code>sigma</code></dt>
+<dd>
+<p>the modelled interval standard deviation</p>
+</dd>
+<dt><code>p</code></dt>
+<dd>
+<p>the modelled probability to not observe an arrival</p>
+</dd>
+<dt><code>fpp</code></dt>
+<dd>
+<p>the modelled fraction of arrivals following a random poisson process, see intervalpdf</p>
+</dd>
+<dt><code>N</code></dt>
+<dd>
+<p>the highest number of consecutive missed arrivals taken into account, see intervalpdf</p>
+</dd>
+<dt><code>convergence</code></dt>
+<dd>
+<p>convergence field of optim</p>
+</dd>
+<dt><code>counts</code></dt>
+<dd>
+<p>counts field of optim</p>
+</dd>
+<dt><code>loglik</code></dt>
+<dd>
+<p>vector of length 2, with first element the log-likelihood of the fitted model, and second element the log-likelihood of the model without a missed event probability (i.e. <code>p</code>=0)</p>
+</dd>
+<dt><code>df.residual</code></dt>
+<dd>
+<p>degrees of freedom, a 2-vector (1, number of intervals - <code>n.param</code>)</p>
+</dd>
+<dt><code>n.param</code></dt>
+<dd>
+<p>number of optimized model parameters</p>
+</dd>
+<dt><code>p.chisq</code></dt>
+<dd>
+<p>p value for a likelihood-ratio test of a model including a miss probability relative against a model without a miss probability</p>
+</dd>
+<dt><code>distribution</code></dt>
+<dd>
+<p>assumed interval distribution, one of 'gamma' or 'normal'</p>
+</dd>
+<dt><code>trunc</code></dt>
+<dd>
+<p>interval range over which the interval pdf was truncated and normalized</p>
+</dd>
+<dt><code>fpp.method</code></dt>
+<dd>
+<p>A string equal to 'fixed' or 'auto'. When 'auto' <code>fpp</code> has been optimized as a free model parameter</p>
+</dd>
+<dt><code>p.method</code></dt>
+<dd>
+<p>A string equal to 'fixed' or 'auto'. When 'auto' <code>p</code> has been optimized as a free model parameter</p>
+</dd>
+</dl>
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(goosedrop)
+# calculate mean and standard deviation of arrival intervals, accounting for missed observations:
+dr=estinterval(goosedrop$interval)
+# plot some summary information
+summary(dr)
+# plot a histogram of the intervals and fit:
+plot(dr)
+# test whether the mean arrival interval is greater than 200 seconds:
+ttest(dr,mu=200,alternative="greater")
+
+# let's estimate mean and variance of dropping intervals by site
+# (schiermonnikoog vs terschelling) for time period 5.
+# first prepare the two datasets:
+set1=goosedrop[goosedrop$site=="schiermonnikoog" &amp; goosedrop$period == 5,]
+set2=goosedrop[goosedrop$site=="terschelling"  &amp; goosedrop$period == 5,]
+# allowing a fraction of intervals to be distributed randomly (fpp='auto')
+dr1=estinterval(set1$interval,fpp.method='auto')
+dr2=estinterval(set2$interval,fpp.method='auto')
+# plot the fits:
+plot(dr1,xlim=c(0,1000))
+plot(dr2,xlim=c(0,1000))
+# mean dropping interval are not significantly different
+# at the two sites (on a 0.95 confidence level):
+ttest(dr1,dr2)
+# now compare this test with a t-test not accounting for unobserved intervals:
+t.test(set1$interval,set2$interval)
+# not accounting for missed observations leads to a (spurious)
+# larger difference in means, which also increases
+# the apparent statistical significance of the difference between means
+</code></pre>
+
+
+</div>

@@ -1,0 +1,99 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>jointRot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Resolve rotational ambiguity in samples of factor loadings and factors jointly
+</h2>
+
+<h3>Description</h3>
+
+<p>Performs the varimax rotation on the factor loadings samples and column-based matching to resolve resultant sign and label switching. Rotates the factors along with the loadings to induce identifiability jointly. Note this method will only work on lists of factors and factor loadings that share the same constant number of factors (k) across all samples, and will likely crash the session if this is not the case.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">jointRot(lambda, eta)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>list of factor loadings samples</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eta</code></td>
+<td>
+<p>list of factor samples</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>rotationally aligned factor loadings samples</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eta</code></td>
+<td>
+<p>rotationally aligned factor samples</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Evan Poworoznek
+</p>
+
+
+<h3>References</h3>
+
+<p>coming soon...
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>msf</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">k0 = 5
+p = 20
+n = 100
+
+lambda = matrix(rnorm(p*k0, 0, 0.01), ncol = k0)
+lambda[sample.int(p, 40, replace = TRUE) +
+         p*(sample.int(k0, 40, replace = TRUE)-1)] = rnorm(40, 0, 1)
+lambda[1:7, 1] = rnorm(7, 2, 0.5)
+lambda[8:14, 2] = rnorm(7, -2, 0.5)
+lambda[15:20, 3] = rnorm(6, 2, 0.5)
+lambda[,4] = rnorm(p, 0, 0.5)
+lambda[,5] = rnorm(p, 0, 0.5)
+plotmat(varimax(lambda)[[1]])
+
+X = matrix(rnorm(n*k0),n,k0)%*%t(lambda) + matrix(rnorm(n*p), n, p)
+
+out = linearMGSP(X = X, nrun = 1000, burn = 500, adapt = FALSE)
+
+aligned = jointRot(out$lambdaSamps, out$etaSamps)
+
+plotmat(lmean(aligned$lambda))
+</code></pre>
+
+
+</div>

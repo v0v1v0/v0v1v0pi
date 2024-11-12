@@ -1,0 +1,129 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>IDF.agg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Aggregation and annual maxima for chosen durations</h2>
+
+<h3>Description</h3>
+
+<p>Aggregates several time series for chosen durations and finds annual maxima 
+(either for the whole year or chosen months). Returns data.frame that can be used for
+the function <code>gev.d.fit</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">IDF.agg(
+  data,
+  ds,
+  na.accept = 0,
+  which.stations = NULL,
+  which.mon = list(0:11),
+  names = c("date", "RR"),
+  cl = 1
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>list of data.frames containing time series for every station. 
+The data.frame must have the columns 'date' and 'RR' unless other names 
+are specified in the parameter ‘names'. The column ’date' must contain strings with 
+standard date format.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ds</code></td>
+<td>
+<p>numeric vector of aggregation durations in hours. 
+(Must be multiples of time resolution at all stations.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.accept</code></td>
+<td>
+<p>numeric in [0,1) giving maximum percentage of missing values 
+for which block max. should still be calculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>which.stations</code></td>
+<td>
+<p>optional, subset of stations. Either numeric vector or character vector 
+containing names of elements in data. If not given, all elements in 'data' will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>which.mon</code></td>
+<td>
+<p>optional, subset of months (as list containing values from 0 to 11) of which to calculate the annual maxima from.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>names</code></td>
+<td>
+<p>optional, character vector of length 2, containing the names of the columns to be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cl</code></td>
+<td>
+<p>optional, number of cores to be used from <code>parLapply</code> for parallel computing.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If data contains stations with different time resolutions that need to be aggregated at
+different durations, IDF.agg needs to be run separately for the different groups of stations. 
+Afterwards the results can be joint together using 'rbind'.
+</p>
+
+
+<h3>Value</h3>
+
+<p>data.frame containing the annual intensity maxima [mm/h] in '$xdat', the corresponding duration in '$ds',
+the '$year' and month ('$mon') in which the maxima occurred 
+and the station id or name in '$station'.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>pgev.d</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">dates &lt;- as.Date("2019-01-01")+0:729
+x &lt;- rgamma(n = 730, shape = 0.4, rate = 0.5)
+df &lt;- data.frame(date=dates,RR=x)
+
+# get annual maxima
+IDF.agg(list('Sample'= df),ds=c(24,48),na.accept = 0.01)
+
+##      xdat ds year  mon station
+## 0.2853811 24 2019 0:11  Sample
+## 0.5673122 24 2020 0:11  Sample
+## 0.1598448 48 2019 0:11  Sample
+## 0.3112713 48 2020 0:11  Sample
+
+# get monthly maxima for each month of june, july and august
+IDF.agg(list('Sample'=df),ds=c(24,48),na.accept = 0.01,which.mon = list(5,6,7))
+
+# get maxima for time range from june to august
+IDF.agg(list('Sample'=df),ds=c(24,48),na.accept = 0.01,which.mon = list(5:7))
+
+</code></pre>
+
+
+</div>

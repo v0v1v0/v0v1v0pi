@@ -1,0 +1,255 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>gev.d.fit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Maximum-likelihood Fitting of the duration-dependent GEV Distribution</h2>
+
+<h3>Description</h3>
+
+<p>Modified <code>gev.fit</code> function for Maximum-likelihood fitting
+for the duration-dependent generalized extreme
+value distribution, following Koutsoyiannis et al. (1998), including generalized linear
+modeling of each parameter.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">gev.d.fit(
+  xdat,
+  ds,
+  ydat = NULL,
+  mutl = NULL,
+  sigma0l = NULL,
+  xil = NULL,
+  thetal = NULL,
+  etal = NULL,
+  taul = NULL,
+  eta2l = NULL,
+  mutlink = make.link("identity"),
+  sigma0link = make.link("identity"),
+  xilink = make.link("identity"),
+  thetalink = make.link("identity"),
+  etalink = make.link("identity"),
+  taulink = make.link("identity"),
+  eta2link = make.link("identity"),
+  init.vals = NULL,
+  theta_zero = FALSE,
+  tau_zero = TRUE,
+  eta2_zero = TRUE,
+  show = TRUE,
+  method = "Nelder-Mead",
+  maxit = 10000,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xdat</code></td>
+<td>
+<p>A vector containing maxima for different durations.
+This can be obtained from <code>IDF.agg</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ds</code></td>
+<td>
+<p>A vector of aggregation levels corresponding to the maxima in xdat.
+1/60 corresponds to 1 minute, 1 corresponds to 1 hour.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ydat</code></td>
+<td>
+<p>A matrix of covariates for generalized linear modeling of the parameters
+(or NULL (the default) for stationary fitting). The number of rows should be the same as the
+length of xdat.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mutl, sigma0l, xil, thetal, etal, taul, eta2l</code></td>
+<td>
+<p>Numeric vectors of integers, giving the columns of ydat that contain
+covariates for generalized linear modeling of the parameters (or NULL (the default)
+if the corresponding parameter is stationary).
+Parameters are: modified location, scale offset, shape, duration offset, duration exponent, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mutlink, sigma0link, xilink, thetalink, etalink, eta2link, taulink</code></td>
+<td>
+<p>Link functions for generalized linear
+modeling of the parameters, created with <code>make.link</code>. The default is <code>make.link("identity")</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init.vals</code></td>
+<td>
+<p>list, giving initial values for all or some parameters
+(order: mut, sigma0, xi, theta, eta, eta2, tau). If one of those parameters shall not be used (see theta_zero, eta2_zero, tau_zero),
+the number of parameters has to be reduced accordingly. If some or all given values in init.vals are NA or 
+no init.vals at all is declared (the default), initial parameters are obtained
+internally by fitting the GEV separately for each duration and applying a linear model to obtain the
+duration dependency of the location and shape parameter.
+Initial values for covariate parameters are assumed as 0 if not given.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta_zero</code></td>
+<td>
+<p>Logical value, indicating whether theta should be estimated (FALSE, the default) or
+should stay zero.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau_zero, eta2_zero</code></td>
+<td>
+<p>Logical values, indicating whether tau,eta2 should be estimated (TRUE, the default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>show</code></td>
+<td>
+<p>Logical; if TRUE (the default), print details of the fit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>The optimization method used in <code>optim</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxit</code></td>
+<td>
+<p>The maximum number of iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other control parameters for the optimization.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For details on the d-GEV and the parameter definitions, see IDF-package.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list containing the following components.
+A subset of these components are printed after the fit.
+If <code>show</code> is TRUE, then assuming that successful convergence is indicated,
+the components nllh, mle and se are always printed.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>nllh</code></td>
+<td>
+<p>single numeric giving the negative log-likelihood value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mle</code></td>
+<td>
+<p>numeric vector giving the MLE's for the modified location, scale_0, shape,
+duration offset and duration exponent, resp. If requested, contains also second duration exponent and intensity-offset</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se</code></td>
+<td>
+<p>numeric vector giving the standard errors for the MLE's (in the same order)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trans</code></td>
+<td>
+<p>A logical indicator for a non-stationary fit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A list with components mutl, sigma0l, xil, thetal and etal. If requested, contains also eta2l and taul</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>link</code></td>
+<td>
+<p>A character vector giving link functions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conv</code></td>
+<td>
+<p>The convergence code, taken from the list returned by <code>optim</code>.
+A zero indicates successful convergence.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>data is standardized to standard Gumbel.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cov</code></td>
+<td>
+<p>The covariance matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vals</code></td>
+<td>
+<p>Parameter values for every data point.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init.vals</code></td>
+<td>
+<p>Initial values that were used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ds</code></td>
+<td>
+<p>Durations for every data point.</p>
+</td>
+</tr>
+</table>
+<h3>See Also</h3>
+
+<p><code>IDF-package</code>, <code>IDF.agg</code>, <code>gev.fit</code>, <code>optim</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># sampled random data from d-gev with covariates
+# GEV parameters:
+# mut = 4 + 0.2*cov1 +0.5*cov2
+# sigma0 = 2+0.5*cov1
+# xi = 0.5
+# theta = 0
+# eta = 0.5
+# eta2 = 0
+# tau = 0
+
+data('example',package ='IDF')
+
+gev.d.fit(xdat=example$dat,ds = example$d,ydat=as.matrix(example[,c('cov1','cov2')])
+,mutl=c(1,2),sigma0l=1)
+</code></pre>
+
+
+</div>

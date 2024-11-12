@@ -1,0 +1,543 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>export.summaryTable</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Export a summary table to <code>docx</code>, <code>pptx</code> 
+or <code>html</code> format (interactive table)</h2>
+
+<h3>Description</h3>
+
+<p>The use of <code>export</code> is recommended.<br><code>exportSummaryStatisticsTable</code> is retained for
+back-compatibility.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'summaryTable'
+export(...)
+
+exportSummaryStatisticsTable(
+  summaryTable,
+  rowVar = getAttribute(summaryTable, "rowVar"),
+  rowVarLab = getAttribute(summaryTable, "rowVarLab", default = getLabelVar(rowVar,
+    labelVars = labelVars)),
+  rowVarInSepCol = NULL,
+  rowVarFormat = NULL,
+  rowVarTotalInclude = getAttribute(summaryTable, "rowVarTotalInclude"),
+  rowTotalLab = NULL,
+  rowVarTotalInSepRow = getAttribute(summaryTable, "rowVarTotalInSepRow"),
+  rowAutoMerge = TRUE,
+  colVar = getAttribute(summaryTable, "colVar"),
+  colTotalLab = getAttribute(summaryTable, "colTotalLab", default = "Total"),
+  colHeaderTotalInclude = TRUE,
+  colHeaderMerge = TRUE,
+  statsVar = getAttribute(summaryTable, "statsVar"),
+  statsLayout = getAttribute(summaryTable, "statsLayout", default = ifelse("DT" %in%
+    outputType, "col", "row")),
+  statsValueLab = "StatisticValue",
+  statsLabInclude = NULL,
+  emptyValue = "-",
+  labelVars = NULL,
+  file = NULL,
+  title = NULL,
+  outputType = "flextable",
+  pageDim = NULL,
+  columnsWidth = NULL,
+  landscape = (style == "presentation"),
+  margin = 1,
+  rowPadBase = 14.4,
+  footer = NULL,
+  style = "report",
+  colorTable = getColorPaletteTable(style = style),
+  fontsize = switch(style, report = 8, presentation = 10),
+  fontname = switch(style, report = "Times", presentation = "Tahoma"),
+  vline = "none",
+  hline = "auto",
+  expandVar = NULL,
+  noEscapeVar = NULL,
+  barVar = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>(DT output) Extra parameters passed to the 
+<code>getClinDT</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>summaryTable</code></td>
+<td>
+<p>A <code>summaryTable</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowVar</code></td>
+<td>
+<p>Character vector with variable(s)
+to be included in the rows.
+If multiple variables are specified, the variables should 
+be sorted in hierarchical order
+(e.g. body system class before adverse event term)
+and are nested in the table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowVarLab</code></td>
+<td>
+<p>Named character vector with 
+label for the <code>rowVar</code> variable(s).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowVarInSepCol</code></td>
+<td>
+<p>Character vector with <code>rowVar</code>
+that should be included in separated columns.
+By default (NULL), all row variables are nested in the first column 
+of the table.<br>
+To include the groups within a <code>var</code> variable in a separated column, 
+set: <code>rowVarInSepCol == 'variableGroup'</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowVarFormat</code></td>
+<td>
+<p>(flextable output) Named list with special formatting for the <code>rowVar</code>.
+Currently, only possibility is to set the variable elements in bold, with:
+list(var1 = "bold").
+(Use 'variable' for <code>var</code> or 'variableGroup' for group within categorical variables.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowVarTotalInclude</code></td>
+<td>
+<p>Character vector with <code>rowVar</code>
+for which the total should be reported.<br>
+If the higher row variable is specified, the total across all rows
+is reported. <br>
+For the export, these variable(s) are formatted as factor with 
+<strong>'Total' as the first level</strong>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowTotalLab</code></td>
+<td>
+<p>(flextable output) string with label for the row with total.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowVarTotalInSepRow</code></td>
+<td>
+<p>Character vector with <code>rowVarTotalInclude</code>
+(not in <code>rowVarInSepCol</code>) for which the total should be included in a separated row labelled 'Total'.
+Otherwise (by default) the total is included in the header row of each category.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowAutoMerge</code></td>
+<td>
+<p>(flextable output) Logical, if TRUE (by default) automatically merge rows,
+e.g. in case there is only one sub-category (e.g. categorical variable with only one group)
+or only one statistic per category.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colVar</code></td>
+<td>
+<p>Character vector with variable(s) to be included in columns.
+If multiple variables are specified, the variables should 
+be sorted in hierarchical order,
+and are included in multi-columns layout.<br>
+Use: 'variable' to include the variables to summarize: <code>var</code>
+(if multiple) in different columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colTotalLab</code></td>
+<td>
+<p>String, label for the total column  'Total' by default.<br></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colHeaderTotalInclude</code></td>
+<td>
+<p>Logical, if TRUE include the total of number of patients
+(<code>'statN'</code>) in the column header.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colHeaderMerge</code></td>
+<td>
+<p>(flextable output) Logical, if TRUE (FALSE by default) 
+the column header is merged.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statsVar</code></td>
+<td>
+<p>Character vector with columns of <code>summaryTable</code> with
+statistic variables. For the export: if not specified, all columns of <code>data</code>
+besides row, column variables, 'variable', 'variableGroup'
+and 'isTotal' are considered.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statsLayout</code></td>
+<td>
+<p>String with layout for the statistics names 
+(in case more than one statistic is included), among:
+</p>
+
+<ul>
+<li>
+<p>row (by default for 'flextable' output): <br> All statistics are
+included in different rows in the first column of the table (after the row variable(s))
+</p>
+</li>
+<li>
+<p>'col' (by default for 'DT' output): <br> Statistics are included 
+in separated columns (last row of the header).<br>
+This option is not compatible with categorical variable(s).
+</p>
+</li>
+<li>
+<p>'rowInSepCol': <br> Statistics are included in different rows, 
+but in a separated column than the <code>rowVar</code> variable(s)
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statsValueLab</code></td>
+<td>
+<p>String with label for the statistic value, 
+'StatisticValue' by default.<br>
+This is only included in the table if the statistics provided in 
+<code>stats</code> are not named and if no <code>colVar</code> is specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statsLabInclude</code></td>
+<td>
+<p>Logical, if TRUE include the statistic label
+in the table. <br> By default only included if more than
+one statistic variables are available in the table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>emptyValue</code></td>
+<td>
+<p>String with placeholder used to fill the table for missing values, '-' by default.
+This value is typically used e.g. if not all statistics are computed for all specified
+row/col/var variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>labelVars</code></td>
+<td>
+<p>(optional) Named character vector with label for
+the row, column variable(s) or variable(s) to summarize. <br>
+Labels specified via dedicated parameter: e.g. 
+<code>rowVarLab</code>, <code>colVarLab</code>, <code>varLab</code>
+have priority on this parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>(Optional) Name of the file the table should be exported to, 
+either:
+</p>
+
+<ul>
+<li>
+<p>string (of length 1). In this case, depending on the
+file extension, the following is exported: 
+</p>
+
+<ul>
+<li>
+<p>'txt': summary table in long format ('data.frame-base' <code>outputType</code>)
+</p>
+</li>
+<li>
+<p>'docx': summary table in final format is exported ('flextable' <code>outputType</code>)
+</p>
+</li>
+<li>
+<p>'html': interactive summary table is exported ('DT' <code>outputType</code>)
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p>named character vector in case of multiple exports.
+The names should correspond to the options in <code>outputType</code>:
+</p>
+
+<ul>
+<li>
+<p>for 'data.frame-base' and 'data.frame': filename with 'txt' extension
+</p>
+</li>
+<li>
+<p>for 'flextable': filename with 'docx' extension
+</p>
+</li>
+<li>
+<p>for 'DT': filename with 'html' extension
+</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>If NULL (by default), the summary table is not exported but only returned as output.
+If <code>byVar</code> is specified, each table is exported to a separated
+file with the suffix: 'file_[i].[ext]' with i the index of the file
+(and [ext] the file extension).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>title</code></td>
+<td>
+<p>Character vector with title(s) for the table.
+Set to NULL (by default) if no title should be included.
+If multiple are specified, specified for each element of <code>byVar</code> (in order of the levels).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outputType</code></td>
+<td>
+<p>String with output type:
+</p>
+
+<ul>
+<li>
+<p>'flextable' (by default): <code>flextable</code> object, with format for
+CSR, compatible with Word/PowerPoint export
+</p>
+</li>
+<li>
+<p>'DT': <code>datatable</code> interactive table,
+compatible with html export
+</p>
+</li>
+<li>
+<p>'data.frame': data.frame in wide format (with elements in 
+<code>colVar</code> in different columns)
+</p>
+</li>
+<li>
+<p>'data.frame-base': data.frame in long format (with elements in 
+<code>colVar</code> in different rows), useful for QC
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pageDim</code></td>
+<td>
+<p>Numeric vector of length 2 with page width and height.<br>
+Depending on <code>outputType</code>:
+</p>
+
+<ul>
+<li>
+<p>'flextable': in inches
+</p>
+</li>
+<li>
+<p>'DT': in number of rows in the table.<br>
+Currently only the height is used (e.g. <code>c(NA, 4)</code>)
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>columnsWidth</code></td>
+<td>
+<p>(expert mode) Column widths of the table. This is only used 
+for flextable and DT tables.<br>
+For flextable, note that the widths should be set to fit into the document page
+(see <code>getDimPage</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>landscape</code></td>
+<td>
+<p>(flextable output) Logical, if TRUE the file is in landscape format.<br>
+By default: FALSE if <code>style</code> is 'report' and TRUE if <code>style</code> is 'presentation'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>margin</code></td>
+<td>
+<p>(flextable output) Margin in the document in inches
+(1 by default).
+This is used to specify the width of the table, from:
+[<code>pageDim[1]</code> - 2 * margin].</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rowPadBase</code></td>
+<td>
+<p>(flextable output) Base padding for row (in points), 
+14.4 by default (corresponds to 0.2 inches)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>footer</code></td>
+<td>
+<p>(flextable output) Character vector with footer(s) for the table.
+Set to NULL (by default) if no footer should be included.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>style</code></td>
+<td>
+<p>(flextable output) String with table style,
+either 'report' or 'presentation'.
+This parameter affects the fontsize, font family, color of the text and background, 
+and table dimensions of the table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colorTable</code></td>
+<td>
+<p>(flextable output) Named character vector with color for the table background/body/text/line,
+e.g. created with the <code>getColorPaletteTable</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fontsize</code></td>
+<td>
+<p>(flextable output) Integer with font size, by default:
+8 if <code>style</code> is 'report' and 10 if <code>style</code> is 'presentation'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fontname</code></td>
+<td>
+<p>(flextable output) String with font name, by default:
+'Times' if <code>style</code> is 'report' and 'Tahoma' if <code>style</code> is 'presentation'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vline</code></td>
+<td>
+<p>(flextable output) String mentioning how vertical lines 
+should be included in the body of the table, either: 
+</p>
+
+<ul>
+<li>
+<p>'none' (default): no vertical lines included
+</p>
+</li>
+<li>
+<p>'auto': vertical lines included between sub-groups
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hline</code></td>
+<td>
+<p>(flextable output) String mentioning how horizontal lines 
+should be included in the body of the table, either: 
+</p>
+
+<ul>
+<li>
+<p>'none': no horizontal lines included
+</p>
+</li>
+<li>
+<p>'auto' (default): horizontal lines included between sub-groups
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>expandVar</code></td>
+<td>
+<p>(DT output) Character vector with variables of the summary table which
+should be expanded in the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>noEscapeVar</code></td>
+<td>
+<p>(DT output) Character vector with variables of <code>summaryTable</code>
+which shouldn't be escaped in the table (e.g. containing URLs).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>barVar</code></td>
+<td>
+<p>(DT output) Character vector with variables of <code>summaryTable</code>
+that should be represented as a bar.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Depending on the <code>outputType</code>:
+</p>
+
+<ul>
+<li>
+<p>'data.frame-base': input summary table in a long format with
+all computed statistics
+</p>
+</li>
+<li>
+<p>'data.frame': summary table in a wide format (
+different columns for each <code>colVar</code>), with specified labels
+</p>
+</li>
+<li>
+<p>'flextable' (by default): <code>flextable</code>
+object with summary table
+</p>
+</li>
+<li>
+<p>'DT': <code>datatable</code> object with summary table
+</p>
+</li>
+</ul>
+<p>If multiple <code>outputType</code> are specified, a list of those objects, named
+by <code>outputType</code>.<br>
+If <code>byVar</code> is specified, each object consists of a list of tables,
+one for each element in <code>byVar</code>.
+</p>
+
+
+<h3>Functions</h3>
+
+
+<ul><li> <p><code>export(summaryTable)</code>: export <code>summaryTable</code> object
+</p>
+</li></ul>
+<h3>Author(s)</h3>
+
+<p>Laure Cougnaud
+</p>
+
+
+</div>

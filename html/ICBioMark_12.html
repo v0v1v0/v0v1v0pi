@@ -1,0 +1,157 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fit_gen_model_uninteract</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit Generative Model Without Gene/Variant Type-Specific Interactions</h2>
+
+<h3>Description</h3>
+
+<p>A function to fit a generative model to a mutation dataset that does not incorporate gene/variant-specific effects.
+Otherwise acts similarly to the function fit_gen_model().
+</p>
+<p>NOTE: fits produced by this model will not be compatible with predictive model fits downstream - it is purely for comparing
+with full models.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fit_gen_model_uninteract(
+  gene_lengths,
+  matrix = NULL,
+  sample_list = NULL,
+  gene_list = NULL,
+  mut_types_list = NULL,
+  col_names = NULL,
+  table = NULL,
+  nlambda = 100,
+  n_folds = 10,
+  maxit = 1e+09,
+  seed_id = 1234,
+  progress = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>gene_lengths</code></td>
+<td>
+<p>(dataframe)
+A table with two columns: Hugo_Symbol and max_cds, providing the lengths of the genes to be modelled.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>matrix</code></td>
+<td>
+<p>(Matrix::sparseMatrix)
+A mutation matrix, such as produced by the function get_table_from_maf().</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sample_list</code></td>
+<td>
+<p>(character)
+The set of samples to be modelled.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gene_list</code></td>
+<td>
+<p>(character)
+The set of genes to be modelled.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mut_types_list</code></td>
+<td>
+<p>(character)
+The set of mutation types to be modelled.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col_names</code></td>
+<td>
+<p>(character)
+The column names of the 'matrix' parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>table</code></td>
+<td>
+<p>(list)
+Optional parameter combining matrix, sample_list, gene_list, mut_types_list, col_names, as is produced by the function get_tables().</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nlambda</code></td>
+<td>
+<p>(numeric)
+The length of the vector of penalty weights, passed to the function glmnet::glmnet().</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_folds</code></td>
+<td>
+<p>(numeric)
+The number of cross-validation folds to employ.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxit</code></td>
+<td>
+<p>(numeric)
+Technical parameter passed to the function glmnet::glmnet().</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed_id</code></td>
+<td>
+<p>(numeric)
+Input value for the function set.seed().</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>progress</code></td>
+<td>
+<p>(logical)
+Show progress bars and text.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list comprising three objects:
+</p>
+
+<ul>
+<li>
+<p> An object 'fit', a fitted glmnet model.
+</p>
+</li>
+<li>
+<p> A table 'dev', giving average deviances for each regularisation penalty factor and cross-validation fold.
+</p>
+</li>
+<li>
+<p> An integer 's_min', the index of the regularsisation penalty minimising cross-validation deviance.
+</p>
+</li>
+<li>
+<p> A list 'names', containing the sample, gene, and mutation type information of the training data.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">example_gen_model_unisamp &lt;- fit_gen_model_unisamp(example_maf_data$gene_lengths,
+                                                   table = example_tables$train)
+print(names(example_gen_model))
+</code></pre>
+
+
+</div>

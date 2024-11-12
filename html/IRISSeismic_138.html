@@ -1,0 +1,119 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>psdList</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Apply McNamara PSD algorithm to a seismic signal</h2>
+
+<h3>Description</h3>
+
+<p>The <code>psdList</code> function subsets a seismic <code>Stream</code> object into a series of
+shorter segments with 50% overlap and uses the <code>McNamaraPSD</code> method to return a smoothed (aka binned)
+Power Spectral Density (PSD) for each segment.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">psdList(st)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>st</code></td>
+<td>
+<p>a <code>Stream</code> object</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>A <code>Stream</code> will be subset into segments depending upon the channel identifier (@stats@channel) associated
+with this seismic data.  The binning frequencies are also channel dependent as exemplified in 
+this code extract where <code>Z</code> is the segment length in seconds:
+</p>
+<pre>
+alignFreq &lt;- 0.1
+  
+if (stringr::str_detect(channel,"^L")) {
+  Z &lt;- 3 * 3600
+  loFreq &lt;- 0.001
+  hiFreq &lt;- 0.5 * tr_merged@stats@sampling_rate
+} else if (stringr::str_detect(channel,"^M")) {
+  Z &lt;- 2 * 3600
+  loFreq &lt;- 0.0025
+  hiFreq &lt;- 0.5 * tr_merged@stats@sampling_rate
+} else {
+  Z &lt;- 3600
+  loFreq &lt;- 0.005
+  hiFreq &lt;- 0.5 * tr_merged@stats@sampling_rate
+}
+</pre>
+<p>Each new segment starts half way through the previous segment. (50% overlap)
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of <code>PSD</code> objects is returned. Each element of the list is
+an <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> <code>list</code> object with the following elements:
+</p>
+<pre>
+freq, spec, snclq, starttime, endtime
+</pre>
+<p><b>Note:</b> Individual PSDs have not had instrument correction applied.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="http://pubs.usgs.gov/of/2005/1438/pdf/OFR-1438.pdf">Seismic Noise Analysis System Using Power Spectral Density Probability Density Functions</a> (McNamara and Boaz 2005)
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>McNamaraPSD</code>,
+<code>psdList2NoiseMatrix</code>,
+<code>psdPlot</code>,
+<code>psdStatistics</code>,
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Create a new IrisClient
+iris &lt;- new("IrisClient", debug=TRUE)
+
+# Get seismic data
+starttime &lt;- as.POSIXct("2011-05-05", tz="GMT") # 2011.125
+endtime &lt;- starttime + 1*24*3600
+st &lt;- getDataselect(iris,"IU","GRFO","--","BHE",starttime,endtime)
+
+# Generate power spectral density for each hour long segment
+psdList &lt;- psdList(st)
+
+# Plot uncorrected PSDs
+period &lt;- 1/psdList[[1]]$freq
+plot(period, psdList[[1]]$spec, log='x', type='l',
+     xlab="Period (Sec)", ylab="Power (dB)",
+     main="Uncorrected PSDs")
+     
+for (i in seq(2:length(psdList))) {
+  points(period, psdList[[i]]$spec, type='l')
+}
+
+## End(Not run)
+</code></pre>
+
+
+</div>

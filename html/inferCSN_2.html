@@ -1,0 +1,98 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>as_matrix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Convert dgCMatrix into a dense matrix</h2>
+
+<h3>Description</h3>
+
+<p>Convert dgCMatrix into a dense matrix
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">as_matrix(x, parallel = FALSE, sparse = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>Logical value, default is <em><code>FALSE</code></em>.
+Setting to parallelize the computation with <code>setThreadOptions</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sparse</code></td>
+<td>
+<p>Logical value, default is <em><code>FALSE</code></em>, whether to output a sparse matrix.</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">dims_i &lt;- 2000
+dims_j &lt;- 2000
+sparse_matrix &lt;- Matrix::sparseMatrix(
+  i = sample(1:dims_i, 500),
+  j = sample(1:dims_j, 500),
+  x = rnorm(500),
+  dims = c(dims_i, dims_j),
+  dimnames = list(
+    paste0("a", rep(1:dims_i)),
+    paste0("b", rep(1:dims_j))
+  )
+)
+
+system.time(as.matrix(sparse_matrix))
+system.time(as_matrix(sparse_matrix))
+system.time(as_matrix(sparse_matrix, parallel = TRUE))
+
+identical(
+  as.matrix(sparse_matrix),
+  as_matrix(sparse_matrix)
+)
+
+identical(
+  as.matrix(sparse_matrix),
+  as_matrix(sparse_matrix, parallel = TRUE)
+)
+
+identical(
+  sparse_matrix,
+  as_matrix(as.matrix(sparse_matrix), sparse = TRUE)
+)
+
+## Not run: 
+network_table_1 &lt;- inferCSN(
+  as_matrix(example_matrix, sparse = TRUE)
+)
+network_table_2 &lt;- inferCSN(
+  as(example_matrix, "sparseMatrix")
+)
+
+plot_scatter(
+  data.frame(
+    network_table_1$weight,
+    network_table_2$weight
+  ),
+  legend_position = "none"
+)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

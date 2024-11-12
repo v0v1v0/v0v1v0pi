@@ -1,0 +1,542 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cat_plot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot interaction effects between categorical predictors.</h2>
+
+<h3>Description</h3>
+
+<p><code>cat_plot</code> is a complementary function to <code>interact_plot()</code> that is designed
+for plotting interactions when both predictor and moderator(s) are
+categorical (or, in R terms, factors).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cat_plot(
+  model,
+  pred,
+  modx = NULL,
+  mod2 = NULL,
+  data = NULL,
+  geom = c("point", "line", "bar"),
+  pred.values = NULL,
+  modx.values = NULL,
+  mod2.values = NULL,
+  interval = TRUE,
+  plot.points = FALSE,
+  point.shape = FALSE,
+  vary.lty = FALSE,
+  centered = "all",
+  int.type = c("confidence", "prediction"),
+  int.width = 0.95,
+  line.thickness = 1.1,
+  point.size = 1.5,
+  pred.point.size = 3.5,
+  jitter = 0.1,
+  geom.alpha = NULL,
+  dodge.width = NULL,
+  errorbar.width = NULL,
+  interval.geom = c("errorbar", "linerange"),
+  outcome.scale = "response",
+  robust = FALSE,
+  cluster = NULL,
+  vcov = NULL,
+  pred.labels = NULL,
+  modx.labels = NULL,
+  mod2.labels = NULL,
+  set.offset = 1,
+  x.label = NULL,
+  y.label = NULL,
+  main.title = NULL,
+  legend.main = NULL,
+  colors = NULL,
+  partial.residuals = FALSE,
+  point.alpha = 0.6,
+  color.class = NULL,
+  at = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A regression model. The function is tested with <code>lm</code>,
+<code>glm</code>, <code>svyglm</code>, <code>merMod</code>,
+<code>rq</code>, <code>brmsfit</code>,
+<code>stanreg</code> models.
+Models from other classes may work as well but are not officially
+supported. The model should include the interaction of interest.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pred</code></td>
+<td>
+<p>A categorical predictor variable that will appear on the x-axis.
+Note that it is evaluated using <code>rlang</code>, so programmers can use the <code style="white-space: pre;">⁠!!⁠</code>
+syntax to pass variables instead of the verbatim names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modx</code></td>
+<td>
+<p>A categorical moderator variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mod2</code></td>
+<td>
+<p>For three-way interactions, the second categorical moderator.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Optional, default is NULL. You may provide the data used to
+fit the model. This can be a better way to get mean values for centering
+and can be crucial for models with variable transformations in the formula
+(e.g., <code>log(x)</code>) or polynomial terms (e.g., <code>poly(x, 2)</code>). You will
+see a warning if the function detects problems that would likely be
+solved by providing the data with this argument and the function will
+attempt to retrieve the original data from the global environment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>geom</code></td>
+<td>
+<p>What type of plot should this be? There are several options
+here since the best way to visualize categorical interactions varies by
+context. Here are the options:
+</p>
+
+<ul>
+<li> <p><code>"point"</code>: The default. Simply plot the point estimates. You may want to
+use <code>point.shape = TRUE</code> with this and you should also consider
+<code>interval = TRUE</code> to visualize uncertainty.
+</p>
+</li>
+<li> <p><code>"line"</code>: This connects observations across levels of the <code>pred</code>
+variable with a line. This is a good option when the <code>pred</code> variable
+is ordinal (ordered). You may still consider <code>point.shape = TRUE</code> and
+<code>interval = TRUE</code> is still a good idea.
+</p>
+</li>
+<li> <p><code>"bar"</code>: A bar chart. Some call this a "dynamite plot."
+Many applied researchers advise against this type of plot because it
+does not represent the distribution of the observed data or the
+uncertainty of the predictions very well. It is best to at least use the
+<code>interval = TRUE</code> argument with this geom.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pred.values</code></td>
+<td>
+<p>Which values of the predictor should be included in the
+plot? By default, all levels are included.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modx.values</code></td>
+<td>
+<p>For which values of the moderator should lines be
+plotted? There are two basic options:
+</p>
+
+<ul>
+<li>
+<p> A vector of values (e.g., <code>c(1, 2, 3)</code>)
+</p>
+</li>
+<li>
+<p> A single argument asking to calculate a set of values. See details
+below.
+</p>
+</li>
+</ul>
+<p>Default is <code>NULL</code>. If <code>NULL</code> (or <code>mean-plus-minus</code>),
+then the customary +/- 1 standard
+deviation from the mean as well as the mean itself are used for continuous
+moderators. If <code>"plus-minus"</code>, plots lines when the moderator is at
++/- 1 standard deviation without the mean. You may also choose <code>"terciles"</code>
+to split the data into equally-sized groups and choose the point at the
+mean of each of those groups.
+</p>
+<p>If the moderator is a factor variable and <code>modx.values</code> is
+<code>NULL</code>, each level of the factor is included. You may specify
+any subset of the factor levels (e.g., <code>c("Level 1", "Level 3")</code>) as long
+as there is more than 1. The levels will be plotted in the order you
+provide them, so this can be used to reorder levels as well.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mod2.values</code></td>
+<td>
+<p>For which values of the second moderator should the plot
+be
+facetted by? That is, there will be a separate plot for each level of this
+moderator. Defaults are the same as <code>modx.values</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interval</code></td>
+<td>
+<p>Logical. If <code>TRUE</code>, plots confidence/prediction
+intervals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.points</code></td>
+<td>
+<p>Logical. If <code>TRUE</code>, plots the actual data points as a
+scatterplot on top of the interaction lines. Note that if
+<code>geom = "bar"</code>, this will cause the bars to become transparent so you can
+see the points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>point.shape</code></td>
+<td>
+<p>For plotted points—either of observed data or predicted
+values with the "point" or "line" geoms—should the shape of the points
+vary by the values of the factor? This is especially useful if you aim to
+be black and white printing- or colorblind-friendly.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vary.lty</code></td>
+<td>
+<p>Should the resulting plot have different shapes for each
+line in addition to colors? Defaults to <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>centered</code></td>
+<td>
+<p>A vector of quoted variable names that are to be
+mean-centered. If <code>"all"</code>, all non-focal predictors are centered. You
+may instead pass a character vector of variables to center. User can
+also use "none" to base all predictions on variables set at 0.
+The response variable, <code>pred</code>, <code>modx</code>, and <code>mod2</code> variables are never
+centered.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>int.type</code></td>
+<td>
+<p>Type of interval to plot. Options are "confidence" or
+"prediction". Default is confidence interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>int.width</code></td>
+<td>
+<p>How large should the interval be, relative to the standard
+error? The default, .95, corresponds to roughly 1.96 standard errors and
+a .05 alpha level for values outside the range. In other words, for a
+confidence interval, .95 is analogous to a 95% confidence interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>line.thickness</code></td>
+<td>
+<p>How thick should the plotted lines be? Default is 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>point.size</code></td>
+<td>
+<p>What size should be used for observed data when
+<code>plot.points</code> is TRUE? Default is 1.5.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pred.point.size</code></td>
+<td>
+<p>If TRUE and <code>geom</code> is <code>"point"</code> or <code>"line"</code>,
+sets the size of the predicted points. Default is 3.5.
+Note the distinction from <code>point.size</code>, which refers to the
+observed data points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>jitter</code></td>
+<td>
+<p>How much should <code>plot.points</code> observed values be "jittered"
+via <code>ggplot2::position_jitter()</code>? When there are many points near each
+other, jittering moves them a small amount to keep them from
+totally overlapping. In some cases, though, it can add confusion since
+it may make points appear to be outside the boundaries of observed
+values or cause other visual issues. Default is 0.1, but increase as
+needed if your points are overlapping too much or set to 0 for no jitter.
+If the argument is a vector with two values, then the first is assumed to
+be the jitter for width and the second for the height.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>geom.alpha</code></td>
+<td>
+<p>What should the alpha aesthetic be for the plotted
+lines/bars? Default is NULL, which means it is set depending on the value
+of <code>geom</code> and <code>plot.points</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dodge.width</code></td>
+<td>
+<p>What should the <code>width</code> argument to
+<code>ggplot2::position_dodge()</code> be? Default is NULL, which means it is set
+depending on the value of <code>geom</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>errorbar.width</code></td>
+<td>
+<p>How wide should the error bars be? Default is NULL,
+meaning it is set depending on the value <code>geom</code>. Ignored if <code>interval</code>
+is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interval.geom</code></td>
+<td>
+<p>For categorical by categorical interactions.
+One of "errorbar" or "linerange". If the former,
+<code>ggplot2::geom_errorbar()</code> is used. If the latter,
+<code>ggplot2::geom_linerange()</code> is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outcome.scale</code></td>
+<td>
+<p>For nonlinear models (i.e., GLMs), should the outcome
+variable be plotted on the link scale (e.g., log odds for logit models) or
+the original scale (e.g., predicted probabilities for logit models)? The
+default is <code>"response"</code>, which is the original scale. For the link
+scale, which will show straight lines rather than curves, use
+<code>"link"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>robust</code></td>
+<td>
+<p>Should robust standard errors be used to find confidence
+intervals for supported models? Default is FALSE, but you should specify
+the type of sandwich standard errors if you'd like to use them (i.e.,
+<code>"HC0"</code>, <code>"HC1"</code>, and so on). If <code>TRUE</code>, defaults to <code>"HC3"</code> standard
+errors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster</code></td>
+<td>
+<p>For clustered standard errors, provide the column name of
+the cluster variable in the input data frame (as a string). Alternately,
+provide a vector of clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vcov</code></td>
+<td>
+<p>Optional. You may supply the variance-covariance matrix of the
+coefficients yourself. This is useful if you are using some method for
+robust standard error calculation not supported by the <span class="pkg">sandwich</span>
+package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pred.labels</code></td>
+<td>
+<p>A character vector of equal length to the number of
+factor levels of the predictor (or number specified in <code>predvals</code>). If
+<code>NULL</code>, the default, the factor labels are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modx.labels</code></td>
+<td>
+<p>A character vector of labels for each level of the
+moderator values, provided in the same order as the <code>modx.values</code>
+argument. If <code>NULL</code>, the values themselves are used as labels unless
+<code>modx,values</code> is also <code>NULL</code>. In that case, "+1 SD" and "-1 SD"
+are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mod2.labels</code></td>
+<td>
+<p>A character vector of labels for each level of the 2nd
+moderator values, provided in the same order as the <code>mod2.values</code>
+argument. If <code>NULL</code>, the values themselves are used as labels unless
+<code>mod2.values</code> is also <code>NULL</code>. In that case, "+1 SD" and "-1 SD"
+are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>set.offset</code></td>
+<td>
+<p>For models with an offset (e.g., Poisson models), sets an
+offset for the predicted values. All predicted values will have the same
+offset. By default, this is set to 1, which makes the predicted values a
+proportion. See details for more about offset support.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x.label</code></td>
+<td>
+<p>A character object specifying the desired x-axis label. If
+<code>NULL</code>, the variable name is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y.label</code></td>
+<td>
+<p>A character object specifying the desired x-axis label. If
+<code>NULL</code>, the variable name is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main.title</code></td>
+<td>
+<p>A character object that will be used as an overall title
+for the plot. If <code>NULL</code>, no main title is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>legend.main</code></td>
+<td>
+<p>A character object that will be used as the title that
+appears above the legend. If <code>NULL</code>, the name of the moderating
+variable is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>colors</code></td>
+<td>
+<p>Any palette argument accepted by <code>jtools::get_colors()</code>.
+Default is "CUD Bright" for factor moderators and "blue" for continuous
+moderators. You may also simply supply a vector of colors accepted by
+<code>ggplot2</code> and of equal length to the number of moderator levels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>partial.residuals</code></td>
+<td>
+<p>Instead of plotting the observed data, you may plot
+the partial residuals (controlling for the effects of variables besides
+<code>pred</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>point.alpha</code></td>
+<td>
+<p>What should the <code>alpha</code> aesthetic for plotted points of
+observed data be? Default is 0.6, and it can range from 0 (transparent) to
+1 (opaque).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>color.class</code></td>
+<td>
+<p>Deprecated. Now known as <code>colors</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>at</code></td>
+<td>
+<p>If you want to manually set the values of other variables in the
+model, do so by providing a named list where the names are the variables
+and the list values are vectors of the values. This can be useful
+especially when you are exploring interactions or other conditional
+predictions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>extra arguments passed to <code>make_predictions</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function provides a means for plotting conditional effects
+for the purpose of exploring interactions in the context of regression.
+You must have the
+package <code>ggplot2</code> installed to benefit from these plotting functions.
+</p>
+<p>The function is designed for two and three-way interactions. For
+additional terms, the
+<code>effects</code> package may be better suited to the task.
+</p>
+<p>This function supports nonlinear and generalized linear models and by
+default will plot them on
+their original scale (<code>outcome.scale = "response"</code>).
+</p>
+<p>While mixed effects models from <code>lme4</code> are supported, only the fixed
+effects are plotted. <code>lme4</code> does not provide confidence intervals,
+so they are not supported with this function either.
+</p>
+<p>Note: to use transformed predictors, e.g., <code>log(variable)</code>,
+provide only the variable name to <code>pred</code>, <code>modx</code>, or <code>mod2</code> and supply
+the original data separately to the <code>data</code> argument.
+</p>
+<p><em>Info about offsets:</em>
+</p>
+<p>Offsets are partially supported by this function with important
+limitations. First of all, only a single offset per model is supported.
+Second, it is best in general to specify offsets with the offset argument
+of the model fitting function rather than in the formula. You are much
+more likely to have success if you provide the data used to fit the model
+with the <code>data</code> argument.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The functions returns a <code>ggplot</code> object, which can be treated
+like a user-created plot and expanded upon as such.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(ggplot2)
+fit &lt;- lm(price ~ cut * color, data = diamonds)
+cat_plot(fit, pred = color, modx = cut, interval = TRUE)
+
+# 3-way interaction
+
+## Will first create a couple dichotomous factors to ensure full rank
+mpg2 &lt;- mpg
+mpg2$auto &lt;- "auto"
+mpg2$auto[mpg2$trans %in% c("manual(m5)", "manual(m6)")] &lt;- "manual"
+mpg2$auto &lt;- factor(mpg2$auto)
+mpg2$fwd &lt;- "2wd"
+mpg2$fwd[mpg2$drv == "4"] &lt;- "4wd"
+mpg2$fwd &lt;- factor(mpg2$fwd)
+## Drop the two cars with 5 cylinders (rest are 4, 6, or 8)
+mpg2 &lt;- mpg2[mpg2$cyl != "5",]
+mpg2$cyl &lt;- factor(mpg2$cyl)
+## Fit the model
+fit3 &lt;- lm(cty ~ cyl * fwd * auto, data = mpg2)
+
+# The line geom looks good for an ordered factor predictor
+cat_plot(fit3, pred = cyl, modx = fwd, mod2 = auto, geom = "line",
+ interval = TRUE)
+
+</code></pre>
+
+
+</div>

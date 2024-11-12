@@ -1,0 +1,206 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>icmm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Empirical Bayes Variable Selection</h2>
+
+<h3>Description</h3>
+
+<p>Empirical Bayes variable selection via the ICM/M algorithm.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">icmm(Y, X, event, b0.start, b.start, family = "gaussian", 
+     ising.prior = FALSE, structure, estalpha = FALSE, 
+     alpha = 0.5, maxiter = 100)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>an (n*1) numeric matrix of responses.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>an (n*p) numeric design matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event</code></td>
+<td>
+<p>an (n*1) numeric matrix of status for censored data: <code>0</code>=censored data, <code>1</code>=event at time. <code>event</code> is required when <code>family="cox"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b0.start</code></td>
+<td>
+<p>a starting value of intercept term (optional).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b.start</code></td>
+<td>
+<p>a (p*1) matrix of starting values for regression coefficients.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>specification of the model. It can be one of these three models: <code>"gaussian"</code>, <code>"binomial"</code>, <code>"cox"</code>. The default is <code>family="gaussian"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ising.prior</code></td>
+<td>
+<p>a logical flag for Ising prior utilization. <code>ising.prior=FALSE</code> assumes no prior on structure among predictors. <code>ising.prior=TRUE</code> indicates incorporation of Ising prior to capture structure among predictors in modeling process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>structure</code></td>
+<td>
+<p>a data frame stores the information of structured predictors (need to specify when <code>ising.prior=TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>estalpha</code></td>
+<td>
+<p>a logical flag specifying whether to obtain <code>alpha</code> via ICM/M algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>a scalar value of scale parameter in Laplace density (non-zero part of prior). The default value is <code>0.5</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+<p>a maximum values of iterations for ICM/M algorithm.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The main function for empirical Bayes variable selection. Iterative conditional modes/medians (ICM/M) is implemented in this function. The basic problem is to estimate regression coefficients in high-dimensional data (i.e., large p small n) and we assume that most coefficients are zero. This function also allows the prior of structure of covariates to be incorporated in the model.</p>
+
+
+<h3>Value</h3>
+
+<p>Return a list including elements
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>coef</code></td>
+<td>
+<p>a vector of model coefficients. The first element is an intercept term when specifying <code>family="gaussian"</code> or <code>family="binomial"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterations</code></td>
+<td>
+<p>number of iterations of ICM/M.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>a scalar value of <code>alpha</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>postprob</code></td>
+<td>
+<p>a p-vector of local posterior probabilities or zeta.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Vitara Pungpapong, Min Zhang, Dabao Zhang</p>
+
+
+<h3>References</h3>
+
+<p>Pungpapong, V., Zhang, M. and Zhang, D. (2015). Selecting massive variables using an iterated conditional modes/medians algorithm. Electronic Journal of Statistics. 9:1243-1266. &lt;doi:10.1214/15-EJS1034&gt;.<br>
+Pungpapong, V., Zhang, M. and Zhang, D. (2020). Integrating Biological Knowledge Into Case-Control Analysis Through Iterated Conditional Modes/Medians Algorithm. Journal of Computational Biology. 27(7): 1171-1179. &lt;doi:10.1089/cmb.2019.0319&gt;.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>get.ab</code>, <code>get.alpha</code>, <code>get.beta</code>, <code>get.beta.ising</code>, <code>get.pseudodata.binomial</code>, <br><code>get.pseudodata.cox</code>, <code>get.sigma</code>, <code>get.wprior</code>, <code>get.zeta</code>, <code>get.zeta.ising</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Normal linear regression model
+# With no prior on structure among predictors
+data(simGaussian)
+Y&lt;-as.matrix(simGaussian[,1])
+X&lt;-as.matrix(simGaussian[,-1])
+# Obtain initial values from lasso
+data(initbetaGaussian)
+initbeta&lt;-as.matrix(initbetaGaussian)
+result&lt;-icmm(Y=Y, X=X, b.start=initbeta, family="gaussian", 
+        ising.prior=FALSE, estalpha=FALSE, alpha=0.5, maxiter=100)
+result$coef
+result$iterations
+result$alpha
+result$wpost
+
+# With prior on structure among predictors
+data(linearrelation)
+result&lt;-icmm(Y=Y, X=X, b.start=initbeta, family="gaussian", 
+        ising.prior=TRUE, structure=linearrelation, 
+        estalpha=FALSE, alpha=0.5, maxiter=100)
+result$coef
+result$iterations
+result$alpha
+result$wpost
+
+# Binary logistic regression model
+data(simBinomial)
+Y&lt;-as.matrix(simBinomial[,1])
+X&lt;-as.matrix(simBinomial[,-1])
+p&lt;-dim(X)[2]
+# Obtain initial values from lasso
+data(initbetaBinomial)
+initbeta&lt;-as.matrix(initbetaBinomial)
+result&lt;-icmm(Y=Y, X=X, b0.start=0, b.start=initbeta, family="binomial", 
+        ising.prior=TRUE, structure=linearrelation, estalpha=FALSE, 
+        alpha=0.5, maxiter=100)
+result$coef
+result$iterations
+result$alpha
+result$wpost
+
+# Cox's model
+data(simCox)
+Y&lt;-as.matrix(simCox[,1])
+event&lt;-as.matrix(simCox[,2])
+X&lt;-as.matrix(simCox[,-(1:2)])
+# Obtain initial values from lasso
+data(initbetaCox)
+initbeta&lt;-as.matrix(initbetaCox)
+result &lt;- icmm(Y=Y, X=X, event=event, b.start=initbeta, family="cox",
+          ising.prior=TRUE, structure=linearrelation, estalpha=FALSE,
+          alpha=0.5, maxiter=100)
+result$coef
+result$iterations
+result$alpha
+result$wpost
+</code></pre>
+
+
+</div>

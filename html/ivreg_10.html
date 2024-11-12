@@ -1,0 +1,138 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>CigaretteDemand</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>U.S. Cigarette Demand Data</h2>
+
+<h3>Description</h3>
+
+<p>Determinants of cigarette demand for the 48 continental US States in 1995 and
+compared between 1995 and 1985.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">data("CigaretteDemand", package = "ivreg")
+</code></pre>
+
+
+<h3>Format</h3>
+
+<p>A data frame with 48 rows and 10 columns.
+</p>
+
+<dl>
+<dt>packs</dt>
+<dd>
+<p>Number of cigarette packs per capita sold in 1995.</p>
+</dd>
+<dt>rprice</dt>
+<dd>
+<p>Real price in 1995 (including sales tax).</p>
+</dd>
+<dt>rincome</dt>
+<dd>
+<p>Real per capita income in 1995.</p>
+</dd>
+<dt>salestax</dt>
+<dd>
+<p>Sales tax in 1995.</p>
+</dd>
+<dt>cigtax</dt>
+<dd>
+<p>Cigarette-specific taxes (federal and average local excise taxes) in 1995.</p>
+</dd>
+<dt>packsdiff</dt>
+<dd>
+<p>Difference in <code>log(packs)</code> (between 1995 and 1985).</p>
+</dd>
+<dt>pricediff</dt>
+<dd>
+<p>Difference in <code>log(rprice)</code> (between 1995 and 1985).</p>
+</dd>
+<dt>incomediff</dt>
+<dd>
+<p>Difference in <code>log(rincome)</code> (between 1995 and 1985).</p>
+</dd>
+<dt>salestaxdiff</dt>
+<dd>
+<p>Difference in <code>salestax</code> (between 1995 and 1985).</p>
+</dd>
+<dt>cigtaxdiff</dt>
+<dd>
+<p>Difference in <code>cigtax</code> (between 1995 and 1985).</p>
+</dd>
+</dl>
+<h3>Details</h3>
+
+<p>The data are taken from the online complements to Stock and Watson (2007) and
+had been prepared as panel data (in long form) in <code>CigarettesSW</code>
+from the AER package (Kleiber and Zeileis 2008). Here, the data are provided by
+state (in wide form), readily preprocessed to contain all variables needed for
+illustrations of OLS and IV regressions. More related examples from Stock and
+Watson (2007) are provided in the AER package in <code>StockWatson2007</code>.
+A detailed discussion of the various cigarette demand examples with R code
+is provided by Hanck et al. (2020, Chapter 12).
+</p>
+
+
+<h3>Source</h3>
+
+<p>Online complements to Stock and Watson (2007).
+</p>
+
+
+<h3>References</h3>
+
+<p>Hanck, C., Arnold, M., Gerber, A., and Schmelzer, M. (2020).
+<em>Introduction to Econometrics with R</em>. <a href="https://www.econometrics-with-r.org/">https://www.econometrics-with-r.org/</a>
+</p>
+<p>Kleiber, C. and Zeileis, A. (2008). <em>Applied Econometrics with R</em>. Springer-Verlag
+</p>
+<p>Stock, J.H. and Watson, M.W. (2007). <em>Introduction to Econometrics</em>, 2nd ed., Addison Wesley.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>CigarettesSW</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## load data
+data("CigaretteDemand", package = "ivreg")
+
+## basic price elasticity: OLS vs. IV
+cig_ols &lt;- lm(log(packs) ~ log(rprice), data = CigaretteDemand)
+cig_iv &lt;- ivreg(log(packs) ~ log(rprice) | salestax, data = CigaretteDemand)
+cbind(OLS = coef(cig_ols), IV = coef(cig_iv))
+
+## adjusting for income differences (exogenous)
+cig_iv2 &lt;- ivreg(log(packs) ~ log(rprice) + log(rincome) | salestax + log(rincome),
+  data = CigaretteDemand)
+## adding a second instrument for log(rprice)
+cig_iv3 &lt;- update(cig_iv2, . ~ . | . + cigtax)
+
+## comparison using heteroscedasticity-consistent standard errors
+library("lmtest")
+library("sandwich")
+coeftest(cig_iv2, vcov = vcovHC, type = "HC1")
+coeftest(cig_iv3, vcov = vcovHC, type = "HC1")
+
+## long-run price elasticity using differences between 1995 and 1985
+cig_ivdiff1 &lt;- ivreg(packsdiff ~ pricediff + incomediff | incomediff + salestaxdiff,
+  data = CigaretteDemand)
+cig_ivdiff2 &lt;- update(cig_ivdiff1, . ~ . | . - salestaxdiff + cigtaxdiff)
+cig_ivdiff3 &lt;- update(cig_ivdiff1, . ~ . | . + cigtaxdiff)
+coeftest(cig_ivdiff1, vcov = vcovHC, type = "HC1")
+coeftest(cig_ivdiff2, vcov = vcovHC, type = "HC1")
+coeftest(cig_ivdiff3, vcov = vcovHC, type = "HC1")
+</code></pre>
+
+
+</div>

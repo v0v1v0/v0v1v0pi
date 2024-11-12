@@ -1,0 +1,204 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.imptree</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Classification with Imprecise Probabilities</h2>
+
+<h3>Description</h3>
+
+<p>Prediction of <code>imptree</code> objects
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'imptree'
+predict(object, data, dominance = c("strong", "max"),
+  utility = 0.65, ...)
+
+## S3 method for class 'evaluation_imptree'
+print(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>An object of class <code>imptree</code>. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Data.frame containing observations to be predicted.
+If <code>NULL</code> the observations in the training set of <code>"object"</code>
+are employed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dominance</code></td>
+<td>
+<p>Dominace criterion to be applied when predicting
+classes. This may either be <code>"strong"</code> (default) or <code>"max"</code>.
+See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>utility</code></td>
+<td>
+<p>Utility for the utility based accuracy measure for a 
+vacuous prediction result (default: 0.65).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments for data. May be <code>"weights"</code>,
+<code>"subset"</code>, <code>"na.action"</code>, any further are discarded.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an object of class <code>evaluation_imptree</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function carries out the prediction of an imprecise tree. 
+An existence check on the stored C++ object reference is carried out 
+at first. If the reference is not valid the original call
+for <code>"object"</code> is printed as error.
+</p>
+<p>There are currently 2 different dominance criteria available:
+</p>
+
+<dl>
+<dt>max</dt>
+<dd>
+<p>Maximum frequency criterion. Dominance is decided only
+by the upper bound of the probability interval, ie. a state <code class="reqn">C_i</code> is 
+dominated if there exists any <code class="reqn">j \neq i</code> with
+<code class="reqn">u(C_i) &lt; u(C_j)</code></p>
+</dd>
+<dt>strong</dt>
+<dd>
+<p>Interval dominance criterion. For the IDM it
+coincides with the strong dominance criterion. Here a state
+<code class="reqn">C_i</code> is dominated if there exists any <code class="reqn">j \neq i</code> 
+with <code class="reqn">u(C_i) &lt; l(C_j)</code></p>
+</dd>
+</dl>
+<h3>Value</h3>
+
+<p><code>predict.imptree()</code> return an object of class 
+<code>evaluation_imptree</code>, which is a named list containing 
+predicted classes, predicted probability distribution and  accuracy 
+evaluation
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>probintlist</code></td>
+<td>
+<p>List of the imprecise probability distributions of the
+class variable. One matrix per observation in the test data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>classes</code></td>
+<td>
+<p>Predicted class(es) of the observations as boolean matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>evaluation</code></td>
+<td>
+<p>Result of accuracy evaluation
+</p>
+
+<ul>
+<li>
+<p>nObs: Number of observations
+</p>
+</li>
+<li>
+<p>deter: Determinacy
+</p>
+</li>
+<li>
+<p>nObsIndet: Number of observations with indeterminate prediction
+</p>
+</li>
+<li>
+<p>indetSize: Average number of classes when predicting 
+indeterminate (<code>NA</code> when no indeterminate observation)
+</p>
+</li>
+<li>
+<p>acc_single: Single-set accuracy (<code>NA</code> when no determinate 
+observation)
+</p>
+</li>
+<li>
+<p>acc_set: Set-accuracy (<code>NA</code> when no indeterminate observation)
+</p>
+</li>
+<li>
+<p>acc_disc: Discounted-accuracy
+</p>
+</li>
+<li>
+<p>acc_util: Utility based (discounted) accuracy
+</p>
+</li>
+</ul>
+</td>
+</tr>
+</table>
+<p>The printing function returns the
+<code>evaluation_imptree</code> object invisibly.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Paul Fink <a href="mailto:Paul.Fink@stat.uni-muenchen.de">Paul.Fink@stat.uni-muenchen.de</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>imptree</code>, <code>node_imptree</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("carEvaluation")
+
+## create a tree with IDM (s=1) to full size
+## carEvaluation, leaving the first 10 observations out
+ip &lt;- imptree(acceptance~., data = carEvaluation[-(1:10),], 
+  method="IDM", method.param = list(splitmetric = "globalmax", s = 1), 
+  control = list(depth = NULL, minbucket = 1))
+
+## predict the first 10 observations with 'max' dominance
+pp &lt;- predict(ip, dominance = "max", data = carEvaluation[(1:10),])
+print(pp)
+pp$classes                ## predicted classes as logical matrix
+
+## predict the first 10 observations with 'strong' dominance and
+## use a different level of utility
+predict(ip, dominance = "strong", data = carEvaluation[(1:10),],
+        utility = 0.5)
+
+</code></pre>
+
+
+</div>

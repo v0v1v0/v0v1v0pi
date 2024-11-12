@@ -1,0 +1,273 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>senslocallycomp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Verifying Optimality of The Locally DP-optimal Designs</h2>
+
+<h3>Description</h3>
+
+<p>This function plot the sensitivity (derivative) function given an approximate (continuous) design and calculate the efficiency lower bound (ELB) for locally DP-optimal designs.
+Let <code class="reqn">\boldsymbol{x}</code> belongs to <code class="reqn">\chi</code> that denotes the design space.
+Based on the general equivalence theorem, generally, a design <code class="reqn">\xi^*</code> is optimal if and only if the value of its sensitivity (derivative) function
+be non-positive for all <code class="reqn">\boldsymbol{x}</code> in <code class="reqn">\chi</code> and it only reaches zero
+when <code class="reqn">\boldsymbol{x}</code> belong to the support of <code class="reqn">\xi^*</code> (be equal to one of the design point).
+Therefore, the user can look at the sensitivity plot and the ELB to decide whether the
+design is optimal or close enough to the true optimal design.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">senslocallycomp(
+  formula,
+  predvars,
+  parvars,
+  alpha,
+  prob,
+  family = gaussian(),
+  x,
+  w,
+  lx,
+  ux,
+  inipars,
+  fimfunc = NULL,
+  sens.control = list(),
+  calculate_criterion = TRUE,
+  plot_3d = c("lattice", "rgl"),
+  plot_sens = TRUE,
+  npar = length(inipars),
+  silent = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>A linear or nonlinear model <code>formula</code>.
+A symbolic description of the model consists of predictors and the unknown model parameters.
+Will be coerced to a <code>formula</code> if necessary.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predvars</code></td>
+<td>
+<p>A vector of characters. Denotes the predictors in the <code>formula</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parvars</code></td>
+<td>
+<p>A vector of characters. Denotes the unknown parameters in the <code>formula</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>A value between 0 and 1.
+Compound or combined DP-criterion  is the product of the efficiencies of a design  with respect to D- and average P- optimality, weighted by <code>alpha</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob</code></td>
+<td>
+<p>Either <code>formula</code> or a <code>function</code>. When function, its argument are <code>x</code> and <code>param</code>, and they are the same as the arguments in <code>fimfunc</code>.
+<code>prob</code> as a function takes the design points and vector of parameters and returns the probability of success at each design points.
+See 'Examples'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>A description of the response distribution and the link function to be used in the model.
+This can be a family function, a call to a family function or a character string naming the family.
+Every family function has a link argument allowing to specify the link function to be applied on the response variable.
+If not specified, default links are used. For details see <code>family</code>.
+By default, a linear gaussian model <code>gaussian()</code> is applied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Vector of the design (support) points. See 'Details' of <code>sensminimax</code> for models with more than one predictors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>Vector of the corresponding design weights for <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lx</code></td>
+<td>
+<p>Vector of lower bounds for the predictors. Should be in the same order as <code>predvars</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ux</code></td>
+<td>
+<p>Vector of upper bounds for the predictors. Should be in the same order as <code>predvars</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inipars</code></td>
+<td>
+<p>Vector of initial estimates for the unknown parameters.
+It must match <code>parvars</code> or argument <code>param</code> of the function provided in <code>fimfunc</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fimfunc</code></td>
+<td>
+<p>A function. Returns the FIM as a <code>matrix</code>. Required when <code>formula</code> is missing. See 'Details' of <code>minimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sens.control</code></td>
+<td>
+<p>Control Parameters for Calculating the ELB. For details, see <code>sens.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>calculate_criterion</code></td>
+<td>
+<p>Calculate the optimality criterion? See 'Details' of <code>sensminimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_3d</code></td>
+<td>
+<p>Which package should be used to plot the sensitivity (derivative) function for models with two predictors.
+Either <code>"rgl"</code> or <code>"lattice"</code> (default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_sens</code></td>
+<td>
+<p>Plot the sensitivity (derivative) function? Defaults to <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>npar</code></td>
+<td>
+<p>Number of model parameters.  Used when <code>fimfunc</code> is given instead of <code>formula</code> to specify the number of model parameters.
+If not given, the sensitivity plot may be shifted below the y-axis.
+When <code>NULL</code>, it is set  to <code>length(inipars)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>silent</code></td>
+<td>
+<p>Do not print anything? Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>an object of class <code>sensminimax</code> that is a list with the following elements:
+</p>
+
+<dl>
+<dt><code>type</code></dt>
+<dd>
+<p>Argument <code>type</code> that is required for print methods.</p>
+</dd>
+<dt><code>optima</code></dt>
+<dd>
+<p>A <code>matrix</code> that stores all the local optima over the parameter space.
+The cost  (criterion) values are stored in a column named <code>Criterion_Value</code>.
+The last column (<code>Answering_Set</code>)
+shows if the optimum belongs to the answering set (1) or not (0). See 'Details' of <code>sens.minimax.control</code>.
+Only applicable for minimax or standardized maximin designs.</p>
+</dd>
+<dt><code>mu</code></dt>
+<dd>
+<p>Probability measure on the answering set.
+Corresponds to the rows of <code>optima</code> for which the associated row in column <code>Answering_Set</code> is equal to 1.
+Only applicable for minimax or standardized maximin designs.</p>
+</dd>
+<dt><code>max_deriv</code></dt>
+<dd>
+<p>Global maximum of the sensitivity (derivative) function (<code class="reqn">\epsilon</code> in 'Details').</p>
+</dd>
+<dt><code>ELB</code></dt>
+<dd>
+<p>D-efficiency lower bound. Can not be larger than 1. If negative, see 'Note' in <code>sensminimax</code> or  <code>sens.minimax.control</code>.</p>
+</dd>
+<dt><code>merge_tol</code></dt>
+<dd>
+<p>Merging tolerance to create the answering set from the set of all local optima. See 'Details' in <code>sens.minimax.control</code>.
+Only applicable for minimax or standardized maximin designs.</p>
+</dd>
+<dt><code>crtval</code></dt>
+<dd>
+<p>Criterion value. Compare it with the column <code>Crtiterion_Value</code> in <code>optima</code> for minimax and standardized maximin designs.</p>
+</dd>
+<dt><code>time</code></dt>
+<dd>
+<p>Used CPU time (rough approximation).</p>
+</dd>
+</dl>
+<h3>References</h3>
+
+<p>McGree, J. M., Eccleston, J. A., and Duffull, S. B. (2008). Compound optimal design criteria for nonlinear models. Journal of Biopharmaceutical Statistics, 18(4), 646-661.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+p &lt;- c(1, -2, 1, -1)
+prior4.4 &lt;- uniform(p -1.5, p + 1.5)
+formula4.4 &lt;- ~exp(b0+b1*x1+b2*x2+b3*x1*x2)/(1+exp(b0+b1*x1+b2*x2+b3*x1*x2))
+prob4.4 &lt;- ~1-1/(1+exp(b0 + b1 * x1 + b2 * x2 + b3 * x1 * x2))
+predvars4.4 &lt;-  c("x1", "x2")
+parvars4.4 &lt;- c("b0", "b1", "b2", "b3")
+lb &lt;- c(-1, -1)
+ub &lt;- c(1, 1)
+
+## That is the optimal design when alpha = .25, see ?locallycomp on how to find it
+xopt &lt;- c(-1, -0.389, 1, 0.802, -1, 1, -1, 1)
+wopt &lt;- c(0.198, 0.618, 0.084, 0.1)
+
+# We want to verfiy the optimality of the optimal design by the general equivalence theorem.
+
+senslocallycomp(formula = formula4.4, predvars = predvars4.4, parvars = parvars4.4,
+                family = binomial(), prob = prob4.4, lx = lb, ux = ub,
+                alpha = .25, inipars = p, x = xopt, w = wopt)
+
+## Not run: 
+# is this design also optimal when alpha = .3
+
+senslocallycomp(formula = formula4.4, predvars = predvars4.4, parvars = parvars4.4,
+                family = binomial(), prob = prob4.4, lx = lb, ux = ub,
+                alpha = .3, inipars = p, x = xopt, w = wopt)
+
+# when alpha = .3
+senslocallycomp(formula = formula4.4, predvars = predvars4.4, parvars = parvars4.4,
+                family = binomial(), prob = prob4.4, lx = lb, ux = ub,
+                alpha = .5, inipars = p, x = xopt, w = wopt)
+# when alpha = .8
+senslocallycomp(formula = formula4.4, predvars = predvars4.4, parvars = parvars4.4,
+                family = binomial(), prob = prob4.4, lx = lb, ux = ub,
+                alpha = .8, inipars = p, x = xopt, w = wopt)
+
+
+# when alpha = .9
+senslocallycomp(formula = formula4.4, predvars = predvars4.4, parvars = parvars4.4,
+                family = binomial(), prob = prob4.4, lx = lb, ux = ub,
+                alpha = .9, inipars = p, x = xopt, w = wopt)
+
+## As can be seen, the design looses efficiency as alpha increases.
+
+## End(Not run)
+</code></pre>
+
+
+</div>

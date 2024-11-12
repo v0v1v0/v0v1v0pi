@@ -1,0 +1,197 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>rfbaseline</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Robust Fitting of Baselines </h2>
+
+<h3>Description</h3>
+
+<p>Robust fitting of local regression models for estimating a baseline or a background signal
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">rfbaseline(x, y, span = 2/3, NoXP = NULL,
+           maxit = c(2, 2), b = 3.5, weight = NULL,
+           Scale = function(r) median(abs(r))/0.6745,
+           delta = NULL, SORT = TRUE, DOT = FALSE, init = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x, y</code></td>
+<td>
+<p> Abscissa and ordinate of the points on the scatterplot. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>span</code></td>
+<td>
+<p> Specifies the amount of smoothing; span is the fraction
+of points used to compute each fitted value; as span increases the
+output becomes smoother. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>NoXP</code></td>
+<td>
+<p> Another way of specifying the amount of smoothing; NoXP
+is the Number of X Points used to compute each fitted value; it must
+be larger than 3.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxit</code></td>
+<td>
+<p> The number of iterations in the robust fit; if
+maxit=c(0,0), the nonrobust fit is  returned; the first entry
+specifies the number of iterations using an asymmetric biweight
+function, whereas the second entry specifies the number of
+iterations using the usual (symmetric) biweight function. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p> Tuning constant in the biweight function. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weight</code></td>
+<td>
+<p> Optional weights to be given to individual
+observations. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Scale</code></td>
+<td>
+<p> function specifying how to calculate the scale of the
+residuals. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta</code></td>
+<td>
+<p> Nonnegative parameter which may be used to save
+computation. By default, if <code>length(x) &lt;= 100</code>, delta is
+set equal to 0; if <code>length(x) &gt; 100</code> set to 1/100th of the
+range of <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SORT</code></td>
+<td>
+<p> Boolean variable indicating whether x data must be
+sorted. Change it only when the x are sorted and you want to safe
+computer time. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>DOT</code></td>
+<td>
+<p> If TRUE disregard outliers totally; that is, observations
+with weight 0 are disregarded even when the neighbourhood is
+determined. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init</code></td>
+<td>
+<p> Values of an initial fit. </p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>List containing components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>x </code></td>
+<td>
+<p>Sorted input vector x with  duplicate points removed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y </code></td>
+<td>
+<p>Corresponding input vector y</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fit </code></td>
+<td>
+<p>Fitted values at x</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rw </code></td>
+<td>
+<p>Robust weights of (x,y)-Points used in last iteration of fit</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale </code></td>
+<td>
+<p>Scale used in last iteration of fit</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p> Andreas Ruckstuhl </p>
+
+
+<h3>References</h3>
+
+<p>Ruckstuhl, Andreas F., Matthew P. Jacobson,   Robert W. Field and James
+A. Dodd (2001); Baseline Subtraction Using Robust Local Regression
+Estimation; Journal of Quantitative Spectroscopy and Radiative
+Transfer <b>68</b>: 179 – 193
+</p>
+<p>Ruckstuhl, Andreas F., et al.; Estimation of background concentrations
+of atmospheric trace gases using robust local regression; to be
+published </p>
+
+
+<h3>See Also</h3>
+
+<p> See Also as <code>loess</code> and <code>lowess</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(MS)
+MS1 &lt;- log10(MS[MS$mz&gt;12000&amp;MS$mz&lt;1e5,])
+
+MS1.rfb2 &lt;- rfbaseline(x=MS1$mz, y=MS1$I, NoXP=2200, maxit=c(5,0))
+plot(x=MS1$mz, y=MS1$I, type="l",
+     xlab="log(mass/charge)", ylab="log(intensity)")
+lines(MS1.rfb2$x, MS1.rfb2$fit, col="orange", lwd=3)
+
+MS1.rfb3 &lt;- rfbaseline(x=MS1$mz, y=MS1$I, NoXP=1100, maxit=c(5,0),
+                       DOT=TRUE, Scale=function(x) mad(x, center=0))
+plot(x=MS1$mz, y=MS1$I, type="l",
+     xlab="log(mass/charge)", ylab="log(intensity)")
+lines(MS1.rfb3$x, MS1.rfb3$fit, col="orange", lwd=3)
+
+## 'delta=0' needs much more computer time
+## Not run: 
+MS1.rfb4 &lt;- rfbaseline(x=MS1$mz, y=MS1$I, NoXP=2200,
+                       delta=0, maxit=c(5,0))
+plot(x=MS1$mz, y=MS1$I,ty="l",
+     xlab="log(mass/charge)", ylab="log(intensity)")
+lines(MS1.rfb4$x, MS1.rfb4$fit, col="orange", lwd=3)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

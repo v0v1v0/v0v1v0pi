@@ -1,0 +1,75 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>collapse_pop_state</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Extract threshold based population size information</h2>
+
+<h3>Description</h3>
+
+<p>Given a model object, this function computes population sizes
+given thresholds for a state variable of interest. For example,
+the number (or proportion) of individuals shorter than 60 cm tall at the 20th
+time step of the model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">collapse_pop_state(ipm, time_step, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ipm</code></td>
+<td>
+<p>An object created by <code>make_ipm</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time_step</code></td>
+<td>
+<p>the time step to pull out. Can be a single time step or a
+vector of multiple time steps. In the latter case, one value is computed for
+each time step.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Named expressions that provide the threshold information for the
+desired classes. The expression should be logicals with a state variable name
+on the left side, and a threshold value on the right side.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A named list of numeric vectors containing the summed population
+sizes at each requested time step. Names are taken from <code>...</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(gen_di_det_ex)
+
+# Rebuild the model and return_main_env this time
+
+gen_di_det_ex &lt;- gen_di_det_ex$proto_ipm %&gt;%
+  make_ipm(iterate = TRUE, iterations = 50, return_main_env = TRUE)
+
+disc_sizes &lt;- collapse_pop_state(gen_di_det_ex,
+                                 time_step = 20:25,
+                                 seedlings = ht &lt;= 10,
+                                 NRA = ht &gt; 10 &amp; ht &lt;= 200,
+                                 RA = ht &gt; 200)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,143 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>rep_sample_n</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Perform repeated sampling</h2>
+
+<h3>Description</h3>
+
+<p>These functions extend the functionality of <code>dplyr::sample_n()</code> and
+<code>dplyr::slice_sample()</code> by allowing for repeated sampling of data.
+This operation is especially helpful while creating sampling
+distributions—see the examples below!
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">rep_sample_n(tbl, size, replace = FALSE, reps = 1, prob = NULL)
+
+rep_slice_sample(
+  .data,
+  n = NULL,
+  prop = NULL,
+  replace = FALSE,
+  weight_by = NULL,
+  reps = 1
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>tbl, .data</code></td>
+<td>
+<p>Data frame of population from which to sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size, n, prop</code></td>
+<td>
+<p><code>size</code> and <code>n</code> refer to the sample size of each sample.
+The <code>size</code> argument to <code>rep_sample_n()</code> is required, while in
+<code>rep_slice_sample()</code> sample size defaults to 1 if not specified. <code>prop</code>, an
+argument to <code>rep_slice_sample()</code>, refers to the proportion of rows to sample
+in each sample, and is rounded down in the case that <code>prop * nrow(.data)</code> is
+not an integer. When using <code>rep_slice_sample()</code>, please only supply one of
+<code>n</code> or <code>prop</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>replace</code></td>
+<td>
+<p>Should samples be taken with replacement?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reps</code></td>
+<td>
+<p>Number of samples to take.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob, weight_by</code></td>
+<td>
+<p>A vector of sampling weights for each of the rows in
+<code>.data</code>—must have length equal to <code>nrow(.data)</code>. For <code>weight_by</code>, this
+may also be an unquoted column name in <code>.data</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>rep_sample_n()</code> and <code>rep_slice_sample()</code> are designed to behave similar to
+their dplyr counterparts. As such, they have at least the following
+differences:
+</p>
+
+<ul><li>
+<p> In case <code>replace = FALSE</code> having <code>size</code> bigger than number of data rows in
+<code>rep_sample_n()</code> will give an error. In <code>rep_slice_sample()</code> having such <code>n</code>
+or <code>prop &gt; 1</code> will give warning and output sample size will be set to number
+of rows in data.
+</p>
+</li></ul>
+<p>Note that the <code>dplyr::sample_n()</code> function  has been superseded by
+<code>dplyr::slice_sample()</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A tibble of size <code>reps * n</code> rows corresponding to <code>reps</code>
+samples of size <code>n</code> from <code>.data</code>, grouped by <code>replicate</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(dplyr)
+library(ggplot2)
+library(tibble)
+
+# take 1000 samples of size n = 50, without replacement
+slices &lt;- gss %&gt;%
+  rep_slice_sample(n = 50, reps = 1000)
+
+slices
+
+# compute the proportion of respondents with a college
+# degree in each replicate
+p_hats &lt;- slices %&gt;%
+  group_by(replicate) %&gt;%
+  summarize(prop_college = mean(college == "degree"))
+
+# plot sampling distribution
+ggplot(p_hats, aes(x = prop_college)) +
+  geom_density() +
+  labs(
+    x = "p_hat", y = "Number of samples",
+    title = "Sampling distribution of p_hat"
+  )
+
+# sampling with probability weights. Note probabilities are automatically
+# renormalized to sum to 1
+df &lt;- tibble(
+  id = 1:5,
+  letter = factor(c("a", "b", "c", "d", "e"))
+)
+
+rep_slice_sample(df, n = 2, reps = 5, weight_by = c(.5, .4, .3, .2, .1))
+
+# alternatively, pass an unquoted column name in `.data` as `weight_by`
+df &lt;- df %&gt;% mutate(wts = c(.5, .4, .3, .2, .1))
+
+rep_slice_sample(df, n = 2, reps = 5, weight_by = wts)
+</code></pre>
+
+
+</div>

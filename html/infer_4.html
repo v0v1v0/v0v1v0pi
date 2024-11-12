@@ -1,0 +1,208 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>calculate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate summary statistics</h2>
+
+<h3>Description</h3>
+
+<p>Given the output of <code>specify()</code> and/or <code>hypothesize()</code>, this function will
+return the observed statistic specified with the <code>stat</code> argument. Some test
+statistics, such as <code>Chisq</code>, <code>t</code>, and <code>z</code>, require a null hypothesis. If
+provided the output of <code>generate()</code>, the function will calculate the
+supplied <code>stat</code> for each <code>replicate</code>.
+</p>
+<p>Learn more in <code>vignette("infer")</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">calculate(
+  x,
+  stat = c("mean", "median", "sum", "sd", "prop", "count", "diff in means",
+    "diff in medians", "diff in props", "Chisq", "F", "slope", "correlation", "t", "z",
+    "ratio of props", "odds ratio", "ratio of means"),
+  order = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>The output from <code>generate()</code> for computation-based inference or the
+output from <code>hypothesize()</code> piped in to here for theory-based inference.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stat</code></td>
+<td>
+<p>A string giving the type of the statistic to calculate. Current
+options include <code>"mean"</code>, <code>"median"</code>, <code>"sum"</code>, <code>"sd"</code>, <code>"prop"</code>, <code>"count"</code>,
+<code>"diff in means"</code>, <code>"diff in medians"</code>, <code>"diff in props"</code>, <code>"Chisq"</code> (or
+<code>"chisq"</code>), <code>"F"</code> (or <code>"f"</code>), <code>"t"</code>, <code>"z"</code>, <code>"ratio of props"</code>, <code>"slope"</code>,
+<code>"odds ratio"</code>, <code>"ratio of means"</code>, and <code>"correlation"</code>. <code>infer</code> only
+supports theoretical tests on one or two means via the <code>"t"</code> distribution
+and one or two proportions via the <code>"z"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>order</code></td>
+<td>
+<p>A string vector of specifying the order in which the levels of
+the explanatory variable should be ordered for subtraction (or division
+for ratio-based statistics), where <code>order = c("first", "second")</code> means
+<code>("first" - "second")</code>, or the analogue for ratios. Needed for inference on
+difference in means, medians, proportions, ratios, t, and z statistics.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>To pass options like <code>na.rm = TRUE</code> into functions like
+mean(), sd(), etc. Can also be used to
+supply hypothesized null values for the <code>"t"</code> statistic or additional
+arguments to <code>stats::chisq.test()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A tibble containing a <code>stat</code> column of calculated statistics.
+</p>
+
+
+<h3>Missing levels in small samples</h3>
+
+<p>In some cases, when bootstrapping with small samples, some generated
+bootstrap samples will have only one level of the explanatory variable
+present. For some test statistics, the calculated statistic in these
+cases will be NaN. The package will omit non-finite values from
+visualizations (with a warning) and raise an error in p-value calculations.
+</p>
+
+
+<h3>Reproducibility</h3>
+
+<p>When using the infer package for research, or in other cases when exact
+reproducibility is a priority, be sure the set the seed for R’s random
+number generator. infer will respect the random seed specified in the
+<code>set.seed()</code> function, returning the same result when <code>generate()</code>ing
+data given an identical seed. For instance, we can calculate the
+difference in mean <code>age</code> by <code>college</code> degree status using the <code>gss</code>
+dataset from 10 versions of the <code>gss</code> resampled with permutation using
+the following code.
+</p>
+<div class="sourceCode r"><pre>set.seed(1)
+
+gss %&gt;%
+  specify(age ~ college) %&gt;%
+  hypothesize(null = "independence") %&gt;%
+  generate(reps = 5, type = "permute") %&gt;%
+  calculate("diff in means", order = c("degree", "no degree"))
+</pre></div>
+<div class="sourceCode"><pre>## Response: age (numeric)
+## Explanatory: college (factor)
+## Null Hypothesis: independence
+## # A tibble: 5 x 2
+##   replicate   stat
+##       &lt;int&gt;  &lt;dbl&gt;
+## 1         1 -0.531
+## 2         2 -2.35 
+## 3         3  0.764
+## 4         4  0.280
+## 5         5  0.350
+</pre></div>
+<p>Setting the seed to the same value again and rerunning the same code
+will produce the same result.
+</p>
+<div class="sourceCode r"><pre># set the seed
+set.seed(1)
+
+gss %&gt;%
+  specify(age ~ college) %&gt;%
+  hypothesize(null = "independence") %&gt;%
+  generate(reps = 5, type = "permute") %&gt;%
+  calculate("diff in means", order = c("degree", "no degree"))
+</pre></div>
+<div class="sourceCode"><pre>## Response: age (numeric)
+## Explanatory: college (factor)
+## Null Hypothesis: independence
+## # A tibble: 5 x 2
+##   replicate   stat
+##       &lt;int&gt;  &lt;dbl&gt;
+## 1         1 -0.531
+## 2         2 -2.35 
+## 3         3  0.764
+## 4         4  0.280
+## 5         5  0.350
+</pre></div>
+<p>Please keep this in mind when writing infer code that utilizes
+resampling with <code>generate()</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>visualize()</code>, <code>get_p_value()</code>, and <code>get_confidence_interval()</code>
+to extract value from this function's outputs.
+</p>
+<p>Other core functions: 
+<code>generate()</code>,
+<code>hypothesize()</code>,
+<code>specify()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# calculate a null distribution of hours worked per week under
+# the null hypothesis that the mean is 40
+gss %&gt;%
+  specify(response = hours) %&gt;%
+  hypothesize(null = "point", mu = 40) %&gt;%
+  generate(reps = 200, type = "bootstrap") %&gt;%
+  calculate(stat = "mean")
+
+# calculate the corresponding observed statistic
+gss %&gt;%
+  specify(response = hours) %&gt;%
+  calculate(stat = "mean")
+
+# calculate a null distribution assuming independence between age
+# of respondent and whether they have a college degree
+gss %&gt;%
+  specify(age ~ college) %&gt;%
+  hypothesize(null = "independence") %&gt;%
+  generate(reps = 200, type = "permute") %&gt;%
+  calculate("diff in means", order = c("degree", "no degree"))
+
+# calculate the corresponding observed statistic
+gss %&gt;%
+  specify(age ~ college) %&gt;%
+  calculate("diff in means", order = c("degree", "no degree"))
+
+# some statistics require a null hypothesis
+ gss %&gt;%
+   specify(response = hours) %&gt;%
+   hypothesize(null = "point", mu = 40) %&gt;%
+   calculate(stat = "t")
+
+# more in-depth explanation of how to use the infer package
+## Not run: 
+vignette("infer")
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,143 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_cat_response_data</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Extracts the response data of CAT output.</h2>
+
+<h3>Description</h3>
+
+<p>This function extracts the response data from a single
+<code>cat_output</code> object or a list of <code>cat_output</code> objects and returns
+a <code>Response_set</code> object that contains the administered items of each
+simulee or a matrix or responses.
+</p>
+<p>If <code>cd</code>, cat design, object is given, then the item pool in the
+<code>cd</code> will be used.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_cat_response_data(
+  cat_sim_output,
+  cd = NULL,
+  output_type = c("Response_set", "matrix"),
+  remove_na = FALSE,
+  attach_summary = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>cat_sim_output</code></td>
+<td>
+<p>This is a list object containing elements that are
+<code>cat_output</code> class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cd</code></td>
+<td>
+<p>A <code>cat_design</code> object that is created by function
+<code>create_cat_design</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output_type</code></td>
+<td>
+<p>A string that specifies the output type. Available
+options are <code>"Response_set"</code> which returns a <code>Response_set</code>
+object and <code>"matrix"</code> which returns a matrix.
+If <code>attach_summary = TRUE</code> and <code>output_type = "matrix"</code>, a
+data frame will be returned instead of a matrix.
+The default value is <code>"Response_set"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>remove_na</code></td>
+<td>
+<p>If <code>TRUE</code>, the columns that are all <code>NA</code> will be
+removed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>attach_summary</code></td>
+<td>
+<p>If <code>TRUE</code> and <code>output_type = "matrix"</code>, the
+summary of each CAT will be
+attached to the beginning of the response string as columns. The default
+value is <code>FALSE</code>. When <code>output_type = "Response_set"</code>,
+CAT summary will automatically added to each Response object of the
+output within <code>misc</code> field.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Depending on the <code>output_type</code>, the function returns the
+response matrix of adaptive tests. If the input is a list of
+<code>cat_output</code>, then the rows will represent examinees
+and columns will represent items.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Emre Gonulates
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>cat_sim</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">n &lt;- 40 # number of items
+ip &lt;- generate_ip(n = n)
+cd &lt;- create_cat_design(ip = ip, next_item_rule = 'mfi',
+                        termination_rule = 'max_item',
+                        termination_par = list(max_item = 10))
+cat_data &lt;- cat_sim(true_ability = rnorm(10), cd = cd)
+resp_set &lt;- get_cat_response_data(cat_sim_output = cat_data, cd)
+resp_set
+
+# Get the examinee_id of third simulee:
+resp_set[[3]]$examinee_id
+# Extract the true theta of the third examinee:
+resp_set[[3]]$true_ability
+# Extract the final estimated theta of the third examinee:
+resp_set[[3]]$est_ability
+# Extract the final standard error of the third examinee:
+resp_set[[3]]$se
+
+
+# Alternatively, output can be a matrix:
+
+resp_matrix &lt;- get_cat_response_data(cat_sim_output = cat_data,
+                                     output_type = "matrix")
+resp_matrix
+
+# If cat design provided, the matrix columns will be sorted as the
+# item pool used for the simulation:
+resp_matrix &lt;- get_cat_response_data(cat_sim_output = cat_data, cd = cd,
+                                     output_type = "matrix")
+resp_matrix
+
+# Additionally, remove the colums which has all NA values:
+resp_matrix &lt;- get_cat_response_data(cat_sim_output = cat_data, cd = cd,
+                                     remove_na = TRUE,
+                                     output_type = "matrix")
+resp_matrix
+
+</code></pre>
+
+
+</div>

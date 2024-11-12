@@ -1,0 +1,414 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bayescomp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Bayesian Compound DP-Optimal Designs</h2>
+
+<h3>Description</h3>
+
+<p>Finds compound Bayesian DP-optimal designs that meet the dual goal of parameter estimation and
+increasing the probability of a particular outcome in a binary response  model.
+A compound Bayesian DP-optimal design maximizes  the product of the Bayesian efficiencies of a design <code class="reqn">\xi</code> with respect to D- and average P-optimality, weighted by a pre-defined mixing constant
+<code class="reqn">0 \leq \alpha \leq 1</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">bayescomp(
+  formula,
+  predvars,
+  parvars,
+  family = binomial(),
+  prior,
+  alpha,
+  prob,
+  lx,
+  ux,
+  iter,
+  k,
+  fimfunc = NULL,
+  ICA.control = list(),
+  sens.control = list(),
+  crt.bayes.control = list(),
+  sens.bayes.control = list(),
+  initial = NULL,
+  npar = NULL,
+  plot_3d = c("lattice", "rgl")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>A linear or nonlinear model <code>formula</code>.
+A symbolic description of the model consists of predictors and the unknown model parameters.
+Will be coerced to a <code>formula</code> if necessary.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predvars</code></td>
+<td>
+<p>A vector of characters. Denotes the predictors in the <code>formula</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parvars</code></td>
+<td>
+<p>A vector of characters. Denotes the unknown parameters in the <code>formula</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>A description of the response distribution and the link function to be used in the model.
+This can be a family function, a call to a family function or a character string naming the family.
+Every family function has a link argument allowing to specify the link function to be applied on the response variable.
+If not specified, default links are used. For details see <code>family</code>.
+By default, a linear gaussian model <code>gaussian()</code> is applied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior</code></td>
+<td>
+<p>An object of class <code>cprior</code>. User can also use one of the functions
+<code>uniform</code>, <code>normal</code>,
+<code>skewnormal</code> or <code>student</code>  to create the  prior. See 'Details' of <code>bayes</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>A value between 0 and 1.
+Compound or combined DP-criterion  is the product of the efficiencies of a design  with respect to D- and average P- optimality, weighted by <code>alpha</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob</code></td>
+<td>
+<p>Either <code>formula</code> or a <code>function</code>. When function, its argument are <code>x</code> and <code>param</code>, and they are the same as the arguments in <code>fimfunc</code>.
+<code>prob</code> as a function takes the design points and vector of parameters and returns the probability of success at each design points.
+See 'Examples'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lx</code></td>
+<td>
+<p>Vector of lower bounds for the predictors. Should be in the same order as <code>predvars</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ux</code></td>
+<td>
+<p>Vector of upper bounds for the predictors. Should be in the same order as <code>predvars</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter</code></td>
+<td>
+<p>Maximum number of iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>Number of design points. Must be at least equal to the number of model parameters to avoid singularity of the FIM.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fimfunc</code></td>
+<td>
+<p>A function. Returns the FIM as a <code>matrix</code>. Required when <code>formula</code> is missing. See 'Details' of <code>minimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ICA.control</code></td>
+<td>
+<p>ICA control parameters. For details, see <code>ICA.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sens.control</code></td>
+<td>
+<p>Control Parameters for Calculating the ELB. For details, see <code>sens.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>crt.bayes.control</code></td>
+<td>
+<p>A list. Control parameters to approximate the integral in  the Bayesian criterion at a given design over the parameter space.
+For details, see <code>crt.bayes.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sens.bayes.control</code></td>
+<td>
+<p>A list. Control parameters to verify the general equivalence theorem. For details, see <code>sens.bayes.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial</code></td>
+<td>
+<p>A matrix of the  initial design points and weights that will be inserted into the initial solutions (countries) of the algorithm.
+Every row is a design, i.e.  a concatenation of <code>x</code> and <code>w</code>. Will be coerced to a <code>matrix</code> if necessary.  See 'Details' of <code>minimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>npar</code></td>
+<td>
+<p>Number of model parameters.  Used when <code>fimfunc</code> is given instead of <code>formula</code> to specify the number of model parameters.
+If not specified correctly, the sensitivity (derivative) plot may be shifted below the y-axis.
+When <code>NULL</code> (default), it will be set to <code>length(parvars)</code> or
+<code>prior$npar</code> when <code>missing(formula)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_3d</code></td>
+<td>
+<p>Which package should be used to plot the sensitivity (derivative) function for two-dimensional design space. Defaults to <code>"lattice"</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Let <code class="reqn">\Xi</code> be the space of all  approximate designs with
+<code class="reqn">k</code> design points (support points) at <code class="reqn">x_1, x_2, ...,  x_k</code>
+from  design space <code class="reqn">\chi</code> with
+corresponding weights  <code class="reqn">w_1,... ,w_k</code>.
+Let <code class="reqn">M(\xi, \theta)</code> be the Fisher information
+matrix (FIM) of a <code class="reqn">k-</code>point design <code class="reqn">\xi</code>,
+<code class="reqn">\pi(\theta)</code> is a user-given  prior distribution for the vector of unknown parameters <code class="reqn">\theta</code> and
+<code class="reqn">p(x_i, \theta)</code> is the ith probability of success
+given by <code class="reqn">x_i</code> in a binary response model.
+A  compound Bayesian DP-optimal design maximizes over <code class="reqn">\Xi</code>
+</p>
+<p style="text-align: center;"><code class="reqn">\int_{\theta \in \Theta} \frac{\alpha}{q}\log|M(\xi, \theta)| + (1- \alpha)
+\log \left( \sum_{i=1}^k w_ip(x_i, \theta) \right) \pi(\theta) d\theta.</code>
+</p>
+
+<p>To verify the equivalence theorem of the output design,
+use <code>plot</code> function or change the value of the <code>checkfreq</code> in the argument <code>ICA.control</code>.
+</p>
+<p>To increase the speed of the algorithm, change the value of the tuning parameters <code>tol</code> and <code>maxEval</code> via
+the argument  <code>crt.bayes.control</code> when its <code>method</code> component  is equal to  <code>"cubature"</code>.
+In general, if the CPU time matters, the user should find an appropriate speed-accuracy trade-off  for her/his own problem.
+See 'Examples' for more details.
+</p>
+
+
+<h3>Value</h3>
+
+<p>an object of class <code>minimax</code> that is a list including three sub-lists:
+</p>
+
+<dl>
+<dt><code>arg</code></dt>
+<dd>
+<p>A list of design and algorithm parameters.</p>
+</dd>
+<dt><code>evol</code></dt>
+<dd>
+<p>A list of length equal to the number of iterations that stores the information about the best design (design with the minimum criterion value) of each iteration as follows:
+<code>evol[[iter]]</code> contains:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+      <code>iter</code>                   </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Iteration number.</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>x</code>                      </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Design points. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>w</code>                      </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Design weights. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>min_cost</code>               </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Value of the criterion for the best imperialist (design).  </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>mean_cost</code>              </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Mean of the criterion values of all the imperialists. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>sens</code>                   </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> An object of class <code>'sensminimax'</code>. See below.</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+    </td>
+</tr>
+</table>
+</dd>
+<dt><code>empires</code></dt>
+<dd>
+<p>A list of all the empires of the last iteration.</p>
+</dd>
+<dt><code>alg</code></dt>
+<dd>
+<p>A list with following information:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+      <code>nfeval</code>           </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Number of function evaluations. It does not count the function evaluations from checking the general equivalence theorem. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>nlocal</code>           </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Number of successful local searches. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>nrevol</code>           </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Number of successful revolutions. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>nimprove</code>         </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Number of successful movements toward the imperialists in the assimilation step. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>convergence</code>      </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Stopped by <code>'maxiter'</code> or <code>'equivalence'</code>?</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+    </td>
+</tr>
+</table>
+</dd>
+<dt><code>method</code></dt>
+<dd>
+<p>A type of optimal designs used.</p>
+</dd>
+<dt><code>design</code></dt>
+<dd>
+<p>Design points and weights at the final iteration.</p>
+</dd>
+<dt><code>out</code></dt>
+<dd>
+<p>A data frame of design points, weights, value of the criterion for the best imperialist (min_cost), and Mean of the criterion values of all the imperialistsat each iteration (mean_cost).</p>
+</dd>
+</dl>
+<p>The list <code>sens</code>  contains information about the design verification by the general equivalence theorem.
+See <code>sensbayes</code> for more Details.
+It is only given every <code>ICA.control$checkfreq</code> iterations
+and also the last iteration if   <code>ICA.control$checkfreq &gt;= 0</code>. Otherwise, <code>NULL</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>McGree, J. M., Eccleston, J. A., and Duffull, S. B. (2008). Compound optimal design criteria for nonlinear models. Journal of Biopharmaceutical Statistics, 18(4), 646-661.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>sensbayescomp</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##########################################################################
+# DP-optimal design for a logitic model with two predictors: with formula
+##########################################################################
+p &lt;- c(1, -2, 1, -1)
+myprior &lt;- uniform(p -1.5, p + 1.5)
+myformula1 &lt;- ~exp(b0+b1*x1+b2*x2+b3*x1*x2)/(1+exp(b0+b1*x1+b2*x2+b3*x1*x2))
+res1 &lt;- bayescomp(formula = myformula1,
+                  predvars = c("x1", "x2"),
+                  parvars = c("b0", "b1", "b2", "b3"),
+                  family = binomial(),
+                  lx = c(-1, -1), ux = c(1, 1),
+                  prior = myprior, iter = 1, k = 7,
+                  prob = ~1-1/(1+exp(b0 + b1 * x1 + b2 * x2 + b3 * x1 * x2)),
+                  alpha = .5, ICA.control = list(rseed = 1366),
+                  crt.bayes.control = list(cubature = list(tol = 1e-4, maxEval = 1000)))
+
+
+## Not run: 
+  res1 &lt;- update(res1, 1000)
+  plot(res1, sens.bayes.control = list(cubature = list(tol = 1e-3, maxEval = 1000)))
+  # or use quadrature method
+  plot(res1, sens.bayes.control= list(method = "quadrature"))
+
+## End(Not run)
+
+##########################################################################
+# DP-optimal design for a logitic model with two predictors: with fimfunc
+##########################################################################
+# The function of the Fisher information matrix for this model is 'FIM_logistic_2pred'
+# We should reparameterize it to match the standard of the argument 'fimfunc'
+## Not run: 
+myfim &lt;- function(x, w, param){
+  npoint &lt;- length(x)/2
+  x1 &lt;- x[1:npoint]
+  x2 &lt;- x[(npoint+1):(npoint*2)]
+  FIM_logistic_2pred(x1 = x1,x2 = x2, w = w, param = param)
+}
+
+## The following function is equivalent to the function created
+# by the formula: ~1-1/(1+exp(b0 + b1 * x1 + b2 * x2 + b3 * x1 * x2))
+# It returns probability of success given x and param
+# x = c(x1, x2) and param = c()
+
+myprob &lt;- function(x, param){
+  npoint &lt;- length(x)/2
+  x1 &lt;- x[1:npoint]
+  x2 &lt;- x[(npoint+1):(npoint*2)]
+  b0 &lt;- param[1]
+  b1 &lt;- param[2]
+  b2 &lt;- param[3]
+  b3 &lt;- param[4]
+  out &lt;- 1-1/(1+exp(b0 + b1 * x1 + b2 * x2 + b3 * x1 * x2))
+  return(out)
+}
+
+res2 &lt;- bayescomp(fimfunc = myfim,
+                  lx = c(-1, -1), ux = c(1, 1),
+                  prior = myprior, iter = 1000, k = 7,
+                  prob = myprob, alpha = .5,
+                  ICA.control = list(rseed = 1366))
+  plot(res2, sens.bayes.control = list(cubature = list(maxEval = 1000, tol = 1e-4)))
+  # quadrature with 6 nodes (default)
+  plot(res2, sens.bayes.control= list(method = "quadrature"))
+
+## End(Not run)
+
+
+</code></pre>
+
+
+</div>

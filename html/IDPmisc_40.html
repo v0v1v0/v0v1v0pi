@@ -1,0 +1,190 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>rose</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Creates a rose object out of circular data</h2>
+
+<h3>Description</h3>
+
+<p><code>rose</code> splits data into subsets according to one or two
+grouping elements, computes summary statistics for each, and returns
+the result in a rose object.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">rose(x, subset = NULL,
+     cyclVar = NULL, circle = NULL, n.cyclVar = 8,
+     cut = NULL, labels = NULL,
+     breaks = NULL, include.lowest = FALSE, right = TRUE, dig.lab = 2,
+     warn = TRUE, FUN = mean, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>Vector, data frame or matrix containing the response.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+<p> An optional vector specifying a subset of observations
+to be used in the aggregating process. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cyclVar</code></td>
+<td>
+<p>Cyclic variable as first grouping
+element.  <code>cyclVar</code> must be a numeric vector whose length is
+equal to the number of rows in <code>x</code> with 0 &lt;= <code>cyclVar</code> &lt;
+<code>circle</code>.  Observations where cyclic variables are NA are
+automatically excluded from the rose object. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>circle</code></td>
+<td>
+<p>Defines the value of a full circle with no default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.cyclVar</code></td>
+<td>
+<p>Defines the number of equally spaced intervals of the
+cyclic variable, into which the data are split.  The first interval is
+labeled with 0 and is always centered around 0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cut</code></td>
+<td>
+<p>Vector of numerics, logicals  or factors as second grouping
+elements.  Its length is equal to the number of rows in
+<code>x</code>.  <code>cut</code> is used  to group the observations similar to
+function <code>cut</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>labels</code></td>
+<td>
+<p> Labels for the corresponding intervals.  When cut is a
+logical, labels has to be named in the order: FALSE, TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>breaks, include.lowest, right, dig.lab</code></td>
+<td>
+<p> These arguments are
+only active when <code>cut</code> is numeric and  are used
+in exactly the same way as in cut. <br><code>breaks</code> defines the break points. <br><code>include.lowest = TRUE</code> indicates that the lowest (or
+highest, for right = FALSE) breaks value should be also
+included. <br><code>right = TRUE</code> indicates that the intervals should be closed
+on the right (and open on the left) or vice versa for <code>right =
+      FALSE</code>. <br><code>dig.lab</code> number of digits for breaks labeling when labels
+are <em>not</em> given explicitely.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn</code></td>
+<td>
+<p> Logical, indicating if warnings should be issued
+for NAs in <code>cyclVar</code> and / or x-values outside of breaks range. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FUN</code></td>
+<td>
+<p> Summary function, returning a scalar or vector. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> Additional arguments for summary function. </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The first grouping element, <code>cyclVar</code>, for the summary statistics
+must be circular and numeric.  The second grouping element, <code>cut</code>,
+can be numeric, logical or a factor. <br>
+Not all combinations of arguments are allowed: <br>
+Argument <code>cut</code> can only be defined when summary consists of a
+scalar and <code>x</code> consists of 1 column. <br>
+When <code>x</code> contains only one column and <code>cut</code> is <em>not</em>
+defined, the summary function may also be a vector with the
+restriction, that the summary of each subset, defined by the cyclic
+variable, must have the same number of elements. <br>
+When <code>x</code> is a data frame or matrix with more than 1 column,
+the summary function must be scalar.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Object of class <code>rose</code>
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Rene Locher </p>
+
+
+<h3>See Also</h3>
+
+ <p>rose-class, plot.rose, <code>cart2clock</code>,
+<code>clock2cart</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## artificial example:
+## concentration of A and B as function of
+## hour of day (hour) and wind direction (WD)
+hour &lt;- rep(0:23,100)
+dat &lt;- data.frame(hour = hour,
+                  A =    (2*cos((hour+6)/6*pi)+rnorm(24*100,1))^2,
+                  B =    (2*cos((hour+4)/6*pi)+rnorm(24*100,1,2))^2,
+                  WD =   rnorm(24*100,
+                           mean=sample(c(190,220,50),24*100, replace = TRUE),
+                           sd=30)%%360)
+
+## two different responses, scalar summary function
+mean.windrose &lt;- rose(dat[,c("A","B")],
+                      cyclVar=dat$WD,
+                      circle=360,
+                      FUN=mean, na.rm=TRUE)
+mean.windrose
+
+## one response, vectorial summary function
+quant.dayrose &lt;- rose(dat$A,
+                      cyclVar=dat$hour,
+                      n.cyclVar=24, circle=24,
+                      FUN=quantile, na.rm=TRUE)
+quant.dayrose
+
+
+mean.windroseB &lt;- rose(dat[,c("A")],
+                       cyclVar=dat$WD,
+                       circle=360,
+                       cut=dat$B,
+                       breaks=c(0,30,100),
+                       dig.lab=3,
+                       FUN=mean, na.rm=TRUE)
+mean.windroseB
+
+</code></pre>
+
+
+</div>

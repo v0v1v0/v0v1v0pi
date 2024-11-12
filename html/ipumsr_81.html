@@ -1,0 +1,268 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>read_ipums_micro</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Read data from an IPUMS microdata extract</h2>
+
+<h3>Description</h3>
+
+<p>Read a microdata dataset downloaded from the IPUMS extract system.
+</p>
+<p>Two files are required to load IPUMS microdata extracts:
+</p>
+
+<ul>
+<li>
+<p> A <a href="https://ddialliance.org/learn/what-is-ddi">DDI codebook</a> file
+(.xml) used to parse the extract's data file
+</p>
+</li>
+<li>
+<p> A data file (either .dat.gz or .csv.gz)
+</p>
+</li>
+</ul>
+<p>See <em>Downloading IPUMS files</em> below for more information about
+downloading these files.
+</p>
+<p><code>read_ipums_micro()</code> and <code>read_ipums_micro_list()</code> differ in their handling
+of extracts that contain multiple record types. See <em>Data structures</em>
+below.
+</p>
+<p>Note that Stata, SAS, and SPSS file formats are not supported by
+ipumsr readers. Convert your extract to fixed-width or CSV format, or see
+<a href="https://haven.tidyverse.org/index.html">haven</a> for help
+loading these files.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">read_ipums_micro(
+  ddi,
+  vars = NULL,
+  n_max = Inf,
+  data_file = NULL,
+  verbose = TRUE,
+  var_attrs = c("val_labels", "var_label", "var_desc"),
+  lower_vars = FALSE
+)
+
+read_ipums_micro_list(
+  ddi,
+  vars = NULL,
+  n_max = Inf,
+  data_file = NULL,
+  verbose = TRUE,
+  var_attrs = c("val_labels", "var_label", "var_desc"),
+  lower_vars = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ddi</code></td>
+<td>
+<p>Either a path to a DDI .xml file downloaded from
+<a href="https://www.ipums.org/">IPUMS</a>, or an
+ipums_ddi object parsed by <code>read_ipums_ddi()</code>. See
+<em>Downloading IPUMS files</em> below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vars</code></td>
+<td>
+<p>Names of variables to include in the output. Accepts a
+vector of names or a tidyselect selection.
+If <code>NULL</code>, includes all variables in the file.
+</p>
+<p>For hierarchical data, the <code>RECTYPE</code> variable is always included even if
+unspecified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_max</code></td>
+<td>
+<p>The maximum number of lines to read. For
+<code>read_ipums_micro_list()</code>, this applies before splitting records into
+list components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_file</code></td>
+<td>
+<p>Path to the data (.gz) file associated with
+the provided <code>ddi</code> file. By default, looks for the data file in the same
+directory as the DDI file. If the data file has been moved, specify
+its location here.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Logical indicating whether to display IPUMS conditions and
+progress information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var_attrs</code></td>
+<td>
+<p>Variable attributes from the DDI to add to the columns of
+the output data. Defaults to all available attributes.
+See <code>set_ipums_var_attributes()</code> for more details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower_vars</code></td>
+<td>
+<p>If reading a DDI from a file,
+a logical indicating whether to convert variable names to lowercase.
+Defaults to <code>FALSE</code> for consistency with IPUMS conventions.
+</p>
+<p>This argument will be ignored if argument <code>ddi</code> is
+an ipums_ddi object. Use <code>read_ipums_ddi()</code> to convert variable
+names to lowercase when reading a DDI file.
+</p>
+<p>If <code>lower_vars = TRUE</code> and <code>vars</code> is specified, <code>vars</code> should reference the
+lowercase column names.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>read_ipums_micro()</code> returns a single
+<code>tibble</code> object.
+</p>
+<p><code>read_ipums_micro_list()</code> returns a list of <code>tibble</code> objects with one
+entry for each record type.
+</p>
+
+
+<h3>Data structures</h3>
+
+<p>Files from IPUMS projects that contain data for multiple types of records
+(e.g. household records and person records) may be either rectangular
+or hierarchical.
+</p>
+<p>Rectangular data are transformed such that each row of data
+represents only one type of record. For instance, each row will represent
+a person record, and all household-level information for that person will
+be included in the same row.
+</p>
+<p>Hierarchical data have records of
+different types interspersed in a single file. For instance, a household
+record will be included in its own row followed by the person records
+associated with that household.
+</p>
+<p>Hierarchical data can be read in two different formats:
+</p>
+
+<ul>
+<li> <p><code>read_ipums_micro()</code> reads data into a <code>tibble</code>
+where each row represents a single record, regardless of record type.
+Variables that do not apply to a particular record type will be filled with
+<code>NA</code> in rows of that record type. For instance, a person-specific variable
+will be missing in all rows associated with household records.
+</p>
+</li>
+<li> <p><code>read_ipums_micro_list()</code> reads data into a list of
+<code>tibble</code> objects, where each list element contains
+only one record type. Each list element is named with its corresponding
+record type.
+</p>
+</li>
+</ul>
+<h3>Downloading IPUMS files</h3>
+
+<p>You must download both the DDI codebook and the data file from the IPUMS
+extract system to load the data into R. <code style="white-space: pre;">⁠read_ipums_micro_*()⁠</code> functions
+assume that the data file and codebook share a common base file name and
+are present in the same directory. If this is not the case, provide a
+separate path to the data file with the <code>data_file</code> argument.
+</p>
+<p>If using the IPUMS extract interface:
+</p>
+
+<ul>
+<li>
+<p> Download the data file by clicking <strong>Download .dat</strong> under
+<strong>Download Data</strong>.
+</p>
+</li>
+<li>
+<p> Download the DDI codebook by right clicking on the <strong>DDI</strong> link in the
+<strong>Codebook</strong> column of the extract interface and selecting <strong>Save as...</strong>
+(on Safari, you may have to select <strong>Download Linked File as...</strong>).
+Be sure that the codebook is downloaded in .xml format.
+</p>
+</li>
+</ul>
+<p>If using the IPUMS API:
+</p>
+
+<ul><li>
+<p> For supported collections, use <code>download_extract()</code> to download a completed
+extract via the IPUMS API. This automatically downloads both the DDI
+codebook and the data file from the extract and
+returns the path to the codebook file.
+</p>
+</li></ul>
+<h3>See Also</h3>
+
+<p><code>read_ipums_micro_chunked()</code> and
+<code>read_ipums_micro_yield()</code> to read data from large IPUMS
+microdata extracts in chunks.
+</p>
+<p><code>read_ipums_ddi()</code> to read metadata associated with an IPUMS microdata
+extract.
+</p>
+<p><code>read_ipums_sf()</code> to read spatial data from an IPUMS extract.
+</p>
+<p><code>ipums_list_files()</code> to list files in an IPUMS extract.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Codebook for rectangular example file
+cps_rect_ddi_file &lt;- ipums_example("cps_00157.xml")
+
+# Load data based on codebook file info
+cps &lt;- read_ipums_micro(cps_rect_ddi_file)
+
+head(cps)
+
+# Can also load data from a pre-existing `ipums_ddi` object
+# (This may be useful to retain codebook metadata even if lost from data
+# during processing)
+ddi &lt;- read_ipums_ddi(cps_rect_ddi_file)
+cps &lt;- read_ipums_micro(ddi, verbose = FALSE)
+
+# Codebook for hierarchical example file
+cps_hier_ddi_file &lt;- ipums_example("cps_00159.xml")
+
+# Read in "long" format to get a single data frame
+read_ipums_micro(cps_hier_ddi_file, verbose = FALSE)
+
+# Read in "list" format and you get a list of multiple data frames
+cps_list &lt;- read_ipums_micro_list(cps_hier_ddi_file)
+
+head(cps_list$PERSON)
+
+head(cps_list$HOUSEHOLD)
+
+# Use the `%&lt;-%` operator from zeallot to unpack into separate objects
+c(household, person) %&lt;-% read_ipums_micro_list(cps_hier_ddi_file)
+
+head(person)
+
+head(household)
+</code></pre>
+
+
+</div>

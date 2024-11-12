@@ -1,0 +1,174 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ic.weights</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> functions for calculating the distributions of normal distribution 
+order-related likelihood ratio tests </h2>
+
+<h3>Description</h3>
+
+<p>Test statistics of normal distribution-based order-related likelihood ratio 
+tests are often distributed as mixtures of chi-square or beta-distributions 
+with different parameters. These functions determine the mixing weights and 
+the cumulative distribution functions based on these.
+They can be directly used and are called by function ic.test.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ic.weights(corr, ...)
+pchibar(x, df, wt)
+pbetabar(x, df1, df2, wt)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>corr</code></td>
+<td>
+ <p><code>corr</code> is the correlation or covariance matrix 
+(or any multiple thereof) of the data or coefficients 
+for which weights are to be calculated </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+ <p>... contains further arguments to be given to function 
+<code>pmvnorm</code> of package <code>mvtnorm</code> for calculating 
+multivariate normal rectangle probabilities; it is possible 
+to select an algorithm (default in current version of <code>mvtnorm</code>: 
+<code>algorithm = GenzBretz()</code>) and 
+to tune weight accuracy by modifying including additional 
+parameters into the algorithm specification, 
+cf. help for <code>GenzBretz</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+ <p><code>x</code> is the quantile for which the distribution function
+is to be calculated </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p> is the vector of the degrees of freedom for the chi-square 
+distributions that are mixed into the chibar-square-distribution 
+with the proportions given in <code>wt</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wt</code></td>
+<td>
+<p> each element of <code>wt</code> is the mixing weight of the chi-square
+distribution with df as in the corresponding element of <code>df</code>;
+such weights can be calculated with function <code>ic.weights</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df1</code></td>
+<td>
+<p> vector of first parameters of the beta-distributions to be 
+mixed into the betabar-distribution </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df2</code></td>
+<td>
+<p> second parameter of the beta-distributions to be 
+mixed into the betabar-distribution; error degrees of freedom
+in the tests implemented for linear models in summary.orlm;<br>
+NOTE: see details for the (perhaps unexpected) constancy of <code>df2</code> </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Function <code>ic.weights</code> uses results by Kudo (1963) 
+regarding the calculation of the weights. The weights are the probabilities that 
+the projection along its covariance onto the non-negative orthant 
+of a multivariate normal random vector with expectation 0 and 
+correlation <code>corr</code> lies in faces of dimensions <code>nrow(corr):1</code> 
+(in this order). It is known that these probabilities coincide with 
+various other useful probabilities related to order-related hypothesis testing,
+cf. e.g. Shapiro (1988). Calculation of the weights involves various calls 
+to function <code>pmvnorm</code> from package <code>mvtnorm</code>.
+</p>
+<p>Functions <code>pchibar</code> (taken from package ibdreg) and <code>pbetabar</code> 
+calculate cumulative probabilities from mixtures of chi-square and 
+beta-distributions, respectively.<br>
+IMPORTANT: Contrary to likelihood ratio theory in linear models, the beta 
+distributions mixed always use the error sum of squares from the unrestricted model, 
+i.e. the smallest possible error sum of squares with a fixed no. of df. Therefore, 
+the second df entry is not increased when decreasing the first! 
+This is appropriate for the test statistics calculated by functions <code>ic.test</code> 
+or <code>summary.orlm</code>, but not necessarily for test statistics obtained elsewhere. 
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>ic.weights</code> returns the vector of weights, 
+<code>pchibar</code> and <code>pchibar</code> return the cumulative probability of the 
+respective distribution. 
+Function <code>ic.weights</code> relies on package <span class="pkg">mvtnorm</span> for determining 
+multivariate normal rectangle probabilities. Note that these calculations 
+involve Monte Carlo steps so that these weights are not completely repeatable.  
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Ulrike Groemping, BHT Berlin </p>
+
+
+<h3>References</h3>
+
+ 
+<p>Kudo, A. (1963) A multivariate analogue of the one-sided test. 
+<em>Biometrika</em> <b>50</b>, 403–418
+</p>
+<p>Shapiro, A. (1988) Towards a unified theory of inequality-constrained 
+testing in multivariate analysis. <em>International Statistical Review</em> 
+<b>56</b>, 49–62
+</p>
+<p>Silvapulle, M.J. and Sen, P.K. (2004) <em>Constrained Statistical Inference</em>. 
+Wiley, New York</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>ic.test</code>, <code>orlm</code>, <code>pmvnorm</code>, 
+<code>GenzBretz</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">z &lt;- 0.5
+corr &lt;- matrix(c(1,0.9,0.9,1),2,2)
+print(wt.plus &lt;- ic.weights(corr))
+T &lt;- c(z,z)%*%solve(corr,c(z,z))
+1-pchibar(T,2:0,wt.plus)
+1-pbetabar(T/(T+10),2:0,10,wt.plus)
+corr &lt;- matrix(c(1,0,0,1),2,2)
+print(wt.0 &lt;- ic.weights(corr))
+T &lt;- c(z,z)%*%solve(corr,c(z,z))
+1-pchibar(T,2:0,wt.0)
+1-pbetabar(T/(T+10),2:0,10,wt.0)
+corr &lt;- matrix(c(1,-0.9,-0.9,1),2,2)
+print(wt.minus &lt;- ic.weights(corr))
+T &lt;- c(z,z)%*%solve(corr,c(z,z))
+1-pchibar(T,2:0,wt.minus)
+1-pbetabar(T/(T+10),2:0,10,wt.minus)
+</code></pre>
+
+
+</div>

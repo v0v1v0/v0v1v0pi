@@ -1,0 +1,150 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>read</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Read FASTA and FASTQ files.</h2>
+
+<h3>Description</h3>
+
+<p>Text parsing functions for reading sequences in the FASTA or FASTQ format into R.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">readFASTQ(file = file.choose(), bin = TRUE)
+
+readFASTA(
+  file = file.choose(),
+  bin = TRUE,
+  residues = "DNA",
+  alignment = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>the name of the FASTA or FASTQ file from which the sequences
+are to be read.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bin</code></td>
+<td>
+<p>logical indicating whether the returned object should be in
+binary/raw byte format (i.e. "DNAbin" or "AAbin" objects for
+nucleotide and amino acid sequences, respectively).
+If FALSE a vector of named character strings is returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>residues</code></td>
+<td>
+<p>character string indicating whether the sequences to
+be read are composed of nucleotides ("DNA"; default) or amino acids ("AA").
+Only required for <code>readFASTA</code> and if <code>bin = TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alignment</code></td>
+<td>
+<p>logical indicating whether the sequences represent
+an alignment to be parsed as a matrix.
+Only applies to <code>readFASTA</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+
+<h4>Compatibility:</h4>
+
+<p>The FASTQ convention is somewhat
+ambiguous with several slightly different interpretations appearing
+in the literature. For now, this function supports the Illumina
+convention for FASTQ files, where each sequence and its associated
+metadata occupies four line of the text file as follows : (1) the
+run and cluster metadata preceded by an @ symbol; (2) the sequence
+itself in capitals without spaces;
+(3) a single "+" symbol; and (4) the Phred quality
+scores from 0 to 93 represented as ASCII symbols. For more information
+on this convention see the Illumina help page
+<a href="https://help.basespace.illumina.com/articles/descriptive/fastq-files/">here</a>
+.</p>
+
+
+
+<h4>Speed and Memory Requirements:</h4>
+
+<p>For optimal memory efficiency and compatibility with other functions,
+it is recommended to store sequences in raw byte format
+as either DNAbin or AAbin objects.
+For FASTQ files when bin = TRUE, a vector of quality scores
+(also in raw-byte format) is attributed to each sequence.
+These can be converted back to numeric quality scores with <code>as.integer</code>.
+For FASTQ files when bin = FALSE the function returns a vector with each
+sequence as a concatenated string with a similarly concatenated quality attribute
+comprised of the same ASCII metacharacters used in the FASTQ coding scheme.
+</p>
+<p>This function can take a while to process larger FASTQ files,
+a multithreading option may be available in a future version.</p>
+
+
+
+<h3>Value</h3>
+
+<p>Either a vector of character strings (if bin = FALSE),
+or a list of raw ("DNAbin" or "AAbin") vectors,
+with each element having a "quality" attribute.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Shaun Wilkinson
+</p>
+
+
+<h3>References</h3>
+
+<p>Bokulich NA, Subramanian S, Faith JJ, Gevers D, Gordon JI, Knight R,
+Mills DA, Caporaso JG (2013) Quality-filtering vastly improves diversity
+estimates from Illumina amplicon sequencing.
+<em>Nat Methods</em>, <strong>1</strong>, 57-59.
+</p>
+<p>Illumina help page:
+<a href="https://help.basespace.illumina.com/articles/descriptive/fastq-files/">https://help.basespace.illumina.com/articles/descriptive/fastq-files/</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>writeFASTQ</code> and <code>writeFASTA</code>
+for writing sequences to text in the FASTA or FASTQ format.
+See also <code>read.dna</code> in the <code>ape</code> package.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+  ## download and extract example FASTQ file to temporary directory
+  td &lt;- tempdir()
+  URL &lt;- "https://www.dropbox.com/s/71ixehy8e51etdd/insect_tutorial1_files.zip?dl=1"
+  dest &lt;- paste0(td, "/insect_tutorial1_files.zip")
+  download.file(URL, destfile = dest, mode = "wb")
+  unzip(dest, exdir = td)
+  x &lt;- readFASTQ(paste0(td, "/COI_sample2.fastq"))
+ 
+</code></pre>
+
+
+</div>

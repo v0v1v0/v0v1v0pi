@@ -1,0 +1,101 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>eval.stats</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Predictive Modelling Evaluation Statistics</h2>
+
+<h3>Description</h3>
+
+<p>Evaluation statistics including standard and non-standard evaluation metrics. Returns a structure of data containing the results of several evaluation metrics (both standard and some focused on the imbalanced regression problem).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">eval.stats(formula, train, test, y_pred, phi.parms = NULL, cf = 1.5)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>A model formula</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>train</code></td>
+<td>
+<p>A data.frame object with the training data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test</code></td>
+<td>
+<p>A data.frame object with the test set</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y_pred</code></td>
+<td>
+<p>A vector with the predictions of a given model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phi.parms</code></td>
+<td>
+<p>The relevance function providing the data points where the pairs of values-relevance are known (use ?phi.control() for more information). If this parameter is not defined, this method will create a relevance function based on the data.frame variable in parameter train. Default is NULL</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cf</code></td>
+<td>
+<p>The coefficient used to calculate the boxplot whiskers in the event that a relevance function is not provided (parameter phi.parms)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with four slots for the results of standard and relevance-based evaluation metrics
+</p>
+<table><tr style="vertical-align: top;">
+<td><code>overall</code></td>
+<td>
+<p>Results for standard metrics MAE, MSE and RMSE, along with Pearson's Correlation, bias, variance and the Squared Error Relevance Area metric.</p>
+</td>
+</tr></table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(IRon)
+
+if(requireNamespace("earth")) {
+
+   data(accel)
+
+   form &lt;- acceleration ~ .
+
+   ind &lt;- sample(1:nrow(accel),0.75*nrow(accel))
+
+   train &lt;- accel[ind,]
+   test &lt;- accel[-ind,]
+
+   ph &lt;- phi.control(accel$acceleration)
+
+   m &lt;- earth::earth(form, train)
+   preds &lt;- as.vector(predict(m,test))
+
+   eval.stats(form, train, test, preds)
+   eval.stats(form, train, test, preds, ph)
+   eval.stats(form, train, test, preds, ph, cf=3) # Focusing on extreme outliers
+
+}
+
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,266 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>genTarget</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generating target MTR moments</h2>
+
+<h3>Description</h3>
+
+<p>This function estimates the moment of each MTR term under the
+target weight.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">genTarget(
+  treat,
+  m0,
+  m1,
+  target,
+  target.weight0,
+  target.weight1,
+  target.knots0,
+  target.knots1,
+  late.Z,
+  late.from,
+  late.to,
+  late.X,
+  eval.X,
+  genlate.lb,
+  genlate.ub,
+  data,
+  splinesobj,
+  pmodobj,
+  pm0,
+  pm1,
+  noisy = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>treat</code></td>
+<td>
+<p>variable name for treatment indicator. The name can be
+provided with or without quotation marks.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m0</code></td>
+<td>
+<p>one-sided formula for the marginal treatment response
+function for the control group. Splines may also be
+incorporated using the expression <code>uSpline</code>, e.g.
+<code>uSpline(degree = 2, knots = c(0.4, 0.8), intercept =
+TRUE)</code>. The <code>intercept</code> argument may be omitted, and is
+set to <code>TRUE</code> by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m1</code></td>
+<td>
+<p>one-sided formula for the marginal treatment response
+function for the treated group. See <code>m0</code> for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target</code></td>
+<td>
+<p>character, target parameter to be estimated. The
+function allows for ATE (<code>'ate'</code>), ATT (<code>'att'</code>), ATU
+(<code>'atu'</code>), LATE (<code>'late'</code>), and generalized LATE
+(<code>'genlate'</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target.weight0</code></td>
+<td>
+<p>user-defined weight function for the control
+group defining the target parameter. A list of functions can be
+submitted if the weighting function is in fact a spline. The
+arguments of the function should be variable names in
+<code>data</code>. If the weight is constant across all observations,
+then the user can instead submit the value of the weight
+instead of a function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target.weight1</code></td>
+<td>
+<p>user-defined weight function for the treated
+group defining the target parameter. See <code>target.weight0</code>
+for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target.knots0</code></td>
+<td>
+<p>user-defined set of functions defining the
+knots associated with spline weights for the control group. The
+arguments of the function should consist only of variable names
+in <code>data</code>. If the knots are constant across all
+observations, then the user can instead submit the vector of
+knots instead of a function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target.knots1</code></td>
+<td>
+<p>user-defined set of functions defining the
+knots associated with spline weights for the treated group. See
+<code>target.knots0</code> for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>late.Z</code></td>
+<td>
+<p>vector of variable names used to define the LATE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>late.from</code></td>
+<td>
+<p>baseline set of values of Z used to define the
+LATE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>late.to</code></td>
+<td>
+<p>comparison set of values of Z used to define the
+LATE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>late.X</code></td>
+<td>
+<p>vector of variable names of covariates to condition
+on when defining the LATE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eval.X</code></td>
+<td>
+<p>numeric vector of the values to condition variables
+in <code>late.X</code> on when estimating the LATE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>genlate.lb</code></td>
+<td>
+<p>lower bound value of unobservable <code>u</code> for
+estimating the generalized LATE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>genlate.ub</code></td>
+<td>
+<p>upper bound value of unobservable <code>u</code> for
+estimating the generalized LATE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p><code>data.frame</code> or <code>data.table</code> used to estimate
+the treatment effects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>splinesobj</code></td>
+<td>
+<p>list of spline components in the MTRs for treated
+and control groups. Spline terms are extracted using
+<code>removeSplines</code>. This object is supposed to be a
+dictionary of splines, containing the original calls of each
+spline in the MTRs, their specifications, and the index used
+for naming each basis spline.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pmodobj</code></td>
+<td>
+<p>A vector of propensity scores.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pm0</code></td>
+<td>
+<p>A list of the monomials in the MTR for d = 0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pm1</code></td>
+<td>
+<p>A list of the monomials in the MTR for d = 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>noisy</code></td>
+<td>
+<p>boolean, default set to <code>TRUE</code>. If <code>TRUE</code>,
+then messages are provided throughout the estimation
+procedure. Set to <code>FALSE</code> to suppress all messages,
+e.g. when performing the bootstrap.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list containing either the vectors of gamma moments for
+<code>D = 0</code> and <code>D = 1</code>, or a matrix of individual gamma
+values for <code>D = 0</code> and <code>D = 1</code>. Additoinally, two
+vectors are returned. <code>xindex0</code> and <code>xindex1</code> list
+the variables that interact with the unobservable <code>u</code> in
+<code>m0</code> and <code>m1</code>. <code>uexporder0</code> and
+<code>uexporder1</code> lists the exponents of the unobservable
+<code>u</code> in each term it appears in.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">dtm &lt;- ivmte:::gendistMosquito()
+
+## Declare MTR functions
+formula1 = ~ 1 + u
+formula0 = ~ 1 + u
+splinesList = list(removeSplines(formula0), removeSplines(formula1))
+
+## Declare propensity score model
+propensityObj &lt;- propensity(formula = d ~ z,
+                            data = dtm,
+                            link = "linear")
+
+## Construct MTR polynomials
+polynomials0 &lt;- polyparse(formula = formula0,
+                 data = dtm,
+                 uname = u,
+                 as.function = FALSE)
+
+polynomials1 &lt;- polyparse(formula = formula0,
+                 data = dtm,
+                 uname = u,
+                 as.function = FALSE)
+
+## Generate target gamma moments
+genTarget(treat = "d",
+          m0 = ~ 1 + u,
+          m1 = ~ 1 + u,
+          target = "atu",
+          data = dtm,
+          splinesobj = splinesList,
+          pmodobj = propensityObj,
+          pm0 = polynomials0,
+          pm1 = polynomials1)
+
+</code></pre>
+
+
+</div>

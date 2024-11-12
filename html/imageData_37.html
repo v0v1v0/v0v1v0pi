@@ -1,0 +1,194 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>twoLevelOpcreate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Creates a data.frame formed by applying, for each response, a binary operation 
+to the paired values of two different treatments </h2>
+
+<h3>Description</h3>
+
+<p>Takes pairs of values for a set of responses indexed by a two-level 
+<code>treatment.factor</code> and calculates, for each of pair, 
+the result of applying a binary <code>operation</code> to their values 
+for the two levels of the <code>treatment.factor</code>. The level of the 
+<code>treatment.factor</code> designated the <code>control</code> will be 
+on the right of the binary operator and the value for the other 
+level will be on the left.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">twoLevelOpcreate(responses, data, treatment.factor = "Treatment.1", 
+                 suffices.treatment = c("Cont","Salt"), control = 1, 
+                 columns.suffixed = NULL, 
+                 operations = "/", suffices.results="OST", 
+                 columns.retained = c("Snapshot.ID.Tag","Smarthouse","Lane", 
+                                      "Zones","xZones","SHZones","ZLane",
+                                      "ZMainplots","xMainPosn", "Genotype.ID"),
+                 by = c("Smarthouse","Zones","ZMainplots"))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>responses</code></td>
+<td>
+<p>A <code>character</code> giving the names of the columns 
+in <code>data</code> that contain the responses to which the binary 
+operations are to be applied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A <code>data.frame</code> containing the columns specified by 
+<code>treatment.factor</code>, <code>columns.retained</code> and 
+<code>responses</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treatment.factor</code></td>
+<td>
+<p>A <code>factor</code> with two levels corresponding to 
+what is to be designated the <code>control</code> and treated 
+observations .</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>suffices.treatment</code></td>
+<td>
+<p>A <code>character</code> giving the characters to be 
+appended to the names of the <code>responses</code> and 
+<code>columns.suffixed</code>  in constructing the 
+names of the columns containing the <code>responses</code> and 
+<code>columns.suffixed</code> for each 
+level of the <code>treatment.factor</code>. The order of the 
+suffices in <code>suffices.treatment</code> should correspond to 
+the order of the levels of <code>treatment.factor</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>A <code>numeric</code>, equal to either 1 or 2, that specifies 
+the level of <code>treatment.factor</code> that is the control 
+treatment. The value for the <code>control</code> level will be on 
+the right of the binary operator.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>columns.suffixed</code></td>
+<td>
+<p>A <code>character</code> giving the names of the 
+<code>columns.retained</code> in <code>data</code> that are to be have the 
+values for each treatment retained and whose names are to be 
+suffixed using <code>suffices.treatment</code>. Generally, this is done 
+when <code>columns.retained</code> has different values for different 
+levels of the <code>treatment.factor</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>operations</code></td>
+<td>
+<p>A <code>character</code> giving the binary operations to 
+perform on the values for the two different levels of the 
+<code>treatment.factor</code>. It should be either of length one, 
+in which case the same operation will be performed for all columns 
+specified in <code>response.GR</code>, or equal in length to 
+<code>response.GR</code> so its elements correspond to those of 
+<code>response.GR</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>suffices.results</code></td>
+<td>
+<p>A <code>character</code> giving the characters to be 
+appended to the names of the responses in constructing the 
+names of the columns containing the results of applying 
+the operations. The order of the 
+suffices in <code>suffices.results</code> should correspond to 
+the order of the operators in <code>operations</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>columns.retained</code></td>
+<td>
+<p>A <code>character</code> giving the names of the 
+columns in <code>data</code> that are to be retained in the 
+<code>data.frame</code> being created. These are usually 
+<code>factors</code> that index the results of applying the 
+operations and that might be used subsequently.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>by</code></td>
+<td>
+<p>A <code>character</code> giving the names of the columns in 
+<code>data</code> whose combinations will be unique for the observation 
+for each treatment. It is used by <code>merge</code> when combining 
+the values of the two treatments in separate 
+columns in the <code>data.frame</code> to be returned.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A <code>data.frame</code> containing the following columns and the values of the :
+</p>
+
+<ol>
+<li>
+<p> those from <code>data</code> nominated in <code>columns.retained</code>;
+</p>
+</li>
+<li>
+<p> those containing the treated values of the columns whose names 
+are specified in <code>responses</code>; the treated values are 
+those having the other level of <code>treatment.factor</code> to 
+that specified by <code>control</code>;
+</p>
+</li>
+<li>
+<p> those containing the <code>control</code> values of the columns whose 
+names are specified in <code>responses</code>; the control values are 
+those having the level of <code>treatment.factor</code> specified 
+by <code>control</code>;
+</p>
+</li>
+<li>
+<p> those containing the values calculated using the binary 
+<code>operations</code>; the names of these columns will be 
+constructed from <code>responses</code> by appending 
+<code>suffices.results</code> to them.
+</p>
+</li>
+</ol>
+<h3>Author(s)</h3>
+
+<p>Chris Brien</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(exampleData)
+responses &lt;- c("Area.smooth.AGR","Area.smooth.RGR")
+cols.retained &lt;-  c("Snapshot.ID.Tag","Smarthouse","Lane","Position",
+                    "Days","Snapshot.Time.Stamp", "Hour", "xDays",
+                    "Zones","xZones","SHZones","ZLane","ZMainplots",
+                    "xMainPosn", "Genotype.ID")
+longi.SIIT.dat &lt;- 
+  twoLevelOpcreate(responses, longi.dat, suffices.treatment=c("C","S"),
+                   operations = c("-", "/"), 
+                   suffices.results = c("diff", "SIIT"), 
+                   columns.retained = cols.retained, 
+                   by = c("Smarthouse","Zones","ZMainplots","Days"))
+longi.SIIT.dat &lt;- with(longi.SIIT.dat, 
+                            longi.SIIT.dat[order(Smarthouse,Zones,ZMainplots,Days),])
+</code></pre>
+
+
+</div>

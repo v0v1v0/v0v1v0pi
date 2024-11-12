@@ -1,0 +1,81 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>prob.mcar.tab</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Estimation of a matrix of probabilities that missing values are MCAR.
+</h2>
+
+<h3>Description</h3>
+
+<p>This function returns a matrix of probabilities that each missing value is MCAR from specified confidence intervals.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">prob.mcar.tab(tab.u,res)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>tab.u</code></td>
+<td>
+<p>A numeric matrix of upper bounds for missing values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>res</code></td>
+<td>
+<p>An output list resulting from the function <code>estim.mix</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A numeric matrix of estimated probabilities to be MCAR for missing values assuming upper bounds for them (<code>tab.u</code>).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Quentin Giai Gianetto &lt;quentin2g@yahoo.fr&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>estim.mix</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#Simulating data
+res.sim=sim.data(nb.pept=2000,nb.miss=600,para=5);
+
+#Imputation of missing values with a MCAR-devoted algorithm: here the slsa algorithm
+dat.slsa=impute.slsa(tab=res.sim$dat.obs,conditions=res.sim$condition,repbio=res.sim$repbio);
+
+#Estimation of the mixture model
+res=estim.mix(tab=res.sim$dat.obs, tab.imp=dat.slsa, conditions=res.sim$condition);
+
+#Computing probabilities to be MCAR
+born=estim.bound(tab=res.sim$dat.obs,conditions=res.sim$condition);
+proba=prob.mcar.tab(born$tab.upper,res);
+
+#Histogram of probabilities to be MCAR associated to generated MCAR values
+hist(proba[res.sim$list.MCAR[[1]],1],
+
+freq=FALSE,main="Estimated probabilities to be MCAR for known MCAR values",xlab="",col=2);
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,242 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>estimateCoeffs</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimation of one- and two-locus relatedness coefficients</h2>
+
+<h3>Description</h3>
+
+<p>Estimate by simulation various relatedness coefficients, and two-locus
+versions of the same coefficients, for a given recombination rate. The
+current implementation covers inbreeding coefficients, kinship coefficients,
+IBD (kappa) coefficients between noninbred individuals, and condensed
+identity coefficients. These functions are primarily meant as tools for
+validating exact algorithms, e.g., as implemented in the <code>ribd</code> package.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">estimateInbreeding(x, id, Nsim, Xchrom = FALSE, verbose = FALSE, ...)
+
+estimateTwoLocusInbreeding(
+  x,
+  id,
+  rho = NULL,
+  cM = NULL,
+  Nsim,
+  Xchrom = FALSE,
+  verbose = FALSE,
+  ...
+)
+
+estimateKinship(x, ids, Nsim, Xchrom = FALSE, verbose = FALSE, ...)
+
+estimateTwoLocusKinship(
+  x,
+  ids,
+  rho = NULL,
+  cM = NULL,
+  Nsim,
+  Xchrom = FALSE,
+  verbose = FALSE,
+  ...
+)
+
+estimateKappa(x, ids, Nsim, Xchrom = FALSE, verbose = FALSE, ...)
+
+estimateTwoLocusKappa(
+  x,
+  ids,
+  rho = NULL,
+  cM = NULL,
+  Nsim,
+  Xchrom = FALSE,
+  verbose = FALSE,
+  ...
+)
+
+estimateIdentity(x, ids, Nsim, Xchrom = FALSE, verbose = FALSE, ...)
+
+estimateTwoLocusIdentity(
+  x,
+  ids,
+  rho = NULL,
+  cM = NULL,
+  Nsim,
+  Xchrom = FALSE,
+  verbose = FALSE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A pedigree in the form of a <code>pedtools::ped()</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id, ids</code></td>
+<td>
+<p>A vector of one or two ID labels.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Nsim</code></td>
+<td>
+<p>The number of simulations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Xchrom</code></td>
+<td>
+<p>A logical indicating if the loci are X-linked or autosomal.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>A logical.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments passed on to <code>ibdsim()</code>, e.g. <code>seed</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+<p>A scalar in the interval <code style="white-space: pre;">⁠[0, 0.5]⁠</code>: the recombination fraction
+between the two loci, converted to centiMorgans using Haldane's map
+function: cM = -50 * log(1 - 2 * rho). Either <code>rho</code> or <code>cM</code> (but not both)
+must be non-NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cM</code></td>
+<td>
+<p>A non-negative number: the genetic distance between the two loci,
+given in centiMorgans. Either <code>rho</code> or <code>cM</code> (but not both) must be
+non-NULL.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>In the following, let L1 and L2 denote two arbitrary autosomal loci with
+recombination rate <code class="reqn">\rho</code>, and let A and B be members of the pedigree
+<code>x</code>.
+</p>
+<p>The <em>two-locus inbreeding coefficient</em> <code class="reqn">f_2(\rho)</code> of A is defined as the
+probability that A is autozygous at both L1 and L2 simultaneously.
+</p>
+<p>The <em>two-locus kinship coefficient</em> <code class="reqn">\phi_2(\rho)</code> of A and B is defined
+as the probability that a random gamete emitted from A, and a random gamete
+emitted from B, contain IBD alleles at both L1 and L2.
+</p>
+<p>The <em>two-locus kappa coefficient</em> <code class="reqn">\kappa_{ij}(\rho)</code>, for <code class="reqn">i,j =
+0,1,2</code>, of noninbred A and B, is the probability that A and B share exactly
+<code>i</code> alleles IBD at L1, and exactly <code>j</code> alleles IBD at L2.
+</p>
+<p>The <em>two-locus identity coefficient</em> <code class="reqn">\Delta_{ij}</code>, <code class="reqn">i,j = 1,...,9</code>
+is defined for any (possibly inbred) A and B, as the probability that A and B
+are in identity state <code>i</code> at L1, and state <code>j</code> at L2. This uses the
+conventional ordering of the nine condensed identity states. For details, see
+for instance the <a href="https://github.com/magnusdv/ribd">GitHub page of the <code>ribd</code> package</a>.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>estimateInbreeding()</code>: a single probability.
+</p>
+<p><code>estimateTwoLocusInbreeding()</code>: a single probability.
+</p>
+<p><code>estimateKappa()</code>: a numeric vector of length 3, with the estimated
+<code class="reqn">\kappa</code> coefficients.
+</p>
+<p><code>estimateTwoLocusKappa()</code>: a symmetric, numerical 3*3 matrix, with the
+estimated values of <code class="reqn">\kappa_{ij}</code>, for <code class="reqn">i,j = 0,1,2</code>.
+</p>
+<p><code>estimateIdentity()</code>: a numeric vector of length 9, with the estimated
+identity coefficients.
+</p>
+<p><code>estimateTwoLocusIdentity()</code>: a symmetric, numerical 9*9 matrix, with the
+estimated values of <code class="reqn">\Delta_{ij}</code>, for <code class="reqn">i,j = 1,...,9</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+############################
+### Two-locus inbreeding ###
+############################
+
+x = cousinPed(0, child = TRUE)
+rho = 0.25
+Nsim = 10 # Increase!
+estimateTwoLocusInbreeding(x, id = 5, rho = rho, Nsim = Nsim, seed = 123)
+
+# Exact:
+ribd::twoLocusInbreeding(x, id = 5, rho = rho)
+
+########################################
+### Two-locus kappa:                 ###
+### Grandparent vs half sib vs uncle ###
+########################################
+
+# These are indistinguishable with unlinked loci, see e.g.
+# pages 182-183 in Egeland, Kling and Mostad (2016).
+# In the following, each simulation approximation is followed
+# by its exact counterpart.
+
+rho = 0.25; R = .5 * (rho^2 + (1-rho)^2)
+Nsim = 10 # Should be increased to at least 10000
+
+# Grandparent/grandchild
+G = linearPed(2); G.ids = c(1,5); # plot(G, hatched = G.ids)
+estimateTwoLocusKappa(G, G.ids, rho = rho, Nsim = Nsim, seed = 123)[2,2]
+.5*(1-rho) # exact
+
+# Half sibs
+H = halfSibPed(); H.ids = c(4,5); # plot(H, hatched = H.ids)
+estimateTwoLocusKappa(H, H.ids, rho = rho, Nsim = Nsim, seed = 123)[2,2]
+R # exact
+
+# Uncle
+U = avuncularPed(); U.ids = c(3,6); # plot(U, hatched = U.ids)
+estimateTwoLocusKappa(U, U.ids, rho = rho, Nsim = Nsim, seed = 123)[2,2]
+(1-rho) * R + rho/4 # exact
+
+# Exact calculations by ribd:
+# ribd::twoLocusIBD(G, G.ids, rho = rho, coefs = "k11")
+# ribd::twoLocusIBD(H, H.ids, rho = rho, coefs = "k11")
+# ribd::twoLocusIBD(U, U.ids, rho = rho, coefs = "k11")
+
+##########################
+### Two-locus Jacquard ###
+##########################
+
+x = fullSibMating(1)
+rho = 0.25
+Nsim = 10 # (increase to at least 10000)
+
+estimateTwoLocusIdentity(x, ids = 5:6, rho = rho, Nsim = Nsim, seed = 123)
+
+# Exact by ribd:
+# ribd::twoLocusIdentity(x, ids = 5:6, rho = rho)
+
+</code></pre>
+
+
+</div>

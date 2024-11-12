@@ -1,0 +1,270 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>IPW.ASYM.boxplot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Boxplot adapted to skewness and missing values
+</h2>
+
+<h3>Description</h3>
+
+<p>The function draws a modified boxplot adapted to missing data and skewness. The drop-out probabilities can be given by the practitioner or  fitted through a logistic model using auxiliary covariates.  The plots are adapted to asymmetric distributions by correcting the whiskers through a measure of the skewness.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">IPW.ASYM.boxplot(y,px=NULL,x=NULL,graph=c("IPW","both"),names=c("IPW Asymmetric Boxplot",
+                "NAIVE Asymmetric Boxplot"), size.letter=1.2,
+                method=c("quartile","octile"), ctea=-4, cteb=3, lim.inf=NULL,lim.sup=NULL,
+                main=" ",xlab = " ", ylab ="  ",color="black")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>  Numerical vector of length n with possible missing values codified by NA or NAN.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>px</code></td>
+<td>
+<p>Optional. Numerical vector of drop-out probabilities. If not provided a logistic fit is performed using <code>x</code> as predictive variable. Missing values are not admitted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>  	Optional. The matrix of fully observed variables used to estimate the missing model with dimension nrows=n and ncol=p. Missing values are not admitted. One of the vectors px or x must be supplied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>   Optional. Character string indicating if the plot contains two boxplots ("both") or only the boxplot computed with the inverse probability weighted quantiles ("IPW"). 	The default is "IPW".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>names</code></td>
+<td>
+<p>  	Optional. Character string to name the boxplots. The default is "IPW Asymmetric Boxplot", when <code>graph="IPW"</code> and
+c("IPW Asymmetric Boxplot",   "NAIVE Asymmetric Boxplot") when <code>graph="both"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size.letter</code></td>
+<td>
+<p>  	Optional. The font size of names. Default value is 1.2</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>   		Optional. Character string indicating if the skewness measure is based on the quartiles ("quartile") or the octiles ("octile").
+The default is "quartile". </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ctea</code></td>
+<td>
+<p> 	Optional. Scaling factors to compute the outlier boundary. The default is -4.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cteb</code></td>
+<td>
+<p> Optional. Scaling factors to compute the outlier boundary. The default is 3. When ctea=cteb=0 the IPW boxplot for symmetric data is obtained.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lim.inf</code></td>
+<td>
+<p>  	Optional. The lower limit of the plot if supplied by the user.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lim.sup</code></td>
+<td>
+<p> Optional. The upper limit of the plot if supplied by the user.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p> Optional. Character string to title the plot. By default no main title is given.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>Optional. Character string to indicate the label of the horizontal axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p> 	Optional. Character string to indicate the label of the vertical axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>color</code></td>
+<td>
+<p>  Optional. Color for the IPW Boxplot.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function draws boxplots designed to adjust both for  skewness and missingness. The drop-out probabilities can be supplied by the user or estimated through a logistic model from given covariates.
+</p>
+<p>The function plots as default a modified boxplot based on the inverse probability weighted (IPW) quantiles adapting for missing observations as in Zhang et al.(2012), but using a correction factor to adjust for skewness. For that purpose, the function incorporates a skewness measure  to compute  the whiskers and the outlier cut–off values in a similar way to that considered in Hubert and Vandervieren (2008).
+The argument <code>method</code> selects quartiles (<code>method="quartile"</code>) or octiles (<code>method="octile"</code>) to calculate the skewness measure SKEW, respectively, as
+</p>
+<p style="text-align: center;"><code class="reqn"> SKEW=\frac{(Q_{0.75}-Q_{0.5})-(Q_{0.5}-Q_{25})}{(Q_{0.75}-Q_{0.25})},</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn"> SKEW=\frac{(Q_{0.875}-Q_{0.5})-(Q_{0.5}-Q_{0.125})}{(Q_{0.875}-Q_{0.125})},</code>
+</p>
+
+<p>where <code class="reqn">Q\alpha</code> denotes the <code class="reqn">\alpha-</code>quantile.
+</p>
+<p>The whiskers and the outlier cut–off values are computed by means of an exponential model in the fashion of Hubert and Vandervieren (2008) taking into account the interval:
+</p>
+<p style="text-align: center;"><code class="reqn">(Q_{0.25}-1.5*\exp{(c_i*SKEW)}*IQR,Q_{0.75}+1.5*\exp{(c_s*SKEW)}*IQR),</code>
+</p>
+
+<p>where  <code class="reqn">IQR=Q_{0.75}-Q_{0.25}</code> and    <code class="reqn">c_i</code>=<code>ctea</code> and  <code class="reqn">c_s</code>=<code>cteb</code> if SKEW is positive, otherwise,  <code class="reqn">c_i</code>=-<code>cteb</code> and  <code class="reqn">c_s</code>=-<code>ctea</code>.
+</p>
+<p>The default values for <code>ctea</code> and <code>cteb</code> are  <code class="reqn">-4</code> and  <code class="reqn">3</code>, however, the user may choose other values for these constants.
+</p>
+<p>By specifying <code>graph = "both"</code>, the function displays two parallel modified boxplots. The boxplot on the left corresponds to the IPW boxplot adapted for missingness and skewness, while that on the right, to its naive counterpart which is simply based on the observations <code>y</code> at hand without any correction for missingness.
+</p>
+<p>The user can supply a vector of drop-out probabilities <code>px</code> or a set of covariates <code>x</code> to estimate the propensity.
+When both <code>px</code> and <code>x</code> are supplied, the IPW.ASYM.boxplot is executed using <code>px</code>. When <code>px</code> is not given, it is estimated assuming a logistic model depending on the covariates <code>x</code> .
+For more details, see Bianco et al. (2018).
+</p>
+
+
+<h3>Value</h3>
+
+<p>The output of the function is a list with components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>px </code></td>
+<td>
+<p>Numerical vector of drop-out probabilities.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>IPW.Quartiles</code></td>
+<td>
+<p>Numerical vector of inverse probability weighted quartiles.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>IPW.whisker</code></td>
+<td>
+<p>Numerical vector of lower and upper whiskers calculated from IPW quantiles.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>out.IPW</code></td>
+<td>
+<p>Numerical vector of data points detected as atypical by the IPW boxplot adapted to skewness.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SKEW.IPW</code></td>
+<td>
+<p>Skewness measure based on the IPW quartiles (method="quartile") or IPW octiles (method="octile"). </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>NAIVE.Quartiles</code></td>
+<td>
+<p>Numerical vector of naive quartiles computed from the subset of non-missing values of <code>y</code>. Returned only when graph="both".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>NAIVE.whisker</code></td>
+<td>
+<p>Numerical vector of lower and upper whiskers obtained from the naive quantiles. Returned only when graph="both".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>out.NAIVE</code></td>
+<td>
+<p>Numerical vector of data points detected as atypical by the naive boxplot. Returned only when graph="both".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SKEW.NAIVE</code></td>
+<td>
+<p> Skewness measure based on the naive quartiles (method="quartile") or Naive octiles (method="octile"), computed from the subset of non-missing values of <code>y</code>. Returned only when graph="both".</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>The missing values of <code>y</code> must be codified as  NA or NAN.
+</p>
+<p>The numerical vector <code>px</code> and the matrix of covariates <code>x</code> must be fully observed.  <code>px</code> or  <code>x</code> must be supplied by the user.
+</p>
+<p>The lengths of <code>y</code>, <code>px</code>, and <code>nrow(x)</code> must be equal.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Ana Maria Bianco &lt;abianco@dm.uba.ar&gt;, Graciela Boente &lt;gboente@dm.uba.ar&gt; and Ana Perez-Gonzalez &lt;anapg@uvigo.es&gt;.</p>
+
+
+<h3>References</h3>
+
+<p>Bianco, A. M., Boente, G., and Perez-Gonzalez, A. (2018). A boxplot adapted to missing values: an R function when predictive covariates are available. Submitted.<br><br></p>
+<p>Hubert, M. and Vandervieren,  E. (2008).  An adjusted boxplot for skewed distributions.  Computational Statistics &amp; Data Analysis, 52, 5186-5201. <br><br></p>
+<p>Zhang, Z., Chen, Z., Troendle, J. F. and Zhang, J. (2012). Causal inference on quantiles with  an obstetric application. Biometrics, 68, 697-706. <br><br></p>
+
+
+<h3>See Also</h3>
+
+<p>IPW.quantile,
+IPW.Boxplot
+
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## A real data example
+
+
+library(mice)
+data(boys)
+attach(boys)
+
+# The function plots the IPW boxplot adapted to skewness.
+# Some statistical summaries computed using the inverse probability weighting approach
+# are also returned.
+res1=IPW.ASYM.boxplot(hc,x=age,main="IPW boxplot adjusted for skewness of the head circumference")
+
+# We can compare the naive and IPW approaches. We also can consider the skewness measure computed
+# using the  quartiles (as default).
+res2=IPW.ASYM.boxplot(hc,x=age,method="quartile",graph="both",main=" ")
+
+# The results obtained if the skewness measure is computed with the octiles (method="octile") are:
+
+res3=IPW.ASYM.boxplot(hc,x=age,method="octile",graph="both",main=" ")
+
+</code></pre>
+
+
+</div>

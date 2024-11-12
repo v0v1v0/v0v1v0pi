@@ -1,0 +1,111 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>r_squared</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Model prediction error</h2>
+
+<h3>Description</h3>
+
+<p><code>r_squared</code> evaluates <code class="reqn">R^2</code> for our simulated dynamics. <br><code>simulated_model</code> Error of the stochastic model. <br><code>null_model</code>
+Error of the null model. <br></p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">r_squared(observed, simulated, sp)
+
+null_model(observed, sp)
+
+simulated_model(observed, simulated)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>observed</code></td>
+<td>
+<p>A vector with the actual observed species richness.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>simulated</code></td>
+<td>
+<p>A vector with the simulated species richness.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sp</code></td>
+<td>
+<p>Number of species in the species pool.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The importance of assessing how well a model predicts new data is paramount.
+The most used metric to assess this model error is <code class="reqn">R^2</code>.  <code class="reqn">R^2</code> is
+always refered to a null model and is defined as follows: </p>
+<p style="text-align: center;"><code class="reqn">R^{2} = 1 -
+\epsilon^{2} / \epsilon^{2}_0</code>
+</p>
+<p> where
+<code class="reqn">\epsilon^2</code> is the prediction error defined as the mean squared
+deviation of model predictions from actual observations, and
+<code class="reqn">\epsilon^2_0</code> is a null model error, in example, an average of squared
+deviations evaluated with a null model.
+</p>
+<p>Our null model corresponds with a random species model with no time
+correlations, in which we draw randomly from a uniform distribution a number
+of species between 0 and number of species observed in the species pool. The
+expectation of the sum of squared errors under the null model is evaluated
+analytically in Alonso et al. (2015).
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>r_squared</code>  gives the value of <code class="reqn">R^2</code> for the predictions of
+the model. <br><br><code>null_model</code> gives the average of squared
+deviations of the null model predictions from actual observations,
+<code class="reqn">\epsilon^2_0</code>. <br><br><code>simulated_model</code> gives the average of
+squared deviations of the model predictions from the actual observations,
+<code class="reqn">\epsilon^2</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The value of <code class="reqn">R^2</code> depends critically on the definition of the null
+model. Note that different definitions of the null model will lead to
+different values of <code class="reqn">R^2</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Alonso, D., Pinyol-Gallemi, A., Alcoverro T. and Arthur, R..
+(2015) Fish community reassembly after a coral mass mortality: higher
+trophic groups are subject to increased rates of extinction. <em>Ecology
+Letters</em>, <b>18</b>, 451–461.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">idaho.sim &lt;- data_generation(as.data.frame(c(rep(0, 163),
+rep(1, 57))), 1, matrix(c(0.162599, 0.111252), ncol = 2), 250, 20)
+idaho.me &lt;- c(57, apply(idaho.sim, 1, quantile, 0.5))
+r_squared(colSums(idaho[[1]][,3:23]), idaho.me, 220)
+
+null_model(colSums(idaho[[1]][,3:23]), 220)
+
+simulated_model(colSums(idaho[[1]][,3:23]), idaho.me)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,279 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>confcurves</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Wald Confidence Curves and the Likelihood Confidence Curves
+</h2>
+
+<h3>Description</h3>
+
+<p>Calculates the Wald confidence curves and the likelihood confidence curves of model parameters.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">confcurves( expr, x, y, ini.val, weights = NULL, control=list(), 
+            fig.opt = TRUE, fold = 5, np = 20, alpha = seq(1, 0.001, by=-0.001), 
+            show.CI = NULL, method = "Richardson", method.args = 
+            list(eps = 1e-04, d = 0.11, zero.tol = sqrt(.Machine$double.eps/7e-07), 
+            r = 6, v = 2, show.details = FALSE), side = NULL )
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>expr</code></td>
+<td>
+<p>A given parametric model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A vector or matrix of observations of independent variable(s)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>A vector of observations of response variable</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ini.val</code></td>
+<td>
+<p>A vector or list of initial values of model parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>An optional vector of weights to be used in the fitting process. 
+<code>weights</code> should be NULL or a numeric vector. If non-NULL, weighted least squares is used with weights <code>weights</code>; 
+otherwise ordinary least squares is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>A list of control parameters for using 
+the <code>optim</code> function in package <span class="pkg">stats</span></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fig.opt</code></td>
+<td>
+<p>An option to determine whether to draw the confidence curves of each parameter</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fold</code></td>
+<td>
+<p>The fold of <code class="reqn"> \mbox{SE}\left(\hat{\theta_{i}}\right) </code> for controlling the width of the confidence interval of <code class="reqn">\hat{\theta_{i}}</code> that represents the estimate of the <code class="reqn">i</code>th parameter</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>np</code></td>
+<td>
+<p>The number of data points for forming the lower or upper bounds of a likelihood confidence interval of <code class="reqn"> \hat{\theta_{i}} </code>, which controlls the step size (i.e., <code class="reqn">\delta</code>) in the <code class="reqn">y</code> coordinates of the likelihood confidence curves</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>The significance level(s) for calculating the <code class="reqn">x</code> coordinate(s) of the <code class="reqn">(1-\alpha)100\%</code> Wald confidence curves, which equals to 
+<code class="reqn"> t_{\alpha/2}\left(n-p\right) </code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>show.CI</code></td>
+<td>
+<p>The <code class="reqn"> t_{\alpha/2}\left(n-p\right) </code> value(s) associated with the confidence level(s) of each parameter to be showed, i.e., <code>c(0.80, 0.90, 0.95, 0.99)</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>It is the same as the input argument of <code>method</code> of the <code>hessian</code> function in package <span class="pkg">numDeriv</span></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method.args</code></td>
+<td>
+<p>It is the same as the input argument of <code>method.args</code> of the <code>hessian</code> function in package <span class="pkg">numDeriv</span></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>side</code></td>
+<td>
+<p>It is the same as the input argument of <code>side</code> of the <code>jacobian</code> function in package <span class="pkg">numDeriv</span></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For the <code class="reqn">(1-\alpha)100\%</code> Wald confidence curves, the corresponding <code class="reqn">x</code> and <code class="reqn">y</code> coordinates are:
+</p>
+<p style="text-align: center;"><code class="reqn"> x = t_{\alpha/2}\left(n-p\right), </code>
+</p>
+
+<p>and
+</p>
+<p style="text-align: center;"><code class="reqn"> y = \hat{\theta_{i}} \pm t_{\alpha/2}\left(n-p\right)\,\mbox{SE}\left(\hat{\theta_{i}}\right), </code>
+</p>
+
+<p>where <code class="reqn">n</code> denotes the number of the observations, <code class="reqn">p</code> denotes the number of model parameters, and 
+<code class="reqn">\mbox{SE}\left(\hat{\theta_{i}}\right)</code> denotes the standard error of the <code class="reqn">i</code>th model parameter's estimate. 
+</p>
+<p><code class="reqn">\quad</code> For the likelihood confidence curves (Cook and Weisberg, 1990), the corresponding <code class="reqn">x</code> and <code class="reqn">y</code> coordinates are:
+</p>
+<p style="text-align: center;"><code class="reqn"> x = \sqrt{\frac{\mbox{RSS}\left(\hat{\theta}^{\,\left(-i\right)}\right)-\mbox{RSS}\left(\hat{\theta}\right)}{\mbox{RSS}\left(\hat{\theta}\right)/(n-p)}}, </code>
+</p>
+
+<p>where <code class="reqn">\mbox{RSS}\left(\hat{\theta}\right)</code> represents the residual sum of squares for fitting the model with all model parameters; 
+<code class="reqn">\mbox{RSS}\left(\hat{\theta}^{\,\left(-i\right)}\right)</code> represents the residual sum of squares for fitting the model with the <code class="reqn">i</code>th model parameter 
+being fixed to be <code class="reqn">\hat{\theta_{i}} \pm k\,\delta</code>. Here, <code class="reqn">k</code> denotes the <code class="reqn">k</code>th iteration, and <code class="reqn">\delta</code> denotes the step size, 
+which equals  
+</p>
+<p style="text-align: center;"><code class="reqn"> \delta = \frac{\hat{\theta_{i}} \pm \mbox{fold}\,\mbox{SE}\left(\hat{\theta_{i}}\right)}{\mbox{np}}. </code>
+</p>
+
+<p style="text-align: center;"><code class="reqn"> y = \hat{\theta_{i}} \pm k\,\delta. </code>
+</p>
+
+<p>Here, <code>fold</code> and <code>np</code> are defined by the user in the arguments. 
+</p>
+<p><code class="reqn">\quad</code> For other arguments, please see the <code>fitIPEC</code> and <code>parinfo</code> functions for details.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>partab</code></td>
+<td>
+<p>The estimates, standard errors and confidence intervals of model parameters; also see the <code>parinfo</code> function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parlist</code></td>
+<td>
+<p>A list for the estimate, Wald interval curves and likelihood interval curves of each model parameter.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>In the value of <code>parlist</code>, there are the estimate (<code>pari</code>), the Wald interval curves 
+(<code>WaldCI</code>), and the likelihood interval curves (<code>lhCI</code>) of the <code class="reqn">i</code>th model parameter. 
+In <code>WaldCI</code>, there are three columns. The first column, <code>tc</code>, 
+represents <code class="reqn"> t_{\alpha/2}\left(n-p\right) </code>, the second and third columns, <code>LCI</code> and <code>UCI</code>, 
+represent the lower and upper bounds of the <code class="reqn">(1-\alpha)100\%</code> Wald confidence intervals, respectively. 
+In <code>lhCI</code>, there are six columns. The first and second columns, <code>x.lower</code> and <code>lhLCI</code>, 
+represent the lower bounds of the likelihood confidence intervals the and corresponding <code class="reqn">x</code> values, 
+respectively; the third and fourth columns, <code>x.upper</code> and <code>lhUCI</code>, represent the upper 
+bounds of the likelihood confidence intervals and the corresponding <code class="reqn">x</code> values, respectively; 
+the fifth and sixth columns, <code>RSS.lower</code> and <code>RSS.upper</code>, represent 
+the values of the residual sum of squares of the lower bounds 
+and those of the upper bounds, respectively. Please see Cook and Weisberg (1990) for details.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Peijian Shi <a href="mailto:pjshi@njfu.edu.cn">pjshi@njfu.edu.cn</a>, Peter M. Ridland <a href="mailto:p.ridland@unimelb.edu.au">p.ridland@unimelb.edu.au</a>, 
+David A. Ratkowsky <a href="mailto:d.ratkowsky@utas.edu.au">d.ratkowsky@utas.edu.au</a>, Yang Li <a href="mailto:yangli@fau.edu">yangli@fau.edu</a>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Cook, R.D. and Weisberg, S. (1990) Confidence curves in nonlinear regression. 
+<em>J. Am. Statist. Assoc.</em> 82, 221<code class="reqn">-</code>230. <a href="https://doi.org/10.1080/01621459.1990.10476233">doi:10.1080/01621459.1990.10476233</a>
+</p>
+<p>Nelder, J.A. and Mead, R. (1965) A simplex method for function minimization. 
+<em>Comput. J.</em> 7, 308<code class="reqn">-</code>313. <a href="https://doi.org/10.1093/comjnl/7.4.308">doi:10.1093/comjnl/7.4.308</a>
+</p>
+<p>Ratkowsky, D.A. (1990) <em>Handbook of Nonlinear Regression Models</em>, Marcel Dekker, New York.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>parinfo</code>, <code>fitIPEC</code>, <code>optim</code> in package <span class="pkg">stats</span>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#### Example 1 ###################################################################################
+# Weight of cut grass data (Pattinson 1981)
+# References:
+#   Clarke, G.P.Y. (1987) Approximate confidence limits for a parameter function in nonlinear 
+#       regression. J. Am. Stat. Assoc. 82, 221-230.
+#   Gebremariam, B. (2014) Is nonlinear regression throwing you a curve? 
+#       New diagnostic and inference tools in the NLIN Procedure. Paper SAS384-2014.
+#       http://support.sas.com/resources/papers/proceedings14/SAS384-2014.pdf
+#   Pattinson, N.B. (1981) Dry Matter Intake: An Estimate of the Animal
+#       Response to Herbage on Offer. unpublished M.Sc. thesis, University
+#       of Natal, Pietermaritzburg, South Africa, Department of Grassland Science.
+
+# 'x4' is the vector of weeks after commencement of grazing in a pasture
+# 'y4' is the vector of weight of cut grass from 10 randomly sited quadrants
+
+x4 &lt;- 1:13
+y4 &lt;- c(3.183, 3.059, 2.871, 2.622, 2.541, 2.184, 
+        2.110, 2.075, 2.018, 1.903, 1.770, 1.762, 1.550)
+
+# Define the first case of Mitscherlich equation
+MitA &lt;- function(P, x){    
+    P[3] + P[2]*exp(P[1]*x)
+}
+
+# Define the second case of Mitscherlich equation
+MitB &lt;- function(P2, x){
+    if(P2[3] &lt;= 0)
+        temp &lt;- mean(y4)
+    if(P2[3] &gt; 0)
+       temp &lt;- log(P2[3]) + exp(P2[2] + P2[1]*x)
+    return( temp )
+}
+
+# Define the third case of Mitscherlich equation
+MitC &lt;- function(P3, x, x1=1, x2=13){
+    theta1 &lt;- P3[1]
+    beta2  &lt;- P3[2]
+    beta3  &lt;- P3[3]
+    theta2 &lt;- (beta3 - beta2)/(exp(theta1*x2)-exp(theta1*x1))
+    theta3 &lt;- beta2/(1-exp(theta1*(x1-x2))) - beta3/(exp(theta1*(x2-x1))-1)
+    theta3 + theta2*exp(theta1*x)
+}
+
+ini.val3 &lt;- c(-0.1, 2.5, 1)
+RESU1    &lt;- confcurves( MitA, x=x4, y=y4, ini.val=ini.val3, fig.opt = TRUE, 
+                        fold=5, np=20, alpha=seq(1, 0.001, by=-0.001), 
+                        show.CI=c(0.8, 0.9, 0.95, 0.99) )
+
+ini.val4 &lt;- c(-0.10, 0.90, 2.5)
+RESU2    &lt;- confcurves( MitB, x=x4, y=y4, ini.val=ini.val4, fig.opt = TRUE, 
+                        fold=5, np=200, alpha=seq(1, 0.001, by=-0.001), 
+                        show.CI=c(0.8, 0.9, 0.95, 0.99) )
+
+ini.val6 &lt;- c(-0.15, 2.5, 1)
+RESU3    &lt;- confcurves( MitC, x=x4, y=y4, ini.val=ini.val6, fig.opt = TRUE, 
+                        fold=5, np=20, alpha=seq(1, 0.001, by=-0.001), 
+                        show.CI=c(0.8, 0.9, 0.95, 0.99) )
+##################################################################################################
+
+graphics.off()
+</code></pre>
+
+
+</div>

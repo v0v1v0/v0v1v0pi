@@ -1,0 +1,154 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>relation-detect-pairwise</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Pairwise detect a relationship between two ivs</h2>
+
+<h3>Description</h3>
+
+<p>This family of functions detects different types of relationships between
+two ivs <em>pairwise</em>, where pairwise means that the i-th interval of
+<code>x</code> is compared against the i-th interval of <code>y</code>. This is in contrast to
+<code>iv_overlaps()</code>, which works more like base::%in%.
+</p>
+
+<ul>
+<li> <p><code>iv_pairwise_overlaps()</code> detects a specific <code>type</code> of overlap
+between the i-th interval of <code>x</code> and the i-th interval of <code>y</code>.
+</p>
+</li>
+<li> <p><code>iv_pairwise_precedes()</code> detects if the i-th interval of <code>x</code>
+precedes (i.e. comes before) the i-th interval of <code>y</code>.
+</p>
+</li>
+<li> <p><code>iv_pairwise_follows()</code> detects if the i-th interval of <code>x</code>
+follows (i.e. comes after) the i-th interval of <code>y</code>.
+</p>
+</li>
+</ul>
+<p>These functions return a logical vector the same size as the common size of
+<code>x</code> and <code>y</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iv_pairwise_overlaps(x, y, ..., type = "any")
+
+iv_pairwise_precedes(x, y)
+
+iv_pairwise_follows(x, y)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x, y</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[iv]⁠</code>
+</p>
+<p>A pair of interval vectors.
+</p>
+<p>These will be recycled against each other and cast to the same type.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>These dots are for future extensions and must be empty.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[character(1)]⁠</code>
+</p>
+<p>The type of relationship to find. One of:
+</p>
+
+<ul>
+<li> <p><code>"any"</code>: Finds any overlap whatsoever between an interval in <code>needles</code>
+and an interval in <code>haystack</code>.
+</p>
+</li>
+<li> <p><code>"within"</code>: Finds when an interval in <code>needles</code> is completely within
+(or equal to) an interval in <code>haystack</code>.
+</p>
+</li>
+<li> <p><code>"contains"</code>: Finds when an interval in <code>needles</code> completely contains
+(or equals) an interval in <code>haystack</code>.
+</p>
+</li>
+<li> <p><code>"equals"</code>: Finds when an interval in <code>needles</code> is exactly equal to
+an interval in <code>haystack</code>.
+</p>
+</li>
+<li> <p><code>"starts"</code>: Finds when the start of an interval in <code>needles</code> matches the
+start of an interval in <code>haystack</code>.
+</p>
+</li>
+<li> <p><code>"ends"</code>: Finds when the end of an interval in <code>needles</code> matches the end
+of an interval in <code>haystack</code>.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A logical vector the same size as the common size of <code>x</code> and <code>y</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Locating relationships
+</p>
+<p>Detecting relationships
+</p>
+<p>Locating relations from Allen's Interval Algebra
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(vctrs)
+
+x &lt;- iv_pairs(
+  as.Date(c("2019-01-05", "2019-01-10")),
+  as.Date(c("2019-01-07", "2019-01-15")),
+  as.Date(c("2019-01-20", "2019-01-31"))
+)
+
+y &lt;- iv_pairs(
+  as.Date(c("2019-01-01", "2019-01-03")),
+  as.Date(c("2019-01-07", "2019-01-09")),
+  as.Date(c("2019-01-18", "2019-01-21"))
+)
+
+x
+y
+
+# Does the i-th interval of `x` overlap the i-th interval of `y`?
+iv_pairwise_overlaps(x, y)
+
+# Does the i-th interval of `x` contain the i-th interval of `y`?
+iv_pairwise_overlaps(x, y, type = "contains")
+
+# Does the i-th interval of `x` follow the i-th interval of `y`?
+iv_pairwise_follows(x, y)
+
+a &lt;- iv_pairs(c(1, 2), c(NA, NA), c(NA, NA))
+b &lt;- iv_pairs(c(NA, NA), c(3, 4), c(NA, NA))
+
+# Missing intervals always propagate
+iv_pairwise_overlaps(a, b)
+</code></pre>
+
+
+</div>

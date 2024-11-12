@@ -1,0 +1,308 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>qpen.cm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Quantifying assembly processes based on entire-community null model analysis under multiple metacommunities
+</h2>
+
+<h3>Description</h3>
+
+<p>The framework quantifying assembly processes based on entire-community null model analysis (Stegen et al 2013, 2015). add bigmemory function to handle large datasets. This function can deal with local communities under different metacommunities (regional pools).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">qpen.cm(comm, pd = NULL, pd.big.wd = NULL,
+        pd.big.spname = NULL, tree = NULL,
+        meta.group = NULL, meta.com = NULL,
+        meta.frequency = NULL, meta.ab = NULL,
+        ab.weight = TRUE, exclude.conspecifics = FALSE,
+        rand.time = 1000, sig.bNTI = 1.96, sig.rc = 0.95,
+        nworker = 4, memory.G = 50, project = NA, wd = getwd(),
+        output.detail = FALSE, save.bNTIRC = FALSE,
+        taxo.metric = "bray", transform.method = NULL,
+        logbase = 2, dirichlet = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>comm</code></td>
+<td>
+<p>matrix or data.frame, community data, each row is a sample or site, each colname is a taxon (species or OTU or ASV), thus rownames should be sample IDs, colnames should be taxa IDs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pd</code></td>
+<td>
+<p>a character or a matrix or NULL. If it is a character, it specifies the name of the file to hold the backingfile description of the big phylogenetic distance matrix, it is usually "pd.desc" if using default setting in pdist.big function. If it is matrix, it is the phylogenetic distance matrix with taxa IDs as colnames and rownames. The function will check the consistency of species names between phylogenetic matrix and comm. if pd is NULL, the function will calculate phylogenetic distance matrix from tree.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pd.big.wd</code></td>
+<td>
+<p>a folder path, where the bigmemmory file of the phylogenetic distance matrix are saved. If pd has given the phylogenetic matrix, pd.big.wd should be NULL. If pd is NULL and pd.big.wd is NULL either, a folder will be created to save the big phylgoenetic distance matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pd.big.spname</code></td>
+<td>
+<p>character vector, taxa id in the same rank as the big matrix of phylogenetic distances. not necessary if pd has given the phylogenetic matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tree</code></td>
+<td>
+<p>phylogenetic tree, an object of class "phylo".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meta.group</code></td>
+<td>
+<p>matrix or data.frame, a one-column (n x 1) matrix indicating which metacommunity each sample belongs to. Rownames are sample IDs. The first column is metacommunity names. Such that different samples can belong to different metacommunities. If input a n x m matrix, only the first column is used. NULL means all samples belong to the same metacommunity. Default is NULL, means all samples from the same metacommunity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meta.com</code></td>
+<td>
+<p>a list object, each element is a matrix or data.frame to define abundance (or relative abundance) of taxa in a metacommunity (regional pool). The element names indicate metacommunity names, which should be consistent with the metacommunity names defined in meta.group. If there is only one metacommunity, meta.com can be a matrix or data.frame to define taxa abundance (or relative abundance) in the metacommunity. Default is NULL, means to calculate metacommunity structure from comm according to metacommunities defined in meta.group.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meta.frequency</code></td>
+<td>
+<p>matrix or data.frame, each column represents a taxon, each row represents a metacommunity (regional pool), to define the occurrence frequency of each taxon in each metacommunity. The rownames indicate metacommunity names, which should be the same as the metacommunity names in meta.group. Default setting is NULL, means to calculate meta.frequency as occurrence frequency of each taxon in comm across the samples within each metacommunity defined by meta.group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meta.ab</code></td>
+<td>
+<p>matrix or data.frame, each column represents a taxon, each row represents a metacommunity (regional pool), to define the aubndance (or relative abundance) of each taxon in each metacommunity. The rownames indicate metacommunity names, which should be the same as the metacommunity names in meta.group. Default setting is NULL, means to calculate meta.ab as average relative abundance of each taxon in comm across the samples within each metacommunity defined by meta.group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ab.weight</code></td>
+<td>
+<p>logic, abundance-weighted or binary. default is TRUE, means abundance-weighted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exclude.conspecifics</code></td>
+<td>
+<p>Logic, should conspecific taxa in different communities be exclude from MNTD calculations? default is FALSE. The same as in the function bmntd.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rand.time</code></td>
+<td>
+<p>integer, randomization times. default is 1000.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sig.bNTI</code></td>
+<td>
+<p>numeric, the cutoff of significant betaNTI, default is 1.96.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sig.rc</code></td>
+<td>
+<p>numeric, the cutoff of significant modified Raup-Crick metric, default is 0.95.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nworker</code></td>
+<td>
+<p>for parallel computing. Either a character vector of host names on which to run the worker copies of R, or a positive integer (in which case that number of copies is run on localhost). default is 4, means 4 threads will be run.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>memory.G</code></td>
+<td>
+<p>numeric, to set the memory size as you need, so that calculation of large tree will not be limited by physical memory. unit is Gb. default is 50Gb.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>project</code></td>
+<td>
+<p>character string, the prefix of saved output files.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wd</code></td>
+<td>
+<p>a folder path, where the files will be saved.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output.detail</code></td>
+<td>
+<p>logic, if TRUE, some detailed results including all null values will be output.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>save.bNTIRC</code></td>
+<td>
+<p>logic, if TRUE, a file will be saved in the folder specified by wd.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>taxo.metric</code></td>
+<td>
+<p>taxonomic beta diversity index, the same as 'method' in the function 'vegdist' in package 'vegan', including "manhattan", "euclidean", "canberra", "clark", "bray", "kulczynski", "jaccard", "gower", "altGower", "morisita", "horn", "mountford", "raup", "binomial", "chao", "cao" or "mahalanobis". If taxo.metric='bray' and transform.method=NULL, RC will be calculated based on Bray-Curtis dissimilarity as recommended in original iCAMP; otherwise, unit.sum setting will be ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>transform.method</code></td>
+<td>
+<p>character or a defined function, to specify how to transform community matrix before calculating taxonomic dissimilarity. Due to the definition of the phylogenetic dissimilarity (bMNTD), it is not affected by data transformation. If transform.method is a characher, it should be a method name as in the function 'decostand' in package 'vegan', including 'total','max','freq','normalize','range','standardize','pa','chi.square','cmdscale','hellinger','log'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>logbase</code></td>
+<td>
+<p>numeric, the logarithm base used when transform.method='log'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dirichlet</code></td>
+<td>
+<p>Logic. If TRUE, the taxonomic null model will use Dirichlet distribution to generate relative abundances in randomized community matrix. If the input community matrix has all row sums no more than 1, the function will automatically set dirichlet=TRUE. default is FALSE.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function is particularly designed for samples from different metacommunities. The null model will randomize the commuity matrix under different metacommunities, separately (and independently). All other details are the same as the function qpen. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>output is a list with following elements.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>ratio</code></td>
+<td>
+<p>The overall percentage of turnovers governed by each process</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>result</code></td>
+<td>
+<p>a matrix, showing betaMNTD, Bray-Curtis dissimilarity, betaNTI, RC, and the identified process governing each turnover. Each row represents a turnover between two samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pd</code></td>
+<td>
+<p>phylogenetic distance matrix or the backingfile name if phylogenetic distance is saved by bigmemeory function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bMNTD</code></td>
+<td>
+<p>a square matrix of observed betaMNTD.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>BC</code></td>
+<td>
+<p>a square matrix of observed Bary-Curtis index.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bMNTD.rand</code></td>
+<td>
+<p>a matrix showing all null values of betaMNTD.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>BC.rand</code></td>
+<td>
+<p>a matrix showing all null values of Bray-Curtis index.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>setting</code></td>
+<td>
+<p>a data.frame showing all settings for this function.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Version 1: 2021.8.3
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Daliang Ning
+</p>
+
+
+<h3>References</h3>
+
+<p>Stegen, J.C., Lin, X., Fredrickson, J.K., Chen, X., Kennedy, D.W., Murray, C.J. et al. (2013). Quantifying community assembly processes and identifying features that impose them. ISME J, 7, 2069.
+</p>
+<p>Stegen, J.C., Lin, X., Fredrickson, J.K. &amp; Konopka, A.E. (2015). Estimating and mapping ecological processes influencing microbial community assembly. Front Microbiol, 6, 370.
+</p>
+<p>Kane, M.J., Emerson, J., &amp; Weston, S. (2013). Scalable Strategies for Computing with Massive Data. Journal of Statistical Software, 55(14), 1-19. URL http://www.jstatsoft.org/v55/i14/.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>qpen</code>, <code>RC.cm</code>, <code>bNTI.cm</code>, <code>bNTI.big.cm</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("example.data")
+comm=example.data$comm
+tree=example.data$tree
+
+# in this example, 10 samples from one metacommunity,
+# the other 10 samples from another metacommunity.
+meta.group=data.frame(meta.com=c(rep("meta1",10),rep("meta2",10)))
+rownames(meta.group)=rownames(comm)
+
+# since pdist.big need to save output to a certain folder,
+# the following code is set as 'not test'.
+# but you may test the code on your computer
+# after change the folder path for 'save.wd'.
+
+  wd0=getwd()
+  nworker=2 # parallel computing thread number
+  rand.time=5 # usually use 1000 for real data.
+  
+  # for a small dataset, phylogenetic distance matrix can be directly used.
+  pd=example.data$pd
+  qp=qpen.cm(comm=comm, meta.group=meta.group, pd=pd,
+          rand.time=rand.time,nworker=nworker)
+  
+  # for a big dataset, pdist.big may be used
+  save.wd=paste0(tempdir(),"/pdbig.qpen.cm")
+  # please change to the folder you want to save the pd.big output.
+  
+  pd.big=pdist.big(tree = tree, wd=save.wd, nworker = nworker)
+  qp2=qpen.cm(comm=comm, meta.group=meta.group,
+           pd=pd.big$pd.file, pd.big.wd=pd.big$pd.wd,
+           pd.big.spname=pd.big$tip.label, tree=tree,
+           rand.time=rand.time, nworker=nworker)
+  setwd(wd0)
+
+</code></pre>
+
+
+</div>

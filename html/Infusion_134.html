@@ -1,0 +1,116 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>summLik</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Model density evaluation for given data and parameters
+</h2>
+
+<h3>Description</h3>
+
+<p>Evaluation of inferred probability density as function of parameters and of (projected) summary statistics is implemented as a generic function <code>summLik</code>.
+This documentation deals mostly with its method for objects of class <code>SLik_j</code> produced by the up-to-date version of the summary-likelihood workflow.
+</p>
+<p>Given the (projected) statistics for the data used to build the <code>SLik_j</code> object, and the fitted parameters, this returns the (log)likelihood, as the generic
+<code>logLik</code> extractor does. However, parameters can be varied (so that <code>summLik</code> provides the likelihood function rather than simply its maximum), the data can be varied too, and likelihood profiles (or even full new estimates) are computed when an incomplete parameter vector (or even NULL) is specified. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">summLik(object, parm, data, ...)
+
+## S3 method for class 'SLik_j'
+summLik(object, parm, data=t(get_from(object,"proj_data")), 
+                         log=TRUE, which="safe", constr_tuning = Inf, 
+                         newMSL=FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>An <code>SLik</code> or <code>SLik_j</code> object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parm</code></td>
+<td>
+<p>Vector, data frame or matrix, containing coordinates of parameter points for which (log) likelihoods will be computed; or NULL. A profile will be computed if a single incomplete parameter vector is provided. A full new estimate will be computed in <code>parm</code> is NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Matrix of (projected, if relevant) summary statistics for which the likelihood of given parameters is to be computed. By default, the (projected) statistics for the data used to build the <code>SLik_j</code> object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>log</code></td>
+<td>
+<p>Boolean: whether to return log likelihood or raw likelihood. Better ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>which</code></td>
+<td>
+<p>character string: <code>"lik"</code> for (log) likelihood deduced from the multivariate gaussian mixture model for joint parameters and summary statistics, without further modifications. But the default, <code>"safe"</code>, may correct this result to deal with possible extrapolation artefacts (see Details of <code>predict.SLik_j</code>).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constr_tuning</code></td>
+<td>
+<p>Passed to <code>predict.SLik_j</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newMSL</code></td>
+<td>
+
+<p>Boolean. If this is TRUE and a profile was computed, attributes are added to the result (see Value).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments passed to or from other methods. Currently only passed to <code>predict.SLik_j</code> when no likelihood profile is computed.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Numeric vector, with optional attribute(s).
+</p>
+<p>If no profile is computed, it may have attributes from the return value of <code>predict.SLik_j</code>. If a profile is computed, the returned value has attribute <code>"profpt"</code> giving the profile-maximizing parameter vector. Further, if <code>newMSL=TRUE</code>, the following attributes are added: <code>"newobs_MSL"</code>, a list with information about unconstrained summary-likelihood maximization (useful mainly when there are new <code>data</code>); and <code>"LRstat"</code>, the resulting log-likelihood ratio.  
+</p>
+
+
+<h3>See Also</h3>
+
+ 
+<p><code>predict.SLik_j</code>) for case without profiling; 
+<code>logLik</code>, the standard extractor of likelihood for the model fitted to the original data.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+## Using 'slik_j' object from the example in help("example_reftable") 
+summLik(slik_j, parm=slik_j$MSL$MSLE+0.1)
+
+# summLik() generalizes logLik():
+summLik(slik_j, parm=slik_j$MSL$MSLE) == logLik(slik_j) # must be TRUE
+
+## End(Not run)
+</code></pre>
+
+
+</div>

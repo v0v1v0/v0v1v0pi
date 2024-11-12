@@ -1,0 +1,142 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>imeval</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Evaluation in an image context</h2>
+
+<h3>Description</h3>
+
+<p>imeval does for images what "with" does for data.frames, namely contextual evaluation. It provides various shortcuts for pixel-wise operations.
+imdo runs imeval, and reshapes the output as an image of the same dimensions as the input (useful for functions that return vectors).
+imeval takes inspiration from purrr::map in using formulas for defining anonymous functions using the "." argument.
+Usage is made clear (hopefully) in the examples.
+The old version of imeval used CImg's internal math parser, but has been retired.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">imeval(obj, ..., env = parent.frame())
+
+imdo(obj, form)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+<p>an image, pixset or imlist</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>one or more formula objects, defining anonymous functions that will be evaluated with the image as first argument (with extra contextual variables added to the evaluation context)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>env</code></td>
+<td>
+<p>additional variables (defaults to the calling environment)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>form</code></td>
+<td>
+<p>a single formula</p>
+</td>
+</tr>
+</table>
+<h3>Functions</h3>
+
+
+<ul><li> <p><code>imdo()</code>: run imeval and reshape
+</p>
+</li></ul>
+<h3>Author(s)</h3>
+
+<p>Simon Barthelme
+</p>
+
+
+<h3>See Also</h3>
+
+<p>imchange, which modifies specific parts of an image
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Computing mean absolute deviation
+imeval(boats, ~ mean(abs(.-median(.))))
+##Equivalent to:
+mean(abs(boats-median(boats)))
+##Two statistics
+imeval(boats,mad=  ~ mean(abs(.-median(.))),sd=  ~ sd(.))
+##imeval can precompute certain quantities, like the x or y coord. of each pixel
+imeval(boats,~ x) %&gt;% plot
+##same as Xc(boats) %&gt;% plot
+## Other predefined quantities:
+##w is width, h is height
+imeval(boats,~ x/w) %&gt;% range
+##It defines certain transformed coordinate systems:
+##Scaled x,y,z
+## xs=x/w
+## ys=y/h
+##Select upper-left quadrant (returns a pixset)
+imeval(boats,~ xs&lt;.5 &amp; ys &lt; .5) %&gt;% plot
+##Fade effect
+imeval(boats,~ xs*.) %&gt;% plot
+## xc and yc are another set of transformed coordinates
+## where xc=0,yc=0 is the image center
+imeval(boats,~ (abs(xc)/w)*.) %&gt;% plot
+
+##rho, theta: circular coordinates. rho is distance to center (in pix.), theta angle
+##Gaussian mask with sd 10 pix.
+blank &lt;- imfill(30,30)
+imeval(blank,~ dnorm(rho,sd=w/3)) %&gt;% plot(int=FALSE)
+imeval(blank,~ theta) %&gt;% plot
+##imeval is made for interactive use, meaning it
+##accesses the environment it got called from, e.g. this works: 
+f &lt;- function()
+{
+  im1 &lt;- imfill(3,3,val=1)
+   im2 &lt;- imfill(3,3,val=3)
+
+  imeval(im1,~ .+im2)
+}
+f()
+##imeval accepts lists as well 
+map_il(1:3, ~ isoblur(boats,.)) %&gt;%
+   imeval(~ xs*.) %&gt;%
+   plot
+
+##imeval is useful for defining pixsets:
+##here, all central pixels that have value under the median
+grayscale(boats) %&gt;%
+    imeval(~ (. &gt; median(.)) &amp; rho &lt; 150) %&gt;%
+    plot
+##other abbreviations are defined:
+##s for imshift, b for isoblur, rot for imrotate.
+##e.g.
+imeval(boats, ~ .*s(.,3)) %&gt;% plot
+
+
+#The rank function outputs a vector
+grayscale(boats) %&gt;% rank %&gt;% class
+#Auto-reshape into an image
+grayscale(boats)  %&gt;% imdo(~ rank(.)) %&gt;% plot
+#Note that the above performs histogram normalisation
+
+#Also works on lists
+imsplit(boats,"c") %&gt;% imdo( ~ rank(.)) %&gt;% imappend("c") %&gt;% plot
+</code></pre>
+
+
+</div>

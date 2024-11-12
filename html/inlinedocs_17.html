@@ -1,0 +1,83 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>extract.file.parse</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>File content analysis</h2>
+
+<h3>Description</h3>
+
+<p>Using the base <code>parse</code> function, analyse the file to link
+preceding "prefix" comments to each active chunk. Those comments form
+the default description for that chunk. The analysis also looks for
+S4 class "setClass" calls and R.oo setConstructorS3 and <code>setMethodS3</code>
+calls in order to link the documentation of those properly.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">extract.file.parse(code)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>code</code></td>
+<td>
+<p>Lines of R source <code>code</code> in a character vector - note that any
+nested <code>source</code> statements are <em>ignored</em> when scanning
+for class definitions.</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p>If the definition chunk does not contain a
+description, any immediately preceding sequence consecutive
+"prefix" lines will be used instead.
+</p>
+<p>Class and method definitions can take several forms,
+determined by expression type: </p>
+
+<dl>
+<dt>assignment (&lt;-)</dt>
+<dd>
+<p>Ordinary assignment of value/function;</p>
+</dd>
+<dt>setClass</dt>
+<dd>
+<p>Definition of S4 class;</p>
+</dd>
+<dt>setConstructorS3</dt>
+<dd>
+<p>Definition of S3 class using R.oo package;</p>
+</dd>
+<dt>R.methodsS3::setMethodS3</dt>
+<dd>
+<p>Definition of method for S3 class using R.oo package.</p>
+</dd>
+</dl>
+<p>Additionally, the value may be a name of a function defined elsewhere,
+in which case the documentation should be copied from that other definition.
+This is handled using the concept of documentation links.
+</p>
+<p>The <code>R.methodsS3::setMethodS3</code> calls introduce additional
+complexity: they will define an additional S3 generic (which
+needs documentation to avoid warnings at package build time)
+unless one already exists. This also is handled by "linking"
+documentation. A previously unseen generic is linked to the
+first defining instances, subsequent definitions of that generic
+also link back to the first defining instance.</p>
+
+
+<h3>Value</h3>
+
+<p>Returns an invisible list of .DocLink objects.</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Toby Dylan Hocking &lt;toby.hocking@r-project.org&gt; [aut, cre], Keith Ponting [aut], Thomas Wutzler [aut], Philippe Grosjean [aut], Markus Müller [aut], R Core Team [ctb, cph]</p>
+
+
+</div>

@@ -1,0 +1,285 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>low-level-read-write</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Low-level file read and write</h2>
+
+<h3>Description</h3>
+
+<p>Interfaces to read from or write to files with common formats.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">io_read_fst(
+  con,
+  method = c("proxy", "data_table", "data_frame", "header_only"),
+  ...,
+  old_format = FALSE
+)
+
+io_write_fst(x, con, compress = 50, ...)
+
+io_read_ini(con, ...)
+
+io_read_json(con, ...)
+
+io_write_json(
+  x,
+  con = stdout(),
+  ...,
+  digits = ceiling(-log10(.Machine$double.eps)),
+  pretty = TRUE,
+  serialize = TRUE
+)
+
+io_read_mat(
+  con,
+  method = c("auto", "R.matlab", "pymatreader", "mat73"),
+  verbose = TRUE,
+  on_convert_error = c("warning", "error", "ignore"),
+  ...
+)
+
+io_write_mat(x, con, method = c("R.matlab", "scipy"), ...)
+
+io_read_yaml(con, ...)
+
+io_write_yaml(x, con, ..., sorted = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>con</code></td>
+<td>
+<p>connection or file</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>method to read table. For <code>'fst'</code>, the choices are
+</p>
+
+<dl>
+<dt><code>'proxy'</code></dt>
+<dd>
+<p>do not read data to memory, query the table when
+needed;</p>
+</dd>
+<dt><code>'data_table'</code></dt>
+<dd>
+<p>read as <code>data.table</code>;</p>
+</dd>
+<dt><code>'data_frame'</code></dt>
+<dd>
+<p>read as <code>data.frame</code>;</p>
+</dd>
+<dt><code>'header_only'</code></dt>
+<dd>
+<p>read <code>'fst'</code> table header.</p>
+</dd>
+</dl>
+<p>For <code>'mat'</code>, the choices are
+</p>
+
+<dl>
+<dt><code>'auto'</code></dt>
+<dd>
+<p>automatically try the native option, and then
+<code>'pymatreader'</code> if fails;</p>
+</dd>
+<dt><code>'R.matlab'</code></dt>
+<dd>
+<p>use the native method (provided
+by <code>readMat</code>); only support 'MAT 5.0' format;</p>
+</dd>
+<dt><code>'pymatreader'</code></dt>
+<dd>
+<p>use 'Python' library <code>'pymatreader'</code>;</p>
+</dd>
+<dt><code>'mat73'</code></dt>
+<dd>
+<p>use 'Python' library <code>'mat73'</code>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>passed to internal function calls</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>old_format</code></td>
+<td>
+<p>see <code>fst</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>data to write to disk</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>compress</code></td>
+<td>
+<p>compress level from 0 to 100; default is 50</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits, pretty</code></td>
+<td>
+<p>for writing numeric values to 'json' format</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>serialize</code></td>
+<td>
+<p>set to <code>TRUE</code> to serialize the data to 'json' format
+(with the data types, default); or <code>FALSE</code> to save the
+values without types</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>whether to print out the process</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>on_convert_error</code></td>
+<td>
+<p>for reading <code>'mat'</code> files with 'Python' modules,
+the results will be converted to R objects in the end. Not all objects
+can be converted. This input defines the behavior when the conversion fails;
+choices are <code>"error"</code>, <code>"warning"</code>, or <code>"ignore"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sorted</code></td>
+<td>
+<p>whether to sort the list; default is <code>FALSE</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The reader functions returns the data extracted from files, mostly
+as R objects, with few exceptions on some 'Matlab' files. When reading a
+'Matlab' file requires using 'Python' modules, <code>io_read_mat</code> will
+try its best effort to convert 'Python' objects to R. However, such
+conversion might fail. In this case, the result might partially contain
+'Python' objects with warnings.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# ---- fst ----------------------------------------------------------------
+
+
+f &lt;- tempfile(fileext = ".fst")
+x &lt;- data.frame(
+  a = 1:10,
+  b = rnorm(10),
+  c = letters[1:10]
+)
+
+io_write_fst(x, con = f)
+
+# default reads in proxy
+io_read_fst(f)
+
+# load as data.table
+io_read_fst(f, "data_table")
+
+# load as data.frame
+io_read_fst(f, "data_frame")
+
+# get header
+io_read_fst(f, "header_only")
+
+# clean up
+unlink(f)
+
+
+
+# ---- json ---------------------------------------------------------------
+f &lt;- tempfile(fileext = ".json")
+
+x &lt;- list(a = 1L, b = 2.3, c = "a", d = 1+1i)
+
+# default is serialize
+io_write_json(x, f)
+
+io_read_json(f)
+
+cat(readLines(f), sep = "\n")
+
+# just values
+io_write_json(x, f, serialize = FALSE, pretty = FALSE)
+
+io_read_json(f)
+
+cat(readLines(f), sep = "\n")
+
+# clean up
+unlink(f)
+
+
+
+# ---- Matlab .mat --------------------------------------------------------
+
+## Not run: 
+
+f &lt;- tempfile(fileext = ".mat")
+
+x &lt;- list(a = 1L, b = 2.3, c = "a", d = 1+1i)
+
+# save as MAT 5.0
+io_write_mat(x, f)
+
+io_read_mat(f)
+
+# require setting up Python environment
+
+io_read_mat(f, method = "pymatreader")
+
+# MAT 7.3 example
+sample_data &lt;- ieegio_sample_data("mat_v73.mat")
+io_read_mat(sample_data)
+
+# clean up
+unlink(f)
+
+
+## End(Not run)
+
+
+
+# ---- yaml ---------------------------------------------------------------
+
+f &lt;- tempfile(fileext = ".yaml")
+
+x &lt;- list(a = 1L, b = 2.3, c = "a")
+io_write_yaml(x, f)
+
+io_read_yaml(f)
+
+# clean up
+unlink(f)
+
+</code></pre>
+
+
+</div>

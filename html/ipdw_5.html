@@ -1,0 +1,81 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pathdistGen</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generate a stack of path distance raster objects</h2>
+
+<h3>Description</h3>
+
+<p>Generate a stack of path accumulated distance raster objects
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pathdistGen(sf_ob, costras, range, yearmon = "default", progressbar = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>sf_ob</code></td>
+<td>
+<p>sf object with point geometries</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>costras</code></td>
+<td>
+<p>RasterLayer cost raster</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>range</code></td>
+<td>
+<p>numeric. Range of interpolation neighborhood</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yearmon</code></td>
+<td>
+<p>character. String specifying the name of the sf_ob</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>progressbar</code></td>
+<td>
+<p>logical show progressbar during processing?</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>RasterStack object of path distances
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(sf)
+sf_ob &lt;- data.frame(rnorm(2))
+xy   &lt;- data.frame(x = c(4, 2), y = c(8, 4))
+sf_ob &lt;- st_as_sf(cbind(sf_ob, xy), coords = c("x", "y"))
+
+m &lt;- matrix(NA, 10, 10)
+costras &lt;- raster(m, xmn = 0, xmx = ncol(m), ymn = 0, ymx = nrow(m))
+costras[] &lt;- runif(ncell(costras), min = 1, max = 10)
+# introduce spatial gradient
+for (i in 1:nrow(costras)) {
+  costras[i, ] &lt;- costras[i, ] + i
+  costras[, i] &lt;- costras[, i] + i
+}
+
+rstack &lt;- pathdistGen(sf_ob, costras, 100, progressbar = FALSE)
+</code></pre>
+
+
+</div>

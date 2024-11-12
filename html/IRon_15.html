@@ -1,0 +1,128 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sera</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Squared Error-Relevance Area (SERA)</h2>
+
+<h3>Description</h3>
+
+<p>Computes an approximation of the area under the curve described by squared error of predictions for a sequence of subsets with increasing relevance
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sera(
+  trues,
+  preds,
+  phi.trues = NULL,
+  ph = NULL,
+  pl = FALSE,
+  m.name = "Model",
+  step = 0.001,
+  return.err = FALSE,
+  norm = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>trues</code></td>
+<td>
+<p>Target values from a test set of a given data set. Should be a vector and have the same size as the variable preds</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>preds</code></td>
+<td>
+<p>Predicted values given a certain test set of a given data set. Should be a vector and have the same size as the variable preds</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phi.trues</code></td>
+<td>
+<p>Relevance of the values in the parameter trues. Use ??phi() for more information. Defaults to NULL</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ph</code></td>
+<td>
+<p>The relevance function providing the data points where the pairs of values-relevance are known. Default is NULL</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pl</code></td>
+<td>
+<p>Boolean to indicate if an illustration of the curve should be provided. Default is FALSE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m.name</code></td>
+<td>
+<p>Name of the model to be appended in the plot title</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>step</code></td>
+<td>
+<p>Relevance intervals between 0 (min) and 1 (max). Default 0.001</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return.err</code></td>
+<td>
+<p>Boolean to indicate if the errors at each subset of increasing relevance should be returned. Default is FALSE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>norm</code></td>
+<td>
+<p>Normalize the SERA values for internal optimisation only (TRUE/FALSE)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Value for the area under the relevance-squared error curve (SERA)
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(IRon)
+library(rpart)
+
+if(requireNamespace("rpart")) {
+
+   #' data(accel)
+
+   form &lt;- acceleration ~ .
+
+   ind &lt;- sample(1:nrow(accel),0.75*nrow(accel))
+
+   train &lt;- accel[ind,]
+   test &lt;- accel[-ind,]
+
+   ph &lt;- phi.control(accel$acceleration)
+
+   m &lt;- rpart::rpart(form, train)
+   preds &lt;- as.vector(predict(m,test))
+
+   trues &lt;- test$acceleration
+   phi.trues &lt;- phi(test$acceleration,ph)
+
+   sera(trues,preds,phi.trues)
+   sera(trues,preds,phi.trues,pl=TRUE, m.name="Regression Trees")
+   sera(trues,preds,phi.trues,pl=TRUE, return.err=TRUE)
+
+}
+
+</code></pre>
+
+
+</div>

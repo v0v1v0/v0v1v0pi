@@ -1,0 +1,220 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>if97</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+IAPWS-IF97 Equations for Regions 1, 2, 3 and 5
+</h2>
+
+<h3>Description</h3>
+
+<p>Compute thermodynamic and transport properties of water and steam
+using the IAPWS industrial formulation 1997.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">if97(what, p, t, h, state = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>what</code></td>
+<td>
+
+<p>a character vector listing the output properties.
+See Details for available properties.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+
+<p>a numeric vector giving the pressure values in MPa.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t</code></td>
+<td>
+
+<p>a numeric vector giving the temperature values in K.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+
+<p>a numeric vector giving the specific enthalpy values in kJ/kg.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>state</code></td>
+<td>
+
+<p><code>NULL</code> or a character vector giving the physical state.
+One of <code>"liquid"</code>, <code>"gas"</code> or <code>"supercritical"</code>.
+In case of <code>NULL</code>, the state is determined by the function
+<code>if97_state()</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The available properties for <code>what</code> are:
+</p>
+
+<ul>
+<li> <p><code>"f"</code>: the specific free energy in kJ/kg.
+</p>
+</li>
+<li> <p><code>"g"</code>: the specific Gibbs enthalpy in kJ/kg.
+</p>
+</li>
+<li> <p><code>"u"</code>: the specific internal energy in kJ/kg.
+</p>
+</li>
+<li> <p><code>"h"</code>: the specific enthalpy in kJ/kg.
+</p>
+</li>
+<li> <p><code>"s"</code>: the specific entropy in kJ/K/kg.
+</p>
+</li>
+<li> <p><code>"t"</code>: the temperature in K.
+</p>
+</li>
+<li> <p><code>"p"</code>: the pressure in MPa.
+</p>
+</li>
+<li> <p><code>"v"</code>: the specific volume in m<code class="reqn">^3</code>/kg.
+</p>
+</li>
+<li> <p><code>"rho"</code>: the mass density in kg/m<code class="reqn">^3</code>.
+</p>
+</li>
+<li> <p><code>"cv"</code>: the specific isochoric heat capacity in kJ/K/kg.
+</p>
+</li>
+<li> <p><code>"cp"</code>: the specific isobaric heat capacity in kJ/K/kg.
+</p>
+</li>
+<li> <p><code>"alpha"</code>: the expansion coefficient in 1/K
+</p>
+</li>
+<li> <p><code>"beta"</code>: the pressure coefficient in MPa/K.
+</p>
+</li>
+<li> <p><code>"kappat"</code>: the isothermal compressibility in 1/MPa.
+</p>
+</li>
+<li> <p><code>"w"</code>: the speed of sound in m/s.
+</p>
+</li>
+<li> <p><code>"eta"</code>: the dynamic viscosity in <code class="reqn">\mu</code>Pa.s.
+</p>
+</li>
+<li> <p><code>"lambda"</code>: the thermal conductivity in mW/K/m.
+
+
+</p>
+</li>
+</ul>
+<p>A valid pair of <code>p</code>, <code>t</code> and <code>h</code> is needed:
+either <code>(p, t)</code> or <code>(p, h)</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A numeric matrix of dimension <code>c(n, length(what))</code> with <code>n</code>
+the maximum length of either <code>p</code>, <code>t</code>, <code>h</code> or <code>state</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Computing several properties in a single call may be more efficient
+than separately because most of the computation time is shared.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Debove
+</p>
+
+
+<h3>References</h3>
+
+<p>International Association for the Properties of Water and Steam,
+IAPWS R7-97(2012), <em>Revised Release on the IAPWS Industrial
+Formulation 1997 for the Thermodynamic Properties of Water and Steam.</em>
+</p>
+<p>International Association for the Properties of Water and Steam,
+IAPWS R12-08(2008), <em>Release on the IAPWS Formulation 2008
+for the Viscosity of Ordinary Water Substance.</em>
+</p>
+<p>International Association for the Properties of Water and Steam,
+IAPWS R15-11(2011), <em>Release on the IAPWS Formulation 2011
+for the Thermal Conductivity of Ordinary Water Substance.</em>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">what &lt;- c("v", "h", "u", "s", "cp", "w")
+
+# Region 1 Tab. 5
+tab5 &lt;- if97(what, t = c(300, 300, 500), p = c(3, 80, 3))
+format(tab5, scientific = TRUE, digits = 9)
+
+# Region 2 Tab. 15
+tab15 &lt;- if97(what, t = c(300, 700, 700), p = c(3.5e-3, 3.5e-3, 30))
+format(tab15, scientific = TRUE, digits = 9)
+
+# Region 2 metastable Tab. 18
+tab18 &lt;- if97(what, t = c(450, 440, 450), p = c(1, 1, 1.5), state = "gas")
+format(tab18, scientific = TRUE, digits = 9)
+
+# Region 3 Tab. 33
+tab33 &lt;- if97(what, t = c(650, 650, 750),
+              p = c(0.255837018e2, 0.222930643e2, 0.783095639e2))
+format(tab33, scientific = TRUE, digits = 9)
+
+# Region 5 Tab. 42
+tab42 &lt;- if97(what, t = c(1500, 1500, 2000), p = c(0.5, 30, 30))
+format(tab42, scientific = TRUE, digits = 9)
+
+
+
+# Viscosity and thermal conductivity
+what &lt;- c("lambda", "eta")
+
+# Region 1 Tab. 7
+tab7 &lt;- if97(what, p = c(20, 50), t = c(620, 620))
+format(tab7, scientific = TRUE, digits = 9)
+
+# Region 2 Tab. 8
+tab8 &lt;- if97(what, p = c(0.3, 50), t = c(650, 800))
+format(tab8, scientific = TRUE, digits = 9)
+
+## Region 3 Tab. 9
+#tab9 &lt;- if97_rhot(c("lambda", "rho", "cp", "cv", "eta"),
+#      rho = c(0.3, 50), t = c(222, 322)),
+#format(tab9, scientific = TRUE, digits = 9)
+
+
+</code></pre>
+
+
+</div>

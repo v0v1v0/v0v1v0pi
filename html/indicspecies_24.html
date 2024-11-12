@@ -1,0 +1,141 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>signassoc</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Statistical significance of species site-group associations</h2>
+
+<h3>Description</h3>
+
+<p>This function computes the permutation p-value of the association between a species vector and a vector of memberships to a site-group. Four different tests of hypotheses arise from considering either presence/absence or quantitative species data, and from using a non-equalized or group-equalized approach.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">signassoc(
+  X,
+  U = NULL,
+  cluster = NULL,
+  mode = 1,
+  alternative = "greater",
+  control = how(),
+  permutations = NULL,
+  print.perm = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>Community data table (rows are sites, columns are species).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>U</code></td>
+<td>
+<p>A matrix of group memberships. Each column corresponds to one site-group. Membership values can be crisp or fuzzy. If this matrix is not provided, vector gmv will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster</code></td>
+<td>
+<p>A vector of numeric group labels for sites.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mode</code></td>
+<td>
+<p>Association mode, 0 (site-based) or 1 (group-based).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative</code></td>
+<td>
+<p>Alternative statistical hypothesis: "greater" (positive association), "less" (negative association), "two.sided" (either positive or negative).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>A list of control values describing properties of the permutation design, as returned by a call to <code>how</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>permutations</code></td>
+<td>
+<p>A custom matrix of permutations, to be used if <code>control = NULL</code>, with permutations in rows and site indices in columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print.perm</code></td>
+<td>
+<p>If TRUE, prints permutation numbers after each set of 100 permutations.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Input data for this function is the species matrix X and either a matrix of group memberships (U) or a vector of numeric group labels (cluster). This R function works for both presence/absence and quantitative species data, depending on the values of the input matrix X.
+If <code>mode = 0</code>, the null ecological hypothesis is that the frequency (or abundance) of the species of interest in sites belonging to the site group is not higher than the frequency (or abundance) in sites not belonging to it. If <code>mode = 1</code>, the null ecological hypothesis is that the relative frequency (average abundance) of the species of interest is not higher in the target site group than in other groups. See De Cáceres and Legendre for more details. 
+</p>
+<p>Complex permutation designs are allowed through the function <code>how</code> from package "permute". If those are not enough, the user can set <code>control = NULL</code> and specify a custom matrix of permutations to test with parameter <code>permutations</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a matrix of p-values, where species are in rows and groups are in columns. Two additional columns indicate the group with lowest p-value and the p-value for this group after Sidak's correction for multiple testing.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Users should be aware that the significance test in <code>signassoc</code> is not exactly the same as the one in <code>indval</code> from <code>labdsv</code> package. The <code>signassoc</code> function is using the preference for the target group (either non-equalized or group-equalized) as test statistic. After every permutation the preference for the target group is recalculated. The function is therefore testing the null hypothesis stating that the preference of the species for a given site group is due to chance only (as in Bakker 2008). The test is repeated for every group, and this is the reason why there are as many p-values as groups. In contrast, the <code>indval</code> function from <code>labdsv</code> package uses the maximum preference value as test statistic, and the maximum preference value is recalculated after each permutation. The maximum preference may correspond to other groups than the one chosen for the unpermuted data. <code>indval</code> function from <code>labdsv</code> package is therefore testing the null hypothesis saying that the group with observed maximum preference is not such, because the maximum preference was in that group due to chance only. In order to get the consistent results compared to the <code>indval</code> function, users should use the function <code>multipatt</code>, along with the option <code>duleg=TRUE</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Miquel De Cáceres Ainsa,  EMF-CREAF
+</p>
+
+
+<h3>References</h3>
+
+<p>Bakker, J. 2008. Increasing the utility of Indicator Species Analysis. Journal of Applied Ecology 45: 1829-1835.
+</p>
+<p>De Cáceres, M. and Legendre, P. 2009. Associations between species and groups of sites: indices and statistical inference. Ecology 90(12): 3566-3574.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>strassoc</code>, <code>multipatt</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(stats)
+
+data(wetland) ## Load species data
+
+wetkm &lt;- kmeans(wetland, centers=3)## Create three clusters using
+
+## Look for species whose abundance is significantly higher in one of the three groups
+signassoc(wetland, cluster=wetkm$cluster, mode=1, control = how(nperm=999))
+
+## Look for species whose abundance is significantly higher in sites belonging 
+## to one group as opposed to sites not belonging to it.
+signassoc(wetland, cluster=wetkm$cluster, mode=0, control = how(nperm=999)) 
+
+</code></pre>
+
+
+</div>

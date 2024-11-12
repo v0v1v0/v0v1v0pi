@@ -1,0 +1,168 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pdpEst_mpfr</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Partial dependence plot with specific numerical precision</h2>
+
+<h3>Description</h3>
+
+<p>Estimates the partial dependence plot (PDP) curve given specified numerical 
+precision.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pdpEst_mpfr(
+  colInd,
+  object,
+  predictfun,
+  X,
+  centering = FALSE,
+  outputVector = TRUE,
+  newX = NULL,
+  nCores = 1,
+  precBits = 53 * 2
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>colInd</code></td>
+<td>
+<p>Index of columns of covariates to specify the null hypothesis 
+set <em>s</em> (integer vector).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>Prediction model object (class flexible).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predictfun</code></td>
+<td>
+<p>Prediction function to be evaluated (class function). The
+prediction function needs to be specified with two arguments 
+<em>predictfun(object, X)</em>. The argument <em>object</em> is the prediction 
+model and <em>X</em> the data on which the partial dependence functions
+are evaluated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>Data on that the partial dependence function is evaluated 
+(class matrix or data.frame). The structure of the data depends on the 
+specified argument <em>predictfun</em>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>centering</code></td>
+<td>
+<p>Should the resulting values be mean centered? 
+(logical scalar). Default corresponds to output original values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outputVector</code></td>
+<td>
+<p>Should be only the partial dependence function returned</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newX</code></td>
+<td>
+<p>Test data set (class "data.frame")</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nCores</code></td>
+<td>
+<p>Number of cores used in standard parallel computation
+setup based on R <em>parallel</em> package. The default value of one uses 
+serial processing across observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>precBits</code></td>
+<td>
+<p>Numerical precision that are used in computation after the 
+calculation of the predictions from the estimated model. Default is defined 
+to be double the amount of the 53 Bits usually used in R.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Vector of estimated the PDP curve values for each sample in <em>X</em>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Thomas Welchowski <a href="mailto:welchow@imbie.meb.uni-bonn.de">welchow@imbie.meb.uni-bonn.de</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Friedman JH, Popescu BE (2008).
+“Predictive learning via rule ensembles.”
+<em>The Annals of Applied Statistics</em>, <b>2</b>(3), 916-954.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>testIAD_mpfr</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#####################
+# Simulation example
+
+# Simulate covariates from multivariate standard normal distribution
+set.seed(-72498)
+library(mvnfast)
+X &lt;- mvnfast::rmvn(n=1e2, mu=rep(0, 2), sigma=diag(2))
+
+# Response generation
+y &lt;- X[, 1]^2 + rnorm(n=1e2, mean=0, sd=0.5)
+trainDat &lt;- data.frame(X, y=y)
+
+# Estimate generalized additive model
+library(mgcv)
+gamFit &lt;- gam(formula=y~s(X1)+s(X2), data=trainDat, 
+family=gaussian())
+
+# Estimate PDP function
+pdpEst1 &lt;- pdpEst_mpfr(colInd=1, object=gamFit, 
+predictfun=function(object, X){
+predict(object=object, newdata=X, type="response")
+}, X=trainDat, 
+centering=FALSE, nCores=1, precBits=53*2)
+
+# Convert to standard precision and order in sequence of observations
+pdpEst1 &lt;- as.numeric(pdpEst1)
+ordInd &lt;- order(X[, 1])
+pdpEst1 &lt;- pdpEst1[ordInd]
+
+# Plot: PDP curve vs. true effect
+plot(x=X[ordInd, 1], y=pdpEst1, type="l")
+lines(x=X[ordInd, 1], y=X[ordInd, 1]^2, lty=2, col="red")
+# -&gt; Both curves are similiar
+
+</code></pre>
+
+
+</div>

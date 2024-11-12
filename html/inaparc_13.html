@@ -1,0 +1,176 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>inscsf</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Initialization cluster prototypes using Inscsf algorithm
+</h2>
+
+<h3>Description</h3>
+
+<p>Initializes cluster prototypes with <code>Inscsf</code> which is a novel prototype initialization algorithm using a selected central tendency measure of a selected feature. For reducing the computational complexity and increasing the accuracy in initialization, the algorithm works on only one feature which can be selected according to its importance in clustering. Furthermore, with a selection mechanism using the distribution of data the algorithm also automatically decides what type of center measure should be used.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">inscsf(x, k, sfidx, ctype)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a numeric vector, data frame or matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>an integer specifying the number of clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sfidx</code></td>
+<td>
+<p>an integer specifying the column index of the selected feature. If missing, it is internally determined by comparing the number of unique values for all the features in the data set. The feature having the maximum number of unique values is used as the selected feature.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ctype</code></td>
+<td>
+<p>a string for the type of the selected center. The options are ‘avg’ for average, ‘med’ for median or ‘mod’ for mode. The default value is ‘avg’.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>inscsf</code> is based on a technique so-called "<dfn>initialization using a selected center of a selected feature</dfn>". It resembles Ball and Hall's method (Ball and Hall, 1967) for assignment of the first cluster prototype but it differs by the use of two different interval values (<code class="reqn">R_1</code> and <code class="reqn">R_2</code>) instead of using only one fixed threshold value (<em>T</em>) for determining the prototypes of remaining clusters. The technique <code>inscsf</code> does not require to sort the data set. <code class="reqn">R_1</code> is an interval which is calculated by dividing the distance between the center and maximum of the selected feature (<code class="reqn">x_f</code>) by half of the number of clusters minus 1. 
+</p>
+<p style="text-align: center;"><code class="reqn">R_1=\frac{max(x_f)-center(x_f)}{(c-1)/2}</code>
+</p>
+ 
+<p>Similarly, <code class="reqn">R_2</code> is an interval which is calculated by dividing the distance between the maximum and center of the selected feature by half of the number of clusters minus 1. 
+</p>
+<p style="text-align: center;"><code class="reqn">R_2=\frac{center(x_f)-min(x_f)}{(k-1)/2}</code>
+</p>
+  
+<p>These two intervals become equal to each other if the selected feature is normally distributed, and thus, cluster prototypes are located in equidistant positions from each other in the <var>p</var>-dimensional space of <var>n</var> data objects.
+</p>
+<p>Depending on the distribution of selected feature, the mean, median or mode of the selected feature can be used to determine the prototype of first cluster. If the type of center measure is not input by the user, it is internally determined according to the distribution of data. Then, the nearest data instance to the center of the selected feature is searched on the selected feature column, and assigned as the prototype of first cluster. 
+</p>
+<p style="text-align: center;"><code class="reqn">v_1=x_i ;  i = row \;index \;of \;the \;nearest  \;data \;object \;to \;center(x_f))</code>
+</p>
+
+<p>The prototype of an even-numbered cluster is determined by adding the value of <code class="reqn">R_1</code> times the cluster index minus 1 to the first cluster prototype.
+</p>
+<p style="text-align: center;"><code class="reqn">v_j={(x_{(i+(j-1)}\;R_1)}</code>
+</p>
+
+<p>On the other hand, <code class="reqn">R_2</code> is used to calculate the prototypes for the odd-numbered clusters. 
+</p>
+<p style="text-align: center;"><code class="reqn">v_j={(x_{(i+(j-1)}\; R_2)}</code>
+</p>
+
+
+
+<h3>Value</h3>
+
+<p>an object of class ‘inaparc’, which is a list consists of the following items:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>v</code></td>
+<td>
+<p>a numeric matrix containing the initial cluster prototypes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sfidx</code></td>
+<td>
+<p>an integer for the column index of the selected feature.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ctype</code></td>
+<td>
+<p>a string for the type of centroid. It is ‘obj’ with this function because the prototypes matrix contain contains the selected objects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>a string containing the matched function call that generates this ‘inaparc’ object.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>The selected feature can be determined in several ways. The feature with highest number of peaks among the others can be also utilized as the selected feature with this function. For determination of it, the function <code>findpolypeaks</code> of the package ‘<span class="pkg">kpeaks</span>’ can be used.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Zeynel Cebeci, Cagatay Cebeci
+</p>
+
+
+<h3>References</h3>
+
+<p>Ball, G.H. &amp; Hall, D.J. (1967). A clustering technique for summarizing multivariate data, <em>Systems Res. &amp; Behavioral Sci.</em>, 12 (2): 153-155.
+</p>
+<p>Cebeci, Z., Sahin, M. &amp; Cebeci, C. (2018). Data dependent techniques for initialization of cluster prototypes in partitioning cluster analysis. In Proc. of <em>4th International Conference on Engineering and Natural Science</em>, Kiev, Ukraine, May 2018. pp. 12-22.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>aldaoud</code>,
+<code>ballhall</code>,
+<code>crsamp</code>,
+<code>firstk</code>,
+<code>forgy</code>,
+<code>hartiganwong</code>,
+<code>inofrep</code>,
+<code>insdev</code>,
+<code>kkz</code>,
+<code>kmpp</code>,
+<code>ksegments</code>,
+<code>ksteps</code>,
+<code>lastk</code>,
+<code>lhsmaximin</code>,
+<code>lhsrandom</code>,
+<code>maximin</code>,
+<code>mscseek</code>,
+<code>rsamp</code>,
+<code>rsegment</code>,
+<code>scseek</code>,
+<code>scseek2</code>,
+<code>spaeth</code>,
+<code>ssamp</code>,
+<code>topbottom</code>,
+<code>uniquek</code>,
+<code>ursamp</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(iris)
+# Use the 4th feature as the selected feature
+v1 &lt;- inscsf(x=iris[,1:4], k=5, sfidx=4)$v
+print(v1)
+
+# Use the internally selected feature
+v2 &lt;- inscsf(x=iris[,1:4], k=5)$v
+print(v2)
+</code></pre>
+
+
+</div>

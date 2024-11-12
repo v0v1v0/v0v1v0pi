@@ -1,0 +1,68 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>IPA_targeted_xlsxAnalyzer</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+IPA Targeted xlsxAnalyzer
+</h2>
+
+<h3>Description</h3>
+
+<p>This function processes the spreadsheet of the IPA parameters to ensure the parameter inputs are in agreement with the 'IPA_targeted' function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">IPA_targeted_xlsxAnalyzer(spreadsheet)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>spreadsheet</code></td>
+<td>
+
+<p>contains the IPA parameters.
+</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p>'PARAM_targeted' which is the IPA parameters to feed the 'IPA_targeted' function.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## To generate the IPA spreadsheet parameters
+s_path &lt;- system.file("extdata", package = "IDSL.IPA")
+SSh1 &lt;- paste0(s_path,"/IPA_parameters.xlsx")
+spreadsheet &lt;- readxl::read_xlsx(SSh1, sheet = 'IPA_targeted')
+PARAM_targeted = cbind(spreadsheet[, 2], spreadsheet[, 4])
+temp_wd &lt;- tempdir()
+temp_wd_zip &lt;- paste0(temp_wd,"/idsl_ipa_test_files.zip")
+tryCatch({download.file(paste0("https://github.com/idslme/IDSL.IPA/blob/main/",
+                               "IPA_educational_files/idsl_ipa_test_files.zip?raw=true"),
+                        destfile = temp_wd_zip)
+  unzip(temp_wd_zip, exdir = temp_wd)
+  pass_download &lt;- TRUE},
+  error = function(e) {pass_download &lt;- FALSE},
+  warning = function(w) {pass_download &lt;- FALSE})
+if (pass_download) {
+  PARAM_targeted[3, 2] &lt;- temp_wd
+  PARAM_targeted[7, 2] &lt;- temp_wd
+  PARAM_targeted[8, 2] &lt;- "53.01853, 61.00759"
+  PARAM_targeted[9, 2] &lt;- "0.951, 0.961"
+  ##
+  PARAM_targeted &lt;- IPA_targeted_xlsxAnalyzer(PARAM_targeted)
+}
+
+</code></pre>
+
+
+</div>

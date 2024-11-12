@@ -1,0 +1,96 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>print.break_down_uncertainty</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Print Generic for Break Down Uncertainty Objects</h2>
+
+<h3>Description</h3>
+
+<p>Print Generic for Break Down Uncertainty Objects
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'break_down_uncertainty'
+print(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an explanation created with <code>break_down_uncertainty</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other parameters.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a data frame.
+</p>
+
+
+<h3>References</h3>
+
+<p>Explanatory Model Analysis. Explore, Explain and Examine Predictive Models. <a href="https://ema.drwhy.ai">https://ema.drwhy.ai</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library("DALEX")
+library("iBreakDown")
+set.seed(1313)
+model_titanic_glm &lt;- glm(survived ~ gender + age + fare,
+                       data = titanic_imputed, family = "binomial")
+explain_titanic_glm &lt;- explain(model_titanic_glm,
+                           data = titanic_imputed,
+                           y = titanic_imputed$survived,
+                           label = "glm")
+
+bd_glm &lt;- break_down_uncertainty(explain_titanic_glm, titanic_imputed[1, ])
+bd_glm
+plot(bd_glm)
+
+## Not run: 
+## Not run:
+library("randomForest")
+set.seed(1313)
+model &lt;- randomForest(status ~ . , data = HR)
+new_observation &lt;- HR_test[1,]
+
+explainer_rf &lt;- explain(model,
+                        data = HR[1:1000,1:5],
+                        y = HR$status[1:1000],
+                        verbose = FALSE)
+
+bd_rf &lt;- break_down_uncertainty(explainer_rf,
+                           new_observation)
+bd_rf
+
+# example for regression - apartment prices
+# here we do not have intreactions
+model &lt;- randomForest(m2.price ~ . , data = apartments)
+explainer_rf &lt;- explain(model,
+                        data = apartments_test[1:1000,2:6],
+                        y = apartments_test$m2.price[1:1000])
+
+bd_rf &lt;- break_down_uncertainty(explainer_rf, apartments_test[1,])
+bd_rf
+
+## End(Not run)
+</code></pre>
+
+
+</div>

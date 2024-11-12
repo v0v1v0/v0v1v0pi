@@ -1,0 +1,283 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.bru</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Prediction from fitted bru model</h2>
+
+<h3>Description</h3>
+
+<p>Takes a fitted <code>bru</code> object produced by the function <code>bru()</code> and produces
+predictions given a new set of values for the model covariates or the
+original values used for the model fit. The predictions can be based on any
+R expression that is valid given these values/covariates and the joint
+posterior of the estimated random effects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'bru'
+predict(
+  object,
+  newdata = NULL,
+  formula = NULL,
+  n.samples = 100,
+  seed = 0L,
+  probs = c(0.025, 0.5, 0.975),
+  num.threads = NULL,
+  include = NULL,
+  exclude = NULL,
+  used = NULL,
+  drop = FALSE,
+  ...,
+  data = deprecated()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>An object obtained by calling <code>bru()</code> or <code>lgcp()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p>A <code>data.frame</code> or <code>SpatialPointsDataFrame</code> of covariates
+needed for the prediction.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>A formula where the right hand side defines an R expression
+to evaluate for each generated sample. If <code>NULL</code>, the latent and
+hyperparameter states are returned as named list elements.
+See Details for more information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.samples</code></td>
+<td>
+<p>Integer setting the number of samples to draw in order to
+calculate the posterior statistics. The default is rather low but provides
+a quick approximate result.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>Random number generator seed passed on to <code>inla.posterior.sample</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probs</code></td>
+<td>
+<p>A numeric vector of probabilities with values in <code style="white-space: pre;">⁠[0, 1]⁠</code>,
+passed to <code>stats::quantile</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.threads</code></td>
+<td>
+<p>Specification of desired number of threads for parallel
+computations. Default NULL, leaves it up to INLA.
+When seed != 0, overridden to "1:1"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include</code></td>
+<td>
+<p>Character vector of component labels that are needed by the
+predictor expression; Default: the result of <code style="white-space: pre;">⁠[all.vars()]⁠</code> on the
+predictor expression, unless the expression is not ".", in which case
+<code>include=NULL</code>, to include all components that are not
+explicitly excluded. The <code>bru_used()</code> methods are used
+to extract the variable names, followed by removal of non-component names
+when the components are available.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exclude</code></td>
+<td>
+<p>Character vector of component labels that are not used by the
+predictor expression. The exclusion list is applied to the list
+as determined by the <code>include</code> parameter; Default: NULL (do not remove
+any components from the inclusion list)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>used</code></td>
+<td>
+<p>Either <code>NULL</code> or a <code>bru_used()</code> object, overriding <code>include</code> and
+<code>exclude</code>. Default <code>NULL</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>drop</code></td>
+<td>
+<p>logical; If <code>keep=FALSE</code>, <code>newdata</code> is a <code>Spatial*DataFrame</code>, and
+the prediciton summary has the same number of rows as <code>newdata</code>, then the
+output is a <code>Spatial*DataFrame</code> object. Default <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments passed on to <code>inla.posterior.sample()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated"><img src="../help/figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a> Use <code>newdata</code> instead.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Mean value predictions are accompanied by the standard errors, upper and
+lower 2.5% quantiles, the
+median, variance, coefficient of variation as well as the variance and
+minimum and maximum sample
+value drawn in course of estimating the statistics.
+</p>
+<p>Internally, this method calls <code>generate.bru()</code> in order to draw samples from
+the model.
+</p>
+<p>In addition to the component names (that give the effect of each component
+evaluated for the input data), the suffix <code style="white-space: pre;">⁠_latent⁠</code> variable name can be used
+to directly access the latent state for a component, and the suffix function
+<code style="white-space: pre;">⁠_eval⁠</code> can be used to evaluate a component at other input values than the
+expressions defined in the component definition itself, e.g.
+<code>field_eval(cbind(x, y))</code> for a component that was defined with
+<code>field(coordinates, ...)</code> (see also <code>component_eval()</code>).
+</p>
+<p>For "iid" models with <code>mapper = bru_mapper_index(n)</code>, <code>rnorm()</code> is used to
+generate new realisations for indices greater than <code>n</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a <code>data.frame</code>, <code>sf</code>, or <code style="white-space: pre;">⁠Spatial*⁠</code> object with predicted mean values and
+other summary statistics attached. Non-S4 object outputs have the class
+"bru_prediction" added at the front of the class list.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+if (bru_safe_inla(multicore = FALSE) &amp;&amp;
+    bru_safe_sp() &amp;&amp;
+    require("sp") &amp;&amp;
+    require("sn", quietly = TRUE) &amp;&amp;
+    require("ggplot2", quietly = TRUE)) {
+
+  # Load the Gorilla data
+
+  data(gorillas, package = "inlabru")
+
+  # Plot the Gorilla nests, the mesh and the survey boundary
+
+  ggplot() +
+    gg(gorillas$mesh) +
+    gg(gorillas$nests) +
+    gg(gorillas$boundary)
+
+  # Define SPDE prior
+
+  matern &lt;- INLA::inla.spde2.pcmatern(gorillas$mesh,
+    prior.sigma = c(0.1, 0.01),
+    prior.range = c(0.01, 0.01)
+  )
+
+  # Define domain of the LGCP as well as the model components (spatial SPDE effect and Intercept)
+
+  cmp &lt;- coordinates ~ mySmooth(main = coordinates, model = matern) + Intercept(1)
+
+  # Fit the model, with "eb" instead of full Bayes
+  fit &lt;- lgcp(cmp, gorillas$nests,
+    samplers = gorillas$boundary,
+    domain = list(coordinates = gorillas$mesh),
+    options = list(control.inla = list(int.strategy = "eb"))
+  )
+
+  # Once we obtain a fitted model the predict function can serve various purposes.
+  # The most basic one is to determine posterior statistics of a univariate
+  # random variable in the model, e.g. the intercept
+
+  icpt &lt;- predict(fit, NULL, ~ c(Intercept = Intercept_latent))
+  plot(icpt)
+
+  # The formula argument can take any expression that is valid within the model, for
+  # instance a non-linear transformation of a random variable
+
+  exp.icpt &lt;- predict(fit, NULL, ~ c(
+    "Intercept" = Intercept_latent,
+    "exp(Intercept)" = exp(Intercept_latent)
+  ))
+  plot(exp.icpt, bar = TRUE)
+
+  # The intercept is special in the sense that it does not depend on other variables
+  # or covariates. However, this is not true for the smooth spatial effects 'mySmooth'.
+  # In order to predict 'mySmooth' we have to define where (in space) to predict. For
+  # this purpose, the second argument of the predict function can take \code{data.frame}
+  # objects as well as Spatial objects. For instance, we might want to predict
+  # 'mySmooth' at the locations of the mesh vertices. Using
+
+  vrt &lt;- fm_vertices(gorillas$mesh, format = "sp")
+
+  # we obtain these vertices as a SpatialPointsDataFrame
+
+  ggplot() +
+    gg(gorillas$mesh) +
+    gg(vrt, color = "red")
+
+  # Predicting 'mySmooth' at these locations works as follows
+
+  mySmooth &lt;- predict(fit, vrt, ~mySmooth)
+
+  # Note that just like the input also the output will be a SpatialPointsDataFrame
+  # and that the predicted statistics are simply added as columns
+
+  class(mySmooth)
+  head(vrt)
+  head(mySmooth)
+
+  # Plotting the mean, for instance, at the mesh node is straight forward
+
+  ggplot() +
+    gg(gorillas$mesh) +
+    gg(mySmooth, aes(color = mean), size = 3)
+
+  # However, we are often interested in a spatial field and thus a linear interpolation,
+  # which can be achieved by using the gg mechanism for meshes
+
+  ggplot() +
+    gg(gorillas$mesh, color = mySmooth$mean)
+
+  # Alternatively, we can predict the spatial field at a grid of locations, e.g. a
+  # SpatialPixels object covering the mesh
+
+  pxl &lt;- fm_pixels(gorillas$mesh, format = "sp")
+  mySmooth2 &lt;- predict(fit, pxl, ~mySmooth)
+
+  # This will give us a SpatialPixelDataFrame with the columns we are looking for
+
+  head(mySmooth2)
+  ggplot() +
+    gg(mySmooth2)
+}
+
+</code></pre>
+
+
+</div>

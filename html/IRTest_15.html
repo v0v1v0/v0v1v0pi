@@ -1,0 +1,345 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>IRTest_Poly</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Item and ability parameters estimation for polytomous items</h2>
+
+<h3>Description</h3>
+
+<p>This function estimates IRT item and ability parameters when all items are scored polytomously.
+Based on Bock &amp; Aitkin's (1981) marginal maximum likelihood and EM algorithm (EM-MML), this function provides several latent distribution estimation algorithms which could free the normality assumption on the latent variable.
+If the normality assumption is violated, application of these latent distribution estimation methods could reflect non-normal characteristics of the unknown true latent distribution,
+and, thus, could provide more accurate parameter estimates (Li, 2021; Woods &amp; Lin, 2009; Woods &amp; Thissen, 2006).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">IRTest_Poly(
+  data,
+  model = "GPCM",
+  range = c(-6, 6),
+  q = 121,
+  initialitem = NULL,
+  ability_method = "EAP",
+  latent_dist = "Normal",
+  max_iter = 200,
+  threshold = 1e-04,
+  bandwidth = "SJ-ste",
+  h = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A matrix or data frame of item responses coded as <code>0, 1, ..., m</code> for the <code>m+1</code> category item.
+Rows and columns indicate examinees and items, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A character value for an IRT model to be applied.
+Currently, <code>PCM</code>, <code>GPCM</code>, and <code>GRM</code> are available. The default is <code>"GPCM"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>range</code></td>
+<td>
+<p>Range of the latent variable to be considered in the quadrature scheme.
+The default is from <code>-6</code> to <code>6</code>: <code>c(-6, 6)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>A numeric value that represents the number of quadrature points. The default value is 121.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initialitem</code></td>
+<td>
+<p>A matrix of initial item parameter values for starting the estimation algorithm. The default value is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ability_method</code></td>
+<td>
+<p>The ability parameter estimation method.
+The available options are Expected <em>a posteriori</em> (<code>EAP</code>), Maximum Likelihood Estimates (<code>MLE</code>), and weighted likelihood estimates (<code>WLE</code>).
+The default is <code>EAP</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>latent_dist</code></td>
+<td>
+<p>A character string that determines latent distribution estimation method.
+Insert <code>"Normal"</code>, <code>"normal"</code>, or <code>"N"</code> for the normality assumption on the latent distribution,
+<code>"EHM"</code> for empirical histogram method (Mislevy, 1984; Mislevy &amp; Bock, 1985),
+<code>"2NM"</code> or <code>"Mixture"</code> for using two-component Gaussian mixture distribution (Li, 2021; Mislevy, 1984),
+<code>"DC"</code> or <code>"Davidian"</code> for Davidian-curve method (Woods &amp; Lin, 2009),
+<code>"KDE"</code> for kernel density estimation method (Li, 2022),
+and <code>"LLS"</code> for log-linear smoothing method (Casabianca &amp; Lewis, 2015).
+The default value is set to <code>"Normal"</code> to follow the convention.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_iter</code></td>
+<td>
+<p>A numeric value that determines the maximum number of iterations in the EM-MML.
+The default value is 200.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>A numeric value that determines the threshold of EM-MML convergence.
+A maximum item parameter change is monitored and compared with the threshold.
+The default value is 0.0001.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bandwidth</code></td>
+<td>
+<p>A character value that can be used if <code>latent_dist = "KDE"</code>.
+This argument determines the bandwidth estimation method for <code>"KDE"</code>.
+The default value is <code>"SJ-ste"</code>. See <code>density</code> for available options.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>A natural number less than or equal to 10 if <code>latent_dist = "DC" or "LLS"</code>.
+This argument determines the complexity of the distribution.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<dl>
+<dt>
+The probability for scoring <code class="reqn">u=k</code> (i.e., <code class="reqn">k=0, 1, ..., m; m \ge 2</code>)
+</dt>
+<dd>
+<p>1) Partial credit model (PCM)
+</p>
+<p style="text-align: center;"><code class="reqn">P(u=0|\theta, b_1, ..., b_{m})=\frac{1}{1+\sum_{c=1}^{m}{\exp{\left[\sum_{v=1}^{c}{a(\theta-b_v)}\right]}}}</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">P(u=1|\theta, b_1, ..., b_{m})=\frac{\exp{(\theta-b_1)}}{1+\sum_{c=1}^{m}{\exp{\left[\sum_{v=1}^{c}{\theta-b_v}\right]}}}</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\vdots</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">P(u=m|\theta, b_1, ..., b_{m})=\frac{\exp{\left[\sum_{v=1}^{m}{\theta-b_v}\right]}}{1+\sum_{c=1}^{m}{\exp{\left[\sum_{v=1}^{c}{\theta-b_v}\right]}}}</code>
+</p>
+
+<p>2) Generalized partial credit model (GPCM)
+</p>
+<p style="text-align: center;"><code class="reqn">P(u=0|\theta, a, b_1, ..., b_{m})=\frac{1}{1+\sum_{c=1}^{m}{\exp{\left[\sum_{v=1}^{c}{a(\theta-b_v)}\right]}}}</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">P(u=1|\theta, a, b_1, ..., b_{m})=\frac{\exp{(a(\theta-b_1))}}{1+\sum_{c=1}^{m}{\exp{\left[\sum_{v=1}^{c}{a(\theta-b_v)}\right]}}}</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\vdots</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">P(u=m|\theta, a, b_1, ..., b_{m})=\frac{\exp{\left[\sum_{v=1}^{m}{a(\theta-b_v)}\right]}}{1+\sum_{c=1}^{m}{\exp{\left[\sum_{v=1}^{c}{a(\theta-b_v)}\right]}}}</code>
+</p>
+
+<p>3) Graded response model (GRM)
+</p>
+<p style="text-align: center;"><code class="reqn">P(u=0|\theta, a, b_1, ..., b_{m})=1-\frac{1}{1+\exp{\left[-a(\theta-b_1)\right]}}</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">P(u=1|\theta, a, b_1, ..., b_{m})=\frac{1}{1+\exp{\left[-a(\theta-b_1)\right]}}-\frac{1}{1+\exp{\left[-a(\theta-b_2)\right]}}</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">\vdots</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">P(u=m|\theta, a, b_1, ..., b_{m})=\frac{1}{1+\exp{\left[-a(\theta-b_m)\right]}}-0</code>
+</p>
+
+</dd>
+<dt>
+Latent distribution estimation methods
+</dt>
+<dd>
+<p>1) Empirical histogram method
+</p>
+<p style="text-align: center;"><code class="reqn">P(\theta=X_k)=A(X_k)</code>
+</p>
+
+<p>where <code class="reqn">k=1, 2, ..., q</code>, <code class="reqn">X_k</code> is the location of the <code class="reqn">k</code>th quadrature point, and <code class="reqn">A(X_k)</code> is a value of probability mass function evaluated at <code class="reqn">X_k</code>.
+Empirical histogram method thus has <code class="reqn">q-1</code> parameters.
+</p>
+<p>2) Two-component Gaussian mixture distribution
+</p>
+<p style="text-align: center;"><code class="reqn">P(\theta=X)=\pi \phi(X; \mu_1, \sigma_1)+(1-\pi) \phi(X; \mu_2, \sigma_2)</code>
+</p>
+
+<p>where <code class="reqn">\phi(X; \mu, \sigma)</code> is the value of a Gaussian component with mean <code class="reqn">\mu</code> and standard deviation <code class="reqn">\sigma</code> evaluated at <code class="reqn">X</code>.
+</p>
+<p>3) Davidian curve method
+</p>
+<p style="text-align: center;"><code class="reqn">P(\theta=X)=\left\{\sum_{\lambda=0}^{h}{{m}_{\lambda}{X}^{\lambda}}\right\}^{2}\phi(X; 0, 1)</code>
+</p>
+
+<p>where <code class="reqn">h</code> corresponds to the argument <code>h</code> and determines the degree of the polynomial.
+</p>
+<p>4) Kernel density estimation method
+</p>
+<p style="text-align: center;"><code class="reqn">P(\theta=X)=\frac{1}{Nh}\sum_{j=1}^{N}{K\left(\frac{X-\theta_j}{h}\right)}</code>
+</p>
+
+<p>where <code class="reqn">N</code> is the number of examinees, <code class="reqn">\theta_j</code> is <code class="reqn">j</code>th examinee's ability parameter, <code class="reqn">h</code> is the bandwidth which corresponds to the argument <code>bw</code>, and <code class="reqn">K( \bullet )</code> is a kernel function.
+The Gaussian kernel is used in this function.
+</p>
+<p>5) Log-linear smoothing method
+</p>
+<p style="text-align: center;"><code class="reqn">P(\theta=X_{q})=\exp{\left(\beta_{0}+\sum_{m=1}^{h}{\beta_{m}X_{q}^{m}}\right)}</code>
+</p>
+
+<p>where <code class="reqn">h</code> is the hyper parameter which determines the smoothness of the density, and <code class="reqn">\theta</code> can take total <code class="reqn">Q</code> finite values (<code class="reqn">X_1, \dots ,X_q, \dots, X_Q</code>).
+</p>
+</dd>
+</dl>
+<h3>Value</h3>
+
+<p>This function returns a <code>list</code> of several objects:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>par_est</code></td>
+<td>
+<p>The item parameter estimates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se</code></td>
+<td>
+<p>The asymptotic standard errors for item parameter estimates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fk</code></td>
+<td>
+<p>The estimated frequencies of examinees at quadrature points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter</code></td>
+<td>
+<p>The number of EM-MML iterations elapsed for the convergence.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quad</code></td>
+<td>
+<p>The location of quadrature points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diff</code></td>
+<td>
+<p>The final value of the monitored maximum item parameter change.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Ak</code></td>
+<td>
+<p>The estimated discrete latent distribution.
+It is discrete (i.e., probability mass function) by the quadrature scheme.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Pk</code></td>
+<td>
+<p>The posterior probabilities of examinees at quadrature points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta</code></td>
+<td>
+<p>The estimated ability parameter values. If <code>ability_method = "MLE"</code>. If an examinee receives a maximum or minimum score for all items, the function returns <code class="reqn">\pm</code><code>Inf</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta_se</code></td>
+<td>
+<p>Standard error of ability estimates. The asymptotic standard errors for <code>ability_method = "MLE"</code> (the function returns <code>NA</code> for all or none correct answers).
+The standard deviations of the posterior distributions for <code>ability_method = "MLE"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>logL</code></td>
+<td>
+<p>The deviance (i.e., -2log<em>L</em>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>density_par</code></td>
+<td>
+<p>The estimated density parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Options</code></td>
+<td>
+<p>A replication of input arguments and other information.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Seewoo Li <a href="mailto:cu@yonsei.ac.kr">cu@yonsei.ac.kr</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Bock, R. D., &amp; Aitkin, M. (1981). Marginal maximum likelihood estimation of item parameters: Application of an EM algorithm. <em>Psychometrika, 46</em>(4), 443-459.
+</p>
+<p>Casabianca, J. M., &amp; Lewis, C. (2015). IRT item parameter recovery with marginal maximum likelihood estimation using loglinear smoothing models. <em>Journal of Educational and Behavioral Statistics, 40</em>(6), 547-578.
+</p>
+<p>Li, S. (2021). Using a two-component normal mixture distribution as a latent distribution in estimating parameters of item response models. <em>Journal of Educational Evaluation, 34</em>(4), 759-789.
+</p>
+<p>Li, S. (2022). <em>The effect of estimating latent distribution using kernel density estimation method on the accuracy and efficiency of parameter estimation of item response models</em> [Master's thesis, Yonsei University, Seoul]. Yonsei University Library.
+</p>
+<p>Mislevy, R. J. (1984). Estimating latent distributions. <em>Psychometrika, 49</em>(3), 359-381.
+</p>
+<p>Mislevy, R. J., &amp; Bock, R. D. (1985). Implementation of the EM algorithm in the estimation of item parameters: The BILOG computer program. In D. J. Weiss (Ed.). <em>Proceedings of the 1982 item response theory and computerized adaptive testing conference</em> (pp. 189-202). University of Minnesota, Department of Psychology, Computerized Adaptive Testing Conference.
+</p>
+<p>Woods, C. M., &amp; Lin, N. (2009). Item response theory with estimation of the latent density using Davidian curves. <em>Applied Psychological Measurement, 33</em>(2), 102-117.
+</p>
+<p>Woods, C. M., &amp; Thissen, D. (2006). Item response theory with estimation of the latent population distribution using spline-based densities. <em>Psychometrika, 71</em>(2), 281-301.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Preparation of dichotomous item response data
+
+data &lt;- DataGeneration(N=1000,
+                       nitem_P = 8)$data_P
+
+# Analysis
+
+M1 &lt;- IRTest_Poly(data)
+
+</code></pre>
+
+
+</div>

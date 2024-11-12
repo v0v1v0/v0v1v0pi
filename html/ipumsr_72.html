@@ -1,0 +1,92 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>lbl_na_if</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Convert labelled data values to NA</h2>
+
+<h3>Description</h3>
+
+<p>Convert data values in a <code>labelled</code> vector
+to <code>NA</code> based on the value labels associated with that vector. Ignores
+values that do not have a label.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">lbl_na_if(x, .predicate)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A <code>labelled</code> vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.predicate</code></td>
+<td>
+<p>A function taking <code>.val</code> and <code>.lbl</code> arguments that
+returns <code>TRUE</code> for all values that should be converted to <code>NA</code>.
+</p>
+<p>Can be provided as an anonymous function or formula. See Details section.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Several <code style="white-space: pre;">⁠lbl_*()⁠</code> functions include arguments that can be passed a function
+of <code>.val</code> and/or <code>.lbl</code>. These refer to the existing values and
+labels in the input vector, respectively.
+</p>
+<p>Use <code>.val</code> to refer to the <em>values</em> in the vector's value labels.
+Use <code>.lbl</code> to refer to the <em>label names</em> in the vector's value labels.
+</p>
+<p>Note that not all <code style="white-space: pre;">⁠lbl_*()⁠</code> functions support both of these arguments.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>labelled</code> vector
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other lbl_helpers: 
+<code>lbl()</code>,
+<code>lbl_add()</code>,
+<code>lbl_clean()</code>,
+<code>lbl_define()</code>,
+<code>lbl_relabel()</code>,
+<code>zap_ipums_attributes()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x &lt;- haven::labelled(
+  c(10, 10, 11, 20, 30, 99, 30, 10),
+  c(Yes = 10, `Yes - Logically Assigned` = 11, No = 20, Maybe = 30, NIU = 99)
+)
+
+# Convert labelled values greater than 90 to `NA`
+lbl_na_if(x, function(.val, .lbl) .val &gt;= 90)
+
+# Can use purrr-style notation
+lbl_na_if(x, ~ .lbl %in% c("Maybe"))
+
+# Or refer to named function
+na_function &lt;- function(.val, .lbl) .val &gt;= 90
+lbl_na_if(x, na_function)
+</code></pre>
+
+
+</div>

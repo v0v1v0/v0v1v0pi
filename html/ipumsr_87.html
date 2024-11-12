@@ -1,0 +1,113 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>read_nhgis_codebook</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Read metadata from an NHGIS codebook (.txt) file</h2>
+
+<h3>Description</h3>
+
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental"><img src="../help/figures/lifecycle-experimental.svg" alt="[Experimental]"></a>
+</p>
+<p>Read the variable metadata contained in the .txt codebook file included with
+NHGIS extracts into an ipums_ddi object.
+</p>
+<p>Because NHGIS variable metadata do not
+adhere to all the standards of microdata DDI files, some of the <code>ipums_ddi</code>
+fields will not be populated.
+</p>
+<p>This function is marked as experimental while we determine whether
+there may be a more robust way to standardize codebook and DDI reading across
+IPUMS collections.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">read_nhgis_codebook(cb_file, file_select = NULL, raw = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>cb_file</code></td>
+<td>
+<p>Path to a .zip archive containing an NHGIS extract or to an
+NHGIS codebook (.txt) file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>file_select</code></td>
+<td>
+<p>If <code>cb_file</code> is a .zip archive or directory that contains
+multiple codebook files, an expression identifying the file to read.
+Accepts a character string specifying the file name, a
+tidyselect selection, or an index position of the
+file. Ignored if <code>cb_file</code> is the path to a single codebook file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>raw</code></td>
+<td>
+<p>If <code>TRUE</code>, return a character vector containing the lines
+of <code>cb_file</code> rather than an <code>ipums_ddi</code> object. Defaults to
+<code>FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>If <code>raw = FALSE</code>, an <code>ipums_ddi</code> object with information on the
+variables contained in the data for the extract associated with the given
+<code>cb_file</code>.
+</p>
+<p>If <code>raw = TRUE</code>, a character vector with one element for each
+line of the given <code>cb_file</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>read_nhgis()</code> to read tabular data from an IPUMS NHGIS extract.
+</p>
+<p><code>read_ipums_sf()</code> to read spatial data from an IPUMS extract.
+</p>
+<p><code>ipums_list_files()</code> to list files in an IPUMS extract.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example file
+nhgis_file &lt;- ipums_example("nhgis0972_csv.zip")
+
+# Read codebook as an `ipums_ddi` object:
+codebook &lt;- read_nhgis_codebook(nhgis_file)
+
+# Variable-level metadata about the contents of the data file:
+ipums_var_info(codebook)
+
+ipums_var_label(codebook, "PMSA")
+
+# If variable metadata have been lost from a data source, reattach from
+# the corresponding `ipums_ddi` object:
+nhgis_data &lt;- read_nhgis(nhgis_file, verbose = FALSE)
+
+nhgis_data &lt;- zap_ipums_attributes(nhgis_data)
+ipums_var_label(nhgis_data$PMSA)
+
+nhgis_data &lt;- set_ipums_var_attributes(nhgis_data, codebook$var_info)
+ipums_var_label(nhgis_data$PMSA)
+
+# You can also load the codebook in raw format to display in the console
+codebook_raw &lt;- read_nhgis_codebook(nhgis_file, raw = TRUE)
+
+# Use `cat` for human-readable output
+cat(codebook_raw[1:20], sep = "\n")
+</code></pre>
+
+
+</div>

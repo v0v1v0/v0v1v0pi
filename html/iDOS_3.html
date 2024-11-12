@@ -1,0 +1,128 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>estimate.expression.cna.correlation</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>estimate.expression.cna.correlation</h2>
+
+<h3>Description</h3>
+
+<p>Estimate subtype specific correlation between mRNA and CNA profiles
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">estimate.expression.cna.correlation(
+  exp.data = NULL, 
+  cna.data.log2 = NULL, 
+  corr.threshold = 0.3, 
+  corr.direction = "two.sided", 
+  subtypes.metadata = NULL, 
+  feature.ids = NULL, 
+  cancer.type = NULL, 
+  data.dir = NULL, 
+  graphs.dir = NULL
+  )
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>exp.data</code></td>
+<td>
+<p>Feature by sample mRNA abundance matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cna.data.log2</code></td>
+<td>
+<p>Feature by sample CNA log ratio matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>corr.threshold</code></td>
+<td>
+<p>Threshold for Spearman's Rho to consider a feature as candidate driver</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>corr.direction</code></td>
+<td>
+<p>Whether to include positively (greater), negatively (less) or both (two.sided) correlated features. Defaults to <code>two.sided</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subtypes.metadata</code></td>
+<td>
+<p>Subtypes metadata list of lists. Must contain at least one subtype specific samples using list <code>subtype.samples.list</code>. If no subtypes are present, specify list element "All" with all samples</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>feature.ids</code></td>
+<td>
+<p>Vector of features to be used to estimate correlation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cancer.type</code></td>
+<td>
+<p>Name of the cancer type or dataset</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.dir</code></td>
+<td>
+<p>Path to output directory where mRNA and CNA correlation statistics will be stored</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>graphs.dir</code></td>
+<td>
+<p>Path to graphs directory</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list of lists containing correlated features per cancer subtype
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Syed Haider
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# load test data
+x &lt;- get.test.data(data.types = c("mRNA.T", "CNA"));
+
+# temporary output directory
+tmp.output.dir &lt;- tempdir();
+
+# estimate mRNA and CNA correlation
+correlated.features &lt;- estimate.expression.cna.correlation(
+  exp.data = x$mRNA.T$BLCA, 
+  cna.data.log2 = x$CNA.log2$BLCA, 
+  corr.threshold = 0.3, 
+  corr.direction = "two.sided", 
+  subtypes.metadata = list(
+    "subtype.samples.list" = list("All" = colnames(x$mRNA.T$BLCA))
+    ), 
+  feature.ids = rownames(x$mRNA.T$BLCA), 
+  cancer.type = "BLCA", 
+  data.dir = paste(tmp.output.dir, "/data/BLCA/", sep = ""),
+  graphs.dir = paste(tmp.output.dir, "/graphs/BLCA/", sep = "")
+  );
+
+</code></pre>
+
+
+</div>

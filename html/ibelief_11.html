@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>decisionDST</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Decision Rules</h2>
+
+<h3>Description</h3>
+
+<p>Different rules for making decisions in the framework of belief functions
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">decisionDST(mass, criterion, r = 0.5, sDec = 1:nrow(mass),
+  D = Dcalculus(nrow(mass)))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>mass</code></td>
+<td>
+<p>The matrix containing the masses. Each column represents a piece of mass.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>criterion</code></td>
+<td>
+<p>The decision baseline:
+</p>
+<p>criterion=1 maximum of the plausibility
+</p>
+<p>criterion=2 maximum of the credibility
+</p>
+<p>criterion=3 maximum of the credibility with rejection
+</p>
+<p>criterion=4 maximum of the pignistic probability
+</p>
+<p>criterion=5 Appriou criterion (decision onto <code class="reqn">2^\Theta</code>)
+</p>
+<p>criterion=6 Distance criterion (decision onto a given subset (sDec) of <code class="reqn">2^\Theta</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>The parameter in BayesianMass function. If criterion 5 is used, it should be given. 
+Otherwise it will be set to the default value 0.5.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sDec</code></td>
+<td>
+<p>The parameter for the set on which we want to decide. It should be a subset of {1,2,3,...,<code class="reqn">2^n</code>}, where <code class="reqn">n</code> is the number of elements in <code class="reqn">\Theta</code>. If criterion 6 is used, it should be given; Otherwise it will be set as the default value <code class="reqn">2^\Theta</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>The parameter for the used matrix in Jousselme distance. If criterion 6 is used, it should be given. Otherwise it will be  set as default
+Otherwise it will be calculated.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The decision vector. E.g., in classification problem, class labels.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">m1=c(0,0.4, 0.1, 0.2, 0.2, 0, 0, 0.1);
+m2=c(0,0.2, 0.3, 0.1, 0.1, 0, 0.2, 0.1);
+m3=c(0.1,0.2, 0, 0.1, 0.1, 0.1, 0, 0.3);
+
+m3d=discounting(m3,0.95);
+
+M_comb_Smets=DST(cbind(m1,m2,m3d),1);
+M_comb_PCR6=DST(cbind(m1,m2),8);
+
+class_fusion=decisionDST(M_comb_Smets,1)
+class_fusion=decisionDST(M_comb_PCR6,1)
+class_fusion=decisionDST(M_comb_Smets,5,0.5)
+class_fusion=decisionDST(cbind(M_comb_Smets,M_comb_PCR6),1)
+sDec&lt;-c(2,3,4)
+class_fusion=decisionDST(M_comb_Smets,6, sDec = sDec)
+
+</code></pre>
+
+
+</div>

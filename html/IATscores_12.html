@@ -1,0 +1,401 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>RobustScores</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Compute the Robust IAT scores
+</h2>
+
+<h3>Description</h3>
+
+<p>This is the main function of the package. It allows to compute many variants of the robust IAT scores all with a single command.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">RobustScores(IATdata,
+P1 = c("none", "fxtrim", "fxwins", "trim10", "wins10", "inve10"),
+P2 = c("ignore", "exclude", "recode", "separate", "recode600"),
+P3 = c("dscore", "gscore", "wpr90", "minid", "minid_t10", "minid_w10",
+"minid_i10"),
+P4 = c("nodist", "dist"), maxMemory = 1000,
+verbose = TRUE,
+autoremove = TRUE)
+
+D2(IATdata, ...)
+D5(IATdata, ...)
+D6(IATdata, ...)
+D2SWND(IATdata, ...)
+D5SWND(IATdata, ...)
+D6SWND(IATdata, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>IATdata</code></td>
+<td>
+
+<p>a dataframe with the following columns:
+</p>
+
+<ul>
+<li> <p><code>subject</code>: (factor or coercible to factor). Univocally identifies a participant.
+</p>
+</li>
+<li> <p><code>correct</code>: (logical). has value <code>TRUE</code> or <code>1</code> if the trial was answered correctly, <code>FALSE</code> or <code>0</code> otherwise.
+</p>
+</li>
+<li> <p><code>latency</code>: (numeric). Response latency, in ms. 
+</p>
+</li>
+<li> <p><code>blockcode</code>: (factor or string). Can assume only two values, <code>"pair1"</code> and <code>"pair2"</code>. <code>"pair1"</code> is for one critical block and <code>"pair2"</code> is the other critical block.
+</p>
+</li>
+<li> <p><code>praccrit</code>. (factor, optional). Can assume only two values, <code>"prac"</code> is for practice combined categorization block and <code>"crit"</code> is for critical combined categorization block. In a IAT with 60 trials for each double categorization block, the first 20 are sometimes administered as practice block, the other 40 as critical.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>P1</code></td>
+<td>
+<p>(Vector of strings). Determines how the latencies are treated for computing the scores. Can include one or more of the following strings. It is worth noticing that latencies &gt; 10s are excluded by default, independent of P1.
+</p>
+
+<ol>
+<li> <p><code>"none"</code>: Do nothing.
+</p>
+</li>
+<li> <p><code>"fxtrim"</code>: Trim values &lt; 400ms
+</p>
+</li>
+<li>
+<p>"fxwins": Values &lt; 300ms assume the value 300ms and values &gt; 3000ms assume the value 3000ms
+</p>
+</li>
+<li> <p><code>"trim10"</code>: 10% trimming
+</p>
+</li>
+<li> <p><code>"wins10"</code>: 10% winsorizing
+</p>
+</li>
+<li> <p><code>"inve10"</code>: 10% inverse trimming (i.e., trim central values)
+</p>
+</li>
+</ol>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>P2</code></td>
+<td>
+<p>(Vector of strings). Determines how the error latencies are treated. Can include one or more of the following strings.
+</p>
+
+<ol>
+<li> <p><code>"ignore"</code>: Disregard the correct-error distinction, treat all the latencies as if they were correct latencies.
+</p>
+</li>
+<li> <p><code>"exclude"</code>: Remove error latencies and consider only the correct ones.
+</p>
+</li>
+<li> <p><code>"recode"</code>: Recode the error latencies with the M+2SD of correct latencies. In the computation of the M and of the SD, all correct latencies are considered that are &lt; 10s.
+</p>
+</li>
+<li> <p><code>"separate"</code>: Apply parameter P1 separately for correct and error latencies. Notice that for parameter 1 equal to "none", "fxtrim", and "fxwins", if P4 = "ignore" and P4 = "separate", the result is the same.)
+</p>
+</li>
+<li> <p><code>"recode600"</code>: Recode the error latencies with the the mean of correct latencies + 600ms. In the computation of the Mean, all correct latencies are considered that are &lt; 10s.
+</p>
+</li>
+</ol>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>P3</code></td>
+<td>
+<p>The algorithm for computing the Dscores. Can include one or more of the following strings.
+</p>
+
+<ol>
+<li> <p><code>"dscore"</code>. Compute the Dscores as M pair2 - Mpair1 / pooled SD.
+</p>
+</li>
+<li> <p><code>"gscore"</code>. Compute the Gscores, as shown in Nosek, Bar-Anan, Sriram, &amp; Greenwald (2013).
+</p>
+</li>
+<li> <p><code>"wpr90"</code>. Compute the scores based on the worst-performance-rule, which are the same as the Dscores, but instead of the mean, the 90th percentile is used in the numerator.
+</p>
+</li>
+<li> <p><code>minid</code>. Compute the minidifferences, i.e., the differences between any latency in pair2 and any latency in pair1. Then compute the IAT scores as the Mean of the minidifferences, divided by their SD.
+</p>
+</li>
+<li> <p><code>minid_t10</code>. Compute the 10% trimmed minidifferences, which are identical to the minidiffernces, but instead of the mean, the 10% trimmed mean is used.
+</p>
+</li>
+<li> <p><code>"minid_w10"</code> Compute the 10% winsorized minidifferences, which are as the minidifferences, but instead of the mean, the 10% winsorized mean is used.
+</p>
+</li>
+<li> <p><code>"minid_i10"</code> Compute the 10% inverse_trimmed minidifferences, which are as the minidifferences, but instead of the mean, the 10% inverse trimmed mean is used.
+</p>
+</li>
+</ol>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>P4</code></td>
+<td>
+<p>Distinguish the practice and the critical blocks, as specified by column <code>praccrit</code> in the <code>IATdata</code>, or do not.
+</p>
+
+<ol>
+<li> <p><code>"nodist"</code> no distinction between practice and critical blocks. no distinction is made between practice and critical blocks and the IAT scores are computed using all trials together.
+</p>
+</li>
+<li> <p><code>"dist"</code> compute the IAT scores as the average IAT score computed. the scores are computed on practice and critical blocks separately: the total score is then computedc as the average of the two IAT scores.
+</p>
+</li>
+</ol>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxMemory</code></td>
+<td>
+
+<p>In computing the minidifferences, a very large dataframe is required. <code>maxMemory</code> specifies the maximum size of this dataframe, in MB. This limit is respected by "slicing" the dataset and computing the scores separately for many subsets of participants. This can slow the computation a bit, but prevents RAM overflows.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>if <code>TRUE</code>, Print the time at which several operations are performed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>autoremove</code></td>
+<td>
+<p>if <code>TRUE</code> (the default), participants with less than 3 correct responses with latency between 400ms and 10s in each block are excluded from the analyses. Disabling this option can result in computing some variants of IAT scores on too few trials and it can lead to errors and missing values. Change this parameter to <code>FALSE</code> only if you know what you are doing.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments for <code>RobustScores</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A precise description of the parameters can be found in Richetin et al. (2015, Table 1).
+The procedure for computing the scores is the following.
+</p>
+
+<ol>
+<li>
+<p> First parameter P4 is applied: for <code>"nodist"</code> the whole dataset is given as input, for <code>"dist"</code> the dataset is first split in two parts according to column <code>praccrit</code> and then given in input.
+</p>
+</li>
+<li>
+<p> Second, the parameter P1 and P2 are applied: correct and error latencies are treated for each combinations of P1 and P2 and a new column is internally created.
+</p>
+</li>
+<li>
+<p> Third, parameter P3 is applied. On each and every vector of latencies defined by a combination of P1 and P2, the IAT scores are computed using all the methods specified in P3.
+</p>
+</li>
+<li>
+<p> Finally, for P4 = <code>"dist"</code>, the scores computed i the practice and critical blocks are averaged.
+</p>
+</li>
+</ol>
+<p>Functions <code>D2</code>, <code>D5</code>, and <code>D6</code> are simple wrappers around RobustScores that allow computing the D2, D5, and D6 scores shown in Greenwald et al. (2003).
+Similarly, <code>D2SWND</code>, <code>D5SWND</code>, and <code>D6SWND</code> allow computing the same D2, D5, and D6 scores with the improvements proposed by Richetin et al. (2015): use of statistical winsorizing (SW) and no distinction (ND) between practice and critical blocks.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A dataframe with as many columns as subjects, and as many rows as the possible combinations of the parameters P1, P2, P3 and P4.
+</p>
+<table><tr style="vertical-align: top;">
+<td><code>subject</code></td>
+<td>
+<p>The identifier of the participant</p>
+</td>
+</tr></table>
+<p>.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>p1342</code></td>
+<td>
+<p>The IAT score variants computed. Each number after the p indicates the value of the parameter corresponding to the position. For instance <code>p1342</code> indicates that parameter P1 has value 1 (i.e. <code>"none"</code>), parameter P2 has value 3, i.e., <code>recode</code>, parameter P3 has value 4 (i.e., <code>"minid"</code>) and parameter P4 has value 2 (i.e. <code>"dist"</code>). This naming convention was adopted to allow to immediately and precisely know what has been done by reading the name of the score.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other columns in the form <code>pxxxx</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Giulio Costantini
+</p>
+
+
+<h3>References</h3>
+
+<p>Greenwald, A. G., Nosek, B. A., &amp; Banaji, M. R. (2003). Understanding and using the Implicit Association Test: I. An improved scoring algorithm. Journal of Personality and Social Psychology, 85(2), 197-216. doi:10.1037/0022-3514.85.2.197 <br><br>
+Nosek, B. A., Bar-Anan, Y., Sriram, N., &amp; Greenwald, A. G. (2013). Understanding and Using the Brief Implicit Association Test: I. Recommended Scoring Procedures. SSRN Electronic Journal. doi:10.2139/ssrn.2196002 <br><br>
+Richetin, J., Costantini, G., Perugini, M., Schonbrodt, F. (in press). Should we stop looking for a better scoring algorithm for handling Implicit Association Test data? Test of the role of errors, extreme latencies treatment, scoring formula, and practice trials on reliability and validity. PLoS ONE.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>SplitHalf</code>, <code>alg2param</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#### generate random IAT data ####
+set.seed(1234)
+rawIATdata &lt;- data.frame(
+  # ID of each participant (N = 10)
+  ID = rep(1:10, each = 180), 
+  # seven-block structure, as in Greenwald, Nosek &amp; Banaji (2003)
+  # block 1 = target discrimination (e.g., Bush vs. Gore items)
+  # block 2 = attribute discrimination (e.g., Pleasant words vs. unpleasant)
+  # block 3 = combined practice (e.g., Bush + pleasant vs. Gore + unpleasant)
+  # block 4 = combined critical  (e.g., Bush + pleasant vs. Gore + unpleasant)
+  # block 5 = reversed target discrimination (e.g., Gore vs. Bush)
+  # block 6 = reversed combined practice (e.g., Gore + pleasant vs. Bush + unpleasant)
+  # block 7 = reversed combined critical (e.g., Gore + pleasant vs. Bush + unpleasant)
+  block = rep(c(rep(1:3, each = 20),
+                rep(4, 40),
+                rep(5:6, each = 20),
+                rep(7, 40)), 10),
+  # expected proportion of errors = 10 percent
+  correct = sample(c(0, 1), size = 1800, replace = TRUE, prob = c(.2, .8)),
+  # reaction times are generated from a mix of two chi2 distributions,
+  # one centered on 550ms and one on 100ms to simulate fast latencies
+  latency = round(sample(c(rchisq(1500, df = 1, ncp = 550),
+                           rchisq(300, df = 1, ncp = 100)), 1800)))
+
+# add some IAT effect by making trials longer in block 6 and 7
+rawIATdata[rawIATdata$block &gt;= 6, "latency"] &lt;- 
+  rawIATdata[rawIATdata$block &gt;= 6, "latency"] + 100
+  
+# add some more effect for subjects 1 to 5
+rawIATdata[rawIATdata$block &gt;= 6 &amp;
+             rawIATdata$ID &lt;= 5, "latency"] &lt;- 
+  rawIATdata[rawIATdata$block &gt;= 6 &amp;
+             rawIATdata$ID &lt;= 5, "latency"] + 100
+               
+#### pretreat IAT data using function Pretreatment ####
+IATdata &lt;- Pretreatment(rawIATdata,
+                             label_subject = "ID",
+                          label_latency = "latency",
+                          label_accuracy = "correct",
+                          label_block = "block",
+                          block_pair1 = c(3, 4),
+                          block_pair2 = c(6, 7),
+                          label_praccrit = "block",
+                          block_prac = c(3, 6),
+                          block_crit = c(4, 7))
+
+
+#### Compute Greenwald et al.'s (2003, Table 3) D2, D5, and D6 measures ####
+# All scores are computed both with the RobustScores and with
+# the wrappers D2, D5, and D6. Results are identical
+
+# D2 scores
+D2(IATdata, verbose = FALSE)
+RobustScores(IATdata = IATdata,
+             P1 = "fxtrim",
+             P2 = "ignore",
+             P3 = "dscore",
+             P4 = "dist",
+             verbose = FALSE)
+
+# D5 scores
+D5(IATdata, verbose = FALSE)
+RobustScores(IATdata = IATdata,
+             P1 = "fxtrim",
+             P2 = "recode",
+             P3 = "dscore",
+             P4 = "dist",
+             verbose = FALSE)
+
+# D6 scores
+D6(IATdata, verbose = FALSE)
+RobustScores(IATdata = IATdata,
+             P1 = "fxtrim",
+             P2 = "recode600",
+             P3 = "dscore",
+             P4 = "dist",
+             verbose = FALSE)
+
+#### Compute D scores with improvements by Richetin et al. (2015, p. 20) ####
+# "In this perspective, we examined whether the D2 for built-in penalty and the
+# D5 and D6 for no built-in penalty could benefit from the inclusion of two
+# elements that stand out from the results. Within their respective parameter,
+# the Statistical Winsorizing as a treatment for extreme latencies and No 
+# distinction between practice and test trials when computing the difference
+# between the two critical blocks seem to lead to the best performances". 
+
+# All scores are computed both with the RobustScores and with
+# the wrappers D2SWND, D5SWND, and D6SWND. Results are identical
+
+
+# D2SWND scores
+D2SWND(IATdata, verbose = FALSE)
+RobustScores(IATdata = IATdata,
+             P1 = "wins10",
+             P2 = "ignore",
+             P3 = "dscore",
+             P4 = "nodist",
+             verbose = FALSE)
+
+# D5_SWND scores
+D5SWND(IATdata, verbose = FALSE)
+RobustScores(IATdata = IATdata,
+             P1 = "wins10",
+             P2 = "recode",
+             P3 = "dscore",
+             P4 = "nodist",
+             verbose = FALSE)
+
+# D6_SWND scores
+D6SWND(IATdata, verbose = FALSE)
+RobustScores(IATdata = IATdata,
+             P1 = "wins10",
+             P2 = "recode600",
+             P3 = "dscore",
+             P4 = "nodist",
+             verbose = FALSE)
+
+
+
+  #### Compute all 421 combinations of IAT scores ####
+  # 421 are the combinations given by parameters P1, P2, P3, and P4. For
+  # details, see Richetin et al. (2015)
+  allIATscores &lt;- RobustScores(IATdata = IATdata)
+
+</code></pre>
+
+
+</div>

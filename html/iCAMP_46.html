@@ -1,0 +1,166 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>qpen.test</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Summary and comparison of QPEN results based on bootstrapping
+</h2>
+
+<h3>Description</h3>
+
+<p>Bootstrapping analysis of the results from QPEN (quantifying assembly processes based on entire-community null model analysis, Stegen et al 2013, 2015), to estimate the mean and variation of each index and each process influence in each group, and calculate the significance of the difference between groups.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">qpen.test(qpen.result, treat, rand.time = 1000,
+          between.group = FALSE, out.detail = TRUE,
+          silent = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>qpen.result</code></td>
+<td>
+<p>the output of the function 'qpen', or the element 'result' (data.frame) in qpen output.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treat</code></td>
+<td>
+<p>matrix or data.frame, each column indicates the group or treatment of each sample, rownames are sample IDs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rand.time</code></td>
+<td>
+<p>integer, bootstrapping times. default is 1000.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>between.group</code></td>
+<td>
+<p>logic. if True, the turnovers between each pair of treatments will also be calculated as a group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>out.detail</code></td>
+<td>
+<p>logic. if True, the 'qpen' results and the bootstrapping results in each group will also be output.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>silent</code></td>
+<td>
+<p>logic. if FALSE, some messages will show during calculation.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Basically use bootstrapping of samples to estimate the variation of each index's mean and relative importance of each process in each group, as well as the effect size and signficance of the difference between different groups.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Output is a list.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>obs.summary</code></td>
+<td>
+<p>the mean, standarded deviation, quartile, and boxplot elements for each observed index (e.g. bMNTD, bNTI, etc.) in each group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.summary</code></td>
+<td>
+<p>the mean, standarded deviation, quartile, and boxplot elements of the average level of each index and the estimated relative importance of each process in each group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>compare</code></td>
+<td>
+<p>The relative difference, Cohen's d, and P value of the difference of each index or each process importance between different groups.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group.results.detail</code></td>
+<td>
+<p>the qpen results in each group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boot.detail</code></td>
+<td>
+<p>the average value of each index or estimated relative importanc of each process in each group in each time of bootstrapping.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Version 2: 2021.6.9 speed up transformation for a huge number of comparisons by using package data.table.
+Version 1: 2021.4.15 include the function into package iCAMP.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Daliang Ning
+</p>
+
+
+<h3>References</h3>
+
+<p>Ning, D., Yuan, M., Wu, L., Zhang, Y., Guo, X., Zhou, X. et al. (2020). A quantitative framework reveals ecological drivers of grassland microbial community assembly in response to warming. Nature Communications, 11, 4717.
+</p>
+<p>Stegen, J.C., Lin, X., Fredrickson, J.K., Chen, X., Kennedy, D.W., Murray, C.J. et al. (2013). Quantifying community assembly processes and identifying features that impose them. ISME J, 7, 2069.
+</p>
+<p>Stegen, J.C., Lin, X., Fredrickson, J.K. &amp; Konopka, A.E. (2015). Estimating and mapping ecological processes influencing microbial community assembly. Front Microbiol, 6, 370.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>qpen</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("example.data")
+comm=example.data$comm
+tree=example.data$tree
+treat=example.data$treat
+# since pdist.big need to save output to a certain folder,
+# the following code is set as 'not test'.
+# but you may test the code on your computer
+# after change the folder path for 'save.wd'.
+
+  wd0=getwd()
+  nworker=2 # parallel computing thread number
+  rand.time=5 # usually use 1000 for real data.
+  
+  # for a big dataset, pdist.big may be used
+  save.wd=paste0(tempdir(),"/pdbig.qpen.test")
+  # please change to the folder you want to save the pd.big output.
+  
+  pd.big=pdist.big(tree = tree, wd=save.wd, nworker = nworker)
+  qp2=qpen(comm=comm, pd=pd.big$pd.file, pd.big.wd=pd.big$pd.wd,
+           pd.big.spname=pd.big$tip.label, tree=tree,
+           rand.time=rand.time, nworker=nworker)
+
+  qptest=qpen.test(qpen.result=qp2, treat=treat)
+  setwd(wd0)
+
+</code></pre>
+
+
+</div>

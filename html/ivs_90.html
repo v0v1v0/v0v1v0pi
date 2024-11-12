@@ -1,0 +1,345 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>vector-locate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Locate relationships between a vector and an iv</h2>
+
+<h3>Description</h3>
+
+<p>This family of functions locates different types of relationships between a
+vector and an iv. It works similar to <code>base::match()</code>, where <code>needles[i]</code>
+checks for a match in all of <code>haystack</code>. Unlike <code>match()</code>, <em>all</em> matches are
+returned, rather than just the first.
+</p>
+
+<ul>
+<li> <p><code>iv_locate_between()</code> locates where <code>needles</code>, a vector, falls between the
+bounds of <code>haystack</code>, an iv.
+</p>
+</li>
+<li> <p><code>iv_locate_includes()</code> locates where <code>needles</code>, an iv, includes the values
+of <code>haystack</code>, a vector.
+</p>
+</li>
+</ul>
+<p>These functions return a two column data frame. The <code>needles</code> column is an
+integer vector pointing to locations in <code>needles</code>. The <code>haystack</code> column is
+an integer vector pointing to locations in <code>haystack</code> with a match.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iv_locate_between(
+  needles,
+  haystack,
+  ...,
+  missing = "equals",
+  no_match = NA_integer_,
+  remaining = "drop",
+  multiple = "all",
+  relationship = "none"
+)
+
+iv_locate_includes(
+  needles,
+  haystack,
+  ...,
+  missing = "equals",
+  no_match = NA_integer_,
+  remaining = "drop",
+  multiple = "all",
+  relationship = "none"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>needles, haystack</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[vector, iv]⁠</code>
+</p>
+<p>For <code style="white-space: pre;">⁠iv_*_between()⁠</code>, <code>needles</code> should be a vector and <code>haystack</code> should be
+an iv.
+</p>
+<p>For <code style="white-space: pre;">⁠iv_*_includes()⁠</code>, <code>needles</code> should be an iv and <code>haystack</code> should be
+a vector.
+</p>
+
+<ul>
+<li>
+<p> Each element of <code>needles</code> represents the value / interval to match.
+</p>
+</li>
+<li> <p><code>haystack</code> represents the values / intervals to match against.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>These dots are for future extensions and must be empty.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>missing</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[integer(1) / "equals" / "drop" / "error"]⁠</code>
+</p>
+<p>Handling of missing values in <code>needles</code>.
+</p>
+
+<ul>
+<li> <p><code>"equals"</code> considers missing values in <code>needles</code> as exactly equal
+to missing values in <code>haystack</code> when determining if there is a
+matching relationship between them.
+</p>
+</li>
+<li> <p><code>"drop"</code> drops missing values in <code>needles</code> from the result.
+</p>
+</li>
+<li> <p><code>"error"</code> throws an error if any values in <code>needles</code> are missing.
+</p>
+</li>
+<li>
+<p> If a single integer is provided, this represents the value returned in
+the <code>haystack</code> column for values in <code>needles</code> that are missing.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>no_match</code></td>
+<td>
+<p>Handling of <code>needles</code> without a match.
+</p>
+
+<ul>
+<li> <p><code>"drop"</code> drops <code>needles</code> with zero matches from the result.
+</p>
+</li>
+<li> <p><code>"error"</code> throws an error if any <code>needles</code> have zero matches.
+</p>
+</li>
+<li>
+<p> If a single integer is provided, this represents the value returned in
+the <code>haystack</code> column for values of <code>needles</code> that have zero matches. The
+default represents an unmatched needle with <code>NA</code>.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>remaining</code></td>
+<td>
+<p>Handling of <code>haystack</code> values that <code>needles</code> never matched.
+</p>
+
+<ul>
+<li> <p><code>"drop"</code> drops remaining <code>haystack</code> values from the result.
+Typically, this is the desired behavior if you only care when <code>needles</code>
+has a match.
+</p>
+</li>
+<li> <p><code>"error"</code> throws an error if there are any remaining <code>haystack</code>
+values.
+</p>
+</li>
+<li>
+<p> If a single integer is provided (often <code>NA</code>), this represents the value
+returned in the <code>needles</code> column for the remaining <code>haystack</code> values
+that <code>needles</code> never matched. Remaining <code>haystack</code> values are always
+returned at the end of the result.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>multiple</code></td>
+<td>
+<p>Handling of <code>needles</code> with multiple matches. For each needle:
+</p>
+
+<ul>
+<li> <p><code>"all"</code> returns all matches detected in <code>haystack</code>.
+</p>
+</li>
+<li> <p><code>"any"</code> returns any match detected in <code>haystack</code> with no guarantees on
+which match will be returned. It is often faster than <code>"first"</code> and
+<code>"last"</code> if you just need to detect if there is at least one match.
+</p>
+</li>
+<li> <p><code>"first"</code> returns the first match detected in <code>haystack</code>.
+</p>
+</li>
+<li> <p><code>"last"</code> returns the last match detected in <code>haystack</code>.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>relationship</code></td>
+<td>
+<p>Handling of the expected relationship between
+<code>needles</code> and <code>haystack</code>. If the expectations chosen from the list below
+are invalidated, an error is thrown.
+</p>
+
+<ul>
+<li> <p><code>"none"</code> doesn't perform any relationship checks.
+</p>
+</li>
+<li> <p><code>"one-to-one"</code> expects:
+</p>
+
+<ul>
+<li>
+<p> Each value in <code>needles</code> matches at most 1 value in <code>haystack</code>.
+</p>
+</li>
+<li>
+<p> Each value in <code>haystack</code> matches at most 1 value in <code>needles</code>.
+</p>
+</li>
+</ul>
+</li>
+<li> <p><code>"one-to-many"</code> expects:
+</p>
+
+<ul>
+<li>
+<p> Each value in <code>needles</code> matches any number of values in <code>haystack</code>.
+</p>
+</li>
+<li>
+<p> Each value in <code>haystack</code> matches at most 1 value in <code>needles</code>.
+</p>
+</li>
+</ul>
+</li>
+<li> <p><code>"many-to-one"</code> expects:
+</p>
+
+<ul>
+<li>
+<p> Each value in <code>needles</code> matches at most 1 value in <code>haystack</code>.
+</p>
+</li>
+<li>
+<p> Each value in <code>haystack</code> matches any number of values in <code>needles</code>.
+</p>
+</li>
+</ul>
+</li>
+<li> <p><code>"many-to-many"</code> expects:
+</p>
+
+<ul>
+<li>
+<p> Each value in <code>needles</code> matches any number of values in <code>haystack</code>.
+</p>
+</li>
+<li>
+<p> Each value in <code>haystack</code> matches any number of values in <code>needles</code>.
+</p>
+</li>
+</ul>
+<p>This performs no checks, and is identical to <code>"none"</code>, but is provided to
+allow you to be explicit about this relationship if you know it exists.
+</p>
+</li>
+<li> <p><code>"warn-many-to-many"</code> doesn't assume there is any known relationship, but
+will warn if <code>needles</code> and <code>haystack</code> have a many-to-many relationship
+(which is typically unexpected), encouraging you to either take a closer
+look at your inputs or make this relationship explicit by specifying
+<code>"many-to-many"</code>.
+</p>
+</li>
+</ul>
+<p><code>relationship</code> is applied after <code>filter</code> and <code>multiple</code> to allow potential
+multiple matches to be filtered out first.
+</p>
+<p><code>relationship</code> doesn't handle cases where there are zero matches. For that,
+see <code>no_match</code> and <code>remaining</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A data frame containing two integer columns named <code>needles</code> and <code>haystack</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Locating relationships
+</p>
+<p>Detect relationships between a vector and an iv
+</p>
+<p>Pairwise detect relationships between a vector and an iv
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x &lt;- as.Date(c("2019-01-05", "2019-01-10", "2019-01-07", "2019-01-20"))
+
+y &lt;- iv_pairs(
+  as.Date(c("2019-01-01", "2019-01-03")),
+  as.Date(c("2019-01-04", "2019-01-08")),
+  as.Date(c("2019-01-07", "2019-01-09")),
+  as.Date(c("2019-01-10", "2019-01-20")),
+  as.Date(c("2019-01-15", "2019-01-20"))
+)
+
+x
+y
+
+# Find any location where `x` is between the intervals in `y`
+loc &lt;- iv_locate_between(x, y)
+loc
+
+iv_align(x, y, locations = loc)
+
+# Find any location where `y` includes the values in `x`
+loc &lt;- iv_locate_includes(y, x)
+loc
+
+iv_align(y, x, locations = loc)
+
+# Drop values in `x` without a match
+loc &lt;- iv_locate_between(x, y, no_match = "drop")
+loc
+
+iv_align(x, y, locations = loc)
+
+# ---------------------------------------------------------------------------
+
+a &lt;- c(1, NA)
+b &lt;- iv(c(NA, NA), c(NA, NA))
+
+# By default, missing values in `needles` are treated as being exactly
+# equal to missing values in `haystack`, so the missing value in `a` is
+# considered between the missing interval in `b`.
+iv_locate_between(a, b)
+iv_locate_includes(b, a)
+
+# If you'd like missing values in `needles` to always be considered
+# unmatched, set `missing = NA`
+iv_locate_between(a, b, missing = NA)
+iv_locate_includes(b, a, missing = NA)
+</code></pre>
+
+
+</div>

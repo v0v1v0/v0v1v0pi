@@ -1,0 +1,96 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>correlationMetric</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Correlation between channels</h2>
+
+<h3>Description</h3>
+
+<p>The correlationMetric() function calculates the correlation between two streams of seismic data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">correlationMetric(st1, st2)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>st1</code></td>
+<td>
+<p>a <code>Stream</code> object containing a seismic signal</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>st2</code></td>
+<td>
+<p>a <code>Stream</code> object containing a seismic signal</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The correlation returned is a value in the range [0-1]. This 'pearson r' correlation
+is  a measure of the strength and direction of the linear relationship between two
+variables that is defined as the (sample) covariance of the variables divided by the
+product of their (sample) standard deviations.
+</p>
+<p>Missing values are handled by casewise deletion with the following R code:
+</p>
+<pre>
+cor(x,y,use="na.or.complete")
+</pre>
+
+
+<h3>Value</h3>
+
+<p>A list with a single <code>SingleValueMetric</code> object is returned.
+The metric name is <code>cross_talk</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Seismic streams passed to <code>correlationMetric</code> must have the same network and station,
+must cover the same time range and must have the same sampling rate.
+</p>
+<p>The metricList generated for this two-channel metric will have a SNCL code of the form:
+<code>N.S.L1:L2.C1:C2.Q</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  ## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+# Get seismic traces
+starttime &lt;- as.POSIXct("2013-03-01", tz="GMT")
+endtime &lt;- as.POSIXct("2013-03-02",tz="GMT")
+stZ &lt;- getDataselect(iris,"IU","ANMO","00","BHZ",starttime,endtime,inclusiveEnd=FALSE)
+st1 &lt;- getDataselect(iris,"IU","ANMO","00","BH1",starttime,endtime,inclusiveEnd=FALSE)
+st2 &lt;- getDataselect(iris,"IU","ANMO","00","BH2",starttime,endtime,inclusiveEnd=FALSE)
+
+# Calculate correlationMetric
+correlationMetric(stZ,st1)[[1]]
+correlationMetric(stZ,st2)[[1]]
+correlationMetric(st1,st2)[[1]]
+  
+## End(Not run)
+</code></pre>
+
+
+</div>

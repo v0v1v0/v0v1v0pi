@@ -1,0 +1,212 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>IPW.boxplot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Boxplot adapted to missing values
+</h2>
+
+<h3>Description</h3>
+
+<p>The function draws a modified boxplot adapted to missing values. The drop-out probabilities can be given by the practitioner or  fitted through a logistic model using auxiliary covariates.
+The function returns the usual boxplot of the available data as well as a modified plot which takes into account the missing data model and weights the observations using the estimated/given propensity.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">IPW.boxplot(y,px=NULL,x=NULL,graph=c("IPW","both"),
+names=c("IPW  Boxplot", "NAIVE  Boxplot"), size.letter=1.2,
+lim.inf=NULL,lim.sup=NULL,main=" ",xlab = " ", ylab =" ",color="black")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>  Numerical vector of length n with possible missing values codified by NA or NAN.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>px</code></td>
+<td>
+<p>Optional. Numerical vector of drop-out probabilities. If not provided a logistic fit is performed using <code>x</code> as predictive variable. Missing values are not admitted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>  	Optional. The matrix of fully observed variables used to estimate the missing model with dimension nrows=n and ncol=p. Missing values are not admitted. One of the vectors px or x must be supplied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>graph</code></td>
+<td>
+<p>   Optional. Character string indicating if the plot contains two boxplots ("both") or only the boxplot computed with the inverse probability weighted quantiles("IPW"). 	The default is "IPW".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>names</code></td>
+<td>
+<p>  	Optional. Character string to name the boxplots. The default is "IPW  Boxplot", when <code>graph="IPW"</code> and
+c("IPW  Boxplot",   "NAIVE  Boxplot") when <code>graph="both"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>size.letter</code></td>
+<td>
+<p>  	Optional. The font size of names. Default value is 1.2</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lim.inf</code></td>
+<td>
+<p>  	Optional. The lower limit of the plot if supplied by the user.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lim.sup</code></td>
+<td>
+<p> Optional. The upper limit of the plot if supplied by the user.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p> Optional. Character string to title the plot. By default no main title is given.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>Optional. Character string to indicate the label of the horizontal axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p> 	Optional. Character string to indicate the label of the vertical axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>color</code></td>
+<td>
+<p>  Optional. Color for the IPW Boxplot.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function draws boxplots designed to adjust for missing values. The propensity can be supplied by the user or estimated through a logistic model from given covariates.
+</p>
+<p>The function plots as default a modified boxplot based on the inverse probability weighted (IPW) quantiles adapting for missing observations as in Zhang et al.(2012).
+</p>
+<p>By specifying <code>graph = "both"</code>, the function displays two parallel boxplots. The boxplot on the left corresponds to the IPW boxplot adapted for missingness, while on the right, the naive boxplot, i.e., the usual boxplot simply computed with the observations <code>y</code> at hand, is displayed.
+</p>
+<p>The user can supply a vector of probabilities <code>px</code> or a set of covariates <code>x</code> to estimate it.
+When both <code>px</code> and <code>x</code> are supplied, the IPW.boxplot is executed using <code>px</code>. When <code>px</code> is not supplied, it is estimated assuming a logistic model depending on the covariates <code>x</code> .
+For more details, see Bianco et al. (2018).
+</p>
+
+
+<h3>Value</h3>
+
+<p>The output of the function is a list with components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>px </code></td>
+<td>
+<p>Numerical vector of probabilities.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>IPW.Quartiles</code></td>
+<td>
+<p>Numerical vector of inverse probability weighted quartiles.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>IPW.whisker</code></td>
+<td>
+<p>Numerical vector of lower and upper whiskers calculated from IPW quartiles.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>out.IPW </code></td>
+<td>
+<p>Numerical vector of data points detected as atypical by the IPW boxplot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code> NAIVE.Quartiles </code></td>
+<td>
+<p>Numerical vector of naive quartiles computed from the subset of non-missing values of <code>y</code>. Returned only when graph="both".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>NAIVE.whisker </code></td>
+<td>
+<p>Numerical vector of lower and upper whiskers obtained from the naive quantiles. Returned only when graph="both".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>out.NAIVE </code></td>
+<td>
+<p>Numerical vector of data points detected as atypical by the naive boxplot. Returned only when graph="both".</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>The missing values of <code>y</code> must be codified as  NA or NAN.
+</p>
+<p>The numerical vector <code>px</code> and the matrix of covariates <code>x</code> must be fully observed.  <code>px</code> or  <code>x</code> must be supplied by the user.
+</p>
+<p>The lengths of <code>y</code>, <code>px</code>, and <code>nrow(x)</code> must be equal.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Ana Maria Bianco &lt;abianco@dm.uba.ar&gt;, Graciela Boente &lt;gboente@dm.uba.ar&gt; and Ana Perez-Gonzalez &lt;anapg@uvigo.es&gt;.</p>
+
+
+<h3>References</h3>
+
+<p>Bianco, A. M., Boente, G., and Perez-Gonzalez, A. (2018). A boxplot adapted to missing values: an R function when predictive covariates are available. Submitted.<br><br></p>
+<p>Zhang, Z., Chen, Z., Troendle, J. F. and Zhang, J. (2012). Causal inference on quantiles with an obstetric application. Biometrics, 68, 697-706. <br><br></p>
+
+
+<h3>See Also</h3>
+
+<p>IPW.quantile, IPW.ASYM.Boxplot
+
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+## A real data example
+
+library(mice)
+data(boys)
+attach(boys)
+
+res1=IPW.boxplot(tv,x=age,main="IPW boxplot of the testicular volume")
+
+
+# We  can compare the naive and IPW boxplots
+res2=IPW.boxplot(tv,x=age,graph="both",main=" ")
+
+</code></pre>
+
+
+</div>

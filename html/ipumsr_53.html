@@ -1,0 +1,131 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ipums_shape_join</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Join tabular data to geographic boundaries</h2>
+
+<h3>Description</h3>
+
+<p>These functions are analogous to dplyr's joins, except
+that:
+</p>
+
+<ul>
+<li>
+<p> They operate on a data frame and an <code>sf</code> object
+</p>
+</li>
+<li>
+<p> They retain the variable attributes provided in IPUMS files and loaded
+by ipumsr data-reading functions
+</p>
+</li>
+<li>
+<p> They handle minor incompatibilities between attributes in spatial and
+tabular data that emerge in some IPUMS files
+</p>
+</li>
+</ul>
+<h3>Usage</h3>
+
+<pre><code class="language-R">ipums_shape_left_join(
+  data,
+  shape_data,
+  by,
+  suffix = c("", "SHAPE"),
+  verbose = TRUE
+)
+
+ipums_shape_right_join(
+  data,
+  shape_data,
+  by,
+  suffix = c("", "SHAPE"),
+  verbose = TRUE
+)
+
+ipums_shape_inner_join(
+  data,
+  shape_data,
+  by,
+  suffix = c("", "SHAPE"),
+  verbose = TRUE
+)
+
+ipums_shape_full_join(
+  data,
+  shape_data,
+  by,
+  suffix = c("", "SHAPE"),
+  verbose = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A tibble or data frame. Typically, this will contain data that
+has been aggregated to a specific geographic level.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shape_data</code></td>
+<td>
+<p>An <code>sf</code> object loaded with <code>read_ipums_sf()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>by</code></td>
+<td>
+<p>Character vector of variables to join by. See <code>dplyr::left_join()</code>
+for syntax.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>suffix</code></td>
+<td>
+<p>If there are non-joined duplicate variables in the two
+data sources, these suffixes will be added to the output to disambiguate
+them. Should be a character vector of length 2.
+</p>
+<p>Defaults to adding the <code>"SHAPE"</code> suffix to duplicated variables in
+<code>shape_file</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>If <code>TRUE</code>, display information about any geometries that were
+unmatched during the join.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An <code>sf</code> object containing the joined data
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data &lt;- read_nhgis(
+  ipums_example("nhgis0972_csv.zip"),
+  verbose = FALSE
+)
+
+sf_data &lt;- read_ipums_sf(ipums_example("nhgis0972_shape_small.zip"))
+joined_data &lt;- ipums_shape_inner_join(data, sf_data, by = "GISJOIN")
+
+colnames(joined_data)
+
+</code></pre>
+
+
+</div>

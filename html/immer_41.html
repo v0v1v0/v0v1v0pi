@@ -1,0 +1,239 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>immer_proc_data</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Processing Datasets and Creating Design Matrices for Rating Data
+</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>immer_proc_data</code> processes datasets containing rating data
+into a dataset into a long format of pseudoitems (item <code class="reqn">\times</code> raters).
+</p>
+<p>The function <code>immer_create_design_matrix_formula</code> creates a design matrix
+for a processed dataset and a provided formula.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">immer_proc_data(dat, pid=NULL, rater=NULL, weights=NULL, maxK=NULL)
+
+immer_create_design_matrix_formula( itemtable, formulaA )
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dat</code></td>
+<td>
+
+<p>Datasets with integer item responses
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pid</code></td>
+<td>
+
+<p>Vector with person identifiers
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rater</code></td>
+<td>
+
+<p>Vector with rater identifiers
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+
+<p>Vector with sampling weights
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxK</code></td>
+<td>
+<p>Optional vector with maximum category per item</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>itemtable</code></td>
+<td>
+<p>Processed item table. The table must include the column
+<code>item</code> (an integer item identifier) and <code>maxK</code> (maximum number of
+categories per item). Optional columns are <code>rater</code>
+(an integer rater identifier),<code>item_name</code> and <code>rater_name</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formulaA</code></td>
+<td>
+<p>An <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> formula. The facets <code>item</code>, <code>step</code> and
+<code>rater</code> are treated as numeric. However, numeric transformation can
+be applied for the step parameter by using the arguments <code>item_num</code>,
+<code>step_num</code> or <code>rater_num</code> in <code>formulaA</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The output of <code>immer_proc_data</code> is a list with several entries (selection)
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>dat2</code></td>
+<td>
+<p>Dataset containing pseudoitems</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dat2.resp</code></td>
+<td>
+<p>Dataset containing response indicators for pseudoitems</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dat2.NA</code></td>
+<td>
+<p>Dataset containing pseudoitems and missing responses coded as <code>NA</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dat</code></td>
+<td>
+<p>Original dataset</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>person.index</code></td>
+<td>
+<p>Person identifiers</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rater.index</code></td>
+<td>
+<p>Rater identifiers</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>VV</code></td>
+<td>
+<p>Number of items</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>Number of persons</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>RR</code></td>
+<td>
+<p>Number of raters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dat2.ind.resp</code></td>
+<td>
+<p>Array containing indicators of pseudoitems and categories</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ND</code></td>
+<td>
+<p>Number of person-rater interactions</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>itemtable</code></td>
+<td>
+<p>Information about processed data</p>
+</td>
+</tr>
+</table>
+<p>The output of <code>immer_create_design_matrix_formula</code> is a list with several
+entries (selection)
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>design matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>itemtable2</code></td>
+<td>
+<p>Processed item table</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">#############################################################################
+# EXAMPLE 1: Processing rating data
+#############################################################################
+
+data(data.immer01a, package="immer")
+dat &lt;- data.immer01a
+
+res &lt;- immer::immer_proc_data( dat=dat[,paste0("k",1:5)], pid=dat$idstud,
+             rater=dat$rater)
+str(res, max.level=1)
+
+## Not run: 
+#############################################################################
+# EXAMPLE 2: Creating several design matrices for rating data
+#############################################################################
+
+data(data.ratings1, package="sirt")
+dat &lt;- data.ratings1
+resp &lt;- dat[,-c(1,2)]
+#- redefine the second and third item such that the maximum category score is 2
+for (vv in c(2,3)){
+    resp[ resp[,vv] &gt;=2,vv ] &lt;- 2
+}
+
+#--- process data
+res0 &lt;- immer::immer_proc_data( dat=resp, pid=dat$idstud,  rater=dat$rater)
+
+#--- rating scale model
+des1 &lt;- immer::immer_create_design_matrix_formula( itemtable=res0$itemtable,
+                formulaA=~ item + step )
+des1$des
+
+#--- partial scale model
+des2 &lt;- immer::immer_create_design_matrix_formula( itemtable=res0$itemtable,
+                formulaA=~ item + item:step )
+des2$des
+
+#--- multi-facets Rasch model
+des3 &lt;- immer::immer_create_design_matrix_formula( itemtable=res0$itemtable,
+                formulaA=~ item + item:step + rater )
+des3$des
+
+#--- polytomous model with quadratic step effects
+des4 &lt;- immer::immer_create_design_matrix_formula( itemtable=res0$itemtable,
+                formulaA=~ item + item:I(step_num^2) )
+des4$des
+
+## End(Not run)
+</code></pre>
+
+
+</div>

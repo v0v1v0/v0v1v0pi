@@ -1,0 +1,192 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>strat</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create Ichimoku Strategies</h2>
+
+<h3>Description</h3>
+
+<p>Create ichimoku cloud strategies using the indicator condition 'long / short
+while c1 &gt; c2'. Complex strategies can be formulated as combined
+'c1 &gt; c2 &amp; c3 &gt; c4' (both conditions must be satisfied) or asymmetric
+'c1 &gt; c2 x c3 &gt; c4' (where 'c1 &gt; c2' denotes the entry and 'c3 &gt; c4' the
+exit indicator).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">strat(
+  x,
+  c1 = c("close", "chikou", "open", "high", "low", "tenkan", "kijun", "senkouA",
+    "senkouB", "cloudT", "cloudB"),
+  c2 = c("tenkan", "kijun", "senkouA", "senkouB", "cloudT", "cloudB", "chikou", "close",
+    "open", "high", "low"),
+  c3 = c("close", "chikou", "open", "high", "low", "tenkan", "kijun", "senkouA",
+    "senkouB", "cloudT", "cloudB"),
+  c4 = c("tenkan", "kijun", "senkouA", "senkouB", "cloudT", "cloudB", "chikou", "close",
+    "open", "high", "low"),
+  dir = c("long", "short"),
+  type = 2
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an ichimoku object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c1</code></td>
+<td>
+<p>[default 'close'] column name specified as a string.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c2</code></td>
+<td>
+<p>[default 'tenkan'] column name specified as a string.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c3</code></td>
+<td>
+<p>(optional) column name specified as a string.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c4</code></td>
+<td>
+<p>(optional) column name specified as a string.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dir</code></td>
+<td>
+<p>[default 'long'] trade direction, either ‘long’ or
+‘short’.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>[default 2] if ‘c3’ and ‘c4’ are specified, type 2
+will create the combined strategy ‘c1 &gt; c2 &amp; c3 &gt; c4’ whilst type
+3 will create the asymmetric strategy ‘c1 &gt; c2 x c3 &gt; c4’.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The following assumption applies to all strategies: confirmation of
+whether a condition is satisfied is received at the ‘close’ of a
+particular period, and a transaction is initiated at the immediately
+following ‘open’. All transactions occur at the ‘open’.
+</p>
+<p>By default, the periods in which the strategy results in a position is
+shaded on the ichimoku cloud chart and the strategy is printed as the
+chart message (if not otherwise specified). To turn off this behaviour,
+pass the <code>strat = FALSE</code> argument to plot() or iplot().
+</p>
+
+
+<h3>Value</h3>
+
+<p>An ichimoku object augmented with the strategy.
+</p>
+
+
+<h3>Ichimoku Object Specification for Strategies</h3>
+
+<p>The ichimoku object is augmented with the following additional elements:
+</p>
+<p>Columns [numeric]:
+</p>
+
+<ul>
+<li> <p><code>$cond</code>: a boolean vector if the indicator condition is met
+</p>
+</li>
+<li> <p><code>$posn</code>: a boolean vector indicating if a position is held
+</p>
+</li>
+<li> <p><code>$txn</code>: a vector representing the transactions to implement
+the position (1 = enter position, -1 = exit position)
+</p>
+</li>
+<li> <p><code>$logret</code>: a vector of log returns
+</p>
+</li>
+<li> <p><code>$slogret</code>: a vector of log returns for the strategy
+</p>
+</li>
+<li> <p><code>$ret</code>: a vector of discrete returns
+</p>
+</li>
+<li> <p><code>$sret</code>: a vector of of discrete returns for the strategy
+</p>
+</li>
+</ul>
+<p>Attributes:
+</p>
+
+<ul><li> <p><code>$strat</code>: the strategy summary [matrix]
+</p>
+</li></ul>
+<p>The strategy summary may be accessed by the <code>summary()</code> method for
+ichimoku objects or via <code>look</code>.
+</p>
+
+
+<h3>Complex Strategies</h3>
+
+<p>For complex strategies: 's1' denotes the strategy 'c1 &gt; c2' and 's2'
+denotes the strategy 'c3 &gt; c4'.
+</p>
+
+<ul>
+<li>
+<p> Combined strategy 's1 &amp; s2': indicator conditions in 's1' and
+'s2' have to be met simulateneously for a position to be taken. The
+column <code>$cond</code> will show when both conditions are met
+</p>
+</li>
+<li>
+<p> Asymmetric strategy 's1 x s2': indicator condition in 's1' has
+to be met to enter a position, and indicator condition in 's2' to
+exit a position. These rules are applied recursively over the length
+of the data. The column <code>$cond</code> will show when the indicator
+condition is met in 's1'
+</p>
+</li>
+</ul>
+<h3>Further Details</h3>
+
+<p>Please refer to the strategies vignette by calling:
+<code>vignette("strategies", package = "ichimoku")</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">cloud &lt;- ichimoku(sample_ohlc_data, ticker = "TKR")
+
+strat &lt;- strat(cloud, c1 = "tenkan", c2 = "cloudB", dir = "short")
+summary(strat)
+plot(strat)
+
+strat2 &lt;- strat(cloud, c1 = "cloudT", c2 = "kijun", c3 = "cloudT", c4 = "close")
+summary(strat2)
+plot(strat2)
+
+</code></pre>
+
+
+</div>

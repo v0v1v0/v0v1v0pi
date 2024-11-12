@@ -1,0 +1,92 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>icd_parse</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Extract all ICD codes from a character vector</h2>
+
+<h3>Description</h3>
+
+<p>An ICD code consists of, at a minimum,
+a three digit ICD-10 code
+(i.e. one upper-case letter followed by
+two digits). This may optionally be followed
+by a two digit subcode, selected punctuation symbols
+(cross "*", dagger "U2020" or
+exclamation mark "!"). Both the period
+separating the three-digit code from the subcode,
+and the hyphen indicating an "incomplete" subcode,
+are optional. Finally, in the ambulatory system, an
+additional letter G, V, Z or A may be appended to
+signify the status ("security") of the diagnosis.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">icd_parse(str, type = "bounded", bind_rows = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>str</code></td>
+<td>
+<p>Character vector from which to extract all ICD codes</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>A character string determining how strictly matching should be performed. This must be one of "strict" (<code>str</code> contains a ICD code with no extraneous characters), <code>bounded</code> (<code>str</code> contains an ICD code with a word boundary on both sides) or <code>weak</code> (ICD codes are extracted even if they are contained within a word, e.g. "E10Diabetes" would return "E10"). Default: <code>bounded</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bind_rows</code></td>
+<td>
+<p>logical. Whether to convert the matrix output of <code>stirngi::stri_match_all</code> to a data.frame, with additional <code>icd_sub</code> to uniquely represent the code and allow lookup of the code</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>By default, the function returns a data.frame
+containing the matched codes and the standardised
+three digit code (<code>icd3</code>), subcode (<code>icd_subcode</code>),
+normcode (<code>icd_norm</code>) and code without period (<code>icd_sub</code>).
+</p>
+<p>If <code>bind_rows = FALSE</code>, the list output of
+<code>stringi::stri_match_all_regex</code> is returned.
+This is particularly useful to retrieve the
+matches from each element of the <code>str</code> vector
+separately.
+</p>
+
+
+<h3>Value</h3>
+
+<p>data.frame (if bind_rows = TRUE) or matrix
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>is_icd_code()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">icd_parse("E11.7")
+icd_parse("Depression: F32")
+icd_parse(c(
+  "Backpain (M54.9) is one of the most common diagnoses in primary care",
+  "Codes for chronic pain include R52.1 and F45.4"
+  ))
+</code></pre>
+
+
+</div>

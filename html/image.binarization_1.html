@@ -1,0 +1,193 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>image_binarization</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Binarize Images For Enhancing Optical Character Recognition</h2>
+
+<h3>Description</h3>
+
+<p>Binarize images in order to further process it for Optical Character Recognition (OCR) or Handwritten Text Recognition (HTR) purposes
+</p>
+
+<ul>
+<li>
+<p> Otsu - "A threshold selection method from gray-level histograms", 1979.
+</p>
+</li>
+<li>
+<p> Bernsen - "Dynamic thresholding of gray-level images", 1986.
+</p>
+</li>
+<li>
+<p> Niblack - "An Introduction to Digital Image Processing", 1986.
+</p>
+</li>
+<li>
+<p> Sauvola - "Adaptive document image binarization", 1999.
+</p>
+</li>
+<li>
+<p> Wolf - "Extraction and Recognition of Artificial Text in Multimedia Documents", 2003.
+</p>
+</li>
+<li>
+<p> Gatos - "Adaptive degraded document image binarization", 2005. (Partial)
+</p>
+</li>
+<li>
+<p> NICK - "Comparison of Niblack inspired Binarization methods for ancient documents", 2009.
+</p>
+</li>
+<li>
+<p> Su - "Binarization of Historical Document Images Using the Local Maximum and Minimum", 2010.
+</p>
+</li>
+<li>
+<p> T.R. Singh - "A New local Adaptive Thresholding Technique in Binarization", 2011.
+</p>
+</li>
+<li>
+<p> Bataineh - "An adaptive local binarization method for document images based on a novel thresholding method and dynamic windows", 2011. (unreproducible)
+</p>
+</li>
+<li>
+<p> ISauvola - "ISauvola: Improved Sauvola’s Algorithm for Document Image Binarization", 2016.
+</p>
+</li>
+<li>
+<p> WAN - "Binarization of Document Image Using Optimum Threshold Modification", 2018.
+</p>
+</li>
+</ul>
+<h3>Usage</h3>
+
+<pre><code class="language-R">image_binarization(x, type, opts = list())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an image of class 'magick-image'. In grayscale. E.g. a PGM file. If not provided in grayscale, will extract the gray channel.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>a character string with the type of binarization to use. Either 'otsu', 'bernsen', 'niblack', 'sauvola', 'wolf', 'nick', 'gatos', 'su', 'trsingh', 'bataineh', 'wan' or 'isauvola'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>opts</code></td>
+<td>
+<p>a list of options to pass on to the algorithm. See the details and the examples.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Options which can be bassed on to the binarization routines, with the defaults between brackets
+</p>
+
+<ul>
+<li>
+<p> otsu: none
+</p>
+</li>
+<li>
+<p> bernsen: window(75L), k(0.2), threshold(100L), contrast-limit(25L)
+</p>
+</li>
+<li>
+<p> niblack: window(75L), k(0.2)
+</p>
+</li>
+<li>
+<p> sauvola: window(75L), k(0.2)
+</p>
+</li>
+<li>
+<p> wolf: window(75L), k(0.2)
+</p>
+</li>
+<li>
+<p> nick: window(75L), k(-0.2)
+</p>
+</li>
+<li>
+<p> gatos: window(75L), k(0.2), glyph(60L)
+</p>
+</li>
+<li>
+<p> su: window(75L), minN(75L)
+</p>
+</li>
+<li>
+<p> trsingh: window(75L), k(0.2)
+</p>
+</li>
+<li>
+<p> bataineh: none
+</p>
+</li>
+<li>
+<p> wan: window(75L), k(0.2)
+</p>
+</li>
+<li>
+<p> isauvola: window(75L), k(0.2)
+</p>
+</li>
+</ul>
+<p>Note that it is important that you provide the window / threshold / contrast-limit, minN, glyph argument as integers (e.g. as in 75L)
+and the other parameters as numerics.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a binarized image of class magick-image as handled by the magick R package
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(magick)
+f   &lt;- system.file("extdata", "doxa-example.png", package = "image.binarization")
+img &lt;- image_read(f)
+img &lt;- image_convert(img, format = "PGM", colorspace = "Gray")
+
+binary &lt;- image_binarization(img, type = "otsu")
+binary
+binary &lt;- image_binarization(img, type = "bernsen", 
+                             opts = list(window = 50L, k = 0.2, threshold = 50L))
+binary
+binary &lt;- image_binarization(img, type = "niblack", opts = list(window = 75L, k = 0.2))
+binary
+binary &lt;- image_binarization(img, type = "sauvola")
+binary
+binary &lt;- image_binarization(img, type = "wolf")
+binary
+binary &lt;- image_binarization(img, type = "nick", opts = list(window = 75L, k = -0.2))
+binary
+binary &lt;- image_binarization(img, type = "gatos", opts = list(window = 75L, k = 0.2, glyph = 50L))
+binary
+binary &lt;- image_binarization(img, type = "su", opts = list(window = 20L))
+binary
+binary &lt;- image_binarization(img, type = "trsingh")
+binary
+binary &lt;- image_binarization(img, type = "bataineh")
+binary
+binary &lt;- image_binarization(img, type = "wan")
+binary
+binary &lt;- image_binarization(img, type = "isauvola", opts = list(window = 75L, k = 0.2))
+binary
+</code></pre>
+
+
+</div>

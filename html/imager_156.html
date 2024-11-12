@@ -1,0 +1,127 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>imwarp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Image warping</h2>
+
+<h3>Description</h3>
+
+<p>Image warping consists in remapping pixels, ie. you define a function
+M(x,y,z) -&gt; (x',y',z')
+that displaces pixel content from (x,y,z) to (x',y',z').
+Actual implementations rely on either the forward transformation M, or the backward (inverse) transformation M^-1.
+In CImg the forward implementation will go through all source (x,y,z) pixels and "paint" the corresponding pixel at (x',y',z'). This will result in unpainted pixels in the output if M is expansive (for example in the case of a scaling M(x,y,z) = 5*(x,y,z)).
+The backward implementation will go through every pixel in the destination image and look for ancestors in the source, meaning that every pixel will be painted.
+There are two ways of specifying the map: absolute or relative coordinates. In absolute coordinates you specify M or M^-1 directly. In relative coordinates you specify an offset function D:
+M(x,y) = (x,y) + D(x,y) (forward)
+M^-1(x,y) = (x,y) - D(x,y) (backward)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">imwarp(
+  im,
+  map,
+  direction = "forward",
+  coordinates = "absolute",
+  boundary = "dirichlet",
+  interpolation = "linear"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>im</code></td>
+<td>
+<p>an image</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>map</code></td>
+<td>
+<p>a function that takes (x,y) or (x,y,z) as arguments and returns a named list with members (x,y) or (x,y,z)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>direction</code></td>
+<td>
+<p>"forward" or "backward" (default "forward")</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coordinates</code></td>
+<td>
+<p>"absolute" or "relative" (default "relative")</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>boundary</code></td>
+<td>
+<p>boundary conditions: "dirichlet", "neumann", "periodic". Default "dirichlet"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interpolation</code></td>
+<td>
+<p>"nearest", "linear", "cubic" (default "linear")</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Note that 3D warps are possible as well.
+The mapping should be specified via the "map" argument, see examples.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a warped image
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Simon Barthelme
+</p>
+
+
+<h3>See Also</h3>
+
+<p>warp for direct access to the CImg function
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+im &lt;- load.example("parrots")
+#Shift image
+map.shift &lt;- function(x,y) list(x=x+10,y=y+30)
+imwarp(im,map=map.shift) %&gt;% plot
+#Shift image (backward transform)
+imwarp(im,map=map.shift,dir="backward") %&gt;% plot
+
+#Shift using relative coordinates
+map.rel &lt;- function(x,y) list(x=10+0*x,y=30+0*y)
+imwarp(im,map=map.rel,coordinates="relative") %&gt;% plot
+
+#Scaling
+map.scaling &lt;- function(x,y) list(x=1.5*x,y=1.5*y)
+imwarp(im,map=map.scaling) %&gt;% plot #Note the holes
+map.scaling.inv &lt;- function(x,y) list(x=x/1.5,y=y/1.5)
+imwarp(im,map=map.scaling.inv,dir="backward") %&gt;% plot #No holes
+
+#Bending
+map.bend.rel &lt;- function(x,y) list(x=50*sin(y/10),y=0*y)
+imwarp(im,map=map.bend.rel,coord="relative",dir="backward") %&gt;% plot #No holes
+</code></pre>
+
+
+</div>

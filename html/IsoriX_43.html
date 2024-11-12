@@ -1,0 +1,180 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>IsoriX-package</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Isoscape Computation and Inference of Spatial Origins using Mixed Models</h2>
+
+<h3>Description</h3>
+
+<p><span class="pkg">IsoriX</span> can be used for building isoscapes using mixed models and
+inferring the geographic origin of organisms based on their isotopic
+signature. This package is essentially a simplified interface combining
+several other packages which implements the statistical framework proposed by
+Courtiol &amp; Rousset 2017. It uses the package <span class="pkg">spaMM</span> for fitting and
+predicting isoscapes, and for performing the assignment. <span class="pkg">IsoriX</span> also
+heavily relies on the package <span class="pkg">rasterVis</span> for plotting the maps produced
+with the package <span class="pkg">terra</span> using the powerful package <span class="pkg">lattice</span>
+visualization system.
+</p>
+
+
+<h3>Details</h3>
+
+<p>Below, we describe briefly the main steps of the workflow that aims at
+performing the construction of an isoscape and the assignment of organisms of
+unknown geographic origin(s) based on their isotopic signature. We advise you
+to also read the detailed book chapter we wrote (in press), as well as our
+<a href="https://bookdown.org/content/782/">online documentation</a>, which essentially
+cover the same material in a more detailed manner. You should also read the
+dedicated help pages of the functions you are using.
+</p>
+<p>The statistical methods will not be detailed in this document but information
+on the computation of isoscapes is available in Courtiol &amp; Rousset 2017, and
+information on the calibration and assignment in the appendix of Courtiol et
+al. 2019.
+</p>
+ <ol>
+<li>
+<p> Fitting the isoscape model with <code>isofit</code>:
+</p>
+<p>The function <code>isofit</code> fits a geostatistical model, which
+approximates the relationship between the topographic features of a location
+and its isotopic signature (see <code>isofit</code> for details). The model
+fits observations of isotopic delta values at several geographic locations
+(hereafter, called <em>sources</em>). One common type of sources used in
+ecology is the delta values for hydrogen in precipitation water collected at
+weather stations, but one may also use measurements performed on sedentary
+organisms. In either case, the accuracy of the isoscape (and thereby the
+accuracy of assignments) increases with the number and spatial coverage of
+the sources. The function <code>isofit</code> is designed to fit the model
+on data aggregated per location across all measurements. If instead you want
+to fit the model on measurements split per time intervals (e.g. per month),
+within each location, you should use the alternative function
+<code>isomultifit</code>. Either way the data must be prepared using the
+function <code>prepsources</code>.
+</p>
+</li>
+<li>
+<p> Preparing the structural raster with <code>prepraster</code>:
+</p>
+<p>Building isoscapes and assigning organisms to their origin requires an
+adequate structural raster, i.e. a matrix representing a spatial grid. The
+function <code>prepraster</code> allows restricting the extent of the raster
+to the area covered by isoscape data (in order to avoid extrapolation) and to
+reduce the resolution of the original structural raster (in order to speed up
+computation in all following steps). Note that aggregating the raster may
+lead to different results for the assignment, if the structural raster is
+used to define a covariate. This is because the values of raster cells
+changes depending on the aggregation function, which in turn will affect
+model predictions.
+</p>
+<p>We provide the function <code>getelev</code> to download an elevation raster
+for the entire world at a resolution of one altitude per square-km, and other
+rasters may be used. Such an elevation raster can be used as a structural
+raster. We have also stored a low resolution raster for Germany in our
+package (see <code>ElevRasterDE</code>) for users to try things out, but we
+do not encourage its use for real application.
+</p>
+</li>
+<li>
+<p> Predicting the isoscape across the area covered by the elevation raster
+with <code>isoscape</code>:
+</p>
+<p>The function <code>isoscape</code> generates the isoscapes: it uses the
+fitted geostatistical models to predict the isotopic values (and several
+variances associated to those) for each raster cell defined by the structural
+raster. If the model has been fitted with <code>isomultifit</code>, you
+should use the alternative function <code>isomultiscape</code> to generate
+the isoscape.
+</p>
+<p>Our package allows the production of fine-tuned isoscape figures (using the
+function <code>plot.ISOSCAPE</code>). Alternatively, the isoscape rasters
+can be exported as ascii raster and edited in any Geographic Information
+System (GIS) software (see <code>isoscape</code> and the online
+documentation for details).
+</p>
+</li>
+<li>
+<p> Fitting the calibration model with <code>calibfit</code>:
+</p>
+<p>In most cases, organisms are of another kind than the sources used to build
+the isoscape (i.e. the isoscape is built on precipitation isotopic values and
+organisms are not water drops, but e.g. the fur of some bats). In such a
+case, the hydrogen delta values of the sampled organisms were modulated by
+their distinct physiology and do not directly correspond to the isotopic
+signature of the sources. In this situation, one must use sedentary organisms
+to study the relationship between the isotopic values in organisms and that
+of their environment. The function <code>calibfit</code> fits a statistical
+model on such a calibration dataset.
+</p>
+<p>If the isoscape is directly built from isotopic values of organisms, there is
+no need to fit a calibration model.
+</p>
+</li>
+<li>
+<p> Inferring spatial origins of samples with <code>isofind</code>:
+</p>
+<p>The function <code>isofind</code> tests for each location across the
+isoscape if it presents a similar isotopic signature than the unknown origin
+of a given individual(s). This assignment procedure considered the some (but
+not all, see Courtiol et al. 2019) uncertainty stemming from the model fits
+(geostatistical models and calibration model). The function
+<code>plot.ISOFIND</code> then draws such assignment by plotting the most
+likely origin with the prediction region around it. When several organisms
+are being assigned, both assignments at the level of each sample and a single
+assignment for the whole group can be performed. </p>
+</li>
+</ol>
+<h3>Note</h3>
+
+<p>Please note that the geographic coordinates (latitude,
+longitude) of any spatial data (locations, rasters) must be given in decimal
+degrees following the WGS84 spheroid standard.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Alexandre Courtiol <a href="mailto:alexandre.courtiol@gmail.com">alexandre.courtiol@gmail.com</a>,
+</p>
+<p>François Rousset,
+</p>
+<p>Marie-Sophie Rohwaeder,
+</p>
+<p>Stephanie Kramer-Schadt <a href="mailto:kramer@izw-berlin.de">kramer@izw-berlin.de</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Courtiol A, Rousset F, Rohwäder M, Soto DX, Lehnert L, Voigt CC, Hobson KA,
+Wassenaar LI &amp; Kramer-Schadt S (2019). "Isoscape computation and inference of
+spatial origins with mixed models using the R package IsoriX." In Hobson KA,
+Wassenaar LI (eds.), Tracking Animal Migration with Stable Isotopes, second
+edition. Academic Press, London.
+</p>
+<p>Courtiol A, Rousset F (2017). "Modelling isoscapes using mixed models." bioRxiv.
+doi: 10.1101/207662, <a href="https://www.biorxiv.org/content/10.1101/207662v1">link</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Useful links:
+</p>
+
+<ul>
+<li> <p><a href="https://github.com/courtiol/IsoriX">https://github.com/courtiol/IsoriX</a>
+</p>
+</li>
+<li> <p><a href="https://bookdown.org/content/782">https://bookdown.org/content/782</a>
+</p>
+</li>
+<li>
+<p> Report bugs at <a href="https://github.com/courtiol/IsoriX/issues">https://github.com/courtiol/IsoriX/issues</a>
+</p>
+</li>
+</ul>
+</div>

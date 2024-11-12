@@ -1,0 +1,331 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NHJ</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimating the cross J-function  and testing independence</h2>
+
+<h3>Description</h3>
+
+<p>This function estimates the  cross J-function  between 
+two sets, <code class="reqn">C</code> and <code class="reqn">D</code>,  of (homogenous or nonhomogeneous)  point processes in time.  
+It  is evaluated in a grid of distances <code class="reqn">r</code>,  and it can be optionally plotted.  A test to 
+assess the independence between the sets of processes, based on  the cross J-function,   is also implemented.
+</p>
+<p>It calls the auxiliary functions NHJaux and Jenv, not intended for users.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">NHJ(lambdaC, lambdaD,T=NULL, Ptype="inhom", posC, typeC=1, posD, typeD=1, r=NULL,
+L=NULL,test=FALSE,nTrans=100, rTest=NULL, conf=0.95, dplot=NULL, 
+tit=c("J-function","D-function","F-function"),mfrow=NULL,cores=1,fixed.seed=NULL,...)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>lambdaC</code></td>
+<td>
+<p>A matrix of positive values. Each column is the intensity vector of one of the point processes in 
+<code class="reqn">C</code>. If there is only one process in <code class="reqn">C</code>, it can be a vector or even a numeric value
+if the process is homogeneous.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambdaD</code></td>
+<td>
+<p>A matrix of positive values. Each column is the intensity vector of one of the point process in 
+<code class="reqn">D</code>. If there is only one process in <code class="reqn">D</code>, it can be a vector or even a numeric value
+if the process is homogeneous.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>T</code></td>
+<td>
+<p>Numeric value. Length of the observed period. It only must be specified
+if the number of rows in <code>lambdaC</code> and <code>lambdaD</code> is 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Ptype</code></td>
+<td>
+<p>Optional. Label: "hom" or "inhom".  The first one indicates that 
+all the point processes in sets <code class="reqn">C</code> and <code class="reqn">D</code> are homogeneous.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>posC</code></td>
+<td>
+<p>Numeric vector.  Occurrence times of the  points in all the point processes in <code class="reqn">C</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>typeC</code></td>
+<td>
+<p>Numeric vector with the same length as <code>posC</code>.  Code of the point process  
+in <code class="reqn">C</code>  where the points in <code>posC</code>  have occurred. See Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>posD</code></td>
+<td>
+<p>Numeric vector.  Occurrence times of the  points in all the point processes in <code class="reqn">D</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>typeD</code></td>
+<td>
+<p>Numeric vector with the same length as <code>posD</code>.  Code of the point process  
+in <code class="reqn">D</code>  where the points in <code>posD</code>  have occurred.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>Optional. Numeric vector. Values where J-function  must be evaluated. If it  is NULL, a default 
+vector is used, see Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L</code></td>
+<td>
+<p>Optional. Numeric vector. Values in the observed period used to calculate 
+the J-function. If it  is NULL, a default vector is used, see Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test</code></td>
+<td>
+<p>Optional. Logical flag. If it is TRUE, a  test of independence
+and a 95%  envelope   for the J-function are calculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nTrans</code></td>
+<td>
+<p>Optional. Numeric value. Only used if <code>test=TRUE</code>. Number of translations to
+be performed in the test and envelope calculation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rTest</code></td>
+<td>
+<p>Optional. Numeric value. Maximum value of <code class="reqn">r</code> used to calculate the 
+independence test statistc, see Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf</code></td>
+<td>
+<p>Optional. Numeric value  in (0,1). Confidence level of the envelope for the J-function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dplot</code></td>
+<td>
+<p>Optional. Label "JDF" or "J". If it is "JDF", plots of J, D and F-functions
+are displayed. If it is "J", only  J-function is plotted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tit</code></td>
+<td>
+<p>Optional.  A vector with  one or  three titles to be used in the plots of J, D and F-functions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mfrow</code></td>
+<td>
+<p>Optional. Argument to be passed to <code>par</code> for the plot of the J-function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>Optional. Number of cores of the computer to be used in the calculations. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed.seed</code></td>
+<td>
+<p>An integer or NULL. If it is an integer, that is the value  used to set the seed 
+in  random  generation processes. It it is NULL, a random seed is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments to  be passed to  the function <code>plot</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The information about the processes  is provided by  arguments <code>posC</code>,  the vector of all the occurrence times  
+in the processes in <code class="reqn">C</code>, and  <code>typeC</code>,  the vector of  the code of the point process  in set <code class="reqn">C</code>
+where each point in <code>posC</code> has occurred;  the second set <code class="reqn">D</code> is characterized analogously by 
+<code>typeD</code> and <code>posD</code>. 
+</p>
+<p>This function estimates the cross J-function  between 
+two sets,  <code class="reqn">C</code> and <code class="reqn">D</code>, of (homogenous or nonhomogeneous)  time point processes, see 
+Cebrian et al (2020) for details of the estimation. The J-function measures the interpoint dependence between points in any 
+of the processes in <code class="reqn">D</code>,  and points in any of the processes in <code class="reqn">C</code>, adjusted for time varying intensity in the case 
+of nonhomogenous processes. The cross J-function is defined as <code class="reqn">J_{CD}(r)=(1-D_{CD}(r))/(1-F_D(r))</code>, 
+if <code class="reqn">F_D(r)&lt;1</code> and it is not calculated otherwise.  It compares <code class="reqn">D_{CD}(r)</code>, the distribution 
+function of the distances from a  point  in any of the processes in set <code class="reqn">C</code> to the nearest
+point in any of the processes in set <code class="reqn">D</code>,  to <code class="reqn">F_{D}(r)</code>,  the distribution 
+function of the distances from a fixed point   in the space to the nearest
+point in any of the processes in set <code class="reqn">D</code>.
+</p>
+<p>If argument <code>r</code> is NULL,   the following grid is used to evaluate the function
+</p>
+<p>r1&lt;-max(20, floor(T/20))
+</p>
+<p>r&lt;-seq(1,r1,by=2)
+</p>
+<p>if (length(r)&gt;200) r&lt;-seq(1,r1,length.out=200)
+</p>
+<p>If argument <code>L</code> is NULL, the following grid is used 
+</p>
+<p>L &lt;- seq(1, T, by = 2)
+if (length(L) &gt; 5000)  L &lt;- seq(1, T, by = round((T - 1)/199))
+</p>
+<p>Testing independence:
+</p>
+<p>If the processes in <code class="reqn">C</code>  are independent of the processes in <code class="reqn">D</code> given the marginal structure 
+of the processes, the J-funtion is equal to 1, since D(r)=F(r). Hence, deviations of J(r) estimations from 1, 
+suggest dependence betweent  the two sets of processes. The test  statistic is based on the  mean
+of   values <code class="reqn">|J(r)-1|</code> evaluated in a given grid of r values.
+</p>
+<p>A test based on a Lotwick-Silverman approach, see Lotwick and Silverman (1982),  is implemented. This test 
+provides a nonparametric way to test independence given the marginal intensities of the processes. 
+Using the Lotwick-Silverman approach,  not only the p-value of 
+the test  but also an envelope for the <code class="reqn">J(r)</code> values is calculated. 
+</p>
+<p>In point  processes, dependence often appears between close observations,  and  with high <code class="reqn">r</code> values it is more 
+difficult that the J-function is able to discriminate  between dependent and independent processes.
+By this reason, the argument <code>rTest</code> allows us to fix a maximum value of <code class="reqn">r</code>
+so that only <code class="reqn">J(r)</code> estimations for <code class="reqn">r&lt;rTest</code>  will be used to
+calculate the  test statistic. The value <code>rTest</code> is  drawn in the plot of the J-function
+as a vertical grey line.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>Vector of values <code class="reqn">r</code> where the J-function is estimated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>NHJr</code></td>
+<td>
+<p>Estimated values of <code class="reqn">J_{CD}(r)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>NHDr</code></td>
+<td>
+<p>Estimated values of <code class="reqn">D_{CD}(r)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>NHFr</code></td>
+<td>
+<p>Estimated values of <code class="reqn">F_{D}(r)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>JenvL</code></td>
+<td>
+<p>Lower bounds of the envelope of <code class="reqn">J_{CD}(r)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>JenvU</code></td>
+<td>
+<p>Upper bounds of the envelope for <code class="reqn">J_{CD}(r)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>JStatOb</code></td>
+<td>
+<p>Observed value of the statistic.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>JStatTr</code></td>
+<td>
+<p>Sample of the values of the  test statistic obtained by random translations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pv</code></td>
+<td>
+<p>P-value of the independence test.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>T</code></td>
+<td>
+<p>Length of the observed period of the process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L</code></td>
+<td>
+<p>Grid of  L values to calculate  the F-funtion. </p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Cebrian, A.C., Abaurrea, J.  and Asin, J. (2020).   Testing  independence between two  point processes in time.
+<em>Journal of Simulation and Computational Statistics</em>.
+</p>
+<p>Cronie, O. and van Lieshout, M.N.M. (2015). Summary statistics for inhomogeneous marked point
+processes. <em>Ann Inst Stat Math</em>. 
+</p>
+<p>Lotwick, H.W. and Silverman, B.W. (1982). Methods for analysing Spatial processes of several types of points. 
+<em>J.R. Statist. Soc. B</em>, 44(3), pp. 406-13
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>NHK</code>, <code>NHD</code>, <code>NHF</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(120)
+lambda1&lt;-runif(100, 0.05, 0.1)
+set.seed(121)
+lambda2&lt;-runif(100, 0.01, 0.2)
+pos1&lt;-simNHPc(lambda=lambda1,fixed.seed=123)$posNH  
+pos2&lt;-simNHPc(lambda=lambda2,fixed.seed=123)$posNH
+
+aux&lt;-NHJ(lambdaC=lambda1, lambdaD=lambda2, posC=pos1,nTrans=50, 
+	 posD=pos2, rTest=7, dplot='J', cores=1,test=TRUE)
+aux$pv
+
+#Sets with two processes
+#pos3&lt;-simNHPc(lambda=lambda1,fixed.seed=300)$posNH  
+#pos4&lt;-simNHPc(lambda=lambda2,fixed.seed=30)$posNH 
+#aux&lt;-NHJ(lambdaC=cbind(lambda1,lambda2), lambdaD=cbind(lambda1,lambda2), 
+#	posC=c(pos1,pos2), typeC=c(rep(1, length(pos1)), rep(2, length(pos2))), 
+#	posD=c(pos3, pos4), typeD=c(rep(1, length(pos3)), rep(2, length(pos4))), 
+#	dplot='J', test=TRUE)
+#aux$pv
+</code></pre>
+
+
+</div>

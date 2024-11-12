@@ -1,0 +1,221 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>calibrate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calibration for the simple linear regression model</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>calibrate</code> computes the maximum likelihood estimate and a
+condfidence interval for the unknown predictor value that corresponds to an 
+observed value of the response (or vector thereof) or specified value of the 
+mean response. See the reference listed below for more details.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">calibrate(object, ...)
+
+## Default S3 method:
+calibrate(
+  object,
+  y0,
+  interval = c("inversion", "Wald", "none"),
+  level = 0.95,
+  mean.response = FALSE,
+  adjust = c("none", "Bonferroni", "Scheffe"),
+  k,
+  ...
+)
+
+## S3 method for class 'formula'
+calibrate(formula, data = NULL, ..., subset, na.action = stats::na.fail)
+
+## S3 method for class 'lm'
+calibrate(
+  object,
+  y0,
+  interval = c("inversion", "Wald", "none"),
+  level = 0.95,
+  mean.response = FALSE,
+  adjust = c("none", "Bonferroni", "Scheffe"),
+  k,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>A matrix, list, data frame, or object that inherits from class 
+<code>lm</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional optional arguments. At present, no optional arguments 
+are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y0</code></td>
+<td>
+<p>The value of the observed response(s) or specified value of the
+mean response.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interval</code></td>
+<td>
+<p>The method to use for forming a confidence interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+<p>A numeric scalar between 0 and 1 giving the confidence level for 
+the interval to be calculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mean.response</code></td>
+<td>
+<p>Logicial indicating whether confidence intervals should 
+correspond to an observed response(s) (<code>FALSE</code>) or a specified value of 
+the mean response (<code>TRUE</code>). Default is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adjust</code></td>
+<td>
+<p>A logical value indicating if an adjustment should be made to
+the critical value used in constructing the confidence interval. This useful 
+when the calibration curve is to be used k &gt; 0 times.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>The number of times the calibration curve is to be used for 
+computing a confidence interval. Only needed when <code>adjust = TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>A formula of the form <code>y ~ x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>an optional data frame, list or environment (or object coercible 
+by <code>as.data.frame</code> to a data frame) containing the variables in the 
+model. If not found in data, the variables are taken from 
+<code>environment(formula)</code>, typically the environment from which 
+<code>lm</code> was called.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+<p>An optional vector specifying a subset of observations to be 
+used in the fitting process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+<p>a function which indicates what should happen when the data 
+contain <code>NA</code>s.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class <code>"invest"</code> containing the following 
+components:
+</p>
+
+<ul>
+<li> <p><code>estimate</code> The estimate of x0.
+</p>
+</li>
+<li> <p><code>lwr</code> The lower confidence limit for x0.
+</p>
+</li>
+<li> <p><code>upr</code> The upper confidence limit for x0.
+</p>
+</li>
+<li> <p><code>se</code> An estimate of the standard error (Wald interval only).
+</p>
+</li>
+<li> <p><code>interval</code> The method used for calculating <code>lower</code> and 
+<code>upper</code> (only used by <code>print</code> method).
+</p>
+</li>
+</ul>
+<h3>Note</h3>
+
+<p>The <code>invest</code> function is more general, but is based on 
+numerical techniques to find the solution. When the underlying model is that 
+of the simple linear regression model with normal errors, closed-form 
+expressions exist which are utilized by the <code>calibrate</code> function.
+</p>
+
+
+<h3>References</h3>
+
+<p>Graybill, F. A., and Iyer, H. K. (1994)
+<em>Regression analysis: Concepts and Applications</em>. Duxbury Press.
+</p>
+<p>Miller, R. G. (1981)
+<em>Simultaneous Statistical Inference</em>. Springer-Verlag.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#
+# Arsenic example (simple linear regression with replication)
+#
+
+# Inverting a prediction interval for an individual response
+arsenic.lm &lt;- stats::lm(measured ~ actual, data = arsenic)
+plotFit(arsenic.lm, interval = "prediction", shade = TRUE, 
+        col.pred = "lightblue")
+(cal &lt;- calibrate(arsenic.lm, y0 = 3, interval = "inversion"))
+abline(h = 3)
+segments(cal$estimate, 3, cal$estimate, par()$usr[3])
+arrows(cal$lower, 3, cal$lower, par()$usr[3])
+arrows(cal$upper, 3, cal$upper, par()$usr[3])
+
+#
+# Crystal weight example (simple linear regression)
+#
+
+# Inverting a confidence interval for the mean response
+crystal.lm &lt;- stats::lm(weight ~ time, data = crystal)
+plotFit(crystal.lm, interval = "confidence", shade = TRUE,
+        col.conf = "lightblue")
+(cal &lt;- calibrate(crystal.lm, y0 = 8, interval = "inversion", 
+                  mean.response = TRUE))
+abline(h = 8)
+segments(cal$estimate, 8, cal$estimate, par()$usr[3])
+arrows(cal$lower, 8, cal$lower, par()$usr[3])
+arrows(cal$upper, 8, cal$upper, par()$usr[3])
+
+# Wald interval and approximate standard error based on the delta method
+calibrate(crystal.lm, y0 = 8, interval = "Wald", mean.response = TRUE)
+</code></pre>
+
+
+</div>

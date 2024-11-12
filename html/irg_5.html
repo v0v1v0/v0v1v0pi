@@ -1,0 +1,80 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>filter_top</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Filter top NDVI</h2>
+
+<h3>Description</h3>
+
+<p>Using upper quantile (default = 0.925) of multi-year MODIS data, determine the top NDVI for each id.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">filter_top(DT, probs = 0.925, id = "id")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>DT</code></td>
+<td>
+<p>data.table of NDVI time series</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probs</code></td>
+<td>
+<p>quantile probability to determine top. default is 0.925.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>id column. default is 'id'. See details.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The id argument is used to split between sampling units. This may be a point id, polygon id, pixel id, etc. depending on your analysis.
+</p>
+
+
+<h3>Value</h3>
+
+<p>filtered data.table with appended 'top' column of each id's top (quantile) NDVI value.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other filter: 
+<code>filter_ndvi()</code>,
+<code>filter_qa()</code>,
+<code>filter_roll()</code>,
+<code>filter_winter()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Load data.table
+library(data.table)
+
+# Read example data
+ndvi &lt;- fread(system.file("extdata", "sampled-ndvi-MODIS-MOD13Q1.csv", package = "irg"))
+
+filter_qa(ndvi, ndvi = 'NDVI', qa = 'SummaryQA', good = c(0, 1))
+filter_winter(ndvi, probs = 0.025, limits = c(60L, 300L), doy = 'DayOfYear', id = 'id')
+filter_roll(ndvi, window = 3L, id = 'id')
+filter_top(ndvi, probs = 0.925, id = 'id')
+</code></pre>
+
+
+</div>

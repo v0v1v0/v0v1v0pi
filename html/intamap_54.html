@@ -1,0 +1,179 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>spatialPredict</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Spatial prediction</h2>
+
+<h3>Description</h3>
+
+<p><code>spatialPredict</code> is a generic method for spatial predictions 
+within the <code>intamap-package</code>.
+A series of methods have been implemented, 
+partly based on other R-packages (as <code>krige</code>),
+other methods have been developed particularly for the INTAMAP project. The object 
+has to include a range of variables, further described in 
+<code>intamap-package</code>. The prediction method is 
+chosen based on the class of the object.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'automap'
+spatialPredict(object, nsim = 0, ...)
+## S3 method for class 'copula'
+spatialPredict(object, ...)
+## Default S3 method:
+spatialPredict(object, ...)
+## S3 method for class 'idw'
+spatialPredict(object, ...)
+## S3 method for class 'linearVariogram'
+spatialPredict(object, nsim = 0, ...)
+
+## S3 method for class 'transGaussian'
+spatialPredict(object, nsim = 0, ...)
+## S3 method for class 'yamamoto'
+spatialPredict(object, nsim = 0, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p> a list object. Most arguments necessary for interpolation
+are passed through this object. See <code>intamap-package</code> for further 
+description of the necessary content of this variable</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+<p>number of simulations to return, for methods able to return simulations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> other arguments that will be passed to the requested interpolation method. 
+See the individual interpolation methods for more information. </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function <code>spatialPredict</code> is a wrapper around different
+spatial interpolation methods found within the <code>intamap-package</code> or within other packages
+in <code>R</code>. It is for most of the
+methods necessary to have parameters of the correlation structure
+included in <code>object</code> to be able to carry out the spatial prediction.
+Below are some details 
+about particular interpolation methods
+</p>
+
+<dl>
+<dt><code>default</code></dt>
+<dd>
+<p>a default method is not really implemented, this function is only 
+created to give a sensible error message if the function is called
+with an object for which no method exist</p>
+</dd>
+<dt><code>automap</code></dt>
+<dd>
+<p>If the object already has an element <code>variogramModel</code> with
+variogram parameters,
+<code>krige</code> is called. If the this is not a part of the object,
+<code>estimateParameters</code> is called to create this element.</p>
+</dd>
+<dt><code>copula</code></dt>
+<dd>
+<p>spatial prediction using <code>bayesCopula</code></p>
+</dd>
+<dt><code>idw</code></dt>
+<dd>
+<p>applies inverse distance modelling with the idp-power found by <code>estimateParameters.idw</code></p>
+</dd>
+<dt><code>linearVariogram</code></dt>
+<dd>
+<p>this function estimates the process using an unfitted linear variogram; although variance is returned it can not be relied upon</p>
+</dd>
+</dl>
+<dl>
+<dt><code>transGaussian</code></dt>
+<dd>
+<p>spatial prediction using <code>krigeTg</code></p>
+</dd>
+<dt><code>yamamoto</code></dt>
+<dd>
+<p>spatial prediction using <code>yamamotoKrige</code></p>
+</dd>
+</dl>
+<p>It is also possible to add to the above methods with functionality from
+other packages, if wanted. 
+You can also check which methods are available from other packages by calling 
+</p>
+<pre>
+&gt;methods(spatialPredict)
+</pre>
+
+
+
+<h3>Value</h3>
+
+ 
+<p>a list object similar to <code>object</code>, but extended with predictions at
+a the set of locations defined <code>object</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Jon Olav Skoien</p>
+
+
+<h3>References</h3>
+
+ 
+<p>Pebesma, E., Cornford, D., Dubois, G., Heuvelink, G.B.M., Hristopulos, D., Pilz, J., Stohlker, U., Morin, G., Skoien, J.O. INTAMAP: The design and implementation f an interoperable automated interpolation Web Service. Computers and Geosciences 37 (3), 2011. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>gstat</code>,<code>autoKrige</code>, 
+<code>createIntamapObject</code>, <code>estimateParameters</code>, 
+<code>intamap-package</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># This example skips some steps that might be necessary for more complicated
+# tasks, such as estimateParameters and pre- and postProcessing of the data
+data(meuse)
+coordinates(meuse) = ~x+y
+meuse$value = log(meuse$zinc)
+data(meuse.grid)
+gridded(meuse.grid) = ~x+y
+proj4string(meuse) = CRS("+init=epsg:28992")
+proj4string(meuse.grid) = CRS("+init=epsg:28992")
+
+# set up intamap object:
+obj = createIntamapObject(
+	observations = meuse,
+	predictionLocations = meuse.grid,
+	targetCRS = "+init=epsg:3035",
+	params = getIntamapParams(),
+	class = "linearVariogram"
+)
+
+# do interpolation step:
+obj = spatialPredict(obj)  # spatialPredict.linearVariogram
+</code></pre>
+
+
+</div>

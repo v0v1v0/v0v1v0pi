@@ -1,0 +1,73 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>rDirichlet</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate Mixing Proportions from a Dirichlet Distribution</h2>
+
+<h3>Description</h3>
+
+<p>Generates samples from the Dirichlet distribution with parameter <code>alpha</code> efficiently by simulating Gamma(<code>alpha</code>, 1) random variables and normalising them.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">rDirichlet(G,
+           alpha,
+           nn = 0L)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>G</code></td>
+<td>
+<p>The number of clusters for which weights need to be sampled.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>The Dirichlet hyperparameter, either of length 1 or <code>G</code>. When the length of <code>alpha</code> is 1, this amounts to assuming an exchangeable prior, which doesn't favour one component over another. Be warned that this will be recycled if necessary. Larger values have the effect of making the returned samples more equal.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nn</code></td>
+<td>
+<p>A vector giving the number of observations in each of G clusters so that Dirichlet posteriors rather than priors can be sampled from. This defaults to 0, i.e. simulation from the prior. Must be non-negative. Be warned that this will be recycled if necessary.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A Dirichlet vector of <code>G</code> weights which sum to 1.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Though the function is available for standalone use, note that few checks take place, in order to speed up repeated calls to the function inside <code>mcmc_IMIFA</code>. In particular, <code>alpha</code> and <code>nn</code> may be invisibly recycled.
+</p>
+<p>While small values of <code>alpha</code> have the effect of increasingly concentrating the mass onto fewer components, note that this function may return <code>NaN</code> for excessively small values of <code>alpha</code>, when <code>nn=0</code>; see the details of <code>rgamma</code> for small <code>shape</code> values.
+</p>
+
+
+<h3>References</h3>
+
+<p>Devroye, L. (1986) <em>Non-Uniform Random Variate Generation</em>, New York, NY, USA: Springer-Verlag, p. 594.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">(prior      &lt;- rDirichlet(G=5, alpha=1))
+(posterior  &lt;- rDirichlet(G=5, alpha=1, nn=c(20, 41, 32, 8, 12)))
+(asymmetric &lt;- rDirichlet(G=5, alpha=c(3,4,5,1,2), nn=c(20, 41, 32, 8, 12)))
+</code></pre>
+
+
+</div>

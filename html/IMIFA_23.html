@@ -1,0 +1,268 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>mixfaControl</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Control settings for the IMIFA family of factor analytic mixtures</h2>
+
+<h3>Description</h3>
+
+<p>Supplies a list of arguments for use in <code>mcmc_IMIFA</code> pertaining to <em>ALL</em> methods in the <code>IMIFA</code> family: e.g. MCMC settings, cluster initialisation, generic hyperparameters for factor-analytic mixtures, etc.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">mixfaControl(n.iters = 25000L,
+             burnin = n.iters/5L,
+             thinning = 2L,
+             centering = TRUE,
+             scaling = c("unit", "pareto", "none"),
+             uni.type = c("unconstrained", "isotropic",
+                          "constrained", "single"),
+             psi.alpha = 2.5,
+             psi.beta = NULL,
+             mu.zero = NULL,
+             sigma.mu = 1L,
+             prec.mu = 0.01,
+             sigma.l = 1L,
+             z.init = c("hc", "kmeans", "list", "mclust", "priors"),
+             z.list = NULL,
+             equal.pro = FALSE,
+             uni.prior = c("unconstrained", "isotropic"),
+             mu0g = FALSE,
+             psi0g = FALSE,
+             drop0sd = TRUE,
+             verbose = interactive(),
+             ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>n.iters</code></td>
+<td>
+<p>The number of iterations to run the sampler for. Defaults to 25000.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>burnin</code></td>
+<td>
+<p>The number of burn-in iterations for the sampler. Defaults to <code>n.iters/5</code>. Note that chains can also be burned in later, using <code>get_IMIFA_results</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thinning</code></td>
+<td>
+<p>The thinning interval used in the simulation. Defaults to 2. No thinning corresponds to 1. Note that chains can also be thinned later, using <code>get_IMIFA_results</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>centering</code></td>
+<td>
+<p>A logical value indicating whether mean centering should be applied to the data, defaulting to <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scaling</code></td>
+<td>
+<p>The scaling to be applied - one of <code>"unit"</code>, <code>"none"</code> or <code>"pareto"</code>. Defaults to <code>"unit"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>uni.type</code></td>
+<td>
+<p>This argument specifies the type of constraint, if any, to be placed on the uniquenesses/idiosyncratic variances, i.e. whether a general diagonal matrix or isotropic diagonal matrix is to be assumed, and in turn whether these matrices are constrained to be equal across clusters. The default <code>"unconstrained"</code> corresponds to factor analysis (and mixtures thereof), whereas <code>"isotropic"</code> corresponds to probabilistic principal components analysers (and mixtures thereof).
+</p>
+<p>Constraints <em>may</em> be particularly useful when <code>N &lt;= P</code>, though caution is advised when employing constraints for any of the infinite factor models, especially <code>"isotropic"</code> and <code>"single"</code>, which may lead to overestimation of the number of clusters &amp;/or factors if this specification is inappropriate. The four options correspond to the following 4 parsimonious Gaussian mixture models:
+</p>
+
+<dl>
+<dt><code>"unconstrained"</code></dt>
+<dd>
+<p>(<strong>UUU</strong>) - variable-specific and cluster-specific: <code class="reqn">\Psi_g = \Psi_g</code>.</p>
+</dd>
+<dt><code>"isotropic"</code></dt>
+<dd>
+<p>(<strong>UUC</strong>) - cluster-specific, equal across variables: <code class="reqn">\Psi_g = \psi\mathcal{I}_p</code>.</p>
+</dd>
+<dt><code>"constrained"</code></dt>
+<dd>
+<p>(<strong>UCU</strong>) - variable-specific, equal across clusters: <code class="reqn">\Psi_g = \Psi</code>.</p>
+</dd>
+<dt><code>"single"</code></dt>
+<dd>
+<p>(<strong>UCC</strong>) - single value equal across clusters and variables: <code class="reqn">\Psi_g = \psi\mathcal{I}_p</code>.</p>
+</dd>
+</dl>
+<p>The first letter <strong>U</strong> here corresponds to constraints on loadings (not yet implemented), the second letter corresponds to uniquenesses constrained/unconstrained across clusters, and the third letter corresponds to the isotropic constraint on the uniquenesses. Of course, only the third letter is of relevance for the single-cluster <code>"FA"</code> and <code>"IFA"</code> models, such that <code>"unconstrained"</code> and <code>"constrained"</code> are equivalent for these models, and so too are <code>"isotropic"</code> and <code>"single"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>psi.alpha</code></td>
+<td>
+<p>The shape of the inverse gamma prior on the uniquenesses. Defaults to 2.5. Must be greater than 1 if <code>psi.beta</code> is <em>not</em> supplied. Otherwise be warned that values less than or equal to 1 may not bound uniquenesses sufficiently far away from 0, and the algorithm may therefore terminate. Also, excessively small values may lead to critical numerical issues and should thus be avoided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>psi.beta</code></td>
+<td>
+<p>The scale of the inverse gamma prior on the uniquenesses. Can be either a single scalar parameter, a vector of variable specific scales, or (if <code>psi0g</code> is <code>TRUE</code>) a matrix of variable and cluster-specific scales (or a vector coercible to such a matrix) or a list of length <code>length(range.G)</code> of such items of appropriate dimensions. If this is not supplied, <code>psi_hyper</code> is invoked to choose sensible values, depending on the value of <code>uni.prior</code> and the data size and dimension and, for the <code>"MFA"</code> and <code>"MIFA"</code> models only, the value of <code>psi0g</code> (i.e., <code>psi_hyper</code> is applied per cluster if <code>psi0g</code> is <code>TRUE</code> and <code>psi.beta</code> is not supplied). Excessively small values may lead to critical numerical issues and should thus be avoided.
+</p>
+<p>Note that optional arguments to <code>psi_hyper</code> can be supplied via the <code>...</code> construct here.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu.zero</code></td>
+<td>
+<p>The mean of the prior distribution for the mean parameter. Either a scalar, a vector of appropriate dimension, or (if <code>mu0g</code> is <code>TRUE</code>) a matrix of variable-specific and cluster-specific hypermeans (or a vector coercible to such a matrix) or a list of length <code>length(range.G)</code> of such items of appropriate dimensions. Defaults to the sample mean of the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma.mu</code></td>
+<td>
+<p>The covariance of the prior distribution for the cluster mean parameters. Always assumed to be a diagonal matrix, and set to the identity matrix by default. Can also be a scalar by which the identity is multiplied, a vector of appropriate dimension; if supplied as a matrix, only the diagonal elements will be extracted. Specifying <code>sigma.mu=NULL</code> will use the diagonal entries of the sample covariance matrix: for unit-scaled data this is simply the identity again. See <code>prec.mu</code> for further control over the hypercovariance in the prior for the means.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prec.mu</code></td>
+<td>
+<p>A scalar controlling the degree of flatness of the prior for the cluster means by scaling <code>sigma.mu</code> (i.e. multiplying every element of <code>sigma.mu</code> by <code>1/prec.mu</code>). Lower values lead to a more diffuse prior. Defaults to <code>0.01</code>, such that the prior is relatively non-informative by default. Of course, <code>prec.mu=1</code> nullifies any effect of this argument. The user can supply a scaled <code>sigma.mu</code> directly, but this argument is especially useful when specifying <code>sigma.mu=NULL</code>, such that the diagonal entries of the sample covariance matrix are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma.l</code></td>
+<td>
+<p>A scalar controlling the diagonal covariance of the prior distribution for the loadings. Defaults to <code>1</code>, i.e. the identity; otherwise a diagonal matrix with non-zero entries all equal to <code>sigma.l</code> Only relevant for the finite factor methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z.init</code></td>
+<td>
+<p>The method used to initialise the cluster labels. Defaults to model-based agglomerative hierarchical clustering via <code>"hc"</code>. Other options include <code>"kmeans"</code> (with 10 random starts, by default), <code>Mclust</code> via <code>"mclust"</code>, random initialisation via <code>"priors"</code>, and a user-supplied <code>"list"</code> (<code>z.list</code>). Not relevant for the <code>"FA"</code> and <code>"IFA"</code> methods. Arguments for the relevant functions can be passed via the <code>...</code> construct. For <code>"hc"</code>, <code>VVV</code> is used by default, unless the data is high-dimensional, in which case the default is <code>EII</code>. The option <code>"priors"</code> may lead to empty components at initialisation, which will return an error.
+</p>
+<p>In any case, unless <code>z.list</code> is explicitly supplied, or <code>verbose</code> is <code>FALSE</code>, the initial cluster sizes will be printed to the screen to alert users to potentially bad initialisiations (e.g. heavily imbalanced initial cluster sizes).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z.list</code></td>
+<td>
+<p>A user supplied list of cluster labels. Only relevant if <code>z.init == "z.list"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>equal.pro</code></td>
+<td>
+<p>Logical variable indicating whether or not the mixing mixing proportions are to be equal across clusters in the model (default = <code>FALSE</code>). Only relevant for the <code>"MFA"</code> and <code>"MIFA"</code> methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>uni.prior</code></td>
+<td>
+<p>A switch indicating whether uniquenesses scale hyperparameters are to be <code>"unconstrained"</code> or <code>"isotropic"</code>, i.e. variable-specific or not. <code>"uni.prior"</code> must be <code>"isotropic"</code> if the last letter of <code>uni.type</code> is <strong>C</strong>, but can take either value otherwise. Defaults to correspond to the last letter of <code>uni.type</code> if that is supplied and <code>uni.prior</code> is not, otherwise defaults to <code>"unconstrained"</code> (though <code>"isotropic"</code> is recommended when <code>N &lt;= P</code>). Only relevant when <code>psi.beta</code> is not supplied and <code>psi_hyper</code> is therefore invoked (with optional arguments passable via the <code>...</code> construct).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu0g</code></td>
+<td>
+<p>Logical indicating whether the <code>mu.zero</code> hyperparameter can be cluster-specific. Defaults to <code>FALSE</code>. Only relevant for the <code>"MFA"</code> and <code>"MIFA"</code> methods when <code>z.list</code> is supplied. See <strong>Examples</strong> below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>psi0g</code></td>
+<td>
+<p>Logical indicating whether the <code>psi.beta</code> hyperparameter(s) can be cluster-specific. Defaults to <code>FALSE</code>. Only relevant for the <code>"MFA"</code> and <code>"MIFA"</code> methods when <code>z.list</code> is supplied and only allowable when <code>uni.type</code> is one of <code>unconstrained</code> or <code>isotropic</code>. See <strong>Examples</strong> below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>drop0sd</code></td>
+<td>
+<p>Logical indicating whether to drop variables with no standard deviation (defaults to <code>TRUE</code>). This is <em>strongly</em> recommended, especially a) when <code>psi.beta</code> is not supplied &amp;/or <code>sigma.mu=NULL</code>, and either/both are therefore estimated using the empirical covariance matrix, &amp;/or b) if some form of posterior predictive checking is subsequently desired when calling <code>get_IMIFA_results</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Logical indicating whether to print output (e.g. run times) and a progress bar to the screen while the sampler runs. By default is <code>TRUE</code> if the session is interactive, and <code>FALSE</code> otherwise. If <code>FALSE</code>, warnings and error messages will still be printed to the screen, but everything else will be suppressed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Also catches unused arguments. A number of optional arguments can be also supplied here:
+</p>
+
+<ul>
+<li>
+<p>The additional <code>psi_hyper</code> argument <code>beta0</code>, especially when <code>N &lt;= P</code>.
+</p>
+</li>
+<li>
+<p>Additional arguments to be passed to <code>hc</code> (<code>modelName</code> &amp; <code>use</code> only), to <code>Mclust</code> (<code>modelNames</code>, and the arguments for <code>hc</code> with which <code>Mclust</code> is itself initialised - <code>modelName</code> &amp; <code>use</code>), or to <code>kmeans</code> (<code>iter.max</code> and <code>nstart</code> only), depending on the value of <code>z.init</code>.
+</p>
+</li>
+<li>
+<p>Additionally, when <code>z.init="mclust"</code>, <code>criterion</code> can be passed here (can be <code>"icl"</code> or <code>"bic"</code>, the default) to control how the optimum <code>Mclust</code> model to initialise with is determined.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A named list in which the names are the names of the arguments and the values are the values of the arguments.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Users should be careful to note that data are mean-centered (<code>centering=TRUE</code>) and unit-scaled (<code>scaling="unit"</code>) by default when supplying other parameters among the list above, especially those related in any way to <code>psi.hyper</code>, or to the other control functions <code>mgpControl</code> and <code>bnpControl</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Keefe Murphy - &lt;<a href="mailto:keefe.murphy@mu.ie">keefe.murphy@mu.ie</a>&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Murphy, K., Viroli, C., and Gormley, I. C. (2020) Infinite mixtures of infinite factor analysers, <em>Bayesian Analysis</em>, 15(3): 937-963. &lt;<a href="https://doi.org/10.1214/19-BA1179">doi:10.1214/19-BA1179</a>&gt;.
+</p>
+<p>McNicholas, P. D. and Murphy, T. B. (2008) Parsimonious Gaussian mixture models, <em>Statistics and Computing</em>, 18(3): 285-296.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>mcmc_IMIFA</code>, <code>psi_hyper</code>, <code>hc</code>, <code>kmeans</code>, <code>Mclust</code>, <code>mgpControl</code>, <code>bnpControl</code>, <code>storeControl</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">mfctrl &lt;- mixfaControl(n.iters=200, prec.mu=1E-03, sigma.mu=NULL,
+                       beta0=1, uni.type="constrained")
+
+# data(olive)
+# sim  &lt;- mcmc_IMIFA(olive, "IMIFA", mixFA=mfctrl)
+
+# Alternatively specify these arguments directly
+# sim  &lt;- mcmc_IMIFA(olive, "IMIFA", n.iters=200, prec.mu=1E-03,
+#                    sigma.mu=NULL, beta0=1, uni.type="constrained")
+
+# Use mu0g and psi0g for MIFA models with supplied cluster labels
+# oliveScaled &lt;- as.data.frame(scale(olive[,-(1:2)]))
+# sim2 &lt;- mcmc_IMIFA(olive, "MIFA", n.iters=200, range.G=c(3, 9),
+#                    z.list=list(olive$area, olive$region), mu0g=TRUE, psi0g=TRUE,
+#                    mu.zero=list(do.call(cbind, tapply(oliveScaled, olive$area,   colMeans)),
+#                                 do.call(cbind, tapply(oliveScaled, olive$region, colMeans))))
+</code></pre>
+
+
+</div>

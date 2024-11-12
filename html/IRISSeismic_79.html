@@ -1,0 +1,132 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>basicStats</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Length, Max, Mean, Median, Min and Standard Deviation</h2>
+
+<h3>Description</h3>
+
+<p>Basic statistics on the data in <code>Trace</code> and <code>Stream</code> objects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R"># length(x)
+# max(x, ...)
+mean(x, ...)
+# median(x, na.rm)
+# min(x, ...)
+sd(x, na.rm)
+parallelLength(x)
+parallelMax(x, na.rm)
+parallelMean(x, na.rm)
+parallelMedian(x, na.rm)
+parallelMin(x, na.rm)
+parallelSd(x, na.rm)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a <code>Trace</code> or <code>Stream</code> object </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.rm</code></td>
+<td>
+<p> a logical specifying whether missing values should be removed </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> arguments to be passed to underlying methods, e.g. the <code>mean</code> function:
+</p>
+
+<ul><li>
+<p><code>na.rm</code> – as above (default=<code>FALSE</code>) 
+</p>
+</li></ul>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><b>Trace methods</b>
+</p>
+<p>When <code>x</code> is a <code>Trace</code> object, methods <code>length</code>, <code>max</code>, <code>mean</code>, <code>median</code>,
+<code>min</code> and <code>sd</code> operate on the <code>data</code> slot of the <code>Trace</code> and are 
+equivalent to, e.g., <code>max(x@data, na.rm=FALSE)</code>.
+</p>
+<p><b>Stream methods</b>
+</p>
+<p>When <code>x</code> is a <code>Stream</code> object, methods <code>length</code>, <code>max</code>, <code>mean</code>, <code>median</code>,
+<code>min</code> and <code>sd</code> are applied to the concatenation of data from every 
+<code>Trace</code> in the <code>Stream</code>, treating this as a single data series.
+</p>
+<p>The <code>parallel~</code> versions of these methods are available only on <code>Stream</code> objects
+and return a vector of values, one for each <code>Trace</code>.
+</p>
+<p>By default, the <code>Stream-method</code> versions of these methods use <code>na.rm=FALSE</code> as there
+should be no missing datapoints in each <code>Trace</code>. The <code>Trace</code> methods default to 
+<code>na.rm=TRUE</code> to accommodate merged traces where gaps have been filled with <code>NA</code>s.
+</p>
+
+
+<h3>Value</h3>
+
+<p>For the simple statistics, a single numeric value is returned or <code>NA</code> if the <code>Trace</code> or <code>Stream</code>
+has no data.
+</p>
+<p>For the <code>parallel~</code> versions of these methods, available on <code>Stream</code> objects,
+a numeric vector is returned of the same length as <code>Stream@traces</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>See the R documentation on the respective base functions for further details.
+</p>
+<p>The <code>length.Stream</code> method only counts the number of actual data values in the individual
+<code>Traces</code> in the <code>Stream</code> object. Missing values associated with the gaps
+between <code>Traces</code> are not counted.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+starttime &lt;- as.POSIXct("2012-01-24", tz="GMT")
+endtime &lt;- as.POSIXct("2012-01-25", tz="GMT")
+
+# Get the waveform
+st &lt;- getDataselect(iris,"AK","PIN","","BHZ",starttime,endtime)
+
+# Get the first trace and generate some statistics
+tr1 &lt;- st@traces[[1]]
+length(tr1)
+max(tr1)
+mean(tr1)
+sd(tr1)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

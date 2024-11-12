@@ -1,0 +1,152 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iCARH.plotBeta</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Postprocess and plot model parameters</h2>
+
+<h3>Description</h3>
+
+<p>Group of functions to postprocess and plot model parameters of interest, compute WAIC
+(Watanabe-Akaike Information Criterion) and MADs (Mean Absolute Deviation) for posterior predictive checks
+and check normality assumptions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iCARH.plotBeta(fit, indx = TRUE, indy = TRUE)
+
+iCARH.plotARCoeff(fit, indx = TRUE)
+
+iCARH.plotTreatmentEffect(fit, indx = TRUE)
+
+iCARH.plotPathwayPerturbation(fit, path.names, indpath = TRUE)
+
+iCARH.plotDataImputation(fit, indx = T, indy = T, plotx = T, ploty = T, ...)
+
+iCARH.checkRhats(fit)
+
+iCARH.checkNormality(fit)
+
+iCARH.waic(fit)
+
+iCARH.mad(fit)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fit</code></td>
+<td>
+<p>object returned by iCARH.model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indx</code></td>
+<td>
+<p>vector to specify X variables to plot. Selects all variables of X by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indy</code></td>
+<td>
+<p>vector to specify Y variables to plot. Selects all variables of Y by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>path.names</code></td>
+<td>
+<p>pathway names</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indpath</code></td>
+<td>
+<p>vector to specify pathways to plot. Selects all pathways by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plotx</code></td>
+<td>
+<p>plot X data imputation?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ploty</code></td>
+<td>
+<p>plot Y data imputation?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>passed to ggplot2::geom_violin</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>the <code>iCARH.plot[*]</code> functions return a ggplot graph object. <code>iCARH.checkNormality</code> returns the normalized data.
+<code>iCARH.waic</code> and <code>iCARH.mad</code> return corresponding waic (scalar) and mad (vector of <code class="reqn">J*(J+1)/2</code>) values. 
+<code>iCARH.checkRhats</code> checks model convergence.
+</p>
+
+
+<h3>Functions</h3>
+
+
+<ul>
+<li> <p><code>iCARH.plotBeta</code>: Plot boxplots of posterior densities of <code class="reqn">\beta</code> coefficients.
+</p>
+</li>
+<li> <p><code>iCARH.plotARCoeff</code>: Plot boxplots of posterior densities of theta (time effect) coefficients.
+</p>
+</li>
+<li> <p><code>iCARH.plotTreatmentEffect</code>: Plot boxplots of posterior densities of treatment effect coefficients.
+</p>
+</li>
+<li> <p><code>iCARH.plotPathwayPerturbation</code>: Plot posterior densities of pathway perturbation parameters
+</p>
+</li>
+<li> <p><code>iCARH.plotDataImputation</code>: Plot imputed values
+</p>
+</li>
+<li> <p><code>iCARH.checkRhats</code>: check model convergence and return Rhat coefficients
+</p>
+</li>
+<li> <p><code>iCARH.checkNormality</code>: Check normality assumptions. Returns normalized data
+and performs quantile-quantile plot
+</p>
+</li>
+<li> <p><code>iCARH.waic</code>: Compute Watanabe-Akaike Information Criterion (WAIC)
+</p>
+</li>
+<li> <p><code>iCARH.mad</code>: Compute MADs (Mean Absolute Deviation) between true covariance matrix
+and inferred covariance matrix for posterior predictive checks
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">data.sim = iCARH.simulate(4, 10, 14, 8, 2, path.probs=0.3, Zgroupeff=c(0,4),
+beta.val=c(1,-1,0.5, -0.5))
+XX = data.sim$XX
+Y = data.sim$Y
+Z = data.sim$Z
+pathways = data.sim$pathways
+
+rstan_options(auto_write = TRUE)
+options(mc.cores = 2)
+fit = iCARH.model(XX, Y, Z, groups=rep(c(0,1), each=5), pathways, 
+control = list(adapt_delta = 0.99, max_treedepth=10), iter = 2, chains = 2)
+if(!is.null(fit$icarh))
+gplot = iCARH.plotBeta(fit, indx=1:3, indy=1:2)
+
+</code></pre>
+
+
+</div>

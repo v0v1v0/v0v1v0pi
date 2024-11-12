@@ -1,0 +1,124 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getSNCL</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Retrieve seismic data from IRIS DMC</h2>
+
+<h3>Description</h3>
+
+<p>The getSNCL() method is a convenience wrapper for the getSNCL() method
+and returns a <code>Stream</code> object in which individual <code>Traces</code>
+have been sorted by start time.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getSNCL(obj, sncl, starttime, endtime, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+ <p><code>IrisClient</code> object </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sncl</code></td>
+<td>
+<p> character string with the SNCL code </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>starttime</code></td>
+<td>
+<p> POSIXct class specifying the starttime (GMT) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>endtime</code></td>
+<td>
+<p> POSIXct class specifying the endtime (GMT) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>optional arguments   
+<code>quality</code> optional character string identifying the quality. IRIS webservices defaults to quality="M".
+<code>repository</code> optional character string identifying whether to exclusively search primary archive or realtime collection buffers.
+Acceptable values are "primary" or "realtime". If not specified, IRIS webservices defaults to both repositories.
+<code>inclusiveEnd</code> optional logical determining whether the endtime is inclusive (default = TRUE)
+<code>ignoreEpoch</code> optional logical defining behavior when multiple epochs are encountered (default = FALSE)
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The SNCL argument should be ordered network-station-location channel, e.g. <code>IU.ANMO.00.LHZ</code>.
+This argument is split into component parts which are then used in a call to the
+getSNCL() method.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A new <code>Stream</code> object is returned.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>References</h3>
+
+
+<p>The IRIS DMC dataselect web service:
+</p>
+<p><a href="https://service.iris.edu/fdsnws/dataselect/1/">https://service.iris.edu/fdsnws/dataselect/1/</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>getDataselect</code>, 
+<code>IrisClient-class</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"> 
+## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+# Use getSNCL to request data for II.JTS.00.BHZ
+starttime &lt;- as.POSIXct("2001-02-28",tz="GMT")
+endtime &lt;- as.POSIXct("2001-03-01",tz="GMT")
+
+st &lt;- getSNCL(iris, "II.JTS.00.BHZ",starttime, endtime, quality="M",
+              repository="primary",inclusiveEnd=FALSE,ignoreEpoch=TRUE)
+
+# Display structure of trace(s)
+
+str(st)
+
+# Plot trace
+plot(st)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

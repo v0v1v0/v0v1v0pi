@@ -1,0 +1,98 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getMetricsPCA</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Performance Measures with PCA pre-processing</h2>
+
+<h3>Description</h3>
+
+<p>getMetricsPCA allows to obtain performance measures from Confusion Matrix for algorithms with PCA pre-processing,it returns a data frame containing performance measures from the confusion matrix given by the <code>caret</code> package when algorithms have been run with PCA pre-processing.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getMetricsPCA(yhat, y, classtype, model)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>yhat</code></td>
+<td>
+<p>expression. The vector of predicted values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>expression. The class variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>classtype</code></td>
+<td>
+<p>character or numeric. The number of levels in <code>y</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>expression. The model object to which output of the model has been assigned.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Works with target variables that have two, three, four, six or eight classes. Similar to <code>getMetrics</code> but used in the case where models have been run with PCA specified as an option for the <code>preProcess</code> argument in the <code>train</code> function of <code>caret</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Outputs an object with performance measures calculated from the confusion matrix given by the <code>caret</code> package. A data frame is the resulting output with the first column giving the name of the performance measure, and the second column giving the corresponding value.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Khadija Aziz, Zainab Azough, Zakaria Kehel, Bancy Ngatia
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>confusionMatrix</code>,
+<code>predict.train</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">if(interactive()){
+ # Obtain predictions from several previously run models
+ dataX &lt;- subset(data, select = -y)
+ pred.knn &lt;- predict(model.knn, newdata = dataX)
+ pred.rf &lt;- predict(model.rf, newdata = dataX)
+
+ # Get metrics for several algorithms
+ metrics.knn &lt;- getMetricsPCA(y = data$y, yhat = pred.knn,
+                              classtype = 2, model = model.knn)
+ metrics.rf &lt;- getMetricsPCA(y = data$y, yhat = pred.rf,
+                             classtype = 2, model = model.rf)
+
+ # Indexing for 2-class models to remove extra column with
+ # names of performance measures
+ metrics.all &lt;- cbind(metrics.knn, metrics.rf[ , 2])
+
+ # No indexing needed for 3-, 4-, 6- or 8-class models
+ metrics.all &lt;- cbind(metrics.knn, metrics.rf)
+ }
+</code></pre>
+
+
+</div>

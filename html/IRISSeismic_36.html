@@ -1,0 +1,153 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getEvent</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Retrieve seismic event information from the USGS NEIC</h2>
+
+<h3>Description</h3>
+
+<p>The <code>getEvent</code> method obtains seismic event data from
+the USGS NEIC <code>event</code> webservice.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getEvent(obj, starttime, endtime, minmag, maxmag, magtype,
+         mindepth, maxdepth)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+<p> an <code>IrisClient</code> object </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>starttime</code></td>
+<td>
+<p> POSIXct class limiting results to events occurring after starttime (GMT) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>endtime</code></td>
+<td>
+<p> POSIXct class limiting results to events occurring before endtime (GMT) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minmag</code></td>
+<td>
+<p> optional minimum magnitude </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxmag</code></td>
+<td>
+<p> optional maximum magnitude </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>magtype</code></td>
+<td>
+<p> optional magnitude type </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mindepth</code></td>
+<td>
+<p> optional minimum depth (km) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxdepth</code></td>
+<td>
+<p> optional maximum depth (km) </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>getEvent</code> method uses the event web service to obtain data for all events that meet the criteria defined by the arguments
+and returns that data in a dataframe. Each row of the dataframe represents a unique event.
+</p>
+<p><code>getEvent</code> calls to the IRIS event webservice now go to https://earthquake.usgs.gov/fdsnws/event/1/. If <code>obj@site</code> is something
+other than "https://service.iris.edu", getEvent will point to <code>obj@site</code>/fdsnws/event/1/. The event service must be able to output
+format=text.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A dataframe with the following columns:
+</p>
+<pre>
+eventId ,time, latitude, longitude, depth, author, cCatalog, contributor,
+  contributorId, magType, magnitude, magAuthor, eventLocationName 
+</pre>
+<p>Rows are ordered by <code>time</code>.
+</p>
+<p><strong>NOTE:</strong> column names are identical to the names returned from the event web service
+with the exception of "latitude" for "lat" and "longitude" for "lon". The longer names are
+used for internal consistency – all other web services return columns named "latitude" and "longitude".
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>The USGS event webservice:
+<a href="https://earthquake.usgs.gov/fdsnws/event/1/">https://earthquake.usgs.gov/fdsnws/event/1/</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>IrisClient-class</code>,
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  ## Not run: 
+# NOTE:  'maps' and 'mapdata' packages must be installed
+#require(maps)
+#require(mapdata)
+
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+# Get events &gt; mag 5.0 over a week in June of 2012
+starttime &lt;- as.POSIXct("2012-06-21", tz="GMT")
+endtime &lt;- starttime + 3600 * 24 * 7
+result &lt;- try(events &lt;- getEvent(iris, starttime, endtime, minmag=5.0))
+if (inherits(result,"try-error")) {
+  message(geterrmessage())
+} else {
+
+# Look at all events
+  print(paste(nrow(events),"earthquakes found with magnitude &gt; 5.0"))
+  
+# Plot events on a map
+  #map('world')
+  #points(events$longitude, events$latitude, pch=16, cex=1.5, col='red')
+  #labels &lt;- paste(" ", as.character(round(events$magnitude,1)), sep="")
+  #text(events$longitude, events$latitude, labels=labels, pos=4, cex=1.2, col='red3')
+  }
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,95 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>filter_winter</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Filter winter NDVI</h2>
+
+<h3>Description</h3>
+
+<p>Using lower quantile (default = 0.025) of multi-year MODIS data, determine the "winterNDVI" for each id.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">filter_winter(
+  DT,
+  probs = 0.025,
+  limits = c(60L, 300L),
+  doy = "DayOfYear",
+  id = "id"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>DT</code></td>
+<td>
+<p>data.table of NDVI time series</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probs</code></td>
+<td>
+<p>quantile probability to determine "winterNDVI". default is 0.025.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>limits</code></td>
+<td>
+<p>integer vector indicating limit days of absolute winter (snow cover, etc.). default is c(60, 300): 60 days after Jan 1 and 65 days before Jan 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>doy</code></td>
+<td>
+<p>julian day column. default is 'DayOfYear'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p>id column. default is 'id'. See details.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The id argument is used to split between sampling units. This may be a point id, polygon id, pixel id, etc. depending on your analysis.
+</p>
+
+
+<h3>Value</h3>
+
+<p>filtered data.table with appended 'winter' column of each id's "winterNDVI" baseline value.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other filter: 
+<code>filter_ndvi()</code>,
+<code>filter_qa()</code>,
+<code>filter_roll()</code>,
+<code>filter_top()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Load data.table
+library(data.table)
+
+# Read example data
+ndvi &lt;- fread(system.file("extdata", "sampled-ndvi-MODIS-MOD13Q1.csv", package = "irg"))
+filter_qa(ndvi, ndvi = 'NDVI', qa = 'SummaryQA', good = c(0, 1))
+filter_winter(ndvi, probs = 0.025, limits = c(60L, 300L), doy = 'DayOfYear', id = 'id')
+</code></pre>
+
+
+</div>

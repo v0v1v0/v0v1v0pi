@@ -1,0 +1,163 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ReadAndSplitVCFs</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Read and split VCF files</h2>
+
+<h3>Description</h3>
+
+<p>Read and split VCF files
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ReadAndSplitVCFs(
+  files,
+  variant.caller = "unknown",
+  num.of.cores = 1,
+  names.of.VCFs = NULL,
+  tumor.col.names = NA,
+  filter.status = NULL,
+  get.vaf.function = NULL,
+  ...,
+  max.vaf.diff = 0.02,
+  suppress.discarded.variants.warnings = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>files</code></td>
+<td>
+<p>Character vector of file paths to the VCF files.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variant.caller</code></td>
+<td>
+<p>Name of the variant caller that produces the VCF, can
+be either <code>"strelka"</code>, <code>"mutect"</code>, <code>"freebayes"</code> or
+<code>"unknown"</code>. This information is needed to calculate the VAFs (variant
+allele frequencies). If variant caller is <code>"unknown"</code>(default) and
+<code>get.vaf.function</code> is NULL, then VAF and read depth will be NAs. If
+variant caller is <code>"mutect"</code>, do <strong>not</strong> merge SBSs into DBS.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.of.cores</code></td>
+<td>
+<p>The number of cores to use. Not available on Windows
+unless <code>num.of.cores = 1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>names.of.VCFs</code></td>
+<td>
+<p>Character vector of names of the VCF files. The order
+of names in <code>names.of.VCFs</code> should match the order of VCF file paths
+in <code>files</code>. If <code>NULL</code>(default), this function will remove all of
+the path up to and including the last path separator (if any) and file
+paths without extensions (and the leading dot) will be used as the names of
+the VCF files.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tumor.col.names</code></td>
+<td>
+<p>Optional. Only applicable to <strong>Mutect</strong> VCFs.
+Character vector of column names in <strong>Mutect</strong> VCFs which contain the
+tumor sample information. The order of names in <code>tumor.col.names</code>
+should match the order of <strong>Mutect</strong> VCFs specified in <code>files</code>.
+If <code>tumor.col.names</code> is equal to <code>NA</code>(default), this function
+will use the 10th column in all the <strong>Mutect</strong> VCFs to calculate VAFs.
+See <code>GetMutectVAF</code> for more details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filter.status</code></td>
+<td>
+<p>The status indicating a variant has passed all filters.
+An example would be <code>"PASS"</code>. Variants which don't have the specified
+<code>filter.status</code> in the <code>FILTER</code> column in VCF will be removed. If
+<code>NULL</code>(default), no variants will be removed from the original VCF.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>get.vaf.function</code></td>
+<td>
+<p>Optional. Only applicable when <code>variant.caller</code> is
+<strong>"unknown"</strong>. Function to calculate VAF(variant allele frequency) and read
+depth information from original VCF. See <code>GetMutectVAF</code> as an example.
+If <code>NULL</code>(default) and <code>variant.caller</code> is "unknown", then VAF
+and read depth will be NAs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Optional arguments to <code>get.vaf.function</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.vaf.diff</code></td>
+<td>
+<p><strong>Not</strong> applicable if <code>variant.caller =
+  "mutect"</code>. The maximum difference of VAF, default value is 0.02. If the
+absolute difference of VAFs for adjacent SBSs is bigger than <code>max.vaf.diff</code>,
+then these adjacent SBSs are likely to be "merely" asynchronous single base
+mutations, opposed to a simultaneous doublet mutation or variants involving
+more than two consecutive bases.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>suppress.discarded.variants.warnings</code></td>
+<td>
+<p>Logical. Whether to suppress
+warning messages showing information about the discarded variants. Default
+is TRUE.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list containing the following objects:
+</p>
+
+<ul>
+<li> <p><code>SBS</code>: List of VCFs with only single base substitutions.
+</p>
+</li>
+<li> <p><code>DBS</code>: List of VCFs with only doublet base substitutions.
+</p>
+</li>
+<li> <p><code>ID</code>: List of VCFs with only small insertions and deletions.
+</p>
+</li>
+<li> <p><code>discarded.variants</code>: <strong>Non-NULL only if</strong> there are variants
+that were excluded from the analysis. See the added extra column
+<code>discarded.reason</code> for more details.
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>VCFsToCatalogs</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">file &lt;- c(system.file("extdata/Mutect-vcf",
+                      "Mutect.GRCh37.s1.vcf",
+                      package = "ICAMS"))
+list.of.vcfs &lt;- ReadAndSplitVCFs(file, variant.caller = "mutect")
+</code></pre>
+
+
+</div>

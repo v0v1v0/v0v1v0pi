@@ -1,0 +1,295 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>incidence_</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compute the incidence of events (tidyselect compatible)</h2>
+
+<h3>Description</h3>
+
+<p><code>incidence_()</code> calculates the <em>incidence</em> of different events across
+specified time periods and groupings. It differs from <code>incidence()</code> only in
+its support for tidy-select
+semantics in some of its arguments.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">incidence_(
+  x,
+  date_index,
+  groups = NULL,
+  counts = NULL,
+  count_names_to = "count_variable",
+  count_values_to = "count",
+  date_names_to = "date_index",
+  rm_na_dates = TRUE,
+  interval = NULL,
+  offset = NULL,
+  complete_dates = FALSE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A data frame object representing a linelist or pre-aggregated dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>date_index</code></td>
+<td>
+<p>tidyselect.
+</p>
+<p>The time index(es) of the given data.
+</p>
+<p>This should be the name(s) corresponding to the desired date column(s) in x.
+</p>
+<p>A named vector can be used for convenient relabelling of the resultant output.
+</p>
+<p>Multiple indices only make sense when  <code>x</code> is a linelist.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groups</code></td>
+<td>
+<p>tidyselect.
+</p>
+<p>An optional vector giving the names of the groups of observations for which
+incidence should be grouped.
+</p>
+<p>A named vector can be used for convenient relabelling of the resultant output.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>counts</code></td>
+<td>
+<p>tidyselect.
+</p>
+<p>The count variables of the given data.  If NULL (default) the data is taken
+to be a linelist of individual observations.
+</p>
+<p>A named vector can be used for convenient relabelling of the resultant output.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>count_names_to</code></td>
+<td>
+<p><code>character</code>.
+</p>
+<p>The column to create which will store the <code>counts</code> column names provided that
+<code>counts</code> is not NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>count_values_to</code></td>
+<td>
+<p><code>character</code>.
+</p>
+<p>The name of the column to store the resultant count values in.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>date_names_to</code></td>
+<td>
+<p><code>character</code>.
+</p>
+<p>The name of the column to store the date variables in.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rm_na_dates</code></td>
+<td>
+<p><code>bool</code>.
+</p>
+<p>Should <code>NA</code> dates be removed prior to aggregation?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interval</code></td>
+<td>
+<p>An optional scalar integer or string indicating the (fixed) size of
+the desired time interval you wish to use for for computing the incidence.
+</p>
+<p>Defaults to NULL in which case the date_index columns are left unchanged.
+</p>
+<p>Numeric values are coerced to integer and treated as a number of days to
+group.
+</p>
+<p>Text strings can be one of:
+</p>
+<div class="sourceCode"><pre>* day or daily
+* week(s) or weekly
+* epiweek(s)
+* isoweek(s)
+* month(s) or monthly
+* yearmonth(s)
+* quarter(s) or quarterly
+* yearquarter(s)
+* year(s) or yearly
+</pre></div>
+<p>More details can be found in the "Interval specification" section.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+<p>Only applicable when <code>interval</code> is not NULL.
+</p>
+<p>An optional scalar integer or date indicating the value you wish to start
+counting periods from relative to the Unix Epoch:
+</p>
+
+<ul>
+<li>
+<p> Default value of NULL corresponds to 0L.
+</p>
+</li>
+<li>
+<p> For other integer values this is stored scaled by <code>n</code>
+(<code>offset &lt;- as.integer(offset) %% n</code>).
+</p>
+</li>
+<li>
+<p> For date values this is first converted to an integer offset
+(<code>offset &lt;- floor(as.numeric(offset))</code>) and then scaled via <code>n</code> as above.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>complete_dates</code></td>
+<td>
+<p><code>bool</code>.
+</p>
+<p>Should the resulting object have the same range of dates for each grouping.
+</p>
+<p>Missing counts will be filled with <code>0L</code>.
+</p>
+<p>Will attempt to use <code>function(x) seq(min(x), max(x), by = 1)</code> on the
+resultant date_index column to generate a complete sequence of dates.
+</p>
+<p>More flexible completion is possible by using the <code>complete_dates()</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Not currently used.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code style="white-space: pre;">⁠&lt;incidence2&gt;⁠</code> objects are a sub class of data frame with some
+additional invariants. That is, an <code style="white-space: pre;">⁠&lt;incidence2&gt;⁠</code> object must:
+</p>
+
+<ul>
+<li>
+<p> have one column representing the date index (this does not need to be a
+<code>date</code> object but must have an inherent ordering over time);
+</p>
+</li>
+<li>
+<p> have one column representing the count variable (i.e. what is being
+counted) and one variable representing the associated count;
+</p>
+</li>
+<li>
+<p> have zero or more columns representing groups;
+</p>
+</li>
+<li>
+<p> not have duplicated rows with regards to the date and group variables.
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>A <code>tibble</code> with subclass <code>incidence2</code>.
+</p>
+
+
+<h3>Interval specification</h3>
+
+<p>Where <code>interval</code> is specified, <code>incidence_()</code>, predominantly uses the
+<a href="https://cran.r-project.org/package=grates"><code>grates</code></a> package to generate
+appropriate date groupings. The grouping used depends on the value of
+<code>interval</code>. This can be specified as either an integer value or a string
+corresponding to one of the classes:
+</p>
+
+<ul>
+<li>
+<p> integer values:                     <code>&lt;grates_period&gt;</code> object, grouped by the specified number of days.
+</p>
+</li>
+<li>
+<p> day, daily:                         <code>&lt;Date&gt;</code> objects.
+</p>
+</li>
+<li>
+<p> week(s), weekly, isoweek:           <code>&lt;grates_isoweek&gt;</code> objects.
+</p>
+</li>
+<li>
+<p> epiweek(s):                         <code>&lt;grates_epiweek&gt;</code> objects.
+</p>
+</li>
+<li>
+<p> month(s), monthly, yearmonth:       <code>&lt;grates_yearmonth&gt;</code> objects.
+</p>
+</li>
+<li>
+<p> quarter(s), quarterly, yearquarter: <code>&lt;grates_yearquarter&gt;</code> objects.
+</p>
+</li>
+<li>
+<p> year(s) and yearly:                 <code>&lt;grates_year&gt;</code> objects.
+</p>
+</li>
+</ul>
+<p>For "day" or "daily" interval, we provide a thin wrapper around <code>as.Date()</code>
+that ensures the underlying data are whole numbers and that time zones are
+respected. Note that additional arguments are not forwarded to <code>as.Date()</code>
+so for greater flexibility users are advised to modifying your input prior to
+calling <code>incidence_()</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+
+<ul>
+<li> <p><code>browseVignettes("grates")</code> for more details on the grate object classes.
+</p>
+</li>
+<li> <p><code>incidence()</code> for a the underlying function without support for tidyselect
+semantics. This may be preferable for programatic usage.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+if (requireNamespace("outbreaks", quietly = TRUE)) {
+    data(ebola_sim_clean, package = "outbreaks")
+    dat &lt;- ebola_sim_clean$linelist
+    incidence_(dat, date_of_onset)
+    incidence_(dat, date_of_onset, groups = c(gender, hospital))
+}
+
+
+</code></pre>
+
+
+</div>

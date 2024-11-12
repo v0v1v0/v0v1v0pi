@@ -1,0 +1,89 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ic_sample</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Draw samples from an icenReg model</h2>
+
+<h3>Description</h3>
+
+<p>Samples response values from an icenReg fit conditional on covariates, but not 
+censoring intervals. To draw response samples conditional on covariates and 
+restrained to intervals, see <code>imputeCens</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ic_sample(fit, newdata = NULL, sampleType = "fullSample", samples = 5)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fit</code></td>
+<td>
+<p>icenReg model fit</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p><code>data.frame</code> containing covariates. If blank, will use data from model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sampleType</code></td>
+<td>
+<p>type of samples See details for options</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>samples</code></td>
+<td>
+<p>Number of samples</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Returns a matrix of samples. Each row of the matrix corresponds with a subject with the 
+covariates of the corresponding row of <code>newdata</code>. For each column of the matrix, 
+the same sampled parameters are used to sample response variables. 
+</p>
+<p>If <code>newdata</code> is left blank, will provide estimates for original data set. 
+</p>
+<p>There are several options for how to sample. To get random samples without accounting
+for error in the estimated parameters <code>imputeType ='fixedParSample'</code> takes a 
+random sample of the response variable, conditional on the response interval, 
+covariates and estimated parameters at the MLE. Alternatively, 
+<code>imputeType = 'fullSample'</code> first takes a random sample of the coefficients,
+(assuming asymptotic normality for the ic_par) and then takes a random sample 
+of the response variable, conditional on the response interval, 
+covariates, and the random sample of the coefficients.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Clifford Anderson-Bergman
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">simdata &lt;- simIC_weib(n = 500)
+
+fit &lt;- ic_par(cbind(l, u) ~ x1 + x2,
+              data = simdata)
+
+newdata = data.frame(x1 = c(0, 1), x2 = c(1,1))
+
+sampleResponses &lt;- ic_sample(fit, newdata = newdata, samples = 100)
+</code></pre>
+
+
+</div>

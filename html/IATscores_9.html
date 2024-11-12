@@ -1,0 +1,203 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>IATdescriptives</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Summary statistics of reaction time and error
+</h2>
+
+<h3>Description</h3>
+
+<p>Provides several summary statistics for reaction times and errors, by subject and by block. If by block, only two critical blocks, pair1 and pair2, are considered. See function <code>Pretreatment</code>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">IATdescriptives(IATdata, byblock = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>IATdata</code></td>
+<td>
+
+<p>a dataframe with the following columns:
+</p>
+
+<ul>
+<li> <p><code>subject</code>: (factor or coercible to factor). Univocally identifies a participant.
+</p>
+</li>
+<li> <p><code>correct</code>: (logical). has value <code>TRUE</code> or <code>1</code> if the trial was answered correctly, <code>FALSE</code> or <code>0</code> otherwise.
+</p>
+</li>
+<li> <p><code>latency</code>: (numeric). Response latency, in ms. 
+</p>
+</li>
+<li> <p><code>blockcode</code>: (factor or string). Can assume only two values, <code>"pair1"</code> and <code>"pair2"</code>. <code>"pair1"</code> is for one critical block and <code>"pair2"</code> is the other critical block.
+</p>
+</li>
+<li> <p><code>praccrit</code>. (factor, optional). Can assume only two values, <code>"prac"</code> is for practice combined categorization block and <code>"crit"</code> is for critical combined categorization block. In a IAT with 60 trials for each double categorization block, the first 20 are sometimes administered as practice block, the other 40 as critical.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>byblock</code></td>
+<td>
+
+<p>If <code>TRUE</code>, summary statistics are returned separately for the two critical blocks, pair1 and pair2</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>These summary statistics are used sometimes to define exclusion criteria. For example, Greenwald, Nosek, &amp; Banaji's (2003) improved algorithm suggests to eliminate subjects for whom more than 10 percent trials have latency less than 300ms.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Ntrials</code></td>
+<td>
+<p>number of trials</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Nmissing_latency</code></td>
+<td>
+<p>number of trials in which latency information is missing</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Nmissing_accuracy</code></td>
+<td>
+<p>number of trials in which accuracy information is missing</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Prop_error</code></td>
+<td>
+<p>proportion of error trials</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>M_latency</code></td>
+<td>
+<p>mean latency</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SD_latency</code></td>
+<td>
+<p>SD of latency</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_latency</code></td>
+<td>
+<p>minimum value of latency</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_latency</code></td>
+<td>
+<p>maximum value of latency</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Prop_latency300</code></td>
+<td>
+<p>proportion of latencies faster than 300 ms</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Prop_latency400</code></td>
+<td>
+<p>proportion of latencies faster than 400 ms</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Prop_latency10s</code></td>
+<td>
+<p>proportion of latencies slower than 10 seconds</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Giulio Costantini</p>
+
+
+<h3>References</h3>
+
+<p>Greenwald, A. G., Nosek, B. A., &amp; Banaji, M. R. (2003). Understanding and using the Implicit Association Test: I. An improved scoring algorithm. Journal of Personality and Social Psychology, 85(2), 197-216. doi:10.1037/0022-3514.85.2.197 <br><br></p>
+
+
+<h3>See Also</h3>
+
+<p><code>Pretreatment</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#### generate random IAT data ####
+set.seed(1234)
+rawIATdata &lt;- data.frame(
+  # ID of each participant (N = 10)
+  ID = rep(1:10, each = 180), 
+  # seven-block structure, as in Greenwald, Nosek &amp; Banaji (2003)
+  # block 1 = target discrimination (e.g., Bush vs. Gore items)
+  # block 2 = attribute discrimination (e.g., Pleasant words vs. unpleasant)
+  # block 3 = combined practice (e.g., Bush + pleasant vs. Gore + unpleasant)
+  # block 4 = combined critical  (e.g., Bush + pleasant vs. Gore + unpleasant)
+  # block 5 = reversed target discrimination (e.g., Gore vs. Bush)
+  # block 6 = reversed combined practice (e.g., Gore + pleasant vs. Bush + unpleasant)
+  # block 7 = reversed combined critical (e.g., Gore + pleasant vs. Bush + unpleasant)
+  block = rep(c(rep(1:3, each = 20),
+                rep(4, 40),
+                rep(5:6, each = 20),
+                rep(7, 40)), 10),
+  # expected proportion of errors = 10 percent
+  correct = sample(c(0, 1), size = 1800, replace = TRUE, prob = c(.2, .8)),
+  # reaction times are generated from a mix of two chi2 distributions,
+  # one centered on 550ms and one on 100ms to simulate fast latencies
+  latency = round(sample(c(rchisq(1500, df = 1, ncp = 550),
+                           rchisq(300, df = 1, ncp = 100)), 1800)))
+
+# add some IAT effect by making trials longer in block 6 and 7
+rawIATdata[rawIATdata$block &gt;= 6, "latency"] &lt;- 
+  rawIATdata[rawIATdata$block &gt;= 6, "latency"] + 100
+  
+# add some more effect for subjects 1 to 5
+rawIATdata[rawIATdata$block &gt;= 6 &amp;
+             rawIATdata$ID &lt;= 5, "latency"] &lt;- 
+  rawIATdata[rawIATdata$block &gt;= 6 &amp;
+             rawIATdata$ID &lt;= 5, "latency"] + 100
+               
+#### pretreat IAT data using function Pretreatment ####
+IATdata &lt;- Pretreatment(rawIATdata,
+                             label_subject = "ID",
+                          label_latency = "latency",
+                          label_accuracy = "correct",
+                          label_block = "block",
+                          block_pair1 = c(3, 4),
+                          block_pair2 = c(6, 7),
+                          label_praccrit = "block",
+                          block_prac = c(3, 6),
+                          block_crit = c(4, 7))
+IATdescriptives(IATdata)
+</code></pre>
+
+
+</div>

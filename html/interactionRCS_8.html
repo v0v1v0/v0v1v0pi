@@ -1,0 +1,134 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>rcsOR</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Restricted cubic spline interaction OR for more than 3 knots</h2>
+
+<h3>Description</h3>
+
+<p>Generate OR values in a logistic model for a 1 unit increase in a variable at
+specified points of another interacting variable splined with rcs(df &gt;= 3)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">rcsOR(
+  var2values,
+  model,
+  data = NULL,
+  var1,
+  var2,
+  ci = TRUE,
+  conf = 0.95,
+  ci.method = "delta",
+  ci.boot.method = "perc",
+  R = 100,
+  parallel = "multicore",
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>var2values</code></td>
+<td>
+<p>numeric vector of var2 points to estimate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>model of class lrm, Glm or glm family binomial. If data is NULL, the function expects to find the data in model$x.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>data used in the model. If absent, we will attempt to recover the data from the model. Only used for bootstrap and glm class models</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var1</code></td>
+<td>
+<p>variable that increases by 1 unit from 0</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var2</code></td>
+<td>
+<p>variable to spline. var2values belong to var2</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci</code></td>
+<td>
+<p>calculate 95% CI?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf</code></td>
+<td>
+<p>confidence level. Default 0.95</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci.method</code></td>
+<td>
+<p>confidence interval method. "delta" performs delta method. "bootstrap" performs bootstrapped CI (slower)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci.boot.method</code></td>
+<td>
+<p>one of the available bootstrap CI methods from <code>boot.ci</code>. Default percentile</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+<p>number of bootstrap samples if ci.method = "bootstrap". Default 100</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>can take values "no", "multicore", "snow" if ci.method = "bootstrap". Default multicore</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other parameters for boot</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>if ci = FALSE, a dataframe with initial values and OR
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(rms)
+library(mlbench)
+data(PimaIndiansDiabetes)
+# Set age on a 5-year scale
+PimaIndiansDiabetes$age &lt;- PimaIndiansDiabetes$age/5
+# Recode diabetes as 0/1
+PimaIndiansDiabetes$diabetes &lt;- ifelse(PimaIndiansDiabetes$diabetes=="pos" , 1 , 0)
+myformula &lt;- diabetes ~ mass + age * rcs( glucose , 4 )
+model &lt;- glm(myformula , data = PimaIndiansDiabetes , family = "binomial")
+rcsOR( var2values = 20:80
+       , model = model , data = PimaIndiansDiabetes , var1 ="age", var2="glucose"
+       , ci=TRUE , conf = 0.95 , ci.method = "delta")
+</code></pre>
+
+
+</div>

@@ -1,0 +1,107 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get.wpost</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimate posterior probability of mixing weight.</h2>
+
+<h3>Description</h3>
+
+<p>With the Ising prior on structured predictors, this function gets the posterior probability of mixing weight.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get.wpost(SS, beta, alpha, hyperparam, structure, edgeind, j)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>SS</code></td>
+<td>
+<p>a scalar value of sufficient statistic for regression coefficient.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p>a (p*1) matrix of regression coefficients.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>a scalar value of hyperparameter <code>alpha</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hyperparam</code></td>
+<td>
+<p>a two-dimensional vector of hyperparameters <code>a</code> and <code>b</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>structure</code></td>
+<td>
+<p>a data frame stores the information of structure among predictors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>edgeind</code></td>
+<td>
+<p>a vector stores primary keys of <code>structure</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>j</code></td>
+<td>
+<p>an index ranges from 1 to p. This function estimates a  posterior probability of a mixing weight corresponding to predictor <code>j</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>With the Ising prior on structured predictors, the problem is transformed into the realm of empirical Bayes thresholding with Laplace prior by estimating the posterior probability of mixing weight. The posterior probability is used to find the posterior median of a regression coefficient.</p>
+
+
+<h3>Value</h3>
+
+<p>Return a scalar value of a posterior probability of mixing weight for predictor.</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Vitara Pungpapong, Min Zhang, Dabao Zhang</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(simGaussian)
+Y&lt;-as.matrix(simGaussian[,1])
+X&lt;-as.matrix(simGaussian[,-1])
+n&lt;-dim(X)[1]
+data(linearrelation)
+edgeind&lt;-sort(unique(linearrelation[,1]))
+# Obtain initial values from lasso
+data(initbetaGaussian)
+beta&lt;-as.matrix(initbetaGaussian)
+# Initiate all other parameters
+alpha&lt;-0.5
+sigma&lt;-get.sigma(Y=Y, X=X, beta=beta, alpha=alpha)
+hyperparam&lt;-get.ab(beta, linearrelation, edgeind)
+# Estimate the posterior probability of first predictor
+j&lt;-1
+Yres&lt;-Y-X%*%beta+X[,j]*beta[j,1]
+sxy&lt;-t(Yres)%*%X[,j]
+ssx&lt;-sum(X[,j]^2)
+SS&lt;-sqrt(n-1)*sxy/(sigma*ssx)
+wpost&lt;-get.wpost(SS=SS, beta=beta, alpha=alpha, hyperparam=hyperparam, 
+       structure=linearrelation, edgeind=edgeind, j=j)
+</code></pre>
+
+
+</div>

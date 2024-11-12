@@ -1,0 +1,119 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bwadap.numeric</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Adaptive bandwidth choice for infinite order density estimates
+</h2>
+
+<h3>Description</h3>
+
+<p>Adaptive bandwidth choice for infinite order flat-top kernel density estimates.  
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'numeric'
+bwadap(x, smax = 13.49/IQR(x), n.points = 1000, Kn = 1.349 * 
+    5/IQR(x), c.thresh = 2, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p> A univariate data set.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smax</code></td>
+<td>
+
+<p>The algorithm searches for smoothing parameters on the interval <code>[0, smax]</code>.  <code>smax</code> is problem dependent, and the defaults are not consistently appropriate.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.points</code></td>
+<td>
+
+<p>The number of points in <code>[0, smax]</code> at which the algorithm looks for crossing of the threshold <code>c.thresh*sqrt(log(n,10)/n)</code>.  If the sample characteristic function is highly oscillatory on <code>[0,smax]</code>, this may need to be increased.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Kn</code></td>
+<td>
+
+<p>Tuning parameter <code>Kn</code> discussed in Politis (2003).  Roughly, the distance over which the sample characteristic function must stay below the threshold determined by <code>c.thresh</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c.thresh</code></td>
+<td>
+
+<p>The bandwidth is chosen by looking for the first time the sample characteristic function drops below <code>c.thresh*sqrt(log(n,10)/n)</code> and stays below that level for a distance of <code>Kn</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Currently unimplemented.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Returns a bandwidth, <code>h</code>, for use with infinite order flat-top kernel density estimates.  All frequencies higher than <code>1/h</code> are downweighted by the kernel.  All kernels in this package are scaled to use roughly the same bandwidth.  We recommend using this algorithm in conjunction with <code>bwplot.numeric</code> to double check the automated selection.  
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns the estimated kernel bandwidth h.   
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Timothy L. McMurry
+</p>
+
+
+<h3>References</h3>
+
+<p>Politis, D. N. (2003). Adaptive bandwidth choice. <em>Journal of Nonparametric Statistics</em>, 15(4-5), 517-533.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>bwadap</code>, <code>bwadap.ts</code>, <code>bwplot.numeric</code>, <code>bwplot</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x &lt;- rnorm(100)
+bwplot(x)
+h &lt;- bwadap(x)
+plot(iodensity(x, h, kernel="Trap"), type="l")
+rug(x)
+# Add the truth in red
+xs &lt;- seq(-3, 3, len=1000)
+lines(xs, dnorm(xs), col="red")
+</code></pre>
+
+
+</div>

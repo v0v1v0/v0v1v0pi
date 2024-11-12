@@ -1,0 +1,125 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dtw_partial</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Partial Dynamic Time Warping
+</h2>
+
+<h3>Description</h3>
+
+<p>Get the cheapest partial open end alignment of two time series
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dtw_partial(x, partial_Q = TRUE, partial_C = TRUE, reverse = FALSE)
+                     
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>result object of either <code>dtw()</code> or <code>idtw2vec()</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>partial_Q</code></td>
+<td>
+
+<p>logical (default = TRUE), whether Q is aligned completely to C or open ended.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>partial_C</code></td>
+<td>
+
+<p>logical (default = TRUE), whether C is aligned completely to Q or open ended. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reverse</code></td>
+<td>
+
+<p>logical (default = FALSE), whether Q and C are in original or reverse order. 
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Q is the time series that describes the vertical dimension of the global cost matrix, so <code>length(Q)</code> is equal to <code>nrow(x$gcm)</code>. So C describes the horizontal dimension of the global cost matrix, <code>length(C)</code> is equal to <code>ncol(x$gcm)</code>.
+</p>
+<p><code>dtw_partial()</code> returns the open-end alignment of Q and C with the minimal normalized distance.
+If <code>partial_Q</code> and <code>partial_C</code> both are <code>TRUE</code> the partial alignment with the smaller normalized distance is returned.
+</p>
+<p>If Q and C are in reverse order, then the optimal solution for the reverse problem is found, that is the alignment with minimal normalized distance allowing and open-start alignment.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>rangeQ</code></td>
+<td>
+<p>Vector of initial and ending index for best alignment</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rangeC</code></td>
+<td>
+<p>Vector of initial and ending index for best alignment</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>normalized_distance</code></td>
+<td>
+<p>the normalized DTW distance (see details in <code>dtw</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">#--- Open-end alignment for multivariate time series.
+# First simulate a 2-dim time series Q
+Q &lt;- matrix(cumsum(rnorm(50 * 2)), ncol = 2)
+
+# Then simulate C as warped version of Q, 
+C &lt;- simulate_timewarp(Q, stretch = 0.2, compress = 0.2, 
+                       preserve_length = TRUE)
+
+# add some noise
+C &lt;- C + rnorm(prod(dim(C)))
+
+# and append noise at the end
+C &lt;- rbind(C, matrix(rnorm(30), ncol = 2))
+
+tmp &lt;- dtw(Q = Q, C = C, ws = 50, return_QC = TRUE, return_wp = TRUE)
+par &lt;- dtw_partial(tmp, partial_C = TRUE)
+par
+plot(tmp, partial = par, type = "QC")
+plot(tmp, partial = par, type = "warp")
+plot(tmp, partial = par, type = "QC", selDim = 2)
+
+
+#--- Open-start is possible as well:
+Q &lt;- sin(1:100)
+C &lt;- c(rnorm(50), Q)
+tmp &lt;- dtw(Q = rev(Q), C = rev(C))
+dtw_partial(tmp, reverse = TRUE)
+
+</code></pre>
+
+
+</div>

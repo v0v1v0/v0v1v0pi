@@ -1,0 +1,92 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ipflasso.predict</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Using an IPF-lasso model for prediction of new observations</h2>
+
+<h3>Description</h3>
+
+<p>Derives predictions for new observations from a model fitted by the functions <code>cvr.ipflasso</code> or <code>cvr2.ipflasso</code>.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ipflasso.predict(object, Xtest)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>the output of either <code>cvr.ipflasso</code> (if the user chooses the penalty factor himself) or <code>cvr2.ipflasso</code> (if the user cross-validates the penalty factor).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Xtest</code></td>
+<td>
+<p>a ntest x p matrix containing the values of the predictors for the test data. It should have the same number of columns as the matrix <code>X</code> used to obtain the model <code>result</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with the following arguments:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>linpredtest</code></td>
+<td>
+<p>a ntest-vector giving the value of the linear predictor for the test observations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>classtest</code></td>
+<td>
+<p>a ntest-vector with values 0 or 1 giving the predicted class for the test observations (for binary Y).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probabilitiestest</code></td>
+<td>
+<p>a ntest-vector giving the predicted probability of Y=1 for the test observations (for binary Y).</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Anne-Laure Boulesteix (<a href="https://www.en.ibe.med.uni-muenchen.de/mitarbeiter/professoren/boulesteix/index.html">https://www.en.ibe.med.uni-muenchen.de/mitarbeiter/professoren/boulesteix/index.html</a>)   
+</p>
+
+
+<h3>References</h3>
+
+<p>Boulesteix AL, De Bin R, Jiang X, Fuchs M, 2017. IPF-lasso: integrative L1-penalized regression with penalty factors for prediction based on multi-omics data. Comput Math Methods Med 2017:7691937.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># load ipflasso library
+library(ipflasso)
+
+# generate dummy data
+X&lt;-matrix(rnorm(50*200),50,200)
+Xtest&lt;-matrix(rnorm(20*200),20,200)
+Y&lt;-rbinom(50,1,0.5)
+
+# fitting the IPF-lasso model
+model1&lt;-cvr.ipflasso(X=X,Y=Y,family="binomial",standardize=FALSE,
+                    blocks=list(block1=1:50,block2=51:200),
+                    pf=c(1,2),nfolds=5,ncv=10,type.measure="class")
+
+# making predictions from Xtest
+ipflasso.predict(object=model1,Xtest=Xtest)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,194 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>twoLocusIBD</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Estimating two-locus IBD coefficients
+</h2>
+
+<h3>Description</h3>
+
+<p>Estimates by simulation the two-locus IBD coefficients of a non-inbred pairwise relationship.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">twoLocusIBD(x, ind1, ind2, rho=NULL, cM=NULL, Nsim, Xchrom=FALSE, verbose=TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>A pedigree in the form of a <code>linkdat</code> object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ind1, ind2</code></td>
+<td>
+
+<p>Numeric ID labels of the two individuals.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+
+<p>NULL, or a number in the interval [0, 0.5]: the recombination fraction between the two loci. If non-NULL, it is converted to centiMorgan using Haldanes map function: <code>cM = -50*log(1-2*rho)</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cM</code></td>
+<td>
+
+<p>NULL, or a non-negative number: the distance in centiMorgan between the two loci.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Nsim</code></td>
+<td>
+
+<p>The number of simulations to be performed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Xchrom</code></td>
+<td>
+
+<p>A logical indicating if the loci are X-linked (if TRUE) or autosomal (FALSE).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>A logical.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Further arguments to be passed on to <code>IBDsim</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For a given pair of autosomal loci, the two-locus IBD coefficients of a non-inbred pairwise relationship are defined by
+</p>
+<p style="text-align: center;"><code class="reqn">\kappa[i,j] = Pr(sharing i alleles IBD at locus 1, and j alleles IBD at locus 2),</code>
+</p>
+
+<p>where <code class="reqn">0 \le i,j \le 2</code>. For X-chromosomal loci, and if at least one of the individuals is male, <code class="reqn">\kappa[i,j]</code> is defined only for <code class="reqn">0 \le i,j \le 1</code>.
+</p>
+<p>While the single-locus IBD coefficients <code class="reqn">\kappa=(\kappa[0], \kappa[1], \kappa[2])</code> (see <code>oneLocusIBD</code>) depend only on the genealogy relating the two individuals, the two-locus coefficients also depend on the genetic distance between the loci. In particular, if the loci are completely linked (rho=0; cM=0) we have <code class="reqn">\kappa[i,j] = \kappa[i]</code> if i=j and 0 otherwise. If the loci are unlinked (rho=0.5; cM=Inf) we have <code class="reqn">\kappa[i,j] = \kappa[i]*\kappa[j]</code>. (See examples.)
+</p>
+
+
+<h3>Value</h3>
+
+<p>A numerical matrix, where the entry in row <code class="reqn">a</code> and column <code class="reqn">b</code> is the estimate of <code class="reqn">\kappa[a-1, b-1]</code> defined above. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Magnus Dehli Vigeland
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>oneLocusIBD</code>, <code>oneLocusJacquard</code>, <code>twoLocusJacquard</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">### Example 1: Full siblings
+x &lt;- nuclearPed(2) 
+Nsim &lt;- 100 # Should be increased substantially
+
+# One-locus kappa estimates (autosomal and X):
+k_est = oneLocusIBD(x, ind1=3, ind2=4, Nsim=Nsim, seed=123)
+k_est_X = oneLocusIBD(x, ind1=3, ind2=4, Nsim=Nsim, Xchrom=TRUE, seed=123)
+
+### Two-locus IBD estimation
+# Completely linked, autosomal
+rho = 0 
+k2_linked = twoLocusIBD(x, ind1=3, ind2=4, rho=rho, Nsim=Nsim, seed=123)
+stopifnot(identical(diag(k2_linked), k_est))
+
+# Completely unlinked, autosomal
+rho = 0.5
+k2_unlinked = twoLocusIBD(x, ind1=3, ind2=4, rho=rho, Nsim=Nsim, seed=123)
+stopifnot(identical(k2_unlinked, outer(k_est, k_est)))
+
+# Recombination rate 10%, autosomal
+rho &lt;- 0.1 
+cM &lt;- -50*log(1-2*rho)
+r1 &lt;- twoLocusIBD(x, ind1=3, ind2=4, rho=rho, Nsim=Nsim, seed=17)
+r2 &lt;- twoLocusIBD(x, ind1=3, ind2=4, cM=cM, Nsim=Nsim, seed=17)
+stopifnot(identical(r1, r2))
+
+### Two-locus IBD on X
+# Completely linked, X chromosome
+rho = 0 
+k2_linked_X = twoLocusIBD(x, ind1=3, ind2=4, rho=rho, Nsim=Nsim, Xchrom=TRUE, seed=123)
+stopifnot(identical(diag(k2_linked_X), k_est_X))
+
+# Completely unlinked, X chromosome
+rho = 0.5
+k2_unlinked_X = twoLocusIBD(x, ind1=3, ind2=4, rho=rho, Nsim=Nsim, Xchrom=TRUE, seed=123)
+stopifnot(identical(k2_unlinked_X, outer(k_est_X, k_est_X)))
+
+# Recombination rate 10%, X chromosome
+rho &lt;- 0.1 
+cM &lt;- -50*log(1-2*rho)
+r1_X &lt;- twoLocusIBD(x, ind1=3, ind2=4, rho=rho, Nsim=Nsim, Xchrom=TRUE, seed=123)
+r2_X &lt;- twoLocusIBD(x, ind1=3, ind2=4, cM=cM, Nsim=Nsim, Xchrom=TRUE, seed=123)
+stopifnot(identical(r1_X, r2_X))
+
+
+### Example 2: Comparing half sib, grandparent and uncle
+# These are indistinguishable with unlinked loci, see e.g. 
+# pages 182-183 in Egeland, Kling and Mostad (2016).
+# Each simulations followed by exact counterpart.
+x &lt;- addSon(addSon(nuclearPed(2, sex=1:2), 4), 5)
+plot(x)
+rho &lt;- 0.25
+Nsim &lt;- 10 # Should be increased to at least 10000
+twoLocusIBD(x, 1, 6, rho=rho, Nsim=Nsim, verbose=FALSE)[2,2]; .5*(1-rho)
+twoLocusIBD(x, 8, 6, rho=rho, Nsim=Nsim, verbose=FALSE)[2,2]; .5*(rho^2+(1-rho)^2)
+twoLocusIBD(x, 3, 6, rho=rho, Nsim=Nsim, verbose=FALSE)[2,2]; .5*((1-rho)*(rho^2+(1-rho)^2) + rho/2)
+
+### Example 3: X chromosome, granddaughter vs maternal grandfather.
+y &lt;- addDaughter(nuclearPed(1, sex=2), 3)
+plot(y)
+rho &lt;- 0.25
+Nsim &lt;-10
+twoLocusIBD(y, 1, 5, rho=rho, Nsim=Nsim, Xchrom=TRUE)
+
+# Exact
+matrix(c(1-rho, rho, rho, 1-rho)/2, ncol=2) 
+
+</code></pre>
+
+
+</div>

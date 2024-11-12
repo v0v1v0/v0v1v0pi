@@ -1,0 +1,128 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>MISE_mixnorm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>The MISE function in the case when the true density is the specified mixture of normal distributions and the selection kernel  <code>L_ICV</code> is used in the cross-validation stage.</h2>
+
+<h3>Description</h3>
+
+<p>Computing <code class="reqn">MISE(h)</code> for given <code class="reqn">h</code> in the case when the true density is the specified mixture of normal distributions and the kernel is <code>L_ICV</code> defined by expression (4) of Savchuk, Hart, and Sheather (2010).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">MISE_mixnorm(h, n, alpha, sigma, w, mu, sdev)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>numerical vector of bandwidth values,</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>sample size,</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>first parameter of the selection kernel,</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>second parameter of the selection kernel,</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>vector of weighs (positive numbers between 0 and 1 that add up to one),</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu</code></td>
+<td>
+<p>vector of means,</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sdev</code></td>
+<td>
+<p>vector of standard deviations.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Calculation of <code class="reqn">MISE(h)</code> in the case when the true density is the mixture of normal distributions defined by the vector of weights <code class="reqn">w</code>, the vector of means <code class="reqn">\mu</code>, and the vector of standard deviations <code class="reqn">\sigma</code>. See expression (2.3) of Marron and Wand (1992). It is assumed that the normals are defined as parsimonious as possible. The normal distributions in the mixture should be ordered such that the means in <code class="reqn">\mu</code> are arranged in a nondecreasing order. The MISE function is based on the selection kernel <code>L_ICV</code> defined by expression (4) of Savchuk, Hart, and Sheather (2010). Notice that the Gaussian kernel <code class="reqn">\phi</code> is the special case of  <code>L_ICV</code> given that <strong>(Case 1)</strong> <code class="reqn">\alpha=0</code>, <code class="reqn">\sigma&gt;0</code> or <strong>(Case 2)</strong> <code class="reqn">\sigma=1</code>, <code class="reqn">-\infty&lt;\alpha&lt;\infty</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The vector of MISE values corresponding to the specified values of <code class="reqn">h</code>.
+</p>
+
+
+<h3>References</h3>
+
+
+<ul>
+<li>
+<p> Savchuk, O.Y., Hart, J.D., Sheather, S.J. (2010). Indirect cross-validation for density estimation. <em>Journal of the American Statistical Association</em>, 105(489), 415-423.
+</p>
+</li>
+<li>
+<p>  Marron, J.S., Wand, M.P. (1992). Exact Mean Integrated Squared Error. <em>The Annals of Statistics</em>, 20(2), 712-736.
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>mixnorm</code>, <code>ISE_mixnorm</code>, <code>h_isemixnorm</code>, <code>L_ICV</code>, <code>ICV</code>, <code>h_ICV</code>,  <code>C_ICV</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Example 1. MISE for the separated bimodal density of Marron and Wand (1992).
+# in the case (alpha,sigma)=(2.42,5.06), n=100.
+harray=seq(0.05,1,len=1000)
+w=c(1/2,1/2)
+m=c(-3/2,3/2)
+s=c(1/2,1/2)
+MISEarray=MISE_mixnorm(harray,100,2.42,5.06,w,m,s)
+hopt=round(optimize(MISE_mixnorm,c(0.01,1),n=100,alpha=2.42,sigma=5.06,w=w,mu=m,sdev=s)$minimum,
+digits=4)
+dev.new()
+plot(harray,MISEarray,'l',lwd=3,xlab="h",ylab="MISE",cex.lab=1.7,cex.axis=1.7,main="")
+title(main="MISE(h) for the separated bimodal density",cex.main=1.5)
+legend(0.45,0.45,legend=c(paste("h_MISE=",hopt),"n=100"),bty="n",cex=1.7)
+
+# Example 2. MISE for the N(0,1) density in the case of the Gaussian kernel and n=500.
+harray=seq(0.03,1,len=1000)
+MISEarray=MISE_mixnorm(harray,500,1,1,1,0,1)
+hopt=round(optimize(MISE_mixnorm,c(0.01,1),n=500,alpha=1,sigma=1,w=1,mu=0,sdev=1)$minimum,digits=4)
+dev.new()
+plot(harray,MISEarray,'l',lwd=3,xlab="h",ylab="MISE",cex.lab=1.7,cex.axis=1.7,main="")
+title(main="MISE(h) for the standard normal density",cex.main=1.7)
+legend(0.2,0.02,legend=c(paste("h_MISE=",hopt),"n=500"),bty="n",cex=1.7)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,165 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>gg_injriskmatrix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot risk matrices</h2>
+
+<h3>Description</h3>
+
+<p>Given an <code>injds</code> <strong>S3</strong> object, it depicts risk matrix plots , a
+graph in which the injury incidence (frequency) is plotted against the
+average days lost per injury (consequence). The point estimate of injury
+incidence together with its confidence interval is plotted, according to the
+method used when running <code>injsummary()</code> function. On
+the y-axis, the mean time-loss per injury together with <code class="reqn">\pm</code> IQR (days)
+is plotted. The number shown inside the point and the point size itself,
+report the injury burden (days lost per player-exposure time), the bigger the
+size the greater the burden. See References section.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">gg_injriskmatrix(
+  injds,
+  var_type_injury = NULL,
+  add_contour = TRUE,
+  title = NULL,
+  xlab = "Incidence (injuries per _)",
+  ylab = "Mean time-loss (days) per injury",
+  errh_height = 1,
+  errv_width = 0.05,
+  cont_max_x = NULL,
+  cont_max_y = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>injds</code></td>
+<td>
+<p><code>injds</code> <strong>S3</strong> object (see
+<code>injsummary()</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var_type_injury</code></td>
+<td>
+<p>Character specifying the name of the column. A
+(categorical) variable referring to the "type of injury" (e.g.
+muscular/articular/others or overuse/not-overuse etc.) according to which
+visualize injury summary statistics (optional, defaults to <code>NULL</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add_contour</code></td>
+<td>
+<p>Logical, whether or not to add contour lines of the
+product between injury incidence and mean severity (i.e. 'incidence x
+average time-loss'), which leads to injury burden (defaults to
+<code>TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>title</code></td>
+<td>
+<p>Text for the main title passed to
+<code>ggplot2::ggtitle()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>x-axis label to be passed to
+<code>ggplot2::xlab()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>y-axis label to be passed to
+<code>ggplot2::ylab()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>errh_height</code></td>
+<td>
+<p>Set the height of the horizontal interval whiskers; the
+<code>height</code> argument for
+<code>ggplot2::geom_errorbarh()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>errv_width</code></td>
+<td>
+<p>Set the width of the vertical interval whiskers; the
+<code>width</code> argument for <br><code>ggplot2::geom_errorbar()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cont_max_x, cont_max_y</code></td>
+<td>
+<p>Numerical (optional) values indicating the
+maximum on the x-axis and y-axis, respectively, to be reached by the
+contour.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments passed on to
+<code>ggplot2::geom_contour()</code> and
+<code>metR::geom_text_contour()</code>.
+These are often aesthetics like <code>bins = 15</code> or <code>breaks = 10</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A ggplot object (to which optionally more layers can be added).
+</p>
+
+
+<h3>References</h3>
+
+<p>Bahr R, Clarsen B, Derman W, et al. International Olympic Committee
+consensus statement: methods for recording and reporting of epidemiological
+data on injury and illness in sport 2020 (including STROBE Extension for
+Sport Injury and Illness Surveillance (STROBE-SIIS)) <em>British Journal of
+Sports Medicine</em> 2020; 54:372-389.
+</p>
+<p>Fuller C. W. (2018). Injury Risk (Burden), Risk Matrices and Risk Contours
+in Team Sports: A Review of Principles, Practices and Problems.<em>Sports
+Medicine</em>, 48(7), 1597–1606. <br> https://doi.org/10.1007/s40279-018-0913-5
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+df_exposures &lt;- prepare_exp(raw_df_exposures, player = "player_name",
+                            date = "year", time_expo = "minutes_played")
+df_injuries  &lt;- prepare_inj(raw_df_injuries, player = "player_name",
+                            date_injured = "from", date_recovered = "until")
+injd         &lt;- prepare_all(data_exposures = df_exposures,
+                            data_injuries  = df_injuries,
+                            exp_unit = "matches_minutes")
+
+
+
+injds &lt;- injsummary(injd)
+injds2 &lt;- injsummary(injd, var_type_injury = "injury_type")
+
+gg_injriskmatrix(injds)
+gg_injriskmatrix(injds2, var_type_injury = "injury_type", title = "Risk matrix")
+
+</code></pre>
+
+
+</div>

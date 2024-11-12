@@ -1,0 +1,156 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>summary.imptree</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Classification with Imprecise Probabilities</h2>
+
+<h3>Description</h3>
+
+<p>Summary function for an imptree object, assesses 
+accuracy achieved on training data and further tree properties.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'imptree'
+summary(object, utility = 0.65,
+  dominance = c("strong", "max"), ...)
+
+## S3 method for class 'summary.imptree'
+print(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>An object of class <code>imptree</code>. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>utility</code></td>
+<td>
+<p>Utility for the utility based accuracy measure for
+a vacuous prediction result (default: 0.65).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dominance</code></td>
+<td>
+<p>Dominace criterion to be applied when predicting
+classes. This may either be <code>"strong"</code> (default) or
+<code>"max"</code>. See details at <code>predict.imptree</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments are ignored at the moment.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an object of class <code>summary.imptree</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>An existence check on the stored C++ object reference is carried
+out at first. If the reference is not valid the original call
+for <code>"object"</code> is printed as error.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A named list of class <code>summary.imptree</code> containing
+the tree creation call, accuracy on the training data, meta data
+and supplied the utility and dominance criterion for evaluation.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>Call to create the tree</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>utility</code></td>
+<td>
+<p>Supplied utility, or its default value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dominance</code></td>
+<td>
+<p>Supplied dominace criterion, or its 
+default value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sizes</code></td>
+<td>
+<p>List containing the overall number and number of 
+indeterminate predictions on training data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>acc</code></td>
+<td>
+<p>named vector containing the accuracy measures 
+on training data with nicer names (without size information)
+(see <code>predict.imptree</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meta</code></td>
+<td>
+<p>named vector containing the tree's depth, 
+number of leaves and number of nodes</p>
+</td>
+</tr>
+</table>
+<p>The printing function returns the
+<code>summary.imptree</code> object invisibly.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Paul Fink <a href="mailto:Paul.Fink@stat.uni-muenchen.de">Paul.Fink@stat.uni-muenchen.de</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>imptree</code>, <code>predict.imptree</code>,
+for information on a single node <code>node_imptree</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("carEvaluation")
+
+## create a tree with IDM (s=1) to full size
+## carEvaluation, leaving the first 10 observations out
+ip &lt;- imptree(acceptance~., data = carEvaluation[-(1:10),], 
+  method="IDM", method.param = list(splitmetric = "globalmax", s = 1), 
+  control = list(depth = NULL, minbucket = 1))
+
+## summary including prediction on training data
+summary(ip)                       # default prediction
+summary(ip, dominance = "max")    # different prediction parameter
+
+</code></pre>
+
+
+</div>

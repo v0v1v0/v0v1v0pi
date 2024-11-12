@@ -1,0 +1,170 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getDataselect</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Retrieve seismic data from IRIS DMC</h2>
+
+<h3>Description</h3>
+
+<p>The <code>getDataselect</code> method makes a request of the IRIS DMC <code>dataselect</code> 
+webservice and returns a <code>Stream</code> object in which individual <code>Traces</code>
+have been sorted by start time.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getDataselect(obj, network, station, location, channel, 
+              starttime, endtime, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+ <p><code>IrisClient</code> object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>network</code></td>
+<td>
+<p>character string with the two letter seismic network code</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>station</code></td>
+<td>
+<p>character string with the station code</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>location</code></td>
+<td>
+<p>character string with the location code</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>channel</code></td>
+<td>
+<p>character string with the three letter channel code</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>starttime</code></td>
+<td>
+<p>POSIXct class specifying the starttime (GMT)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>endtime</code></td>
+<td>
+<p>POSIXct class specifying the endtime (GMT)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>optional arguments
+<code>quality</code> optional character string identifying the quality. IRIS webservices defaults to quality="M".
+<code>repository</code> optional character string identifying whether to exclusively search primary archive or realtime collection buffers.
+Acceptable values are "primary" or "realtime". If not specified, IRIS webservices defaults to both repositories.
+<code>inclusiveEnd</code> optional logical determining whether the endtime is inclusive (default = TRUE)
+<code>ignoreEpoch</code> optional logical defining behavior when multiple epochs are encountered (default = FALSE)
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This is the primary method for retrieving seismic data.  Data requests are made through
+the <code>dataselect</code> webservice and returned data are parsed using the internal miniseed2Stream() function.
+</p>
+<p>If the location argument contains an empty string to specify a 'blank' location code, a location
+code of <code>"--"</code> will be used in the dataselect request URL.
+(See <a href="https://service.iris.edu/fdsnws/dataselect/1/">dataselect documentation</a>.)
+</p>
+<p>If <code>inclusiveEnd=FALSE</code>, then <code>getDataselect</code> will subtract 0.000001 seconds from the endtime before passing the 
+value to the <code>dataselect</code> webservice. An endtime of, e.g., <code>as.POSIXct("2016-01-03", tz="GMT")</code> will be passed 
+into <code>dataselect</code> as <code>end=2016-01-02T23:59:59.999999</code>. A data sample at time 2016-01-03T00:00:00 will not be returned
+unless <code>inclusiveEnd=TRUE</code>.
+</p>
+<p>Error returns from the webservice will stop evaluation and generate an error message.
+</p>
+<p>Sometimes the station webservice will return multiple records for the same SNCL,
+each with a different scale or starttime.  These represent different <em>epochs</em> with
+potentially different metadata parameters for the SNCL and, by default, will cause
+a 'Multiple epochs' error message to be generated.
+</p>
+<p>Handling all possible metadata differences so that the data may be merged is beyond the scope of this
+package. Instead, to avoid errors, users may specify <code>ignoreEpoch=TRUE</code> in which case
+the very first SNCL-epoch encountered will be used and all others will be discarded.
+</p>
+<p>For access to restricted data, getDataselect will look for system environmental variable "IrisClient_netrc"
+which should point to a .netrc authentication file.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A new <code>Stream</code> object is returned.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>References</h3>
+
+
+<p>The IRIS DMC dataselect webservice:
+</p>
+<p><a href="https://service.iris.edu/fdsnws/dataselect/1/">https://service.iris.edu/fdsnws/dataselect/1/</a>
+</p>
+<p>This implementation is similar in functionality to the obspy dataselect function:
+</p>
+<p><a href="https://docs.obspy.org/_modules/obspy/clients/fdsn/client.html">https://docs.obspy.org/_modules/obspy/clients/fdsn/client.html</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>getSNCL</code>, 
+<code>IrisClient-class</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"> 
+## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+options("nanotimeFormat"="%Y-%m-%dT%H-%M-%E9S")
+
+# Use getDataselect to request data for II.JTS.00.BHZ
+starttime &lt;- as.POSIXct("2001-02-28",tz="GMT")
+endtime &lt;- as.POSIXct("2001-03-01",tz="GMT")
+
+st &lt;- getDataselect(iris, "II","JTS","00","BHZ",starttime, endtime, 
+                    inclusiveEnd=FALSE,ignoreEpoch=TRUE)
+
+# Display structure of trace(s)
+
+str(st)
+
+# Plot trace
+plot(st)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

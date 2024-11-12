@@ -1,0 +1,178 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iccTraj</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimates the intraclass correlation coefficient (ICC) for trajectory data</h2>
+
+<h3>Description</h3>
+
+<p>Estimates the intraclass correlation coefficient (ICC) for trajectory data
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iccTraj(
+  data,
+  ID,
+  trip,
+  LON,
+  LAT,
+  time,
+  projection = CRS("+proj=longlat"),
+  origin = "1970-01-01 UTC",
+  parallel = TRUE,
+  individual = TRUE,
+  distance = c("H", "F"),
+  bootCI = TRUE,
+  nBoot = 100,
+  q = 0.5
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A data frame with the locations and times of trajectories. It is assumed the time between locations is uniform. It must contain at least five columns: subject identifier, trip identifier, latitude, longitude, and time of the reading.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ID</code></td>
+<td>
+<p>Character string indicating the name of the subjects column in the dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trip</code></td>
+<td>
+<p>Character string indicating the trip column in the dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LON</code></td>
+<td>
+<p>Numeric. Longitude readings.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LAT</code></td>
+<td>
+<p>Numeric. Latitude readings.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time</code></td>
+<td>
+<p>Numeric. Time of the readings.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>projection</code></td>
+<td>
+<p>Projection string of class CRS-class.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>origin</code></td>
+<td>
+<p>Optional. Origin of the date-time. Only needed in the internal process to create an object of type POSIXct.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>TRUE/FALSE value. Use parallel computation? Default value is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>individual</code></td>
+<td>
+<p>TRUE/FALSE value. Compute individual within-subjects variances? Default value is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distance</code></td>
+<td>
+<p>Metric used to compute the distances between trajectories. Options are **H** for median Hausforff distance, and **F** for discrete Fréchet distance.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bootCI</code></td>
+<td>
+<p>TRUE/FALSE value. If TRUE it will generate boostrap resamples. Default value is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nBoot</code></td>
+<td>
+<p>Numeric. Number of bootstrap resamples. Ignored if <code>"bootCI"</code> is FALSE. Default value is 100.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>Quantile for the extended Hausdorff distance. Default value q=0.5 leads to median Hausdorff distance.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The intraclass correlation coefficient is estimated using the distance matrix among trajectories.
+</p>
+<p>Bootstrap resamples are obtained using balanced randomized cluster bootstrap approach (Davison and Hinkley, 1997; Field and Welsh, 2007)
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class *iccTraj*.The output is a list with the following components:
+</p>
+
+<ul>
+<li>
+<p> *est*. Data frame with the following estimates: the ICC (r), the subjects' mean sum-of-squares (MSA), the between-subjects variance (sb), the total variance (st), and the within-subjects variance (se).
+</p>
+</li>
+<li>
+<p> *boot*. If bootCI argument is set to TRUE, data frame with the bootstrap estimates.
+</p>
+</li>
+<li>
+<p> *D*. Data frame with the pairwise distances among trajectories.
+</p>
+</li>
+<li>
+<p> *indW* Data frame with the following columns: the subject's identifier (ID), the individual within-subjects variances (w), the individual ICC (r), and the number of trips (n).
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+
+<p>Davison A.C., Hinkley D.V. (1997). Bootstrap Methods and Their Application. Cambridge: Cambridge University Press.
+</p>
+<p>Field, C.A., Welsh, A.H. (2007). Bootstrapping Clustered Data. Journal of the Royal Statistical Society. Series B (Statistical Methodology). 69(3), 369-390.
+</p>
+
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Using median Hausdorff distance.
+ Hd&lt;-iccTraj(gull_data,"ID","trip","LONG","LAT","triptime")
+ Hd$est
+# Using discrete Fréchet distance.
+Fd&lt;-iccTraj(gull_data,"ID","trip","LONG","LAT","triptime", distance="F")
+Fd$est
+
+</code></pre>
+
+
+</div>

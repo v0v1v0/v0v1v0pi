@@ -1,0 +1,358 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>isa</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Iterative Signature Algorithm</h2>
+
+<h3>Description</h3>
+
+<p>Run ISA with the default parameters</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S4 method for signature 'matrix'
+isa(data, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>The input. It must be a numeric matrix. It may contain
+<code>NA</code> and/or <code>NaN</code> values, but then the algorithm might be a
+bit slower, as R matrix multiplication might be slower for these
+matrices, depending on your platform.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments, see details below.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Please read the isa2-package manual page for an introduction on
+ISA.
+</p>
+<p>This function can be called as
+</p>
+<pre>
+    isa(data, thr.row=seq(1,3,by=0.5),
+        thr.col=seq(1,3,by=0.5), no.seeds=100,
+        direction=c("updown", "updown"))
+      </pre>
+<p>where the arguments are:
+</p>
+
+<dl>
+<dt>data</dt>
+<dd>
+<p>The input. It must be a numeric matrix. It may contain
+<code>NA</code> and/or <code>NaN</code> values, but then the algorithm might be a
+bit slower, as R matrix multiplication might be slower for these
+matrices, depending on your platform.</p>
+</dd>
+<dt>thr.row</dt>
+<dd>
+<p>Numeric vector.
+The row threshold parameters for which the ISA will be
+run. We use all possible combinations of <code>thr.row</code> and
+<code>thr.col</code>.</p>
+</dd>
+<dt>thr.col</dt>
+<dd>
+<p>Numeric vector.
+The column threshold parameters for which the ISA will be run. We
+use all possible combinations of <code>thr.row</code> and <code>thr.col</code>.
+</p>
+</dd>
+<dt>no.seeds</dt>
+<dd>
+<p>Integer scalar, the number of seeds to use.</p>
+</dd>
+<dt>direction</dt>
+<dd>
+<p>Character vector of length two, one for the rows, one
+for the columns. It specifies whether we are interested in
+rows/columns that are higher (‘<code>up</code>’) than average,
+lower than average (‘<code>down</code>’), or both
+(‘<code>updown</code>’).</p>
+</dd>
+</dl>
+<p>The <code>isa</code> function provides an easy to use interface to the
+ISA. It runs all steps of a typical ISA work flow with their default
+parameters. 
+</p>
+<p>This involves:
+</p>
+
+<ol>
+<li>
+<p> Normalizing the data by calling <code>isa.normalize</code>.
+</p>
+</li>
+<li>
+<p> Generating random input seeds via
+<code>generate.seeds</code>.
+</p>
+</li>
+<li>
+<p> Running ISA with all combinations of given row and column
+thresholds, (by default 1, 1.5, 2, 2.5, 3); by calling
+<code>isa.iterate</code>. 
+</p>
+</li>
+<li>
+<p> Merging similar modules, separately for each threshold
+combination, by calling <code>isa.unique</code>.
+</p>
+</li>
+<li>
+<p> Filtering the modules separately for each threshold combination,
+by calling <code>isa.filter.robust</code>.
+</p>
+</li>
+<li>
+<p> Putting all modules from the runs with different thresholds into
+a single object.
+</p>
+</li>
+<li>
+<p> Merging similar modules, across all threshold combinations, if
+two modules are similar, then the larger one, the one with the
+milder thresholds is kept.
+</p>
+</li>
+</ol>
+<p>Please see the manual pages of these functions for the details or if
+you want to change their default parameters.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A named list is returned with the following elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>rows</code></td>
+<td>
+<p>The row components in the biclusters, a numeric
+matrix. Every column in it corresponds to a bicluster, if an
+element (the score of the row) is non-zero, that means that the row
+is included in the bicluster, otherwise it is not. Scores are
+between -1 and 1. If the scores of two rows have the same (nonzero)
+sign, that means that the two corresponding rows “behave” the
+same way. If they have opposite sign, that means that they behave
+the opposite way.
+</p>
+<p>If the corresponding seed has not converged during the allowed
+number of iterations, then that column of <code>rows</code> contains
+<code>NA</code> values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>columns</code></td>
+<td>
+<p>The column components of the biclusters, in the same
+format as the rows.
+</p>
+<p>If the corresponding seed has not converged during the allowed
+number of iterations, then that column of <code>columns</code> contains
+<code>NA</code> values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seeddata</code></td>
+<td>
+<p>A data frame containing information about the
+biclusters. There is one row for each bicluster. The data frame has
+the following columns:
+</p>
+
+<dl>
+<dt><code>iterations</code></dt>
+<dd>
+<p>The number of iterations needed to
+converge to the bicluster.</p>
+</dd>
+<dt><code>oscillation</code></dt>
+<dd>
+<p>The oscillation period for oscillating
+biclusters. It is zero for non-oscillating ones.</p>
+</dd>
+<dt><code>thr.row</code></dt>
+<dd>
+<p>The row threshold that was used for find the
+bicluster.</p>
+</dd>
+<dt><code>thr.col</code></dt>
+<dd>
+<p>The column threshold that was used for finding the
+bicluster.</p>
+</dd>
+<dt><code>freq</code></dt>
+<dd>
+<p>The number of times the bicluster was found.</p>
+</dd>
+<dt><code>rob</code></dt>
+<dd>
+<p>The robustness score of the bicluster, see
+<code>robustness</code> for details.</p>
+</dd>
+<dt><code>rob.limit</code></dt>
+<dd>
+<p>The robustness limit that was used to filter the
+module. See <code>isa.filter.robust</code> for details.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rundata</code></td>
+<td>
+<p>A named list with information about the ISA runs. It
+has the following entries:
+</p>
+
+<dl>
+<dt><code>direction</code></dt>
+<dd>
+<p>Character vector of length two.
+Specifies which side(s) of the score distribution
+were kept in each ISA step. See the <code>direction</code> argument
+of <code>isa.iterate</code> for details.</p>
+</dd>
+<dt><code>convergence</code></dt>
+<dd>
+<p>Character scalar. The convergence criteria for
+the iteration. See the <code>convergence</code> argument of
+<code>isa.iterate</code> for details.</p>
+</dd>
+<dt><code>eps</code></dt>
+<dd>
+<p>Numeric scalar. The threshold for convergence, if the
+‘eps’ convergence criteria was used.</p>
+</dd>
+<dt><code>cor.limit</code></dt>
+<dd>
+<p>Numeric scalar. The threshold for convergence, if
+the ‘cor’ convergence criteria was used.</p>
+</dd>
+<dt><code>corx</code></dt>
+<dd>
+<p>Numeric scalar, the shift in number of
+iterations, to check convergence. See the <code>convergence</code>
+argument of <code>isa.iterate</code> for details.</p>
+</dd>
+<dt><code>maxiter</code></dt>
+<dd>
+<p>Numeric scalar. The maximum number of iterations
+that were allowed for an input seed.</p>
+</dd>
+<dt><code>N</code></dt>
+<dd>
+<p>Numeric scalar. The total number of seeds that were used
+for all the thresholds.</p>
+</dd>
+<dt><code>prenormalize</code></dt>
+<dd>
+<p>Logical scalar. Whether the data was
+pre-normalized.</p>
+</dd> 
+<dt><code>hasNA</code></dt>
+<dd>
+<p>Logical scalar. Whether the (normalized) data had
+<code>NA</code> or <code>NaN</code> values.</p>
+</dd>
+<dt><code>unique</code></dt>
+<dd>
+<p>Logical scalar. Whether the similar biclusters were
+merged by calling <code>isa.unique</code>.</p>
+</dd>
+<dt><code>oscillation</code></dt>
+<dd>
+<p>Logical scalar. Whether the algorithm looked
+for oscillating modules as well.</p>
+</dd> 
+<dt><code>rob.perms</code></dt>
+<dd>
+<p>Numeric scalar, the number of permutations that
+were used to calculate the baseline robustness for
+filtering. See the <code>perms</code> argument of the
+<code>isa.filter.robust</code> function for details.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p> Gabor Csardi <a href="mailto:Gabor.Csardi@unil.ch">Gabor.Csardi@unil.ch</a> </p>
+
+
+<h3>References</h3>
+
+<p>Bergmann S, Ihmels J, Barkai N: Iterative signature algorithm for the
+analysis of large-scale gene expression data <em>Phys Rev E Stat
+Nonlin Soft Matter Phys.</em> 2003 Mar;67(3 Pt 1):031902. Epub 2003 Mar 11.
+</p>
+<p>Ihmels J, Friedlander G, Bergmann S, Sarig O, Ziv Y, Barkai N:
+Revealing modular organization in the yeast transcriptional network
+<em>Nat Genet.</em> 2002 Aug;31(4):370-7. Epub 2002 Jul 22
+</p>
+<p>Ihmels J, Bergmann S, Barkai N:
+Defining transcription modules using large-scale gene expression data
+<em>Bioinformatics</em> 2004 Sep 1;20(13):1993-2003. Epub 2004 Mar 25.
+</p>
+
+
+<h3>See Also</h3>
+
+ <p>isa2-package for a short introduction on the Iterative
+Signature Algorithm. See the functions mentioned above if you want to
+change the default ISA parameters.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+## We generate some noisy in-silico data with modules and try to find
+## them with the ISA. This might take one or two minutes.
+data &lt;- isa.in.silico(noise=0.1)
+isa.result &lt;- isa(data[[1]])
+
+## Find the best bicluster for each block in the input
+best &lt;- apply(cor(isa.result$rows, data[[2]]), 2, which.max)
+
+## Check correlation
+sapply(seq_along(best),
+       function(x) cor(isa.result$rows[,best[x]], data[[2]][,x]))
+
+## The same for the columns
+sapply(seq_along(best),
+       function(x) cor(isa.result$columns[,best[x]], data[[3]][,x]))
+
+## Plot the data and the modules found
+if (interactive()) {
+  layout(rbind(1:2,3:4))
+  image(data[[1]], main="In-silico data")
+  sapply(best, function(b) image(outer(isa.result$rows[,b],
+                                       isa.result$columns[,b]),
+                                 main=paste("Module", b)))  
+}
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,93 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>as.output</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Character Output
+</h2>
+
+<h3>Description</h3>
+
+<p>Create objects of class <code>output</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  as.output(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>object to be converted to an instance of <code>output</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>optional arguments to be passed to implementing methods
+of <code>as.output</code>. Most methods support the following arguments:
+<code>sep</code> string, column/value separator, <code>nsep</code> string, key
+separator, <code>keys</code> either a logical (if <code>FALSE</code> names/row
+names are suppressed) or a character vector with overriding
+keys. The default for <code>keys</code> typically varies by class or is
+auto-detected (e.g., named vectors user names as keys,
+<code>data.frames</code> use row names if they are non-automatic
+etc.). All methods also support <code>con</code> argument which pushes
+the output into a connection instead of generating an output object
+- so <code>as.output(x, con=...)</code> is thus not a coersion but used
+only for its side-effect.
+Note that <code>con</code> also supports special values
+<code>iotools.stdout</code>, <code>iotools.stderr</code> and
+<code>iotools.fd(fd)</code> which write directly into the corresponding
+streams instead of using theconnection API.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>as.output</code> is generic, and methods can be written to support
+new classes. The output is meant to be a raw vector suitable for
+writing to the disk or sending over a connection.
+</p>
+
+
+<h3>Value</h3>
+
+<p>if <code>con</code> is set to a connection then the result is <code>NULL</code>
+and the method is used for its side-effect, otherwise the result is a
+raw vector.
+</p>
+<p>Side note: we cannot create a formal type of <code>output</code>, because
+<code>writeBin</code> does <code>is.vector()</code> check which doesn't dispatch
+and prevents anything with a class to be written.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Simon Urbanek
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  m = matrix(sample(letters), ncol=2)
+  as.output(m)
+
+  df = data.frame(a = sample(letters), b = runif(26), c = sample(state.abb,26))
+  str(as.output(df))
+
+  as.output(df, con=iotools.stdout)
+</code></pre>
+
+
+</div>

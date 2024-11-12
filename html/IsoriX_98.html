@@ -1,0 +1,517 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>calibfit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit the calibration model (or load parameters from calibration done outside
+IsoriX)</h2>
+
+<h3>Description</h3>
+
+<p>This function establishes the relationship between the isotopic values of
+organisms (e.g. tissues such as hair, horn, ivory or feathers; referred in
+code as <em>sample_value</em>) and the isotopic values of their environment (e.g.
+precipitation water; referred in code as <em>source_value</em>). This function is
+only needed when the assignment of organisms has to be performed within an
+isoscape that was not built using the organisms themselves, but that was
+instead built using another source of isotopic values (e.g., precipitation).
+If the isoscape had been fitted using isotopic ratios from sedentary animals
+directly, this calibration step is not needed (e.g. isoscape fitted using
+sedentary butterflies and migratory butterflies to assign). In other cases,
+this calibration step is usually needed since organisms may not directly
+reflect the isotopic values of their environment. Depending on the
+calibration data to be used (provided via the argument <code>data</code>), one of four
+possible calibration methods must be selected (via the argument <code>method</code>).
+Each method considers a different statistical model and requires particular
+data that are organised in a specific way (see <strong>Details</strong> for explanations
+and <strong>Examples</strong> for use cases).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">calibfit(
+  data,
+  isofit = NULL,
+  method = c("wild", "lab", "desk", "desk_inverse"),
+  verbose = interactive(),
+  control_optim = list()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A <em>dataframe</em> containing the calibration data (see note
+below)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>isofit</code></td>
+<td>
+<p>The fitted isoscape created by <code>isofit</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>A <em>string</em> indicating the method used to generate the data
+used for the calibration. By default method is <code>"wild"</code>, but the other
+<code>"lab"</code>, <code>"desk"</code> and <code>"desk_inverse"</code>.
+See <strong>Details</strong> for the difference between these three methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>A <em>logical</em> indicating whether information about the
+progress of the procedure should be displayed or not while the function is
+running. By default verbose is <code>TRUE</code> if you run an interactive R
+session and <code>FALSE</code> otherwise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control_optim</code></td>
+<td>
+<p>A <em>list</em> to pass information to the argument control
+in the call to <code>optim</code> (only effective when <code>method = "wild"</code>; for advanced users only).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>method</code> argument can take one of the four values "wild" (default),
+"lab", "desk" and "desk_inverse" corresponding to the four calibration
+methods. It is crucial for you to select the method that is most appropriate
+for your workflow, as the choice of method can impact the most likely
+assignment locations during the assignment test performed in
+<code>isofind</code>.
+</p>
+
+
+<h4>Method "wild"</h4>
+
+<p>This calibration method is the one to be used when the calibration data to be
+used correspond to isotopic values measured on sedentary organisms and when
+no direct measurement of isotopic values in the environment are available at
+the locations where sedentary organisms have been collected. In such a case,
+the isotopic values in the environment of sedentary organisms are predicted
+internally using an isoscape fitted with <code>isofit</code>. This calibration method
+thus aims at estimating and accounting for the uncertainty associated with
+these predicted values. Such uncertainty is accounted for when fitting the
+calibration fit so as to produce an unbiased estimation of the calibration
+relationship and it is also then accounted for by <code>isofind</code> when inferring
+the possible locations of origin. Before we added the argument <code>method</code> in
+calibfit (i.e. before releasing the version 0.8.3), this method was the only
+one available in IsoriX.
+</p>
+
+<ul>
+<li> <p><strong>Statistical model</strong>: in this case, the calibration model to be fitted is
+a linear mixed-effects model (LMM) that fits the isotopic values of sedentary
+organisms as a linear function of the isotopic values in their environment
+(e.g. precipitation). The function considers that the isotopic values from
+the environment (e.g. from precipitation) at the locations at which organisms
+were sampled are not known. The function therefore predicts these isotopic
+values from the geostatistical model fitted by the function <code>isofit</code>, which
+is provided to calibfit using the argument <code>isofit</code>. The LMM used to fit the
+calibration function has a simple fixed-effect structure: an intercept and a
+slope. The random effect is more complex: it is normally distributed with
+mean zero, a certain variance between locations proportional to the squared
+(fixed) slope, and a covariance structure defined by the prediction
+covariance matrix of the isoscape model between the calibration locations.
+See appendix in Courtiol et al. 2019 for more details.
+</p>
+</li>
+<li> <p><strong>Required calibration data</strong>: the calibration data to be used here must be
+a dataframe (or a tibble) containing at least the following columns:
+</p>
+
+<ul>
+<li> <p><code>sample_value</code>: the isotopic value of the calibration sample
+</p>
+</li>
+<li> <p><code>long</code>: the longitude coordinate (decimal degrees)
+</p>
+</li>
+<li> <p><code>lat</code>: the latitude coordinate (decimal degrees)
+</p>
+</li>
+<li> <p><code>site_ID</code>: the sample site
+</p>
+</li>
+</ul>
+<p>The column name must be identical to those indicated here. Other columns
+can be present in the data but won't be used. Each row must correspond to
+a different calibration sample (i.e. a single isotopic measurement). See
+<code>CalibDataAlien</code>, <code>CalibDataBat</code>, or
+<code>CalibDataBat2</code> for examples of such a dataset.
+</p>
+</li>
+</ul>
+<h4>Method "lab"</h4>
+
+<p>This calibration method is the one to be used when the calibration data to be
+used correspond to isotopic values recorded for both organisms and their
+environment. We can foresee three main situations in which the "lab" method
+is the one to be used:
+</p>
+
+<ol>
+<li>
+<p> the data are generated by growing organisms in a controlled
+environment where they are fed and/or given water with a specific (known)
+isotopic value.
+</p>
+</li>
+<li>
+<p> sedentary organisms are sampled in the wild together with a sample
+from their environment and that isotopic values have been measured for
+both.
+</p>
+</li>
+<li>
+<p> you want to use a calibration made by others based on a plot of that
+calibration showing the datapoints. In such a case, you should use an R
+package (e.g. metaDigitse or digitize) or software (e.g. graphClick or
+dataThief) to extract the coordinates on the plots so as to obtain the
+isotopic values of the sample and the environment behind each point.
+</p>
+</li>
+</ol>
+<p>Note that the use cases 1 and 2 will allow for the propagation of all
+relevant sources of uncertainty during the assignment. In contrast, the third
+use case implies to neglect uncertainty in the isotopic values in the
+environment if those were initially predicted using an isoscape. It also
+neglects the covariances involving such predicted values. That being said, if
+you want to use someone else calibration relationship, using this method is
+generally preferable to using the method "desk" described below (less error
+prone and de facto accounting for all five parameters mentioned for the
+method "desk").
+</p>
+
+<ul>
+<li> <p><strong>Statistical model</strong>: in this case, the calibration model to be fitted is
+a simple linear model (LM) or a simple linear mixed-effects model (LMM) that
+fits the isotopic values of sedentary organisms as a linear function of the
+isotopic values in their environment (e.g. precipitation). Whether it is a LM
+or a LMM depends on the presence of a column <code>site_ID</code> in the dataset as
+well as on the number of unique values for such a column. If the column is
+present and the number of unique values is larger than 4, a LMM is fitted.
+Otherwise, a LM is fitted. In both cases, the function considers that the
+isotopic values from the environment (e.g. from precipitation) at the
+locations at which organisms were sampled are known. Contrary to the method
+"wild", the environment values are thus considered as observed and not
+predicted from an isoscape. The argument <code>isofit</code> should thus remain
+<code>NULL</code> in this case (since no isoscape is used, no isoscape fit is
+required to perform the calibration). The model used to fit the calibration
+function has a simple fixed effect structure: an intercept and a slope.
+</p>
+</li>
+<li> <p><strong>Required calibration data</strong>: the calibration data to be used here must be
+a dataframe (or a tibble) containing at least the following columns:
+</p>
+
+<ul>
+<li> <p><code>sample_value</code>: the isotopic value of the calibration sample
+</p>
+</li>
+<li> <p><code>source_value</code>: the isotopic value of the environment
+</p>
+</li>
+<li> <p><code>site_ID</code> (optional): the sample site
+</p>
+</li>
+</ul>
+<p>The column name must be identical to those indicated here. Other columns
+can be present in the data but won't be used. Each row must correspond to
+a different calibration sample (i.e. a single sample-environment pair of
+isotopic measurements).
+</p>
+</li>
+</ul>
+<h4>Methods "desk" and "desk_inverse"</h4>
+
+<p>These calibration methods must only be used as a last resource! They are
+unlikely to yield robust inference during the assignment step. These
+calibration methods are the ones to be used when no calibration data is
+directly available, when you cannot either extract the data from a plot, and
+thus when you must rely solely on published metrics (including intercept and
+slope) to represent a calibration relationship. They work by making crude
+assumptions that various uncertainty components are null.
+</p>
+<p>The method "desk" is the one to be used when the published calibration
+relationship is of the form <code>lm(sample_value ~ source_value)</code> and the
+method "desk_inverse" is the one to be used when the published calibration
+relationship is of the form <code>lm(source_value ~ sample_value)</code>. Do make
+sure you are using the correct alternative. Note that the model used for the
+published calibration must be a linear regression (LM) and not a reduced
+major axis regression (RMA). If you use parameter values stemming from a RMA,
+the assignment will most likely be biased.
+</p>
+<p>Both methods require five metrics to work at their best: the intercept and
+slope of a calibration relationship, the standard errors (SE) associated to
+them, and the residual variance (not SD). For statistical reasons, the method
+"desk" is more flexible than the method "desk_inverse" and can still work (in
+the sense of running, but the reliability of the assignments will get worse)
+if the SEs and/or the residual variance is not provided. For the method
+"desk_inverse" all metrics are unfortunately necessary.
+</p>
+<p>Don't expect miracles: even if the "desk" method is used together with its
+five parameters, the assignment will still suffer from the same limitations
+as those impacting the method "lab" usage number 3. If less than five
+parameters are provided, further assumptions are made and this comes with a
+cost: again, it can bias the assignment and bias the confidence region. For
+these reasons, we were tempted to use <code>method = "dirty"</code> instead of
+<code>method = "desk"</code>... but we chickened out since we predicted that users
+would then refrain from mentioning the method they used in publications...
+</p>
+<p>Note that if the provided slope is set to 0 and an intercept is considered,
+the calibration methods actually corresponds to the simple consideration of a
+fractionation factor.
+</p>
+
+<ul>
+<li> <p><strong>Statistical model</strong>: none!
+</p>
+</li>
+<li> <p><strong>Required calibration data</strong> for method "desk": the calibration data to be
+used here must be a dataframe (or a tibble) containing a single row with the
+following columns:
+</p>
+
+<ul>
+<li> <p><code>intercept</code>: the estimated slope of a LM calibration fit
+</p>
+</li>
+<li> <p><code>slope</code>: the estimated slope of a LM calibration fit
+</p>
+</li>
+<li> <p><code>intercept_se</code> (optional): the standard error around the intercept
+</p>
+</li>
+<li> <p><code>slope_se</code> (optional): the standard error around the slope
+</p>
+</li>
+<li> <p><code>resid_var</code> (optional): the residual variance (not SD) of a LM
+calibration fit
+</p>
+</li>
+</ul>
+</li>
+<li> <p><strong>Required calibration data</strong> for method "desk_inverse": the calibration
+data to be used here must be a dataframe (or a tibble) containing a single
+row with the following columns:
+</p>
+
+<ul>
+<li> <p><code>intercept</code>: the estimated slope of a LM calibration fit
+</p>
+</li>
+<li> <p><code>slope</code>: the estimated slope of a LM calibration fit
+</p>
+</li>
+<li> <p><code>intercept_se</code>: the standard error around the intercept
+</p>
+</li>
+<li> <p><code>slope_se</code>: the standard error around the slope
+</p>
+</li>
+<li> <p><code>resid_var</code>: the residual variance (not SD) of a LM calibration fit
+</p>
+</li>
+<li> <p><code>sign_mean_Y</code>: a <em>numeric</em> indicating the sign of the mean
+value of the isotopes in the environment in the format returned by <code>sign</code>;
+that is either <code>1</code> (if positive) or <code>-1</code> (if negative). This is
+required for pivoting the regression from "desk_inverse" to "desk".
+</p>
+</li>
+<li> <p><code>N</code>: a  <em>numeric</em> indicating the sample size of the data used
+for the calibration fit. This is required for pivoting the regression from
+"desk_inverse" to "desk".
+</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>This function returns a <em>list</em> of class <em>CALIBFIT</em> containing
+the name of the calibration method used, whether a species_ID random effect
+was estimated, whether a site_ID random effect was estimated, the
+fixed-effect estimates of the calibration function, the covariance of the
+fixed effects, the residual variance of the calibration fit, the fitted
+calibration model (if applicable), the fitted isoscape model (if
+applicable), the original calibration data set with additional information
+added during the fit, and the location of the calibration points as spatial
+points.
+</p>
+
+
+<h3>References</h3>
+
+<p>Courtiol A, Rousset F, Rohwäder M, Soto DX, Lehnert L, Voigt CC,
+Hobson KA, Wassenaar LI &amp; Kramer-Schadt S (2019). Isoscape computation and
+inference of spatial origins with mixed models using the R package IsoriX.
+In Hobson KA &amp; Wassenaar LI (eds.), Tracking Animal Migration with Stable
+Isotopes, second edition. Academic Press, London.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>see <code>plot</code> for the help on how to plot the calibration
+relationship.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## The examples below will only be run if sufficient time is allowed
+## You can change that by typing e.g. options_IsoriX(example_maxtime = XX)
+## if you want to allow for examples taking up to ca. XX seconds to run
+## (so don't write XX but put a number instead!)
+
+if (getOption_IsoriX("example_maxtime") &gt; 30) {
+  #####################################################
+  ## 1 Example of calibration using the method "wild" #
+  #####################################################
+
+  ## 1.1 We prepare the data to fit the isoscape:
+  GNIPDataDEagg &lt;- prepsources(data = GNIPDataDE)
+
+  ## 1.2 We fit the isoscape models for Germany:
+  GermanFit &lt;- isofit(
+    data = GNIPDataDEagg,
+    mean_model_fix = list(elev = TRUE, lat_abs = TRUE)
+  )
+
+  ## 1.3 We fit the calibration model using the method "wild" (the default):
+  CalibAlien &lt;- calibfit(data = CalibDataAlien, isofit = GermanFit)
+
+  ## 1.4 We explore the outcome of the calibration:
+  CalibAlien
+  summary(CalibAlien)
+  plot(CalibAlien)
+
+  ## Note 1: you can plot several calibrations at once (using bats this time):
+  CalibBat1 &lt;- calibfit(data = CalibDataBat, isofit = GermanFit)
+  CalibBat2 &lt;- calibfit(data = CalibDataBat2, isofit = GermanFit)
+  plot(CalibBat1)
+  points(CalibBat2, pch = 3, col = "red", CI = list(col = "green"))
+
+  ## Note 2: you can extract data created by plot()
+  ## for plotting things yourself:
+  dataplot &lt;- plot(CalibAlien, plot = FALSE)
+  plot(sample_fitted ~ source_value,
+    data = dataplot,
+    xlim = range(dataplot$source_value),
+    ylim = range(dataplot$sample_lwr, dataplot$sample_upr), col = NULL
+  )
+  polygon(
+    x = c(dataplot$source_value, rev(dataplot$source_value)),
+    y = c(dataplot$sample_lwr, rev(dataplot$sample_upr)),
+    col = 3
+  )
+  points(sample_fitted ~ source_value, data = dataplot, type = "l", lty = 2)
+
+
+  ####################################################
+  ## 2 Example of calibration using the method "lab" #
+  ####################################################
+
+  ## 2.0 We create made up data here because we don't have yet a good dataset
+  ## for this case, but you should use your own data instead:
+  GermanScape &lt;- isoscape(raster = ElevRasterDE, isofit = GermanFit)
+  set.seed(123)
+  CalibDataAlien2 &lt;- create_aliens(
+    calib_fn = list(
+      intercept = 3, slope = 0.5,
+      resid_var = 5
+    ),
+    isoscape = GermanScape,
+    raster = ElevRasterDE,
+    n_sites = 25,
+    min_n_samples = 5,
+    max_n_samples = 5
+  )
+  CalibDataAlien2 &lt;- CalibDataAlien2[, c(
+    "site_ID", "sample_ID",
+    "source_value", "sample_value"
+  )]
+  head(CalibDataAlien2) ## your data should have this structure
+
+  ## 2.1 We fit the calibration model using the method "lab":
+  CalibAlien2 &lt;- calibfit(data = CalibDataAlien2, method = "lab")
+
+  ## 2.2 We explore the outcome of the calibration:
+  CalibAlien2
+  summary(CalibAlien2)
+  plot(CalibAlien2)
+
+
+  #####################################################
+  ## 3 Example of calibration using the method "desk" #
+  #####################################################
+
+  ## 3.1 We format the information about the calibration function to be used
+  ## as a dataframe:
+  CalibDataAlien3 &lt;- data.frame(
+    intercept = 1.67, slope = 0.48,
+    intercept_se = 1.65, slope_se = 0.03,
+    resid_var = 3.96
+  )
+  CalibDataAlien3
+
+  ## 3.2 We fit the calibration model using the method "desk":
+  CalibAlien3 &lt;- calibfit(data = CalibDataAlien3, method = "desk")
+
+  ## 3.3 We explore the outcome of the calibration:
+  CalibAlien3
+  summary(CalibAlien3)
+  plot(CalibAlien3, xlim = c(-100, 100), ylim = c(-50, 50))
+
+  ## Note: the desk function also work with just intercept and slope:
+  CalibDataAlien4 &lt;- CalibDataAlien3[, c("intercept", "slope")]
+  CalibAlien4 &lt;- calibfit(data = CalibDataAlien4, method = "desk")
+  CalibAlien4
+  summary(CalibAlien4)
+  plot(CalibAlien3, xlim = c(-100, 100), ylim = c(-50, 50))
+  points(CalibAlien4, line = list(col = "orange"))
+  ## Regression lines are the same, but the new calibration does not have a
+  ## confidence intervals since we provided no uncertainty measure in
+  ## CalibDataAlien4, which will make a difference during assignments...
+
+
+  #############################################################
+  ## 4 Example of calibration using the method "desk_inverse" #
+  #############################################################
+
+  ## 4.1 We format the information about the calibration function to be used
+  ## as a dataframe:
+  CalibDataAlien4 &lt;- data.frame(
+    intercept = -16.98822, slope = 1.588885,
+    intercept_se = 2.200435, slope_se = 0.08106032,
+    resid_var = 13.15102, N = 125, sign_mean_Y = -1
+  )
+  CalibDataAlien4
+
+  ## 4.2 We fit the calibration model using the method "desk_inverse":
+  CalibAlien4 &lt;- calibfit(data = CalibDataAlien4, method = "desk_inverse")
+
+  ## 4.3 We explore the outcome of the calibration:
+  CalibAlien4
+  summary(CalibAlien4)
+  plot(CalibAlien4, xlim = c(-100, 100), ylim = c(-50, 50))
+}
+
+</code></pre>
+
+
+</div>

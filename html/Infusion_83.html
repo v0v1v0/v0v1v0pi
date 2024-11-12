@@ -1,0 +1,321 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot1Dprof</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Plot likelihood profiles
+</h2>
+
+<h3>Description</h3>
+
+<p>These functions plot 1D and 2D profiles from a summary-likelihood object.
+</p>
+<p>If you feel the 1D profiles are ugly, see the Details. Confidence intervals may still be correct in such cases.
+</p>
+<p>High quality 2D plots may be slow to compute, and there may be many of them in high-dimensional parameter spaces, so parallelization of the computation of each profile point has been implemented for them. Usual caveats apply: there is an time cost of launching processes on a cluster, particularly on socket clusters, possibly offsetting the benefits of parallelization when each profile point is fast to evaluate. Further, summary-likelihood objects are typically big (memory-wise), notably when theyinclude many projections, and this may constrain the number of processes that can run in parallel.
+</p>
+<p>Parallelization is also implemented for 1D profiles, but over the parameter for which profiles are computed, rather than over points in a profile. So it is effective only if profiles are computed for several parameters.  
+</p>
+<p>In default 2D plots, some areas may be left blank, for distinct reasons: the function values may be too low (as controlled by the <code>min_logLR</code> argument), or the likelihood profile may be maximized at parameter values which do not satisfy constraints defined by the <code>constr_crits</code> of the <code>infer_SLik_joint</code> function. Low profile values, even when shown, are not accurate anyway, since the inference workflow aims at inferring the top of likelihood “hill”  relevant for the computation of confidence regions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">plot1Dprof(object, pars=object$colTypes$fittedPars, fixed=NULL, 
+           type="logLR", gridSteps=21, xlabs=list(), ylab, scales=NULL,
+           plotpar=list(pch=20), 
+           control=list(min=-7.568353, shadow_col="grey70"),
+           decorations = function(par) NULL, 
+           profiles=NULL, add=NULL, safe=TRUE,
+           cluster_args=NULL, do_plot=TRUE, CIlevels=NULL,
+           lower=NULL, upper=NULL,
+           verbose=TRUE,
+           ...)
+plot2Dprof(object, pars=object$colTypes$fittedPars, fixed=NULL, 
+           type="logLR", gridSteps=17, xylabs=list(), main, scales=NULL,
+           plotpar=list(pch=20), margefrac = 0,
+           decorations = function(par1,par2) NULL, 
+           filled.contour.fn = "spaMM.filled.contour", cluster_args=NULL, 
+           min_logLR = qchisq(0.95,df=length(object$colTypes$fittedPars))/2 +3,
+           lower=NULL, upper=NULL, color.palette=NULL, profiles=NULL,
+           ... )
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>An <code>SLik</code> or <code>SLik_j</code> object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pars</code></td>
+<td>
+<p> Control of parameters for which profiles will be computed. If <code>pars</code> is specified as a vector of names, profiles are plotted for each parameter, or (2D case) for all pairs of distinct parameters. 
+</p>
+<p>Finer control is possible in the 2D case: the <code>pars</code> may be specified as a two-column natrix, in which case profiles are generated for all pairs of distinct parameters specified by rows of the matrix. It may also be specified as a two-element list, where each element is a vector of parameter names. In that case, profiles are generated for all pairs of distinct parameters combining one element of each vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed</code></td>
+<td>
+<p>A named vector of parameter values to keep fixed in the profile computation: these parameters will be excluded from the <code>pars</code> as well as from the paramters over which maximization occurs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+
+<p>Character: possible values are <code>"logL"</code> to plot the log-likelihood profile; <code>"logLR"</code> (or <code>"LR"</code> for the not-log version) to plot the log-likelihood-ratio profile; and, for 1D profiles, <code>"zoom"</code>, <code>"ranges"</code> and <code>"dual"</code> which are variants of the <code>"logLR"</code> plot controlling the plot ranges in different ways (see Details). </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gridSteps</code></td>
+<td>
+<p> The number of values (in each dimension for 2D plots) for which likelihood  should be computed. For 1D plots, 
+<code>gridSteps=0</code> is now obsolete.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlabs</code></td>
+<td>
+<p> A <em>list</em> of alternative axis labels. The names  of the list elements should be elements of <code>pars</code> (see Examples)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xylabs</code></td>
+<td>
+<p> Same as <code>xlabs</code> but affecting both axes in 2D plots</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p> Same as <code>ylab</code> argument of <code>plot</code>. Default depends on <code>type</code> argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p> Same as <code>main</code> argument of <code>plot</code>. Default depends on <code>type</code> argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scales</code></td>
+<td>
+<p> A named character vector, which controls ticks and tick labels on axes, so that these can be expressed as (say) the exponential of the parameter inferred in the SLik object. 
+For example if the likelihood of <code>logPop</code> = log(population size) was thus inferred, <code>scales=c(logPop="log")</code> will give population size values on the axis (but will retain a log scale for this parameter). Possible values of each element of the vector are <code>"identity"</code> (default), <code>"log"</code>, and <code>"log10"</code>,   
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plotpar</code></td>
+<td>
+<p>Arguments for <code>par()</code> such as font sizes, etc.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>Control of <code>"zoom"</code> or <code>"dual"</code> plots (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>decorations</code></td>
+<td>
+<p> A function implementing graphic directives added to the plot (anything that is not a function is converted to the default function). Its formal parameters are as shown by its trivial default value, the <code>par</code>[.] arguments being parameters names (as a vector of character strings), to allow the additional plot elements to depend on the parameter of each subplot (see Plot 3 in Examples).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>margefrac</code></td>
+<td>
+<p> For development purposes, not documented.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>safe</code></td>
+<td>
+<p> For development purposes, not documented.</p>
+</td>
+</tr>
+</table>
+<table>
+<tr style="vertical-align: top;">
+<td><code>filled.contour.fn</code></td>
+<td>
+<p>Name of a possible alternative to <code>graphics::filled.contour</code> to be used for rendering the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster_args</code></td>
+<td>
+<p>NULL, or a list in which case a cluster may be created and used. The list elements must match the arguments <code>spec</code> and <code>type</code> of <code>parallel::makeCluster</code>. A socket cluster is created unless <code>type="FORK"</code> (on operating systems that support fork clusters). For <code>plot1Dprof</code>, parallelisation is over the parametrs for which profiles are computed; For <code>plot2Dprof</code>,it is over the grid of points for each profile.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>profiles</code></td>
+<td>
+<p>The <code>profiles</code> element of the return value of a previous call of the function. The point coordinates it provides for a given parameter or pair of parameters will be used, instead of recomputing the profile.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add</code></td>
+<td>
+<p>The <code>profiles</code> element of the return value of a previous <code>plot1Dprof()</code> call. The point coordinates it provides for a given parameter will be added to the profile produced by other arguments, using the graphic directives specified by the ...\ to distingush them.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_logLR</code></td>
+<td>
+<p>Numeric; the minimal value of the log-likelihood ratio to be shown on 2D plots of type <code>logLR</code>, parameter regions having lower ratios being left blank.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>do_plot</code></td>
+<td>
+<p>Boolean: whether to actually plot the profiles or only return computations for it.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CIlevels</code></td>
+<td>
+<p>NULL, or a vector of confidence levels whose bounds will be added to the plot. Suggested values are <code>c(0.99, 0.95,0.90,0.75)</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower, upper</code></td>
+<td>
+<p>Numeric vectors of bounds for the parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Boolean: whether to print information about the progress of the computation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>color.palette</code></td>
+<td>
+
+<p>Either NULL or a function that can replace the default color function used by <code>plot2Dprof</code>. The function must have a single argument, giving the number of color levels. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> Further arguments passed by another function. Currently these arguments are ignored, except when handling the <code>add</code> argument, where they are passed to <code>graphics::lines</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><b>Possible issues in computing the profiles:</b>
+Computation of profiles is complicated by local maximization issues, which may result in highly visible artefacts in the plots. <code>plot1Dprof</code> tries to reduce their impact by computing the profile points starting from parameter values closest to the identified likelihood-maximizing value, and by using a method for selecting initial values for maximization which is partially controlled by the result of computation of the previous profile point. A second sequential computation of points profile may additionally be performed, this time starting from parameter values closest to the identified 95%\ confidence intervals rather than from the MLEs, when such intervals are available in the fit object or if they are requested by the <code>CIlevels</code> argument.  
+</p>
+<p><b>Graphic details of the plots:</b> 
+The 2D profile plots will typically include a contour level for the 95% 2D confidence region, labelled “2D CI” on the scale.
+</p>
+<p>A <code>"zoom"</code> plot shows only the top part of the profile, defined as points whose y-values are above a threshold minus-log-likelihood ratio <code>control$min</code>, whose default is -7.568353, the 0.9999 p-value threshold.
+</p>
+<p>A <code>"ranges"</code> (for <code>plot1Dprof</code>) is similar to <code>"zoom"</code> but maintains a fixed y range, facilitating comparison of profiles with and among different <code>plot1Dprof</code> calls. Few of the originally computed points may appear in the retained x range, in which case it may be useful to generate additional points ensured to appear in the plot, using the <code>CIlevels</code> argument.
+</p>
+<p>A <code>"dual"</code> plot displays both the zoom, and a shadow graph showing the full profile. The dual plot is shown only when requested and if there are values above and below <code>control$min</code>. The shadow curve color is given by <code>control$shadow_col</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Both functions return a list, invisibly for <code>plot1Dprof</code>. The list has elements<br><code> * MSL_updated</code> which is a boolean indicating whether the summary-likelihood maximum has been recomputed (if it is TRUE, a message is printed);<br><code> * profiles</code>, itself a list which stores information about each profile. The format of the information per profile is not yet stable (subject to changes without notice), 
+but consistent with the one handled by the <code>profiles</code> and <code>add</code> argument). Its elements currently include<br><code>    - </code>the x,y or x,y,z coordinates of the putative plot;<br><code>    - </code>the full coordinates of the profile points in a <code>profpts</code> matrix (1D plot) or a 3D array (2D plot; first dimension are the fitted parameters, second and third are x and y steps). 
+</p>
+<p><code>plot1Dprof</code> may have the side effect of adding confidence interval information to the fit object.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+if (Infusion.getOption("example_maxtime")&gt;20) { # 2D plots relatively slow
+  #### Toy bivariate gaussian model, three parameters, no projections
+  #
+  myrnorm2 &lt;- function(mu1,mu2,s2,sample.size) {
+    sam1 &lt;- rnorm(n=sample.size,mean=mu1,sd=sqrt(s2))
+    sam2 &lt;- rnorm(n=sample.size,mean=mu2,sd=sqrt(s2))
+    s &lt;- c(sam1,sam2)
+    e_mu &lt;- mean(s)
+    e_s2 &lt;- var(s)
+    c(mean=e_mu,var=e_s2,kurt=sum((s-e_mu)^4)/e_s2^2)
+  } 
+  #
+  ## simulated data, standing for the actual data to be analyzed:  
+  set.seed(123)
+  Sobs &lt;- myrnorm2(mu1=4,mu2=2,s2=1,sample.size=40) ## 
+  #
+  ## build reference table
+  parsp &lt;- init_reftable(lower=c(mu1=2.8,mu2=1,s2=0.2), 
+                         upper=c(mu1=5.2,mu2=3,s2=3))
+  parsp &lt;- cbind(parsp,sample.size=40)
+  simuls &lt;- add_reftable(Simulate="myrnorm2", parsTable=parsp)
+  
+  ## Inferring the summary-likelihood surface...
+  densvj &lt;- infer_SLik_joint(simuls,stat.obs=Sobs)
+  slik_j &lt;- MSL(densvj) ## find the maximum of the log-likelihood surface
+  
+  ### plots
+  # Plot 1: a 1D profile:
+  prof1 &lt;- plot1Dprof(slik_j,pars="s2",gridSteps=40,xlabs=list(s2=expression(paste(sigma^2))))
+  
+  # Using 'add' for comparison of successive profiles:
+  slik_2 &lt;- refine(slik_j, n=600)
+  # Plot 2: comparing 1D profiles of different iterations:
+  prof2 &lt;- plot1Dprof(slik_2,"s2", gridSteps=40,xlabs=list(s2=expression(paste(sigma^2))), 
+                      add=prof1$profiles, col="grey30") 
+                      
+  # Plot 3: using 'decorations' and 'profiles' for recycling previous computation for s2:
+  DGpars &lt;- c(mu1=4,mu2=2,s2=1,sample.size=40) # data-generating parameters
+  plot1Dprof(slik_2, gridSteps=40,xlabs=list(s2=expression(paste(sigma^2))), 
+             profiles=prof2$profiles,
+   decorations=function(par) {
+      points(y=-7,x=DGpars[par],pch=20,cex=2,col="red");
+      points(y=-0.5,x=slik_2$MSL$MSLE[par],pch=20,cex=2,col="blue")
+   }
+  ) 
+
+  plot2Dprof(slik_j,gridSteps=21,
+             ## alternative syntaxes for non-default 'pars':
+             # pars = c("mu1","mu2"), # =&gt; all combinations of given elements
+             # pars = list("s2",c("mu1","mu2")), # =&gt; combinations via expand.grid()
+             # pars = matrix(c("mu1","mu2","s2","mu1"), ncol=2), # =&gt; each row of matrix
+             xylabs=list(
+               mu1=expression(paste(mu[1])),
+               mu2=expression(paste(mu[2])),
+               s2=expression(paste(sigma^2))
+             )) 
+  # One could also add (e.g.) 
+  #            cluster_args=list(spec=4, type="FORK"), 
+  # when longer computations are requested.
+}
+
+if (Infusion.getOption("example_maxtime")&gt;5) {
+ #### Older example with primitive workflow 
+ data(densv)
+ slik &lt;- infer_surface(densv) ## infer a log-likelihood surface
+ slik &lt;- MSL(slik) ## find the maximum of the log-likelihood surface
+ prof1 &lt;- plot1Dprof(slik,pars="s2",gridSteps=40,xlabs=list(s2=expression(paste(sigma^2)))) 
+}
+
+</code></pre>
+
+
+</div>

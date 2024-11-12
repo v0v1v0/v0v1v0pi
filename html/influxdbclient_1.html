@@ -1,0 +1,367 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>InfluxDBClient</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>InfluxDBClient</h2>
+
+<h3>Description</h3>
+
+<p>Client for querying from and writing to InfluxDB 2.x.
+</p>
+
+
+<h3>Format</h3>
+
+<p>An <code>R6Class</code> object
+</p>
+
+
+<h3>Public fields</h3>
+
+<div class="r6-fields">
+
+<dl>
+<dt><code>url</code></dt>
+<dd>
+<p>Database URL</p>
+</dd>
+<dt><code>token</code></dt>
+<dd>
+<p>Authentication token</p>
+</dd>
+<dt><code>org</code></dt>
+<dd>
+<p>Organization name</p>
+</dd>
+<dt><code>dialect</code></dt>
+<dd>
+<p>Flux dialect</p>
+</dd>
+<dt><code>retryOptions</code></dt>
+<dd>
+<p>Retry options</p>
+</dd>
+</dl>
+</div>
+
+
+<h3>Methods</h3>
+
+
+
+<h4>Public methods</h4>
+
+
+<ul>
+<li> <p><a href="#method-new"><code>InfluxDBClient$new()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-health"><code>InfluxDBClient$health()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-query"><code>InfluxDBClient$query()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-ready"><code>InfluxDBClient$ready()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-write"><code>InfluxDBClient$write()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-clone"><code>InfluxDBClient$clone()</code></a>
+</p>
+</li>
+</ul>
+<hr>
+<a id="method-new"></a>
+
+
+
+<h4>Method <code>new()</code>
+</h4>
+
+<p>Creates instance of <code>InfluxDBClient</code>.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>InfluxDBClient$new(url, token, org, retryOptions = NULL)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>url</code></dt>
+<dd>
+<p>InfluxDB instance URL</p>
+</dd>
+<dt><code>token</code></dt>
+<dd>
+<p>Authentication token</p>
+</dd>
+<dt><code>org</code></dt>
+<dd>
+<p>Organization name</p>
+</dd>
+<dt><code>org</code></dt>
+<dd>
+<p>Retry options. See <code>RetryOptions</code> for details. Set to <code>TRUE</code>
+for default retry options. Default is <code>NULL</code> which disables retries.</p>
+</dd>
+</dl>
+</div>
+
+
+<hr>
+<a id="method-health"></a>
+
+
+
+<h4>Method <code>health()</code>
+</h4>
+
+<p>Gets health info of the InfluxDB instance.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>InfluxDBClient$health()</pre></div>
+
+
+
+<h5>Returns</h5>
+
+<p>Named list with <code>name</code>, <code>message</code>, <code>status</code>,
+<code>version</code>, <code>commit</code> elements or error
+</p>
+
+
+<hr>
+<a id="method-query"></a>
+
+
+
+<h4>Method <code>query()</code>
+</h4>
+
+<p>Queries data in the InfluxDB instance.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>InfluxDBClient$query(
+  text,
+  POSIXctCol = c(`_time` = "time"),
+  flatSingleResult = TRUE
+)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>text</code></dt>
+<dd>
+<p>Flux query</p>
+</dd>
+<dt><code>POSIXctCol</code></dt>
+<dd>
+<p>Flux time to (new) <code>POSIXct</code> column mapping (named list).
+Default is <code>c("_time"="time")</code>. Use <code>NULL</code> to skip it.</p>
+</dd>
+<dt><code>flatSingleResult</code></dt>
+<dd>
+<p>Whether to return simple list when response contains
+only one result. Default is <code>TRUE</code>.</p>
+</dd>
+</dl>
+</div>
+
+
+
+<h5>Returns</h5>
+
+<p>List of data frames. Data frame represents Flux table.
+It can be a named list of nested lists of data frames when query response contains
+multiple results (see Flux <a href="https://docs.influxdata.com/influxdb/v2.0/reference/flux/stdlib/built-in/outputs/yield/">yield</a>),
+or a simple list of data frames for single result response.
+</p>
+
+
+<hr>
+<a id="method-ready"></a>
+
+
+
+<h4>Method <code>ready()</code>
+</h4>
+
+<p>Gets readiness status of the InfluxDB instance.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>InfluxDBClient$ready()</pre></div>
+
+
+
+<h5>Returns</h5>
+
+<p>Named list with <code>status</code>, <code>started</code> and <code>up</code> elements or error
+</p>
+
+
+<hr>
+<a id="method-write"></a>
+
+
+
+<h4>Method <code>write()</code>
+</h4>
+
+<p>Writes data to the InfluxDB instance.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>InfluxDBClient$write(
+  x,
+  bucket,
+  batchSize = 5000,
+  precision = c("ns", "us", "ms", "s"),
+  measurementCol = "_measurement",
+  tagCols = NULL,
+  fieldCols = c(`_field` = "_value"),
+  timeCol = "_time",
+  object = NULL,
+  ...
+)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>x</code></dt>
+<dd>
+<p>Data as (list of) <code>data.frame</code></p>
+</dd>
+<dt><code>bucket</code></dt>
+<dd>
+<p>Target bucket name</p>
+</dd>
+<dt><code>batchSize</code></dt>
+<dd>
+<p>Batch size. Positive number or <code>FALSE</code> to disable.
+Default is <code>5000</code>.</p>
+</dd>
+<dt><code>precision</code></dt>
+<dd>
+<p>Time precision</p>
+</dd>
+<dt><code>measurementCol</code></dt>
+<dd>
+<p>Name of measurement column. Default is <code>"_measurement"</code>.</p>
+</dd>
+<dt><code>tagCols</code></dt>
+<dd>
+<p>Names of tag (index) columns</p>
+</dd>
+<dt><code>fieldCols</code></dt>
+<dd>
+<p>Names of field columns. In case of unpivoted data
+previously retrieved from InfluxDB, use default value ie. named list
+<code>c("_field"="_value")</code>.
+For all other cases, just use simple vector of column names (see Examples).</p>
+</dd>
+<dt><code>timeCol</code></dt>
+<dd>
+<p>Name of time column. The column values should be either
+of <code>nanotime</code> or <code>POSIXct</code> type. Default is <code>"_time"</code>.</p>
+</dd>
+<dt><code>object</code></dt>
+<dd>
+<p><em>Output object name. For dry-run operation, specify the name
+of the object to receive the output. Default is <code>NULL</code>. For debugging purposes.</em></p>
+</dd>
+</dl>
+</div>
+
+
+<hr>
+<a id="method-clone"></a>
+
+
+
+<h4>Method <code>clone()</code>
+</h4>
+
+<p>The objects of this class are cloneable with this method.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>InfluxDBClient$clone(deep = FALSE)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>deep</code></dt>
+<dd>
+<p>Whether to make a deep clone.</p>
+</dd>
+</dl>
+</div>
+
+
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Instantiation
+client &lt;- InfluxDBClient$new(url = "http://localhost:8086",
+                             token = "my-token",
+                             org = "my-org")
+
+# Query
+data &lt;- client$query('from(bucket: "my-bucket") |&gt; range(start: -1h)')
+
+# Write
+data &lt;- data.frame(...)
+client$write(data, bucket = "my-bucket", precision = "us",
+             measurementCol = "name",
+             tagCols = c("location", "id"),
+             fieldCols = c("altitude", "temperature"),
+             timeCol = "time")
+
+# Ready status
+ready &lt;- client$ready()
+
+# Healt info
+ready &lt;- client$health()
+
+## End(Not run)
+</code></pre>
+
+
+</div>

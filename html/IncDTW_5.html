@@ -1,0 +1,288 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dba</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Dynamic Time Warping Barycenter Averaging
+</h2>
+
+<h3>Description</h3>
+
+<p>Average multiple time series that are non-linearly aligned by Dynamic Time Warping. Find the centroid of a list of time series.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dba(lot, m0 = NULL, iterMax = 10, eps = NULL, 
+                dist_method = c("norm1", "norm2", "norm2_square"),
+                step_pattern = c("symmetric2", "symmetric1"),
+                ws = NULL,
+                iter_dist_method = c("dtw_norm1", "dtw_norm2",
+                                     "norm1","norm2", "max", "min"), 
+                plotit = FALSE)
+                
+# deprecated
+DBA(lot, m0 = NULL, iterMax = 10, eps = NULL, 
+                dist_method = c("norm1", "norm2", "norm2_square"),
+                step_pattern = c("symmetric2", "symmetric1"),
+                ws = NULL,
+                iter_dist_method = c("dtw_norm1", "dtw_norm2",
+                                     "norm1","norm2", "max", "min"), 
+                plotit = FALSE)
+                
+centroid(lot, dist_method = c("norm1", "norm2", "norm2_square"),
+              step_pattern = c("symmetric2", "symmetric1"),
+              normalize = TRUE, ws = NULL, ncores = NULL,
+              useRcppParallel = TRUE)
+
+
+              
+## S3 method for class 'dba'
+print(x, digits = getOption("digits"),  ...)
+
+## S3 method for class 'dba'
+summary(object, ...)              
+
+is.dba(x)             
+              
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>lot</code></td>
+<td>
+<p>List of time series. Each entry of the list is a time series as described in <code>dtw2vec</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m0</code></td>
+<td>
+<p>time series as vector or matrix. If <code>m0</code> is <code>NULL</code>, the initial time series <code>m0</code> is determined by <code>centroid</code> as the centroid of <code>lot</code>, which is the one time series of <code>lot</code> with the minimum average DTW distance to all other time series of <code>lot</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterMax</code></td>
+<td>
+<p>integer, number of maximum iterations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>numeric, threshold parameter that causes the algorithm to break if the distance of two consecutive barycenters are closer than eps</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist_method</code></td>
+<td>
+<p>character, describes the method of distance measure. See also <code>dtw</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>step_pattern</code></td>
+<td>
+<p>character, describes the step pattern. See also <code>dtw</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ws</code></td>
+<td>
+
+<p>integer, describes the window size for the sakoe chiba window. If NULL, then no window is applied. (default = NULL)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter_dist_method</code></td>
+<td>
+<p>character, that describes how the distance between two consecutive barycenter iterations are defined (default = "dtw")</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plotit</code></td>
+<td>
+<p>logical, if the iterations should be plotted or not (only possible for univariate time series)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>normalize</code></td>
+<td>
+<p>logical, default is TRUE, passed to <code>dtw_dismat</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncores</code></td>
+<td>
+<p>integer, default = NULL,  passed to <code>dtw_dismat</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>useRcppParallel</code></td>
+<td>
+<p>logical, default is TRUE, passed to <code>dtw_dismat</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>output from <code>dba</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>any R object
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+
+<p>passed to <code>round</code> and <code>print</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>additional arguments, e.g. passed to <code>print</code> or <code>summary</code>
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The parameter <code>iter_dist_method</code> describes the method to measure the progress between two iterations. For two consecutive centroid candidates <code>m1</code> and <code>m2</code> the following methods are implemented:
+</p>
+<p>'dtw_norm1':
+<code>dtw2vec(m1, m2, dist_method = "norm1", step_pattern = "symmetric2")$normalized_distance</code>
+</p>
+<p>'idm_dtw2':
+<code>dtw2vec(m1, m2, dist_method = "norm2", step_pattern = "symmetric2")$normalized_distance</code>
+</p>
+<p>'idm_norm1':
+<code>sum(abs(m1-m2))/(ncol(m1) * 2 * nrow(m1))</code>
+</p>
+<p>'idm_norm2':
+<code>sqrt(sum((m1-m2)^2))/(ncol(m1) * 2 * nrow(m1))</code>
+</p>
+<p>'idm_max':
+<code>max(abs(m1-m2))</code>
+</p>
+<p>'idm_min':
+<code>min(abs(m1-m2))</code>
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>function call</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m1</code></td>
+<td>
+<p>new centroid/ bary center of the list of time series</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterations</code></td>
+<td>
+<p>list of time series that are the best centroid of the respective iteration</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterDist_m2lot</code></td>
+<td>
+<p>list of distances of the iterations to lot</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterDist_m2lot_norm</code></td>
+<td>
+<p>list of normalized distances of the iterations to lot</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterDist_m2m</code></td>
+<td>
+<p>vector of distances of the iterations to their ancestors</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>centroid_index</code></td>
+<td>
+<p>integer giving the index of the centroid time series of <code>lot</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dismat_result</code></td>
+<td>
+<p>list of results of <code>dtw_dismat</code> called by <code>centroid</code></p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+
+<ul>
+<li>
+<p> Leodolter, M.; Pland, C.; Brändle, N; <em>IncDTW: An R Package for Incremental Calculation of Dynamic Time Warping</em>. Journal of Statistical Software, 99(9), 1-23. doi: <a href="https://doi.org/10.18637/jss.v099.i09">10.18637/jss.v099.i09</a>
+</p>
+</li>
+<li>
+<p> Sakoe, H.; Chiba, S., <em>Dynamic programming algorithm optimization for spoken word recognition, Acoustics, Speech, and Signal Processing</em> [see also IEEE Transactions on Signal Processing], IEEE Transactions on , vol.26, no.1, pp. 43-49, Feb 1978. http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1163055
+</p>
+</li>
+<li>
+<p> Petitjean, F; Ketterlin, A; Gancarski, P, A global averaging method for dynamic time warping, with applications to clustering, Pattern Recognition, Volume 44, Issue 3, 2011, Pages 678-693, ISSN 0031-3203
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+data("drink_glass")
+# initialize with any time series 
+m1 &lt;- dba(lot = drink_glass[1:10], m0 = drink_glass[[1]], 
+          dist_method = "norm2", iterMax = 20)
+
+# initialize with the centroid
+
+tmp &lt;- centroid(drink_glass)
+cent &lt;- drink_glass[[tmp$centroid_index]]
+m1 &lt;- dba(lot = drink_glass[1:10], m0 = cent, 
+          dist_method = "norm2", iterMax = 20)
+
+# plot all dimensions of the barycenters m_n per iteration:
+plot(m1)
+
+# plot the distances of the barycenter of one iteration m_n
+# to the barycenter of the previous iteration m_n-1:
+plot(m1, type = "m2m")
+
+# plot the average distances of the barycenter m_n 
+# to the list of time series:
+plot(m1, type = "m2lot")
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

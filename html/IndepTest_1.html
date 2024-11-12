@@ -1,0 +1,74 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>KLentropy</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>KLentropy</h2>
+
+<h3>Description</h3>
+
+<p>Calculates the (weighted) Kozachenko–Leonenko entropy estimator studied in Berrett, Samworth and Yuan (2018), which is based on the <code class="reqn">k</code>-nearest neighbour distances of the sample.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">KLentropy(x, k, weights = FALSE, stderror = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>The <code class="reqn">n \times d</code> data matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>The tuning parameter that gives the maximum number of neighbours that will be considered by the estimator.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>Specifies whether a weighted or unweighted estimator is used. If a weighted estimator is to be used then the default (<code>weights=TRUE</code>) results in the weights being calculated by <code>L2OptW</code>, otherwise the user may specify their own weights.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stderror</code></td>
+<td>
+<p>Specifies whether an estimate of the standard error of the weighted estimate is calculated. The calculation  is done using an unweighted version of the variance estimator described on page 7 of Berrett, Samworth and Yuan (2018).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The first element of the list is the unweighted estimator for the value of 1 up to the user-specified <code class="reqn">k</code>. The second element of the list is the weighted estimator, obtained by taking the inner product between the first element of the list and the weight vector. If <code>stderror=TRUE</code> the third element of the list is an estimate of the standard error of the weighted estimate.
+</p>
+
+
+<h3>References</h3>
+
+<p>Berrett, T. B., Samworth, R. J. and Yuan, M. (2018).
+“Efficient multivariate entropy estimation via k-nearest neighbour distances.”
+<em>Annals of Statistics, to appear</em>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">n=1000; x=rnorm(n); KLentropy(x,30,stderror=TRUE)   # The true value is 0.5*log(2*pi*exp(1)) = 1.42.
+n=5000; x=matrix(rnorm(4*n),ncol=4)                 # The true value is 2*log(2*pi*exp(1)) = 5.68
+KLentropy(x,30,weights=FALSE)                       # Unweighted estimator
+KLentropy(x,30,weights=TRUE)                        # Weights chosen by L2OptW
+w=runif(30); w=w/sum(w); KLentropy(x,30,weights=w)  # User-specified weights
+
+</code></pre>
+
+
+</div>

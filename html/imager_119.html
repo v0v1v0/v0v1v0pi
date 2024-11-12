@@ -1,0 +1,68 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>hough_circle</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Circle detection using Hough transform</h2>
+
+<h3>Description</h3>
+
+<p>Detects circles of known radius in a pixset. The output is an image where the pixel value at (x,y) represents the amount of evidence for the presence of a circle of radius r at position (x,y). 
+NB: in the current implementation, does not detect circles centred outside the limits of the pixset.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">hough_circle(px, radius)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>px</code></td>
+<td>
+<p>a pixset (e.g., the output of a Canny detector)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>radius</code></td>
+<td>
+<p>radius of circle</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a histogram of Hough scores, with the same dimension as the original image.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Simon Barthelme
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+im &lt;- load.example('coins')
+px &lt;- cannyEdges(im)
+#Find circles of radius 20
+hc &lt;- hough_circle(px,20)
+plot(hc)
+#Clean up, run non-maxima suppression
+nms &lt;- function(im,sigma) { im[dilate_square(im,sigma) != im] &lt;- 0; im}
+hc.clean &lt;- isoblur(hc,3) %&gt;% nms(50)
+#Top ten matches
+df &lt;- as.data.frame(hc.clean) %&gt;%
+dplyr::arrange(desc(value)) %&gt;% head(10)
+with(df,circles(x,y,20,fg="red",lwd=3))
+</code></pre>
+
+
+</div>

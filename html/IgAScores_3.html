@@ -1,0 +1,140 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>igascores</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generate various scores for IgA binding in IgA-Seq experiments</h2>
+
+<h3>Description</h3>
+
+<p>Calculate various different IgA-Seq scores across all the taxa and samples in an experiment.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">igascores(
+  posabunds = NULL,
+  negabunds = NULL,
+  possizes = NULL,
+  negsizes = NULL,
+  pseudo = NULL,
+  presortabunds = NULL,
+  method = "probratio",
+  scaleratio = TRUE,
+  nazeros = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>posabunds</code></td>
+<td>
+<p>A dataframe of taxa abundances in the positive/high IgA gate samples. Samples as columns and taxa as rows, column and row names must match across abundance tables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>negabunds</code></td>
+<td>
+<p>A dataframe of taxa abundances in the negative/low IgA gate samples. Samples as columns and taxa as rows, column and row names must match across abundance tables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>possizes</code></td>
+<td>
+<p>A named vector containing the fraction of events in the IgA positive gate for each sample, with sample names matching abundance dataframes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>negsizes</code></td>
+<td>
+<p>A named vector containing the fraction of events in the IgA negative gate for each sample, with sample names matching abundance dataframes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pseudo</code></td>
+<td>
+<p>The pseudo count to be used in scores. Default is 1e-5. Recommend setting to minimum observed abundance.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>presortabunds</code></td>
+<td>
+<p>A dataframe of taxa abundances in the whole/initial samples. Samples as columns and taxa as rows, column and row names must match across abundance tables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>Method to use to score IgA binding. One of: "probratio","prob","kau","palm". Default is "probratio".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scaleratio</code></td>
+<td>
+<p>Should probratio scores be scaled to the pseudo count. Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nazeros</code></td>
+<td>
+<p>Should taxa with zero abundance in both the posabunds and negabunds (posabunds and presortabunds for prob method)  be scored as NA. Default is TRUE.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function enables calculation of a variety of different indices for scoring immunoglobulin A (IgA) binding to taxa in IgA sequencing (IgA-Seq) experiments.
+It is designed to be called on dataframes of abundance values, allowing easy calculation of scores across multiple taxa and samples.
+The igaprobabilityratio(), igaprobability(), kauindex() and palmindex() functions can be used to calculate scores for one taxa and one sample.
+</p>
+<p>Scoring method can be chosen by specifying the method parameter as one of: "probratio", "prob", "kau", "palm" (Defaults to "probratio").
+Each method requires different inputs as detailed below:
+</p>
+
+<ul>
+<li>
+<p> probratio - equivalent to igaprobabilityratio() - requires two separate dataframes with iga positive abundances and iga negative abundances, two vectors with the sizes of the iga positive and negative gates per sample, and a pseudo count
+</p>
+</li>
+<li>
+<p> prob - equivalent to igaprobability() - requires a dataframe with iga pos or neg fraction abundances, a vector of iga pos or neg gate size per sample, and a dataframe of taxa abundances in the presort samples
+</p>
+</li>
+<li>
+<p> kau - equivalent to kauindex() - requires two separate dataframes with iga positive abundances and iga negative abundances, and a pseudo count
+</p>
+</li>
+<li>
+<p> palm - equivalent to palmindex() - requires two separate dataframes with iga positive abundances and iga negative abundances, and a pseudo count
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>A data frame of IgA binding scores for all taxa and samples in the input data frame, generated using the scoring appraoch specified in 'method'.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">pab &lt;- data.frame(Samp1=c(0.01,0.02,0.03),Samp2=c(0.05,0.02,0.04))
+rownames(pab) &lt;- c("Taxon1","Taxon2","Taxon3")
+nab &lt;- data.frame(Samp1=c(0.08,0.2,0.11),Samp2=c(0.05,0.0,0.07))
+rownames(nab) &lt;- c("Taxon1","Taxon2","Taxon3")
+ps &lt;- c(0.04,0.1)
+ns &lt;- c(0.08,0.4)
+preab &lt;- data.frame(Samp1=c(0.1,0.3,0.2),Samp2=c(0.15,0.05,0.2))
+rownames(preab) &lt;- c("Taxon1","Taxon2","Taxon3")
+igascores(posabunds=pab,negabunds=nab, possizes=ps, negsizes=ns,pseudo=0.009)
+igascores(posabunds=pab, possizes=ps, presortabunds=preab, method="prob")
+igascores(posabunds=pab, negabunds=nab, pseudo=0.009, method="palm")
+igascores(posabunds=pab, negabunds=nab, pseudo=0.009, method="kau")
+</code></pre>
+
+
+</div>

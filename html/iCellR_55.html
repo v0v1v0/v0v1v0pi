@@ -1,0 +1,228 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>run.diffusion.map</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Run diffusion map on PCA data (PHATE - Potential of Heat-Diffusion for Affinity-Based Transition Embedding)</h2>
+
+<h3>Description</h3>
+
+<p>This function takes an object of class iCellR and runs diffusion map on PCA data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">run.diffusion.map(
+  x = NULL,
+  dims = 1:10,
+  method = "destiny",
+  ndim = 3,
+  k = 5,
+  alpha = 40,
+  n.landmark = 2000,
+  gamma = 1,
+  t = "auto",
+  knn.dist.method = "euclidean",
+  init = NULL,
+  mds.method = "metric",
+  mds.dist.method = "euclidean",
+  t.max = 100,
+  npca = 100,
+  plot.optimal.t = FALSE,
+  verbose = 1,
+  n.jobs = 1,
+  seed = NULL,
+  potential.method = NULL,
+  use.alpha = NULL,
+  n.svd = NULL,
+  pca.method = NULL,
+  g.kernel = NULL,
+  diff.op = NULL,
+  landmark.transitions = NULL,
+  diff.op.t = NULL,
+  dist.method = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An object of class iCellR.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dims</code></td>
+<td>
+<p>PC dimentions to be used for UMAP analysis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>diffusion map method, default = "phate".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ndim</code></td>
+<td>
+<p>int, optional, default: 2 number of dimensions in which the data will be embedded</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>int, optional, default: 5 number of nearest neighbors on which to build kernel</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>int, optional, default: 40 sets decay rate of kernel tails. If NULL, alpha decaying kernel is not used</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.landmark</code></td>
+<td>
+<p>int, optional, default: 2000 number of landmarks to use in fast PHATE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gamma</code></td>
+<td>
+<p>float, optional, default: 1 Informational distance constant between -1 and 1. gamma=1 gives the PHATE log potential, gamma=0 gives a square root potential.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t</code></td>
+<td>
+<p>int, optional, default: 'auto' power to which the diffusion operator is powered sets the level of diffusion</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>knn.dist.method</code></td>
+<td>
+<p>string, optional, default: 'euclidean'. recommended values: 'euclidean', 'cosine', 'precomputed' Any metric from scipy.spatial.distance can be used distance metric for building kNN graph. If 'precomputed', data should be an n_samples x n_samples distance or affinity matrix. Distance matrices are assumed to have zeros down the diagonal, while affinity matrices are assumed to have non-zero values down the diagonal. This is detected automatically using data[0,0]. You can override this detection with knn.dist.method='precomputed_distance' or knn.dist.method='precomputed_affinity'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init</code></td>
+<td>
+<p>phate object, optional object to use for initialization. Avoids recomputing intermediate steps if parameters are the same.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mds.method</code></td>
+<td>
+<p>string, optional, default: 'metric' choose from 'classic', 'metric', and 'nonmetric' which MDS algorithm is used for dimensionality reduction</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mds.dist.method</code></td>
+<td>
+<p>string, optional, default: 'euclidean' recommended values: 'euclidean' and 'cosine'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t.max</code></td>
+<td>
+<p>int, optional, default: 100. Maximum value of t to test for automatic t selection.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>npca</code></td>
+<td>
+<p>int, optional, default: 100 Number of principal components to use for calculating neighborhoods. For extremely large datasets, using n_pca &lt; 20 allows neighborhoods to be calculated in log(n_samples) time.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.optimal.t</code></td>
+<td>
+<p>boolean, optional, if TRUE, produce a plot showing the Von Neumann Entropy curve for automatic t selection.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>int or boolean, optional (default : 1) If TRUE or &gt; 0, message verbose updates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.jobs</code></td>
+<td>
+<p>int, optional (default: 1) The number of jobs to use for the computation. If -1 all CPUs are used. If 1 is given, no parallel computing code is used at all, which is useful for debugging. For n_jobs below -1, (n.cpus + 1 + n.jobs) are used. Thus for n_jobs = -2, all CPUs but one are used</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>int or NULL, random state (default: NULL)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>potential.method</code></td>
+<td>
+<p>Deprecated. For log potential, use gamma=1. For sqrt potential, use gamma=0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>use.alpha</code></td>
+<td>
+<p>Deprecated To disable alpha decay, use alpha=NULL</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.svd</code></td>
+<td>
+<p>Deprecated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pca.method</code></td>
+<td>
+<p>Deprecated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>g.kernel</code></td>
+<td>
+<p>Deprecated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diff.op</code></td>
+<td>
+<p>Deprecated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>landmark.transitions</code></td>
+<td>
+<p>Deprecated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diff.op.t</code></td>
+<td>
+<p>Deprecated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist.method</code></td>
+<td>
+<p>Deprecated.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class iCellR.
+</p>
+
+
+</div>

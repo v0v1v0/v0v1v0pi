@@ -1,0 +1,330 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>DataGeneration</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generating an artificial item response dataset</h2>
+
+<h3>Description</h3>
+
+<p>This function generates an artificial item response dataset allowing various options.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">DataGeneration(
+  seed = 1,
+  N = 2000,
+  nitem_D = 0,
+  nitem_P = 0,
+  nitem_C = 0,
+  model_D = "2PL",
+  model_P = "GPCM",
+  latent_dist = "Normal",
+  item_D = NULL,
+  item_P = NULL,
+  item_C = NULL,
+  theta = NULL,
+  prob = 0.5,
+  d = 1.7,
+  sd_ratio = 1,
+  m = 0,
+  s = 1,
+  a_l = 0.8,
+  a_u = 2.5,
+  b_m = NULL,
+  b_sd = NULL,
+  c_l = 0,
+  c_u = 0.2,
+  categ = 5,
+  possible_ans = c(0.1, 0.3, 0.5, 0.7, 0.9)
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>A numeric value that is used for random sampling.
+Seed number can guarantee a replicability of the result.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>A numeric value of the number of examinees.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nitem_D</code></td>
+<td>
+<p>A numeric value of the number of dichotomous items.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nitem_P</code></td>
+<td>
+<p>A numeric value of the number of polytomous items.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nitem_C</code></td>
+<td>
+<p>A numeric value of the number of continuous response items.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model_D</code></td>
+<td>
+<p>A vector or a character string that represents the probability model for the dichotomous items.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model_P</code></td>
+<td>
+<p>A character string that represents the probability model for the polytomous items.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>latent_dist</code></td>
+<td>
+<p>A character string that determines the type of latent distribution.
+Currently available options are <code>"beta"</code> (four-parameter beta distribution; <code>betafunctions::rBeta.4P</code>),
+<code>"chi"</code> (<code class="reqn">\chi^2</code> distribution; <code>rchisq</code>),
+<code>"normal"</code>, <code>"Normal"</code>, or <code>"N"</code> (standard normal distribution; <code>rnorm</code>),
+and <code>"Mixture"</code> or <code>"2NM"</code> (two-component Gaussian mixture distribution; see Li (2021) for details.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>item_D</code></td>
+<td>
+<p>An item parameter matrix for using fixed parameter values. The number of columns should be 3: <code>a</code> parameter for the first, <code>b</code> parameter for the second, and <code>c</code> parameter for the third column. Default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>item_P</code></td>
+<td>
+<p>An item parameter matrix for using fixed parameter values. The number of columns should be 7: <code>a</code> parameter for the first, and <code>b</code> parameters for the rest of the columns. Default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>item_C</code></td>
+<td>
+<p>An item parameter matrix for using fixed parameter values. The number of columns should be 3: <code>a</code> parameter for the first, <code>b</code> parameter for the second, and <code>nu</code> parameter for the third column. Default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta</code></td>
+<td>
+<p>An ability parameter vector for using fixed parameter values. Default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob</code></td>
+<td>
+<p>A numeric value for using <code>latent_dist = "2NM"</code>.
+It is the <code class="reqn">\pi = \frac{n_1}{N}</code> parameter of two-component Gaussian mixture distribution, where <code class="reqn">n_1</code> is the estimated number of examinees belonging to the first Gaussian component and <code class="reqn">N</code> is the total number of examinees (Li, 2021).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p>A numeric value for using <code>latent_dist = "2NM"</code>.
+It is the <code class="reqn">\delta = \frac{\mu_2 - \mu_1}{\bar{\sigma}}</code> parameter of two-component Gaussian mixture distribution,
+where <code class="reqn">\mu_1</code> and <code class="reqn">\mu_2</code> are the estimated means of the first and second Gaussian components, respectively.
+And <code class="reqn">\bar{\sigma}</code> is the overall standard deviation of the latent distribution (Li, 2021).
+Without loss of generality, <code class="reqn">\mu_2 \ge \mu_1</code> is assumed, thus <code class="reqn">\delta \ge 0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sd_ratio</code></td>
+<td>
+<p>A numeric value for using <code>latent_dist = "2NM"</code>.
+It is the <code class="reqn">\zeta = \frac{\sigma_2}{\sigma_1}</code> parameter of two-component Gaussian mixture distribution, where <code class="reqn">\sigma_1</code> and <code class="reqn">\sigma_2</code> are the estimated standard deviations of the first and second Gaussian components, respectively (Li, 2021).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>A numeric value of the overall mean of the latent distribution. The default is 0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s</code></td>
+<td>
+<p>A numeric value of the overall standard deviation of the latent distribution. The default is 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a_l</code></td>
+<td>
+<p>A numeric value. The lower bound of item discrimination parameters (<em>a</em>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a_u</code></td>
+<td>
+<p>A numeric value. The upper bound of item discrimination parameters (<em>a</em>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b_m</code></td>
+<td>
+<p>A numeric value. The mean of item difficulty parameters (<em>b</em>).
+If unspecified, <code>m</code> is passed on to the value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b_sd</code></td>
+<td>
+<p>A numeric value. The standard deviation of item difficulty parameters (<em>b</em>).
+If unspecified, <code>s</code> is passed on to the value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c_l</code></td>
+<td>
+<p>A numeric value. The lower bound of item guessing parameters (<em>c</em>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c_u</code></td>
+<td>
+<p>A numeric value. The lower bound of item guessing parameters (<em>c</em>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>categ</code></td>
+<td>
+<p>A scalar or a numeric vector of length <code>nitem_P</code>. The default is 5.
+If <code>length(categ)&gt;1</code>, the <em>i</em>th element equals the number of categories of the <em>i</em>th polyotomous item.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>possible_ans</code></td>
+<td>
+<p>Possible options for continuous items (e.g., 0.1, 0.3, 0.5, 0.7, 0.9)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>This function returns a <code>list</code> of several objects:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>theta</code></td>
+<td>
+<p>A vector of ability parameters (<code class="reqn">\theta</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>item_D</code></td>
+<td>
+<p>A matrix of dichotomous item parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initialitem_D</code></td>
+<td>
+<p>A matrix that contains initial item parameter values for dichotomous items.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_D</code></td>
+<td>
+<p>A matrix of dichotomous item responses where rows indicate examinees and columns indicate items.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>item_P</code></td>
+<td>
+<p>A matrix of polytomous item parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initialitem_P</code></td>
+<td>
+<p>A matrix that contains initial item parameter values for polytomous items.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_P</code></td>
+<td>
+<p>A matrix of polytomous item responses where rows indicate examinees and columns indicate items.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>item_D</code></td>
+<td>
+<p>A matrix of continuous response item parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initialitem_D</code></td>
+<td>
+<p>A matrix that contains initial item parameter values for continuous response items.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_D</code></td>
+<td>
+<p>A matrix of continuous response item responses where rows indicate examinees and columns indicate items.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Seewoo Li <a href="mailto:cu@yonsei.ac.kr">cu@yonsei.ac.kr</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Li, S. (2021). Using a two-component normal mixture distribution as a latent distribution in estimating parameters of item response models. <em>Journal of Educational Evaluation, 34</em>(4), 759-789.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Dichotomous item responses
+
+Alldata &lt;- DataGeneration(N = 500,
+                          nitem_D = 10)
+
+
+# Polytomous item responses
+
+Alldata &lt;- DataGeneration(N = 1000,
+                          nitem_P = 10)
+
+
+# Mixed-format items
+
+Alldata &lt;- DataGeneration(N = 1000,
+                          nitem_D = 20,
+                          nitem_P = 10)
+
+# Continuous items
+
+AllData &lt;- DataGeneration(N = 1000,
+                          nitem_C = 10)
+
+# Dataset from non-normal latent density using two-component Gaussian mixture distribution
+
+Alldata &lt;- DataGeneration(N=1000,
+                          nitem_P = 10,
+                          latent_dist = "2NM",
+                          d = 1.664,
+                          sd_ratio = 2,
+                          prob = 0.3)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,121 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>PER</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Two-sided test for the pooled effect ratio estimand</h2>
+
+<h3>Description</h3>
+
+<p><code>PER</code> returns the two-sided p-value testing
+the pooled effect ratio equal to lambda_0 in a cluster-randomized
+encouragement experiment.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">PER(lambda_0, R_t, R_c, d_t, d_c, Q = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>lambda_0</code></td>
+<td>
+<p>The magnitude of the pooled effect ratio estimand to
+be tested.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R_t</code></td>
+<td>
+<p>A length-K vector where K is equal to the number of
+clusters and the kth entry equal to
+the sum of unit-level outcomes in the encouraged cluster
+of the kth matched pair of two clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R_c</code></td>
+<td>
+<p>A length-K vector where K is equal to the number of
+clusters and the kth entry equal to
+the sum of unit-level outcomes in the control cluster
+of the kth matched pair of two clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d_t</code></td>
+<td>
+<p>A length-K vector where K is equal to the number of
+clusters and the kth entry equal to the sum of unit-level
+treatment received in the encouraged cluster
+of the kth matched pair of two clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d_c</code></td>
+<td>
+<p>A length-K vector where K is equal to the number of
+clusters and the kth entry equal to the sum of unit-level
+treatment received in the control cluster
+of the kth matched pair of two clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q</code></td>
+<td>
+<p>A K times p design matrix containing the covariate information.
+See Details.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Q is used to construct a regression-assisted variance estimator.
+Q is can in principle be any K times p design matrix such that p &lt; K.
+When Q is a column vector of 1's, the variance estimator is the classical
+sample variance estimator. More generally, Q may contain any cluster-level
+or even unit-level covariate information that are predictive of the
+encouraged-minus-control difference in the observed aggregated outcomes.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of five elements: two-sided p-value, deviate, test statistics,
+expectation of the test statistic under the null hypothesis,
+and variance of the test statistic under the null hypothesis.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">R_t = encouraged_clusters$aggregated_outcome
+R_c = control_clusters$aggregated_outcome
+d_t = encouraged_clusters$aggregated_treatment
+d_c = control_clusters$aggregated_treatment
+
+
+# Test the pooled effect ratio estimand lambda = 0 using
+# the default sample variance estimator, i.e., setting Q = NULL.
+res = PER(0, R_t, R_c, d_t, d_c)
+
+# We may leverage observed covariates from both the encouraged
+# and control clusters to construct less conservative variance
+# estimator. The variance estimator will be less conservative if
+# these covariate predict the treated-minus-control difference
+# in the outcome. In this illustrated dataset, V1-V10 are simulated
+# white noise; it is not surprising that they do not help
+# reduce the variance.
+Q = cbind(encouraged_clusters[,1:10], control_clusters[,1:10])
+res_2 = PER(0, R_t, R_c, d_t, d_c, Q)
+
+</code></pre>
+
+
+</div>

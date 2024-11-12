@@ -1,0 +1,207 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ifs.FT</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+IFS estimator
+</h2>
+
+<h3>Description</h3>
+
+<p>Distribution function estimator based on inverse Fourier transform of ans IFSs.  
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ifs.FT(x, p, s, a, k = 2)
+ifs.setup.FT(m, p, s, a, k = 2, cutoff)
+ifs.pf.FT(x,b,nterms)
+ifs.df.FT(x,b,nterms)
+IFS.pf.FT(y, k = 2, n = 512, maps=c("quantile","wl1","wl2")) 
+IFS.df.FT(y, k = 2, n = 512, maps=c("quantile","wl1","wl2")) 
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>where to estimate the function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>the vector of coefficients <code class="reqn">p_i</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s</code></td>
+<td>
+<p>the vector of coefficients <code class="reqn">s_i</code> in: <code class="reqn">w_i = s_i *x + a_i</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>a</code></td>
+<td>
+<p>the vector of coefficients <code class="reqn">a_i</code> in: <code class="reqn">w_i = s_i *x + a_i</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>the vector of sample moments</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>number of iterations, default = 2</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>a vector of sample observations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>the number of points in which to calculate the estimator</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maps</code></td>
+<td>
+<p>type of affine maps</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>the Fourier coefficients</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nterms</code></td>
+<td>
+<p>the number of significant Fourier coefficients after the cutoff</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cutoff</code></td>
+<td>
+<p>cutoff used to determine how many Fourier coefficients are needed</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This estimator is intended to estimate the continuous distribution
+function, the charateristic function (Fourier transform) and the density function
+of a random variable on [0,1]. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>The estimated value of the Fourier transform  for <code>ifs.FT</code>, the estimated value
+of the distribution function for <code>ifs.pf.FT</code> and the estimated value
+of the density function for <code>ifs.df.FT</code>. 
+A list of ‘x’ and ‘y’ coordinates plus the Fourier coefficients and the number of
+significant coefficients of the distribution function estimator for <code>IFS.pf.FT</code> 
+and the density function for <code>IFS.df.FT</code>.
+The function <code>ifs.setup.FT</code> return a list of Fourier coefficients and the number
+of significant coefficients.
+</p>
+
+
+<h3>Note</h3>
+
+<p>Details of this tecnique can be found in Iacus and La Torre, 2002.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>S. M. Iacus</p>
+
+
+<h3>References</h3>
+
+<p>Iacus, S.M, La Torre, D. (2005)
+Approximating distribution functions by iterated function systems, 
+<em>Journal of Applied Mathematics and Decision Sciences</em>,
+1, 33-46.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ecdf</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">require(ifs)
+
+
+nobs &lt;- 100
+y&lt;-rbeta(nobs,2,4)
+
+# uncomment if you want to test the normal distribution
+# y&lt;-sort(rnorm(nobs,3,1))/6
+
+
+IFS.est &lt;- IFS(y)
+xx &lt;- IFS.est$x
+tt &lt;- IFS.est$y
+
+ss &lt;- pbeta(xx,2,4)
+
+# uncomment if you want to test the normal distribution   
+# ss &lt;- pnorm(6*xx-3)
+     
+par(mfrow=c(3,1))   
+  
+plot(ecdf(y),xlim=c(0,1),main="IFS estimator versus EDF")
+lines(xx,ss,col="blue")
+lines(IFS.est,col="red")
+IFS.FT.est &lt;- IFS.pf.FT(y)
+xxx &lt;- IFS.FT.est$x
+uuu &lt;- IFS.FT.est$y
+sss &lt;- pbeta(xxx,2,4)
+# uncomment if you want to test the normal distribution   
+# sss &lt;- pnorm(6*xxx-3)
+
+lines(IFS.FT.est,col="green")
+
+
+# calculates MSE
+
+
+ww &lt;- ecdf(y)(xx)
+mean((ww-ss)^2)
+mean((tt-ss)^2)
+mean((uuu-sss)^2)
+
+plot(xx,(ww-ss)^2,main="MSE",type="l",xlab="x",ylab="MSE(x)")
+lines(xx,(tt-ss)^2,col="red")
+lines(xxx,(uuu-sss)^2,col="green")
+
+plot(IFS.df.FT(y),type="l",col="green",ylim=c(0,3),main="IFS vs Kernel")
+lines(density(y),col="blue")
+curve(dbeta(x,2,4),0,1,add=TRUE)
+# uncomment if you want to test the normal distribution   
+# curve(6*dnorm(x*6-3,0,1),0,1,add=TRUE)
+</code></pre>
+
+
+</div>

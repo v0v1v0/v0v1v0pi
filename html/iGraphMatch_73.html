@@ -1,0 +1,104 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>best_matches</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Rank best matches</h2>
+
+<h3>Description</h3>
+
+<p>Rank vertex-pairs in  order of a goodness of matching metric
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">best_matches(A, B, match, measure, num = NULL, true_label = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>A matrix, an <code>igraph</code> object, or a list of either.
+See check_graph</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>A matrix, an <code>igraph</code> object, or a list of either.
+See check_graph</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>match</code></td>
+<td>
+<p>graphMatch, eg result of call to gm</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>measure</code></td>
+<td>
+<p>One of "row_cor", "row_diff", or "row_perm_stat" or
+a function (see details). Measure for computing goodness of matching.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num</code></td>
+<td>
+<p>A positive integer or NULL. Number of pairs of best matched
+vertices needed. NULL indicates all matches.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>true_label</code></td>
+<td>
+<p>the true correspondence (if available).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If measure is a function, it should take exactly two matrices or igraph
+objects as arguments and return a vector of length equal to the number of nonseed nodes
+in the first object. Smaller values will be taken to indicate better matches.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>best_matches</code> returns a data frame with the indices of best
+matched vertices in <code class="reqn">G_1</code> named <code>A_best</code>, the indices of best
+matched vertices in <code class="reqn">G_2</code> named <code>B_best</code> and the values of measure
+for best matches, where smaller values indicate better matches for all
+measures. If the true correspondence is available, also returns the
+precision of top n best matches, for each n &lt;= <code>num</code>.
+</p>
+<p><code>row_cor</code> takes 1 minus the row correlation value for the corresponding vertex.
+<code>row_diff</code> takes the row difference value for each corresponding vertex.
+<code>row_perm_stat</code> uses the row permutation statistics value.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">cgnp_pair &lt;- sample_correlated_gnp_pair(n = 50, corr =  0.5, p =  0.5)
+g1 &lt;- cgnp_pair$graph1
+g2 &lt;- cgnp_pair$graph2
+seeds &lt;- 1:50 &lt;= 10
+match &lt;- gm(g1, g2, seeds, method = "indefinite")
+
+# Application: select best matched seeds from non seeds as new seeds, and do the
+# graph matching iteratively to get higher matching accuracy
+best_matches(A = g1, B = g2, match = match, measure = "row_perm_stat", num = 5, true_label = 1:50)
+
+
+</code></pre>
+
+
+</div>

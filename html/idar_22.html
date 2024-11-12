@@ -1,0 +1,231 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>proportion.idar</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Determine the Proportion of Accumulator and Repeller Species</h2>
+
+<h3>Description</h3>
+
+<p>This function determines the proportion of species in a community that "accumulate" or "repell" diversity, in the sense of Wiegand et al. (2007).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  proportion.idar(envlist, alfa = 0.05)
+     ## S3 method for class 'pidar'
+plot(x,cols=c(1,2,3),type=c("l","o","o"), pch=c(NA,19,19),
+    lty=c(1,1,1),  legend=TRUE, p.legend="topleft",...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>envlist</code></td>
+<td>
+<p>A list whose elements are the result of applying envelope to a set of point patterns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alfa</code></td>
+<td>
+<p>alpha value to calculate deviations from null model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>The result of <code>proportion.idar</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cols</code></td>
+<td>
+<p>A vector (length =3) with the color names or codes for the curves of each of the 3 categories: "neutral", "accumulator", "repeller".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>A vector (length =3), with the type of plot for each category. See plot.default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pch</code></td>
+<td>
+<p>A vector (length =3), with the point type  for each category. See points</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lty</code></td>
+<td>
+<p>A vector (length =3), with the line type  for each category. See par</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>legend</code></td>
+<td>
+<p>Logical. Should a legend be added to the plot?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.legend</code></td>
+<td>
+<p>Position of the legend. It can be a vector wit the xycoordinates of the upperleft corner of the legend box or a  keyword accepted by <code>legend</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional graphical parameters passed both to funtions <code>plot</code> and <code>lines</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function determines the proportion of accumulator, repeller and neutral species at each scale <em>r</em>, following the approach of Wiegand et al (2007). A species is classified as an accumulator at scale <em>r</em> if there are less than <code class="reqn">(nsim+1) *alpha/2</code> simulated values greater than the observed <em>idar(r)</em>. On the contrary, a species is classified as repeller at scale if there are less than <code class="reqn">(nsim+1) *alpha/2</code> simulated values smaller than the observed <em>idar(r)</em>.  The percentage is computed over the total of species in<code> envlist</code>. It is necessary that the objects in envlist (i.e. the envelope objects) had been computed with the argument "<code>simfuns=TRUE</code>".
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>proportion.idar</code> produces an object of class "<code>pidar</code>", basically a list with components
+</p>
+
+<dl>
+<dt>percentage</dt>
+<dd>
+<p>A <code>data.frame</code> with 3 columns ("p.accumulators", "p.repellers", "p.neutrals") indicating the percentage in each category for each <em>r</em> (rows)</p>
+</dd>
+<dt>nsp</dt>
+<dd>
+<p>The total number of species for which the percentage has been computed.</p>
+</dd>
+<dt>nsim</dt>
+<dd>
+<p>The number of simulations</p>
+</dd>
+<dt>alfa</dt>
+<dd>
+<p>The alpha value employed to calculate the deviations from null model and the assignation to each of the categories</p>
+</dd>
+<dt>r</dt>
+<dd>
+<p>The vector of r values at which the idar(r) functions have been estimated</p>
+</dd>
+<dt>behaviour</dt>
+<dd>
+<p>A data.frame with the behaviour ("A"= accumulator, "R" = repeller) of each species at each radius r</p>
+</dd>
+</dl>
+<p><code>plot.pidar</code> plots the result.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Marcelino de la Cruz <a href="mailto:marcelino.delacruz@urjc.es">marcelino.delacruz@urjc.es</a></p>
+
+
+<h3>References</h3>
+
+<p>Wiegand,T., Gunatilleke, C.V.S., Gunatilleke, I.A.U.N. and  Huth, A. (2007) How individual species structure diversity in tropical forests. <em>PNAS</em> 104, 19029-19033.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Compute percentage of accumulator, neutral an repeller species (for ISAR) in Lansing woods
+# In this example, against a null model of IPP.
+data(lansing)
+
+# Compute rISAR and plot envelopes for an inhomogeneous Poisson model
+# of each species in San Francisco plot
+# Split sfsp point pattern ppp by species
+lansing.sp&lt;- split(lansing)
+
+# Set parameters for the simulations, estimation of intensity surface for IPP, etc.
+# BEWARE: THIS is for R-TESTING ALONE. REAL TESTS SHOULD EMPLOY 199 simulations or higher
+nsim&lt;-8
+r&lt;- seq(0.01,0.25, by=0.01)
+# Create list to store the results
+isar.lansing&lt;- list()
+# start computation
+
+for( i in 1: length(lansing.sp)){
+   print(i)
+   # estimate intensity of the focal species
+   lambda&lt;- density(lansing.sp[[i]])
+   # obtain simulated patterns were all species except the focal remain fixed
+   # and the focal varies according to an inhomomgeneous Poiisson process
+   simulados&lt;- multifocalsimulator(lansing, mimark=levels(lansing$marks)[i],
+                            simulate=expression(rpoispp(lambda)), nsim=nsim)
+  # compute isar and envelopes for each species
+  # It is COMPULSORY that the argument "savefuns" it is set to TRUE
+   isar.lansing[[i]] &lt;- envelope(lansing, isar, mimark=levels(lansing$marks)[i],  r=r,
+         simulate=simulados,nsim=nsim, savefuns=TRUE, buffer=0)
+}
+
+
+prop.isar.lansing &lt;- proportion.idar(isar.lansing)
+head(prop.isar.lansing $percentage)
+head(prop.isar.lansing $behaviour)
+plot(prop.isar.lansing, p.legend=c(0.15,60))
+
+## Not run: 
+
+# Compute percentage of accumulator, neutral an repeller species (for ISAR) in San Francisco
+# forest.  In this example, against a null model of IPP.
+data(SF)
+
+# Discard the size mark and keep the species mark in SF ppp:
+sfsp&lt;- ppp(SF$x, SF$y, window=SF$window, marks=SF$marks$species)
+
+# Compute ISAR and plot envelopes for an inhomogeneous Poisson model
+# of each species in San Francisco plot
+# Split sfsp point pattern ppp by species
+sfsp.sp&lt;- split(sfsp)
+# Select species with &gt;= 10 individuals (to get some statistical power)
+sfsp10 &lt;- sapply(sfsp.sp, function(x) x$n&gt;=10)
+#Get names of those species
+nombressf&lt;- names(sfsp10[sfsp10])
+# Set parameters for the simulations, estimation of intensity surface for IPP, etc.
+nsim&lt;-199
+nmin&lt;-10
+sigma &lt;- 8
+r&lt;- seq(1,15, by=0.5)
+# Create list to store the results
+isar.sf&lt;- list()
+# start computation
+# BEWARE: THIS TAKES QUITE A FEW MINUTES!!!
+for( sp in nombressf){
+   print(sp)
+   # estimate intensity of the focal species
+   lambda&lt;- density(unmark(sfsp[sfsp$marks==sp]), sigma=sigma, positive=TRUE)
+   # obtain simulated patterns were all species except the focal remain fixed
+   # and the focal varies according to an inhomomgeneous Poiisson process
+   simulados&lt;- multifocalsimulator(sfsp, mimark=sp,
+                            simulate=expression(rpoispp(lambda)), nsim=nsim,nmin=nmin)
+  # compute isar and envelopes for each species
+  # It is COMPULSORY that the argument "savefuns" it is set to TRUE
+   isar.sf[[sp]] &lt;- envelope(sfsp, isar, mimark=sp,  r=r,
+         simulate=simulados,nsim=nsim, savefuns=TRUE, buffer=0)
+}
+
+
+prop.isar.SF &lt;- proportion.idar(isar.sf)
+head(prop.isar.SF$percentage)
+head(prop.isar.SF$behaviour)
+plot(prop.isar.SF)
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

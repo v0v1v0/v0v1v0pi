@@ -1,0 +1,385 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>refine</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Refine estimates iteratively    
+</h2>
+
+<h3>Description</h3>
+
+<p><code>refine</code> is a generic function with methods for objects of the classes produced by <code>MSL</code>. In the up-to-date workflow, it can automatically (1) define new parameters points, (2) add simulations to the reference table for these points, (3) optionally recompute projections, (4) update the inference of the likelihood surface, and (5) provides new point estimates, confidence intervals, and other results of an <code>MSL</code> call. It can repeat these steps iteratively as controlled by its <code>workflow_design</code>. 
+Although it has many control arguments, few of them may be needed in any application. In particular it is designed to use reasonable default controls for the number of iterations, the number of points added in each iteration, and whether to update projections or not, when given only the current fit object as input.
+</p>
+<p><code>reproject</code> and <code>recluster</code> are wrappers for <code>refine(..., ntot=0L)</code>, updating the object after either recomputing the projections or only re-performing the multivariate gaussian mixture clustering.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'SLik'
+refine(object, method=NULL, ...)
+
+
+## Default S3 method:
+refine(
+    object, 
+    ##       reference table simulations  
+    Simulate = attr(surfaceData,"Simulate"),
+    control.Simulate = attr(surfaceData,"control.Simulate"),
+    newsimuls = NULL,
+    ##       CIs
+    CIs = workflow_design$reftable_sizes[useCI], 
+    useCI = prod(dim(object$logLs))&lt;12000L, level = 0.95,
+    ##       workflow design
+    workflow_design = get_workflow_design(
+        npar=length(fittedPars), n_proj_stats = length(statNames),
+        n_latent=length(latentVars)), 
+    maxit, ntot= maxit*.get_size_first_iter(object), n=NULL,
+    ##       termination conditions 
+    precision = Infusion.getOption("precision"),
+    eval_RMSEs = workflow_design$reftable_sizes,
+    ##       verbosity
+    verbose = list(notable=TRUE, most=interactive(),final=NULL, movie=FALSE,
+                 proj=FALSE, rparam=NULL, progress_bars=interactive()),
+    ##       projection controls
+    update_projectors = NULL,
+    methodArgs = list(),
+    ##       Likelihood surface modeling (up-to-date workflow)
+    using = object$using, 
+    nbCluster = quote(refine_nbCluster(nr=nrow(data))),
+    ##       parallelisation
+    cluster_args = list(), nb_cores=NULL, env=get_from(object,"env"), 
+    packages = get_from(object,"packages"), cl_seed=.update_seed(object),
+    ##       obscure stuff
+    target_LR = NULL,  
+    ##       not explicitly needed in up-to-date workflow
+    trypoints = NULL,
+    surfaceData, 
+    method, 
+    useEI = list(max=TRUE,profileCI=TRUE,rawCI=FALSE),
+    rparamFn = Infusion.getOption("rparamFn"),
+    ## 
+    ... 
+)
+            
+reproject(object, eval_RMSEs = NULL, CIs = NULL, ...)
+recluster(object, eval_RMSEs = NULL, CIs = NULL, update_projectors=FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>an <code>SLik</code> or <code>SLik_j</code> object
+</p>
+</td>
+</tr></table>
+<p><b>## reference table simulations</b>
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Simulate</code></td>
+<td>
+
+<p>Character string: name of the function used to simulate samples. As it is typically stored in the object this argument does not need to be explicitly given; otherwise this should be the same function provided to <code>add_reftable</code>, whose documentation details the design requirements. The only meaningful non-default value is <code>NULL</code>, in which case <code>refine</code> may return (if <code>newsimuls</code> is also <code>NULL</code>) a data frame of parameter points on which to run a simulation function.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control.Simulate</code></td>
+<td>
+
+<p>A list of arguments of the <code>Simulate</code> function (see <code>add_simulation</code>). The default value should be used unless you understand enough of its structure to modify it wisely (e.g., it may contain the path of an executable on one machine and a different path may be specified to refine a fit on another machine).  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newsimuls</code></td>
+<td>
+
+<p>For the <code>SLik_j</code> method, a matrix or data frame, with the same parameters and summary statistics as the <code>data</code> of the original <code>infer_SLik_joint</code> call.
+</p>
+<p>For other methods, a <code>list</code> of simulation of distributions of summary statistics, in the same format as for <code>link{add_simulation}</code>. 
+If no such list is provided (i.e., if <code>newsimuls</code> remains <code>NULL</code>), the function extracted by <code>get_from(object,"Simulate")</code> is used (it is inherited from the <code>Simulate</code> 
+argument of <code>add_simulation</code> through the initial sequence of calls of functions <code>add_simulation</code>,
+<code>infer_logLs</code> or <code>infer_tailp</code>, and <code>infer_surface</code>). If no such function is available, then this function returns parameters for which new distribution should be provided by the user.
+</p>
+</td>
+</tr>
+</table>
+<p><b>## CIs</b>
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>CIs</code></td>
+<td>
+
+<p>Boolean, or boolean vector, or numeric (preferably integer) vector: controls to infer bounds of (one-dimensional, profile) confidence intervals. The numeric vector form allows to specify reference table size(s) for which CIs should be computed when these sizes are first reached. TRUE or FALSE will force or inhibit computation in all iterations. Finally (and probably less useful), a boolean vector such as <code>CIs=c(TRUE,FALSE,TRUE)</code> requests computation of CIs when the number of points cumulatively added reaches the target number of points for the first, third, and any subsequent iterations up to <code>maxit</code> (this may differ in certain cases from the first, third, and so on, iterations: see Details).  
+</p>
+<p>The default for <code>refine</code> is described in the Details. The default for <code>reproject</code> is to update the CIs if there are computed ones within the input <code>object</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>useCI</code></td>
+<td>
+
+<p>whether to perform RMSE computations for inferred confidence interval points.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level</code></td>
+<td>
+
+<p>Intended coverage of confidence intervals 
+</p>
+</td>
+</tr>
+</table>
+<p><b>## workflow design</b>
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>workflow_design</code></td>
+<td>
+
+<p>A list structured as the return value of <code>get_workflow_design</code>. The default value makes reference to elements of the input object's <code>colTypes</code> element.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxit</code></td>
+<td>
+
+<p>Maximum number of iterative refinements (see also <code>precision</code> argument).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ntot</code></td>
+<td>
+
+<p>NULL or numeric: control of the total number of simulated samples (one for each new parameter point) to be added to the reference table over the <code>maxit</code> iterations.  See Details for the rules used to determine the number of points added in each iteration. Reasonable default values are defined for <code>ntot</code> and <code>maxit</code> (see Details), so that beginners (and ideally, even more advanced users) do not have to find good values.
+</p>
+<p><code>ntot=0L</code> may be used to re-generate the projectors or the clustering without augmenting the reference table.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+
+<p>NULL or numeric, for a number of parameter points (excluding replicates and confidence interval points in the primitive workflow), whose likelihood should be computed in each iteration 
+(see <code>n</code> argument of <code>sample_volume</code>). Slightly less intutive alternative to <code>ntot</code> specification, as there is at least one iteration where the actual number of added points is not the nominal <code>n</code> (see Details).   
+<code>n=0L</code> will have the same effect as <code>ntot=0L</code>.
+</p>
+</td>
+</tr>
+</table>
+<p><b>## termination conditions</b>
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>precision</code></td>
+<td>
+
+<p>Requested local precision of surface estimation, in terms of prediction standard errors (RMSEs) of both the maximum summary log-likelihood and the likelihood ratio at any CI bound available. Iterations will stop when either <code>maxit</code> is reached, or if the RMSEs have been computed for the object (see <code>eval_RMSEs</code> argument) and this precision is reached for the RMSEs.
+A given precision on the CI bounds themselves might seem more interesting, but is not well specified by a single precision parameter if the parameters are on widely different scales.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eval_RMSEs</code></td>
+<td>
+<p>Same usage as for <code>CIs</code>; controls the <code>eval_RMSEs</code> argument of <code>MSL</code> in each iteration. See Details for the default. 
+The default for <code>reproject</code> is to update the RMSEs if there are computed ones within the input <code>object</code>.</p>
+</td>
+</tr>
+</table>
+<p><b>## verbosity</b>
+</p>
+<table><tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p> A list as shown by the default, or simply a vector of booleans. <code>verbose$most</code> controls whether to display information about progress and results, except plots; <code>$final</code> controls whether to <code>plot()</code> the final <code>object</code> to show the final likelihood surface. Default is to plot it only in an interactive session and if fewer than three parameters are estimated; <code>$movie</code> controls whether to <code>plot()</code> the updated <code>object</code> in each iteration; <code>verbose$proj</code> controls the <code>verbose</code> argument of <code>project.character</code>; <code>verbose$rparam</code> controls (cryptic) information about generation of new parameter points; <code>verbose$progress_bars</code> controls display of some progress bars. If <code>verbose</code> is an unnamed vector of booleans, they are interpreted as as-many first elements of the<code>verbose</code> vector, in the order shown by the default. 
+</p>
+</td>
+</tr></table>
+<p><b>## projection controls</b>
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>update_projectors</code></td>
+<td>
+<p>Same usage as for <code>CIs</code>; this controls in which iterations the projectors are updated. The default <code>NULL</code> value is strongly recommended. See Details for further explanations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>methodArgs</code></td>
+<td>
+<p>A list of arguments for the projection method. By default the <code>methodArgs</code> of the original <code>project.character</code> calls are reused over iteration, but elements of the new <code>methodArgs</code> list will be used to update the original <code>methodArgs</code>. Note that the updated list becomes the new default for further iterations.</p>
+</td>
+</tr>
+</table>
+<p><b>## Likelihood surface modeling</b>
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>using</code></td>
+<td>
+<p>Passed to <code>infer_SLik_joint</code>: a character string used to control the joint-density estimation method, as documented for that function (see <code>method</code> instead for equivalent control in primitive workflow). Default is to use to same method as in the the first iteration, but this argument allows a change of method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nbCluster</code></td>
+<td>
+<p>Passed to <code>infer_SLik_joint</code>. The <code>data</code> in the expression for the default value refers to the <code>data</code> argument of the latter function.</p>
+</td>
+</tr>
+</table>
+<p><b>## parallelisation</b>
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>cluster_args</code></td>
+<td>
+<p>A list of arguments for <code>makeCluster</code>, in addition to <code>makeCluster</code>'s <code>spec</code> argument which is in most cases best specified by the <code>nb_cores</code> argument. Cluster arguments allow independent control of parallel computations for the different steps of a <code>refine</code> iteration (see Details; as a rough but effective summary, use only <code>nb_cores</code> when the simulations support it, and see the <code>methodArgs</code> argument if independent control of parallelisation of the projection procedure is needed).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nb_cores</code></td>
+<td>
+<p>Integer: shortcut for specifying <code>cluster_args$spec</code> for sample simulation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>packages</code></td>
+<td>
+<p>NULL or a list with possible elements <code>add_simulation</code> and <code>logL_method</code> (the latter for the primitive workflow). These elements should be formatted as the <code>packages</code> arguments of <code>add_simulation</code> and <code>infer_logLs</code>, respectively, wherein they are the additional packages to be loaded on child processes. The effect of the default value of this argument is to pass over successive <code>refine</code> calls the value stored in the input fit object (itself determined by the latest use of the <code>packages</code> argument in, e.g., <code>add_simulation</code> or in previous <code>refine</code>s).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>env</code></td>
+<td>
+<p>An environment, passed as the <code>env</code> argument to <code>add_simulation</code>. The default value keeps the pre-<code>refine</code> value over iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cl_seed</code></td>
+<td>
+<p>NULL or integer, passed to <code>add_simulation</code>. The default code uses an internal function, <code>.update_seed</code>, to update it from a previous iteration.</p>
+</td>
+</tr>
+</table>
+<p><b>## others</b>
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>target_LR</code></td>
+<td>
+<p>Likelihood ratio threshold used to control the sampling of new points and the selection of points for projections. Do not change it unless you known what you are doing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>For the primitive workflow: (a vector of) suggested method(s) for estimation of smoothing parameters (see <code>method</code> argument of <code>infer_surface</code>). The ith element of the vector is
+used in the ith iteration, if available; otherwise the last element is used. This argument is not always heeded, in that REML may be used if the suggested method is GCV but it appears to perform poorly. The default for <code>SLikp</code> and <code>SLikp</code> objects are <code>"REML"</code> and <code>"PQL"</code>, respectively. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trypoints</code></td>
+<td>
+
+<p>A data frame of parameters on which the simulation function <code>get_from(object,"Simulate")</code> should be called to extend the reference table. Only for programming by expert users, because poorly thought input <code>trypoints</code> could severely affect the inferences.     
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>useEI</code></td>
+<td>
+
+<p>for the primitive workflow only: cf this argument in <code>rparam</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>surfaceData</code></td>
+<td>
+
+<p>for the primitive workflow only: a data.frame with attributes, usually taken from the <code>object</code> and thus <b>not</b> specified by user, usable as input for <code>infer_surface</code>.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rparamFn</code></td>
+<td>
+
+<p>Function used to sample new parameter values.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>further arguments passed to or from other methods. <code>refine</code> passes these arguments to the <code>plot</code> method suitable for the <code>object</code>. 
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code> * </code><b>Controls of exploration of parameter space</b>: New parameter points are sampled so as to fill the space of parameters contained in the confidence regions defined by the <code>level</code> argument, and to surround it by a region sampled proportionally to likelihood. 
+</p>
+<p>Each <code>refine</code> call performs several iterations, these iterations stopping when <code>ntot</code> points have been added to the simulation table. The target number of points potentially added in each iteration is controlled by the <code>ntot</code> and <code>maxit</code> arguments as described below, but fewer points may be actually added in each iteration, and more than <code>maxit</code> iterations may be needed to add the <code>ntot</code> points, if in a given iteration too few “good” candidate points are generated according to the internal rules for sampling the parameter region with high likelihood.  In that case, the next iteration tries to keep up with the missing points by adding more points than the target number, but if not enough points have been added after <code>maxit</code> iterations, further iterations will be run. 
+</p>
+<p>CIs and RMSEs may be computed in any iteration but the default values of <code>eval_RMSEs</code> and <code>CIs</code> are chosen so as to avoid performing these computations too often, particularly when they are expected to be slow. The default implies that the RMSE for the maximum logL will be computed at the end each block of iterations that defines a refine (itself defined to reach to reference table sizes specified by the <code>workflow_design</code> and its default value). If the reference table is not too large (see default value of <code>useCI</code> for the precise condition), RMSEs of the logL are also computed at the inferred bounds of profile-based confidence intervals for each parameter. 
+</p>
+<p>Although the <code>update_projectors</code> argument allow similar control of the iterations where projections are updated, it is advised to keep it NULL (default value), so that whether projectors are updated in a given iteration is controlled by default internal rules. Setting it to <code>TRUE</code> would induce updating whenever any of the target reference table sizes implied by the <code>workflow_design$subblock_sizes</code> is reached. The default <code>NULL</code>, as the same effect subject to additional conditions: updating may not be performed when the training set is considered too similar to the one used to compute pre-existing projections, or when the train set includes more samples than the limit define by the global package option <code>upd_proj_subrows_thr</code>
+</p>
+<p>Default values of <code>ntot</code> and <code>maxit</code> are controlled by the value of the <code>workflow_design</code>, which itself has the shown default value, and are distinct for the first vs. subsequent <code>refine</code>s. 
+The target number of points in each iteration is also controlled differently for the first vs. subsequent <code>refine</code>s. This design is motivated by the fact that the likelihood surface is typically poorly inferred in the first refine so that the parameter points sampled then tend to be less relevant than those that can be sampled in later iterations. In the first <code>refine</code> call, the target number of points increases roughly as powers of two over iterations, to reach <code>ntot</code> cumulatively after <code>maxit</code> iterations. The default <code>ntot</code> is twice the size of the initial reference table, and the default <code>maxit</code> is 5. The <code>example_reftable</code> Example illustrates this, where the initial reference table holds 200 simulations, and the default target number of points to be added in 5 iterations by the first <code>refine</code> call are 25, 25, 50, 100 and 200.  In later <code>refine</code> calls, the target number is <code>ntot/maxit</code> in each iteration.
+</p>
+<p><code> * </code>Independent <b>control of parallelisation</b> may be needed in the different steps, e.g. if the simulations are not easily parallelised whereas the projection method natively handles parallelisation. In the up-to-date workflow with default <code>ranger</code> projection method, distinct parallelisation controls may be passed to <code>add_reftable</code> for sample simulations, to <code>project</code> methods when projections are updated, and to <code>MSL</code> for RMSE computations (alternatively for the primitive workflow, <code>add_simulation</code>, <code>infer_logLs</code> and <code>MSL</code> are called). 
+The most explicit way of specifying distinct controls is by a list structured as </p>
+<pre>
+cluster_args=list(reftable=list(&lt;makeCluster arguments&gt;),
+                  RMSEs=list(&lt;makeCluster arguments&gt;))
+</pre> 
+<p>A <code>project=list(num.threads=&lt;.&gt;)</code> element can be added to this list, providing control of the <code>num.threads</code> argument of <span class="pkg">ranger</span> functions. However, this is retained mainly for back compatibility as the <code>methodArgs</code> argument can now be used to specify the <code>num.threads</code>.
+</p>
+<p>Simpler arguments may be used and will be interpreted as follows: <code>nb_cores</code>, if given and not overriden by a <code>spec</code> argument in <code>cluster_args</code> (or in sublists of it), will control simulation and projection steps (but not RMSE computation): that is, <code>nb_cores</code> then gives the number of parallel processes for sample simulation, with additional <code>makeCluster</code> arguments taken from <code>cluster_args</code>, but RMSE computations are performed serially. On the other hand, a <code>spec</code> argument in
+<code>cluster_args=list(spec=&lt;.&gt;, &lt;other makeCluster arguments&gt;))</code> will instead apply the same arguments to both reference table and RMSE computation, overcoming the default effect of <code>nb_cores</code> in both of them.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>refine</code> returns an updated <code>SLik</code> or <code>SLik_j</code> object, unless both <code>newsimuls</code> and <code>Simulate</code> arguments are NULL, in which case a data frame of parameter points is returned.
+</p>
+
+
+<h3>Note</h3>
+
+<p>See workflow examples in (by order of decreasing relevance) <code>example_reftable</code>, <code>example_raw_proj</code> and <code>example_raw</code>.
+</p>
+<p>See <code>get_workflow_design</code>, the function that controls 
+the default value of the <code>workflow_design</code> argument, and can be used to provide non-default controls.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  ## see Note for links to examples.
+</code></pre>
+
+
+</div>

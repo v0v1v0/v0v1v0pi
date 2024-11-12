@@ -1,0 +1,303 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sem.inla</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Fit spatial econometrics models with INLA
+</h2>
+
+<h3>Description</h3>
+
+<p>These functions fit some spatial econometrics models for a given
+value of <code>rho</code> (the spatial autocorrelation parameter).
+<code>sem.inla</code> fits a spatial error model, <code>slm</code> fits a spatial lag model
+and <code>sdm.inla</code> fits a spatial Durbin model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">
+sem.inla(formula, d, W, rho, improve = TRUE, impacts = FALSE, fhyper = NULL, 
+   probit = FALSE, ...)
+slm.inla(formula, d, W, rho, mmatrix = NULL, improve = TRUE, impacts = FALSE, 
+   fhyper = NULL, probit = FALSE, ...)
+sdm.inla(formula, d, W, rho, mmatrix = NULL, intercept = TRUE, impacts = FALSE,
+   improve = TRUE, fhyper = NULL, probit = FALSE, ...)
+sac.inla(formula, d, W.rho, W.lambda, rho, lambda, mmatrix = NULL, 
+   improve = TRUE, impacts = FALSE, fhyper = NULL, probit = FALSE, ...)
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+
+<p>Formula with the response variable, the fixed effects and, possibly, other
+non-linear effects.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+
+<p>Data.frame with the data.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>W</code></td>
+<td>
+
+<p>Adjacency matrix.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+
+<p>Value of the spatial autocorrelation parameter. For the SAC model, spatial
+autocorrelation term on the response.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>W.rho</code></td>
+<td>
+
+<p>For the SAC model, adjacency matrix associated to the autocorrelation on the
+response.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>W.lambda</code></td>
+<td>
+
+<p>For the SAC model, adjacency matrix associated to the autocorrelation on the
+error term.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+
+<p>For the SAC model, spatial autocorrelation of the error term.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mmatrix</code></td>
+<td>
+
+<p>Design matrix of fixed effects.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intercept</code></td>
+<td>
+
+<p>Logical. Whether an intercept has been included in the model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>improve</code></td>
+<td>
+
+<p>Logical. Whether improve model fitting (this may require more computing time).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>impacts</code></td>
+<td>
+
+<p>Logical. Whether impacts are computed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fhyper</code></td>
+<td>
+
+<p>Options to be passed to the definition of the hyper-parameters in the
+spatial effects.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probit</code></td>
+<td>
+
+<p>Logical. Whether a probit model is used. Note this is only used
+when computing the impacts and that argument <code>family</code> must
+be set accordingly.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Other arguments passed to function <code>inla</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>These functions fit a spatial econometrics model with a fixed value
+of the spatial autocorrelation parameter <code>rho</code>. 
+</p>
+<p>In addition, the marginal -log-likelihood is corrected to account for
+the variance-covariance matrix of the error term or random effects.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An <code>inla</code> object.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Virgilio Gómez-Rubio &lt;virgilio.gomez@uclm.es&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Roger S. Bivand, Virgilio Gómez-Rubio, Hĺvard Rue (2014). Approximate 
+Bayesian inference for spatial econometrics models. Spatial Statistics, 
+Volume 9, 146-165.
+</p>
+<p>Roger S. Bivand, Virgilio Gómez-Rubio, Hĺvard Rue (2015). Spatial
+Data Analysis with R-INLA with Some Extensions. Journal of
+Statistical Software, 63(20), 1-31. URL http://www.jstatsoft.org/v63/i20/.
+</p>
+<p>Virgilio Gómez-Rubio and Francisco-Palmí Perales (2016).  Spatial Models with the Integrated Nested Laplace Approximation within Markov Chain Monte Carlo. Submitted.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>leroux.inla</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Not run: 
+
+if(requireNamespace("INLA", quietly = TRUE)) {
+require(INLA)
+require(spdep)
+
+data(columbus)
+
+lw &lt;- nb2listw(col.gal.nb, style="W")
+
+#Maximum Likelihood (ML) estimation
+colsemml &lt;- errorsarlm(CRIME ~ INC + HOVAL, data=columbus, lw, method="eigen", 
+	quiet=FALSE)
+colslmml &lt;- lagsarlm(CRIME ~ INC + HOVAL, data=columbus, lw, method="eigen", 
+	type="lag", quiet=FALSE)
+colsdmml &lt;- lagsarlm(CRIME ~ INC + HOVAL, data=columbus, lw, method="eigen", 
+	type="mixed", quiet=FALSE)
+
+#Define grid on rho
+rrho&lt;-seq(-1, .95, length.out=40)
+
+#Adjacency matrix
+W &lt;- as(as_dgRMatrix_listw(nb2listw(col.gal.nb)), "CsparseMatrix")
+#Index for spatial random effects
+columbus$idx&lt;-1:nrow(columbus)
+
+#Formula
+form&lt;- CRIME ~ INC + HOVAL
+
+zero.variance = list(prec=list(initial = 25, fixed=TRUE))
+
+
+
+seminla&lt;-mclapply(rrho, function(rho){
+
+                sem.inla(form, d=columbus, W=W, rho=rho,
+                        family = "gaussian", impacts=FALSE,
+                        control.family = list(hyper = zero.variance),
+                        control.predictor=list(compute=TRUE),
+                        control.compute=list(dic=TRUE, cpo=TRUE),
+                        control.inla=list(print.joint.hyper=TRUE), 
+				#tolerance=1e-20, h=1e-6),
+			verbose=FALSE
+                )
+
+})
+
+
+
+slminla&lt;-mclapply(rrho, function(rho){
+
+                slm.inla(form, d=columbus, W=W, rho=rho,
+                        family = "gaussian", impacts=FALSE,
+                        control.family = list(hyper = zero.variance),
+                        control.predictor=list(compute=TRUE),
+                        control.compute=list(dic=TRUE, cpo=TRUE),
+                        control.inla=list(print.joint.hyper=TRUE), 
+				#tolerance=1e-20, h=1e-6),
+			verbose=FALSE
+                )
+})
+
+
+sdminla&lt;-mclapply(rrho, function(rho){
+
+                sdm.inla(form, d=columbus, W=W, rho=rho,
+                        family = "gaussian", impacts=FALSE,
+                        control.family = list(hyper = zero.variance),
+                        control.predictor=list(compute=TRUE),
+                        control.compute=list(dic=TRUE, cpo=TRUE),
+                        control.inla=list(print.joint.hyper=TRUE), 
+				#tolerance=1e-20, h=1e-6),
+			verbose=FALSE
+                )
+})
+
+#BMA using a uniform prior (in the log-scale) and using a Gaussian 
+#approximation to the marginal
+sembma&lt;-INLABMA(seminla, rrho, 0, usenormal=TRUE)
+slmbma&lt;-INLABMA(slminla, rrho, 0, usenormal=TRUE)
+sdmbma&lt;-INLABMA(sdminla, rrho, 0, usenormal=TRUE)
+
+#Display results
+plot(sembma$rho$marginal, type="l", ylim=c(0,5))
+lines(slmbma$rho$marginal, lty=2)
+lines(sdmbma$rho$marginal, lty=3)
+#Add ML estimates
+abline(v=colsemml$lambda, col="red")
+abline(v=colslmml$rho, col="red", lty=2)
+abline(v=colsdmml$rho, col="red", lty=3)
+#Legend
+legend(-1,5, c("SEM", "SLM", "SDM"), lty=1:3)
+}
+
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

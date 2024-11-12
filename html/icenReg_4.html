@@ -1,0 +1,163 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>diag_covar</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Evaluate covariate effect for regression model</h2>
+
+<h3>Description</h3>
+
+<p>Creates plots to diagnosis fit of covariate effect in a regression model. 
+For a given variable, stratifies the data across different levels of the variable and adjusts 
+for all the other covariates included in <code>fit</code> and then plots a given function to help 
+diagnosis where covariate effect follows model assumption 
+(i.e. either proportional hazards or proportional odds). See <code>details</code> for descriptions of the plots. 
+</p>
+<p>If <code>varName</code> is not provided, will attempt to figure out how to divide up each covariate 
+and plot all of them, although this may fail.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">diag_covar(
+  object,
+  varName,
+  data,
+  model,
+  weights = NULL,
+  yType = "meanRemovedTransform",
+  factorSplit = TRUE,
+  numericCuts,
+  col,
+  xlab,
+  ylab,
+  main,
+  lgdLocation = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>Either a formula or a model fit with <code>ic_sp</code> or <code>ic_par</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>varName</code></td>
+<td>
+<p>Covariate to split data on. If left blank, will split on each covariate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Data. Unnecessary if <code>object</code> is a fit</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>Type of model. Choices are <code>'ph'</code> or <code>'po'</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>Case weights</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yType</code></td>
+<td>
+<p>Type of plot created. See details</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>factorSplit</code></td>
+<td>
+<p>Should covariate be split as a factor (i.e. by levels)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numericCuts</code></td>
+<td>
+<p>If <code>fractorSplit == FALSE</code>, cut points of covariate to stratify data on</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p>Colors of each subgroup plot. If left blank, will auto pick colors</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>Label of x axis</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>Label of y axis</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p>title of plot</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lgdLocation</code></td>
+<td>
+<p>Where legend should be placed. See details</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For the Cox-PH and proportional odds models, there exists a transformation of survival curves 
+such that the difference should be constant for subjects with different covariates. 
+In the case of the Cox-PH, this is the log(-log(S(t|X))) transformation, for the proporitonal odds, 
+this is the log(S(t|X) / (1 - S(t|X))) transformation. 
+</p>
+<p>The function diag_covar allows the user to easily use these transformations to diagnosis 
+whether such a model is appropriate. In particular, it takes a single covariate and 
+stratifies the data on different levels of that covariate. 
+Then, it fits the semi-parametric regression model 
+(adjusting for all other covariates in the data set) on each of these 
+stratum and extracts the baseline survival function. If the stratified covariate does 
+follow the regression assumption, the difference between these transformed baseline 
+survival functions should be approximately constant. 
+</p>
+<p>To help diagnosis, the default function plotted is the transformed survival functions, 
+with the overall means subtracted off. If the assumption holds true, then the mean 
+removed curves should be approximately parallel lines (with stochastic noise). 
+Other choices of <code>yType</code>, the function to plot, are <code>"transform"</code>, 
+which is the transformed functions without the means subtracted and <code>"survival"</code>, 
+which is the baseline survival distribution is plotted for each strata. 
+</p>
+<p>Currently does not support stratifying covariates that are involved in an interaction term. 
+</p>
+<p>For variables that are factors, it will create a strata for each level of the covariate, up to 20 levels. 
+If <code>factorSplit == FALSE</code>, will divide up numeric covariates according to the cuts provided to numericCuts. 
+</p>
+<p><code>lgdLocation</code> is an argument placed to <code>legend</code> dictating where the legend will be placed. 
+If <code>lgdLocation = NULL</code>, will use standard placement given <code>yType</code>. See <code>?legend</code> for more details.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Clifford Anderson-Bergman
+</p>
+
+
+</div>

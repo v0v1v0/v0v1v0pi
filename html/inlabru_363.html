@@ -1,0 +1,186 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bru_mapper_marginal</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Mapper for marginal distribution transformation</h2>
+
+<h3>Description</h3>
+
+<p>Constructs a mapper that transforms the marginal distribution <code>state</code> from
+<code class="reqn">\textrm{N}(0,1)</code> to the distribution of a given (continuous)
+quantile function. The <code>...</code> arguments are used as parameter arguments to
+<code>qfun</code>, <code>pfun</code>, <code>dfun</code>, and <code>dqfun</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">bru_mapper_marginal(
+  qfun,
+  pfun = NULL,
+  dfun = NULL,
+  dqfun = NULL,
+  ...,
+  inverse = FALSE
+)
+
+## S3 method for class 'bru_mapper_marginal'
+ibm_n(mapper, ..., state = NULL, n_state = NULL)
+
+## S3 method for class 'bru_mapper_marginal'
+ibm_n_output(mapper, input, state = NULL, ..., n_state = NULL)
+
+## S3 method for class 'bru_mapper_marginal'
+ibm_values(mapper, ..., state = NULL, n_state = NULL)
+
+## S3 method for class 'bru_mapper_marginal'
+ibm_jacobian(mapper, input, state = NULL, ..., reverse = FALSE)
+
+## S3 method for class 'bru_mapper_marginal'
+ibm_eval(mapper, input, state = NULL, ..., reverse = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>qfun</code></td>
+<td>
+<p>A quantile function, supporting <code>lower.tail</code> and <code>log.p</code> arguments,
+like <code>stats::qnorm()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pfun</code></td>
+<td>
+<p>A CDF, supporting <code>lower.tail</code> and <code>log.p</code> arguments,
+like <code>stats::pnorm()</code>.  Only needed and used when
+<code>xor(mapper[["inverse"]], reverse)</code> is <code>TRUE</code> in a method call.
+Default <code>NULL</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dfun</code></td>
+<td>
+<p>A pdf, supporting <code>log</code> argument,
+like <code>stats::dnorm()</code>. If <code>NULL</code> (default), uses finite
+differences on <code>qfun</code> or <code>pfun</code> instead.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dqfun</code></td>
+<td>
+<p>A function evaluating the reciprocal of the derivative of <code>qfun</code>.
+If <code>NULL</code> (default), uses <code>dfun(qfun(...),...)</code> or finite
+differences on <code>qfun</code> or <code>pfun</code> instead.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Arguments passed on to other methods</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inverse</code></td>
+<td>
+<p>logical; If <code>FALSE</code> (default), <code>bru_mapper_marginal()</code>
+defines a mapping from standard Normal to a specified distribution.
+If <code>TRUE</code>, it defines a mapping from the specified distribution to a standard
+Normal.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mapper</code></td>
+<td>
+<p>A mapper S3 object, inheriting from <code>bru_mapper</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>state</code></td>
+<td>
+<p>A vector of latent state values for the mapping,
+of length <code>ibm_n(mapper, inla_f = FALSE)</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_state</code></td>
+<td>
+<p>integer giving the length of the state vector for mappers
+that have state dependent output size.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>input</code></td>
+<td>
+<p>Data input for the mapper.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reverse</code></td>
+<td>
+<p>logical; control <code>bru_mapper_marginal</code> evaluation. Default <code>FALSE</code>.
+When <code>TRUE</code>, reverses the direction of the mapping, see details for <code>marginal</code>
+mappers.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For <code>bru_mapper_marginal</code>, non-NULL <code>input</code> values are interpreted
+as a parameter list for <code>qfun</code>, overriding that of the mapper itself.
+</p>
+
+
+<h3>Methods (by generic)</h3>
+
+
+<ul><li> <p><code>ibm_eval(bru_mapper_marginal)</code>: When <code>xor(mapper[["inverse"]], reverse)</code> is
+<code>FALSE</code>, <code>ibm_eval()</code>
+for <code>marginal</code> returns <code>qfun(pnorm(x), param)</code>, evaluated in a numerically
+stable way. Otherwise, evaluates the inverse <code>qnorm(pfun(x, param))</code> instead.
+</p>
+</li></ul>
+<h3>See Also</h3>
+
+<p>bru_mapper, bru_mapper_generics
+</p>
+<p>Other mappers: 
+<code>bru_get_mapper()</code>,
+<code>bru_mapper()</code>,
+<code>bru_mapper.fm_mesh_1d()</code>,
+<code>bru_mapper.fm_mesh_2d()</code>,
+<code>bru_mapper_aggregate()</code>,
+<code>bru_mapper_collect()</code>,
+<code>bru_mapper_const()</code>,
+<code>bru_mapper_factor()</code>,
+<code>bru_mapper_generics</code>,
+<code>bru_mapper_harmonics()</code>,
+<code>bru_mapper_index()</code>,
+<code>bru_mapper_linear()</code>,
+<code>bru_mapper_logsumexp()</code>,
+<code>bru_mapper_matrix()</code>,
+<code>bru_mapper_mesh_B()</code>,
+<code>bru_mapper_multi()</code>,
+<code>bru_mapper_pipe()</code>,
+<code>bru_mapper_scale()</code>,
+<code>bru_mapper_shift()</code>,
+<code>bru_mapper_taylor()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">m &lt;- bru_mapper_marginal(qexp, pexp, rate = 1 / 8)
+(val &lt;- ibm_eval(m, state = -5:5))
+ibm_eval(m, state = val, reverse = TRUE)
+m &lt;- bru_mapper_marginal(qexp, pexp, dexp, rate = 1 / 8)
+ibm_eval2(m, state = -3:3)
+
+</code></pre>
+
+
+</div>

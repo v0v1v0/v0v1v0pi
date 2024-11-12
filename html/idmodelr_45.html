@@ -1,0 +1,106 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>solve_ode</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>A Simple Wrapper for lsoda</h2>
+
+<h3>Description</h3>
+
+<p>This function acts as a simple wrapper for lsoda, allowing for multiple parameter sets and
+initial conditions. It also allows <code>lsoda</code> to be used within the idmodelr framework.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">solve_ode(
+  model = NULL,
+  inits = NULL,
+  params = NULL,
+  times = NULL,
+  as.data.frame = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A model formatted as required by <code>lsoda</code>, see <code>SI_ode</code> for an example.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inits</code></td>
+<td>
+<p>The initial state (states) of the model. Can either be supplied as a named vector or as a matrix with each
+row representing a parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>params</code></td>
+<td>
+<p>A named vector or matrix of parameters. The matrix must have a row for each parameter and if <code>inits</code> is specified
+as a matrix then <code>params</code> must have the same number of columns</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>times</code></td>
+<td>
+<p>A numeric vector of the times for which explicit model estimates are required, this does not effect
+the timestep used by the solver</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>as.data.frame</code></td>
+<td>
+<p>A logical (defaults to <code>TRUE</code>) indicating if the results should be returned as a data frame.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments to pass to <code>lsoda</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A dataframe or lsoda object containing a single or multiple model trajectories
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>lsoda</code> <code>SI_ode</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Intialise
+N = 100000
+I_0 = 1
+S_0 = N - I_0
+R_0 = 1.1
+beta = R_0
+
+##Time for model to run over
+tbegin = 0
+tend = 50
+times &lt;- seq(tbegin, tend, 1)
+
+##Vectorise input
+parameters &lt;- as.matrix(c(beta = beta))
+inits &lt;- as.matrix(c(S = S_0, I = I_0))
+
+solve_ode(model = SI_ode, inits, parameters, times, as.data.frame = TRUE)
+</code></pre>
+
+
+</div>

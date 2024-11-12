@@ -1,0 +1,86 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get.beta</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Obtain model coefficient without assuming prior on structure of predictors.</h2>
+
+<h3>Description</h3>
+
+<p>Given a sufficient statistic for a regression coefficient, this funciton estimates a regression coefficient without assuming prior on structure of predictors.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get.beta(SS, w, alpha, scaledfactor)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>SS</code></td>
+<td>
+<p>a scalar value of sufficient statistic for a regression coefficient.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>a scalar value of mixing weight.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>a scalar value of hyperparameter <code>alpha</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scaledfactor</code></td>
+<td>
+<p>a scalar value of multiplicative factor.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Empirical Bayes thresholding is employed to obtain a posterior median of a regression coefficient.</p>
+
+
+<h3>Value</h3>
+
+<p>a scalar value of regression coefficient.</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Vitara Pungpapong, Min Zhang, Dabao Zhang</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(simGaussian)
+Y&lt;-as.matrix(simGaussian[,1])
+X&lt;-as.matrix(simGaussian[,-1])
+n&lt;-dim(X)[1]
+# Obtain initial values from lasso
+data(initbetaGaussian)
+beta&lt;-as.matrix(initbetaGaussian)
+# Initiate all other parameters
+w&lt;-0.5
+alpha&lt;-0.5
+sigma&lt;-get.sigma(Y=Y, X=X, beta=beta, alpha=alpha)
+# Obtain a sufficient statistic
+j&lt;-1
+Yres&lt;-Y-X%*%beta+X[,j]*beta[j,1]
+sxy&lt;-t(Yres)%*%X[,j]
+ssx&lt;-sum(X[,j]^2)
+SS&lt;-sqrt(n-1)*sxy/(sigma*ssx)
+beta[j,1]&lt;-get.beta(SS=SS, w=w, alpha=alpha, scaledfactor=sigma/sqrt(n-1))
+</code></pre>
+
+
+</div>

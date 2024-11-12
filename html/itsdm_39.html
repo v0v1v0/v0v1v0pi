@@ -1,0 +1,155 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>suspicious_env_outliers</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Function to detect suspicious outliers based on environmental variables.</h2>
+
+<h3>Description</h3>
+
+<p>Run <code>outlier.tree</code> to detect suspicious outliers in observations.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">suspicious_env_outliers(
+  occ,
+  occ_crs = 4326,
+  variables,
+  rm_outliers = FALSE,
+  seed = 10L,
+  ...,
+  visualize = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>occ</code></td>
+<td>
+<p>(<code>data.frame</code>, <code>sf</code>, <code>SpatialPointsDataFrame</code>)
+The occurrence dataset for training.
+There must be column <code>x</code> and <code>y</code> for coordinates if it is a regular <code>data.frame</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>occ_crs</code></td>
+<td>
+<p>(<code>numeric</code> or <code>crs</code>) The EPSG number or
+<code>crs</code> object of occurrence CRS.
+The default value is <code>4326</code>, which is the geographic coordinate system.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variables</code></td>
+<td>
+<p>(<code>RasterStack</code> or <code>stars</code>) The stack of environmental variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rm_outliers</code></td>
+<td>
+<p>(<code>logical</code>) The option to remove the suspicious outliers or not.
+The default is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>(<code>integer</code>) The random seed used in the modeling. It should be an
+integer. The default is <code>10L</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments passed to function <code>outlier.tree</code> in
+package <code>outliertree</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>visualize</code></td>
+<td>
+<p>(<code>logical</code>) If <code>TRUE</code>, plot the result.
+The default is <code>TRUE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Please check more details in R documentation of function
+<code>outlier.tree</code> in package <code>outliertree</code> and their GitHub.
+</p>
+
+
+<h3>Value</h3>
+
+<p>(<code>EnvironmentalOutlier</code>) A list that contains
+</p>
+
+<ul>
+<li>
+<p>outliers (<code>sf</code>) The <code>sf</code> points of outliers
+</p>
+</li>
+<li>
+<p>outlier_details (<code>tibble</code>) A table of outlier details returned from
+function <code>outlier.tree</code> in package <code>outliertree</code>
+</p>
+</li>
+<li>
+<p>pts_occ (<code>sf</code>) The <code>sf</code> points of occurrence.
+If <code>rm_outliers</code> is <code>TRUE</code>, outliers are deleted from points of
+occurrence. If <code>FALSE</code>, the full observations are returned.</p>
+</li>
+</ul>
+<h3>References</h3>
+
+
+<ul>
+<li>
+<p><a href="https://arxiv.org/abs/2001.00636">Cortes, David. "Explainable
+outlier detection through decision tree conditioning."
+<em>arXiv preprint arXiv:2001.00636</em> (2020).</a>
+</p>
+</li>
+<li>
+<p><a href="https://github.com/david-cortes/outliertree">https://github.com/david-cortes/outliertree</a></p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>print.EnvironmentalOutlier</code>, <code>plot.EnvironmentalOutlier</code>
+<code>outlier.tree</code> in package <code>outliertree</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(dplyr)
+library(sf)
+library(stars)
+library(itsdm)
+
+data("occ_virtual_species")
+env_vars &lt;- system.file(
+  'extdata/bioclim_tanzania_10min.tif',
+  package = 'itsdm') %&gt;% read_stars() %&gt;%
+  slice('band', c(1, 5, 12))
+
+occ_outliers &lt;- suspicious_env_outliers(
+  occ = occ_virtual_species, variables = env_vars,
+  z_outlier = 3.5, outliers_print = 4L, nthreads = 1)
+
+occ_outliers
+plot(occ_outliers)
+
+</code></pre>
+
+
+</div>

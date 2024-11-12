@@ -1,0 +1,110 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>repFilter</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Main function for data filtering</h2>
+
+<h3>Description</h3>
+
+<p>Main function for data filtering
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">repFilter(
+  .data,
+  .method = "by.clonotype",
+  .query = list(CDR3.aa = exclude("partial", "out_of_frame")),
+  .match = "exact"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>.data</code></td>
+<td>
+<p>The data to be processed. Must be the list of 2 elements:
+a data table and a metadata table.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.method</code></td>
+<td>
+<p>Method of filtering. Implemented methods:
+by.meta, by.repertoire (by.rep), by.clonotype (by.cl)
+Default value: 'by.clonotype'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.query</code></td>
+<td>
+<p>Filtering query. It's a named list of filters that will be applied
+to data.
+Possible values for names in this list are dependent on filter methods:
+- by.meta: filters by metadata. Names in the named list are metadata column headers.
+- by.repertoire: filters by the number of clonotypes or total number of clones in sample.
+Possible names in the named list are "n_clonotypes" and "n_clones".
+- by.clonotype: filters by data in all samples. Names in the named list are
+data column headers.
+Elements of the named list for each of the filters are filtering options.
+Possible values for filtering options:
+- include("STR1", "STR2", ...): keeps only rows with matching values.
+Available for methods: "by.meta", "by.clonotype".
+- exclude("STR1", "STR2", ...): removes rows with matching values.
+Available for methods: "by.meta", "by.clonotype".
+- lessthan(value): keeps rows/samples with numeric values less than specified.
+Available for methods: "by.meta", "by.repertoire", "by.clonotype".
+- morethan(value): keeps rows/samples with numeric values more than specified.
+Available for methods: "by.meta", "by.repertoire", "by.clonotype".
+- interval(from, to): keeps rows/samples with numeric values that fits in this interval.
+from is inclusive, to is exclusive.
+Available for methods: "by.meta", "by.repertoire", "by.clonotype".
+Default value: 'list(CDR3.aa = exclude("partial", "out_of_frame"))'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.match</code></td>
+<td>
+<p>Matching method for "include" and "exclude" options in query.
+Possible values:
+- exact: matches only the exact specified string;
+- startswith: matches all strings starting with the specified substring;
+- substring: matches all strings containing the specified substring.
+Default value: 'exact'.</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(immdata)
+
+# Select samples with status "MS"
+repFilter(immdata, "by.meta", list(Status = include("MS")))
+
+# Select samples without status "MS"
+repFilter(immdata, "by.meta", list(Status = exclude("MS")))
+
+# Select samples from lanes "A" and "B" with age &gt; 15
+repFilter(immdata, "by.meta", list(Lane = include("A", "B"), Age = morethan(15)))
+
+# Select samples that are not from lanes "A" and "B"
+repFilter(immdata, "by.meta", list(Lane = exclude("A", "B")))
+
+# Select samples with a number of clonotypes from 1000 to 5000
+repFilter(immdata, "by.repertoire", list(n_clonotypes = interval(1000, 5000)))
+
+# Select clonotypes in all samples with alpha chains
+repFilter(immdata, "by.clonotype",
+  list(V.name = include("AV"), J.name = include("AJ")),
+  .match = "substring"
+)
+</code></pre>
+
+
+</div>

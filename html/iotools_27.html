@@ -1,0 +1,121 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>chunk</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Functions for very fast chunk-wise processing
+</h2>
+
+<h3>Description</h3>
+
+<p><code>chunk.reader</code> creates a reader that will read from a binary
+connection in chunks while preserving integrity of lines.
+</p>
+<p><code>read.chunk</code> reads the next chunk using the specified reader.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">chunk.reader(source, max.line = 65536L, sep = NULL)
+read.chunk(reader, max.size = 33554432L, timeout = Inf)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>source</code></td>
+<td>
+<p>binary connection or character (which is interpreted as
+file name) specifying the source</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.line</code></td>
+<td>
+<p>maximum length of one line (in byets) - determines the
+size of the read buffer, default is 64kb</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep</code></td>
+<td>
+<p>optional string: key separator if key-aware chunking is to
+be used</p>
+</td>
+</tr>
+</table>
+<p>character is considered a key and subsequent records holding the
+same key are guaranteed to be 
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>reader</code></td>
+<td>
+<p>reader object as returned by <code>chunk.reader</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.size</code></td>
+<td>
+<p>maximum size of the chunk (in bytes), default is 32Mb</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timeout</code></td>
+<td>
+<p>numeric, timeout (in seconds) for reads if
+<code>source</code> is a raw file descriptor.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>chunk.reader</code> is essentially a filter that converts binary
+connection into chunks that can be subsequently parsed into data while
+preserving the integrity of input lines. <code>read.chunk</code> is used to
+read the actual chunks. The implementation is very thin to prevert
+copying of large vectors for best efficiency.
+</p>
+<p>If <code>sep</code> is set to a string, it is treated as a single-character
+separator character. If specified, prefix in the input up to the
+specified character is treated as a key and subsequent lines with the
+same key are guaranteed to be processed in the same chunk. Note that
+this implies that the chunk size is practically unlimited, since this
+may force accumulation of multiple chunks to satisfy this condition.
+Obviously, this increases the processing and memory overhead.
+</p>
+<p>In addition to connections <code>chunk.reader</code> supports raw file
+descriptors (integers of the class <code>"fileDescriptor"</code>). In that
+case the reads are preformed directly by <code>chunk.reader</code> and
+<code>timeout</code> can be used to perform non-blocking or timed
+reads (unix only, not supported on Windows).
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>chunk.reader</code> returns an object that can be used by
+<code>read.chunk</code>. If <code>source</code> is a string, it is equivalent to
+calling <code>chunk.reader(file(source, "rb"), ...)</code>.
+</p>
+<p><code>read.chunk</code> returns a raw vector holding the next chunk or
+<code>NULL</code> if timeout was reached. It is deliberate that
+<code>read.chunk</code> does NOT return a character vector since that
+would reasult in a high performance penalty. Please use the
+appropriate parser to convert the chunk into data, see
+<code>mstrsplit</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Simon Urbanek
+</p>
+
+
+</div>

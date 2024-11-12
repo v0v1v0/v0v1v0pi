@@ -1,0 +1,237 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fit_inlamemi</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit model for measurement error and missing data in INLA</h2>
+
+<h3>Description</h3>
+
+<p>A wrapper function around "INLA::inla()", providing the necessary structure to fit the hierarchical measurement error model that adjusts coefficient estimates to account for biases due to measurement error and missing data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fit_inlamemi(
+  formula_moi,
+  formula_imp = NULL,
+  formula_mis = NULL,
+  family_moi,
+  data,
+  error_type = "classical",
+  error_variable = NULL,
+  repeated_observations = FALSE,
+  classical_error_scaling = NULL,
+  prior.prec.moi = NULL,
+  prior.prec.berkson = NULL,
+  prior.prec.classical = NULL,
+  prior.prec.imp = NULL,
+  prior.beta.error = NULL,
+  prior.gamma.error = NULL,
+  initial.prec.moi = NULL,
+  initial.prec.berkson = NULL,
+  initial.prec.classical = NULL,
+  initial.prec.imp = NULL,
+  control.family.moi = NULL,
+  control.family.berkson = NULL,
+  control.family.classical = NULL,
+  control.family.imp = NULL,
+  control.family = NULL,
+  control.predictor = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula_moi</code></td>
+<td>
+<p>an object of class "formula", describing the main model to be fitted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula_imp</code></td>
+<td>
+<p>an object of class "formula", describing the imputation model for the mismeasured and/or missing observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula_mis</code></td>
+<td>
+<p>an object of class "formula", describing the missingness model. Does not need to have a response variable, since this will always be a binary missingness indicator.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family_moi</code></td>
+<td>
+<p>a string indicating the likelihood family for the model of interest (the main model).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>an object of class data.frame or list containing the variables in the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>error_type</code></td>
+<td>
+<p>type of error (one or more of "classical", "berkson", "missing")</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>error_variable</code></td>
+<td>
+<p>character vector with the name(s) of the variable(s) with error.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>repeated_observations</code></td>
+<td>
+<p>Does the variable with measurement error and/or missingness have repeated observations? If so, set this to "TRUE". In that case, when specifying the formula, use the name of the variable without any numbers, but when specifying the data, make sure that the repeated measurements end in a number, i.e "sbp1" and "sbp2".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>classical_error_scaling</code></td>
+<td>
+<p>can be specified if the classical measurement error varies across observations. Must be a vector of the same length as the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior.prec.moi</code></td>
+<td>
+<p>a string containing the parameters for the prior for the precision of the residual term for the model of interest.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior.prec.berkson</code></td>
+<td>
+<p>a string containing the parameters for the prior for the precision of the error term for the Berkson error model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior.prec.classical</code></td>
+<td>
+<p>a string containing the parameters for the prior for the precision of the error term for the classical error model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior.prec.imp</code></td>
+<td>
+<p>a string containing the parameters for the precision of the latent variable x, which is the variable being described in the imputation model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior.beta.error</code></td>
+<td>
+<p>parameters for the Gaussian prior for the coefficient of the error prone variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior.gamma.error</code></td>
+<td>
+<p>parameters for the Gaussian prior for the coefficient of the variable with missingness in the missingness model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial.prec.moi</code></td>
+<td>
+<p>the initial value for the precision of the residual term for the model of interest.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial.prec.berkson</code></td>
+<td>
+<p>the initial value for the precision of the residual term for the Berkson error term.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial.prec.classical</code></td>
+<td>
+<p>the initial value for the precision of the residual term for the classical error term.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial.prec.imp</code></td>
+<td>
+<p>the initial value for the precision of the residual term for the latent variable r.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control.family.moi</code></td>
+<td>
+<p>control.family component for model of interest. Can be specified here using the inla syntax instead of passing the "prior.prec..." and "initial.prec..." arguments, or in the cases when other hyperparameters are needed for the model of interest, see for instance survival models.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control.family.berkson</code></td>
+<td>
+<p>control.family component Berkson model. Can be specified here using the inla syntax instead of passing the "prior.prec..." and "initial.prec..." arguments. Useful in the cases when more flexibility is needed, for instance if one wants to specify a different prior distribution than Gamma.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control.family.classical</code></td>
+<td>
+<p>control.family component for classical model. Can be specified here using the inla syntax instead of passing the "prior.prec..." and "initial.prec..." arguments. Useful in the cases when more flexibility is needed, for instance if one wants to specify a different prior distribution than Gamma.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control.family.imp</code></td>
+<td>
+<p>control.family component for imputation model. Can be specified here using the inla syntax instead of passing the "prior.prec..." and "initial.prec..." arguments. Useful in the cases when more flexibility is needed, for instance if one wants to specify a different prior distribution than Gamma.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control.family</code></td>
+<td>
+<p>control.family for use in inla (can be provided directly instead of passing the "prior.prec...." and "initial.prec..." arguments. If this is specified, any other "control.family..." or "prior.prec..." arguments provided will be ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control.predictor</code></td>
+<td>
+<p>control.predictor for use in inla.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments to pass to 'inla'.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class <code>inlamemi</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Fit the model
+simple_model &lt;- fit_inlamemi(data = simple_data,
+                           formula_moi = y ~ x + z,
+                           formula_imp = x ~ z,
+                           family_moi = "gaussian",
+                           error_type = c("berkson", "classical"),
+                           error_variable = "x",
+                           prior.prec.moi = c(10, 9),
+                           prior.prec.berkson = c(10, 9),
+                           prior.prec.classical = c(10, 9),
+                           prior.prec.imp = c(10, 9),
+                           prior.beta.error = c(0, 1/1000),
+                           initial.prec.moi = 1,
+                           initial.prec.berkson = 1,
+                           initial.prec.classical = 1,
+                           initial.prec.imp = 1)
+
+</code></pre>
+
+
+</div>

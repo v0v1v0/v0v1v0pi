@@ -1,0 +1,158 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>download_extract</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Download a completed IPUMS data extract</h2>
+
+<h3>Description</h3>
+
+<p>Download IPUMS data extract files via the IPUMS API and save them on your
+computer.
+</p>
+<p>Learn more about the IPUMS API in <code>vignette("ipums-api")</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">download_extract(
+  extract,
+  download_dir = getwd(),
+  overwrite = FALSE,
+  progress = TRUE,
+  api_key = Sys.getenv("IPUMS_API_KEY")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>extract</code></td>
+<td>
+<p>One of:
+</p>
+
+<ul>
+<li>
+<p> An <code>ipums_extract</code> object
+</p>
+</li>
+<li>
+<p> The data collection and extract number formatted as a string of the
+form <code>"collection:number"</code> or as a vector of the form
+<code>c("collection", number)</code>
+</p>
+</li>
+<li>
+<p> An extract number to be associated with your default IPUMS
+collection. See <code>set_ipums_default_collection()</code>
+</p>
+</li>
+</ul>
+<p>For a list of codes used to refer to each collection, see
+<code>ipums_data_collections()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>download_dir</code></td>
+<td>
+<p>Path to the directory where the files should be written.
+Defaults to current working directory.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overwrite</code></td>
+<td>
+<p>If <code>TRUE</code>, overwrite files with the same name that
+already exist in <code>download_dir</code>. Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>progress</code></td>
+<td>
+<p>If <code>TRUE</code>, output progress bar showing the status of the
+download request. Defaults to <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>api_key</code></td>
+<td>
+<p>API key associated with your user account. Defaults to the
+value of the <code>IPUMS_API_KEY</code> environment variable. See
+<code>set_ipums_api_key()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For NHGIS extracts, data files and GIS files (shapefiles) will be saved in
+separate .zip archives. <code>download_extract()</code> will return a character vector
+including the file paths to all downloaded files.
+</p>
+<p>For microdata extracts, only the file path to the downloaded .xml DDI file
+will be returned, as it is sufficient for reading the data provided in the
+associated .dat.gz data file.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The path(s) to the files required to read the data
+requested in the extract, invisibly.
+</p>
+<p>For NHGIS, paths will be named with either <code>"data"</code> (for tabular data
+files) or <code>"shape"</code> (for spatial data files) to
+indicate the type of data the file contains.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>read_ipums_micro()</code> or <code>read_nhgis()</code> to read tabular
+data from an IPUMS extract.
+</p>
+<p><code>read_ipums_sf()</code> to read spatial data from an IPUMS extract.
+</p>
+<p><code>ipums_list_files()</code> to list files in an IPUMS extract.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">usa_extract &lt;- define_extract_micro(
+  collection = "usa",
+  description = "2013-2014 ACS Data",
+  samples = c("us2013a", "us2014a"),
+  variables = c("SEX", "AGE", "YEAR")
+)
+
+## Not run: 
+submitted_extract &lt;- submit_extract(usa_extract)
+
+downloadable_extract &lt;- wait_for_extract(submitted_extract)
+
+# For microdata, the path to the DDI .xml codebook file is provided.
+usa_xml_file &lt;- download_extract(downloadable_extract)
+
+# Load with a `read_ipums_micro_*()` function
+usa_data &lt;- read_ipums_micro(usa_xml_file)
+
+# You can also download previous extracts with their collection and number:
+nhgis_files &lt;- download_extract("nhgis:1")
+
+# NHGIS extracts return a path to both the tabular and spatial data files,
+# as applicable.
+nhgis_data &lt;- read_nhgis(data = nhgis_files["data"])
+
+# Load NHGIS spatial data
+nhgis_geog &lt;- read_ipums_sf(data = nhgis_files["shape"])
+
+## End(Not run)
+</code></pre>
+
+
+</div>

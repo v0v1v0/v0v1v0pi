@@ -1,0 +1,304 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>impute.mix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Imputation using a decision rule under an assumption of a mixture of MCAR and MNAR values.
+</h2>
+
+<h3>Description</h3>
+
+<p>This function allows imputing data sets with a MCAR-devoted algorithm and a MNAR-devoted algorithm using probabilities that missing values are MCAR. If such a probability is superior to a chosen threshold, then the MCAR-devoted algorithm is used, otherwise it is the MNAR-devoted algorithm. For details, see Giai Gianetto, Q. et al. (2020) (doi: doi: <a href="https://doi.org/10.1101/2020.05.29.122770">10.1101/2020.05.29.122770</a>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">impute.mix(tab, prob.MCAR, threshold, conditions, repbio=NULL, reptech=NULL,
+methodMCAR="mle",nknn=15,weight=1, selec="all", ind.comp=1, progress.bar=TRUE, q=0.95,
+ncp.max=5, maxiter = 10, ntree = 100, variablewise = FALSE, decreasing = FALSE,
+verbose = FALSE, mtry = floor(sqrt(ncol(tab))), replace = TRUE,classwt = NULL,
+cutoff = NULL, strata = NULL, sampsize = NULL, nodesize = NULL, maxnodes = NULL,
+xtrue = NA, parallelize = c('no', 'variables', 'forests'),
+methodMNAR="igcda", q.min = 0.025, q.norm = 3, eps = 0, distribution = "unif",
+param1 = 3, param2 = 1, R.q.min=1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>tab</code></td>
+<td>
+<p>A data matrix containing numeric and missing values. Each column of this matrix is assumed to correspond to an experimental sample, and each row to an identified peptide.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prob.MCAR</code></td>
+<td>
+<p>A matrix of probabilities that each missing value is MCAR. For instance such a matrix can be obtained from the function <code>prob.mcar.tab</code> of this package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>threshold</code></td>
+<td>
+<p>A value such that if the probability that a missing value is MCAR is superior to it, then a MCAR-devoted algorithm is used, otherwise it is a MNAR-devoted algorithm that is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conditions</code></td>
+<td>
+<p>A vector of factors indicating the biological condition to which each column (experimental sample) belongs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>repbio</code></td>
+<td>
+<p>A vector of factors indicating the biological replicate to which each column belongs. Default is NULL (no experimental design is considered).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reptech</code></td>
+<td>
+<p>A vector of factors indicating the technical replicate to which each column belongs. Default is NULL (no experimental design is considered).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>methodMCAR</code></td>
+<td>
+<p>The method used for imputing MCAR data. If <code>methodi="mle"</code> (default), then the <code>impute.mle</code> function is used (imputation using an EM algorithm). If <code>methodi="pca"</code>, then the <code>impute.PCA</code> function is used (imputation using Principal Component Analysis). If <code>methodi="rf"</code>, then the <code>impute.RF</code> function is used (imputation using Random Forest). Else, the <code>impute.slsa</code> function is used (imputation using Least Squares on nearest neighbours).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>methodMNAR</code></td>
+<td>
+<p>The method used for imputing MNAR data. If <code>methodMNAR="igcda"</code> (default), then the <code>impute.igcda</code> function is used. Else, the <code>impute.pa</code> function is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nknn</code></td>
+<td>
+<p>The number of nearest neighbours used in the SLSA algorithm (see <code>impute.slsa</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weight</code></td>
+<td>
+<p>The way of weighting in the algorithm (see <code>impute.slsa</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>selec</code></td>
+<td>
+<p>A parameter to select a part of the dataset to find nearest neighbours between rows. This can be useful for big data sets (see <code>impute.slsa</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ind.comp</code></td>
+<td>
+<p>If <code>ind.comp=1</code>, only nearest neighbours without missing values are selected to fit linear models (see <code>impute.slsa</code>). Else, they can contain missing values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>progress.bar</code></td>
+<td>
+<p>If <code>TRUE</code>, a progress bar is displayed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>A quantile value (see <code>impute.igcda</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncp.max</code></td>
+<td>
+<p>parameter of the <code>impute.PCA</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ntree</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variablewise</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>decreasing</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mtry</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>replace</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>classwt</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cutoff</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>strata</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sampsize</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nodesize</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxnodes</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xtrue</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallelize</code></td>
+<td>
+<p>parameter of the <code>impute.RF</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q.min</code></td>
+<td>
+<p>parameter of the <code>impute.pa</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q.norm</code></td>
+<td>
+<p>parameter of the <code>impute.pa</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>parameter of the <code>impute.pa</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distribution</code></td>
+<td>
+<p>parameter of the <code>impute.pa</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>param1</code></td>
+<td>
+<p>parameter of the <code>impute.pa</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>param2</code></td>
+<td>
+<p>parameter of the <code>impute.pa</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R.q.min</code></td>
+<td>
+<p>parameter of the <code>impute.pa</code> function.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The missing values for which <code>prob.MCAR</code> is superior to a chosen threshold are imputed with one of the MCAR-devoted imputation methods (<code>impute.mle</code>, <code>impute.RF</code>, <code>impute.PCA</code> or <code>impute.slsa</code>). The other missing values are considered MNAR and imputed with <code>impute.igcda</code>. More details and explanations can be bound in Giai Gianetto (2020).
+</p>
+
+
+<h3>Value</h3>
+
+<p>The input matrix <code>tab</code> with imputed values instead of missing values.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Quentin Giai Gianetto &lt;quentin2g@yahoo.fr&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Giai Gianetto, Q., Wieczorek S., Couté Y., Burger, T. (2020).  A peptide-level multiple imputation strategy accounting for the different natures of missing values in proteomics data. bioRxiv 2020.05.29.122770; doi: doi: <a href="https://doi.org/10.1101/2020.05.29.122770">10.1101/2020.05.29.122770</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#Simulating data
+res.sim=sim.data(nb.pept=2000,nb.miss=600);
+
+#Fast imputation of missing values with the impute.rand algorithm
+dat.rand=impute.rand(tab=res.sim$dat.obs,conditions=res.sim$condition);
+
+#Estimation of the mixture model
+res=estim.mix(tab=res.sim$dat.obs, tab.imp=dat.rand, conditions=res.sim$condition);
+
+#Computing probabilities to be MCAR
+born=estim.bound(tab=res.sim$dat.obs,conditions=res.sim$condition);
+proba=prob.mcar.tab(born$tab.upper,res);
+
+#Imputation under the assumption of MCAR and MNAR values
+tabi=impute.mix(tab=res.sim$dat.obs, prob.MCAR=proba, threshold=0.5, conditions=res.sim$conditions,
+repbio=res.sim$repbio, methodMCAR="slsa", methodMNAR="igcda", nknn=15, weight=1, selec="all",
+ind.comp=1, progress.bar=TRUE);
+
+</code></pre>
+
+
+</div>

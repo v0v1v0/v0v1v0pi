@@ -1,0 +1,116 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>model.lrt</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>likelihood ratio test for two models</h2>
+
+<h3>Description</h3>
+
+<p>Conduct likelihood ratio test for comparing two different models.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">model.lrt(d1, d2, parallel = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>d1</code></td>
+<td>
+<p>An object of class 'dis.kstest'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d2</code></td>
+<td>
+<p>An object of class 'dis.kstest'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>Whether to use multiple threads to parallelize computation. Default is FALSE. Please aware that it may take
+longer time to execute the program with <code>parallel=FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If the <code>pvalue</code> of <code>d1</code> and <code>d2</code> are greater than the user-specified significance level, which indicates that
+the original data <code>x</code> may come from the two distributions in <code>d1</code> and <code>d2</code>, a likelihood ratio test is
+desired to choose a more 'possible' distribution based on the current data. NOTE that the <code>x</code> in <code>d1</code> and <code>d2</code>
+must be IDENTICAL! Besides, NOTE that the <code>distri</code> in <code>d1</code> and <code>d2</code> must be DIFFERENT!
+</p>
+<p>The <code>distri</code> inherited from <code>d1</code> is the null distribution and that from <code>d2</code> is used as the alternative
+distribution. Following Aldirawi et al. (2019), <code>nsim</code> bootstrapped or simulated samples will be generated according to
+<code>bootstrap</code> of <code>d1</code>, based on which <code>nsim</code> maximum likelihood estimates of the parameters in null distribution
+will be calculated. Remember that we have obtained <code>nsim</code> such maximum likelihood estimates while calling function
+<code>dis.kstest</code>. Thus, the algorithm just adopts the <code>mle_new</code> from <code>d1</code> to avoid repetitive work. Using the
+<code>nsim</code> maximum likelihood estimates to generate <code>nsim</code> new samples and calculate <code>nsim</code> corresponding new
+likelihood ratio test statistics. The output p-value is the proportion of new samples that have statistics greater than the
+test statistic of the original data <code>x</code>.
+</p>
+<p>As in <code>dis.kstest</code>, the computation is parallelized with the help of packages <code>foreach</code> and
+<code>doParallel</code>.
+</p>
+<p>With the output p-value smaller than the user-specified significance level, the <code>distri</code> of <code>d2</code> is more appropriate
+for modelling <code>x</code>. Otherwise, There is no significant difference between <code>distri</code> of <code>d1</code> and <code>distri</code> of <code>d2</code>,
+given the current data.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The p-value of the likelihood ratio test.
+</p>
+
+
+<h3>Reference</h3>
+
+
+<ul>
+<li>
+<p>H. Aldirawi, J. Yang, A. A. Metwally (2019). Identifying Appropriate Probabilistic Models for Sparse Discrete Omics Data,
+accepted for publication in 2019 IEEE EMBS International Conference on Biomedical &amp; Health Informatics (BHI).
+</p>
+</li>
+<li>
+<p>T. Wolodzko (2019). extraDistr: Additional Univariate and Multivariate Distributions, R package version 1.8.11,
+https://CRAN.R-project.org/package=extraDistr.
+</p>
+</li>
+<li>
+<p>R. Calaway, Microsoft Corporation, S. Weston, D. Tenenbaum (2017). doParallel: Foreach Parallel Adaptor for the 'parallel'
+Package, R package version 1.0.11, https://CRAN.R-project.org/package=doParallel.
+</p>
+</li>
+<li>
+<p>R. Calaway, Microsoft, S. Weston (2017). foreach: Provides Foreach Looping Construct for R, R package version 1.4.4,
+https://CRAN.R-project.org/package=foreach.
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>dis.kstest</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(2001)
+temp1=sample.zi(N=300,phi=0.3,distri='poisson',lambda=5)
+d1=dis.kstest(temp1,nsim=100,bootstrap=TRUE,distri='zip')
+d2=dis.kstest(temp1,nsim=100,bootstrap=TRUE,distri='zinb')
+model.lrt(d1,d2)
+</code></pre>
+
+
+</div>

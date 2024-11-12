@@ -1,0 +1,258 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>localdar</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Map Local Diversity Area Relationships
+</h2>
+
+<h3>Description</h3>
+
+<p>Estimates and maps local diversity-area relationships.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">localdar(mippp, mippp.sp = NULL, nx = NULL, ny = NULL, mimark = NULL, idar = "isar", 
+            buffer = 0, bfw = NULL, r, cross.idar = FALSE, tree = NULL, traits = NULL, 
+            namesmark = NULL, correct.trait.na = TRUE, correct.trait = "mean",
+            correct.phylo="mean")
+fdismap(comm, traits)
+raoDmap(comm, phy = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>mippp</code></td>
+<td>
+<p>A multitype (a.k.a. multivariate) marked point pattern. An object with the ppp format of <span class="pkg">spatstat</span>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mippp.sp</code></td>
+<td>
+<p>Univariate point pattern of the focal species. An object with the ppp format of <span class="pkg">spatstat</span>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nx</code></td>
+<td>
+<p>Number of points of the grid along the x axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ny</code></td>
+<td>
+<p>Number of points of the grid along the y axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mimark</code></td>
+<td>
+<p>Character. Name of the focal species in the multitype <code>mippp</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>idar</code></td>
+<td>
+<p>Character. The name of the idar function to be computed. Either "isar", "ipsvar", "ipsrar", "ipsear", "ipscar", "icwmar", "icwmar.O",  "iraodar"or "imntdar"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>buffer</code></td>
+<td>
+<p>One of "adapt", i.e., compute an adaptive buffer, or a number indicating the width of a fixed buffer area around the plot border</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bfw</code></td>
+<td>
+<p>An owin object indicating the limits of the buffer area.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>Vector of distances to compute IDAR(r) functions</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cross.idar</code></td>
+<td>
+<p>Logical. If <code>TRUE</code>, the focal pattern will be excluded form the community being measured. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tree</code></td>
+<td>
+<p>A phylogenetic tree in <code>phylo</code> format (<span class="pkg">ape</span>) or a phylogenetic covariance matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>traits</code></td>
+<td>
+<p>A data.frame of traits, or a distance matrix among species (in <code>dist</code> or <code>matrix</code> format) computed on a data.frame of traits.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>namesmark</code></td>
+<td>
+<p>Character. If the marks in <code>mippp</code> are within a <code>data.frame</code>, the name of the column with the species names</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>correct.trait.na</code></td>
+<td>
+<p>Logical flag indicating whether <code>NA</code> values in the matrix of traits should be "corrected": NA values will be assigned the mean trait value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>correct.trait</code></td>
+<td>
+<p>Character. Either <code>"mean"</code> or <code>"exclude"</code>. Species missing in the data.frame of traits will be assigned mean trait values or  will be excluded from the analysis, respectively. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>correct.phylo</code></td>
+<td>
+<p>Character. Either <code>"mean"</code> meaning <em>"include missing species in the tree with a constant mean phylogenetic covariance"</em> or <code>"exclude"</code>, meaning <em>"exclude missing species in the tree from the analysis"</em> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comm</code></td>
+<td>
+<p>A comunity data table (sites x species).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phy</code></td>
+<td>
+<p>A comunity data table (sites x species).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>localdar</code> estimates any of the individual diversity area indices (isar, ipsvar,ipsrar, ipsear, ipscar, icwmar, icwmar.O,  iraodar or imntdar) at specific locations, such as the locations of trees of a "focal" point partern or at some grid of points (i.e., "mapping" local diversity area relationships). If no predefined focal point  pattern is provided (by the arguments <code>mippp.sp</code> or <code>mimark</code>), <code>localdar</code> will, by default, estimate the selected idar function in a 30 x 30 point-grid and return a map (the size of the grid can be modified by the arguments <code>nx</code> and <code>ny</code>).
+<code>fdismap</code> and <code>raoDmap</code> are internal functions used by <code>localdar</code> to get the individual componentes of iraoD and FDis, instead of the averages obtained by <code>envelope4idar</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>If a focal point patternn has been provided by the arguments <code>mippp.sp</code> or <code>mimark</code>, <code>localdar</code> will return a list of marked point patterns (as long as the vector <code>r</code>) with the marks showing the estimation of the selected diversity index for the local community defined by a circle of radius <em>r</em> around each of the points of the focal pattern. If no focal point pattern is provided, it will return a list of maps (as long as the vector <code>r</code>)  each with the format im of <span class="pkg">spatstat</span>, each pixel showing the estimation of the selected diversity index for the local community defined by a circle of radius <em>r</em> around the pixel center.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Marcelino de la Cruz <a href="mailto:marcelino.delacruz@urjc.es">marcelino.delacruz@urjc.es</a></p>
+
+
+<h3>See Also</h3>
+
+ <p><code>envelope4idar</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Map of local species area-relationship [ISAR(r)] in San Francisco plot at r=5 and r= 6 m
+  data(SF)
+  data(SFphylotree)
+  data(SFtraits)
+
+  isarSF &lt;- localdar(SF, r=5:6, namesmark="species")
+  
+  isarSF
+  
+  plot(isarSF[[1]])
+  
+  
+# Map of local species area-relationship [ISAR(r)] in San Francisco plot at r=5 and r= 6 m,
+# with an adaptive buffer
+
+isarSF &lt;- localdar(SF, r=5:6, namesmark="species",buffer="adapt")
+
+
+
+# Map of local species area-relationship [ISAR(r)] in lansing woods at different radii,
+# with an fixed  buffer (only for rectangular windows).
+
+data(lansing)
+lansing.bfw&lt;- owin(c(0.2,0.8),c(0.2,0.8))
+lansing.lsar.bf&lt;-localdar(lansing, r=seq(0.05,0.2,by=0.05), bfw=lansing.bfw)
+
+
+# Map of local species area-relationship [ISAR(r)] in San Francisco plot at r=5 and r= 6 m,
+# with a buffer of 7 m within plot limits
+
+  mibfw&lt;- erosion(SF$win, r=7)
+
+ isarSF &lt;- localdar(SF, r=5:6, namesmark="species", bfw=mibfw)
+
+
+
+# Estimate local species area-relationship [ISAR(r)] in the local communities 
+#  in circles with radius  r=5 and r= 6 m around the individuals of sp_44
+
+  sp_44_sar &lt;- localdar(SF, r=5:6, namesmark="species", mimark="sp_44")
+  sp_44_sar
+  plot(sp_44_sar[[1]])
+  sp_44_sar[[1]]$marks
+  
+
+
+# Estimate local species area-relationship [ISAR(r)] in the local communities 
+#  in circles with radius  r=5 and r= 6 m around the individuals of sp_44
+# EXCLUDING the focal species from species counts.
+
+  sp_44_sar &lt;- localdar(SF, r=5:6, namesmark="species", mimark="sp_44", cross.idar=TRUE)
+  sp_44_sar
+  plot(sp_44_sar[[1]])
+  sp_44_sar[[1]]$marks
+ 
+  
+  
+
+
+# Map and estimation of local Phylogenetic Species Variety
+local_psvar&lt;-localdar(SF, r=5:6, idar="ipsvar", tree=SFphylotree, namesmark="species")
+sp44_psvar &lt;- localdar(SF, r=5:6, idar="ipsvar", tree=SFphylotree, namesmark="species",
+                                    mimark="sp_44", buffer="adapt")
+
+# Map and estimation of local Functional Dispersion
+local_fdar &lt;- localdar(SF, nx=50, ny=25, r=5:6,  idar="ifdar", traits=SFtraits,
+                                 namesmark="species", correct.trait.na=TRUE)
+sp44_fdar &lt;- localdar(SF, nx=50, ny=25, r=5:6,  idar="ifdar", traits=SFtraits,
+                                  namesmark="species", mimark="sp_44", correct.trait.na=TRUE)
+
+
+# Map of a local community weighted mean of wood density
+# first, put the wood desnsity data as a named vector
+ wood.density.vec&lt;-unlist(SFtraits[,  "wood.density", drop=FALSE])
+    names(wood.density.vec)&lt;- rownames(SFtraits)
+    
+local_cwd &lt;- localdar(SF, r=5:6,  idar="icwmar", traits=wood.density.vec,
+                                  namesmark="species", correct.trait.na=TRUE)
+local_O.cwm &lt;-localdar(SF, r=5:6, idar="icwmar.O", traits=wood.density.vec, 
+                                     namesmark="species", correct.trait.na=TRUE)
+
+# Map of Rao's phylogenetic diversity
+local_rao&lt;- localdar(SF,  r=5:6, idar="iraodar",  tree=SFphylotree, namesmark="species")
+local_O.rao &lt;- localdar(SF, r=5:6, idar="iraodar.O",  tree=SFphylotree, namesmark="species")
+
+# Map of local mean nearest taxon distance 
+local_mntd &lt;- localdar(SF, r=5:6, idar="imntdar",  tree=SFphylotree, namesmark="species")
+
+
+</code></pre>
+
+
+</div>

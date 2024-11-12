@@ -1,0 +1,115 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>gen.weight</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generate Weights</h2>
+
+<h3>Description</h3>
+
+<p>This function generates a set of weights based on a set of theta values to be used in the functions <code>est_score</code>
+and <code>sx2_fit</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">gen.weight(n = 41, dist = "norm", mu = 0, sigma = 1, l = -4, u = 4, theta)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>An integer identifying the number of theta (or node) values for which weights are generated. Default is 41.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist</code></td>
+<td>
+<p>A character string specifying a probability distribution from which the weights are generated. Available distributions are
+"norm" for a normal distribution, "unif" for a uniform distribution, and "emp" for an empirical distribution.
+When <code>dist = "norm"</code>, either <code>n</code> or <code>theta</code> can be specified, when <code>dist = "unif"</code>,
+only <code>n</code> can be used, and when <code>dist = "emp"</code>, only <code>theta</code> can be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu, sigma</code></td>
+<td>
+<p>A mean and standard deviation of a normal distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>l, u</code></td>
+<td>
+<p>Lower and upper limits of a uniform distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta</code></td>
+<td>
+<p>A vector of empirical theta (or node) values for which weights are generated.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>When the argument <code>theta</code> is missing, <em>n</em> weights can be generated from either the normal distribution or the uniform distribution.
+Note that if <code>dist = "norm"</code>, gaussian quadrature points and weights from the normal distribution are generated. See
+<code>gauss.quad.prob()</code> in the <span class="pkg">statmod</span> package for more details.
+</p>
+<p>When the argument <code>theta</code> is not missing, the weights corresponding to the provided theta values are generated. Specifically, if
+<code>dist = "norm"</code>, normalized weights from the normal distribution are returned. If <code>dist = "emp"</code>, every specified theta value has the equal
+values of normalized weights.
+</p>
+
+
+<h3>Value</h3>
+
+<p>This function returns a data frame with two columns, where the first column has theta values (nodes) and the second column provides weights.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Hwanggyu Lim <a href="mailto:hglim83@gmail.com">hglim83@gmail.com</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>est_score</code>, <code>sx2_fit</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## example 1
+## generate 41 gaussian quadrature points and weights of normal distribution
+gen.weight(n = 41, dist = "norm", mu = 0, sigma = 1)
+
+## example 2
+## generate 41 theta values and weights from the uniform normal distribution,
+## given the mininum value of -4 and the maximum value of 4
+gen.weight(n = 41, dist = "unif", l = -4, u = 4)
+
+## example 3
+## generate the normalized weights from the standardized normal distribution,
+## given a set of theta values
+theta &lt;- seq(-4, 4, by = 0.1)
+gen.weight(dist = "norm", mu = 0, sigma = 1, theta = theta)
+
+## example 4
+## generate the same values of normalized weights for the theta values that are
+## randomly sampled from the standardized normal distribution
+theta &lt;- rnorm(100)
+gen.weight(dist = "emp", theta = theta)
+
+</code></pre>
+
+
+</div>

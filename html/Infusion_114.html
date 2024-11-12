@@ -1,0 +1,208 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>reparam_fit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Conversion to new parameter spaces
+</h2>
+
+<h3>Description</h3>
+
+<p>Functions to facilitate inferences using alternative parametrizations of the same model, reusing an existing reference table. <code>reparam_reftable</code> produces a reference table in the new parametrization.  <code>reparam_fit</code> does the same internally, and runs <code>infer_SLik_joint</code> and <code>MSL</code> on the new reference table. 
+</p>
+<p><code>reparam_fit</code> is <b>experimental</b> and may have various limitations. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">reparam_fit(fitobject, to, reparamfn, 
+             LOWER=NULL, UPPER=NULL, nbCluster="max", 
+             constr_crits = get_from(fitobject, "constr_crits"),
+             raw=FALSE, 
+             
+             reftable_attrs=NULL,
+             ...)
+reparam_reftable(fitobject, to, reparamfn, 
+             LOWER=NULL, UPPER=NULL, raw=FALSE, reftable_attrs=NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fitobject</code></td>
+<td>
+
+<p>an object of class <code>SLik_j</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>to</code></td>
+<td>
+
+<p>Character vector: names of all parameters in the new parametrization.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reparamfn</code></td>
+<td>
+
+<p>A function which can convert a data frame/matrix/vector of “old” parameters to an object of the same class in the new parametrization. It must have two arguments: its first argument must hold the “old” data frame/matrix/vector; and the second argument is either <code>to</code> (holding the <code>to</code> argument given to <code>reparam_reftable</code>) if <code>reparamfn</code> needs this information, or <code>...</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LOWER, UPPER</code></td>
+<td>
+
+<p>Optional named vectors of bounds. They may be incomplete, containing values only for new parameters, and not necessarily for all of them (missing information is deduced from the observed ranges in the reference table).  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nbCluster</code></td>
+<td>
+
+<p>Passed to <code>infer_SLik_joint</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constr_crits</code></td>
+<td>
+
+<p><code>constr_crits</code> applicable in the new parametrization. The suitability of such constraints is checked on the transformed reference table. When this argument is ignored, its default value is taken from the input object and therefore refers to the old parametrization. The check may then highlight the need for providing constraints redefined in reference to the new parametrization.   
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>raw</code></td>
+<td>
+<p>Boolean; if TRUE, the object is re-built starting from the raw 
+reference table. In particular the projections are re-computed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reftable_attrs</code></td>
+<td>
+
+<p>A <code>list</code> whose elements are set as attributes to the re-parametrized reference table (see Value in <code>add_reftable</code>). Elements not provided by this argument will be copied from the input reference table. A typical use is to provide as <code>Simulate</code> function in the new parametrization (see Examples). 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Passed to <code>MSL</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>reparam_reftable</code> returns a reference table with attributes, suitable as input for <code>infer_SLik_joint</code>.
+<code>reparam_fit</code> returns the return value of an <code>MSL</code> call.
+</p>
+<p>The information about projections retained in these objects come from original <code>fitobject</code>.  
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+
+## Toy simulation function 
+# (inspired by elementary population-genetic scenario)
+
+hezsim &lt;- function(logNe=parvec["logNe"],
+                   logmu=parvec["logmu"],parvec) {
+  Ne &lt;- 10^logNe
+  mu &lt;- 10^logmu
+  Es &lt;- Ne*mu
+  Vs &lt;- 1/log(1+Ne) 
+  genom_s &lt;- rgamma(5, shape=Es/Vs,scale=Vs) # 5 summary statistics
+  names(genom_s) &lt;- paste0("stat",seq(5))
+  genom_s
+} 
+
+
+{ ## Analysis with 'canonical' parameters
+  #
+  ## simulated data, standing for the actual data to be analyzed:  
+  set.seed(123)
+  Sobs &lt;- hezsim(logNe=4,logmu=-4) 
+  #
+  parsp &lt;- init_reftable(lower=c(logNe=1,logmu=-5), 
+                         upper=c(logNe=6,logmu=-2))
+  init_reft_size &lt;- nrow(parsp)
+  simuls &lt;- add_reftable(Simulate=hezsim, parsTable=parsp)
+  
+  { 
+    plogNe &lt;- project("logNe", data=simuls, stats=paste0("stat",seq(5)))
+    plogmu &lt;- project("logmu", data=simuls, stats=paste0("stat",seq(5)))
+
+    dprojectors &lt;- list(plogNe=plogNe,plogmu=plogmu)
+    
+    projSimuls &lt;- project(simuls,projectors=dprojectors,verbose=FALSE)
+    projSobs &lt;- project(Sobs,projectors=dprojectors)
+  }
+  
+  { ## Estimation: 
+    ddensv &lt;- infer_SLik_joint(projSimuls,stat.obs=projSobs)
+    dslik_j &lt;- MSL(ddensv, eval_RMSEs=FALSE) ## find the maximum of the log-likelihood surface
+    refined_dslik_j &lt;- refine(dslik_j, eval_RMSEs=FALSE, CIs=FALSE)
+  }
+}
+
+{  ## Reparametrization to composite parameters
+
+  locreparamfn &lt;- function(object, ...) {
+    logTh &lt;- object[["logmu"]]+object[["logNe"]]
+    if (inherits(object,"data.frame")) { # *data.frame case always needed.*
+      data.frame(logTh=logTh,
+                 logNe=object[["logNe"]])
+    } else if (is.matrix(object)) {
+      cbind(logTh=logTh,
+            logNe=object[["logNe"]])
+    } else c(logTh=logTh,
+             logNe=object[["logNe"]])
+  }
+  
+  { ## without re-projection
+     rps &lt;- reparam_fit(refined_dslik_j, to=c("logTh","logNe"),
+                      reparamfn = locreparamfn)
+     plot(rps)
+  }
+
+  
+  { ## with re-projection [necessary to allow refine()'s]
+  
+    # For refine() a new simulation will be needed, with new input parameters: 
+    hezsim2 &lt;- function(logNe=parvec["logNe"],logTh=parvec["logTh"],parvec) {
+      hezsim(logNe=logNe,logmu=logTh-logNe)
+    } 
+    
+    rps &lt;- reparam_fit(refined_dslik_j, to=c("logTh","logNe"),
+                       reparamfn = locreparamfn, 
+                       raw=TRUE,                   # to allow re-projection
+                       reftable_attrs=list(Simulate=hezsim2))
+    plot(rps)
+    refine(rps)
+
+  }
+  
+}
+
+## End(Not run)
+</code></pre>
+
+
+</div>

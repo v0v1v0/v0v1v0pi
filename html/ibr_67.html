@@ -1,0 +1,187 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>npregress</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Local polynomials smoothing</h2>
+
+<h3>Description</h3>
+
+<p>Predicted values from a local polynomials of degree less than 2.  <br>
+Missing values are not allowed.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">npregress(x, y, criterion="rmse", bandwidth=NULL,kernel="g",
+             control.par=list(), cv.options=list())</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A numeric vector of explanatory variable of length <em>n</em>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>A numeric vector of variable to be explained of length <em>n</em>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>criterion</code></td>
+<td>
+<p>Character string. If the bandwidth 
+(<code>bandwidth</code>) is missing or 
+<code>NULL</code> the number of iterations is chosen using
+<code>criterion</code>. The criterion available is (cross-validated) rmse
+(<code>"rmse"</code>) and mean (relative) absolute error.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bandwidth</code></td>
+<td>
+<p>The kernel bandwidth smoothing parameter (a numeric vector of either length 1).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kernel</code></td>
+<td>
+<p>Character string which allows to choose between gaussian kernel
+(<code>"g"</code>), Epanechnikov (<code>"e"</code>), uniform (<code>"u"</code>),
+quartic (<code>"q"</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control.par</code></td>
+<td>
+<p>A named list that control optional parameters. The
+two components are <code>bandwidth</code> for compatibility with <code>ibr</code>
+arguments and <code>degree</code> which controls the degree of the local
+polynomial regression. If argument <code>bandwidth</code> is not null or missing, its
+value is used instead <code>control.par$bandwidth</code>. <code>degree</code> must
+be smaller than 2. For (gaussian binned) local polynomial see
+<code>locpoly</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cv.options</code></td>
+<td>
+<p>A named list which controls the way to do cross
+validation with component <code>gridbw</code>,
+<code>ntest</code>, <code>ntrain</code>, <code>Kfold</code>, <code>type</code>,
+<code>seed</code>, <code>method</code> and <code>npermut</code>. <code>gridbw</code> is
+numeric vector which contains the search grid for optimal bandwidth  (default
+to <code>1/n*(1+1/n)^(0:kmax)</code>, with <code>kmax=floor(log(n*diff(range(x))/3)/log(1+1/n))</code>). <code>ntest</code> is the number of observations in test set and
+<code>ntrain</code> is the number of observations in training set. Actually,
+only one of these is needed the other can be <code>NULL</code> or missing. <code>Kfold</code> a boolean or an integer. If
+<code>Kfold</code> is <code>TRUE</code> then the number of fold is deduced from
+<code>ntest</code> (or <code>ntrain</code>).  <code>type</code> is a character string in
+<code>random</code>,<code>timeseries</code>,<code>consecutive</code>, <code>interleaved</code>
+and give the type of segments.  <code>seed</code> controls the seed of
+random generator. <code>npermut</code> is the number of random draws.   If
+<code>cv.options</code> is <code>list()</code>, then component <code>ntest</code> is set to
+<code>1</code>, <code>type</code> is consecutive, <code>Kfold</code> is <code>TRUE</code>, and
+the other components are <code>NULL</code>, which leads to leave-one-out
+cross-validation.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns an object of class <code>npregress</code> which is a list including:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>bandwidth</code></td>
+<td>
+<p>The kernel bandwidth smoothing parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>residuals</code></td>
+<td>
+<p>Vector of residuals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitted</code></td>
+<td>
+<p>Vector of fitted values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>The effective degree of freedom of the smoother.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>A list containing four components: <code>x</code> contains the
+initial explanatory variables, <code>y</code> contains the
+initial dependant variables, 
+<code>criterion</code> contains the chosen criterion, <code>kernel</code> the
+kernel and <code>degree</code> the chosen degree</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>criteria</code></td>
+<td>
+<p>either a named list containing the bandwidth search
+grid and all the criteria (<code>rmse</code> and <code>mae</code>) evaluated on the
+grid <code>gridbw</code>. If the bandwidth
+<code>bandwidth</code> is given by the user <code>NULL</code> is returned</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>See <code>locpoly</code> for fast binned implementation
+over an equally-spaced grid of local polynomial. See <code>ibr</code>
+for univariate and <strong>multivariate</strong> smoothing. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Pierre-Andre Cornillon, Nicolas Hengartner  and Eric Matzner-Lober.</p>
+
+
+<h3>References</h3>
+
+<p>Wand, M. P. and Jones, M. C. (1995). <em>Kernel Smoothing</em>. Chapman and Hall, London.</p>
+
+
+<h3>See Also</h3>
+
+<p><code>predict.npregress</code>,
+<code>summary.npregress</code>,
+<code>locpoly</code>, <code>ibr</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">f &lt;- function(x){sin(5*pi*x)}
+n &lt;- 100
+x &lt;- runif(n)
+z &lt;- f(x)
+sigma2 &lt;- 0.05*var(z)
+erreur &lt;- rnorm(n,0,sqrt(sigma2))
+y &lt;- z+erreur
+res &lt;- npregress(x,y,bandwidth=0.02)
+summary(res)
+ord &lt;- order(x)
+plot(x,y)
+lines(x[ord],predict(res)[ord])
+</code></pre>
+
+
+</div>

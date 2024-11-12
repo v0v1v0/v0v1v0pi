@@ -1,0 +1,93 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>gg_injprev_polar</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot polar area diagrams representing players' prevalence</h2>
+
+<h3>Description</h3>
+
+<p>Plot the proportions of available and injured players in the cohort, on a
+monthly or season basis, by a polar area diagram. Further information on the
+type of injury may be specified so that the injured players proportions are
+disaggregated and reported according to this variable.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">gg_injprev_polar(
+  injd,
+  by = c("monthly", "season"),
+  var_type_injury = NULL,
+  title = "Polar area diagram\ninjured and available (healthy) players"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>injd</code></td>
+<td>
+<p>Prepared data, an <code>injd</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>by</code></td>
+<td>
+<p>Character, one of "monthly" or "season", specifying the periodicity
+according to which to calculate the proportions of available and injured
+players/athletes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var_type_injury</code></td>
+<td>
+<p>Character specifying the name of the column on the
+basis of which to classify the injuries and calculate proportions of the
+injured players. It should refer to a (categorical) variable that describes
+the "type of injury". Defaults to <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>title</code></td>
+<td>
+<p>Text for the main title.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A ggplot object (to which optionally more layers can be added).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+df_exposures &lt;- prepare_exp(raw_df_exposures, player = "player_name",
+                            date = "year", time_expo = "minutes_played")
+df_injuries  &lt;- prepare_inj(raw_df_injuries, player = "player_name",
+                            date_injured = "from", date_recovered = "until")
+injd         &lt;- prepare_all(data_exposures = df_exposures,
+                            data_injuries  = df_injuries,
+                            exp_unit = "matches_minutes")
+
+
+
+library(ggplot2)
+our_palette &lt;- c("seagreen3", "red3", rev(RColorBrewer::brewer.pal(5, "Reds")))
+gg_injprev_polar(injd, by = "monthly", var_type_injury = "injury_type",
+            title = "Polar area diagram\ninjured and available (healthy) players per month") +
+  scale_fill_manual(values = our_palette)
+gg_injprev_polar(injd, by = "monthly",
+            title = "Polar area diagram\ninjured and available (healthy) players per month") +
+  scale_fill_manual(values = our_palette)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,296 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>blob.extract</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+
+Extract Blob Region from Image (Matrix)
+</h2>
+
+<h3>Description</h3>
+
+
+<p>Find the predominant blob region in an image using a Laplacian of Gaussian (LoG) blob detection algorithm.  Blob points are found using a connected component algorithm (see Details)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">blob.extract(img, blob.point, win.size, gaus, lap)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>img</code></td>
+<td>
+
+
+<p>Matrix with numeric values representing pixel color intensities
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>blob.point</code></td>
+<td>
+
+
+<p>x,y locations of a point that is contained within the sought after blob region.  Normally the image's max (or min) value location.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>win.size</code></td>
+<td>
+
+
+<p>Window size used in connected component algorithm (see Details).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gaus</code></td>
+<td>
+
+
+<p>Low pass Gaussian mask that has same dimensions as img
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lap</code></td>
+<td>
+
+
+<p>Optional high pass Laplacian filter of same dimensions as img.  Defaults to standard 5-point stencil.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<p>The LoG algorithm first applies a Gaussian then a Laplacian operator to the image.  The resulting image is binarized (values either 0 or 1) depending on sign of values in the LoG Image.
+</p>
+<p>The blob x,y locations surrounding the <code>blob.point</code> and are found via a connected component algorithm.  This algorithm is designed for speed and may miss x,y locations if the blob is highly irregular or concave.  Adjusting the <code>win.size</code> can yield more accurate blob locations but has a slower run time.
+</p>
+
+
+<h3>Value</h3>
+
+
+
+
+
+
+<p>List of length 2 where
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>xy.coords</code></td>
+<td>
+<p>Matrix of x,y locations of blob in image</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bin.image</code></td>
+<td>
+<p>Image (matrix) of same dimension of <code>img</code> that gives the binarized result from the LoG Blob Detection</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+
+<p>Alex J.C. Witsil
+</p>
+
+
+<h3>See Also</h3>
+
+
+<p><code>build.gaus</code>
+<code>filt3d</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">############
+### EG 1 ###
+############
+## example with synthetic data
+
+## create an image that is a simple gaussian
+img &lt;- build.gaus(100,100,sig.x=2,sig.y=10,x.mid=80,y.mid=60)
+
+## find the where the maximum value is
+img.max &lt;- which(img==max(img),arr.ind=TRUE)
+
+## define a sigma for the low pass filter
+sig=5
+
+## define the low pass filter as another gaussian
+lp.filt &lt;- build.gaus(nrow(img),ncol(img),sig.x=sig)
+
+## define a window size for the connected component algorithm
+win.size=0.05
+
+## perform the blob detection
+blob &lt;- blob.extract(img=img, blob.point=img.max,win.size=win.size,gaus=lp.filt)
+
+####################
+### PLOTTING EG1 ###
+####################
+
+## define x and y grid lines
+grid.x &lt;- 1:nrow(img)
+grid.y &lt;- 1:ncol(img)
+
+dev.new()
+close.screen(all.screens=TRUE)
+split.screen(c(1,3))
+
+screen(1)
+image(grid.x,grid.y,img,main='Image')
+
+screen(2)
+image(grid.x,grid.y,blob$bin.image,col=gray.colors(2),main='Binarized LoG Image')
+
+screen(3)
+image(grid.x,grid.y,img,main='Img with Blob Detected')
+points(blob$xy.coords,col='black',pch=16,cex=1)
+
+## close the screens
+close.screen(all.screens=TRUE)
+
+
+############
+### EG 2 ###
+############
+## example with volcano image data.
+## This RBG image shows ash erupting above the crater, which is cropped out
+
+data(sakurajima)
+
+## crop accroding to these corner values
+xleft = 1
+xright = 188
+ybottom = 1
+ytop = 396
+
+## crop the image using crop.image
+cropped &lt;- crop.image(sakurajima, xleft, ybottom, xright, ytop)
+
+## redefine the crop image
+img &lt;- cropped$img.crop
+
+######################
+### PRE PROCESSING ###
+######################
+
+## separate the image into red, green, and blue images
+r.img &lt;- img[,,1]
+g.img &lt;- img[,,2]
+b.img &lt;- img[,,3]
+
+## remove the mean
+r.img &lt;- r.img-mean(r.img)
+g.img &lt;- g.img-mean(g.img)
+b.img &lt;- b.img-mean(b.img)
+
+## calculate the the plane trend...
+r.img.trend &lt;- fit3d(r.img)
+g.img.trend &lt;- fit3d(g.img)
+b.img.trend &lt;- fit3d(b.img)
+
+## remove the trend
+r.img.dtrend &lt;- r.img-r.img.trend
+g.img.dtrend &lt;- g.img-g.img.trend
+b.img.dtrend &lt;- b.img-b.img.trend
+
+
+################################
+### SET UP SOME FILTER MASKS ###
+################################
+
+## define a sigma for the LP Gaussian Filter
+gaus.sig=15
+
+## build the Gaussian filter
+gaus &lt;- build.gaus(nrow(img),ncol(img),gaus.sig)
+
+## find the extreme (absolute valued maximum) value of each RGB channel
+blob.r.point &lt;- which(abs(r.img.dtrend)==max(abs(r.img.dtrend)),arr.ind=TRUE)
+blob.g.point &lt;- which(abs(g.img.dtrend)==max(abs(g.img.dtrend)),arr.ind=TRUE)
+blob.b.point &lt;- which(abs(b.img.dtrend)==max(abs(b.img.dtrend)),arr.ind=TRUE)
+
+## set a window size to be used in the connected component algorithm
+win.size = 0.05
+
+## extract the blob xy locations
+blob.r &lt;- blob.extract(r.img.dtrend,blob.r.point,win.size,gaus)
+blob.g &lt;- blob.extract(g.img.dtrend,blob.r.point,win.size,gaus)
+blob.b &lt;- blob.extract(b.img.dtrend,blob.r.point,win.size,gaus)
+
+
+####################
+### PLOTTING EG2 ###
+####################
+
+## note the blob points (blob$xy.coords) must be adjusted according to
+## where the origin (0,0) is located in R plots image plots
+blob.coords.r  &lt;- blob.r$xy.coords
+blob.coords.r[,1] &lt;- blob.r$xy.coords[,2]
+blob.coords.r[,2] &lt;- (blob.r$xy.coords[,1]-nrow(r.img))*-1
+
+blob.coords.g  &lt;- blob.g$xy.coords
+blob.coords.g[,1] &lt;- blob.g$xy.coords[,2]
+blob.coords.g[,2] &lt;- (blob.g$xy.coords[,1]-nrow(g.img))*-1
+
+blob.coords.b  &lt;- blob.b$xy.coords
+blob.coords.b[,1] &lt;- blob.b$xy.coords[,2]
+blob.coords.b[,2] &lt;- (blob.b$xy.coords[,1]-nrow(b.img))*-1
+
+
+## save the users options
+mar.usr=par()$mar
+
+dev.new()
+close.screen(all.screen=TRUE)
+par(mar=c(0,0,2,0))
+split.screen(c(1,2))
+split.screen(c(3,1),screen=2)
+
+screen(1)
+image2(sakurajima,asp=1,axes=FALSE)
+rect(ybottom,nrow(sakurajima)-xleft,ytop,nrow(sakurajima)-xright,lwd=3,border='white',lty=3)
+title('Original Image',line=0,font=2,col='white',cex=2,)
+
+screen(3)
+image2(r.img,asp=1,axes=FALSE)
+points(blob.coords.r,col=rgb(1,0,0,alpha=0.05),pch=16,cex=0.3)
+title('Red Channel',line=0,font=2,col='red',cex=2)
+
+screen(4)
+image2(g.img,asp=1,axes=FALSE)
+points(blob.coords.g,col=rgb(0,1,0,alpha=0.05),pch=16,cex=0.3)
+title('Green Channel',line=0,font=2,col='darkgreen',cex=2)
+
+screen(5)
+image2(b.img,asp=1,axes=FALSE)
+points(blob.coords.b,col=rgb(0,0,1,alpha=0.05),pch=16,cex=0.3)
+title('Blue Channel',line=0,font=2,col='darkblue',cex=2)
+
+## return the users original margins and close screens
+par(mar=mar.usr)
+close.screen(all.screens=TRUE)
+
+</code></pre>
+
+
+</div>

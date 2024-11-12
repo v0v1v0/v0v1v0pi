@@ -1,0 +1,258 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bb.zihmle</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Maximum likelihood estimate for zero-inflated or hurdle beta binomial distributions.</h2>
+
+<h3>Description</h3>
+
+<p>Calculate maximum likelihood estimate and the corresponding log likelihood value for zero-inflated or hurdle
+beta binomial, beta negative binomial, negative binomial and Poisson distributions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">bb.zihmle(x, n, alpha1, alpha2, type = c("zi", "h"), lowerbound = 0.01,
+  upperbound = 10000)
+
+bnb.zihmle(x, r, alpha1, alpha2, type = c("zi", "h"),
+  lowerbound = 0.01, upperbound = 10000)
+
+nb.zihmle(x, r, p, type = c("zi", "h"), lowerbound = 0.01,
+  upperbound = 10000)
+
+poisson.zihmle(x, type = c("zi", "h"), lowerbound = 0.01,
+  upperbound = 10000)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A vector of count data. Should be non-negative integers.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>An initial value of the number of trials. Must be a positive number, but not required to be an integer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha1</code></td>
+<td>
+<p>An initial value for the first shape parameter of beta distribution. Should be a positive number.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha2</code></td>
+<td>
+<p>An initial value for the second shape parameter of beta distribution. Should be a positive number.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>The type of distribution used to calculate the sample estimate, where 'zi' and 'h' stand for zero-inflated
+and hurdle distributions respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lowerbound</code></td>
+<td>
+<p>A lower searching bound used in the optimization of likelihood function. Should be a small positive number.
+The default is 1e-2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upperbound</code></td>
+<td>
+<p>An upper searching bound used in the optimization of likelihood function. Should be a large positive number.
+The default is 1e4.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>An initial value of the number of success before which m failures are observed, where m is the element of x.
+Must be a positive number, but not required to be an integer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>An initial value of the probability of success, should be a positive value within (0,1).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>By setting <code>type='zi'</code>, <code>bb.zihmle</code>, <code>bnb.zihmle</code>, <code>nb.zihmle</code> and <code>poisson.zihmle</code> calculate the
+maximum likelihood estimate of zero-inflated beta binomial, beta negative binomial, negative binomial and Poisson
+distributions, respectively.
+</p>
+<p>By setting <code>type='h'</code>, <code>bb.zihmle</code>, <code>bnb.zihmle</code>, <code>nb.zihmle</code> and <code>poisson.zihmle</code> calculate the
+maximum likelihood estimate of hurdle beta binomial, beta negative binomial, negative binomial and Poisson
+distributions, respectively.
+</p>
+<p>Please NOTE that the arguments in the four functions are NOT CHECKED AT ALL! The user must be aware of their inputs to avoid
+getting suspicious results.
+</p>
+<p>For zero-inflated models, zeros occurred by either sampling process or specific structure of data with the structural parameter
+<code class="reqn">0&lt;\phi&lt;1</code>. The density function for a zero-inflated model is
+</p>
+<p><code class="reqn">P_{zi}(X=k)=\phi 1_{k=0}+(1-\phi)P(X=k)</code>,
+</p>
+<p>where <code class="reqn">P(X=k)</code> is the probability under standard distributions.
+</p>
+<p>Aldirawi et al. (2019) proposed an estimating procedure for zero-inflated models by optimizing over a reparametrization of
+the likelihood function where <code class="reqn">\phi</code> and the rest unknown parameters are separable. When <code class="reqn">X</code> comes from a
+zero-inflated distribution, the maximum likelihood estimate of parameters except for <code class="reqn">\phi</code> are obtained by minimizing
+the truncated version of negative log likelihood function. However, in the zero-deflated case, <code class="reqn">\phi=0</code> and the sample
+estimate of other parameters are identical to those for its corresponding standard distributions. Meanwhile, an warning
+message is shown on the screen such that 'cannot obtain mle with the current model type, the output estimate is derived from
+general ... distribution'.
+</p>
+<p>For hurdle models, all zeros occurred purely by the structure of data with the structural parameter <code class="reqn">0&lt;\phi&lt;1</code>.
+The density function for a hurdle model is
+</p>
+<p><code class="reqn">P_{h}(X=k)=\phi 1_{k=0}+(1-\phi)P_{tr}(X=k)</code>,
+</p>
+<p>where <code class="reqn">P_{tr}(X=k)</code> is the truncated probability under standard distributions, where <code class="reqn">P_{tr}(X=0)=0</code> and
+<code class="reqn">P_{tr}(X=k)=P(X=k)/(1-P(X=0))</code>. Since <code class="reqn">\phi</code> and other unknown parameters are separable in the joint likelihood
+function, <code class="reqn">\phi</code> can be estimated by a value with respect to the number of positive samples. The sample estimate of
+other parameters can be obtained by the same procedure for zero-inflated model.
+</p>
+<p>A warning message may also occur when the algorithm of <code>optim</code> does not converge and the resulting estimates are not
+valid. In this case, the results from the corresponding general distribution are output instead.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A row vector containing the maximum likelihood estimate of unknown parameters and the corresponding value of log likelihood.
+</p>
+<p>With <code>bb.zihmle</code>, the following values are returned:
+</p>
+
+<ul>
+<li>
+<p>n: the maximum likelihood estimate of n.
+</p>
+</li>
+<li>
+<p>alpha1: the maximum likelihood estimate of alpha1.
+</p>
+</li>
+<li>
+<p>alpha2: the maximum likelihood estimate of alpha2.
+</p>
+</li>
+<li>
+<p>phi: the maximum likelihood estimate of <code class="reqn">\phi</code>.
+</p>
+</li>
+<li>
+<p>loglik: the value of log likelihood with maximum likelihood estimates plugged-in.
+</p>
+</li>
+</ul>
+<p>With <code>bnb.zihmle</code>, the following values are returned:
+</p>
+
+<ul>
+<li>
+<p>r: the maximum likelihood estimate of r.
+</p>
+</li>
+<li>
+<p>alpha1: the maximum likelihood estimate of alpha1.
+</p>
+</li>
+<li>
+<p>alpha2: the maximum likelihood estimate of alpha2.
+</p>
+</li>
+<li>
+<p>phi: the maximum likelihood estimate of <code class="reqn">\phi</code>.
+</p>
+</li>
+<li>
+<p>loglik: the value of log likelihood with maximum likelihood estimates plugged-in.
+</p>
+</li>
+</ul>
+<p>With <code>nb.zihmle</code>, the following values are returned:
+</p>
+
+<ul>
+<li>
+<p>r: the maximum likelihood estimate of r.
+</p>
+</li>
+<li>
+<p>p: the maximum likelihood estimate of p.
+</p>
+</li>
+<li>
+<p>phi: the maximum likelihood estimate of <code class="reqn">\phi</code>.
+</p>
+</li>
+<li>
+<p>loglik: the value of log likelihood with maximum likelihood estimates plugged-in.
+</p>
+</li>
+</ul>
+<p>With <code>poisson.zihmle</code>, the following values are returned:
+</p>
+
+<ul>
+<li>
+<p>lambda: the maximum likelihood estimate of lambda.
+</p>
+</li>
+<li>
+<p>phi: the maximum likelihood estimate of <code class="reqn">\phi</code>.
+</p>
+</li>
+<li>
+<p>loglik: the value of log likelihood with maximum likelihood estimate plugged-in.
+</p>
+</li>
+</ul>
+<h3>Reference</h3>
+
+
+<ul>
+<li>
+<p>H. Aldirawi, J. Yang, A. A. Metwally (2019). Identifying Appropriate Probabilistic Models for Sparse Discrete Omics Data,
+accepted for publication in 2019 IEEE EMBS International Conference on Biomedical &amp; Health Informatics (BHI).
+</p>
+</li>
+<li>
+<p>H. Aldirawi, J. Yang (2019). Model Selection and Regression Analysis for Zero-altered or Zero-inflated Data, Statistical
+Laboratory Technical Report, no.2019-01, University of Illinois at Chicago.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">t1=sample.h(N=2000,phi=0.2,distri='Poisson',lambda=5)  ##hurdle poisson random values
+t2=sample.h(N=2000,phi=0.2,distri='nb',r=10,p=0.6)   ##hurdle negative binomial
+t3=sample.zi(N=2000,phi=0.2,distri='bb',alpha1=8,alpha2=9,n=10)   ##zero-inflated beta binomial
+##zero-inflated beta negative binomial.
+t4=sample.zi(N=2000,phi=0.2,distri='bnb',r=10,alpha1=8,alpha2=9)
+bb.zihmle(t3,3,1,1,type='h')
+bnb.zihmle(t4, 3.3, 1, 1,type='h')
+nb.zihmle(t2, 7, 0.5,type='zi')
+poisson.zihmle(t1,type='zi')
+</code></pre>
+
+
+</div>

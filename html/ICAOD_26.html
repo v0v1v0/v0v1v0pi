@@ -1,0 +1,884 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>minimax</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Minimax and Standardized Maximin D-Optimal Designs</h2>
+
+<h3>Description</h3>
+
+<p>Finds minimax and standardized maximin D-optimal designs for linear and nonlinear models.
+It should be used when the user assumes the unknown parameters belong to a parameter region
+<code class="reqn">\Theta</code>, which is called “region of uncertainty”,  and the
+purpose is to protect the experiment from the worst case scenario
+over <code class="reqn">\Theta</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">minimax(
+  formula,
+  predvars,
+  parvars,
+  family = gaussian(),
+  lx,
+  ux,
+  lp,
+  up,
+  iter,
+  k,
+  n.grid = 0,
+  fimfunc = NULL,
+  ICA.control = list(),
+  sens.control = list(),
+  sens.minimax.control = list(),
+  crt.minimax.control = list(),
+  standardized = FALSE,
+  initial = NULL,
+  localdes = NULL,
+  npar = length(lp),
+  plot_3d = c("lattice", "rgl"),
+  x = NULL,
+  crtfunc = NULL,
+  sensfunc = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>A linear or nonlinear model <code>formula</code>.
+A symbolic description of the model consists of predictors and the unknown model parameters.
+Will be coerced to a <code>formula</code> if necessary.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predvars</code></td>
+<td>
+<p>A vector of characters. Denotes the predictors in the <code>formula</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parvars</code></td>
+<td>
+<p>A vector of characters. Denotes the unknown parameters in the <code>formula</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>A description of the response distribution and the link function to be used in the model.
+This can be a family function, a call to a family function or a character string naming the family.
+Every family function has a link argument allowing to specify the link function to be applied on the response variable.
+If not specified, default links are used. For details see <code>family</code>.
+By default, a linear gaussian model <code>gaussian()</code> is applied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lx</code></td>
+<td>
+<p>Vector of lower bounds for the predictors. Should be in the same order as <code>predvars</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ux</code></td>
+<td>
+<p>Vector of upper bounds for the predictors. Should be in the same order as <code>predvars</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lp</code></td>
+<td>
+<p>Vector of lower bounds for the model parameters. Should be in the same order as <code>parvars</code> or <code>param</code> in the argument <code>fimfunc</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>up</code></td>
+<td>
+<p>Vector of upper bounds for the model parameters. Should be in the same order as <code>parvars</code> or <code>param</code> in the argument <code>fimfunc</code>.
+When a parameter is known (has a fixed value), its associated lower and upper bound values  in <code>lp</code> and <code>up</code>  must be set equal.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter</code></td>
+<td>
+<p>Maximum number of iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>Number of design points. Must be at least equal to the number of model parameters to avoid singularity of the FIM.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.grid</code></td>
+<td>
+<p>Only required when the parameter space is
+going to be discretized.
+The total number of grid points from the parameter space is <code>n.grid^p</code>.
+When <code>n.grid &gt; 0</code>, optimal design protects the experimenter against the worst case scenario only over the grid points, and not over the continuous parameter space.
+The resulting designs may not be globally optimal.
+In some literature, this type of designs has been used as a compromise to
+the minimax type designs to avoid continuous optimization problem over
+the parameter space and simplify the minimax design problems.
+Especially when the design criterion is convex with respect to the
+given parameter space at every given design from the design space,
+the obtained design may also be globally optimal (because the maximum of a convex function is attained on the bounds, and here, are included in the grid points).
+See 'Details' of <code>minimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fimfunc</code></td>
+<td>
+<p>A function. Returns the FIM as a <code>matrix</code>. Required when <code>formula</code> is missing. See 'Details' of <code>minimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ICA.control</code></td>
+<td>
+<p>ICA control parameters. For details, see <code>ICA.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sens.control</code></td>
+<td>
+<p>Control Parameters for Calculating the ELB. For details, see <code>sens.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sens.minimax.control</code></td>
+<td>
+<p>Control parameters to construct the answering set required for verify the general equivalence theorem and calculating the ELB. For details, see the function <code>sens.minimax.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>crt.minimax.control</code></td>
+<td>
+<p>Control parameters to optimize the minimax or standardized maximin criterion at a given design over a <strong>continuous</strong> parameter space (when <code>n.grid = 0</code>).
+For details, see the function <code>crt.minimax.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>standardized</code></td>
+<td>
+<p>Maximin standardized design? When <code>standardized = TRUE</code>, the argument <code>localdes</code> must be given.
+Defaults to <code>FALSE</code>. See 'Details' of <code>minimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial</code></td>
+<td>
+<p>A matrix of the  initial design points and weights that will be inserted into the initial solutions (countries) of the algorithm.
+Every row is a design, i.e.  a concatenation of <code>x</code> and <code>w</code>. Will be coerced to a <code>matrix</code> if necessary.  See 'Details' of <code>minimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>localdes</code></td>
+<td>
+<p>A function that takes the parameter values  as inputs and returns the design points and weights of the locally optimal design.
+Required when <code>standardized = "TRUE"</code>. See 'Details' of <code>minimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>npar</code></td>
+<td>
+<p>Number of model parameters.  Used when <code>fimfunc</code> is given instead of <code>formula</code> to specify the number of model parameters.
+If not specified truly, the sensitivity (derivative) plot may be shifted below the y-axis. When <code>NULL</code> (default), it is set to <code>length(lp)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_3d</code></td>
+<td>
+<p>Which package should be used to plot the sensitivity (derivative) function for two-dimensional design space. Defaults to <code>"lattice"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A vector of candidate design (support) points.
+When is not set to <code>NULL</code> (default),
+the algorithm only finds the optimal weights for the candidate points in  <code>x</code>.
+Should be set when the user has a finite number of candidate design points  and the purpose
+is to find the optimal weight for each of them (when zero, they will be excluded from the design).
+For design points with more than one dimension, see 'Details' of <code>sensminimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>crtfunc</code></td>
+<td>
+<p>(Optional) a function that specifies an arbitrary criterion. It must have especial arguments and output. See 'Details' of <code>minimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sensfunc</code></td>
+<td>
+<p>(Optional) a function that specifies the sensitivity function for <code>crtfunc</code>. See 'Details' of <code>minimax</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Let <code class="reqn">\Xi</code> be the space of all  approximate designs with
+<code class="reqn">k</code> design points (support points) at <code class="reqn">x_1, x_2, ...,  x_k</code>
+from  the design space <code class="reqn">\chi</code> with
+corresponding weights  <code class="reqn">w_1, . . . ,w_k</code>.
+Let <code class="reqn">M(\xi, \theta)</code> be the Fisher information
+matrix (FIM) of a <code class="reqn">k-</code>point design <code class="reqn">\xi</code> and <code class="reqn">\theta</code> be the vector of
+unknown parameters.
+A  minimax D-optimal design <code class="reqn">\xi^*</code> minimizes over <code class="reqn">\Xi</code>
+</p>
+<p style="text-align: center;"><code class="reqn">\max_{\theta \in \Theta} -\log|M(\xi, \theta)|.</code>
+</p>
+
+<p>A standardized maximin D-optimal design <code class="reqn">\xi^*</code> maximizes over <code class="reqn">\Xi</code>
+</p>
+<p style="text-align: center;"><code class="reqn">\inf_{\theta \in \Theta} \left[\left(\frac{|M(\xi, \theta)|}{|M(\xi_{\theta}, \theta)|}\right)^\frac{1}{p}\right],</code>
+</p>
+
+<p>where <code class="reqn">p</code> is the number of model parameters and <code class="reqn">\xi_\theta</code> is the locally D-optimal design with respect to <code class="reqn">\theta</code>.<br></p>
+<p>A minimax criterion (cost function or objective function) is evaluated at each design (decision variables) by maximizing the criterion over the parameter space.
+We call the optimization problem over the parameter space as <em>inner optimization problem</em>.
+Two different strategies may be
+applied to solve the inner problem at a given design (design points and weights):
+</p>
+
+<ol>
+<li> <p><strong>Continuous inner problem</strong>: we optimize the criterion
+over a continuous parameter space using the function <code>nloptr</code>.
+In this case, the tuning parameters can be regulated
+via the argument <code>crt.minimax.control</code>, when the most influential one
+is <strong><code>maxeval</code></strong>.
+</p>
+</li>
+<li>  <p><strong>Discrete inner problem</strong>: we map the parameter space to
+the grid points and optimize the criterion over a discrete parameter space.
+In this case, the number of grid points can be regulated via <code>n.grid</code>.
+This strategy is quite efficient (ans fast) when  the maxima most likely attain the vertices of the continuous parameter space at any given design.
+The output design here protects the experiment from the worst scenario
+over the grid points.
+</p>
+</li>
+</ol>
+<p>The <code>formula</code> is used to automatically create the Fisher information matrix (FIM)
+for a linear or nonlinear model provided that the distribution of the
+response variable belongs to the natural exponential family.
+Function <code>minimax</code> also provides an
+option to assign a user-defined FIM directly via the argument  <code>fimfunc</code>.
+In this case, the
+argument <code>fimfunc</code> takes a <code>function</code> that has three arguments as follows:
+</p>
+
+<ol>
+<li> <p><code>x</code> a vector of design points. For design points with more than one dimension,
+it is a concatenation of the design points, but dimension-wise.
+For example, let the model has three predictors   <code class="reqn">(I, S, Z)</code>.
+Then,  a two-point design is of the format
+<code class="reqn">\{\mbox{point1} = (I_1, S_1, Z_1), \mbox{point2} = (I_2, S_2, Z_2)\}</code>.
+and the argument <code>x</code> is equivalent to
+<code>x = c(I1, I2, S1, S2, Z1, Z2)</code>.
+</p>
+</li>
+<li> <p><code>w</code> a vector that includes the design weights associated with <code>x</code>.
+</p>
+</li>
+<li> <p><code>param</code> a vector of parameter values associated with <code>lp</code> and <code>up</code>.
+</p>
+</li>
+</ol>
+<p>The output must be the Fisher information matrix with number of rows equal to <code>length(param)</code>. See 'Examples'.
+</p>
+<p>Minimax optimal designs can have very different criterion values depending on the nominal set of parameter values.
+Accordingly, it is desirable to standardize the criterion and control for the potentially widely varying magnitude of the criterion (Dette, 1997).
+Evaluating a standardized maximin criterion requires knowing locally optimal designs.
+We strongly advise setting <code>standardized = 'TRUE'</code> only when analytical solutions for the locally D-optimal designs is available.
+In this case, for any initial estimate of the unknown parameters,
+an analytical solution  for the locally optimal design, i.e, the support points <code>x</code>
+and the corresponding weights <code>w</code>, must be provided via the argument <code>localdes</code>.
+Therefore, depending on how the model is specified, <code>localdes</code> is a <code>function</code> with the following arguments (input).
+</p>
+
+<ul>
+<li>
+<p> If <code>formula</code> is given (<code>!missing(formula)</code>):
+</p>
+
+<ul><li>
+<p> The parameter names given by <code>parvars</code> in the same order.
+</p>
+</li></ul>
+</li>
+<li>
+<p> If FIM is given via the argument <code>fimfunc</code> (<code>missing(formula)</code>):
+</p>
+
+<ul><li> <p><code>param</code>: A vector of the parameters equal to the argument <code>param</code> in <code>fimfunc</code>.
+</p>
+</li></ul>
+</li>
+</ul>
+<p>This function must return a list with the components <code>x</code> and <code>w</code> (they match the same arguments in the function <code>fimfunc</code>).
+See 'Examples'.<br></p>
+<p>The standardized D-criterion is equal to the  D-efficiency and it must be between 0 and 1.
+However, in practice, when running the algorithm,  it may be the case that
+the criterion takes a value larger than one.
+This may happen  because the user-function that is  given via <code>localdes</code> does not
+return the true (accurate) locally optimal designs for some
+requested initial estimates of the parameters  from <code class="reqn">\Theta</code>.
+In this case, the function <code>minimax</code>
+throw an error where the error message helps the user
+to debug her/his function.
+</p>
+<p>Each row of <code>initial</code> is one design, i.e. a concatenation of values for design (support) points  and the associated design weights.
+Let <code>x0</code> and <code>w0</code> be the vector of initial values with exactly the same length and order as <code>x</code> and <code>w</code> (the arguments of <code>fimfunc</code>).
+As an example, the first row  of the matrix <code>initial</code> is equal to <code>initial[1, ] = c(x0, w0)</code>.
+For models with more than one predictors, <code>x0</code> is a concatenation of the initial values for design points, but <strong>dimension-wise</strong>.
+See the details of the argument <code>fimfunc</code>, above.
+</p>
+<p>To verify the optimality of the output design by the general equivalence theorem,
+the user can either <code>plot</code> the results or set  <code>checkfreq</code> in <code>ICA.control</code>
+to <code>Inf</code>. In either way, the function <code>sensminimax</code> is called for verification.
+Note that  the function <code>sensminimax</code> always verifies the optimality of a design assuming a continues parameter space.
+See 'Examples'.
+</p>
+<p><code>crtfunc</code> is a function that is used
+to specify a new criterion.
+Its arguments are:
+</p>
+
+<ul>
+<li>
+<p> design points <code>x</code> (as a <code>vector</code>).
+</p>
+</li>
+<li>
+<p> design weights <code>w</code> (as a <code>vector</code>).
+</p>
+</li>
+<li>
+<p> model parameters as follows.
+</p>
+
+<ul>
+<li>
+<p> If <code>formula</code> is specified:
+they should be the same parameter specified by <code>parvars</code>.
+</p>
+</li>
+<li>
+<p> If FIM is specified via the argument <code>fimfunc</code>:
+<code>param</code> that is a vector of the parameters in <code>fimfunc</code>.
+</p>
+</li>
+</ul>
+</li>
+<li> <p><code>fimfunc</code> is a <code>function</code> that takes the other arguments of <code>crtfunc</code>
+and returns the computed Fisher information matrix as a <code>matrix</code>.
+</p>
+</li>
+</ul>
+<p>The <code>crtfunc</code> function must return the criterion value.
+<code>crtfunc</code>. It has one more argument than  <code>crtfunc</code>,
+which is  <code>xi_x</code>. It denotes the design point of the degenerate design
+and  must be a vector with the same length as the number of  predictors.
+For more details, see 'Examples'.
+</p>
+
+
+<h3>Value</h3>
+
+<p>an object of class <code>minimax</code> that is a list including three sub-lists:
+</p>
+
+<dl>
+<dt><code>arg</code></dt>
+<dd>
+<p>A list of design and algorithm parameters.</p>
+</dd>
+<dt><code>evol</code></dt>
+<dd>
+<p>A list of length equal to the number of iterations that stores
+the information about the best design (design with least criterion value)
+of each iteration. <code>evol[[iter]]</code> contains:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+      <code>iter</code>                   </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Iteration number.</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>x</code>                      </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Design points. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>w</code>                      </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Design weights. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>min_cost</code>               </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Value of the criterion for the best imperialist (design).  </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>mean_cost</code>              </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Mean of the criterion values of all the imperialists. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>sens</code>                   </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> An object of class <code>'sensminimax'</code>. See below. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>param</code>                  </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Vector of parameters.</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+    </td>
+</tr>
+</table>
+</dd>
+<dt><code>empires</code></dt>
+<dd>
+<p>A list of all the  empires of the last iteration.</p>
+</dd>
+<dt><code>alg</code></dt>
+<dd>
+<p>A list with following information:
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+      <code>nfeval</code>           </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Number of function evaluations.  It does not count the function evaluations from checking the general equivalence theorem.</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>nlocal</code>           </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Number of successful local searches. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>nrevol</code>           </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Number of successful revolutions. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>nimprove</code>         </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Number of successful movements toward the imperialists in the assimilation step. </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+      <code>convergence</code>      </td>
+<td style="text-align: left;">      </td>
+<td style="text-align: left;"> Stopped by <code>'maxiter'</code> or <code>'equivalence'</code>?</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+    </td>
+</tr>
+</table>
+</dd>
+<dt><code>method</code></dt>
+<dd>
+<p>A type of optimal designs used.</p>
+</dd>
+<dt><code>design</code></dt>
+<dd>
+<p>Design points and weights at the final iteration.</p>
+</dd>
+<dt><code>out</code></dt>
+<dd>
+<p>A data frame of design points, weights, value of the criterion for the best imperialist (min_cost), and Mean of the criterion values of all the imperialistsat each iteration (mean_cost).</p>
+</dd>
+</dl>
+<p>The list <code>sens</code> contains information about the design verification by the general equivalence theorem. See <code>sensminimax</code> for more details.
+It is given  every <code>ICA.control$checkfreq</code> iterations
+and also the last iteration if   <code>ICA.control$checkfreq &gt;= 0</code>. Otherwise, <code>NULL</code>.
+</p>
+<p><code>param</code> is a vector of parameters that is the global minimum of
+the minimax criterion or the global maximum of the standardized maximin criterion over the parameter space, given  the current <code>x</code>, <code>w</code>.
+</p>
+
+
+<h3>Note</h3>
+
+<p>For larger parameter space or model with more number of unknown parameters,
+it is always important to increase the value of  <code>ncount</code> in <code>ICA.control</code>
+and <code>optslist$maxeval</code> in <code>crt.minimax.control</code> to produce very accurate designs.
+</p>
+<p>Although standardized criteria have been preferred theoretically,
+in practice, they should be applied only
+when  an analytical solution for
+the locally D-optimal designs is available for the model
+of interest.
+Otherwise, we encounter a three-level nested-optimization algorithm, which is very slow.
+</p>
+
+
+<h3>References</h3>
+
+<p>Atashpaz-Gargari, E, &amp; Lucas, C (2007). Imperialist competitive algorithm: an algorithm for optimization inspired by imperialistic competition. In 2007 IEEE congress on evolutionary computation (pp. 4661-4667). IEEE.<br>
+Dette, H. (1997). Designing experiments with respect to 'standardized' optimality criteria. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 59(1), 97-110. <br>
+Masoudi E, Holling H, Wong WK (2017). Application of Imperialist Competitive Algorithm to Find Minimax and Standardized Maximin Optimal Designs. Computational Statistics and Data Analysis, 113, 330-345. &lt;doi:10.1016/j.csda.2016.06.014&gt;<br></p>
+
+
+<h3>See Also</h3>
+
+<p><code>sensminimax</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">########################################
+# Two-parameter exponential growth model
+########################################
+res1 &lt;- minimax (formula = ~a + exp(-b*x), predvars = "x", parvars = c("a", "b"),
+                 lx = 0, ux = 1, lp = c(1, 1), up = c(1, 10),
+                 iter = 1, k = 4,
+                 ICA.control= ICA.control(rseed = 100),
+                 crt.minimax.control = list(optslist = list(maxeval = 100)))
+# The optimal design has 3 points, but we set k = 4 for illustration purpose to
+#   show how the algorithm modifies the design by adjusting the weights
+# The value of maxeval is changed to reduce the CPU time
+## Not run: 
+  res1 &lt;- update(res1, 150)
+  # iterating the algorithm up to 150 more iterations
+
+## End(Not run)
+
+res1 # print method
+plot(res1) # Veryfying the general equivalence theorem
+
+## Not run: 
+  ## fixed x
+  res1.1 &lt;- minimax (formula = ~a + exp(-b*x), predvars = "x", parvars = c("a", "b"),
+                     lx = 0, ux = 1, lp = c(1, 1), up = c(1, 10),
+                     x = c(0, .5, 1),
+                     iter = 150, k = 3, ICA.control= ICA.control(rseed = 100))
+  # not optimal
+
+## End(Not run)
+
+########################################
+# Two-parameter logistic model.
+########################################
+# A little playing with the tuning parameters
+# The value of maxeval is reduced to 200 to increase the speed
+cont1 &lt;- crt.minimax.control(optslist = list(maxeval = 200))
+cont2 &lt;- ICA.control(rseed = 100, checkfreq = Inf, ncount = 60)
+
+## Not run: 
+  res2 &lt;- minimax (formula = ~1/(1 + exp(-b *(x - a))), predvars = "x",
+                   parvars = c("a", "b"),
+                   family = binomial(), lx = -3, ux = 3,
+                   lp = c(0, 1), up = c(1, 2.5), iter = 200, k = 3,
+                   ICA.control= cont2, crt.minimax.control = cont1)
+  print(res2)
+  plot(res2)
+
+## End(Not run)
+
+############################################
+# An example of a model with two predictors
+############################################
+# Mixed inhibition model
+lower &lt;- c(1, 4, 2, 4)
+upper &lt;- c(1, 5, 3, 5)
+cont &lt;- crt.minimax.control(optslist = list(maxeval = 100)) # to be faster
+## Not run: 
+  res3 &lt;- minimax(formula =  ~ V*S/(Km * (1 + I/Kic)+ S * (1 + I/Kiu)),
+                  predvars = c("S", "I"),
+                  parvars = c("V", "Km", "Kic", "Kiu"),
+                  lx = c(0, 0), ux = c(30, 60), k = 4,
+                  iter = 100, lp = lower, up = upper,
+                  ICA.control= list(rseed = 100),
+                  crt.minimax.control = cont)
+
+  res3 &lt;- update(res3, 100)
+  print(res3)
+  plot(res3) # sensitivity plot
+  res3$arg$time
+
+## End(Not run)
+
+# Now consider grid points instead of assuming continuous parameter space
+# set n.grid to 5
+## Not run: 
+  res4 &lt;- minimax(formula =  ~ V*S/(Km * (1 + I/Kic)+ S * (1 + I/Kiu)),
+                  predvars = c("S", "I"),
+                  parvars = c("V", "Km", "Kic", "Kiu"),
+                  lx = c(0, 0), ux = c(30, 60),
+                  k = 4, iter = 130, n.grid = 5, lp = lower, up = upper,
+                  ICA.control= list(rseed = 100, checkfreq = Inf),
+                  crt.minimax.control = cont)
+  print(res4)
+  plot(res4) # sensitivity plot
+
+## End(Not run)
+
+############################################
+# Standardized maximin D-optimal designs
+############################################
+# Assume the purpose is finding STANDARDIZED designs
+# We know from literature that the locally D-optimal design (LDOD)
+# for this model has an analytical solution.
+# The follwoing function takes the parameter as input and returns
+# the design points and weights of LDOD.
+# x and w are exactly similar to the arguments of 'fimfunc'.
+# x is a vector and returns the design points 'dimension-wise'.
+# see explanation of the arguments of 'fimfunc' in 'Details'.
+
+LDOD &lt;- function(V, Km, Kic, Kiu){
+  #first dimention is for S and the second one is for I.
+  S_min &lt;- 0
+  S_max &lt;- 30
+  I_min &lt;- 0
+  I_max &lt;- 60
+  s2 &lt;- max(S_min, S_max*Km*Kiu*(Kic+I_min)/
+              (S_max*Kic*I_min+S_max*Kic*Kiu+2*Km*Kiu*I_min+2*Km*Kiu*Kic))
+  i3 &lt;- min((2*S_max*Kic*I_min + S_max*Kic*Kiu+2*Km*Kiu*I_min+Km*Kiu*Kic)/
+              (Km*Kiu+S_max*Kic), I_max)
+  i4 &lt;- min(I_min + (sqrt((Kic+I_min)*(Km*Kic*Kiu+Km*Kiu*I_min+
+                                         S_max*Kic*Kiu+S_max*Kic*I_min)/
+                            (Km*Kiu+S_max*Kic))), I_max )
+  s4 &lt;- max(-Km*Kiu*(Kic+2*I_min-i4)/(Kic*(Kiu+2*I_min-i4)), S_min)
+  x &lt;- c(S_max, s2, S_max, s4, I_min, I_min, i3, i4)
+  return(list(x = x, w =rep(1/4, 4)))
+
+}
+formalArgs(LDOD)
+## Not run: 
+  minimax(formula =  ~ V*S/(Km * (1 + I/Kic)+ S * (1 + I/Kiu)),
+          predvars = c("S", "I"),
+          parvars = c("V", "Km", "Kic", "Kiu"),
+          lx = c(0, 0), ux = c(30, 60),
+          k = 4, iter = 300,
+          lp = lower, up = upper,
+          ICA.control= list(rseed = 100, checkfreq = Inf),
+          crt.minimax.control = cont,
+          standardized = TRUE,
+          localdes = LDOD)
+
+## End(Not run)
+
+
+################################################################
+# Not necessary!
+# The rest of the examples here are only for professional uses.
+################################################################
+# Imagine you have written your own FIM, say in Rcpp that is faster than
+# the FIM created by the formula interface above.
+
+###########################################
+# An example of a model with two predictors
+###########################################
+# For example, th cpp FIM function for the mixed inhibition model is named:
+formalArgs(FIM_mixed_inhibition)
+
+# We should reparamterize the arguments to match the standard of the
+# argument 'fimfunc' (see 'Details').
+myfim &lt;- function(x, w, param){
+  npoint &lt;- length(x)/2
+  S &lt;- x[1:npoint]
+  I &lt;- x[(npoint+1):(npoint*2)]
+  out &lt;- FIM_mixed_inhibition(S = S, I = I, w = w, param = param)
+  return(out)
+}
+formalArgs(myfim)
+
+# Finds minimax optimal design, exactly as before, but NOT using the
+# formula interface.
+## Not run: 
+  res5 &lt;- minimax(fimfunc = myfim,
+                  lx = c(0, 0), ux = c(30, 60), k = 4,
+                  iter = 100, lp = lower, up = upper,
+                  ICA.control= list(rseed = 100),
+                  crt.minimax.control = cont)
+  print(res5)
+  plot(res5) # sensitivity plot
+
+## End(Not run)
+#########################################
+# Standardized maximin D-optimal designs
+#########################################
+# To match the argument 'localdes' when no formula inteface is used,
+# we should reparameterize LDOD.
+# The input must be 'param' same as the argument of 'fimfunc'
+LDOD2 &lt;- function(param)
+  LDOD(V = param[1], Km = param[2], Kic = param[3], Kiu = param[4])
+
+# compare these two:
+formalArgs(LDOD)
+formalArgs(LDOD2)
+## Not run: 
+  res6 &lt;- minimax(fimfunc = myfim,
+                  lx = c(0, 0), ux = c(30, 60), k = 4,
+                  iter = 300, lp = lower, up = upper,
+                  ICA.control= list(rseed = 100, checkfreq = Inf),
+                  crt.minimax.control = cont,
+                  standardized = TRUE,
+                  localdes = LDOD2)
+  res6
+  plot(res6)
+
+## End(Not run)
+
+###################################
+# user-defined optimality criterion
+##################################
+# When the model is defined by the formula interface
+# A-optimal design for the 2PL model.
+# the criterion function must have argument x, w fimfunc and the parameters defined in 'parvars'.
+# use 'fimfunc' as a function of the design points x,  design weights w and
+#  the 'parvars' parameters whenever needed.
+Aopt &lt;-function(x, w, a, b, fimfunc){
+  sum(diag(solve(fimfunc(x = x, w = w, a = a, b = b))))
+}
+## the sensitivtiy function
+# xi_x is a design that put all its mass on x in the definition of the sensitivity function
+# x is a vector of design points
+Aopt_sens &lt;- function(xi_x, x, w, a, b, fimfunc){
+  fim &lt;- fimfunc(x = x, w = w, a = a, b = b)
+  M_inv &lt;- solve(fim)
+  M_x &lt;- fimfunc(x = xi_x, w = 1, a  = a, b = b)
+  sum(diag(M_inv %*% M_x %*%  M_inv)) - sum(diag(M_inv))
+}
+## Not run: 
+res7 &lt;- minimax(formula = ~1/(1 + exp(-b * (x-a))), predvars = "x",
+                parvars = c("a", "b"), family = "binomial",
+                lx = -2, ux = 2,
+                lp = c(-2, 1), up = c(2, 1.5),
+                iter = 400, k = 3,
+                crtfunc = Aopt,
+                sensfunc = Aopt_sens,
+                crt.minimax.control = list(optslist = list(maxeval = 200)),
+                ICA.control = list(rseed = 1))
+  plot(res7)
+
+## End(Not run)
+# with grid points
+res7.1 &lt;- minimax(formula = ~1/(1 + exp(-b * (x-a))), predvars = "x",
+                  parvars = c("a", "b"), family = "binomial",
+                  lx = -2, ux = 2,
+                  lp = c(-2, 1), up = c(2, 1.5),
+                  iter = 1, k = 3,
+                  crtfunc = Aopt,
+                  sensfunc = Aopt_sens,
+                  n.grid = 9,
+                  ICA.control = list(rseed = 1))
+## Not run: 
+  res7.1 &lt;- update(res7.1, 400)
+  plot(res7.1)
+
+## End(Not run)
+
+# When the FIM of the model is defined directly via the argument 'fimfunc'
+# the criterion function must have argument x, w fimfunc and param.
+# use 'fimfunc' as a function of the design points x,  design weights w and
+#  the 'parvars' parameters whenever needed.
+Aopt2 &lt;-function(x, w, param, fimfunc){
+  sum(diag(solve(fimfunc(x = x, w = w, param = param))))
+}
+## the sensitivtiy function
+# xi_x is a design that put all its mass on x in the definition of the sensitivity function
+# x is a vector of design points
+Aopt_sens2 &lt;- function(xi_x, x, w, param, fimfunc){
+  fim &lt;- fimfunc(x = x, w = w, param = param)
+  M_inv &lt;- solve(fim)
+  M_x &lt;- fimfunc(x = xi_x, w = 1, param = param)
+  sum(diag(M_inv %*% M_x %*%  M_inv)) - sum(diag(M_inv))
+}
+## Not run: 
+res7.2 &lt;- minimax(fimfunc = FIM_logistic,
+                  lx = -2, ux = 2,
+                  lp = c(-2, 1), up = c(2, 1.5),
+                  iter = 1, k = 3,
+                  crtfunc = Aopt2,
+                  sensfunc = Aopt_sens2,
+                  crt.minimax.control = list(optslist = list(maxeval = 200)),
+                  ICA.control = list(rseed = 1))
+  res7.2 &lt;- update(res7.2, 200)
+  plot(res7.2)
+
+## End(Not run)
+# with grid points
+res7.3 &lt;- minimax(fimfunc = FIM_logistic,
+                  lx = -2, ux = 2,
+                  lp = c(-2, 1), up = c(2, 1.5),
+                  iter = 1, k = 3,
+                  crtfunc = Aopt2,
+                  sensfunc = Aopt_sens2,
+                  n.grid = 9,
+                  ICA.control = list(rseed = 1))
+## Not run: 
+  res7.3 &lt;- update(res7.2, 200)
+  plot(res7.3)
+
+## End(Not run)
+
+
+# robust c-optimal design
+# example from Chaloner and Larntz (1989), Figure 3, but robust design
+c_opt &lt;-function(x, w, a, b, fimfunc){
+  gam &lt;- log(.95/(1-.95))
+  M &lt;- fimfunc(x = x, w = w, a = a, b = b)
+  c &lt;- matrix(c(1, -gam * b^(-2)), nrow = 1)
+  B &lt;- t(c) %*% c
+  sum(diag(B %*% solve(M)))
+}
+
+c_sens &lt;- function(xi_x, x, w, a, b, fimfunc){
+  gam &lt;- log(.95/(1-.95))
+  M &lt;- fimfunc(x = x, w = w, a = a, b = b)
+  M_inv &lt;- solve(M)
+  M_x &lt;- fimfunc(x = xi_x, w = 1, a = a, b = b)
+  c &lt;- matrix(c(1, -gam * b^(-2)), nrow = 1)
+  B &lt;- t(c) %*% c
+  sum(diag(B %*% M_inv %*% M_x %*%  M_inv)) - sum(diag(B %*% M_inv))
+}
+
+## Not run: 
+res8 &lt;- minimax(formula = ~1/(1 + exp(-b * (x-a))), predvars = "x",
+                parvars = c("a", "b"), family = "binomial",
+                lx = -1, ux = 1,
+                lp = c(-.3, 6), up = c(.3, 8),
+                iter = 500, k = 3,
+                crtfunc = c_opt, sensfunc = c_sens,
+                ICA.control = list(rseed = 1, ncount = 100),
+                n.grid = 12)
+  plot(res8)
+
+## End(Not run)
+
+
+
+</code></pre>
+
+
+</div>

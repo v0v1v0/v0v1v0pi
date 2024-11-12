@@ -1,0 +1,66 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>n_grouplevels</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Count number of random effect levels in a mixed model</h2>
+
+<h3>Description</h3>
+
+<p>Returns the number of group levels of random effects from mixed models.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">n_grouplevels(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A mixed model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments that can be passed to the function. Currently,
+you can use <code>data</code> to provide the model data, if available, to avoid
+retrieving model data multiple times.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The number of group levels in the model.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(sleepstudy, package = "lme4")
+set.seed(12345)
+sleepstudy$grp &lt;- sample(1:5, size = 180, replace = TRUE)
+sleepstudy$subgrp &lt;- NA
+for (i in 1:5) {
+  filter_group &lt;- sleepstudy$grp == i
+  sleepstudy$subgrp[filter_group] &lt;-
+    sample(1:30, size = sum(filter_group), replace = TRUE)
+}
+model &lt;- lme4::lmer(
+  Reaction ~ Days + (1 | grp / subgrp) + (1 | Subject),
+  data = sleepstudy
+)
+n_grouplevels(model)
+
+</code></pre>
+
+
+</div>

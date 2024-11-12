@@ -1,0 +1,179 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>NGPPest</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Signal Subspace Dimension Testing Using non-Gaussian Projection Pursuit 
+</h2>
+
+<h3>Description</h3>
+
+<p>Estimates the dimension of the signal subspace using NGPP to conduct sequential hypothesis testing. The test statistic is a multivariate extension of the classical Jarque-Bera statistic and the distribution of it under the null hypothesis is obtained by simulation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">NGPPest(X, nl = c("skew", "pow3"), alpha = 0.8, N = 500, eps = 1e-6,
+        verbose = FALSE, maxiter = 100)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>Numeric matrix with n rows corresponding to the observations and p columns corresponding to the variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nl</code></td>
+<td>
+<p>Vector of non-linearities, a convex combination of the corresponding squared objective functions of which is then used as the projection index. The choices include <code>"skew"</code> (skewness), <code>"pow3"</code> (excess kurtosis), <code>"tanh"</code> (<code class="reqn">log(cosh)</code>) and <code>"gauss"</code> (Gaussian function).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>Vector of positive weights between 0 and 1 given to the non-linearities. The length of <code>alpha</code> should be either one less than the number of non-linearities in which case the missing weight is chosen so that <code>alpha</code> sums to one, or equal to the number of non-linearities in which case the weights are used as such. No boundary checks for the weights are done.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>Number of normal samples to be used in simulating the distribution of the test statistic under the null hypothesis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>Convergence tolerance.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>If <code>TRUE</code> the numbers of iterations will be printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+<p>Maximum number of iterations.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>It is assumed that the data is a random sample from the model <code class="reqn">x = m + A s</code> where the latent vector <code class="reqn">s = (s_1^T, s_2^T)^T</code> consists of <code class="reqn">k</code>-dimensional non-Gaussian subvector (the signal) and <code class="reqn">p - k</code>-dimensional Gaussian subvector (the noise) and the components of <code class="reqn">s</code> are mutually independent. Without loss of generality we further assume that the components of <code class="reqn">s</code> have zero means and unit variances.
+</p>
+<p>The algorithm first estimates full <code class="reqn">p</code> components from the data using deflation-based NGPP with the chosen non-linearities and weighting and then tests the null hypothesis <code class="reqn">H_0: k_{true} \leq k</code> for each <code class="reqn">k = 0, \ldots , p - 1</code>. The testing is based on the fact that under the null hypothesis <code class="reqn">H_0: k_{true} \leq k</code> the distribution of the final <code class="reqn">p - k</code> components is standard multivariate normal and the significance of the test can be obtained by comparing the objective function value of the <code class="reqn">(k + 1)</code>th estimated components to the same quantity estimated from <code>N</code> samples of size <code class="reqn">n</code> from <code class="reqn">(p - k)</code>-dimensional standard multivariate normal distribution.
+</p>
+<p>Note that if <code>maxiter</code> is reached at any step of the algorithm it will use the current estimated direction and continue to the next step. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with class 'icest' containing the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>statistic</code></td>
+<td>
+<p>Test statistic, i.e. the objective function values of all estimated component.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.value</code></td>
+<td>
+<p>Obtained vector of <code class="reqn">p</code>-values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parameter</code></td>
+<td>
+<p>Number <code>N</code> of simulated normal samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>Character string <code>"Estimation the signal subspace dimension using NGPP"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.name</code></td>
+<td>
+<p>Character string giving the name of the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>W</code></td>
+<td>
+<p>Estimated unmixing matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>S</code></td>
+<td>
+<p>Matrix of size <code class="reqn">n \times p</code> containing the estimated signals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>Vector of the objective function values of the signals</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MU</code></td>
+<td>
+<p>Location vector of the data which was substracted before estimating the signal components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conv</code></td>
+<td>
+<p>Boolean vector telling for which components the algorithm converged (<code>TRUE</code>) and for which not (<code>FALSE</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Joni Virta
+</p>
+
+
+<h3>References</h3>
+
+<p><cite>Virta, J., Nordhausen, K. and Oja, H., (2016), Projection Pursuit for non-Gaussian Independent Components, &lt;https://arxiv.org/abs/1612.05445&gt;.</cite> 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>NGPP, NGPPsim</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Iris data
+
+X &lt;- as.matrix(iris[, 1:4])
+
+# The number of simulations N should be increased in practical situations
+# Now we settle for N = 100
+
+res &lt;- NGPPest(X, N = 100)
+res$statistic
+res$p.value
+res$conv
+</code></pre>
+
+
+</div>

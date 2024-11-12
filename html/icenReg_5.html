@@ -1,0 +1,91 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getFitEsts</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get Survival Curve Estimates from icenReg Model</h2>
+
+<h3>Description</h3>
+
+<p>Gets probability or quantile estimates from a <code>ic_sp</code>, <code>ic_par</code> or <code>ic_bayes</code> object. 
+Provided estimates conditional on regression parameters found in <code>newdata</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getFitEsts(fit, newdata = NULL, p, q)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fit</code></td>
+<td>
+<p>model fit with <code>ic_par</code> or <code>ic_sp</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p><code>data.frame</code> containing covariates</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>Percentiles</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>Quantiles</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For the <code>ic_sp</code> and <code>ic_par</code>, the MLE estimate is returned. For <code>ic_bayes</code>, 
+the MAP estimate is returned. To compute the posterior means, use <code>sampleSurv</code>.
+</p>
+<p>If <code>newdata</code> is left blank, baseline estimates will be returned (i.e. all covariates = 0). 
+If <code>p</code> is provided, will return the estimated Q(p | x), where Q is the inverse of F. If <code>q</code> is provided, 
+will return the estimated F(q | x). If neither <code>p</code> nor <code>q</code> are provided, 
+the estimated conditional median is returned.
+</p>
+<p>In the case of <code>ic_sp</code>, the MLE of the baseline survival is not necessarily unique, 
+as probability mass is assigned to disjoint Turnbull intervals, but the likelihood function is 
+indifferent to how probability mass is assigned within these intervals. In order to have a well 
+defined estimate returned, we assume probability is assigned uniformly in these intervals. 
+In otherwords, we return *a* maximum likelihood estimate, but don't attempt to characterize *all* maximum 
+likelihood estimates with this function. If that is desired, all the information needed can be 
+extracted with <code>getSCurves</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Clifford Anderson-Bergman
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">simdata &lt;- simIC_weib(n = 500, b1 = .3, b2 = -.3,
+inspections = 6, inspectLength = 1)
+fit &lt;- ic_par(Surv(l, u, type = 'interval2') ~ x1 + x2,
+             data = simdata)
+new_data &lt;- data.frame(x1 = c(1,2), x2 = c(-1,1))
+rownames(new_data) &lt;- c('grp1', 'grp2')
+
+estQ &lt;- getFitEsts(fit, new_data, p = c(.25, .75))
+
+estP &lt;- getFitEsts(fit, q = 400)
+</code></pre>
+
+
+</div>

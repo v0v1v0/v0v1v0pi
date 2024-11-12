@@ -1,0 +1,171 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>report</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generates report about a conducted igate.</h2>
+
+<h3>Description</h3>
+
+<p>Takes results from a previous igate and automatically generates a html report
+for it. Be aware that running this function will create an html document in your current working directory.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">report(df, versus = 8, target, type = "continuous", test = "w",
+  ssv = NULL, outlier_removal_target = TRUE,
+  outlier_removal_ssv = TRUE, good_outcome = "low", results_path,
+  validation = FALSE, validation_path = NULL,
+  validation_counts = NULL, validation_summary = NULL,
+  image_directory = tempdir(), output_name = NULL, output_directory)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>The data frame that was analysed with <code>igate</code> or <code>categorical.igate</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>versus</code></td>
+<td>
+<p>What value of <code>versus</code> was used?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target</code></td>
+<td>
+<p>What <code>target</code> was used?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Was <code>igate</code> (use <code>type = "continuous"</code>) or <code>categorical.igate</code> (use <code>type = "categorical"</code>) conducted?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test</code></td>
+<td>
+<p>Which hypothesis test was used alongside the counting method?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ssv</code></td>
+<td>
+<p>Which <code>ssv</code> have been used in the analysis? If <code>NULL</code>, it
+will be assumed that <code>ssv = NULL</code> was passed to <code>igate</code> or <code>categorical.igate</code>
+and all numeric variables in <code>df</code> will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outlier_removal_target</code></td>
+<td>
+<p>Was outlier removal conducted for <code>target</code>? If <code>type == "categorical"</code>
+this is set to <code>FALSE</code> automatically.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outlier_removal_ssv</code></td>
+<td>
+<p>Was outlier removal conducted for each <code>ssv</code>?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>good_outcome</code></td>
+<td>
+<p>Are <code>"low"</code> or <code>"high"</code> values of <code>target</code> good? Or, in
+case of a categorical <code>target</code> the name of the best category as a string.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>results_path</code></td>
+<td>
+<p>Name of R object (as string) containing the results of <code>igate</code> or <code>categorical.igate</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>validation</code></td>
+<td>
+<p>Logical. Has validation of the results been performed?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>validation_path</code></td>
+<td>
+<p>Name R object (as string) containing the validated observations, i.e. first data frame returned by <code>validate</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>validation_counts</code></td>
+<td>
+<p>Name of R object (as string) containing the counts from validation, i.e. the second data frame returned by <code>validate</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>validation_summary</code></td>
+<td>
+<p>Name of R object (as string) containing the summary of <code>validation_path</code>, i.e. the third data frame returned by <code>validate</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>image_directory</code></td>
+<td>
+<p>Directory which contains the plots from <code>igate</code>, <code>igate.regressions</code> etc.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output_name</code></td>
+<td>
+<p>Desired name of the output file. File extension .html will be added automatically if not supplied.
+If <code>NULL</code> will be *iGATE_Report.html*.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output_directory</code></td>
+<td>
+<p>Directory into which the report should be saved. To save to the current working directory,
+use <code>output_directory = getwd()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An html file named "iGATE_Report.html" will be output to the current working directory, containing details
+about the conducted analysis. This includes a list of the analysed SSV, as well as tables with the results from
+<code>igate</code>/ <code>categorical.igate</code> and plots from <code>igate.regressions</code>/
+<code>categorical.freqplot</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## Example for categorical target variable
+# If you want to conduct an igate analysis from scratch, running report
+# is the last step and relies on executing the other functions in this package first.
+# Run categorical.igate
+df &lt;- mtcars
+df$cyl &lt;- as.factor(df$cyl)
+results &lt;- categorical.igate(df, target = "cyl", best.cat = "8", worst.cat = "4")
+# Produce density plots
+# Suppose you only want to analyse further the first three identified ssv
+results &lt;- results[1:3,]
+categorical.freqplot(mtcars, target = "cyl", ssv = results$Causes , savePlots = TRUE)
+
+report(df = df, target = "cyl", type = "categorical", good_outcome = "8",
+results_path = "results",
+output_name = "testing_igate", output_directory = tempdir())
+
+
+</code></pre>
+
+
+</div>

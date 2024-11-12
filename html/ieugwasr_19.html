@@ -1,0 +1,113 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ld_clump</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Perform LD clumping on SNP data</h2>
+
+<h3>Description</h3>
+
+<p>Uses PLINK clumping method, where SNPs in LD within a particular window will be pruned.
+The SNP with the lowest p-value is retained.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ld_clump(
+  dat = NULL,
+  clump_kb = 10000,
+  clump_r2 = 0.001,
+  clump_p = 0.99,
+  pop = "EUR",
+  opengwas_jwt = get_opengwas_jwt(),
+  bfile = NULL,
+  plink_bin = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dat</code></td>
+<td>
+<p>Dataframe. Must have a variant name column (<code>rsid</code>) and pval column called <code>pval</code>.
+If <code>id</code> is present then clumping will be done per unique id.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clump_kb</code></td>
+<td>
+<p>Clumping kb window. Default is very strict, <code>10000</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clump_r2</code></td>
+<td>
+<p>Clumping r2 threshold. Default is very strict, <code>0.001</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clump_p</code></td>
+<td>
+<p>Clumping sig level for index variants. Default = <code>1</code> (i.e. no threshold)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pop</code></td>
+<td>
+<p>Super-population to use as reference panel. Default = <code>"EUR"</code>.
+Options are <code>"EUR"</code>, <code>"SAS"</code>, <code>"EAS"</code>, <code>"AFR"</code>, <code>"AMR"</code>.
+<code>'legacy'</code> also available - which is a previously used verison of the EUR
+panel with a slightly different set of markers</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>opengwas_jwt</code></td>
+<td>
+<p>Used to authenticate protected endpoints. Login to <a href="https://api.opengwas.io">https://api.opengwas.io</a> to obtain a jwt. Provide the jwt string here, or store in .Renviron under the keyname OPENGWAS_JWT.#'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bfile</code></td>
+<td>
+<p>If this is provided then will use the API. Default = <code>NULL</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plink_bin</code></td>
+<td>
+<p>If <code>NULL</code> and <code>bfile</code> is not <code>NULL</code> then will detect
+packaged plink binary for specific OS. Otherwise specify path to plink binary.
+Default = <code>NULL</code></p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function interacts with the OpenGWAS API, which houses LD reference panels
+for the 5 super-populations in the 1000 genomes reference panel.
+It includes only bi-allelic SNPs with MAF &gt; 0.01, so it's quite possible that
+a variant you want to include in the clumping process will be absent.
+If it is absent, it will be automatically excluded from the results.
+</p>
+<p>You can check if your variants are present in the LD reference panel using
+<code>ld_reflookup()</code>.
+</p>
+<p>This function does put load on the OpenGWAS servers, which makes life more
+difficult for other users. We have implemented a method and made available
+the LD reference panels to perform clumping locally, see
+<code>ld_clump()</code> and related vignettes for details.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Data frame
+</p>
+
+
+</div>

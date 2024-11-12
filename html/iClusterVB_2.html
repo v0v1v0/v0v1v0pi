@@ -1,0 +1,264 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iClusterVB</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fast Integrative Clustering for High-Dimensional Multi-View Data Using
+Variational Bayesian Inference</h2>
+
+<h3>Description</h3>
+
+<p><code>iClusterVB</code> offers a novel, fast, and integrative approach to
+clustering high-dimensional, mixed-type, and multi-view data. By employing
+variational Bayesian inference, iClusterVB facilitates effective feature
+selection and identification of disease subtypes, enhancing clinical
+decision-making.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iClusterVB(
+  mydata,
+  dist,
+  K = 10,
+  initial_method = "VarSelLCM",
+  VS_method = 0,
+  initial_cluster = NULL,
+  initial_vs_prob = NULL,
+  initial_fit = NULL,
+  initial_omega = NULL,
+  input_hyper_parameters = NULL,
+  max_iter = 200,
+  early_stop = 1,
+  per = 10,
+  convergence_threshold = 1e-04
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>mydata</code></td>
+<td>
+<p>A list of length R, where R is the number of datasets,
+containing the input data.
+</p>
+
+<ul><li>
+<p> Note: For <b>categorical</b> data, <code>0</code>'s must be re-coded to
+another, non-<code>0</code> value.
+</p>
+</li></ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist</code></td>
+<td>
+<p>A vector of length R specifying the type of data or distribution.
+Options include: 'gaussian' (for continuous data), 'multinomial' (for
+binary or categorical data), and 'poisson' (for count data).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>The maximum number of clusters, with a default value of 10. The
+algorithm will converge to a model with dominant clusters, removing
+redundant clusters and automating the determination of the number of
+clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial_method</code></td>
+<td>
+<p>The initialization method for cluster allocation.
+Options include: "VarSelLCM" (default), "random", "kproto" (k-prototypes),
+"kmeans" (continuous data only), "mclust" (continuous data only), or "lca"
+(poLCA, categorical data only).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>VS_method</code></td>
+<td>
+<p>The variable/feature selection method. Options are 0 for
+clustering without variable/feature selection (default) and 1 for
+clustering with variable/feature selection.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial_cluster</code></td>
+<td>
+<p>The initial cluster membership. The default is NULL,
+which uses initial_method for initial cluster allocation. If not NULL, it
+will override the initial values setting for this parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial_vs_prob</code></td>
+<td>
+<p>The initial variable/feature selection probability, a
+scalar. The default is NULL, which assigns a value of 0.5.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial_fit</code></td>
+<td>
+<p>Initial values based on a previously fitted iClusterVB
+model (an iClusterVB object). The default is NULL.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial_omega</code></td>
+<td>
+<p>Customized initial values for feature inclusion
+probabilities. The default is NULL. If not NULL, it will override the
+initial values setting for this parameter. If VS_method = 1, initial_omega
+is a list of length R, with each element being an array with dimensions
+{dim=c(N, p[[r]])}. Here, N is the sample size and p[[r]] is the
+number of features for dataset r, where r = 1, ..., R.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>input_hyper_parameters</code></td>
+<td>
+<p>A list of the initial hyper-parameters of the
+prior distributions for the model. The default is NULL, which assigns
+alpha_00 = 0.001, mu_00 = 0, s2_00 = 100, a_00 = 1, b_00 = 1,kappa_00 = 1,
+u_00 = 1, v_00 = 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_iter</code></td>
+<td>
+<p>The maximum number of iterations for the VB algorithm. The
+default is 200.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>early_stop</code></td>
+<td>
+<p>Whether to stop the algorithm upon convergence or to
+continue until <code>max_iter</code> is reached. Options are 1 (default) to stop
+when the algorithm converges, and 0 to stop only when <code>max_iter</code> is
+reached.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>per</code></td>
+<td>
+<p>Print information every "per" iterations. The default is 10.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>convergence_threshold</code></td>
+<td>
+<p>The convergence threshold for the change in
+ELBO. The default is 0.0001.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The <code>iClusterVB</code> function creates an object (list) of class
+<code>iClusterVB</code>. Relevant outputs include:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td>
+<code>elbo</code>:</td>
+<td>
+<p> The evidence lower bound for each iteration.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td>
+<code>cluster</code>:</td>
+<td>
+<p> The cluster assigned to each individual.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td>
+<code>initial_values</code>:</td>
+<td>
+<p> A list of the initial values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td>
+<code>hyper_parameters</code>:</td>
+<td>
+<p> A list of the hyper-parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td>
+<code>model_parameters</code>:</td>
+<td>
+<p>A list of the model parameters after the
+algorithm is run.</p>
+</td>
+</tr>
+</table>
+<ul><li>
+<p> Of particular interest is <code>rho</code>, a list of the posterior
+inclusion probabilities for the features in each of the data views. This is
+the probability of including a certain predictor in the model, given the
+observations. This is only available if <code>VS_method = 1</code>.
+</p>
+</li></ul>
+<h3>Note</h3>
+
+<p>If any of the data views are "gaussian", please include them
+<b>first</b>, both in the input data <code>mydata</code> and correspondingly in
+the
+distribution vector <code>dist</code>. For example, <code>dist &lt;-
+  c("gaussian","gaussian", "poisson", "multinomial")</code>, and <b>not</b>
+<code>dist &lt;- c("poisson", "gaussian","gaussian", "multinomial")</code> or
+<code>dist &lt;- c("gaussian", "poisson", "gaussian", "multinomial")</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># sim_data comes with the iClusterVB package.
+dat1 &lt;- list(
+  gauss_1 = sim_data$continuous1_data[c(1:20, 61:80, 121:140, 181:200), 1:75],
+  gauss_2 = sim_data$continuous2_data[c(1:20, 61:80, 121:140, 181:200), 1:75],
+  poisson_1 = sim_data$count_data[c(1:20, 61:80, 121:140, 181:200), 1:75],
+  multinomial_1 = sim_data$binary_data[c(1:20, 61:80, 121:140, 181:200), 1:75]
+)
+
+# We re-code `0`s to `2`s
+
+dat1$multinomial_1[dat1$multinomial_1 == 0] &lt;- 2
+
+dist &lt;- c(
+  "gaussian", "gaussian",
+  "poisson", "multinomial"
+)
+
+# Note: `max_iter` is a time-intensive step.
+# For the purpose of testing the code, use a small value (e.g. 10).
+# For more accurate results, use a larger value (e.g. 200).
+
+fit_iClusterVB &lt;- iClusterVB(
+  mydata = dat1,
+  dist = dist,
+  K = 4,
+  initial_method = "VarSelLCM",
+  VS_method = 1,
+  max_iter = 50
+)
+
+# We can obtain a summary using the summary() function
+summary(fit_iClusterVB)
+
+</code></pre>
+
+
+</div>

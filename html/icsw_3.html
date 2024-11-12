@@ -1,0 +1,173 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>compliance.score</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Estimate compliance scores using covariates.
+</h2>
+
+<h3>Description</h3>
+
+<p>Estimate probability that units are compliers using generalized linear models for
+probability of being a complier or always-taker and for being an always-taker conditional
+on being a complier or always-taker. These compliance scores can be used in inverse
+probability weighting to estimate average treatment effects. In the case of one-sided non-compliance,
+this estimation is considerably simpler.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">compliance.score(D, Z, W, weights = NULL,
+  link = qnorm, inv.link = pnorm, genoud = TRUE,
+  num.iter = ifelse(genoud, 200, 10000),
+  one.sided = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+
+<p>Binary treatment of interest.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Z</code></td>
+<td>
+
+<p>Binary instrument.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>W</code></td>
+<td>
+
+<p>Matrix of covariates for compliance model.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+
+<p>Observation weights.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>link</code></td>
+<td>
+
+<p>Link function applied for linear models. Defaults to probit link function.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inv.link</code></td>
+<td>
+
+<p>Inverse link function (i.e., mean function) applied for linear models. Defaults to probit mean function.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>genoud</code></td>
+<td>
+
+<p>Whether to use global optimization via genetic optimization from package <code>rgenoud</code>.
+Default, and highly recommended because the likelihood need not be concave.
+Otherwise, use the BOBYQA algorithm for constrained optimization from package <code>minqa</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.iter</code></td>
+<td>
+
+<p>Number of iterations of optimization routine.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>one.sided</code></td>
+<td>
+
+<p>Whether non-compliance is one-sided (logical). When compliance is one-sided, the previous
+four arguments are ignored, and the compliance scores are estimated with probit regression.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A unit <code class="reqn">i</code> is a complier if <code class="reqn">D_{i1} &gt; D_{i0}</code>, where <code class="reqn">D_{i1}</code> and
+<code class="reqn">D_{i0}</code> are the potential treatments for unit <code class="reqn">i</code> when <code class="reqn">Z</code> is set to
+1 and 0. This is a latent (unobserved) characteristic of individual units, since
+each unit is only observed with one value of <code class="reqn">Z</code>.
+</p>
+<p>By default this function uses genetic optimization via <code>genoud</code> because
+the loss function for the complier scores is not necessarily convex.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Vector of estimated probabilities of being a complier (i.e., compliance scores).
+</p>
+
+
+<h3>Note</h3>
+
+<p>Requires <code>rgenoud</code> package if <code>genoud</code> = TRUE. Requires <code>minqa</code> package if <code>genoud</code> = FALSE. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Peter M. Aronow &lt;peter.aronow@yale.edu&gt;, Dean Eckles &lt;icsw@deaneckles.com&gt;, Kyle Peyton &lt;kyle.peyton@yale.edu&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Peter M. Aronow and Allison Carnegie. (2013). Beyond LATE: Estimation of the average treatment effect with an instrumental variable. <em>Political Analysis</em>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Used by <code>icsw.tsls</code>. 
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Load example dataset, see help(FoxDebate) for details
+data(FoxDebate)
+
+# Matrix of covariates
+covmat &lt;- with(FoxDebate, cbind(partyid, pnintst, watchnat, educad, readnews, 
+                                gender, income, white))
+
+# Estimate compliance scores with covariates, assuming (default) 
+#   case of two-sided non-compliance
+cscoreout &lt;- with(FoxDebate, compliance.score(D = watchpro, Z = conditn,
+                                              W = covmat))
+
+# Extract vector of estimated compliance scores
+cscore &lt;- cscoreout$C.score
+summary(cscore)
+
+</code></pre>
+
+
+</div>

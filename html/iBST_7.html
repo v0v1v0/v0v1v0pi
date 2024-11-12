@@ -1,0 +1,208 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>permute_select_surv</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+permutation variable selection
+</h2>
+
+<h3>Description</h3>
+
+<p>Variable selection using the permutation test on several scores of importance: <code>IIS</code>, <code>DIIS</code> and <code>DEPTH</code>. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">permute_select_surv(xdata, 
+    Y.names, 
+    P.names, 
+    T.names, 
+    importance = "IIS", 
+    method = "R2",
+    Bag, 
+    args.rpart, 
+    args.parallel = list(numWorkers = 1), 
+    nperm = 50)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>xdata</code></td>
+<td>
+
+<p>The learning data frame
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Y.names</code></td>
+<td>
+
+<p>A vector of the names of the two variables of interest (the time-to-event is follow by the event indicator)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>P.names</code></td>
+<td>
+
+<p>The names of independant variables acting on the non-susceptible population (the plateau)
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>T.names</code></td>
+<td>
+
+<p>The names of independant variables acting on the survival of the susceptible population
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>importance</code></td>
+<td>
+
+<p>The importance score to consider: either <code>IIS</code>, <code>DIIS</code> or <code>DEPTH</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>The splitting method: either <code>"R2"</code> for the proposed pseudo-R2 criterion or <code>"LR"</code> for the adjusted Logrank criterion
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Bag</code></td>
+<td>
+
+<p>The number of Bagging samples to consider
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>args.rpart</code></td>
+<td>
+
+<p>The improper survival tree parameters: a list of options that control details of the rpart algorithm.
+<code>minbucket</code>: the minimum number of observations in any terminal &lt;leaf&gt; node; <code>cp</code>: 
+complexity parameter (Any split that does not decrease the overall lack of fit by a factor of
+cp is not attempted); <code>maxdepth</code>:  the maximum depth of any node of the final tree, with
+the root node counted as depth 0. ...
+See <code>rpart.control</code> for further details 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>args.parallel</code></td>
+<td>
+
+<p>a list  containing the number of parallel computing arguments: The number of workers, the type of parallelization to achieve, ...  see <code>mclapply</code> for further details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nperm</code></td>
+<td>
+
+<p>The number of permutation samples to consider for the permutation test
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Testing weither the importance score is null or not.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of five elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>pvalperm1</code></td>
+<td>
+<p>The permutation test P-values ranking in decreasing order</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pvalperm2</code></td>
+<td>
+<p>The permutation test P-values ranking in decreasing order considering an approximate gaussian distribution under the null hypothesis</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pvalKS</code></td>
+<td>
+<p>The Kolmogorov-Smirnov P-values of the comparisons between the observed importance under the null hypothesis and a theoretical gaussian distribution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>IMPH1</code></td>
+<td>
+<p>The observed importance score </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PERMH0</code></td>
+<td>
+<p> A matrix with the importance scores for each permutation sample in each column</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Cyprien Mbogning and Philippe Broet
+</p>
+
+
+<h3>References</h3>
+
+<p>Mbogning, C. and Broet, P. (2016). Bagging survival tree procedure for
+variable selection and prediction in the presence of nonsusceptible patients.
+BMC bioinformatics, 17(1), 1.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>Bagg_Surv</code> <code>Bagg_pred_Surv</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+ myarg = list(cp = 0, maxcompete = 0, maxsurrogate = 0, maxdepth = 2)
+ Y.names = c("T3" ,"D3")
+ P.names = 'Z2'
+ T.names = c("Z1", paste("Z", 3:11, sep = ''))
+ mybag = 40
+ set.seed(5000)
+ 
+ data(burn)
+ resperm0 &lt;- suppressWarnings(permute_select_surv(xdata = burn, 
+       Y.names, 
+       P.names, 
+       T.names, 
+       method = "LR", 
+       Bag = mybag, 
+       args.rpart = myarg, 
+       args.parallel = list(numWorkers = 1), 
+       nperm = 150))
+ 
+## End(Not run)
+</code></pre>
+
+
+</div>

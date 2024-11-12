@@ -1,0 +1,103 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sample_dat</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Sample time series data</h2>
+
+<h3>Description</h3>
+
+<p>Sample time series using completely at random (MCAR) or at random (MAR)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sample_dat(datin, smps = "mcar", repetition = 10, b = 10,
+  blck = 50, blckper = TRUE, plot = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>datin</code></td>
+<td>
+<p>input numeric vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smps</code></td>
+<td>
+<p>chr string of sampling type to use, options are <code>"mcar"</code> or <code>"mar"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>repetition</code></td>
+<td>
+<p>numeric for repetitions to be done for each missPercent value</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>numeric indicating the total amount of missing data as a percentage to remove from the complete time series</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>blck</code></td>
+<td>
+<p>numeric indicating block sizes as a proportion of the sample size for the missing data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>blckper</code></td>
+<td>
+<p>logical indicating if the value passed to <code>blck</code> is a proportion of <code>missper</code>, i.e., blocks are to be sized as a percentage of the total size of the missing data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>logical indicating if a plot is returned showing the sampled data, plots only the first repetition</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Input data with <code>NA</code> values for the sampled observations if <code>plot = FALSE</code>, otherwise a plot showing the missing observations over the complete dataset.
+</p>
+<p>The missing data if <code>smps = 'mar'</code> are based on random sampling by blocks.  The start location of each block is random and overlapping blocks are not counted uniquely for the required sample size given by <code>b</code>.  Final blocks are truncated to ensure the correct value of <code>b</code> is returned.  Blocks are fixed at 1 if the proportion is too small, in which case <code>"mcar"</code> should be used.  Block sizes are also truncated to the required sample size if the input value is too large if <code>blckper = FALSE</code>.  For the latter case, this is the same as setting <code>blck = 1</code> and <code>blckper = TRUE</code>.
+</p>
+<p>For all cases, the first and last observation will never be removed to allow comparability of interpolation schemes.  This is especially relevant for cases when <code>b</code> is large and <code>smps = 'mar'</code> is used.  For example, <code>method = na.approx</code> will have rmse = 0 for a dataset where the removed block includes the last n observations. This result could provide misleading information in comparing methods.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">a &lt;- rnorm(1000)
+
+# default sampling
+sample_dat(a)
+
+# use mar sampling
+sample_dat(a, smps = 'mar')
+
+# show a plot of one repetition
+sample_dat(a, plot = TRUE)
+
+# show a plot of one repetition, mar sampling
+sample_dat(a, smps = 'mar', plot = TRUE)
+
+# change plot aesthetics
+library(ggplot2)
+p &lt;- sample_dat(a, plot = TRUE)
+p + scale_colour_manual(values = c('black', 'grey'))
+p + theme_minimal()
+p + ggtitle('Example of simulating missing data')
+</code></pre>
+
+
+</div>

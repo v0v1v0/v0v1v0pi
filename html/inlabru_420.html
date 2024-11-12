@@ -1,0 +1,78 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>point2count</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Convert a plot sample of points into one of counts.</h2>
+
+<h3>Description</h3>
+
+<p>Converts a plot sample with locations of each point within each plot, into a plot
+sample with only the count within each plot.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">point2count(plots, dets)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>plots</code></td>
+<td>
+<p>A <code>SpatialPolygonsDataFrame</code> object containing the plots that were
+sampled.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dets</code></td>
+<td>
+<p>A <code>SpatialPointsDataFrame</code> object containing the locations of the
+points within the plots.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A <code>SpatialPolygonsDataFrame</code> with counts in each plot contained in
+slot <code style="white-space: pre;">⁠@data$n⁠</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Some features require the raster package
+if (bru_safe_sp() &amp;&amp;
+  require("sp") &amp;&amp;
+  require("raster", quietly = TRUE) &amp;&amp;
+  require("ggplot2", quietly = TRUE)) {
+  data(gorillas, package = "inlabru")
+  plotpts &lt;- plotsample(gorillas$nests, gorillas$boundary,
+    x.ppn = 0.4, y.ppn = 0.4, nx = 5, ny = 5
+  )
+  p1 &lt;- ggplot() +
+    gg(plotpts$plots) +
+    gg(plotpts$dets) +
+    gg(gorillas$boundary)
+  countdata &lt;- point2count(plotpts$plots, plotpts$dets)
+  x &lt;- coordinates(countdata)[, 1]
+  y &lt;- coordinates(countdata)[, 2]
+  count &lt;- countdata@data$n
+  p2 &lt;- ggplot() +
+    gg(gorillas$boundary) +
+    gg(plotpts$plots) +
+    geom_text(aes(label = count, x = x, y = y))
+  multiplot(p1, p2, cols = 2)
+}
+
+
+</code></pre>
+
+
+</div>

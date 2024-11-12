@@ -1,0 +1,83 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ivalidate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Perform interface checks on dataframe inputs using enclosing function formal
+parameter definitions</h2>
+
+<h3>Description</h3>
+
+<p><code>ivalidate(...)</code> is intended to be used within a function to check the validity of a data
+frame parameter (usually the first parameter) against an <code>ispec</code> which is
+given as a default value of a formal parameter.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ivalidate(df = NULL, ..., .imap = imapper(), .prune = FALSE, .default = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>a dataframe - if missing then the first parameter of the calling
+function is assumed to be a dataframe.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>not used but <code>ivalidate</code> should be included in call to inherit
+<code>.imap</code> from the caller function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.imap</code></td>
+<td>
+<p>a set of mappings as an <code>imapper</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.prune</code></td>
+<td>
+<p>get rid of excess columns that are not in the spec.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.default</code></td>
+<td>
+<p>a default dataframe conforming to the specification. This
+overrides any defaults defined in the interface specification</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a dataframe based on <code>df</code> with validity checks passed and <code>.imap</code>
+mappings applied if present
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x = function(df = iface(col1 = integer ~ "an integer column" ), ...) {
+  df = ivalidate(...)
+  return(df)
+}
+input=tibble::tibble(col1 = c(1,2,3))
+x(input)
+
+# This fails because col1 is not coercable to integer
+input2=tibble::tibble(col1 = c(1.5,2,3))
+try(x(input2))
+</code></pre>
+
+
+</div>

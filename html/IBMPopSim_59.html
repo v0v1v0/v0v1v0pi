@@ -1,0 +1,156 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>popsim</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulation of a model.</h2>
+
+<h3>Description</h3>
+
+<p>This function simulates the random evolution of an IBM.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">popsim(
+  model,
+  initial_population,
+  events_bounds,
+  parameters = NULL,
+  age_max = Inf,
+  time,
+  multithreading = FALSE,
+  num_threads = NULL,
+  clean_step = NULL,
+  clean_ratio = 0.1,
+  seed = NULL,
+  verbose = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>Model resulting from a call to the function <code>mk_model</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initial_population</code></td>
+<td>
+<p>Object of population class representing the initial population.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>events_bounds</code></td>
+<td>
+<p>Named vector of events bounds, with names corresponding to events names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parameters</code></td>
+<td>
+<p>List of model parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>age_max</code></td>
+<td>
+<p>Maximum age of individuals in the population (<code>Inf</code> by default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time</code></td>
+<td>
+<p>Final time (Numeric). Can be of length 1 or a vector of simulation discretized times.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>multithreading</code></td>
+<td>
+<p>Logical for multithread activation, <code>FALSE</code> by default. Should be only activated for IBM simulation with no interactions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num_threads</code></td>
+<td>
+<p><em>(Optional)</em> Number of threads used for multithreading. Set by default to the number of concurrent threads supported by the available hardware implementation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clean_step</code></td>
+<td>
+<p><em>(Optional)</em> Optional parameter for improving simulation time. Time step for removing dead (or exited) individuals from the population. By default, equal to age_max.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>clean_ratio</code></td>
+<td>
+<p><em>(Optional)</em> Optional parameter for improving simulation time. 0.1 by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p><em>(Optional)</em> Random generator seed, random by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p><em>(Optional)</em> Activate verbose output, FALSE by default.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>List composed of </p>
+
+<dl>
+<dt>arguments</dt>
+<dd>
+<p>Simulation inputs (initial population, parameters value, multithreading...)</p>
+</dd>
+<dt>logs</dt>
+<dd>
+<p>Simulation logs (algorithm duration, accepted/rejected events...).</p>
+</dd>
+<dt>population</dt>
+<dd>
+<p>If <code>time</code> is of length 1, population is an object of type population containing of all individuals who lived in the population in the time interval <code>[0,time]</code>. If <code>time</code> is a vector (<code>time[1], ..., time[n]</code>), <code>population</code> is a list of <code>n</code> objects of type population, each representing the state of the population at time <code>time[i]</code>, for <code>i = 1,..., n</code>.</p>
+</dd>
+</dl>
+<h3>See Also</h3>
+
+<p><code>mk_model</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+init_size &lt;- 100000
+pop_df &lt;- data.frame(birth = rep(0, init_size), death = NA)
+pop &lt;- population(pop_df)
+
+birth = mk_event_poisson(type = 'birth', intensity = 'lambda')
+death = mk_event_poisson(type = 'death', intensity = 'mu')
+params = list('lambda' = 100, 'mu' = 100)
+birth_death &lt;- mk_model(events = list(birth, death),
+                       parameters = params)
+
+sim_out &lt;- popsim(model = birth_death,
+                 initial_population = pop,
+                 events_bounds = c('birth' = params$lambda, 'death' = params$mu),
+                 parameters = params,
+                 time = 10)
+                       
+</code></pre>
+
+
+</div>

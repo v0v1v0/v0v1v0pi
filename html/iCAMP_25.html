@@ -1,0 +1,141 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>icamp.cate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Summarize iCAMP result for different categories of taxa
+</h2>
+
+<h3>Description</h3>
+
+<p>This function is to calculate various statistic index to assess relative importance of each process on different categories of taxa. The categories can be defined in various ways. For example, core, consistently and occasionally rare taxa; or different phyla; or various particular functional groups.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">icamp.cate(icamp.bins.result, comm, cate, treat = NULL,
+           silent = FALSE, between.group = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>icamp.bins.result</code></td>
+<td>
+<p>list object, the output from <code>icamp.bins</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comm</code></td>
+<td>
+<p>matrix or data.frame, community data, each row is a sample or site, each colname is a taxon (a species or OTU or ASV), thus rownames should be sample IDs, colnames should be taxa IDs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cate</code></td>
+<td>
+<p>matrix or data.frame, indicating the category of each taxon, rownames are taxa IDs. If the matrix has multiple columns, only the first column will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>treat</code></td>
+<td>
+<p>matrix or data.frame, indicating the group or treatment of each sample, rownames are sample IDs. Allow to input multi-column matrix, different columns represent different ways to group the samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>silent</code></td>
+<td>
+<p>logic, if FALSE, some messages will show during calculation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>between.group</code></td>
+<td>
+<p>logic, whether to analyze between-treatment turnovers.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function simply sums up the relative abundance of taxa of a category in different bins governed by a process to summarize the relative importance of the process on the category.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Output is a list object.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Ptuvx</code></td>
+<td>
+<p>Relative importance of each process in governing each category's turnover between each pair of communities (samples).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Ptx</code></td>
+<td>
+<p>Relative importance of each process in governing each category's turnovers among a group of samples.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Version 3: 2021.5.24, set NA if a cate has no taxon in a turnover; solve the problem that group means of different processes do not add up to 1.
+Version 2: 2021.1.7, add help document; fixed NAN error.
+Version 1: 2020.12.9.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Daliang Ning
+</p>
+
+
+<h3>References</h3>
+
+<p>Ning, D., Yuan, M., Wu, L., Zhang, Y., Guo, X., Zhou, X. et al. (2020). A quantitative framework reveals ecological drivers of grassland microbial community assembly in response to warming. Nature Communications, 11, 4717.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>icamp.bins</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("icamp.out")
+data("example.data")
+comm=example.data$comm
+treatment=example.data$treat
+classification=example.data$classification
+rand.time=20 # usually use 1000 for real data.
+# 1 # summarize each bin
+icampbin=icamp.bins(icamp.detail = icamp.out, treat = treatment,
+                    clas = classification, boot = TRUE,
+                    rand.time = rand.time, between.group = TRUE)
+
+# 2 # define category
+cate=data.frame(type=rep("others",ncol(comm)),stringsAsFactors = FALSE)
+rownames(cate)=colnames(comm)
+tax.frequency=colSums(comm&gt;0)/nrow(comm)
+tax.relative.ab=colMeans(comm/rowSums(comm))
+cate[which(tax.frequency&gt;0.75 &amp; tax.relative.ab&gt;0.05),1]="core"
+cate[which(tax.relative.ab&lt;0.02),1]="rare"
+
+# 3 # summarize each category
+icampcate=icamp.cate(icamp.bins.result = icampbin, comm = comm, cate = cate,
+                     treat = treatment, silent = FALSE, between.group = TRUE)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,125 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_table_from_maf</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Produce a Mutation Matrix from a MAF</h2>
+
+<h3>Description</h3>
+
+<p>A function to, given a mutation annotation dataset with columns for sample barcode, gene name and mutation type, to reformulate this as a mutation matrix,
+with rows denoting samples, columns denoting gene/mutation type combinations, and the individual entries giving the number of mutations observed. This
+will likely be very sparse, so we save it as a sparse matrix for efficiency.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_table_from_maf(
+  maf,
+  sample_list = NULL,
+  gene_list = NULL,
+  acceptable_genes = NULL,
+  for_biomarker = "TIB",
+  include_synonymous = TRUE,
+  dictionary = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>maf</code></td>
+<td>
+<p>(dataframe)
+A table of annotated mutations containing the columns 'Tumor_Sample_Barcode', 'Hugo_Symbol', and 'Variant_Classification'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sample_list</code></td>
+<td>
+<p>(character)
+Optional parameter specifying the set of samples to include in the mutation matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gene_list</code></td>
+<td>
+<p>(character)
+Optional parameter specifying the set of genes to include in the mutation matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>acceptable_genes</code></td>
+<td>
+<p>(character)
+Optional parameter specifying a set of acceptable genes, for example those which are in an ensembl databse.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>for_biomarker</code></td>
+<td>
+<p>(character)
+Used for defining a dictionary of mutations. See the function get_mutation_dictionary() for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include_synonymous</code></td>
+<td>
+<p>(logical)
+Optional parameter specifying whether to include synonymous mutations in the mutation matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dictionary</code></td>
+<td>
+<p>(character)
+Optional parameter directly specifying the mutation dictionary to use. See the function get_mutation_dictionary() for details.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with the following entries:
+</p>
+
+<ul>
+<li>
+<p> matrix: A mutation matrix, a sparse matrix showing the number of mutations present in each sample, gene and mutation type.
+</p>
+</li>
+<li>
+<p> sample_list: A vector of characters specifying the samples included in the matrix: the rows of the mutation matrix correspond to each of these.
+</p>
+</li>
+<li>
+<p> gene_list: A vector of characters specifying the the genes included in the matrix.
+</p>
+</li>
+<li>
+<p> mut_types_list: A vector of characters specifying the mutation types (as grouped into an appropriate dictionary) to be included in the matrix.
+</p>
+</li>
+<li>
+<p> col_names: A vector of characters identifying the columns of the mutation matrix. Each entry will be comprised of two parts separated by the character
+'_', the first identifying the gene in question and the second identifying the mutation type. E.g. 'GENE1_NS" where 'GENE1' is an element of gene_list,
+and 'NS' is an element of the dictionary vector.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R"># We use the preloaded maf file example_maf_data
+# Now we make a mutation matrix
+table &lt;- get_table_from_maf(example_maf_data$maf, sample_list = paste0("SAMPLE_", 1:100))
+
+print(names(table))
+print(table$matrix[1:10,1:10])
+print(table$col_names[1:10])
+</code></pre>
+
+
+</div>

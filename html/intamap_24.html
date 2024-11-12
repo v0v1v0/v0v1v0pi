@@ -1,0 +1,309 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>interpolate</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> spatial interpolation </h2>
+
+<h3>Description</h3>
+
+<p><code>interpolate</code> is a function that interpolates spatial data </p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">interpolate(observations, predictionLocations, 
+            outputWhat = list(mean = TRUE, variance = TRUE), 
+            obsChar = NA, methodName = "automatic", maximumTime = 30, 
+            optList = list(), cv = FALSE, ...)
+interpolateBlock(observations, predictionLocations, outputWhat, 
+            blockWhat = "none", obsChar = NA, methodName = "automatic", 
+            maximumTime = 30, 
+            optList = list(), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>observations</code></td>
+<td>
+<p>observation data, object of class <code>SpatialPointsDataFrame</code>. 
+The observation to be interpolated has to be identified through the 
+column name <code>value</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predictionLocations</code></td>
+<td>
+<p> prediction locations, object of class <code>SpatialPoints</code>*, <code>SpatialPixels</code>* or <code>SpatialGrid</code>*, or the number of predictionLocations to be sampled from the boundaries of the observations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outputWhat</code></td>
+<td>
+<p> list with names what kind of output is expected, e.g.
+<code>outputWhat = list(mean=TRUE,variance=TRUE, nsim = 5)</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>blockWhat</code></td>
+<td>
+<p>List defining particular output for block predictions. See <code>createIntamapObject</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>obsChar</code></td>
+<td>
+<p>list with observation characteristics, used by some interpolation methods</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>methodName</code></td>
+<td>
+<p>name of interpolation method to be used, see spatialPredict for more details, or <code>automatic</code>, to let
+the method be decided by the program, based on maximumTime and type of variables input</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maximumTime</code></td>
+<td>
+<p>the maximum time available for interpolation, will be compared to the result of <code>predictTime</code> 
+for the requested method, or for finding the best interpolation method
+able to finish within this time</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optList</code></td>
+<td>
+<p>list; further options, mainly passed to <code>createIntamapObject</code>
+as the argument <code>params</code>, directly as arguments, but some are used
+locally in <code>interpolate</code> and <code>interpolateBlock</code>:
+</p>
+
+<dl>
+<dt>formulaString</dt>
+<dd>
+<p>passed as argument to <code>createIntamapObject</code>,
+if no formulaString is given, it will default to
+<code>value~1</code> if <code>observations</code> has a column named
+<code>value</code> or to <code>col1 ~ 1</code> where <code>col1</code>
+is the first column of the observations </p>
+</dd>
+<dt>set.seed</dt>
+<dd>
+<p>the possibility to pass a seed value to 
+<code>interpolate</code>, to assure reproducible results also
+for methods relying on random numbers</p>
+</dd>
+<dt>methodParameters</dt>
+<dd>
+<p>methodParameters from an earlier run, see also <code>methodParameters</code></p>
+</dd>
+<dt>model</dt>
+<dd>
+<p>defining which variogram model(s) to fit when <code>methodName = "automap"</code></p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cv</code></td>
+<td>
+<p>If cross-validation should be done</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments to be passed to other functions</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The functions <code>interpolate</code> and <code>interpolateBlock</code>  are particularly implemented for being called by 
+a Web Processing Server (WPS), but they can also be used interactively. The only necessary 
+arguments are <code>observations</code> and <code>predictionLocations</code>. It is also recommended
+to set <code>outputWhat</code>, and <code>blockWhat</code> if necessary. If <code>outputWhat</code>
+contains <code>nsim</code>, the return table will also contain a number of realisations,
+for methods able to return simulations. 
+
+</p>
+<p><code>interpolate</code> can use different interpolation methods for the result. The function
+will internally call the following functions which can be method specific.
+</p>
+
+<ul>
+<li> <p><code>preProcess</code>
+</p>
+</li>
+<li> <p><code>estimateParameters</code>
+</p>
+</li>
+<li> <p><code>spatialPredict</code>
+</p>
+</li>
+<li> <p><code>postProcess</code>
+</p>
+</li>
+</ul>
+<p>An indication of available methods can be given by <code>methods(estimateParameters)</code>
+or <code>methods(spatialPredict)</code>.
+The method can be set through the argument <code>methodName</code>, or through the 
+built-in automatic selection method. There are different criteria that helps 
+in selecting the right method for a particular data set. There are four 
+methods that are available for the automatic choice:
+<code>automap</code>, <code>psgp</code> (from the separate package <code>psgp</code>) 
+<code>copula</code> and <code>transgaussian</code> are the possibilities. 
+First of all, if observation errors are present, the <code>psgp</code> method is preferred. 
+If not, it is checked whether the data appear to deviate significantly from normality. 
+This is assumed to be the case if any of the tests below are TRUE:
+</p>
+<pre>
+      test[1] = length(boxplot.stats(dataObs)$out)/length(dataObs) &gt; 0.1
+      test[2] = fivenum(dataObs)[3] - fivenum(dataObs)[2] &lt; IQR(dataObs)/3
+      test[3] = fivenum(dataObs)[4] - fivenum(dataObs)[3] &lt; IQR(dataObs)/3
+      g = boxcox(dataObs ~ 1,lambda=seq(-2.5,2.5,len=101),plotit=FALSE)$y
+      test[4] = g[71] &lt; sort(g)[91]
+</pre>
+<p>where <code>fivenum</code> defines the Tukey five number statistic and 
+<code>IQR</code> finds the interquartile range of the data. If the minimum of 
+dataObs is &lt;= 0, min(dataObs) + sdev(dataObs) is added to all values.
+At last, the function calls <code>predictTime</code> for an estimate of the 
+prediction time. If any of the tests above were true and the estimated prediction time
+for <code>copula</code> prediction is below <code>maximumTime</code>, the <code>copula</code>
+method is chosen. If any of the
+tests were TRUE and the estimated prediction time is too long, <code>transGaussian</code> 
+kriging is chosen, as long as all values are above zero. If any of 
+the tests are true for a set of observations with negative or zero-values, 
+<code>automap</code> is chosen, but a warning is issued.
+</p>
+<p>The element <code>methodParameters</code> in the object being returned is a string that makes it possible
+to regenerate the variogram model or the copula parameters in <code>createIntamapObject</code>.
+This is particularly useful when the function is called through a WPS, when
+the element with the estimated parameters cannot be preserved in a state 
+that makes it possible to use them for a later call to <code>interpolate</code>.
+</p>
+<p>The possibility
+for doing parallel processing is enabled for some of the main methods.
+To be able to take advantage of multiple CPUs on a computer, the package
+<code>doParallel</code> must be downloaded, additionally the parameter nclus must be set to
+a value larger than 1. Parallel computation is not taken into account when 
+estimating the prediction times.
+</p>
+
+
+<h3>Value</h3>
+
+ 
+<p>An intamap object, which is a list with elements, see <code>intamap-package</code>. 
+The exact number and names of these elements might vary due to different methods applied,
+but the list below shows the most typical:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>observations</code></td>
+<td>
+<p>the observations, as a <code>Spatial*DataFrame</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predictionLocations</code></td>
+<td>
+<p>the prediction locations, as a <code>Spatial</code>-object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formulaString</code></td>
+<td>
+<p>the relationship between independent and dependent variables, 
+<code>value</code> or <code>obs</code> used if not given</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outputWhat</code></td>
+<td>
+<p>a list of the prediction types to return</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>anisPar</code></td>
+<td>
+<p>the estimated anisotropy parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variogramModel</code></td>
+<td>
+<p>the estimated parameter for the method, can also be e.g. <code>copulaParams</code>
+for the copula method or <code>inverseDistancePower</code> for inverse distance power method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>methodParameters</code></td>
+<td>
+<p>a string, that when parsed, can be used to regenerate
+the variogram model or copula parameters. Useful for repeated calls to interpolate
+when it is not necessary to reestimate the parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predictions</code></td>
+<td>
+<p>a <code>Spatial*DataFrame</code> with predictions, for most 
+methods with a format equal to the output from <code>krige</code> with 
+predicted mean and variance as <code>var1.pred</code> and <code>var1.var</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>outputTable</code></td>
+<td>
+<p>a matrix, organized in a convenient way for the calling WPS;
+first row: x-coordinates,  second row: y-coordinates; further rows: 
+output elements as specified by <code>outputWhat</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>processDescription</code></td>
+<td>
+<p>some textual descriptions of the interpolation
+process, including warnings</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p> Edzer Pebesma </p>
+
+
+<h3>References</h3>
+
+ 
+<p>Pebesma, E., Cornford, D., Dubois, G., Heuvelink, G.B.M., Hristopulos, D., Pilz, J., Stohlker, U., Morin, G., Skoien, J.O. INTAMAP: The design and implementation f an interoperable automated interpolation Web Service. Computers and Geosciences 37 (3), 2011. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>createIntamapObject</code>, <code>estimateParameters</code>, 
+<code>spatialPredict</code>, <code>intamap-package</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(meuse)
+coordinates(meuse) = ~x+y
+meuse$value = meuse$zinc
+data(meuse.grid)
+gridded(meuse.grid) = ~x+y
+x = interpolate(meuse, meuse.grid, list(mean=TRUE, variance=TRUE))
+summary(t(x$outputTable))
+</code></pre>
+
+
+</div>

@@ -1,0 +1,207 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>acf_n_plots</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generate N ACF plots of individual or aggregated time series.</h2>
+
+<h3>Description</h3>
+
+<p>Generate N ACF plots of individual or aggregated time series.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">acf_n_plots(
+  x,
+  n = 5,
+  split_by = NULL,
+  cond = NULL,
+  max_lag = NULL,
+  fun = mean,
+  plot = TRUE,
+  random = F,
+  mfrow = NULL,
+  add = FALSE,
+  print.summary = getOption("itsadug_print"),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A vector with time series data, typically residuals of a 
+regression model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>The number of plots to generate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>split_by</code></td>
+<td>
+<p>List of vectors (each with equal length as <code>x</code>) that 
+group the values of <code>x</code> into trials or timeseries events. 
+Generally other columns from the same data frame.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cond</code></td>
+<td>
+<p>Named list with a selection of the time series events
+specified in <code>split_by</code>. Default is NULL, indicating that 
+all time series are being processed, rather than a selection.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_lag</code></td>
+<td>
+<p>Maximum lag at which to calculate the acf. 
+Default is the maximum for the longest time series.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fun</code></td>
+<td>
+<p>The function used when aggregating over time series 
+(depending on the value of <code>split_by</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>Logical: whether or not to produce plot. Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>random</code></td>
+<td>
+<p>Logical: determine randomly which <code>n</code> (aggregated) time 
+series are plotted, or use the <code>quantile</code> function to find a 
+range of different time series to plot. Default is FALSE (not random).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mfrow</code></td>
+<td>
+<p>A vector of the form c(nr, nc). The figures will be drawn in 
+an nr-by-nc array on the device by rows.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add</code></td>
+<td>
+<p>Logical: whether to add the plots to an exiting plot window or 
+not. 
+Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print.summary</code></td>
+<td>
+<p>Logical: whether or not to print summary.
+Default set to the print info messages option 
+(see <code>infoMessages</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments for plotting, see <code>par</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>n</code> ACF plots providing information about the autocorrelation 
+in <code>x</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jacolien van Rij, R. Harald Baayen
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Use <code>acf</code> for the original ACF function, 
+and <code>acf_plot</code> for an ACF that takes into account time series 
+in the data.
+</p>
+<p>Other functions for model criticism: 
+<code>acf_plot()</code>,
+<code>acf_resid()</code>,
+<code>derive_timeseries()</code>,
+<code>resid_gam()</code>,
+<code>start_event()</code>,
+<code>start_value_rho()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(simdat)
+
+# Separate ACF for each time series:
+acf_n_plots(simdat$Y, split_by=list(simdat$Subject, simdat$Trial))
+
+# Average ACF per participant:
+acf_n_plots(simdat$Y, split_by=list(simdat$Subject))
+
+## Not run: 
+# Data treated as single time series. Plot is added to current window.
+# Note: 1 time series results in 1 plot.
+acf_n_plots(simdat$Y, add=TRUE)
+# Plot 4 ACF plots doesn't work without splitting data:
+acf_n_plots(simdat$Y, add=TRUE, n=4)
+
+# Plot ACFs of 4 randomly selected time series:
+acf_n_plots(simdat$Y, random=TRUE, n=4, add=TRUE, 
+    split_by=list(simdat$Subject, simdat$Trial))
+
+
+## End(Not run)
+
+#---------------------------------------------
+# When using model residuals
+#---------------------------------------------
+
+## Not run: 
+# add missing values to simdat:
+simdat[sample(nrow(simdat), 15),]$Y &lt;- NA
+# simple linear model:
+m1 &lt;- lm(Y ~ Time, data=simdat)
+
+# This will generate an error:
+# acf_n_plots(resid(m1), split_by=list(simdat$Subject, simdat$Trial))
+
+# This should work:
+el.na &lt;- missing_est(m1)
+acf_n_plots(resid(m1), 
+     split_by=list(simdat[-el.na,]$Subject, simdat[-el.na,]$Trial))
+
+# This should also work:
+simdat$res &lt;- NA
+simdat[!is.na(simdat$Y),]$res &lt;- resid(m1)
+acf_n_plots(simdat$res, split_by=list(simdat$Subject, simdat$Trial))
+
+## End(Not run)
+
+# see the vignette for examples:
+vignette('acf', package='itsadug')
+</code></pre>
+
+
+</div>

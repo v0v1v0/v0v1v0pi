@@ -1,0 +1,159 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>imaging-surface</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Read and write surface files</h2>
+
+<h3>Description</h3>
+
+<p>Supports surface geometry, annotation, measurement, and
+time-series data.
+Please use the high-level function <code>read_surface</code>, which calls
+other low-level functions internally.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">read_surface(file, format = "auto", type = NULL, ...)
+
+write_surface(
+  x,
+  con,
+  format = c("gifti", "freesurfer"),
+  type = c("geometry", "annotations", "measurements", "color", "time_series"),
+  ...
+)
+
+io_read_fs(
+  file,
+  type = c("geometry", "annotations", "measurements"),
+  format = "auto",
+  name = basename(file),
+  ...
+)
+
+io_read_gii(file)
+
+io_write_gii(x, con, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>file, con</code></td>
+<td>
+<p>path the file</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>format</code></td>
+<td>
+<p>format of the file, see 'Arguments' section in
+<code>read.fs.surface</code> (when file type is
+<code>'geometry'</code>) and <code>read.fs.curv</code>
+(when file type is <code>'measurements'</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>type of the data; ignored if the file format is 'GIfTI'. For
+'FreeSurfer' files, supported types are
+</p>
+
+<dl>
+<dt><code>'geometry'</code></dt>
+<dd>
+<p>contains positions of mesh vertex nodes and face
+indices;</p>
+</dd>
+<dt><code>'annotations'</code></dt>
+<dd>
+<p>annotation file (usually with file extension
+<code>'annot'</code>) containing a color look-up table and an array of color keys.
+These files are used to display discrete values on the surface such as
+brain atlas;</p>
+</dd>
+<dt><code>'measurements'</code></dt>
+<dd>
+<p>measurement file such as <code>'sulc'</code> and
+<code>'curv'</code> files, containing numerical values (often with continuous
+domain) for each vertex node</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>for <code>read_surface</code>, the arguments will be passed to
+<code>io_read_fs</code> if the file is a 'FreeSurfer' file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>surface (geometry, annotation, measurement) data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>name</code></td>
+<td>
+<p>name of the data; default is the file name</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A surface object container
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+library(ieegio)
+
+# geometry
+geom_file &lt;- "gifti/GzipBase64/sujet01_Lwhite.surf.gii"
+
+# measurements
+shape_file &lt;- "gifti/GzipBase64/sujet01_Lwhite.shape.gii"
+
+# time series
+ts_file &lt;- "gifti/GzipBase64/fmri_sujet01_Lwhite_projection.time.gii"
+
+if(ieegio_sample_data(geom_file, test = TRUE)) {
+
+  geometry &lt;- read_surface(ieegio_sample_data(geom_file))
+  print(geometry)
+
+  measurement &lt;- read_surface(ieegio_sample_data(shape_file))
+  print(measurement)
+
+  time_series &lt;- read_surface(ieegio_sample_data(ts_file))
+  print(time_series)
+
+  # merge measurement &amp; time_series into geometry
+  merged &lt;- merge(geometry, measurement, time_series)
+  print(merged)
+
+  # make sure you install `rgl` package
+  plot(merged, name = c("measurements", "Shape001"))
+
+  plot(merged, name = "time_series",
+       slice_index = c(1, 11, 21, 31))
+
+}
+
+
+</code></pre>
+
+
+</div>

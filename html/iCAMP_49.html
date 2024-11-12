@@ -1,0 +1,224 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>RC.cm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Modified Raup-Crick index based on Bray-Curtis similarity under multiple metacommunities
+</h2>
+
+<h3>Description</h3>
+
+<p>The Raup-Crick based on taxonomic dissimilarity index (i.e. Bray-Curtis) is to use null models to disentangle variation in community dissimilarity from variation in alpha-diversity. This function can deal with local communities under different metacommunities (regional pools).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">RC.cm(comm, rand = 1000, na.zero = TRUE, nworker = 4,
+      meta.group = NULL, meta.frequency = NULL, meta.ab = NULL,
+      memory.G = 50, weighted = TRUE, unit.sum = NULL,
+      sig.index = c("RC", "Confidence", "SES"), detail.null = FALSE,
+      output.bray = FALSE, silent = FALSE, taxo.metric = "bray",
+      transform.method = NULL, logbase = 2, dirichlet = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>comm</code></td>
+<td>
+<p>Community data matrix. rownames are sample names. colnames are species names.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rand</code></td>
+<td>
+<p>integer, randomization times, default is 1000.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.zero</code></td>
+<td>
+<p>logic. If community data marix has any zero-sum row (sample), Bray-Curtis index will be NA. Somtimes, this kind of NA need be set as zero to avoid some format problem in following calculation. Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nworker</code></td>
+<td>
+<p>for parallel computing. Either a character vector of host names on which to run the worker copies of R, or a positive integer (in which case that number of copies is run on localhost). default is 4, means 4 threads will be run.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meta.group</code></td>
+<td>
+<p>matrix or data.frame, a one-column (n x 1) matrix indicating which metacommunity each sample belongs to. rownames are sample IDs. first column is metacommunity names. Such that different samples can belong to different metacommunities. If input a n x m matrix, only the first column is used. NULL means all samples belong to the same metacommunity. Default is NULL, means all samples from the same metacommunity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meta.frequency</code></td>
+<td>
+<p>matrix or data.frame, each column represents a taxon, each row represents a metacommunity (regional pool), to define the occurrence frequency of each taxon in each metacommunity. The rownames indicate metacommunity names, which should be the same as the metacommunity names in meta.group. Default setting is NULL, means to calculate meta.frequency as occurrence frequency of each taxon in comm across the samples within each metacommunity defined by meta.group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>meta.ab</code></td>
+<td>
+<p>matrix or data.frame, each column represents a taxon, each row represents a metacommunity (regional pool), to define the aubndance (or relative abundance) of each taxon in each metacommunity. The rownames indicate metacommunity names, which should be the same as the metacommunity names in meta.group. Default setting is NULL, means to calculate meta.ab as average relative abundance of each taxon in comm across the samples within each metacommunity defined by meta.group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>memory.G</code></td>
+<td>
+<p>numeric, to set the memory size as you need, so that calculation of big data will not be limited by physical memory. unit is Gb. default is 50Gb.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weighted</code></td>
+<td>
+<p>lOgic, whether to use abundance-weighted metrics. default is TRUE</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unit.sum</code></td>
+<td>
+<p>If unit.sum is set as a number or a numeric vector, the taxa abundances will be divided by unit.sum to calculate the relative abundances, and the Bray-Cuits index in each bin will become manhattan index divided by 2. usually, unit.sum can be set as the sequencing depth in each sample. Default setting is NULL, means not to do this special transformation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sig.index</code></td>
+<td>
+<p>character, the index for null model significance test. RC, modified Raup-Crick index (RC) based on Bray-Curtis (BC), i.e. count the number of null BC lower than observed BC plus a half of the number of null BC equal to observed BC, to get alpha, then calculate RCbray as (2 x alpha - 1). SES, standard effect size; Confidence, percentage of null values less extreme than the observed value, i.e. non-parametric one-side confidence level. default is RC. If input a vector, only the first element will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>detail.null</code></td>
+<td>
+<p>logic, if TRUE, the output will include all the null values. Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output.bray</code></td>
+<td>
+<p>logic, if TRUE, the output will include observed taxonomic dissimilarity (default is Bray-Curtis).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>silent</code></td>
+<td>
+<p>logic, if FALSE, some messages will show during calculation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>taxo.metric</code></td>
+<td>
+<p>taxonomic beta diversity index, the same as 'method' in the function 'vegdist' in package 'vegan', including "manhattan", "euclidean", "canberra", "clark", "bray", "kulczynski", "jaccard", "gower", "altGower", "morisita", "horn", "mountford", "raup", "binomial", "chao", "cao" or "mahalanobis". If taxo.metric='bray' and transform.method=NULL, RC will be calculated based on Bray-Curtis dissimilarity as recommended in original iCAMP; otherwise, unit.sum setting will be ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>transform.method</code></td>
+<td>
+<p>character or a defined function, to specify how to transform community matrix before calculating dissimilarity. if it is a characher, it should be a method name as in the function 'decostand' in package 'vegan', including 'total','max','freq','normalize','range','standardize','pa','chi.square','cmdscale','hellinger','log'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>logbase</code></td>
+<td>
+<p>numeric, the logarithm base used when transform.method='log'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dirichlet</code></td>
+<td>
+<p>Logic. If TRUE, the taxonomic null model will use Dirichlet distribution to generate relative abundances in randomized community matrix. If the input community matrix has all row sums no more than 1, the function will automatically set dirichlet=TRUE. default is FALSE.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>While all other details are the same as the function RC.pc, this function is particularly designed for samples from different metacommunities. The null model will randomize the commuity matrix under different metacommunities, separately (and independently).
+</p>
+
+
+<h3>Value</h3>
+
+<p>Output is a list. 
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>index</code></td>
+<td>
+<p>a square matrix of RC (or SES or Confidence based on Bray-Curtis) values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sig.index</code></td>
+<td>
+<p>character, indicates the index for null model significance test, RC, Confidence, or SES.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>BC.obs</code></td>
+<td>
+<p>Output only if output.bray is TRUE. A square matrix of observed taxonomic dissimilarity index (default is Bray-Curtis dissimilarity) values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rand</code></td>
+<td>
+<p>Output only if detail.null is TRUE. A matrix with all null values of Bray-Curtis index for each turnover.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Version 1: 2021.8.2
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Daliang Ning
+</p>
+
+
+<h3>References</h3>
+
+<p>Ning, D., Yuan, M., Wu, L., Zhang, Y., Guo, X., Zhou, X. et al. (2020). A quantitative framework reveals ecological drivers of grassland microbial community assembly in response to warming. Nature Communications, 11, 4717.
+</p>
+<p>Chase, J.M., Kraft, N.J.B., Smith, K.G., Vellend, M. &amp; Inouye, B.D. (2011). Using null models to disentangle variation in community dissimilarity from variation in alpha-diversity. Ecosphere, 2, 1-11.
+</p>
+<p>Stegen, J.C., Lin, X., Fredrickson, J.K., Chen, X., Kennedy, D.W., Murray, C.J. et al. (2013). Quantifying community assembly processes and identifying features that impose them. ISME J, 7, 2069.
+</p>
+<p>Kraft, N.J.B., Comita, L.S., Chase, J.M., Sanders, N.J., Swenson, N.G., Crist, T.O. et al. (2011). Disentangling the drivers of beta diversity along latitudinal and elevational gradients. Science, 333, 1755-1758.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>RC.pc</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("example.data")
+comm=example.data$comm
+rand.time=20 # usually use 1000 for real data.
+
+# in this example, 10 samples from one metacommunity,
+# the other 10 samples from another metacommunity.
+meta.group=data.frame(meta.com=c(rep("meta1",10),rep("meta2",10)))
+rownames(meta.group)=rownames(comm)
+
+nworker=2 # parallel computing thread number
+RC=RC.cm(comm=comm, rand = rand.time,
+         nworker = nworker, meta.group=meta.group,
+         weighted = TRUE, sig.index="RC")
+</code></pre>
+
+
+</div>

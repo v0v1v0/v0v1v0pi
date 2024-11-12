@@ -1,0 +1,104 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bru_fill_missing</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fill in missing values in Spatial grids</h2>
+
+<h3>Description</h3>
+
+<p>Computes nearest-available-value imputation for missing values in space
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">bru_fill_missing(
+  data,
+  where,
+  values,
+  layer = NULL,
+  selector = NULL,
+  batch_size = deprecated()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A SpatialPointsDataFrame, SpatialPixelsDataFrame,
+SpatialGridDataFrame, SpatRaster, Raster, or sf object
+containing data to use for filling</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>where</code></td>
+<td>
+<p>A, matrix, data.frame, or SpatialPoints or
+SpatialPointsDataFrame, or sf object, containing the locations of the evaluated values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>values</code></td>
+<td>
+<p>A vector of values to be filled in where <code>is.na(values)</code> is
+<code>TRUE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>layer, selector</code></td>
+<td>
+<p>Specifies what data column or columns from which to
+extract data, see <code>component()</code> for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>batch_size</code></td>
+<td>
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated"><img src="../help/figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a> due to improved algorithm.
+Size of nearest-neighbour calculation blocks, to limit the
+memory and computational complexity.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An infilled vector of values
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+if (bru_safe_inla()) {
+  points &lt;-
+    sp::SpatialPointsDataFrame(
+      matrix(1:6, 3, 2),
+      data = data.frame(val = c(NA, NA, NA))
+    )
+  input_coord &lt;- expand.grid(x = 0:7, y = 0:7)
+  input &lt;-
+    sp::SpatialPixelsDataFrame(
+      input_coord,
+      data = data.frame(val = as.vector(input_coord$y))
+    )
+  points$val &lt;- bru_fill_missing(input, points, points$val)
+  print(points)
+
+  # To fill in missing values in a grid:
+  print(input$val[c(3, 30)])
+  input$val[c(3, 30)] &lt;- NA # Introduce missing values
+  input$val &lt;- bru_fill_missing(input, input, input$val)
+  print(input$val[c(3, 30)])
+}
+
+## End(Not run)
+</code></pre>
+
+
+</div>

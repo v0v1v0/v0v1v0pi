@@ -1,0 +1,178 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>isa.in.silico</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generate in-silico input data for biclustering algorithms</h2>
+
+<h3>Description</h3>
+
+<p>This function generates a test data set for ISA, containing
+modules of prescribed number, size, signal level, internal noise and
+background noise. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">isa.in.silico (num.rows = 300, num.cols = 50, num.fact = 3,
+     mod.row.size = round(0.5 * num.rows/num.fact), 
+     mod.col.size = round(0.5 * num.cols/num.fact), noise = 0.1,                 
+     mod.signal = rep(1, num.fact), mod.noise = rep(0, num.fact),                
+     overlap.row = 0, overlap.col = overlap.row)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>num.rows</code></td>
+<td>
+<p>The number of rows in the data matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.cols</code></td>
+<td>
+<p>The number of columns in the data matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.fact</code></td>
+<td>
+<p>The number of modules to put into the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mod.row.size</code></td>
+<td>
+<p>The size of the modules, the number of rows per
+module. It can be a scalar or a vector and it is recycled.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mod.col.size</code></td>
+<td>
+<p>The size of the modules, the number of columns per
+module. It can be a scalar or a vector and it is recycled.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>noise</code></td>
+<td>
+<p>The level of the background noise to be added to the data
+matrix. It gives the standard deviation of the normal distribution
+from which the noise is generated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mod.signal</code></td>
+<td>
+<p>The signal level of the modules.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mod.noise</code></td>
+<td>
+<p>The noise levels of the different modules. Normally
+distributed noise with standard deviation <code>mod.noise</code> is added
+to the data. This is in addition to the background noise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overlap.row</code></td>
+<td>
+<p>The overlap of the modules, for the rows.
+Zero means no overlap, one means one overlapping row, etc.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overlap.col</code></td>
+<td>
+<p>The overlap of the modules, for the columns.
+Zero means no overlap, one means one overlapping column, etc.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>isa.in.silico</code> creates an artificial data set to test the ISA or
+any other biclustering algorithm. It creates a data matrix with a
+checkerboard matrix. In other words, potentially overlapping blocks
+are planted into a noisy background matrix.
+</p>
+<p>These blocks may have different signal and noise levels and they might
+also overlap. See the parameters above.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with three matrices. The first matrix is the in silico data,
+the second contains the rows of the correct modules, the third the
+columns.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Gabor Csardi <a href="mailto:Gabor.Csardi@unil.ch">Gabor.Csardi@unil.ch</a> </p>
+
+
+<h3>References</h3>
+
+<p>Bergmann S, Ihmels J, Barkai N: Iterative signature algorithm for the
+analysis of large-scale gene expression data <em>Phys Rev E Stat
+Nonlin Soft Matter Phys.</em> 2003 Mar;67(3 Pt 1):031902. Epub 2003 Mar 11.
+</p>
+<p>Ihmels J, Friedlander G, Bergmann S, Sarig O, Ziv Y, Barkai N:
+Revealing modular organization in the yeast transcriptional network
+<em>Nat Genet.</em> 2002 Aug;31(4):370-7. Epub 2002 Jul 22
+</p>
+<p>Ihmels J, Bergmann S, Barkai N:
+Defining transcription modules using large-scale gene expression data
+<em>Bioinformatics</em> 2004 Sep 1;20(13):1993-2003. Epub 2004 Mar 25.
+</p>
+
+
+<h3>See Also</h3>
+
+ <p>isa2-package for a short introduction on the Iterative
+Signature Algorithm. See <code>isa</code> for an easy way of running
+ISA.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Define a function for plotting if we are interactive
+if (interactive()) { layout( rbind(1:2,3:4) ) }
+myimage &lt;- function(mat) {
+  if (interactive()) { par(mar=c(1,2,2,1)); image(mat[[1]]) }
+}
+
+## Create a simple checkerboard without overlap and noise
+silico1 &lt;- isa.in.silico(100, 100, 10, mod.row.size=10, mod.col.size=10,
+                         noise=0)
+myimage(silico1)
+
+## The same, but with some overlap and noise
+silico2 &lt;- isa.in.silico(100, 100, 10, mod.row.size=10, mod.col.size=10,
+                         noise=0.1, overlap.row=3)
+myimage(silico2)
+
+## Modules with different noise levels
+silico3 &lt;- isa.in.silico(100, 100, 5, mod.row.size=10, mod.col.size=10,
+                         noise=0.01, mod.noise=seq(0.1,by=0.1,length=5))
+myimage(silico3)
+
+## Modules with different signal levels
+silico4 &lt;- isa.in.silico(100, 100, 5, mod.row.size=10, mod.col.size=10,
+                         noise=0.01, mod.signal=seq(1,5,length=5))
+myimage(silico4)
+</code></pre>
+
+
+</div>

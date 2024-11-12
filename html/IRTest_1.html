@@ -1,0 +1,172 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>adaptive_test</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Ability parameter estimation with fixed item parameters</h2>
+
+<h3>Description</h3>
+
+<p>Ability parameter estimation when item responses and item parameters are given.
+This function can be useful in ability parameter estimation is adaptive testing.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">adaptive_test(
+  response,
+  item,
+  model = "dich",
+  ability_method = "EAP",
+  quad = NULL,
+  prior = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>response</code></td>
+<td>
+<p>A matrix of item responses. For mixed-format test, a list
+of item responses where dichotomous item responses are the first element and
+polytomous item responses are the second element.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>item</code></td>
+<td>
+<p>A matrix of item parameters. For mixed-format test, a list
+of item parameters where dichotomous item parameters are the first element and
+polytomous item parameters are the second element.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p><code>dich</code> for dichotomous items,
+<code>cont</code> for continuous items, and a specific item response model
+(e.g., <code>PCM</code>, <code>GPCM</code>, <code>GRM</code>) for polytomous items and a mixed-format test.
+The default is <code>dich</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ability_method</code></td>
+<td>
+<p>The ability parameter estimation method.
+The available options are Expected <em>a posteriori</em> (<code>EAP</code>), Maximum Likelihood Estimates (<code>MLE</code>), and weighted likelihood estimates (<code>WLE</code>).
+The default is <code>EAP</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quad</code></td>
+<td>
+<p>A vector of quadrature points for <code>EAP</code> calculation.
+If <code>NULL</code> is passed, it is set as <code>seq(-6,6,length.out=121)</code>. The default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior</code></td>
+<td>
+<p>A vector of the prior distribution for <code>EAP</code> calculation. The length of it should be the same as <code>quad</code>.
+If <code>NULL</code> is passed, the standard normal distribution is used. The default is <code>NULL</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>theta</code></td>
+<td>
+<p>The estimated ability parameter values. If <code>ability_method = "MLE"</code>.
+If an examinee receives a maximum or minimum score for all items, the function returns <code class="reqn">\pm</code><code>Inf</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta_se</code></td>
+<td>
+<p>The standard errors of ability parameter estimates.
+It returns standard deviations of posteriors for <code>EAP</code>s and asymptotic standard errors (i.e., square root of inverse Fisher information) for <code>MLE</code>.
+If an examinee receives a maximum or minimum score for all items, the function returns <code>NA</code> for <code>MLE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Seewoo Li <a href="mailto:cu@yonsei.ac.kr">cu@yonsei.ac.kr</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+# dichotomous
+
+response &lt;- c(1,1,0)
+item &lt;- matrix(
+  c(
+      1, -0.5,   0,
+    1.5,   -1,   0,
+    1.2,    0, 0.2
+  ), nrow = 3, byrow = TRUE
+)
+adaptive_test(response, item, model = "dich", ability_method = "WLE")
+
+
+# polytomous
+
+response &lt;- c(1,2,0)
+item &lt;- matrix(
+    c(
+      1, -0.5, 0.5,
+    1.5,   -1,   0,
+    1.2,    0, 0.4
+    ), nrow = 3, byrow = TRUE
+  )
+adaptive_test(response, item, model="GPCM", ability_method = "WLE")
+
+
+# mixed-format test
+
+response &lt;- list(c(0,0,0),c(2,2,1))
+item &lt;- list(
+  matrix(
+    c(
+        1, -0.5, 0,
+      1.5,   -1, 0,
+      1.2,    0, 0
+    ), nrow = 3, byrow = TRUE
+  ),
+  matrix(
+    c(
+        1, -0.5, 0.5,
+      1.5,   -1,   0,
+      1.2,    0, 0.4
+    ), nrow = 3, byrow = TRUE
+  )
+)
+adaptive_test(response, item, model = "GPCM", ability_method = "WLE")
+
+
+# continuous response
+
+response &lt;- c(0.88, 0.68, 0.21)
+item &lt;- matrix(
+  c(
+    1, -0.5, 10,
+    1.5,   -1,  8,
+    1.2,    0, 11
+  ), nrow = 3, byrow = TRUE
+)
+adaptive_test(response, item, model = "cont", ability_method = "WLE")
+
+</code></pre>
+
+
+</div>

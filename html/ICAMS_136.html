@@ -1,0 +1,212 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>StrelkaSBSVCFFilesToZipFile</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create a zip file which contains catalogs and plot PDFs from Strelka SBS VCF files</h2>
+
+<h3>Description</h3>
+
+<p>Create 3 SBS catalogs (96, 192, 1536), 3 DBS catalogs (78, 136, 144) from the
+Strelka SBS VCFs specified by <code>dir</code>, save the catalogs as CSV files,
+plot them to PDF and generate a zip archive of all the output files. The
+function will find and merge adjacent SBS pairs into DBS if their VAFs are
+very similar. The default threshold value for VAF is 0.02.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">StrelkaSBSVCFFilesToZipFile(
+  dir,
+  zipfile,
+  ref.genome,
+  trans.ranges = NULL,
+  region = "unknown",
+  names.of.VCFs = NULL,
+  base.filename = "",
+  return.annotated.vcfs = FALSE,
+  suppress.discarded.variants.warnings = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dir</code></td>
+<td>
+<p>Pathname of the directory which contains <strong>only</strong> the Strelka
+SBS VCF files. Each Strelka SBS VCF <strong>must</strong> have a file extension
+".vcf" (case insensitive) and share the <strong>same</strong> <code>ref.genome</code> and
+<code>region</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zipfile</code></td>
+<td>
+<p>Pathname of the zip file to be created.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ref.genome</code></td>
+<td>
+<p>A <code>ref.genome</code> argument as described in
+<code>ICAMS</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trans.ranges</code></td>
+<td>
+<p>Optional. If <code>ref.genome</code> specifies one of the
+<code>BSgenome</code> object
+</p>
+
+<ol>
+<li> <p><code>BSgenome.Hsapiens.1000genomes.hs37d5</code>
+</p>
+</li>
+<li> <p><code>BSgenome.Hsapiens.UCSC.hg38</code>
+</p>
+</li>
+<li> <p><code>BSgenome.Mmusculus.UCSC.mm10</code>
+</p>
+</li>
+</ol>
+<p>then the function will infer <code>trans.ranges</code> automatically. Otherwise,
+user will need to provide the necessary <code>trans.ranges</code>. Please refer to
+<code>TranscriptRanges</code> for more details.
+If <code>is.null(trans.ranges)</code> do not add transcript range
+information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>region</code></td>
+<td>
+<p>A character string designating a genomic region;
+see <code>as.catalog</code> and <code>ICAMS</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>names.of.VCFs</code></td>
+<td>
+<p>Optional. Character vector of names of the VCF files.
+The order of names in <code>names.of.VCFs</code> should match the order of VCFs
+listed in <code>dir</code>. If <code>NULL</code>(default), this function will remove
+all of the path up to and including the last path separator (if any) in
+<code>dir</code> and file paths without extensions (and the leading dot) will be
+used as the names of the VCF files.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>base.filename</code></td>
+<td>
+<p>Optional. The base name of the CSV and PDF files to be
+produced; multiple files will be generated, each ending in
+<code class="reqn">x</code><code>.csv</code> or <code class="reqn">x</code><code>.pdf</code>, where <code class="reqn">x</code> indicates the type
+of catalog.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return.annotated.vcfs</code></td>
+<td>
+<p>Logical. Whether to return the annotated VCFs
+with additional columns showing mutation class for each variant. Default is
+FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>suppress.discarded.variants.warnings</code></td>
+<td>
+<p>Logical. Whether to suppress
+warning messages showing information about the discarded variants. Default
+is TRUE.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function calls <code>StrelkaSBSVCFFilesToCatalog</code>,
+<code>PlotCatalogToPdf</code>, <code>WriteCatalog</code> and
+<code>zip::zipr</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list containing the following objects:
+</p>
+
+<ul>
+<li> <p><code>catSBS96</code>, <code>catSBS192</code>, <code>catSBS1536</code>: Matrix of
+3 SBS catalogs (one each for 96, 192, and 1536).
+</p>
+</li>
+<li> <p><code>catDBS78</code>, <code>catDBS136</code>, <code>catDBS144</code>: Matrix of
+3 DBS catalogs (one each for 78, 136, and 144).
+</p>
+</li>
+<li> <p><code>discarded.variants</code>: <strong>Non-NULL only if</strong> there are variants
+that were excluded from the analysis. See the added extra column
+<code>discarded.reason</code> for more details.
+</p>
+</li>
+<li> <p><code>annotated.vcfs</code>:
+<strong>Non-NULL only if</strong> <code>return.annotated.vcfs</code> = TRUE.
+A list of elements:
+</p>
+
+<ul>
+<li> <p><code>SBS</code>: SBS VCF annotated by <code>AnnotateSBSVCF</code> with
+three new columns <code>SBS96.class</code>, <code>SBS192.class</code> and
+<code>SBS1536.class</code> showing the mutation class for each SBS variant.
+</p>
+</li>
+<li> <p><code>DBS</code>: DBS VCF annotated by <code>AnnotateDBSVCF</code> with
+three new columns <code>DBS78.class</code>, <code>DBS136.class</code> and
+<code>DBS144.class</code> showing the mutation class for each DBS variant.
+</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>If <code>trans.ranges</code> is not provided by user and cannot be inferred by
+ICAMS, SBS 192 and DBS 144 catalog will not be generated. Each catalog has
+attributes added. See <code>as.catalog</code> for more details.
+</p>
+
+
+<h3>Note</h3>
+
+<p>SBS 192 and DBS 144 catalogs include only mutations in
+transcribed regions.
+</p>
+
+
+<h3>Comments</h3>
+
+<p>To add or change attributes of the catalog, you can use function
+<code>attr</code>. <br> For example, <code>attr(catalog, "abundance")
+&lt;- custom.abundance</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">dir &lt;- c(system.file("extdata/Strelka-SBS-vcf",
+                     package = "ICAMS"))
+if (requireNamespace("BSgenome.Hsapiens.1000genomes.hs37d5", quietly = TRUE)) {
+  catalogs &lt;-
+    StrelkaSBSVCFFilesToZipFile(dir,
+                                zipfile = file.path(tempdir(), "test.zip"),
+                                ref.genome = "hg19",
+                                trans.ranges = trans.ranges.GRCh37,
+                                region = "genome",
+                                base.filename = "Strelka-SBS")
+  unlink(file.path(tempdir(), "test.zip"))}
+</code></pre>
+
+
+</div>

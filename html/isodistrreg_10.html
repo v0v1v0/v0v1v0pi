@@ -1,0 +1,107 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>crps</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Continuous ranked probability score (CRPS)</h2>
+
+<h3>Description</h3>
+
+<p>Computes the CRPS of IDR or raw forecasts.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">crps(predictions, y)
+
+## S3 method for class 'idr'
+crps(predictions, y)
+
+## S3 method for class 'data.frame'
+crps(predictions, y)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>predictions</code></td>
+<td>
+<p>either an object of class <code>idr</code> (output of
+<code>predict.idrfit</code>), or a <code>data.frame</code> of numeric variables. In
+the latter case, the CRPS is computed using the empirical distribution of
+the variables in <code>predictions</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>a numeric vector of obervations of the same length as the number of
+predictions, or of length 1. In the latter case, <code>y</code> will be used for
+all predictions.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function uses adapted code taken from the function <code>crps_edf</code> of
+the <span class="pkg">scoringRules</span> package.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A vector of CRPS values.
+</p>
+
+
+<h3>References</h3>
+
+<p>Jordan A., Krueger F., Lerch S. (2018). "Evaluating Probabilistic
+Forecasts with scoringRules." Journal of Statistical Software. Forthcoming.
+</p>
+<p>Gneiting, T. and Raftery, A. E. (2007), 'Strictly proper scoring rules,
+prediction, and estimation', Journal of the American Statistical Association
+102(477), 359-378
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>predict.idrfit</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("rain")
+
+## Postprocess HRES forecast using data of 3 years
+
+X &lt;- rain[1:(3 * 365), "HRES", drop = FALSE]
+y &lt;- rain[1:(3 * 365), "obs"]
+
+fit &lt;- idr(y = y, X = X)
+
+## Compute CRPS of postprocessed HRES forecast using data of the next 2 years
+## (out-of-sample predictions)
+
+data &lt;- rain[(3 * 365 + 1):(5 * 365), "HRES", drop = FALSE]
+obs &lt;- rain[(3 * 365 + 1):(5 * 365), "obs"]
+predictions &lt;- predict(fit, data = data)
+idrCrps &lt;- crps(predictions, y = obs)
+
+## Compare this to CRPS of the raw ensemble of all forecasts (high resolution,
+## control and 50 perturbed ensemble forecasts)
+
+rawData &lt;- rain[(3 * 365 + 1):(5 * 365), c("HRES", "CTR", paste0("P", 1:50))]
+rawCrps &lt;- crps(rawData, y = obs)
+
+c("idr_HRES" = mean(idrCrps), "raw_all" = mean(rawCrps))
+</code></pre>
+
+
+</div>

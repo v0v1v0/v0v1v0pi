@@ -1,0 +1,167 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>inspect_bfactor_log</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Validate vectors of logarithmic Bayes factors</h2>
+
+<h3>Description</h3>
+
+<p><code>inspect_bfactor_log</code> checks if an object is a numeric vector
+of valid logarithmic Bayes factor values.  This can be useful to validate
+inputs, intermediate calculations or outputs in user-defined functions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">inspect_bfactor_log(x, allow_nas = TRUE, warning_nas = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>An arbitrary object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allow_nas</code></td>
+<td>
+<p>Logical value. If <code>TRUE</code> then <code>NA</code> and <code>NaN</code> values in <code>x</code>
+are allowed. If <code>FALSE</code>, execution is stopped and an error message is thrown
+in case there are <code>NA</code> or <code>NaN</code> values in <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warning_nas</code></td>
+<td>
+<p>Logical value. If <code>TRUE</code> then the presence of <code>NA</code> or
+<code>NaN</code> values in <code>x</code> generates a warning message. <code>NA</code> and <code>NaN</code> values pass
+silently otherwise (if <code>allow_nas</code> is <code>TRUE</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>inspect_bfactor_log</code> conducts a series of tests to check if <code>x</code> is
+a numeric vector of valid logarithmic Bayes factor values. Namely,
+<code>inspect_bfactor_log</code> checks if:
+</p>
+
+<ul>
+<li> <p><code>x</code> is <code>NULL</code> or empty.
+</p>
+</li>
+<li> <p><code>x</code> is an atomic vector.
+</p>
+</li>
+<li> <p><code>x</code> is numeric.
+</p>
+</li>
+<li> <p><code>x</code> has <code>NA</code> or <code>NaN</code> values.
+</p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p><code>inspect_bfactor_log</code> does not return any output. There are three
+possible outcomes:
+</p>
+
+<ul>
+<li>
+<p> The call is silent if:
+</p>
+
+<ul>
+<li> <p><code>x</code> is a numeric vector of valid logarithmic Bayes factor values and
+there are no <code>NA</code> or <code>NaN</code> values in <code>x</code>.
+</p>
+</li>
+<li> <p><code>x</code> is a numeric vector of valid logarithmic Bayes factor values, there
+are some <code>NA</code> or <code>NaN</code> values in <code>x</code>, <code>allow_nas</code> is set to <code>TRUE</code> and
+<code>warning_nas</code> is set to <code>FALSE</code>.
+</p>
+</li>
+</ul>
+</li>
+<li>
+<p> An informative warning message is given if <code>x</code> is a numeric vector of valid
+logarithmic Bayes factor values, there are some <code>NA</code> or <code>NaN</code> values in <code>x</code>
+and both  <code>allow_nas</code> and <code>warning_nas</code> are set to <code>TRUE</code>.
+</p>
+</li>
+<li>
+<p> An informative error message is thrown and the execution is stopped if:
+</p>
+
+<ul>
+<li> <p><code>x</code> is not a numeric vector of valid logarithmic Bayes factor values.
+</p>
+</li>
+<li> <p><code>x</code> is a numeric vector of valid logarithmic Bayes factor values, there
+are some <code>NA</code> or <code>NaN</code> values in <code>x</code> and <code>allow_nas</code> is set to <code>FALSE</code>.
+</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3>See Also</h3>
+
+
+<ul>
+<li> <p><code>inspect_bfactor</code> to check if an object is a numeric
+vector of valid Bayes factor values.
+</p>
+</li>
+<li> <p><code>bfactor_log_interpret</code> for the interpretation of the
+logarithms of Bayes factors.
+</p>
+</li>
+<li> <p><code>inspect_bfactor_scale</code> to check if an object is a
+Bayes factor interpretation scale.
+</p>
+</li>
+<li> <p><code>inspect_log_base</code> to check if an object is an
+eligible logarithmic base.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Calls that pass silently:
+x1 &lt;- c(0, 0.5, 1, 10, 50, 100)
+x2 &lt;- c(NA, 0.5, 1, 10, 50, 100)
+inspect_bfactor_log(x1)
+inspect_bfactor_log(x2, warning_nas = FALSE)
+inspect_bfactor_log(x2, allow_nas = TRUE, warning_nas = FALSE)
+
+# Call that throws an informative warning message:
+y &lt;- c(0.1, 0.2, NA, 0.4, 0.5)
+try(inspect_bfactor_log(y))
+try(inspect_bfactor_log(y, warning_nas = TRUE))
+try(inspect_bfactor_log(y, allow_nas = TRUE, warning_nas = TRUE))
+
+# Calls that throw informative error messages:
+mylist &lt;- list(
+  NULL, TRUE, factor(.5), matrix(0.5),
+  "0.5", list(0.5), numeric(0), NA, NaN
+)
+try(inspect_bfactor_log(mylist[[1]]))
+try(inspect_bfactor_log(mylist[[2]]))
+try(inspect_bfactor_log(mylist[[3]]))
+try(inspect_bfactor_log(mylist[[4]]))
+try(inspect_bfactor_log(mylist[[5]]))
+try(inspect_bfactor_log(mylist[[6]]))
+try(inspect_bfactor_log(mylist[[7]]))
+try(inspect_bfactor_log(mylist[[8]]))
+try(inspect_bfactor_log(mylist[[9]]))
+</code></pre>
+
+
+</div>

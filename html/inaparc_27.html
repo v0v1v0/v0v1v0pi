@@ -1,0 +1,154 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>scseek</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Initialization of cluster prototypes using SCS algorithm
+</h2>
+
+<h3>Description</h3>
+
+<p>Initializes the cluster prototypes matrix with the Simple Cluster Seeking (SCS) algorithm (Tou &amp; Gonzales, 1974).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">scseek(x, k, tv)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a numeric vector, data frame or matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>an integer for the number of clusters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tv</code></td>
+<td>
+<p>a number to be used as the threshold distance which is directly input by the user. Also it is possible to compute <var>T</var>, a threshold distance value with the following options of <code>tv</code> argument:
+</p>
+
+<ul>
+<li> <p><var>T</var> is the mean of differences between the consecutive pairs of objects with the option <span class="option">cd1</span>.  
+</p>
+</li>
+<li> <p><var>T</var> is the minimum of differences between the consecutive pairs of objects with the option <span class="option">cd2</span>.     
+</p>
+</li>
+<li> <p><var>T</var> is the mean of Euclidean distances between the consecutive pairs of objects divided into <var>k</var> with the option <span class="option">md</span>. This is the default if <code>tv</code> is not supplied by the user.
+</p>
+</li>
+<li> <p><var>T</var> is the range of maximum and minimum of Euclidean distances between the consecutive pairs of objects divided into <var>k</var> with the option <span class="option">mm</span>.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The algorithm Simple Cluster Seeking (SCS) (Tou &amp; Gonzales, 1974) is similar to Ball and Hall's algorithm (Ball &amp; Hall, 1967) with an exception for selection of the first object (Celebi et al, 2013). In SCS, the first object in the data set is selected as the prototype of the first cluster. Then, the next object whose distance to the first prototype is greater than <var>T</var>, a threshold distance value is seeked and assigned as the second cluster prototype, if found. Afterwards, the next object whose distance to already determined prototypes is greater than <var>T</var> is searched and assigned as the third cluster prototype. The selection process is repeated for determining the prototypes of remaining clusters in similar way. 
+</p>
+<p>Because SCS is sensitive to the order of the data (Celebi et al, 2013), it may not yield good initializations with the sorted data. On the other hand, the distance between the cluster prototypes can be controlled <var>T</var>, which is an arbitrary number specified by the user. But the problem is that how the user decides on this threshold value. As a solution to this problem in the function <code>scseek</code>, some internally computed distance measures can be used. (See the section‘Arguments’ above for the available options.)</p>
+
+
+<h3>Value</h3>
+
+<p>an object of class ‘inaparc’, which is a list consists of the following items:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>v</code></td>
+<td>
+<p>a numeric matrix of the initial cluster prototypes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ctype</code></td>
+<td>
+<p>a string representing the type of centroid, which used to build prototype matrix. Its value is ‘obj’ with this function because the cluster prototype matrix contains the objects.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>a string containing the matched function call that generates this ‘inaparc’ object.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Zeynel Cebeci, Cagatay Cebeci
+</p>
+
+
+<h3>References</h3>
+
+<p>Ball, G.H. &amp; Hall, D.J. (1967). A clustering technique for summarizing multivariate data, <em>Systems Res. &amp; Behavioral Sci.</em>, 12 (2): 153-155.
+</p>
+<p>Tou, J.T. &amp; Gonzalez,R.C. (1974). <em>Pattern Recognition Principles</em>. Addison-Wesley, Reading, MA. &lt;ISBN:9780201075861&gt;
+</p>
+<p>Celebi, M.E., Kingravi, H.A. &amp; Vela, P.A. (2013). A comparative study of efficient initialization methods for the K-means clustering algorithm, <em>Expert Systems with Applications</em>, 40 (1): 200-210. arXiv:<a href="https://arxiv.org/pdf/1209.1960.pdf">https://arxiv.org/pdf/1209.1960.pdf</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>aldaoud</code>,
+<code>ballhall</code>,
+<code>crsamp</code>,
+<code>firstk</code>,
+<code>forgy</code>,
+<code>hartiganwong</code>,
+<code>inofrep</code>,
+<code>inscsf</code>,
+<code>insdev</code>,
+<code>kkz</code>,
+<code>kmpp</code>,
+<code>ksegments</code>,
+<code>ksteps</code>,
+<code>lastk</code>,
+<code>lhsmaximin</code>,
+<code>lhsrandom</code>,
+<code>maximin</code>,
+<code>mscseek</code>,
+<code>rsamp</code>,
+<code>rsegment</code>,
+<code>scseek2</code>,
+<code>spaeth</code>,
+<code>ssamp</code>,
+<code>topbottom</code>,
+<code>uniquek</code>,
+<code>ursamp</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(iris)
+# Run with the threshold value of 0.5
+res &lt;- scseek(x=iris[,1:4], k=5, tv=0.5)
+v1 &lt;- res$v
+print(v1)
+
+# Run with the internally computed default threshold value 
+res &lt;- scseek(x=iris[,1:4], k=5)
+v2 &lt;- res$v
+print(v2)
+</code></pre>
+
+
+</div>

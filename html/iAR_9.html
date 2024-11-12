@@ -1,0 +1,115 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>CIARforecast</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Forecast from CIAR model</h2>
+
+<h3>Description</h3>
+
+<p>Forecast from models fitted by <code>CIARkalman</code>
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">CIARforecast(phiR, phiI, y1, st, tAhead)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>phiR</code></td>
+<td>
+<p>Real part of the phi coefficient of CIAR model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phiI</code></td>
+<td>
+<p>Imaginary part of the phi coefficient of CIAR model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y1</code></td>
+<td>
+<p>Array with the time series observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>st</code></td>
+<td>
+<p>Array with the observational times.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tAhead</code></td>
+<td>
+<p>The time ahead for which the forecast is required.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with the following components:
+</p>
+
+<ul>
+<li>
+<p>fitted Fitted values by the CIAR model.
+</p>
+</li>
+<li>
+<p>forecast Point forecast in the time ahead required.
+</p>
+</li>
+<li>
+<p>Lambda Lambda value estimated by the CIAR model at the last time point.
+</p>
+</li>
+<li>
+<p>Sighat Covariance matrix estimated by the CIAR model at the last time point.
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+<p>Elorrieta, F, Eyheramendy, S, Palma, W (2019).
+“Discrete-time autoregressive model for unequally spaced time-series observations.”
+<em>A&amp;A</em>, <b>627</b>, A120.
+doi: <a href="https://doi.org/10.1051/0004-6361/201935560">10.1051/0004-6361/201935560</a>, <a href="https://doi.org/10.1051/0004-6361/201935560">https://doi.org/10.1051/0004-6361/201935560</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>CIARsample</code>, <code>CIARkalman</code>, <code>CIARfit</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#Simulated Data
+n=100
+set.seed(6714)
+st&lt;-gentime(n)
+x=CIARsample(n=n,phiR=0.9,phiI=0,st=st,c=1)
+y=x$y
+y1=y/sd(y)
+n=length(y1)
+p=trunc(n*0.99)
+ytr=y1[1:p]
+yte=y1[(p+1):n]
+str=st[1:p]
+ste=st[(p+1):n]
+tahead=ste-str[p]
+
+ciar=CIARkalman(y=ytr,t=str)
+forCIAR&lt;-CIARforecast(ciar$phiR,ciar$phiI,ytr,str,tAhead=tahead)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,219 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>add_simulation</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Create or augment a list of simulated distributions of summary statistics 
+</h2>
+
+<h3>Description</h3>
+
+<p><code>add_simulation</code> is suitable for the primitive <span class="pkg">Infusion</span> workflow; otherwise, it is cleaer to call <code>add_reftable</code> directly. 
+<code>add_simulation</code> creates or augments a list of simulated distributions of summary statistics, and formats the results appropriately for further use. Alternatively, if the simulation function cannot be called directly by the R code, simulated distributions can be added using the <code>newsimuls</code> argument, using a simple format (see <code>onedistrib</code> in the Examples). Finally, a generic data frame of simulations can be reformatted as a reference table by using only the <code>simulations</code> argument.
+</p>
+<p>Depending on the arguments, parallel or serial computation is performed. When parallelization is implied, by default a “socket” cluster, available on all operating systems. Special care is then needed to ensure that all required packages are loaded in the called processes, and that all required variables and functions are passed therein: check the <code>packages</code> and <code>env</code> arguments. For socket clusters, <code>foreach</code> or <code>pbapply</code> is called depending whether the <code>doSNOW</code> package is attached (<code>doSNOW</code> allows more efficient load balancing than <code>pbapply</code>). 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">add_simulation(simulations=NULL, Simulate, parsTable=par.grid, par.grid=NULL, 
+               nRealizations=Infusion.getOption("nRealizations"),
+               newsimuls=NULL, verbose=interactive(), nb_cores=NULL, 
+               packages=NULL, env=NULL, control.Simulate=NULL,
+               cluster_args=list(), cl_seed=NULL, ...) 
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>simulations</code></td>
+<td>
+
+<p>A list of matrices each representing a simulated distribution for given parameters in a format consistent with the return format of <code>add_simulation</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nRealizations</code></td>
+<td>
+
+<p>The number of simulated samples of summary statistics, for each empirical distribution (each row of <code>par.grid</code>).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Simulate</code></td>
+<td>
+
+<p>An *R* function, or the name (as a character string) of an *R* function used to generate empirical distributions of summary statistics. When an external simulation program is called, <code>Simulate</code> must therefore be an R function wrapping the call to the external program. The <code>Simulate</code> function must have one argument for each element of the parameter vector (i.e. of each row of <code>par.grid</code>). It must return a vector of summary statistics with named vector members; <b>or</b> a single matrix of <code>nRealizations</code> simulations, in which case its rows and row names must represent the summary statistics, it should have <code>nRealizations</code> columns, and <code>nRealizations</code> should be named integer of the form “<code>c(as_one=.)</code>” (see Examples).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parsTable, par.grid</code></td>
+<td>
+
+<p>A data frame of which each line is the vector of parameters needed by <code>Simulate</code> for each simulation of the data-generating process. <code>par.grid</code> is an alias for <code>parsTable</code>; the latter argument may be preferred in order not to suggest that the parameter values should form a regular grid.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newsimuls</code></td>
+<td>
+
+<p>If the function used to generate empirical distributions cannot be called by R, then <code>newsimuls</code> can be used to provide these distributions. See Details for the structure of this argument.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nb_cores</code></td>
+<td>
+<p>Number of cores for parallel simulation; <code>NULL</code> or integer value, acting as a shortcut for <code>cluster_args$spec</code>. The effect is complicated: see Details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cluster_args</code></td>
+<td>
+<p>A list of arguments, passed to <code>makeCluster</code>. May contain a non-null <code>spec</code> element, in which case the distinct <code>nb_cores</code> argument and the global <span class="pkg">Infusion</span> option <code>nb_cores</code> are ignored. A typical usage would thus be <code>control_args=list(spec=&lt;number of 'children'&gt;)</code>. Additional elements <code>outfile="log.txt"</code> may be useful to collect output from the nodes, and <code>type="FORK"</code> may be used to force a fork cluster on linux(-alikes) (otherwise a socket cluster is set up as this is the default effect of <code>parallel::makeCluster</code>).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>Whether to print some information or not.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Arguments passed to <code>add_reftable</code> (and possibly beyond, to the simulation function: see <code>nsim</code> argument of <code>myrnorm_tab()</code> in the Examples. These arguments should be constant through all the simulation workflow.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control.Simulate</code></td>
+<td>
+<p>A list, used as an exclusive alternative to “...” to pass additional arguments to <code>Simulate</code>, beyond the parameter vector. The list must contain the same elements as would go in the “...”.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>packages</code></td>
+<td>
+<p>For parallel evaluation: Names of additional libraries to be loaded on the cores, necessary for <code>Simulate</code> evaluation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>env</code></td>
+<td>
+<p>For parallel evaluation: an environment containing additional objects to be exported on the cores, necessary for <code>Simulate</code> evaluation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cl_seed</code></td>
+<td>
+<p>Integer, or NULL. Providing the seed was conceived to allow repeatable results at least for given parallelization settings, if not identical results across different parallelization contexts. However, this functionality may have been been lost as the code was adapted for the up-to-date workflow using <code>add_reftable</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>newsimuls</code> argument should have the same structure as the return value of the function itself, except that <code>newsimuls</code> may include only a subset of the attributes returned by the function. <code>newsimuls</code> should thus be list of matrices, each with a <code>par</code> attribute (see Examples). Rows of each matrix stand for simulation replicates and columns stand for the different summary statistics. 
+</p>
+<p>When <code>nRealizations</code>&gt;1L, if <code>nb_cores</code> is unnamed or has name <code>"replic"</code> and if the simulation function does not return a single table for all replicates (thus, if <code>nRealizations</code> is <b>not</b> a named integer of the form “<code>c(as_one=.)</code>”, parallelisation is over the different samples for each parameter value (and the seed of the random number generator is not controlled in a parallel context). For any other explicit name (e.g., <code>nb_cores=c(foo=7)</code>), or if <code>nRealizations</code> is a named integer of the form “<code>c(as_one=.)</code>”, parallelisation is over the parameter values (the rows of <code>par.grid</code>). In all cases, the progress bar is over parameter values. See Details in <code>Infusion.options</code> for the subtle way these different cases are distinguished in the progress bar.
+</p>
+<p>Using a FORK cluster with <code>nRealizations</code>&gt;1 is warned as unreliable: in particular, anyone trying this combination should check whether other desired controls, such as random generator seed, or progress bar are effective. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>If <code>nRealizations</code>&gt;1L, the return value is an object of class <code>EDFlist</code>, which is a list-with-attributes of matrices-with-attribute. Each matrix contains a simulated distribution of summary statistics for given parameters, and the <code>"par"</code> attribute is a 1-row data.frame of parameters. If <code>Simulate</code> is used, this must give all the parameters to be estimated; otherwise it must at least include all variable parameters in this <b>or later</b> simulations to be appended to the simulation list. 
+</p>
+<p>The value has the following attributes: <code>LOWER</code> and <code>UPPER</code> which are each a vector of per-parameter minima and maxima deduced from any <code>newsimuls</code> argument, and optionally any of the arguments <code>Simulate, control.Simulate, packages, env, par.grid</code> and  <code>simulations</code> (all corresponding to input arguments when provided, except that the actual <code>Simulate</code> function is returned even if it was input as a name).
+</p>
+<p>If <code>nRealizations</code>=1 <code>add_reftable</code> is called: see its distinct return value.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">### Examples using init_grid and add_simulation, for primitive workflow
+### Use init_reftable and add_reftable for the up-to-date workflow
+
+# example of building a list of simulations from scratch:
+myrnorm &lt;- function(mu,s2,sample.size) {
+  s &lt;- rnorm(n=sample.size,mean=mu,sd=sqrt(s2))
+  return(c(mean=mean(s),var=var(s)))
+}
+set.seed(123)
+onedistrib &lt;- t(replicate(100,myrnorm(1,1,10))) # toy example of simulated distribution
+attr(onedistrib,"par") &lt;- c(mu=1,sigma=1,sample.size=10) ## important!
+simuls &lt;- add_simulation(NULL, Simulate="myrnorm", nRealizations=500,
+                         newsimuls=list("example"=onedistrib))
+
+# standard use: smulation over a grid of parameter values
+parsp &lt;- init_grid(lower=c(mu=2.8,s2=0.2,sample.size=40),
+                   upper=c(mu=5.2,s2=3,sample.size=40))
+simuls &lt;- add_simulation(NULL, Simulate="myrnorm", nRealizations=500,
+                         par.grid = parsp[1:7,])
+                         
+## Not run:  # example continued: parallel versions of the same
+# Slow computations, notably because cluster setup is slow.
+
+#    ... parallel over replicates, serial over par.grid rows
+# =&gt; cl_seed has no effect and can be ignored
+simuls &lt;- add_simulation(NULL, Simulate="myrnorm", nRealizations=500,
+                         par.grid = parsp[1:7,], nb_cores=7)
+#                         
+#    ... parallel over 'par.grid' rows =&gt; cl_seed is effective
+simuls &lt;- add_simulation(NULL, Simulate="myrnorm", nRealizations=500,
+                         cl_seed=123, # for repeatable results
+                         par.grid = parsp[1:7,], nb_cores=c(foo=7))
+
+## End(Not run)
+                     
+####### Example where a single 'Simulate' returns all replicates:
+
+myrnorm_tab &lt;- function(mu,s2,sample.size, nsim) {
+  ## By default, Infusion.getOption('nRealizations') would fail on nodes!
+  replicate(nsim, 
+            myrnorm(mu=mu,s2=s2,sample.size=sample.size)) 
+}
+
+parsp &lt;- init_grid(lower=c(mu=2.8,s2=0.2,sample.size=40),
+                   upper=c(mu=5.2,s2=3,sample.size=40))
+
+# 'as_one' syntax for 'Simulate' function returning a simulation table: 
+simuls &lt;- add_simulation(NULL, Simulate="myrnorm_tab",
+              nRealizations=c(as_one=500),
+              nsim=500, # myrnorm_tab() argument, part of the 'dots'
+              parsTable=parsp)
+
+## Not run:  # example continued: parallel versions of the same.
+# Slow cluster setup again
+simuls &lt;- add_simulation(NULL,Simulate="myrnorm_tab", parsTable=parsp,
+              nb_cores=7L,
+              nRealizations=c(as_one=500),
+              nsim=500, # myrnorm_tab() argument again
+              cl_seed=123, # for repeatable results
+              # need to export other variables used by *myrnorm_tab* to the nodes:
+              env=list2env(list(myrnorm=myrnorm)))
+
+## End(Not run)
+
+## see main documentation page for the package for other typical usage
+</code></pre>
+
+
+</div>

@@ -1,0 +1,82 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>create.counts.table</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>create.counts.table</h2>
+
+<h3>Description</h3>
+
+<p>Summary function to collapse the counts of selected (e.g. correlated) features per cancer type into counts table
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">create.counts.table(corr.summary = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>corr.summary</code></td>
+<td>
+<p>A list object containing subtype specific selected (e.g. correlated) features. This is the list object returned by <code>estimate.expression.cna.correlation</code></p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p>A matrix of cancer type specific counts
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Syed Haider
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>estimate.expression.cna.correlation</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# load test data
+x &lt;- get.test.data(data.types = c("mRNA.T", "CNA"));
+
+# temporary output directory
+tmp.output.dir &lt;- tempdir();
+
+# go through each cancer type iteratively and perform mRNA-CNA correlation analysis
+correlated.features &lt;- list();
+for (cancer.type in names(x$mRNA.T)) {
+
+  # estimate mRNA and CNA correlation for each cancer/disease type
+  correlated.features[[cancer.type]] &lt;- estimate.expression.cna.correlation(
+    exp.data = x$mRNA.T[[cancer.type]], 
+    cna.data.log2 = x$CNA.log2[[cancer.type]], 
+    corr.threshold = 0.3, 
+    corr.direction = "two.sided", 
+    subtypes.metadata = list(
+      "subtype.samples.list" = list("All" = colnames(x$mRNA.T[[cancer.type]]))
+      ), 
+    feature.ids = rownames(x$mRNA.T[[cancer.type]]), 
+    cancer.type = cancer.type, 
+    data.dir = paste(tmp.output.dir, "/data/", cancer.type, sep = ""),
+    graphs.dir = paste(tmp.output.dir, "/graphs/", cancer.type, sep = "")
+    );
+  }
+
+# create counts table across cancer types
+counts.table &lt;- create.counts.table(corr.summary = correlated.features);
+
+</code></pre>
+
+
+</div>

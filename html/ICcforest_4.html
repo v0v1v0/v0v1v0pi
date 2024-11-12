@@ -1,0 +1,135 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>predict.ICcforest</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Predict from an ICcforest model</h2>
+
+<h3>Description</h3>
+
+<p>Compute predictions from ICcforest objects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'ICcforest'
+predict(
+  object,
+  newdata = NULL,
+  OOB = FALSE,
+  suppress = TRUE,
+  type = c("response", "prob", "weights", "node"),
+  FUN = NULL,
+  simplify = TRUE,
+  scale = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>an object as returned by <code>ICcforest</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>newdata</code></td>
+<td>
+<p>an optional data frame containing test data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>OOB</code></td>
+<td>
+<p>a logical specifying whether out-of-bag predictions are desired
+</p>
+<p>(only if <code>newdata = NULL</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>suppress</code></td>
+<td>
+<p>a logical specifying whether the messages from <code>getFitEsts</code> 
+are suppressed. If <code>FALSE</code>, the messages are printed. <code>suppress = TRUE</code> is set by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>a character string denoting the type of predicted value returned. 
+</p>
+<p>For <code>"type = response"</code>, the mean of a numeric response, the median survival time for 
+the interval-censored response is returned. For <code>"type = prob"</code>, a list with the survival 
+function constructed using the non-parametric maximum likelihood estimator for each observation 
+is returned. <code>"type = weights"</code> returns an integer vector of prediction weights. 
+For <code>type = "node"</code>, a list of terminal node ids for each of the trees in the 
+forest is returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>FUN</code></td>
+<td>
+<p>a function to compute summary statistics. Predictions for each node must be 
+computed based on arguments <code>(y, w)</code> where <code>y</code> is the response and <code>w</code> are case 
+weights.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>simplify</code></td>
+<td>
+<p>a logical indicating whether the resulting list of predictions should be 
+converted to a suitable vector or matrix (if possible), see <code>cforest</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p>a logical indicating scaling of the nearest neighbor weights by the sum of weights 
+in the corresponding terminal node of each tree, see <code>cforest</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class <code>ICcforest</code>, as a subclass of <code>cforest</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>sbrier_IC</code> for evaluation of model fit for interval-censored data
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(icenReg)
+data(miceData)
+
+## For ICcforest to run, Inf should be set to be a large number, for example, 9999999.
+miceData$u[miceData$u == Inf] &lt;- 9999999.
+
+## First, fit an iterval-censored conditional inference forest
+Cforest &lt;- ICcforest(formula = Surv(l,u,type="interval2")~grp, data = miceData)
+## Predict the survival function constructed using the non-parametric maximum likelihood estimator
+Pred &lt;- predict(Cforest, type = "prob")
+
+## Out-of-bag prediction of the median survival time
+PredOOB &lt;- predict(Cforest, type = "response", OOB = TRUE)
+
+</code></pre>
+
+
+</div>

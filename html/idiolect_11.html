@@ -1,0 +1,112 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>lambdaG_visualize</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Visualize the output of the LambdaG algorithm</h2>
+
+<h3>Description</h3>
+
+<p>This function outputs a colour-coded list of sentences belonging to the input Q text ordered from highest to lowest <code class="reqn">\lambda_G</code>, as shown in Nini et al. (under review).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">lambdaG_visualize(
+  q.data,
+  k.data,
+  ref.data,
+  N = 10,
+  r = 30,
+  output = "html",
+  print = "",
+  scale = "absolute",
+  cores = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>q.data</code></td>
+<td>
+<p>A single questioned or disputed text as a <code>quanteda</code> tokens object with the tokens being sentences (e.g. the output of <code>tokenize_sents()</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k.data</code></td>
+<td>
+<p>A known or undisputed corpus containing exclusively a single candidate author's texts as a <code>quanteda</code> tokens object with the tokens being sentences (e.g. the output of <code>tokenize_sents()</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ref.data</code></td>
+<td>
+<p>The reference dataset as a <code>quanteda</code> tokens object with the tokens being sentences (e.g. the output of <code>tokenize_sents()</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>The order of the model. Default is 10.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>The number of iterations. Default is 30.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output</code></td>
+<td>
+<p>A string detailing the file type of the colour-coded text output. Either "html" (default) or "latex".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print</code></td>
+<td>
+<p>A string indicating the path to the folder where to print a colour-coded text file. If left empty (default), then nothing is printed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale</code></td>
+<td>
+<p>A string indicating what scale to use to colour-code the text file. If "absolute" (default) then the raw <code class="reqn">\lambda_G</code> is used; if "relative", then the z-score of <code class="reqn">\lambda_G</code> over the Q data is used instead, thus showing relative importance.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>The number of cores to use for parallel processing (the default is one).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The function outputs a list of two objects: a data frame with each row being a token in the Q text and the values of <code class="reqn">\lambda_G</code> for the token and sentences, in decreasing order of sentence <code class="reqn">\lambda_G</code> and with the relative contribution of each token and each sentence to the final <code class="reqn">\lambda_G</code> in percentage; the raw code in html or LaTeX that generates the colour-coded file. If a path is provided for the print argument then the function will also save the colour-coded text as an html or plain text file.
+</p>
+
+
+<h3>References</h3>
+
+<p>Nini, A., Halvani, O., Graner, L., Gherardi, V., Ishihara, S. Authorship Verification based on the Likelihood Ratio of Grammar Models. https://arxiv.org/abs/2403.08462v1
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">q.data &lt;- corpus_trim(enron.sample[1], "sentences", max_ntoken = 10) |&gt; quanteda::tokens("sentence")
+k.data &lt;- enron.sample[2:5]|&gt; quanteda::tokens("sentence")
+ref.data &lt;- enron.sample[6:ndoc(enron.sample)] |&gt; quanteda::tokens("sentence")
+outputs &lt;- lambdaG_visualize(q.data, k.data, ref.data, r = 2)
+outputs$table
+
+</code></pre>
+
+
+</div>

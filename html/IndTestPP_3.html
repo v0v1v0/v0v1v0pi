@@ -1,0 +1,127 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>simNHPc</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generating points in a Poisson process</h2>
+
+<h3>Description</h3>
+
+<p>This function generates the occurrence points  
+in a homogenous or nonhomogeneous Poisson process (NHPP) with  a given  intensity <code class="reqn">\lambda(t)</code>, 
+in a  continuous period  of time (0, T). 
+</p>
+<p>It calls the auxiliary function <code>buscar</code> (not intended for the users), see Details.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">simNHPc(lambda, fixed.seed=NULL, algor="Thinning")</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>Numeric vector. Intensity <code class="reqn">\lambda(t)</code>  used to generate the Poisson process.  Its length determines  
+the length of the observed period.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed.seed</code></td>
+<td>
+<p>An integer or NULL. If it is an integer, that is the value  used to set the seed 
+in  random  generation processes. It it is NULL, a random seed is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algor</code></td>
+<td>
+<p> Optional. Character string.  The algorithm  used to generate the process, it can be
+"Inversion" or "Thinning"; see Details.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Two algorithms  to generate the NHPP points  are implemented. "Inversion" is based on the inversion algortihm, 
+see Ross(2006), and it consists in two steps. 
+First,  the points of a homogeneous Poisson process  of intensity one are generated using 
+independent exponentials. Then, the  homogeneous occurrence times are transformed into 
+the points  of a  nonhomogeneous process with intensity <code class="reqn">\lambda(t)</code>.
+This transformation is performed by the auxiliary function <code>buscar</code> 
+(not intended for the user).
+</p>
+<p>The algorithm "Thinning", see Banerjee et al. (2014),  generates  the occurrences times
+in a homogeneous Poisson process with intensity <code class="reqn">\lambda_{max}=\max_t \lambda(t)</code> and the resulting points are retained 
+with probability <code class="reqn">\lambda(t_i)/\lambda_{max}</code>.
+</p>
+<p>The "Inversion" algorithm requires positive values of  the argument <code>lambda</code> and it is slower, but
+the "Thinning" algorithm may yield excesive rejection according to Ross (2006).
+</p>
+<p>The lenght of the period where the processes are generated is  determined by the length of 
+the argument <code>lambda</code>.
+</p>
+<p>Homogenous  processes  are  generated if the intensity vector  <code>lambda</code> is  constant 
+(that is if all the values are equal).
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with elements:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>posNH </code></td>
+<td>
+<p>Numeric vector. Occurrence points of the Poisson process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda </code></td>
+<td>
+<p>Input argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed.seed</code></td>
+<td>
+<p>Input argument.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Banerjee, S., Carlin, B.P. and Gelfand, A. E. (2014) <em>Hierarchical modeling and 
+analysis for spatial data</em>.CRC Press.
+</p>
+<p>Ross, S.M. (2006). <em>Simulation.</em> Academic Press.
+</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>simHPc</code>,  <code>IndNHPP</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#Generation  of a Homogeneous Poisson process 
+aux&lt;-simNHPc(lambda=rep(0.1,200),fixed.seed=123, algor='Inversion')
+aux$posNH
+
+#Generation of a NHPP 
+set.seed(123)
+lambdat&lt;-runif(500, 0.01,0.1)
+aux&lt;-simNHPc(lambda=lambdat,fixed.seed=123, algor='Thinning')
+aux$posNH
+</code></pre>
+
+
+</div>

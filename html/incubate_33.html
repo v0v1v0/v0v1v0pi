@@ -1,0 +1,150 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>test_diff</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Test the difference for delay model parameter(s) between two uncorrelated groups, based on maximum product of spacings estimation (MPSE).</h2>
+
+<h3>Description</h3>
+
+<p>It is in fact a model comparison between a null model where the parameters are enforced to be equal and an unconstrained full model.
+As test statistic we use twice the difference in best (=lowest) objective function value, i.e. 2 * (<code>val_0</code> - <code>val_1</code>).
+This is reminiscent of a likelihood ratio test statistic albeit the objective function is not a negative log-likelihood
+but the negative of the maximum product spacing metric.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">test_diff(
+  x,
+  y = stop("Provide data for group y!"),
+  distribution = c("exponential", "weibull"),
+  twoPhase = FALSE,
+  method = c("MPSE", "MLEn", "MLEw", "MLEc"),
+  profiled = method == "MLEw",
+  ties = c("density", "equidist", "random", "error"),
+  param = "delay1",
+  type = c("all", "bootstrap", "GOF", "moran", "pearson", "logrank", "LR"),
+  doLogrank = TRUE,
+  R = 400,
+  chiSqApprox = FALSE,
+  verbose = 0
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>data from reference/control group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>data from the treatment group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distribution</code></td>
+<td>
+<p>character(1). Name of the parametric delay distribution to use.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>twoPhase</code></td>
+<td>
+<p>logical(1). Do we model two phases per group? Default is <code>FALSE</code>, i.e. a single delay phase per group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>character. Which method to fit the models.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>profiled</code></td>
+<td>
+<p>logical. Use the profiled likelihood?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ties</code></td>
+<td>
+<p>character. How to handle ties in data vector of a group?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>param</code></td>
+<td>
+<p>character. Names of parameters to test difference for. Default value is <code>'delay1'</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>character. Which type of tests to perform?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>doLogrank</code></td>
+<td>
+<p>logical. In any case do log-rank based tests?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+<p>numeric(1). Number of bootstrap samples to evaluate the distribution of the test statistic.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>chiSqApprox</code></td>
+<td>
+<p>logical flag. In bootstrap, should we calculate the approximate degrees of freedom for the distribution of the test statistic under H0?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>numeric. How many details are requested? Higher value means more details. 0=off, no details.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>High values of this difference speak against the null-model (i.e. high <code>val_0</code> indicates bad fit under 0-model and low values of <code>val_1</code> indicate a good fit under the more general model1.
+The test is implemented as a parametric bootstrap test, i.e. we
+</p>
+
+<ol>
+<li>
+<p> take given null-model fit as ground truth
+</p>
+</li>
+<li>
+<p> regenerate data according to this model.
+</p>
+</li>
+<li>
+<p> recalculate the test statistic
+</p>
+</li>
+<li>
+<p> appraise the observed test statistic in light of the generated distribution under H0
+</p>
+</li>
+</ol>
+<h3>Value</h3>
+
+<p>list with the results of the test. Element P contains the different P-values, for instance from parametric bootstrap
+</p>
+
+
+</div>

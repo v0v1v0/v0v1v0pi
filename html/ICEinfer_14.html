@@ -1,0 +1,111 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ICEpref</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Compute ICE Economic Preference Scores from Numeric Cost and Effe Measures</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates Incremental Net Monetary Benefit (INMB) Scores that are expressed in Cost
+units. While these scores are of "linear" form, (lambda * Effe) - Cost, when eta == gamma / beta == 1,
+they are "Nonlinear" when eta is either &gt; 1 or &lt; 1.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  ICEpref(tr, ex, cy, lambda = 1, beta = 1, eta = 3 + 2 * sqrt(2)) 
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>tr</code></td>
+<td>
+<p>Binary [0 or 1] indicator of Treatment Regimen received by each patient [Experimental
+Unit]: tr == 0 denotes the "Standard" Regimen, tr == 1 denotes a "New" Regimen.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ex</code></td>
+<td>
+<p>Numeric vector representing Effe measures observed for 2 or more experimental units.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cy</code></td>
+<td>
+<p>Corresponding numeric vector reporting Total Cost Incurred by patients during treatment.
+The tr, ex and cy vectors must be of the same length, n &gt;= 2, and 1 &lt; sum(tr) &lt; n.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>Positive value for the fair, full-retail Shadow Price of Health. When ex is
+measured in QALYs and cy in U.S. Dollars, lambda = 50000 is traditionally assumed appropriate.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p>Positive Returns-to-Scale Power parameter for ICE Preference calculations. beta = 1
+implies Linear (Constant) Returns-to-Scale.  A beta &gt; 0 but &lt; 1 implies Returns-to-Scale that
+are Diminishing and tend to be highly Realistic.  Any beta &gt; 1 implies Increasing Returns-to-Scale.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eta</code></td>
+<td>
+<p>Positive Power Parameter Ratio: gamma / beta.  Generalized "linear" maps result when
+eta = 1.  An eta ratio &gt; 1 can yield a realistic "Nonlinear" map, but maps with eta &gt; 3+2*sqrt(2)
+= 5.828 (Obenchain's "Omega") violate the "Cartesian Monotonicity" Axiom.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Object of class "numeric" of the same length as the tr, ex and cy vectors input:
+</p>
+<table><tr style="vertical-align: top;">
+<td><code>pref</code></td>
+<td>
+<p>Computed ICE Economic Preference Scores.</p>
+</td>
+</tr></table>
+<h3>Author(s)</h3>
+
+<p>Bob Obenchain &lt;wizbob@att.net&gt;</p>
+
+
+<h3>References</h3>
+
+<p>Hoch JS, Briggs AH, Willan AR. Something old, something new, something borrowed,
+something blue: a framework for the marriage of health econometrics and
+cost-effectiveness analysis. <em>Health Economics</em> 2002; <b>11</b>: 415-430.
+</p>
+<p>Obenchain RL.  ICE Preference Maps: Nonlinear Generalizations of Net Benefit and Acceptability.
+<em>Health Serv Outcomes Res Method</em>  2008; <b>8</b>: 31-56. DOI 10.1007/s10742-007-0027-2.
+Open Access.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot.ICEepmap</code> and <code>print.ICEepmap</code></p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  data(sepsis)
+  attach(sepsis)
+  icedr &lt;- ICEpref(tr=icu, ex=qalypres, cy=totcost, lambda=50000, beta=0.6) # Diminishing Returns.
+  summary(icedr)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,167 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>goftest</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Assessing goodness of fit of inference using simulation
+</h2>
+
+<h3>Description</h3>
+
+<p>A goodness-of-fit test is performed in the case projected statistics have been used for inference. Otherwise some plots of limited interest are produced.
+</p>
+<p><code>summary</code> and <code>print</code> methods for results of <code>goftest</code> call <code>str</code> to display the structure of this result.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">goftest(object, nsim = 99L, method = "", stats=NULL, plot. = TRUE, nb_cores = NULL, 
+        Simulate = get_from(object,"Simulate"), 
+        control.Simulate=get_from(object,"control.Simulate"),
+        packages = get_from(object,"packages"), 
+        env = get_from(object,"env"), verbose = interactive(),
+        cl_seed=.update_seed(object), get_gof_stats=.get_gof_stats)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>an <code>SLik</code> or <code>SLik_j</code> object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsim</code></td>
+<td>
+
+<p>Number of draws of summary statistics.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>For development purposes, not documented.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stats</code></td>
+<td>
+
+<p>Character vector, or NULL: the set of summary statistics to be used to construct the test. If NULL, the union, across all projections, of the raw summary statistics used for projections is potentially used for goodness of fit; however, if this set is too large for gaussian mixture modelling, a subset of variable may be selected. How they are selected is not yet fully settled (see Details).  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.</code></td>
+<td>
+
+<p>Control diagnostic plots. <code>plot.</code> can be of logical, character or numeric type. If <code>plot.</code> is <code>FALSE</code>, no plot is produced. If <code>plot.</code> is <code>TRUE</code> (the default), a data frame of up to 8 goodness-of-fit statistics (the statistics denoted <em>u</em> in Details) is plotted. If more than eight raw summary statistics (denoted <em>s</em> in Details) were used, then only the first eight <em>u</em> are retained (see Details for the ordering of the <em>u</em>s here). 
+If <code>plot.</code> is a <b>numeric vector</b>, then <em>u</em><code>[plot.]</code> are retained (possibly more than 8 statistics, as in the next case). If <code>plot.</code> is a <b>character vector</b>, then it is used to match the names of the <em>u</em> statistics (not of <em>s</em>) to be retained in the plot; the names of <em>u</em> are built from names of <em>s</em> by wrapping the latter within <code>"Res(".")"</code> (see axes labels of default plots for examples of valid names).    
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nb_cores, Simulate, packages, env, verbose</code></td>
+<td>
+
+<p>See same-named <code>add_simulation</code> arguments.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control.Simulate</code></td>
+<td>
+
+<p>A list of arguments of the <code>Simulate</code> function (see<code>add_simulation</code>). The default value should generally be used, unless e.g. it contains the path of an executable on one machine and a different path must be specified on another machine.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cl_seed</code></td>
+<td>
+<p>NULL or integer (see <code>refine</code> for Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>get_gof_stats</code></td>
+<td>
+<p>function for selecting raw statistics (see Details).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><b>Testing goodness-of-fit:</b> The test is somewhat heuristic but appears to give reasonable results (the Example shows how this can be verified). It assumes that all summary statistics are reduced to projections predicting all model parameters. It is then conceived as if any projection <em>p</em> predicting a parameter were a sufficient statistic for this parameter, given the information contained in the summary statistics <b>s</b> (this is certainly the ideal objective of machine-learning regression methods). Then a statistic <em>u</em> independent (under the fitted model) from all projections should be a suitable statistic for testing goodness of fit: if the model is correctly specified, the quantile of observed <em>u</em>, in the distribution of <em>u</em> under the fitted model, should be uniformly distributed over repeated sampling under the data-generating process. The procedure constructs statistics uncorrelated to all <b>p</b> (over repeated sampling under the fitted model) and proceeds as if they were independent from <em>p</em> (rather than simply uncorrelated). A number (depending on the size of the reference table) of statistics <em>u</em> uncorrelated to <em>p</em> are then defined. Each such statistic is obtained as the residual of the regression of a given raw summary statistic to all projections, where the regression input is a simulation table of <code>nsim</code> replicates of <b>s</b> under the fitted model, and of their projections <b>p</b> (using the “projectors” constructed from the full reference table). The latter regression involves one more, small-<code>nsim</code>, approximation (as it is the sample correlation that is zeroed) but using the residuals is crucially better than using the original summary statistics (as some ABC software may do). An additional feature of the procedure is to construct a single test statistic <em>t</em> from joint residuals <b>u</b>, by estimating their joint distribution (using Gaussian mixture modelling) and letting <em>t</em> be the density of <b>u</b> in this distribution.  
+</p>
+<p><b>Selection of raw summary statistics:</b> See the code of the <code>Infusion:::..get_gof_stats</code> function for the method used. It requires that <code>ranger</code> has been used to produce the projectors, and that the latter include variable importance statistics (by default, <span class="pkg">Infusion</span> calls <code>ranger</code> with argument <code>importance="permutation"</code>). <code>.get_gof_stats</code> then selects the raw summary statistics with <em>least</em> importance over projections (this may not be optimal, and in particular appears redundant with the procedure described below to construct goodness-of-fit statistics from raw summary statistics; so this might change in a later version), and returns a vector of names of raw statistics, sorted by increasing least-importance. The number of summary statistics can be controlled by the global package option <code>gof_nstats_fn</code>, a function with arguments <code>nr</code> and <code>nstats</code> for, respectively, the number of simulations of the processus (as controlled by <code>goftest(.,nsim)</code>) and the total number of raw summary statistics used in the projections.
+</p>
+<p>The <b>diagnostic plot</b> will show a data frame of residuals <em>u</em> of the summary statistics identified as the first elements of the vector returned by <code>Infusion:::..get_gof_stats</code>, i.e. again a set of raw statistics with least-importance over projectors. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>goftest</code>, which is a<code>list</code> with element(s)
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>pval </code></td>
+<td>
+<p>The p-value of the test (NULL if the test is not feasible).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plotframe </code></td>
+<td>
+<p>The data frame which is (by default) plotted by the function.
+Its last line contains the residuals <em>u</em> for the analyzed data, and other lines contain the bootstrap replicates.</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">### See end of example("example_reftable") for minimal example.
+
+## Not run: 
+### Performance of GoF test over replicate draws from data-generating process
+
+# First, run 
+example("example_reftable") 
+# (at least up to the final 'slik_j' object), then
+
+# as a shortcut, the same projections will be used in all replicates:
+dprojectors &lt;- slik_j$projectors 
+
+set.seed(123)
+gof_draws &lt;- replicate(200, {
+  cat(" ")
+  dSobs &lt;- blurred(mu=4,s2=1,sample.size=40) 
+  ## ----Inference workflow-----------------------------------------------
+  dprojSobs &lt;- project(dSobs,projectors=dprojectors)
+  dslik &lt;- infer_SLik_joint(dprojSimuls,stat.obs=dprojSobs,verbose=FALSE)
+  dslik &lt;- MSL(dslik, verbose=FALSE, eval_RMSEs=FALSE)
+  ## ----GoF test-----------------------------------------------
+  gof &lt;- goftest(dslik,nb_cores = 1L, plot.=FALSE,verbose=FALSE) 
+  cat(unlist(gof))
+  gof
+})
+# ~ uniform distribution under correctly-specified model: 
+plot(ecdf(unlist(gof_draws)))
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

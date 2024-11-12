@@ -1,0 +1,572 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ipsecr.fit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Spatially Explicit Capture–Recapture by Inverse Prediction
+</h2>
+
+<h3>Description</h3>
+
+<p>Estimate population density by simulation and inverse prediction (Efford 2004; Efford,
+Dawson &amp; Robbins 2004). A restricted range of SECR models may be fitted.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">
+ipsecr.fit(capthist, proxyfn = proxy.ms, model = list(D ~ 1, g0 ~ 1, sigma ~ 1),
+    mask = NULL, buffer = 100, detectfn = "HN", binomN = NULL, start = NULL, 
+    link = list(), fixed = list(), timecov = NULL, sessioncov = NULL, 
+    details = list(), verify = TRUE, verbose = TRUE, ncores = NULL, 
+    seed = NULL, ...)
+
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>capthist</code></td>
+<td>
+<p>secr capthist object including capture data and detector (trap) layout</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>proxyfn</code></td>
+<td>
+<p>function to compute proxy from capthist for each coefficient (beta parameter)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>list with optional components each symbolically defining a linear 
+predictor for one real parameter using <code>formula</code> notation </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mask</code></td>
+<td>
+<p><code>mask</code> object </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>buffer</code></td>
+<td>
+<p>scalar mask buffer radius in metres if <code>mask</code> not specified</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>detectfn</code></td>
+<td>
+<p>integer code or character string for shape of
+detection function 0 = halfnormal, 1 = hazard rate etc. – see detectfn</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>binomN</code></td>
+<td>
+<p>integer code for distribution of counts (see Details) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start</code></td>
+<td>
+<p>vector of initial values for beta parameters, or <code>ipsecr</code> 
+object from which they may be derived </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>link</code></td>
+<td>
+<p>list with optional components corresponding to ‘real’
+parameters (e.g., ‘D’, ‘g0’, ‘sigma’), each a character string in
+{"log", "logit", "identity", "sin"} for the link function of one real parameter </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed</code></td>
+<td>
+<p>list with optional components corresponding to real parameters 
+giving the scalar value to which the parameter is to be fixed </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timecov</code></td>
+<td>
+<p>optional dataframe of values of time (occasion-specific) covariate(s). NOT USED </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sessioncov</code></td>
+<td>
+<p>optional dataframe of values of session-specific covariate(s)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>details</code></td>
+<td>
+<p>list of additional settings, to control estimation (see Details) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verify</code></td>
+<td>
+<p>logical, if TRUE the input data are checked with <code>verify</code> </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p> logical, if TRUE then messages are output during execution</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncores</code></td>
+<td>
+<p> integer number of cores to use for parallel processing</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>either NULL or an integer that will be used in a call to <code>set.seed</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> other arguments passed to proxy function </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The vignette should be consulted for a full exposition.
+</p>
+
+
+<h4>Parallel computation</h4>
+
+<p><code>ncores</code> determines the number of worker processes in a cluster created by <code>makeCluster</code> (default type "FORK" on Unix platforms, otherwise "PSOCK"). If <code>ncores = NULL</code> this defaults to the value from <code>setNumThreads</code>. Simulations are distributed over worker processes using <code>parRapply</code>. There are substantial overheads in running multiple processes: using too many will slow down fitting. With PSOCK clusters (i.e. on Windows) fitting is very often fastest with ncores = 1.
+</p>
+
+
+
+<h4>The ‘details’ argument</h4>
+
+<p><code>details</code> is used for various specialized settings listed below. These are 
+also described separately - see <code>details</code>.
+</p>
+
+<table>
+<tr>
+<td style="text-align: left;">
+  Name </td>
+<td style="text-align: left;"> Default </td>
+<td style="text-align: left;"> Description </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  boxsize1 </td>
+<td style="text-align: left;"> 0.2  </td>
+<td style="text-align: left;"> scalar or vector of length np for size of design</td>
+</tr>
+<tr>
+<td style="text-align: left;"> 
+  boxsize2 </td>
+<td style="text-align: left;"> 0.05  </td>
+<td style="text-align: left;"> as for <code>boxsize1</code>; used from second box onwards</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  boxtype </td>
+<td style="text-align: left;"> 'absolute' </td>
+<td style="text-align: left;"> `absolute' or `relative' </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  centre </td>
+<td style="text-align: left;"> 3 </td>
+<td style="text-align: left;"> number of centre points in simulation design</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  dev.max </td>
+<td style="text-align: left;">  0.002 </td>
+<td style="text-align: left;"> tolerance for precision of points in predictor space </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  var.nsim </td>
+<td style="text-align: left;"> 2000 </td>
+<td style="text-align: left;"> number of additional simulations to estimate variance-covariance matrix </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  keep.sim </td>
+<td style="text-align: left;"> FALSE </td>
+<td style="text-align: left;"> if true then the variance simulations are saved </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  min.nsim </td>
+<td style="text-align: left;"> 20 </td>
+<td style="text-align: left;"> minimum number of simulations per point </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  max.nsim </td>
+<td style="text-align: left;"> 200 </td>
+<td style="text-align: left;"> maximum number of simulations per point </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  min.nbox </td>
+<td style="text-align: left;"> 2 </td>
+<td style="text-align: left;"> minimum number of attempts to `frame' solution </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  max.nbox </td>
+<td style="text-align: left;"> 5 </td>
+<td style="text-align: left;"> maximum number of attempts to `frame' solution </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  max.ntries </td>
+<td style="text-align: left;"> 2 </td>
+<td style="text-align: left;"> maximum number of attempts at each simulation </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  distribution </td>
+<td style="text-align: left;"> `poisson' </td>
+<td style="text-align: left;"> `poisson', `binomial' or `even' </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  binomN </td>
+<td style="text-align: left;"> 0 </td>
+<td style="text-align: left;"> integer code for distribution of counts (unused) </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ignorenontarget </td>
+<td style="text-align: left;"> FALSE </td>
+<td style="text-align: left;"> override nontarget attribute of capthist </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  ignoreusage </td>
+<td style="text-align: left;"> FALSE </td>
+<td style="text-align: left;"> override usage in traps object of capthist </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  debug </td>
+<td style="text-align: left;"> FALSE </td>
+<td style="text-align: left;"> stop at arbitrary points in execution (varies) </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  savecall </td>
+<td style="text-align: left;"> TRUE </td>
+<td style="text-align: left;"> optionally suppress saving of call </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  newdetector </td>
+<td style="text-align: left;"> NULL </td>
+<td style="text-align: left;"> detector type that overrides detector(traps(capthist)) </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  contrasts </td>
+<td style="text-align: left;"> NULL </td>
+<td style="text-align: left;"> coding of factor predictors </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  popmethod </td>
+<td style="text-align: left;"> `internal' </td>
+<td style="text-align: left;"> `internal' or `sim.popn' or a user-provided function </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  CHmethod </td>
+<td style="text-align: left;"> `internal' </td>
+<td style="text-align: left;"> `internal' or `sim.capthist' or a user-provided function </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  factorial </td>
+<td style="text-align: left;"> `full' </td>
+<td style="text-align: left;"> `full' or `fractional' design </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  FrF2args </td>
+<td style="text-align: left;"> NULL </td>
+<td style="text-align: left;"> arguments for FrF2 when factorial = 'fractional' </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  extraparam </td>
+<td style="text-align: left;"> NULL </td>
+<td style="text-align: left;"> list of starting values for extra parameters (see vignette) </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  forkonunix </td>
+<td style="text-align: left;"> TRUE </td>
+<td style="text-align: left;"> logical choice between FORK and PSOCK cluster types (not Windows) </td>
+</tr>
+<tr>
+<td style="text-align: left;">
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An object of class 'ipsecr', a list comprising:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p> the function call (if details$savecall)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>capthist</code></td>
+<td>
+<p>input</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>proxyfn</code></td>
+<td>
+<p>input</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>input</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mask</code></td>
+<td>
+<p>input</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>detectfn</code></td>
+<td>
+<p>input</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start</code></td>
+<td>
+<p>input</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>link</code></td>
+<td>
+<p>input</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed</code></td>
+<td>
+<p>input</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timecov</code></td>
+<td>
+<p>input</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sessioncov</code></td>
+<td>
+<p>input</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>details</code></td>
+<td>
+<p>input</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>designD</code></td>
+<td>
+<p>list of design data for density</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trapdesigndata</code></td>
+<td>
+<p>list of design data for trap-specific models</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parindx</code></td>
+<td>
+<p>mapping of coefficients (beta parameters) to real parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vars</code></td>
+<td>
+<p>names of covariates in model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>betanames</code></td>
+<td>
+<p>names of coefficients</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>realnames</code></td>
+<td>
+<p>names of 'real' parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>code</code></td>
+<td>
+<p>integer completion code: 
+1 successful, 
+2 target not within final box, 
+3 exceeded maximum simulations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p>estimates of coefficients on link scale </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta.vcov</code></td>
+<td>
+<p>variance-covariance matrix of estimates </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>designbeta</code></td>
+<td>
+<p>vertices of final box (design points)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sim.lm</code></td>
+<td>
+<p>last lm model fit</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ip.nsim</code></td>
+<td>
+<p>total number of simulations </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var.nsim.OK</code></td>
+<td>
+<p>number of successful variance simulations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>simulations</code></td>
+<td>
+<p> optional simulation output (see details$keep.sim)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parameters</code></td>
+<td>
+<p> optional simulation input (see details$keep.sim)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variance.bootstrap</code></td>
+<td>
+<p> dataframe summarising simulations for variance estimation </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>version</code></td>
+<td>
+<p>package version</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>starttime</code></td>
+<td>
+<p>time execution started</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>proctime</code></td>
+<td>
+<p> processor time (seconds) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p> RNG state </p>
+</td>
+</tr>
+</table>
+<p>(The order and composition of the output list may change).
+</p>
+
+
+<h3>References</h3>
+
+<p>Efford, M. G. (2004) Density estimation in live-trapping studies.
+<em>Oikos</em> <b>106</b>, 598–610.
+</p>
+<p>Efford, M. G., Dawson, D. K. and Robbins C. S. (2004) DENSITY: software
+for analysing capture-recapture data from passive detector arrays.
+<em>Animal Biodiversity and Conservation</em> <b>27</b>,
+217–228.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>proxy.ms</code>, 
+<code>predict.ipsecr</code>, 
+<code>summary.ipsecr</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+
+ipsecrdemo &lt;- ipsecr.fit(captdata, ncores = 1, buffer = 100, detectfn = 14, seed = 1237)
+
+
+
+</code></pre>
+
+
+</div>

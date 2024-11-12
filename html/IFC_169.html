@@ -1,0 +1,265 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>objectExtract</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Object Extraction</h2>
+
+<h3>Description</h3>
+
+<p>Extracts / Decompress objects stored in RIF or CIF Files.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">objectExtract(ifd, param, verbose = FALSE, bypass = FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ifd</code></td>
+<td>
+<p>list of sub elements of IFD data information extracted by <code>getIFD</code>. This argument can't be missing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>param</code></td>
+<td>
+<p>object of class 'IFC_param', containing extraction parameters defined by <code>objectParam</code>.<br>
+This argument is not mandatory but it may allow to save time for repeated image export on same file.
+If this argument is missing, <code>objectExtract</code> will use named arguments in <code>'...'</code> as input to <code>objectParam</code> to control object extraction.<br>
+However, if <code>'param'</code> is provided, <code>'...'</code> will be <strong>ignored</strong>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>whether to display information (use for debugging purpose). Default is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bypass</code></td>
+<td>
+<p>whether to bypass checks on <code>'ifd'</code> and <code>'param'</code>. Default is <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Arguments passed on to <code>objectParam</code>
+</p>
+
+<dl>
+<dt><code>info</code></dt>
+<dd>
+<p>object of class 'IFC_info', rich information extracted by <code>getInfo</code>. 
+This argument is not mandatory but it may allow to save time for repeated image export on same file.
+If missing, the default, <code>'info'</code> will be extracted thanks to <code>'...'</code>.</p>
+</dd>
+<dt><code>mode</code></dt>
+<dd>
+<p>color mode export. Either <code>"rgb"</code>, <code>"gray"</code> or <code>"raw"</code>. Default is <code>"raw"</code>.
+Note that <code>"raw"</code> is only possible when <code>'export'</code> is <code>"matrix"</code>.</p>
+</dd>
+<dt><code>export</code></dt>
+<dd>
+<p>format mode export. Either <code>"file"</code>, <code>"matrix"</code>, <code>"base64"</code>. Default is <code>"matrix"</code>.</p>
+</dd>
+<dt><code>write_to</code></dt>
+<dd>
+<p>used when export is <code>"file"</code> or <code>"base64"</code> to compute respectively exported file name or base64 id attribute.<br>
+Exported file extension and base64 MIME type will be deduced from this pattern. Allowed export are <code>".bmp"</code>, <code>".jpg"</code>, <code>".jpeg"</code>, <code>".png"</code>, <code>".tif"</code>, <code>".tiff"</code>.
+Note that <code>".bmp"</code> are faster but not compressed producing bigger data.<br>
+Placeholders, if found, will be substituted:<br>
+-<code>%d</code>: with full path directory,<br>
+-<code>%p</code>: with first parent directory,<br>
+-<code>%e</code>: with extension (without leading .),<br>
+-<code>%s</code>: with shortname (i.e. basename without extension),<br>
+-<code>%o</code>: with object_id,<br>
+-<code>%c</code>: with channel_id.<br>
+A good trick is to use:<br>
+-<code>"%d/%s/%s_%o_%c.tiff"</code>, when <code>'export'</code> is <code>"file"</code>,<br>
+-<code>"%o_%c.bmp"</code>, when <code>'export'</code> is <code>"base64"</code>.<br>
+Note that if missing and <code>'export'</code> is not <code>"file"</code>, <code>'write_to'</code> will be set to <code>"%o_%c.bmp"</code>.</p>
+</dd>
+<dt><code>base64_id</code></dt>
+<dd>
+<p>whether to add id attribute to base64 exported object. Default is <code>FALSE</code>.<br>
+Only applied when export is <code>"base64"</code>.</p>
+</dd>
+<dt><code>base64_att</code></dt>
+<dd>
+<p>attributes to add to base64 exported object. Default is <code>""</code>.<br>
+Only applied when export is <code>"base64"</code>. For example, use <code>"class='draggable'"</code>.<br>
+Note that <code>id</code> (if <code>'base64_id'</code> is <code>TRUE</code>) and <code>width</code> and <code>height</code> are already used.</p>
+</dd>
+<dt><code>overwrite</code></dt>
+<dd>
+<p>only apply when <code>'export'</code> is <code>"file"</code> whether to overwrite file or not. Default is <code>FALSE</code>.</p>
+</dd>
+<dt><code>composite</code></dt>
+<dd>
+<p>character vector of image composite. Default is <code>""</code>, for no image composite.<br>
+Should be like <code>"1.05/2.4/4.55"</code> for a composition of 5 perc. of channel 1, 40 perc. of channel 2 and 50 perc. of channel 55.<br>
+Note that channels should have been acquired and final image composition should be 100 perc., otherwise an error is thrown.<br>
+Note that each composite will be appended after <code>'selection'</code>.</p>
+</dd>
+<dt><code>selection</code></dt>
+<dd>
+<p>physical channels to extract.<br>
+Note that this parameter will be ordered.<br>
+Default is <code>"all"</code> to extract all acquired channels.<br>
+Use <code>"none"</code> to only extract composite.</p>
+</dd>
+<dt><code>random_seed</code></dt>
+<dd>
+<p>a list of elements to pass to set.seed or a single value, interpreted as an integer, or NULL to be used when <code>'add_noise'</code> is set to <code>TRUE</code>. Default is <code>NULL</code>.
+Note that <code>NA_integer_</code> or <code>list(seed = NA_integer_)</code> can be used to not call set.seed at all.</p>
+</dd>
+<dt><code>size</code></dt>
+<dd>
+<p>a length 2 integer vector of final dimensions of the image, height 1st and width 2nd. Default is <code>c(0,0)</code> for no change.</p>
+</dd>
+<dt><code>force_width</code></dt>
+<dd>
+<p>whether to use information in <code>'info'</code> to fill size. Default is <code>TRUE</code>.
+When set to <code>TRUE</code>, width of <code>'size'</code> argument will be overwritten.</p>
+</dd>
+<dt><code>removal</code></dt>
+<dd>
+<p>removal method: Either <code>"none"</code>, <code>"raw"</code>, <code>"clipped"</code>, <code>"masked"</code>, <code>"MC"</code>.<br>
+-<code>"none"</code>, to keep image as is, no mask extraction will be performed resulting in faster extraction,<br>
+-<code>"raw"</code>, to keep image as is, it provides a convenient way to retrieve <code>"raw"</code> value for the mask,<br>
+-<code>"clipped"</code>, to remove clipped object from image,<br>
+-<code>"masked"</code>, to only keep masked object from image,<br>
+-<code>"MC"</code>, to keep MC masked object from image.
+This parameter will be repeated with rep_len() from <span class="pkg">base</span> for every physical channel that needs to be extracted according to <code>'selection'</code> and <code>'composite'</code> parameters.</p>
+</dd>
+<dt><code>add_noise</code></dt>
+<dd>
+<p>if <code>TRUE</code> adds normal noise to background using <span class="pkg">Rcpp</span>. Default is <code>TRUE</code>.<br>
+Note that it is better to set it to <code>FALSE</code> when <code>'removal'</code> is <code>"masked"</code> or <code>"MC"</code>. Doing so will allow to place masked object in a zero filled background,
+otherwise background will still be filled with noise.
+This parameter will be repeated with rep_len() from <span class="pkg">base</span> for every physical channel that needs to be extracted according to <code>'selection'</code> and <code>'composite'</code> parameters.</p>
+</dd>
+<dt><code>full_range</code></dt>
+<dd>
+<p>only apply when <code>'mode'</code> is not <code>"raw"</code>, if <code>'full_range'</code> is <code>TRUE</code>, then object range will be considered as 0 to 4095, it is like <code>"raw"</code> <code>'mode'</code> but resulting in [0,4095] normalization to [0,1]. Default is <code>FALSE</code>.<br>
+This parameter will be repeated with rep_len() from <span class="pkg">base</span> for every physical channel that needs to be extracted according to <code>'selection'</code> and <code>'composite'</code> parameters.</p>
+</dd>
+<dt><code>force_range</code></dt>
+<dd>
+<p>only apply when <code>'mode'</code> is not <code>"raw"</code>, if <code>'force_range'</code> is <code>TRUE</code>, then range will be adjusted to object range in <code>[-4095,+inf]</code> resulting in normalization to [0,1]. Default is <code>FALSE</code>.<br>
+This parameter will be repeated with rep_len() from <span class="pkg">base</span> for every physical channel that needs to be extracted according to <code>'selection'</code> and <code>'composite'</code> parameters.<br>
+Note that this parameter takes the precedence over <code>'full_range'</code>.</p>
+</dd>
+<dt><code>spatial_correction</code></dt>
+<dd>
+<p>only apply on RIF file, whether to apply spatial correction. Default is <code>FALSE</code>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>When a mask is detected, <code>'add_noise'</code>, <code>'full_range'</code> and <code>'force_range'</code> are set to <code>FALSE</code> and range used will be forced to <code>[0,3]</code>.<br><br>
+Range of image is controlled by <code>'Images'</code> information from supplied <code>'info'</code> or as extracted by <code>getInfo</code> and will be returned as <code>'channels'</code> by <code>objectParam</code>.
+In case <code>'mode'</code> is not <code>"raw"</code>, '<code>channels$xmin</code>', '<code>channels$xmax</code>', '<code>channels$gamma</code>' will be used for object extraction by <code>objectExtract</code> unless any of <code>'force_range'</code> or <code>'full_range'</code> is <code>TRUE</code>.<br><br>
+Experimental (as of v0.2.0.501): once returned by <code>objectParam</code>, those '<code>channels$xmin</code>' and '<code>channels$xmax</code>' can be manually adjusted to <code>]0,1[</code> so as to be used as <code>'probs'</code> argument to quantile to allow quantile normalization during object extraction (<code>objectExtract</code>) afterwards.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list (for every extracted objects) of list (for every exported channels) depending on '<code>param$export</code>' parameter:<br>
+-<code>"matrix"</code>, a matrix when '<code>param$mode</code>' is set to <code>"raw"</code> or <code>"gray"</code> OR an array when '<code>param$mode</code>' is <code>"rgb"</code>,<br>
+-<code>"base64"</code>, a data-uri string,<br>
+-<code>"file"</code>, an invisible file path corresponding to the location of exported file(s).
+</p>
+
+
+<h3>Note</h3>
+
+<p><code>'...'</code> will be used to compute <code>'param'</code> <strong>only</strong> if <code>'param'</code> is <strong>not</strong> provided.<br><strong>/!\</strong> When <code>'param'</code> is not provided, if not any of <code>'fileName'</code>, <code>'info'</code> can be found in <code>'...'</code>, then <code>attr(ifd, "fileName_image")</code> will be used as <code>'fileName'</code> input parameter to pass to <code>objectParam</code>.
+</p>
+
+
+<h3>Source</h3>
+
+<p>For image decompression, Lee Kamentsky's code porting from <a href="https://github.com/ome/bioformats/blob/4146b9a1797501f0fec7d6cfe69124959bff96ee/components/formats-bsd/src/loci/formats/in/FlowSightReader.java">https://github.com/ome/bioformats/blob/4146b9a1797501f0fec7d6cfe69124959bff96ee/components/formats-bsd/src/loci/formats/in/FlowSightReader.java</a><br>
+cited in <a href="https://linkinghub.elsevier.com/retrieve/pii/S1046-2023(16)30291-2">https://linkinghub.elsevier.com/retrieve/pii/S1046-2023(16)30291-2</a><br><code style="white-space: pre;">⁠
+BSD implementations of Bio-Formats readers and writers
+
+Copyright (C) 2005 - 2017 Open Microscopy Environment:
+  - Board of Regents of the University of Wisconsin-Madison
+  - Glencoe Software, Inc.
+  - University of Dundee
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+⁠</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">if(requireNamespace("IFCdata", quietly = TRUE)) {
+  ## use a cif file
+  file_cif &lt;- system.file("extdata", "example.cif", package = "IFCdata")
+  cif_offs &lt;- getOffsets(fileName = file_cif, fast = TRUE)
+  ## extract infomation
+  info &lt;- getInfo(fileName = file_cif, from = "analysis")
+  ## retrieve number of objects stored
+  nobj &lt;- as.integer(info$objcount)
+  ## randomly subset the offsets of at most 5 "img" objects
+  sel = sample(0:(nobj-1), min(5, nobj))
+  sub_offs &lt;- subsetOffsets(cif_offs, objects = sel, image_type = "img")
+  ## read IFDs from these "img" objects
+  IFDs &lt;- getIFD(fileName = file_cif, offsets = sub_offs)
+  ## extract raw data of these"img" objects to matrix
+  raw = objectExtract(ifd = IFDs, info = info, mode = "raw", 
+                      export = "matrix")
+  ## extract base64 "rgb" colorized version of these "img" objects to base64
+  b64 = objectExtract(ifd = IFDs, info = info, mode = "rgb", 
+                      export = "base64", base64_id = TRUE,
+                      write_to = "example_%o_%c.bmp")
+  ## use DisplayGallery to show the first "img" objects and play with ... extra parameters
+  ## force_range, add_noise, selection, composite, see objectParam
+  DisplayGallery(info = info, offsets = cif_offs, objects = sel,
+                 base64_id = TRUE, write_to = "example_%o_%c.bmp",
+                 force_range = c(FALSE,TRUE,FALSE,TRUE), add_noise = FALSE,
+                 selection = c(1,2,4,6), composite = "1.7/4.3")
+} else {
+  message(sprintf('Please run `install.packages("IFCdata", repos = "%s", type = "source")` %s',
+                  'https://gitdemont.github.io/IFCdata/',
+                  'to install extra files required to run this example.'))
+}
+</code></pre>
+
+
+</div>

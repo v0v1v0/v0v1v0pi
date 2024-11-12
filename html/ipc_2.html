@@ -1,0 +1,243 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>AsyncInterruptor</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>An interruptor useful for stopping child processes.</h2>
+
+<h3>Description</h3>
+
+<p>An interruptor useful for stopping child processes.
+</p>
+<p>An interruptor useful for stopping child processes.
+</p>
+
+
+<h3>Details</h3>
+
+<p>This class is a simple wrapper around a Queue object
+making adding interrupt checking to future code easy
+to implement and read.
+</p>
+<p><strong>Methods</strong>
+</p>
+
+<dl>
+<dt><code>initialize(queue=shinyQueue())</code></dt>
+<dd>
+<p>Creates a new interruptor.
+</p>
+</dd>
+<dt><code>interrupt(msg="Signaled Interrupt")</code></dt>
+<dd>
+<p>Signals an interrupt
+</p>
+</dd>
+<dt><code>execInterrupts()</code></dt>
+<dd>
+<p>Executes anything pushed to the queue, including interrupts.
+</p>
+</dd>
+<dt><code>getInterrupts()</code></dt>
+<dd>
+<p>Gets the result of the queue's executing, not throwing the interrupts.
+</p>
+</dd>
+</dl>
+<h3>Methods</h3>
+
+
+
+<h4>Public methods</h4>
+
+
+<ul>
+<li> <p><a href="#method-AsyncInterruptor-new"><code>AsyncInterruptor$new()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-AsyncInterruptor-interrupt"><code>AsyncInterruptor$interrupt()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-AsyncInterruptor-execInterrupts"><code>AsyncInterruptor$execInterrupts()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-AsyncInterruptor-getInterrupts"><code>AsyncInterruptor$getInterrupts()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-AsyncInterruptor-destroy"><code>AsyncInterruptor$destroy()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-AsyncInterruptor-clone"><code>AsyncInterruptor$clone()</code></a>
+</p>
+</li>
+</ul>
+<hr>
+<a id="method-AsyncInterruptor-new"></a>
+
+
+
+<h4>Method <code>new()</code>
+</h4>
+
+<p>Create the object
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>AsyncInterruptor$new(queue = shinyQueue())</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>queue</code></dt>
+<dd>
+<p>The underlying queue object to use for interruption</p>
+</dd>
+</dl>
+</div>
+
+
+<hr>
+<a id="method-AsyncInterruptor-interrupt"></a>
+
+
+
+<h4>Method <code>interrupt()</code>
+</h4>
+
+<p>signal an error
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>AsyncInterruptor$interrupt(msg = "Signaled Interrupt")</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>msg</code></dt>
+<dd>
+<p>The error message</p>
+</dd>
+</dl>
+</div>
+
+
+<hr>
+<a id="method-AsyncInterruptor-execInterrupts"></a>
+
+
+
+<h4>Method <code>execInterrupts()</code>
+</h4>
+
+<p>Execute any interruptions that have been signaled
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>AsyncInterruptor$execInterrupts()</pre></div>
+
+
+<hr>
+<a id="method-AsyncInterruptor-getInterrupts"></a>
+
+
+
+<h4>Method <code>getInterrupts()</code>
+</h4>
+
+<p>Get any interruptions that have been signaled without throwing them as errors
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>AsyncInterruptor$getInterrupts()</pre></div>
+
+
+<hr>
+<a id="method-AsyncInterruptor-destroy"></a>
+
+
+
+<h4>Method <code>destroy()</code>
+</h4>
+
+<p>Cleans up object after use
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>AsyncInterruptor$destroy()</pre></div>
+
+
+<hr>
+<a id="method-AsyncInterruptor-clone"></a>
+
+
+
+<h4>Method <code>clone()</code>
+</h4>
+
+<p>The objects of this class are cloneable with this method.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>AsyncInterruptor$clone(deep = FALSE)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>deep</code></dt>
+<dd>
+<p>Whether to make a deep clone.</p>
+</dd>
+</dl>
+</div>
+
+
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(future)
+strategy &lt;- "future::multisession"
+plan(strategy)
+inter &lt;- AsyncInterruptor$new()
+fut &lt;- future({
+  for(i in 1:100){
+    Sys.sleep(.01)
+    inter$execInterrupts()
+  }
+})
+inter$interrupt("Error: Stop Future")
+try(value(fut))
+inter$destroy()
+
+# Clean up multisession cluster
+plan(sequential)
+
+</code></pre>
+
+
+</div>

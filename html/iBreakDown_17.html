@@ -1,0 +1,140 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot.break_down_uncertainty</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot Generic for Break Down Uncertainty Objects</h2>
+
+<h3>Description</h3>
+
+<p>Plot Generic for Break Down Uncertainty Objects
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'break_down_uncertainty'
+plot(
+  x,
+  ...,
+  vcolors = DALEX::colors_breakdown_drwhy(),
+  show_boxplots = TRUE,
+  max_features = 10,
+  max_vars = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an explanation created with <code>break_down_uncertainty</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vcolors</code></td>
+<td>
+<p>If <code>NA</code> (default), DrWhy colors are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>show_boxplots</code></td>
+<td>
+<p>logical if <code>TRUE</code> (default) boxplot will be plotted to show uncertanity of attributions</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_features</code></td>
+<td>
+<p>maximal number of features to be included in the plot. By default it's <code>10</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_vars</code></td>
+<td>
+<p>alias for the <code>max_features</code> parameter.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a <code>ggplot2</code> object.
+</p>
+
+
+<h3>References</h3>
+
+<p>Explanatory Model Analysis. Explore, Explain and Examine Predictive Models. <a href="https://ema.drwhy.ai">https://ema.drwhy.ai</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library("DALEX")
+library("iBreakDown")
+set.seed(1313)
+model_titanic_glm &lt;- glm(survived ~ gender + age + fare,
+                       data = titanic_imputed, family = "binomial")
+explain_titanic_glm &lt;- explain(model_titanic_glm,
+                           data = titanic_imputed,
+                           y = titanic_imputed$survived,
+                           label = "glm")
+
+sh_glm &lt;- shap(explain_titanic_glm, titanic_imputed[1, ])
+
+sh_glm
+plot(sh_glm)
+
+## Not run: 
+## Not run:
+library("randomForest")
+set.seed(1313)
+
+model &lt;- randomForest(status ~ . , data = HR)
+new_observation &lt;- HR_test[1,]
+
+explainer_rf &lt;- explain(model,
+                        data = HR[1:1000,1:5])
+
+bd_rf &lt;- break_down_uncertainty(explainer_rf,
+                           new_observation,
+                           path = c(3,2,4,1,5),
+                           show_boxplots = FALSE)
+bd_rf
+plot(bd_rf, max_features = 3)
+
+# example for regression - apartment prices
+# here we do not have intreactions
+model &lt;- randomForest(m2.price ~ . , data = apartments)
+explainer_rf &lt;- explain(model,
+                        data = apartments_test[1:1000,2:6],
+                        y = apartments_test$m2.price[1:1000])
+
+bd_rf &lt;- break_down_uncertainty(explainer_rf,
+                                     apartments_test[1,],
+                                     path = c("floor", "no.rooms", "district",
+                                         "construction.year", "surface"))
+bd_rf
+plot(bd_rf)
+
+bd_rf &lt;- shap(explainer_rf,
+              apartments_test[1,])
+bd_rf
+plot(bd_rf)
+plot(bd_rf, show_boxplots = FALSE)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

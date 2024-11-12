@@ -1,0 +1,94 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>igo_members</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Extract Members of an IGO</h2>
+
+<h3>Description</h3>
+
+<p>Extract all the countries belonging to an IGO on a specific date.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">igo_members(ioname, year = NULL, status = "Full Membership")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ioname</code></td>
+<td>
+<p>Any valid <code>ioname</code> of an IGO as specified on
+igo_year_format3. It could be also a vector of IGOs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>year</code></td>
+<td>
+<p>Year to be assessed, an integer or an array of year. If <code>NULL</code>
+the latest year available of the IGO would be extracted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>status</code></td>
+<td>
+<p>Character or vector with the membership status to be extracted.
+See <strong>Details</strong> on state_year_format3.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A <code>data.frame</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>igo_year_format3, <code>igo_search()</code>, state_year_format3.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(dplyr)
+igo_members("EU", year = 1993) %&gt;% as_tibble()
+igo_members("EU") %&gt;% as_tibble()
+igo_members("NAFTA", year = c(1995:1998)) %&gt;% as_tibble()
+
+# Extract different status
+igo_members("ACCT", status = c("Associate Membership", "Observer")) %&gt;%
+  as_tibble()
+
+# States no members of the UN
+igo_members("UN", status = "No Membership") %&gt;%
+  as_tibble()
+
+# Vectorized
+igo_members(c("NAFTA", "EU"), year = 1993) %&gt;%
+  as_tibble() %&gt;%
+  arrange(state)
+
+# Use countrycodes package to get additional codes
+if (requireNamespace("countrycode", quietly = TRUE)) {
+  library(countrycode)
+  EU &lt;- igo_members("EU")
+  EU$iso3c &lt;- countrycode(EU$ccode, origin = "cown", destination = "iso3c")
+
+  EU$continent &lt;- countrycode(EU$ccode,
+    origin = "cown",
+    destination = "continent"
+  )
+
+  tibble(EU)
+}
+</code></pre>
+
+
+</div>

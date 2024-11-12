@@ -1,0 +1,433 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ibr</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Iterative bias reduction smoothing</h2>
+
+<h3>Description</h3>
+
+<p>Performs iterative bias reduction using kernel, thin plate
+splines Duchon splines or low rank splines. 
+Missing values are not allowed.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ibr(formula, data, subset, criterion="gcv", df=1.5, Kmin=1, Kmax=1e+06, smoother="k",
+ kernel="g", rank=NULL, control.par=list(), cv.options=list())</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>An object of class <code>"formula"</code> (or one that
+can be coerced to that class): a symbolic description of the
+model to be fitted. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>An optional data frame, list or environment (or object
+coercible by <code>as.data.frame</code> to a data frame) containing
+the variables in the model.  If not found in <code>data</code>, the
+variables are taken from <code>environment(formula)</code>,
+typically the environment from which <code>ibr</code> is called.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+<p>An optional vector specifying a subset of observations
+to be used in the fitting process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>criterion</code></td>
+<td>
+<p>A vector of string. If the number of iterations
+(<code>iter</code>) is missing or 
+<code>NULL</code> the number of iterations is chosen using the either one
+criterion (the first
+coordinate of <code>criterion</code>) or several (see component
+<code>criterion</code> of argument list <code>control.par</code>). The criteria available are GCV (default, <code>"gcv"</code>),
+AIC (<code>"aic"</code>), corrected AIC  (<code>"aicc"</code>),   BIC
+(<code>"bic"</code>), gMDL  (<code>"gmdl"</code>), map (<code>"map"</code>) or rmse
+(<code>"rmse"</code>). The last two are designed for cross-validation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>A numeric vector of either length 1 or length equal to the
+number of columns of <code>x</code>. If <code>smoother="k"</code>, it indicates
+the  desired effective degree of
+freedom (trace) of the smoothing   matrix for
+each variable or for the initial smoother (see <code>contr.sp$dftotal</code>); <code>df</code> is repeated when the length of vector
+<code>df</code> is 1. If <code>smoother="tps"</code> or  <code>smoother="ds"</code>, the
+minimum df of splines is multiplied by <code>df</code>. This argument is useless if
+<code>bandwidth</code> is supplied (non null).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Kmin</code></td>
+<td>
+<p>The minimum number of bias correction  iterations of the
+search grid considered by
+the model selection procedure for selecting the optimal number of iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Kmax</code></td>
+<td>
+<p>The maximum number of bias correction  iterations of the
+search grid considered by
+the model selection procedure for selecting the optimal number of iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smoother</code></td>
+<td>
+<p>Character string which allows to choose between thin plate
+splines <code>"tps"</code>, Duchon
+splines <code>"tps"</code> (see Duchon, 1977) or kernel (<code>"k"</code>). </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kernel</code></td>
+<td>
+<p>Character string which allows to choose between gaussian kernel
+(<code>"g"</code>), Epanechnikov (<code>"e"</code>), uniform (<code>"u"</code>),
+quartic (<code>"q"</code>). The default (gaussian kernel) is strongly advised.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rank</code></td>
+<td>
+<p>Numeric value that control the rank of low rank splines
+(denoted as <code>k</code> in mgcv package ; see also choose.k
+for further details or gam for another smoothing approach with
+reduced rank smoother.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control.par</code></td>
+<td>
+<p>A named list that control optional parameters. The
+components are <code>bandwidth</code> (default to NULL), <code>iter</code>
+(default to NULL), <code>really.big</code> (default to <code>FALSE</code>),
+<code>dftobwitmax</code> (default to 1000), <code>exhaustive</code> (default to
+<code>FALSE</code>),<code>m</code> (default to NULL), ,<code>s</code> (default to NULL),
+<code>dftotal</code> (default to <code>FALSE</code>), <code>accuracy</code> (default to
+0.01), <code>ddlmaxi</code> (default to 2n/3), <code>fraction</code> (default
+to <code>c(100, 200, 500, 1000, 5000, 10^4, 5e+04, 1e+05, 5e+05,
+    1e+06)</code>), <code>scale</code> (default to <code>FALSE</code>),
+<code>criterion</code> (default to <code>"strict"</code>) and
+<code>aggregfun</code> (default to 10^(floor(log10(x[2]))+2)).
+</p>
+<p><code>bandwidth</code>: a vector of either length 1 or length equal to the
+number of columns of <code>x</code>. If <code>smoother="k"</code>,
+it indicates the bandwidth used for
+each variable, bandwidth is repeated when the length of vector
+<code>bandwidth</code> is 1. If <code>smoother="tps"</code>, it indicates the
+amount of penalty (coefficient lambda).
+The default (missing) indicates, for <code>smoother="k"</code>, that
+bandwidth for each variable is
+chosen such that each univariate kernel
+smoother (for each explanatory variable) has <code>df</code> effective degrees of
+freedom and for <code>smoother="tps"</code> or <code>smoother="ds"</code> that lambda is chosen such that
+the df of the smoothing matrix is <code>df</code> times the minimum df.
+</p>
+<p><code>iter</code>: the number of iterations. If null or missing, an optimal number of
+iterations is chosen from 
+the search grid (integer from <code>Kmin</code> to <code>Kmax</code>) to minimize the <code>criterion</code>.
+</p>
+<p><code>really.big</code>: a boolean: if <code>TRUE</code> it overides the limitation
+at 500 observations. Expect long computation times if <code>TRUE</code>.
+</p>
+<p><code>dftobwitmax</code>: When bandwidth is chosen by specifying the effective
+degree
+of freedom (see <code>df</code>) a search is done by
+<code>uniroot</code>. This argument specifies the maximum number of iterations transmitted to <code>uniroot</code> function.
+</p>
+<p><code>exhaustive</code>: boolean, if <code>TRUE</code> an exhaustive search of
+optimal number of iteration on the grid <code>Kmin:Kmax</code> is
+performed. All criteria for all iterations in the same class (class
+one: GCV, AIC, corrected AIC, BIC, gMDL ; class two : MAP, RMSE) are
+returned in argument <code>allcrit</code>. If <code>FALSE</code> the minimum of
+criterion is searched using <code>optimize</code> between <code>Kmin</code>
+and <code>Kmax</code>.
+</p>
+<p><code>m</code>: The order of derivatives for the penalty (for thin plate
+splines it is the order). This integer <em>m</em> must verify
+2<em>m</em>+2<em>s</em>/<em>d</em>&gt;1, where <em>d</em> is the number of
+explanatory variables. The default (for <code>smoother="tps"</code>) is to
+choose the order <em>m</em> as the first integer such that
+2<em>m</em>/<em>d</em>&gt;1, where <em>d</em> is the number of explanatory
+variables. The default (for <code>smoother="ds"</code>) is to choose
+<em>m</em>=2 (p
+seudo cubic splines).
+</p>
+<p><code>s</code>: the power of weighting function. For thin plate splines
+<em>s</em> is equal to 0. This real must be strictly smaller than <em>d</em>/2
+(where <em>d</em> is the number of explanatory  variables) and must
+verify 2<em>m</em>+2<em>s</em>/<em>d</em>. To get pseudo-cubic splines (the default),
+choose <em>m</em>=2 and <em>s</em>=(<em>d</em>-1)/2 (See Duchon, 1977).the order of thin plate splines. This integer <em>m</em> must verifies
+2<em>m</em>/<em>d</em>&gt;1, where <em>d</em> is the number of explanatory
+variables. 
+</p>
+<p><code>dftotal</code>: a boolean wich indicates when <code>FAlSE</code> that the
+argument <code>df</code> is the objective df for each univariate kernel (the
+default) calculated for each explanatory variable or for the overall
+(product) kernel, that is the base smoother (when <code>TRUE</code>).
+</p>
+<p><code>accuracy</code>: tolerance when searching bandwidths which lead to a
+chosen overall intial df.
+</p>
+<p><code>dfmaxi</code>: the maximum effective degree of freedom allowed for iterated
+biased reduction smoother. 
+</p>
+<p><code>fraction</code>: the subdivision of interval <code>Kmin</code>,<code>Kmax</code>
+if non exhaustive search is performed (see also <code>iterchoiceA</code> or <code>iterchoiceS1</code>). 
+</p>
+<p><code>scale</code>: boolean. If <code>TRUE</code> <code>x</code> is scaled (using
+<code>scale</code>); default to <code>FALSE</code>.
+</p>
+<p><code>criterion</code> Character string. Possible choices are <code>strict</code>,
+<code>aggregation</code> or <code>recalc</code>. <code>strict</code>
+allows to select the number of iterations according to
+the first coordinate of argument <code>criterion</code>.
+<code>aggregation</code>
+allows to select the number of iterations by applying the
+function <code>control.par$aggregfun</code> to the number of iterations
+selected by all the criteria chosen in argument <code>criterion</code>.
+<code>recalc</code>
+allows to select the number of iterations by first calculating the
+optimal number of the second coordinate of argument
+<code>criterion</code>, then applying the function
+<code>control.par$aggregfun</code> (to add some number to
+it) resulting in a new <code>Kmax</code> and then doing the optimal selction
+between  <code>Kmin</code> and this new <code>Kmax</code> using the first coordinate of argument
+<code>criterion</code>.
+; default to <code>strict</code>.
+</p>
+<p><code>aggregfun</code> function to be applied when
+<code>control.par$criterion</code> is either <code>recalc</code> or
+<code>aggregation</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cv.options</code></td>
+<td>
+<p>A named list which controls the way to do cross
+validation with component <code>bwchange</code>,
+<code>ntest</code>, <code>ntrain</code>, <code>Kfold</code>, <code>type</code>,
+<code>seed</code>, <code>method</code> and <code>npermut</code>. <code>bwchange</code> is a boolean (default to <code>FALSE</code>)
+which indicates if bandwidth have to be recomputed each
+time. <code>ntest</code> is the number of observations in test set and
+<code>ntrain</code> is the number of observations in training set. Actually,
+only one of these is needed the other can be <code>NULL</code> or missing. <code>Kfold</code> a boolean or an integer. If
+<code>Kfold</code> is <code>TRUE</code> then the number of fold is deduced from
+<code>ntest</code> (or <code>ntrain</code>).  <code>type</code> is a character string in
+<code>random</code>,<code>timeseries</code>,<code>consecutive</code>, <code>interleaved</code>
+and give the type of segments.  <code>seed</code> controls the seed of
+random generator. <code>method</code> is either <code>"inmemory"</code> or
+<code>"outmemory"</code>; <code>"inmemory"</code> induces some calculations outside
+the loop saving computational time but leading to an increase of the required
+memory. <code>npermut</code> is the number of random draws.   If
+<code>cv.options</code> is <code>list()</code>, then component <code>ntest</code> is set to
+<code>floor(nrow(x)/10)</code>, <code>type</code> is random, <code>npermut</code> is 20
+and <code>method</code> is <code>"inmemory"</code>, and the other components are <code>NULL</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns an object of class <code>ibr</code> which is a list including:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p>Vector of coefficients.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>residuals</code></td>
+<td>
+<p>Vector of residuals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitted</code></td>
+<td>
+<p>Vector of fitted values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter</code></td>
+<td>
+<p>The number of iterations used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initialdf</code></td>
+<td>
+<p>The initial effective degree of freedom of the pilot (or base) smoother.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>finaldf</code></td>
+<td>
+<p>The effective degree of freedom of the iterated bias reduction
+smoother at the <code>iter</code> iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bandwidth</code></td>
+<td>
+<p>Vector of bandwith for each explanatory variable</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>The matched call</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parcall</code></td>
+<td>
+<p>A list containing several components: 
+<code>p</code> contains the number of explanatory variables and <code>m</code>
+the order of the splines (if relevant), <code>s</code>
+the power of weights, <code>scaled</code> boolean which is <code>TRUE</code>
+when explanatory variables are scaled, <code>mean</code> mean of explanatory
+variables if <code>scaled=TRUE</code>, <code>sd</code> standard deviation of
+explanatory variables if <code>scaled=TRUE</code>,  <code>critmethod</code> that indicates the method chosen
+for criteria <code>strict</code>,
+<code>rank</code> the rank of low rank splines if relevant,
+<code>criterion</code> the chosen criterion,
+<code>smoother</code> the chosen smoother,
+<code>kernel</code> the chosen kernel,
+<code>smoothobject</code> the smoothobject returned by
+smoothCon,
+<code>exhaustive</code> a boolean which indicates if an exhaustive
+search was chosen</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>criteria</code></td>
+<td>
+<p>Value
+of the chosen criterion at the given iteration, <code>NA</code> is
+returned when aggregation of criteria is chosen (see component
+<code>criterion</code> of list <code>control.par</code>). If the number of iterations
+<code>iter</code> is given by the user, <code>NULL</code> is returned</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alliter</code></td>
+<td>
+<p>Numeric vector giving all the optimal number of iterations
+selected by  the chosen criteria.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allcriteria</code></td>
+<td>
+<p>either a list containing all the criteria evaluated on the
+grid <code>Kmin:Kmax</code> (along with the effective degree of freedom of the
+smoother and the sigma squared on this grid) if an exhaustive search is chosen (see the
+value of function 
+<code>iterchoiceAe</code> or <code>iterchoiceS1e</code>) 
+or all the values
+of criteria at the given optimal iteration if a non exhaustive
+search is chosen (see also <code>exhaustive</code> component of list
+<code>control.par</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>The matched call.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>terms</code></td>
+<td>
+<p>The 'terms' object used.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Pierre-Andre Cornillon, Nicolas Hengartner  and Eric Matzner-Lober.</p>
+
+
+<h3>References</h3>
+
+<p>Cornillon, P.-A.; Hengartner, N.; Jegou, N. and Matzner-Lober, E. (2012)
+Iterative bias reduction: a comparative study.
+<em>Statistics and Computing</em>, <em>23</em>, 777-791.
+</p>
+<p>Cornillon, P.-A.; Hengartner, N. and Matzner-Lober, E. (2013)
+Recursive bias estimation for multivariate regression smoothers Recursive 
+bias estimation for multivariate regression smoothers.
+<em>ESAIM: Probability and Statistics</em>, <em>18</em>, 483-502.
+</p>
+<p>Cornillon, P.-A.; Hengartner, N. and Matzner-Lober, E. (2017)
+Iterative Bias Reduction Multivariate Smoothing in R: The ibr Package.
+<em>Journal of Statistical Software</em>, <em>77</em>, 1–26.
+</p>
+<p>Wood, S.N. (2003) Thin plate regression
+splines. <em>J. R. Statist. Soc. B</em>, <em>65</em>, 95-114.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>predict.ibr</code>, <code>summary.ibr</code>, gam</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">f &lt;- function(x, y) { .75*exp(-((9*x-2)^2 + (9*y-2)^2)/4) +
+                      .75*exp(-((9*x+1)^2/49 + (9*y+1)^2/10)) +
+                      .50*exp(-((9*x-7)^2 + (9*y-3)^2)/4) -
+                      .20*exp(-((9*x-4)^2 + (9*y-7)^2)) }
+# define a (fine) x-y grid and calculate the function values on the grid
+ngrid &lt;- 50; xf &lt;- seq(0,1, length=ngrid+2)[-c(1,ngrid+2)]
+yf &lt;- xf ; zf &lt;- outer(xf, yf, f)
+grid &lt;- cbind.data.frame(x=rep(xf, ngrid),y=rep(xf, rep(ngrid, ngrid)),z=as.vector(zf))
+persp(xf, yf, zf, theta=130, phi=20, expand=0.45,main="True Function")
+#generate a data set with function f and noise to signal ratio 5
+noise &lt;- .2 ; N &lt;- 100 
+xr &lt;- seq(0.05,0.95,by=0.1) ; yr &lt;- xr ; zr &lt;- outer(xr,yr,f) ; set.seed(25)
+std &lt;- sqrt(noise*var(as.vector(zr))) ; noise &lt;- rnorm(length(zr),0,std)
+Z &lt;- zr + matrix(noise,sqrt(N),sqrt(N))
+# transpose the data to a column format 
+xc &lt;- rep(xr, sqrt(N)) ; yc &lt;- rep(yr, rep(sqrt(N),sqrt(N)))
+data &lt;- cbind.data.frame(x=xc,y=yc,z=as.vector(Z))
+# fit by thin plate splines (of order 2) ibr
+res.ibr &lt;- ibr(z~x+y,data=data,df=1.1,smoother="tps")
+fit &lt;- matrix(predict(res.ibr,grid),ngrid,ngrid)
+persp(xf, yf, fit ,theta=130,phi=20,expand=0.45,main="Fit",zlab="fit")
+
+## Not run: 
+data(ozone, package = "ibr")
+res.ibr &lt;- ibr(Ozone~.,data=ozone,df=1.1)
+summary(res.ibr)
+predict(res.ibr)
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,85 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get.zeta</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Local posterior probability estimation</h2>
+
+<h3>Description</h3>
+
+<p>This function estimates the local posterior probability when assuming no prior on structured predictors.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get.zeta(SS, w, alpha)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>SS</code></td>
+<td>
+<p>a scalar value of sufficient statistic for regression coefficient.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>a scalar value of mixing weight.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>a scalar value of hyperparameter <code>alpha</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Given all other parameters, this function estimates the local posterior probability or the probability that a regression coefficient is not zero conditional on other parameters. This function is called when assuming no prior on structured predictors.</p>
+
+
+<h3>Value</h3>
+
+<p>Return a scalar value of local posterior probability.</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Vitara Pungpapong, Min Zhang, Dabao Zhang</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(simGaussian)
+Y&lt;-as.matrix(simGaussian[,1])
+X&lt;-as.matrix(simGaussian[,-1])
+n&lt;-dim(X)[1]
+# Obtain initial values from lasso
+data(initbetaGaussian)
+initbeta&lt;-as.matrix(initbetaGaussian)
+# Obtain the final output from ebvs
+output&lt;-icmm(Y, X, b0.start=0, b.start=initbeta, family = "gaussian", 
+        ising.prior = FALSE, estalpha = FALSE, alpha = 0.5, maxiter = 100)
+b0&lt;-output$coef[1]
+beta&lt;-matrix(output$coef[-1], ncol=1)
+# Get all parameters for function arguments
+w&lt;-get.wprior(beta)
+alpha&lt;-0.5
+sigma&lt;-get.sigma(Y,X,beta,alpha)
+# Estimate local posterior probability
+j&lt;-1
+Yres&lt;-Y-b0-X%*%beta+X[,j]*beta[j,1]
+sxy&lt;-t(Yres)%*%X[,j]
+ssx&lt;-sum(X[,j]^2)
+SS&lt;-sqrt(n-1)*sxy/(sigma*ssx)
+zeta&lt;-get.zeta(SS=SS, w=w, alpha=alpha)
+</code></pre>
+
+
+</div>

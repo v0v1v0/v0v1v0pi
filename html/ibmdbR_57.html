@@ -1,0 +1,119 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>idaSample</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Taking a random sample from a IDA data frame</h2>
+
+<h3>Description</h3>
+
+<p>This function draws a random sample from a IDA data frame (that is, an object of the class <code>ida.data.frame</code>).  
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">idaSample(bdf, n, stratCol=NULL,stratVals=NULL,stratProbs=NULL,
+dbPreSamplePercentage=100,fetchFirst=F);
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>bdf</code></td>
+<td>
+<p>The IDA data frame from which the sample is to be drawn.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>The number of rows of sample data to be retrieved.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stratCol</code></td>
+<td>
+<p>For stratified sampling, the column that determines the strata.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stratVals</code></td>
+<td>
+<p>For stratified sampling, a vector of values that determine the subset of strata from which samples are to be drawn.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stratProbs</code></td>
+<td>
+<p>For stratified sampling, a vector of explicit sampling probabilities. 
+Each value corresponds to a value of the vector specified for <code>stratVals</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dbPreSamplePercentage</code></td>
+<td>
+<p>The percentage of the IDA data frame from which the sample is to be drawn (see details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fetchFirst</code></td>
+<td>
+<p>Fetch first rows instead of using random sample.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If <code>stratCol</code> is specified, a stratified sample based on the contents of the specified column is taken. 
+Unless <code>stratVals</code> is also specified, each unique value in the column results in one stratum.
+If <code>stratVals</code> is also specified, only the values it specifies result in strata, and only rows that contain one of those values are included in the  
+sample; other rows are ignored. 
+</p>
+<p>Unless <code>stratProbs</code> is also specified, the number of rows retrieved for each stratum is proportional 
+to the size of that stratum relative to the overall sample. 
+</p>
+<p>To undersample or oversample data, use <code>stratProbs</code> to specify, for each 
+value of <code>stratVals</code>, the fraction of the rows of the corresponding stratum that are to be included in the sample. 
+</p>
+<p>For each stratum, the calculated number of rows is rounded up to the next highest integer. This ensures that there
+is at least one sample for each stratum. Consequently, the number of samples that is returned might
+be higher than the value specified for <code>n</code>.
+</p>
+<p>The value of <code>dbPreSamplePercentage</code> is a numeric value in the range 0-100 that represents the percentage of the 
+IDA data frame that is to serve as the source of the sample data. 
+When working with an especially large IDA data frame, specifying a value smaller than 100 improves performance, because less data must be processed.
+However, the proportionality of the pre-sampled data might vary from that of the complete data, and this would result in
+a biased sample. It can even happen that entire strata are excluded from the final sample.
+</p>
+<p>When <code>fetchFirst</code> is set to TRUE, the sample values of each stratum are taken in the order in which they are 
+returned from the database rather than randomly. This is usually much faster than random sampling, but can introduce bias.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>data.frame</code> that contains the sample.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+idf&lt;-ida.data.frame('IRIS')
+
+#Simple random sampling
+df &lt;- idaSample(idf,10)
+
+#Stratified sample
+df &lt;- idaSample(idf,10,'Species')
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

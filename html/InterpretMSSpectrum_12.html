@@ -1,0 +1,133 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>InterpretTP</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>InterpretTP.</h2>
+
+<h3>Description</h3>
+
+<p><code>InterpretTP</code> is a wrapper function around 
+InterpretMSSpectrum which will read, evaluate and plot 
+a deconvoluted mass spectrum (mass*intensity pairs) from either 
+TMS-derivatized GC-APCI-MS data or ESI+/- data. 
+It allows to provide a chemical formula as a potential precursor of the 
+spectrum. This formula will be used to set the parameters 
+'allowed_elements' and 'maxElements' during de-novo formula generation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">InterpretTP(fml = NULL, param = "APCIpos", ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fml</code></td>
+<td>
+<p>A chemical formula of the standard used for transformation product generation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>param</code></td>
+<td>
+<p>Keyword or parameter list, similar as in InterpretMSSpectrum.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Arguments passed on to <code>InterpretMSSpectrum</code>
+</p>
+
+<dl>
+<dt><code>spec</code></dt>
+<dd>
+<p>A 2-column matrix of mz/int pairs. If spec=NULL then <code>InterpretMSSpectrum</code>
+tries to read data from clipboard (i.e. two columns copied from an Excel spreadsheet).</p>
+</dd>
+<dt><code>precursor</code></dt>
+<dd>
+<p>The ion (m/z) from spec closest to this mass will be considered as
+precursor (can be nominal, i.e. if precursor=364 then 364.1234 would be selected from
+spectrum if it is closest).</p>
+</dd>
+<dt><code>correct_peak</code></dt>
+<dd>
+<p>For testing purposes. A character in the form of "name, formula, mz"
+to evaluate spectra against. Note! Separating character is ', '.</p>
+</dd>
+<dt><code>met_db</code></dt>
+<dd>
+<p>A metabolite DB (e.g. GMD or internal) can be provided to search for
+candidates comparing M+H ions (cf. Examples).</p>
+</dd>
+<dt><code>typical_losses_definition</code></dt>
+<dd>
+<p>A file name (e.g. D:/BuildingBlocks_GCAPCI.txt) from
+where to load relevant neutral losses (cf. Details). Alternatively an data frame with
+columns 'Name', 'Formula' and 'Mass'.</p>
+</dd>
+<dt><code>silent</code></dt>
+<dd>
+<p>Logical. If TRUE no plot is generated and no output except final candidate
+list is returned.</p>
+</dd>
+<dt><code>dppm</code></dt>
+<dd>
+<p>Specifies ppm error for Rdisop formula calculation.</p>
+</dd>
+<dt><code>formula_db</code></dt>
+<dd>
+<p>A pre calculated database of sum formulas and their isotopic fine
+structures can be used to extremely speed up the function.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For further details refer to InterpretMSSpectrum.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An annotated plot of the mass spectrum and detailed information 
+within the console. Main result, list of final candidate formulas and 
+their putative fragments, will be returned invisibly.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># load test data
+utils::data(apci_spectrum)
+
+# provide information of a correct peak (if you know) as character
+cp &lt;- "Glutamic acid (3TMS), C14H33NO4Si3, 364.1790"
+
+# provide database of known peaks and correct peak
+mdb &lt;- data.frame(
+  "Name" = c("Glutamic acid (3TMS)", "other peak with same sum formula"),
+  "Formula" = c("C14H33NO4Si3", "C14H33NO4Si3"),
+  "M+H" = c(364.179, 364.179), stringsAsFactors = FALSE, check.names = FALSE
+)
+
+# provide a database of precalculated formulas to speed up the process
+fdb &lt;- system.file("extdata", "APCI_min.db", package = "InterpretMSSpectrum")
+
+# apply function providing above arguments (dppm is set to 0.5 to reduce run time)
+InterpretTP(fml = "C14H33NO4Si3", spec=apci_spectrum, param="APCIpos")
+
+</code></pre>
+
+
+</div>

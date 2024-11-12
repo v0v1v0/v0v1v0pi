@@ -1,0 +1,252 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ics.outlier</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Outlier Detection Using ICS
+</h2>
+
+<h3>Description</h3>
+
+<p>In a multivariate framework outlier(s) are detected using ICS. The function works on an object of class <code>ics2</code>
+and decides automatically about the number of invariant components to use to search for the outliers and the number of outliers
+detected on these components. Currently the function is restricted to the case of searching outliers only on the first components.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ics.outlier(object, method = "norm.test", test = "agostino.test", mEig = 10000,
+  level.test = 0.05, adjust = TRUE, level.dist = 0.025, mDist = 10000,
+  type = "smallprop", ncores = NULL, iseed = NULL, pkg = "ICSOutlier", 
+  qtype = 7, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>object of class <code>ics2</code> where both <code>S1</code> and <code>S2</code> are specified as functions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>name of the method used to select the ICS components involved to compute ICS distances. Options are 
+<code>"norm.test"</code> and <code>"simulation"</code>. Depending on the method either <code>comp.norm.test</code> or <code>comp.simu.test</code> are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>test</code></td>
+<td>
+<p>name of the marginal normality test to use if <code>method = "norm.test"</code>. Possibilities are 
+<code>"jarque.test"</code>, <code>"anscombe.test"</code>, <code>"bonett.test"</code>, <code>"agostino.test"</code>, <code>"shapiro.test"</code>.
+Default is <code>"agostino.test"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mEig</code></td>
+<td>
+<p>number of simulations performed to derive the cut-off values for selecting the ICS components. Only if <code>method = "simulation"</code>.
+See <code>comp.simu.test</code> for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level.test</code></td>
+<td>
+<p><code>level</code> for the <code>comp.norm.test</code> or <code>comp.simu.test</code> functions. The inital level for selecting the invariant coordinates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>adjust</code></td>
+<td>
+<p>logical. For selecting the invariant coordinates, the level of the test can be adjusted for each component to deal with multiple testing. See <code>comp.norm.test</code> and <code>comp.simu.test</code>
+for details. Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>level.dist</code></td>
+<td>
+<p><code>level</code> for the <code>dist.simu.test</code> function.  The (1-<code>level</code>)th quantile used to determine the cut-off value for the ICS distances.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mDist</code></td>
+<td>
+<p>number of simulations performed to derive the cut-off value for the ICS distances.
+See <code>dist.simu.test</code> for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>currently the only option is <code>"smallprop"</code> which means that only the first ICS components can be selected. See  <code>comp.norm.test</code>
+or <code>comp.simu.test</code> for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncores</code></td>
+<td>
+<p>number of cores to be used in <code>dist.simu.test</code> and <code>comp.simu.test</code>. If <code>NULL</code> or 1, no parallel computing is used. Otherwise makeCluster with <code>type = "PSOCK"</code> is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iseed</code></td>
+<td>
+<p>If parallel computation is used the seed passed on to <code>clusterSetRNGStream</code>. Default is NULL which means no fixed seed is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pkg</code></td>
+<td>
+<p>When using parallel computing, a character vector listing all the packages which need to be loaded on the different cores via <code>require</code>. Must be at least "ICSOutlier"
+and must contain the packages needed to compute the scatter matrices.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qtype</code></td>
+<td>
+<p>specifies the quantile algorithm used in <code>quantile</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>passed on to other methods.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The ICS method has attractive properties for outlier detection in the case of a small proportion of outliers. As for PCA three steps have to be performed:
+(i) select the components most useful for the detection, (ii) compute distances as outlierness measures for all observation and finally (iii) label outliers using some cut-off value.
+</p>
+<p>This function performs these three steps automatically:
+</p>
+
+<dl>
+<dt>(i)</dt>
+<dd>
+<p>For choosing the components of interest two methods are proposed: <code>"norm.test"</code> based on some marginal normality tests (see details in <code>comp.norm.test</code>)
+or <code>"simulation"</code> based on a parallel analysis (see details in <code>comp.simu.test</code>). These two approaches lie on the intrinsic property of ICS in case of a small proportion 
+of outliers with the choice of S1 "more robust" than S2, which ensures to find outliers on the first components. Indeed  when using <code>S1 = MeanCov</code> and <code>S2 = Mean3Cov4</code>, 
+the Invariant Coordinates are ordered according to their classical Pearson kurtosis values in decreasing order. The information to find the outliers should be then contained in the first
+k nonnormal directions.</p>
+</dd>
+<dt>(ii)</dt>
+<dd>
+<p>Then the ICS distances are computed as the Euclidian distances on the selected k centered components <code class="reqn">Z_k</code>. </p>
+</dd>
+<dt>(iii)</dt>
+<dd>
+<p>Finally the outliers are identified based on a cut-off derived from simulations. If the distance of an observation exceeds the expectation under the normal model, 
+this observation is labeled as outlier (see details in <code>dist.simu.test</code>).</p>
+</dd>
+</dl>
+<p>As a rule of thumb, the percentage of contamination should be limited to 10% in case of a mixture of gaussian distributions and using the default combination of locations and scatters for ICS.
+</p>
+
+
+<h3>Value</h3>
+
+<p>an object of class <code>icsOut</code>
+</p>
+
+
+<h3>Note</h3>
+
+<p>Function <code>ics.outlier</code> reached the end of its lifecycle, please use <code>ICS_outlier</code> instead. In future versions, <code>ics.outlier</code> will be deprecated and eventually removed.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Aurore Archimbaud and Klaus Nordhausen
+</p>
+
+
+<h3>References</h3>
+
+<p><cite>Archimbaud, A., Nordhausen, K. and Ruiz-Gazen, A. (2018), ICS for multivariate outlier detection with application to quality control. Computational Statistics &amp; Data Analysis, 128:184-199. ISSN 0167-9473.  &lt;https://doi.org/10.1016/j.csda.2018.06.011&gt;.</cite>   
+</p>
+<p><cite>Archimbaud, A., Nordhausen, K. and Ruiz-Gazen, A. (2018), ICSOutlier: Unsupervised Outlier Detection for Low-Dimensional Contamination Structure. The R Journal, 10:234-250.  &lt;doi:10.32614/RJ-2018-034&gt;.</cite>   
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ics2</code>, <code>comp.norm.test</code>, <code>comp.simu.test</code>, <code>dist.simu.test</code>,
+<code>icsOut-class</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># ReliabilityData example: the observations 414 and 512 are suspected to be outliers  
+library(REPPlab)
+data(ReliabilityData)
+icsReliabilityData &lt;- ics2(ReliabilityData, S1 = tM, S2 = MeanCov)
+# For demo purpose only small mDist value, but as extreme quantiles 
+# are of interest mDist should be much larger. Also number of cores used
+# should be larger if available
+icsOutlierDA &lt;- ics.outlier(icsReliabilityData, level.dist = 0.01, mDist = 50, ncores = 1)
+icsOutlierDA
+summary(icsOutlierDA)
+plot(icsOutlierDA)
+
+## Not run: 
+# For using several cores and for using a scatter function from a different package
+# Using the parallel package to detect automatically the number of cores
+library(parallel)
+# ICS with MCD estimates and the usual estimates
+# Need to create a wrapper for the CovMcd function to return first the location estimate
+# and the scatter estimate secondly.
+data(HTP)
+library(rrcov)
+myMCD &lt;- function(x,...){
+  mcd &lt;- CovMcd(x,...)
+  return(list(location = mcd@center, scatter = mcd@cov))
+}
+icsHTP &lt;- ics2(HTP, S1 = myMCD, S2 = MeanCov, S1args = list(alpha = 0.75))
+# For demo purpose only small m value, should select the first seven components
+icsOutlier &lt;- ics.outlier(icsHTP, mEig = 50, level.test = 0.05, adjust = TRUE, 
+                          level.dist = 0.025, mDist = 50,
+                          ncores =  detectCores()-1, iseed = 123, 
+                          pkg = c("ICSOutlier", "rrcov"))
+icsOutlier
+
+## End(Not run)
+  
+# Exemple of no direction and hence also no outlier
+set.seed(123)
+X = rmvnorm(500, rep(0, 2), diag(rep(0.1,2)))
+icsX &lt;- ics2(X)
+icsOutlierJB &lt;- ics.outlier(icsX, test = "jarque", level.dist = 0.01, 
+				level.test = 0.01, mDist = 100, ncores = 1)
+summary(icsOutlierJB)
+plot(icsOutlierJB)
+rm(.Random.seed)
+
+     
+
+# Example of no outlier
+set.seed(123)
+X = matrix(rweibull(1000, 4, 4), 500, 2)
+X = apply(X,2, function(x){ifelse(x&lt;5 &amp; x&gt;2, x, runif(sum(!(x&lt;5 &amp; x&gt;2)), 5, 5.5))}) 
+icsX &lt;- ics2(X)
+icsOutlierAG &lt;- ics.outlier(icsX, test = "anscombe", level.dist = 0.01, 
+				level.test = 0.05, mDist = 100, ncores = 1)
+summary(icsOutlierAG)
+plot(icsOutlierAG)
+rm(.Random.seed)
+  
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,184 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ks</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Item Characteristic Curve Estimation using Kernel Smoothing</h2>
+
+<h3>Description</h3>
+
+<p>Item Characteristic Curve Estimation using Kernel Smoothing
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ks(
+  resp,
+  h = NULL,
+  kernel_func = "gauss",
+  criterion = NULL,
+  points = seq(-3, 3, 0.05)
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>resp</code></td>
+<td>
+<p>A response matrix where each row is the responses of an examinee
+and each column represents an item.
+</p>
+<p><code>resp</code> does not necessarily be a matrix. It can be <code>data.frame</code>
+or any other object that can be convertible to matrix using
+<code>as.matrix</code> function.
+</p>
+<p><code>resp</code> can contain missing responses.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>The bandwidth parameter that controls the amount of smoothing.
+A small value will decrease the bias whereas increase the sampling
+variability. For a standard normally distributed <code>criterion</code> and
+Gaussian kernel smoothing function,
+<code class="reqn">h = 0.2</code> is recommended for large sample sizes (like 3000),
+<code class="reqn">h = 0.3</code> is recommended for medium sample sizes (like 500), and
+<code class="reqn">h = 0.4</code> is recommended for small sample sizes (like 100), and
+</p>
+<p>The default value is <code class="reqn">1.06  \sigma(criterion) n_{examinees}^{-1/5}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kernel_func</code></td>
+<td>
+<p>Choice of kernel function. Possible choices are:
+</p>
+
+<dl>
+<dt><code>"gauss"</code></dt>
+<dd>
+<p>Gaussian kernel. <code class="reqn">f(x) = e^{-u^2/2}</code>.</p>
+</dd>
+<dt><code>"unif"</code></dt>
+<dd>
+<p>Uniform kernel. <code class="reqn">f(x) = 0.5, |u| &lt; 0.5</code>, else 0.</p>
+</dd>
+<dt><code>"quadratic"</code></dt>
+<dd>
+<p>Quadratic kernel.
+<code class="reqn">f(x) = 0.75(1-u^2), |u| &lt; 1</code>, else 0.</p>
+</dd>
+<dt>Custom Function</dt>
+<dd>
+<p>You can provide a custom kernel function object.
+The function should be maximum at <code class="reqn">u = 0</code> and gets closer to 0
+on either side.</p>
+</dd>
+</dl>
+<p>The default value is <code>"gauss"</code>, i.e. Gaussian kernel function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>criterion</code></td>
+<td>
+<p>The ability estimates for each examinee. The default is
+<code>NULL</code> where the abilities will be estimated from the sum scores.
+First sum scores will be calculated, then the rank of each examinee's
+sum score will be calculated. These ranks will be divided by the number
+of examinees plus 1 in order to get values between 0 and 1. Finally, these
+values will be put on standard normal scale (by inverse CDF).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>points</code></td>
+<td>
+<p>The points at which the item characteristic curve will be
+calculated. The default value is <code>points = seq(-3, 3, 0.05)</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A <code>list</code> with following elements will be returned:
+</p>
+
+<dl>
+<dt><code>points</code></dt>
+<dd>
+<p>The quadrature points at which ICC is calculated.</p>
+</dd>
+<dt><code>icc</code></dt>
+<dd>
+<p>A matrix where each cell represents probability of
+selecting a response (for dichotomous models, probability of correct
+response). Items are on columns and quadrature points are on rows.</p>
+</dd>
+<dt><code>se</code></dt>
+<dd>
+<p>A matrix of standard errors of each point of
+<code>icc</code>. This matrix has the same dimension as <code>icc</code>.</p>
+</dd>
+<dt><code>criterion</code></dt>
+<dd>
+<p>The criterion values used for examinees. If
+<code>criterion = NULL</code> these numbers will be based on sum scores.</p>
+</dd>
+<dt><code>h</code></dt>
+<dd>
+<p>The bandwidth parameter.</p>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p>Emre Gonulates
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">ip &lt;- generate_ip(model = "3PL", n = 50)
+true_theta &lt;- rnorm(10000)
+resp &lt;- sim_resp(ip = ip, theta = true_theta, prop_missing = 0.3)
+
+kern_output &lt;- ks(resp)
+
+# Plot ICC
+i &lt;- 12 # select an item to plot
+x &lt;- kern_output$icc[, i]
+se &lt;- kern_output$se[, i]
+p &lt;- prob(ip = ip[i], theta = kern_output$points)
+p &lt;- sapply(p, `[`, 2) # get the probability of correct responses
+
+graph_data &lt;- data.frame(
+  theta = kern_output$points,
+  icc = x,
+  ci_low = sapply(x - qnorm(.975) * se, function(x) max(x, 0)),
+  ci_high = sapply(x + qnorm(.975) * se, function(x) min(x, 1)),
+  p = p)
+
+## Not run: 
+p &lt;- ggplot(data = graph_data) +
+  geom_line(aes(x = theta, y = icc), color = "blue", alpha = .7, size = 1) +
+  geom_line(aes(x = theta, y = p), color = "red", size = 1, alpha = .7) +
+  geom_ribbon(data = graph_data,
+              aes(x = theta, ymin = ci_low, ymax = ci_high),
+              alpha = .25) +
+  ylim(0, 1) +
+  labs(x = "Theta", y = "Probability",
+       title = "Item Characteristic Curve") +
+  theme_bw()
+
+p
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

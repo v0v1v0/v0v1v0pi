@@ -1,0 +1,74 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>prettySummary</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Provide a pretty summary of model results</h2>
+
+<h3>Description</h3>
+
+<p>This function is useful for presenting the main results (coefficients, tests,
+etc.) of models in a paper
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">prettySummary(x)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>output object from <code>modelCosts</code></p>
+</td>
+</tr></table>
+<h3>Author(s)</h3>
+
+<p>Boris Leroy <a href="mailto:leroy.boris@gmail.com">leroy.boris@gmail.com</a>, Andrew Kramer, Anne-Charlotte
+Vaissière, Christophe Diagne
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://github.com/Farewe/invacost">https://github.com/Farewe/invacost</a>
+</p>
+<p>Leroy Boris, Kramer Andrew M, Vaissière Anne-Charlotte, Kourantidou Melina,
+Courchamp Franck &amp; Diagne Christophe (2022). Analysing economic costs 
+of invasive alien species with the invacost R package. Methods in Ecology
+and Evolution. <a href="https://doi.org/10.1111/2041-210X.13929">doi:10.1111/2041-210X.13929</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(invacost)
+
+### Cleaning steps
+# Eliminating data with no information on starting and ending years
+invacost &lt;- invacost[-which(is.na(invacost$Probable_starting_year_adjusted)), ]
+invacost &lt;- invacost[-which(is.na(invacost$Probable_ending_year_adjusted)), ]
+# Keeping only observed and reliable costs
+invacost &lt;- invacost[invacost$Implementation == "Observed", ]
+invacost &lt;- invacost[which(invacost$Method_reliability == "High"), ]
+# Eliminating data with no usable cost value
+invacost &lt;- invacost[-which(is.na(invacost$Cost_estimate_per_year_2017_USD_exchange_rate)), ]
+
+### Expansion
+
+db.over.time &lt;- expandYearlyCosts(invacost,
+                                  startcolumn = "Probable_starting_year_adjusted",
+                                  endcolumn = "Probable_ending_year_adjusted")
+                                  
+### Analysis                                   
+res &lt;- modelCosts(db.over.time)
+prettySummary(res)
+</code></pre>
+
+
+</div>

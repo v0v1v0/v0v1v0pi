@@ -1,0 +1,473 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>FeatureEffect</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Effect of a feature on predictions</h2>
+
+<h3>Description</h3>
+
+<p><code>FeatureEffect</code> computes and plots (individual) feature effects
+of prediction models.
+</p>
+
+
+<h3>Details</h3>
+
+<p>The FeatureEffect class compute the effect a feature has on the prediction.
+Different methods are implemented:
+</p>
+
+<ul>
+<li>
+<p> Accumulated Local Effect (ALE) plots
+</p>
+</li>
+<li>
+<p> Partial Dependence Plots (PDPs)
+</p>
+</li>
+<li>
+<p> Individual Conditional Expectation (ICE) curves
+</p>
+</li>
+</ul>
+<p>Accumulated local effects and partial dependence plots both show the average
+model prediction over the feature. The difference is that ALE are computed as
+accumulated differences over the conditional distribution and partial
+dependence plots over the marginal distribution. ALE plots preferable to
+PDPs, because they are faster and unbiased when features are correlated.
+</p>
+<p>ALE plots for categorical features are automatically ordered by the
+similarity of the categories based on the distribution of the other features
+for instances in a category. When the feature is an ordered factor, the ALE
+plot leaves the order as is.
+</p>
+<p>Individual conditional expectation curves describe how, for a single
+observation, the prediction changes when the feature changes and can be
+combined with partial dependence plots.
+</p>
+<p>To learn more about accumulated local effects, read the <a href="https://christophm.github.io/interpretable-ml-book/ale.html">Interpretable Machine Learning book</a>.
+</p>
+<p>For the partial dependence plots:
+<a href="https://christophm.github.io/interpretable-ml-book/pdp.html">https://christophm.github.io/interpretable-ml-book/pdp.html</a>
+</p>
+<p>For individual conditional expectation:
+<a href="https://christophm.github.io/interpretable-ml-book/ice.html">https://christophm.github.io/interpretable-ml-book/ice.html</a>
+</p>
+
+
+<h3>Super class</h3>
+
+<p><code>iml::InterpretationMethod</code> -&gt; <code>FeatureEffect</code>
+</p>
+
+
+<h3>Public fields</h3>
+
+<div class="r6-fields">
+
+<dl>
+<dt><code>grid.size</code></dt>
+<dd>
+<p>(<code>numeric(1)</code> | <code>numeric(2)</code>)<br>
+The size of the grid.</p>
+</dd>
+<dt><code>feature.name</code></dt>
+<dd>
+<p>(<code>character(1)</code> | <code>character(2)</code>)<br>
+The names of the features for which the partial dependence was computed.</p>
+</dd>
+<dt><code>n.features</code></dt>
+<dd>
+<p>(<code>numeric(1)</code>)<br>
+The number of features (either 1 or 2).</p>
+</dd>
+<dt><code>feature.type</code></dt>
+<dd>
+<p>(<code>character(1)</code> | <code>character(2)</code>)<br>
+The detected types of the features, either "categorical" or "numerical".</p>
+</dd>
+<dt><code>method</code></dt>
+<dd>
+<p>(<code>character(1)</code>)<br></p>
+</dd>
+</dl>
+</div>
+
+
+<h3>Active bindings</h3>
+
+<div class="r6-active-bindings">
+
+<dl>
+<dt><code>center.at</code></dt>
+<dd>
+<p>numeric<br>
+Value at which the plot was centered. Ignored in the case of two
+features.</p>
+</dd>
+</dl>
+</div>
+
+
+<h3>Methods</h3>
+
+
+
+<h4>Public methods</h4>
+
+
+<ul>
+<li> <p><a href="#method-FeatureEffect-new"><code>FeatureEffect$new()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-FeatureEffect-set.feature"><code>FeatureEffect$set.feature()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-FeatureEffect-center"><code>FeatureEffect$center()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-FeatureEffect-predict"><code>FeatureEffect$predict()</code></a>
+</p>
+</li>
+<li> <p><a href="#method-FeatureEffect-clone"><code>FeatureEffect$clone()</code></a>
+</p>
+</li>
+</ul>
+<details open><summary>Inherited methods</summary><ul>
+<li><span class="pkg-link" data-pkg="iml" data-topic="InterpretationMethod" data-id="plot"><a href="../../iml/html/InterpretationMethod.html#method-InterpretationMethod-plot"><code>iml::InterpretationMethod$plot()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="iml" data-topic="InterpretationMethod" data-id="print"><a href="../../iml/html/InterpretationMethod.html#method-InterpretationMethod-print"><code>iml::InterpretationMethod$print()</code></a></span></li>
+</ul></details><hr>
+<a id="method-FeatureEffect-new"></a>
+
+
+
+<h4>Method <code>new()</code>
+</h4>
+
+<p>Create a FeatureEffect object
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>FeatureEffect$new(
+  predictor,
+  feature,
+  method = "ale",
+  center.at = NULL,
+  grid.size = 20,
+  grid.points = NULL
+)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>predictor</code></dt>
+<dd>
+<p>Predictor<br>
+The object (created with <code>Predictor$new()</code>) holding the machine
+learning model and the data.</p>
+</dd>
+<dt><code>feature</code></dt>
+<dd>
+<p>(<code>character(1)</code> | <code>character(2)</code> | <code>numeric(1)</code> |
+<code>numeric(2)</code>)<br>
+The feature name or index for which to compute the effects.</p>
+</dd>
+<dt><code>method</code></dt>
+<dd>
+<p>(<code>character(1)</code>)<br></p>
+
+<ul>
+<li>
+<p> 'ale' for accumulated local effects,
+</p>
+</li>
+<li>
+<p> 'pdp' for partial dependence plot,
+</p>
+</li>
+<li>
+<p> 'ice' for individual conditional expectation curves,
+</p>
+</li>
+<li>
+<p> 'pdp + ice' for partial dependence plot and ice curves within the same
+plot.
+</p>
+</li>
+</ul>
+</dd>
+<dt><code>center.at</code></dt>
+<dd>
+<p>(<code>numeric(1)</code>)<br>
+Value at which the plot should be centered. Ignored in the case of two
+features.</p>
+</dd>
+<dt><code>grid.size</code></dt>
+<dd>
+<p>(<code>numeric(1)</code> | <code>numeric(2)</code>)<br>
+The size of the grid for evaluating the predictions.</p>
+</dd>
+<dt><code>grid.points</code></dt>
+<dd>
+<p>(<code>numeric()</code> | <code style="white-space: pre;">⁠list(numeric()⁠</code>, <code>numeric()</code>)<br>
+An optional grid along the feature. If grid.points are set, the grid.size
+argument is ignored. Provide a list of two vectors with the same order as
+in the 'feature' argument, if PDP/ALE for two features is to be computed
+with a user-defined grid.</p>
+</dd>
+</dl>
+</div>
+
+
+<hr>
+<a id="method-FeatureEffect-set.feature"></a>
+
+
+
+<h4>Method <code>set.feature()</code>
+</h4>
+
+<p>Get/set feature(s) (by index) for which to compute PDP.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>FeatureEffect$set.feature(feature)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>feature</code></dt>
+<dd>
+<p>(<code>character(1)</code>)<br>
+Feature name.</p>
+</dd>
+</dl>
+</div>
+
+
+<hr>
+<a id="method-FeatureEffect-center"></a>
+
+
+
+<h4>Method <code>center()</code>
+</h4>
+
+<p>Set the value at which the ice computations are centered.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>FeatureEffect$center(center.at)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>center.at</code></dt>
+<dd>
+<p>(<code>numeric(1)</code>)<br>
+Value at which the plot should be centered. Ignored in the case of two
+features.</p>
+</dd>
+</dl>
+</div>
+
+
+<hr>
+<a id="method-FeatureEffect-predict"></a>
+
+
+
+<h4>Method <code>predict()</code>
+</h4>
+
+<p>Predict the marginal outcome given a feature.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>FeatureEffect$predict(data, extrapolate = FALSE)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>data</code></dt>
+<dd>
+<p>data.frame<br>
+Data.frame with the feature or a vector.</p>
+</dd>
+<dt><code>extrapolate</code></dt>
+<dd>
+<p>(<code>character(1)</code>)<br>
+If TRUE, predict returns NA for x values outside of observed range.
+If FALSE, predcit returns the closest PDP value for x values outside the range.
+Ignored for categorical features</p>
+</dd>
+</dl>
+</div>
+
+
+
+<h5>Returns</h5>
+
+<p>Values of the effect curves at the given values.
+</p>
+
+
+<hr>
+<a id="method-FeatureEffect-clone"></a>
+
+
+
+<h4>Method <code>clone()</code>
+</h4>
+
+<p>The objects of this class are cloneable with this method.
+</p>
+
+
+<h5>Usage</h5>
+
+<div class="r"><pre>FeatureEffect$clone(deep = FALSE)</pre></div>
+
+
+
+<h5>Arguments</h5>
+
+<div class="arguments">
+
+<dl>
+<dt><code>deep</code></dt>
+<dd>
+<p>Whether to make a deep clone.</p>
+</dd>
+</dl>
+</div>
+
+
+
+
+<h3>References</h3>
+
+<p>Apley, D. W. 2016. "Visualizing the Effects of Predictor Variables in Black
+Box Supervised Learning Models." ArXiv Preprint.
+</p>
+<p>Friedman, J.H. 2001. "Greedy Function Approximation: A Gradient Boosting
+Machine." Annals of Statistics 29: 1189-1232.
+</p>
+<p>Goldstein, A., Kapelner, A., Bleich, J., and Pitkin, E. (2013). Peeking
+Inside the Black Box: Visualizing Statistical Learning with Plots of
+Individual Conditional Expectation, 1-22.
+https://doi.org/10.1080/10618600.2014.907095
+</p>
+
+
+<h3>See Also</h3>
+
+<p>plot.FeatureEffect
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># We train a random forest on the Boston dataset:
+data("Boston", package = "MASS")
+library("rpart")
+rf &lt;- rpart(medv ~ ., data = Boston)
+mod &lt;- Predictor$new(rf, data = Boston)
+
+# Compute the accumulated local effects for the first feature
+eff &lt;- FeatureEffect$new(mod, feature = "rm", grid.size = 30)
+eff$plot()
+
+# Again, but this time with a partial dependence plot and ice curves
+eff &lt;- FeatureEffect$new(mod,
+  feature = "rm", method = "pdp+ice",
+  grid.size = 30
+)
+plot(eff)
+
+# Since the result is a ggplot object, you can extend it:
+library("ggplot2")
+plot(eff) +
+  # Adds a title
+  ggtitle("Partial dependence") +
+  # Adds original predictions
+  geom_point(
+    data = Boston, aes(y = mod$predict(Boston)[[1]], x = rm),
+    color = "pink", size = 0.5
+  )
+
+# If you want to do your own thing, just extract the data:
+eff.dat &lt;- eff$results
+head(eff.dat)
+
+# You can also use the object to "predict" the marginal values.
+eff$predict(Boston[1:3, ])
+# Instead of the entire data.frame, you can also use feature values:
+eff$predict(c(5, 6, 7))
+
+# You can reuse the pdp object for other features:
+eff$set.feature("lstat")
+plot(eff)
+
+# Only plotting the aggregated partial dependence:
+eff &lt;- FeatureEffect$new(mod, feature = "crim", method = "pdp")
+eff$plot()
+
+# Only plotting the individual conditional expectation:
+eff &lt;- FeatureEffect$new(mod, feature = "crim", method = "ice")
+eff$plot()
+
+# Accumulated local effects and partial dependence plots support up to two
+# features:
+eff &lt;- FeatureEffect$new(mod, feature = c("crim", "lstat"))
+plot(eff)
+
+# FeatureEffect plots also works with multiclass classification
+rf &lt;- rpart(Species ~ ., data = iris)
+mod &lt;- Predictor$new(rf, data = iris, type = "prob")
+
+# For some models we have to specify additional arguments for the predict
+# function
+plot(FeatureEffect$new(mod, feature = "Petal.Width"))
+
+# FeatureEffect plots support up to two features:
+eff &lt;- FeatureEffect$new(mod, feature = c("Sepal.Length", "Petal.Length"))
+eff$plot()
+
+# show where the actual data lies
+eff$plot(show.data = TRUE)
+
+# For multiclass classification models, you can choose to only show one class:
+mod &lt;- Predictor$new(rf, data = iris, type = "prob", class = "setosa")
+plot(FeatureEffect$new(mod, feature = "Sepal.Length"))
+</code></pre>
+
+
+</div>

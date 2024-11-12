@@ -1,0 +1,291 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>InterVA5</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Provide InterVA5 analysis on the data input.</h2>
+
+<h3>Description</h3>
+
+<p>This function implements the algorithm in the InterVA5 software.  It
+produces individual cause of death (COD) and population cause-specific mortality
+fractions.  The output is saved in a .csv file specified by user.
+The calculation is based on the conditional and prior distribution
+of 61 CODs. The function can also  save the full probability distibution
+of each individual to file. All information about each individual is
+saved to a va class object.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">InterVA5(
+  Input,
+  HIV,
+  Malaria,
+  write = TRUE,
+  directory = NULL,
+  filename = "VA5_result",
+  output = "classic",
+  append = FALSE,
+  groupcode = FALSE,
+  sci = NULL,
+  returnCheckedData = FALSE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Input</code></td>
+<td>
+<p>A matrix input, or data read from csv files in the same format
+as required by InterVA5. Sample input is included as data(RandomVA5).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>HIV</code></td>
+<td>
+<p>An indicator of the level of prevalence of HIV. The input should
+be one of the following: "h"(high),"l"(low), or "v"(very low).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Malaria</code></td>
+<td>
+<p>An indicator of the level of prevalence of Malaria. The input
+should be one of the following: "h"(high),"l"(low), or "v"(very low).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>write</code></td>
+<td>
+<p>A logical value indicating whether or not the output (including
+errors and warnings) will be saved to file.  If the value is set to TRUE, the
+user must also provide a value for the parameter "directory".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>directory</code></td>
+<td>
+<p>The directory to store the output from InterVA5. It should
+either be an existing valid directory, or a new folder to be created. If no
+path is given and the parameter for "write" is true, then the function stops
+and and error message is produced.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filename</code></td>
+<td>
+<p>The filename the user wish to save the output. No extension
+needed. The output is in .csv format by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output</code></td>
+<td>
+<p>"classic": The same deliminated output format as InterVA5; or
+"extended": delimited output followed by full distribution of cause of
+death proability.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>append</code></td>
+<td>
+<p>A logical value indicating whether or not the new output
+should be appended to the existing file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groupcode</code></td>
+<td>
+<p>A logical value indicating whether or not the group code
+will be included in the output causes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sci</code></td>
+<td>
+<p>A data frame that contains the symptom-cause-information (aka
+Probbase) that InterVA uses to assign a cause of death.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>returnCheckedData</code></td>
+<td>
+<p>A logical indicating if the checked data (i.e.,
+the data that have been modified by the consistency checks) should be returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>not used</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Be careful if the input file does not match InterVA5 input format strictly.
+The function will run normally as long as the number of symptoms are
+correct. Any inconsistent symptom names will be printed in console as
+warning. If there is a wrong match of symptom from warning, please change 
+the input to the correct order.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ID </code></td>
+<td>
+<p> identifier from batch (input) file</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MALPREV
+</code></td>
+<td>
+<p> selected malaria prevalence</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>HIVPREV </code></td>
+<td>
+<p> selected HIV prevalence</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PREGSTAT </code></td>
+<td>
+<p>most likely pregnancy status</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PREGLIK </code></td>
+<td>
+<p> likelihood of
+PREGSTAT</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PRMAT </code></td>
+<td>
+<p> likelihood of maternal death</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>INDET
+</code></td>
+<td>
+<p> indeterminate outcome</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CAUSE1 </code></td>
+<td>
+<p> most likely cause</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LIK1 </code></td>
+<td>
+
+<p>likelihood of 1st cause</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CAUSE2 </code></td>
+<td>
+<p> second likely cause</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LIK2 </code></td>
+<td>
+
+<p>likelihood of 2nd cause</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CAUSE3 </code></td>
+<td>
+<p> third likely cause</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LIK3 </code></td>
+<td>
+
+<p>likelihood of 3rd cause</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>COMCAT </code></td>
+<td>
+<p> most likely circumstance of mortality</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>COMNUM </code></td>
+<td>
+<p> likelihood of COMCAT</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wholeprob </code></td>
+<td>
+<p> full distribution of causes of death</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Jason Thomas, Zehang Li, Tyler McCormick, Sam Clark
+</p>
+
+
+<h3>References</h3>
+
+<p>http://www.interva.net/
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>InterVA5.plot</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(RandomVA5)
+# only fit first 5 observations for a quick illustration
+RandomVA5 &lt;- RandomVA5[1:5, ]
+
+## to get easy-to-read version of causes of death make sure the column
+## orders match interVA5 standard input this can be monitored by checking
+## the warnings of column names
+
+sample.output1 &lt;- InterVA5(RandomVA5, HIV = "h", Malaria = "l", write = FALSE, 
+    directory = tempdir(), filename = "VA5_result", output = "extended", append = FALSE)
+
+## Not run: 
+## to get causes of death with group code for further usage
+sample.output2 &lt;- InterVA5(RandomVA5, HIV = "h", Malaria = "l", 
+    write = FALSE, directory = "VA test", filename = "VA5_result_wt_code", output = "classic", 
+    append = FALSE, groupcode = TRUE)
+
+## End(Not run)
+
+
+</code></pre>
+
+
+</div>

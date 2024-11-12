@@ -1,0 +1,137 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>designLink</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create list with information for the elicitation session</h2>
+
+<h3>Description</h3>
+
+<p>This builds the structure that will store elicited data. The linear predictor
+has a normal prior <code class="reqn">g(\theta) ~ N(m, V)</code>, <code class="reqn">\theta</code> is the elicitation
+target. Link functions <code class="reqn">g(.)</code>: <code>logit</code>, <code>log</code>, <code>cloglog</code>, 
+<code>identity</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">designLink(
+  design,
+  link = "identity",
+  target = "Target",
+  CI.prob = 1/2,
+  expertID = "Expert",
+  facilitator = "Facilitator",
+  rapporteur = "none",
+  intro.comments = "This is a record of the elicitation session.",
+  fit.method = "KL"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>design</code></td>
+<td>
+<p>a dataframe with covariate values that will be displayed to the
+expert(s) during the elicitation session.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>link</code></td>
+<td>
+<p>character <code>logit</code>, <code>log</code>, <code>cloglog</code>, 
+<code>identity</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target</code></td>
+<td>
+<p>character, name of target parameter of elicitation exercise</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CI.prob</code></td>
+<td>
+<p>numeric, a fraction between 0 and 1 that defines probability 
+attributed to central credible interval. For example, 1/2 for a central 
+credible interval of probability 0.5, or 1/3 for a central credible 
+interval of probablity 0.333... The default is probability 1/2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>expertID</code></td>
+<td>
+<p>character, identifier for expert or group of experts</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>facilitator</code></td>
+<td>
+<p>character, facilitator identifier</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rapporteur</code></td>
+<td>
+<p>character, rapporteur identifier. Default "none".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intro.comments</code></td>
+<td>
+<p>character, text with any prefacing comments. This may 
+include, for example, the definition of the target parameter for the 
+elictation session. Beware of non-ASCII text and special characters, which 
+may affect the ability to save the elicitation record with function <code>saveRecord</code>
+or create a summary report with function <code>makeSweave</code>
+if called by the function <code>makeSweave</code> may affect ability to render  by
+means of <code>Sweave</code> or <code>knitr</code> etc.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fit.method</code></td>
+<td>
+<p>character, method used to fit conditional means prior: 
+<code>KL</code> (default), <code>moment</code>, <code>SS</code> (see vignette and
+<code>mV</code> for more information on these options)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Assumption: at least two fractiles selected from the median, upper and lower 
+bounds of hte central credible interval of probability <code>CI.prob</code> will be
+elicited at each design point. The probabilities assigned to the central 
+credible intervals  can vary across design points. The argument 
+<code>CI.prob</code> can later be adjusted by design point during the elicitation 
+exercise, see function <code>elicitPt</code>. In the first instance, it is
+set to a global value specified by <code>CI.prob</code> in function
+<code>designLink</code> with default value <code class="reqn">0.5</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>list of <code>design</code> with entries: <code>theta</code>, a <code class="reqn">n x 4</code> 
+matrix with columns that give lower, median and upper quantiles followed by
+<code>CI.prob</code> and <code class="reqn">n</code> equal to the number of design points 
+(scenarios); <code>link</code>, the link function used; <code>target</code>; 
+<code>expert</code> <code>facilitator</code>; <code>rapporteur</code>; <code>date</code>; 
+<code>intro.comments</code>; <code>fit.method</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">X &lt;- matrix(c(1, 1, 0, 1), nrow = 2) # design
+Z &lt;- designLink(design = X, link = "logit", target = "target",
+ CI.prob = 1/2, expertID = "Expert", facilitator = "facilitator")
+</code></pre>
+
+
+</div>

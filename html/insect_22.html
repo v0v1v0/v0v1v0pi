@@ -1,0 +1,309 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>learn</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Informatic sequence classification tree learning.</h2>
+
+<h3>Description</h3>
+
+<p>This function learns a classification tree from a reference sequence database
+using a recursive partitioning procedure.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">learn(
+  x,
+  db = NULL,
+  model = NULL,
+  refine = "Viterbi",
+  iterations = 50,
+  nstart = 20,
+  minK = 2,
+  maxK = 2,
+  minscore = 0.95,
+  probs = 0.5,
+  retry = FALSE,
+  resize = TRUE,
+  maxsize = 1000,
+  recursive = TRUE,
+  cores = 1,
+  quiet = FALSE,
+  verbose = FALSE,
+  numcode = NULL,
+  frame = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a reference database of class<code>"DNAbin"</code> representing a list of
+DNA sequences to be used as the training data.
+All sequences should be from the same genetic region of interest
+and be globally alignable (i.e. without unjustified end-gaps).
+The sequences must have "names" attributes, either in RDP format
+(containing semicolon-delimited lineage strings),
+or that include taxonomic ID numbers corresponding with those in the taxonomy
+database <code>db</code> (separated from the sequence ID by a "|" character).
+For example: "AF296347|30962", "AF296346|8022", "AF296345|8017", etc.
+See <code>searchGB</code> for more details on creating the reference
+sequence database and <code>taxonomy</code> for the associated heirarchical
+taxonomic database.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>db</code></td>
+<td>
+<p>a heirarchical taxonomy database in the form of a data.frame.
+Cannot be NULL unless training data is in RDP format
+(containing semicolon delimited lineage strings).
+The object should have
+four columns, labeled "taxID", "parent_taxID", "rank" and "name".
+The first two should be numeric, and all ID numbers in the
+"parent_taxID" column should link to those in the "taxID" column.
+This excludes the first row,
+which should have <code>parent_taxID = 0</code> and <code>name = "root"</code>.
+See <code>taxonomy</code> for more details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>an optional object of class <code>"PHMM"</code> providing the
+starting parameters. Used to train (optimize parameters for)
+subsequent nested models to be positioned at successive
+sub-nodes. If NULL, the root model is derived from the
+sequence list prior to the recursive partitioning process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>refine</code></td>
+<td>
+<p>character string giving the iterative model refinement
+method to be used in the partitioning process. Valid options are
+<code>"Viterbi"</code> (Viterbi training; the default option) and
+<code>"BaumWelch"</code> (a modified version of the Expectation-Maximization
+algorithm).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iterations</code></td>
+<td>
+<p>integer giving the maximum number of training-classification
+iterations to be used in the splitting process.
+Note that this is not necessarily the same as the number of Viterbi training
+or Baum Welch iterations to be used in model training, which can be set
+using the argument <code>"maxiter"</code> (eventually passed to
+<code>train</code> via the dots argument "...").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nstart</code></td>
+<td>
+<p>integer. The number of random starting sets to be chosen
+for initial k-means assignment of sequences to groups. Defaults to 20.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minK</code></td>
+<td>
+<p>integer. The minimum number of furications allowed at each inner
+node of the tree. Defaults to 2 (all inner nodes are bifuricating).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxK</code></td>
+<td>
+<p>integer. The maximum number of furications allowed at each inner
+node of the tree. Defaults to 2 (all inner nodes are bifuricating).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minscore</code></td>
+<td>
+<p>numeric between 0 and 1. The minimum acceptable value
+for the <em>n</em>th percentile of Akaike weights (where <em>n</em> is
+the value given in <code>"probs"</code>, for the node to be split and the
+recursion process to continue.
+At any given node, if the <em>n</em>th percentile of Akaike weights
+falls below this threshold, the recursion process for the node will
+terminate. As an example, if <code>minscore = 0.95</code> and
+<code>probs = 0.5</code> (the default settings), and after generating two
+candidate PHMMs to occupy the candidate subnodes the median
+Akaike weight is less than 0.95, the splitting process will
+terminate and the function will simply return the unsplit root node.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probs</code></td>
+<td>
+<p>numeric between 0 and 1. The percentile of Akaike weights
+to test against the minimum score threshold given in <code>"minscore"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>retry</code></td>
+<td>
+<p>logical indicating whether failure to split a node based on
+the criteria outlined in 'minscore' and 'probs' should prompt a second
+attempt with different initial groupings. These groupings are based on
+maximum kmer frequencies rather than k-means division, which can give
+suboptimal groupings when the cluster sizes are different (due to
+the up-weighting of larger clusters in the k-means algorithm).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resize</code></td>
+<td>
+<p>logical indicating whether the models should be free to
+change size during the training process or if the number of modules
+should be fixed. Defaults to TRUE. Only applicable if
+<code>refine = "Viterbi"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxsize</code></td>
+<td>
+<p>integer giving the upper bound on the number of modules
+in the PHMMs. If NULL, no maximum size is enforced.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>recursive</code></td>
+<td>
+<p>logical indicating whether the splitting process
+should continue recursively until the discrimination criteria
+are not met (TRUE; default), or whether a single split should
+take place at the root node.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>integer giving the number processors for multithreading. Defaults to 1.
+This argument may alternatively be a 'cluster' object,
+in which case it is the user's responsibility to close the socket
+connection at the conclusion of the operation,
+e.g. by running <code>parallel::stopCluster(cores)</code>.
+The string 'autodetect' is also accepted, in which case the maximum
+number of cores to use is one less than the total number of cores
+available.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>logical indicating whether feedback should be printed
+to the console.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>logical indicating whether extra feedback should be
+printed to the console, including progress at each split.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numcode, frame</code></td>
+<td>
+<p>passed to <code>translate</code>.
+Set to NULL (default) unless learning a hybrid DNA/amino acid sequence classifier.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments to be passed on to <code>train</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The "insect" object type is a dendrogram
+with several additional attributes stored at each node.
+These include:
+"clade" the index of the node (see further details below);
+"sequences" the indices of the sequences in the reference
+database used to create the object;
+"taxID" the taxonomic identifier of the lowest common taxon
+of the sequences belonging to the node (linking to <code>"db"</code>);
+"minscore" the lowest likelihood among the training sequences given
+the profile HMM stored at the node;
+"minlength" the minimum length of the sequences belonging to the node;
+"maxlength" the maximum length of the sequences belonging to the node;
+"model" the profile HMM derived from the sequence subset belonging to the node;
+"nunique" the number of unique sequences belonging to the node;
+"ntotal" the total number of sequences belonging to the node (including duplicates);
+"key" the hash key used for exact sequence matching
+(bypasses the classification procedure if an exact match is found; root node only);
+"taxonomy" the taxonomy database containing the taxon ID numbers (root node only).
+</p>
+<p>The clade indexing system used here is based on character strings,
+where "0" refers to the root node,
+"01" is the first child node, "02" is the second child node,
+"011" is the first child node of the first child node, etc.
+The leading zero may be omitted for brevity.
+Note that each inner node can not have more than 9 child nodes.
+</p>
+
+
+<h3>Value</h3>
+
+<p>an object of class <code>"insect"</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Shaun Wilkinson
+</p>
+
+
+<h3>References</h3>
+
+<p>Blackshields G, Sievers F, Shi W, Wilm A, Higgins DG (2010) Sequence embedding
+for fast construction of guide trees for multiple sequence alignment.
+<em>Algorithms for Molecular Biology</em>, <strong>5</strong>, 21.
+</p>
+<p>Durbin R, Eddy SR, Krogh A, Mitchison G (1998) Biological
+sequence analysis: probabilistic models of proteins and nucleic acids.
+Cambridge University Press, Cambridge, United Kingdom.
+</p>
+<p>Gerstein M, Sonnhammer ELL, Chothia C (1994) Volume changes in protein evolution.
+<em>Journal of Molecular Biology</em>, <strong>236</strong>, 1067-1078.
+</p>
+<p>Juang B-H, Rabiner LR (1990) The segmental K-means
+algorithm for estimating parameters of hidden Markov models.
+<em>IEEE Transactions on Acoustics, Speech, and Signal Processing</em>,
+<strong>38</strong>, 1639-1641.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+  data(whales)
+  data(whale_taxonomy)
+  ## use all sequences except first one to train the classifier
+  set.seed(999)
+  tree &lt;- learn(whales[-1], db = whale_taxonomy, maxiter = 5, cores = 2)
+  ## find predicted lineage for first sequence
+  classify(whales[1], tree)
+  ## compare with actual lineage
+  taxID &lt;- as.integer(gsub(".+\\|", "", names(whales)[1]))
+  get_lineage(taxID, whale_taxonomy)
+
+</code></pre>
+
+
+</div>

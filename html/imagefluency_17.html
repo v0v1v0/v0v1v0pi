@@ -1,0 +1,113 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>img_typicality</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Typicality of images relative to each other</h2>
+
+<h3>Description</h3>
+
+<p><code>img_typicality</code> returns the visual typicality of a list of images
+relative to each other. Higher values indicate larger typicality.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">img_typicality(imglist, rescale = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>imglist</code></td>
+<td>
+<p>A <em>list</em> of arrays or matrices with numeric values. Use
+e.g. <code>img_read()</code> to read image files into <code>R</code> (see
+example).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rescale</code></td>
+<td>
+<p>numeric. Rescales the images prior to computing the typicality
+scores (per default no rescaling is performed). Rescaling is performed by
+<code>OpenImageR</code>'s <code>resizeImage</code> function
+(bilinear rescaling)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function returns the visual typicality of a <em>list</em> of image
+arrays or matrices <code>imglist</code> relative to each other. Values can range
+between -1 (inversely typical) over 0 (not typical) to 1 (perfectly typical).
+That is, higher absolute values indicate a larger typicality.
+</p>
+<p>The typicality score is computed as the correlation of a particular image
+with the average representation of all images, i.e. the mean of all images.
+For color images, the weighted average between each color channel's values
+is computed. If the images have different dimensions they are automatically
+resized to the smallest height and width.
+</p>
+<p>Rescaling of the images prior to computing the typicality scores can be
+specified with the optional rescaling parameter (must be a numeric value).
+Most users won't need any rescaling and can use the default (<code>rescale
+  = NULL</code>). See Mayer &amp; Landwehr (2018) for more details.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a named matrix of numeric values (typicality scores)
+</p>
+
+
+<h3>References</h3>
+
+<p>Mayer, S. &amp; Landwehr, J. R. (2018). Objective measures of design
+typicality. <em>Design Studies</em>, <em>54</em>, 146–161.
+doi: <a href="https://doi.org/10.1016/j.destud.2017.09.004">10.1016/j.destud.2017.09.004</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>img_read</code>, <code>img_contrast</code>,
+<code>img_complexity</code>, <code>img_self_similarity</code>
+<code>img_simplicity</code>, <code>img_symmetry</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example images depicting valleys: valley_green, valley_white
+# Example image depicting fireworks: fireworks
+valley_green &lt;- img_read(
+    system.file("example_images", "valley_green.jpg", package = "imagefluency")
+  )
+valley_white &lt;- img_read(
+    system.file("example_images", "valley_white.jpg", package = "imagefluency")
+  )
+fireworks &lt;- img_read(
+    system.file("example_images", "fireworks.jpg", package = "imagefluency")
+  )
+#
+# display images
+grid::grid.raster(valley_green)
+grid::grid.raster(valley_white)
+grid::grid.raster(fireworks)
+
+# create image set as list
+imglist &lt;- list(fireworks, valley_green, valley_white)
+
+# get typicality
+img_typicality(imglist)
+
+</code></pre>
+
+
+</div>

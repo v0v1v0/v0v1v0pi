@@ -1,0 +1,132 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_from</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Backward-compatible extractor from summary-likelihood objects
+</h2>
+
+<h3>Description</h3>
+
+<p>A generic function, whose default method works for <code>list</code>, and with specific methods for objects inheriting from classes <code>SLik_j</code> and <code>SLik</code>. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_from(object, which, ...)
+
+## S3 methods with additional argument(s)
+## S3 method for class 'SLik'
+get_from(object, which, raw=FALSE, force=FALSE, ...)
+## S3 method for class 'SLik_j'
+get_from(object, which, raw=FALSE, force=FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>Any object with a list structure.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>which</code></td>
+<td>
+
+<p>Character: identifier for the element to be extracted. See Examples for possible values.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>raw</code></td>
+<td>
+
+<p>Boolean: if TRUE, <code>object[[which]]</code> is returned, without any particular check of its value. By default, <code>raw</code> is FALSE and various operations may be performed on the extracted value (see “example” below), including optional recomputation if <code>force</code> is TRUE.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>force</code></td>
+<td>
+
+<p>Boolean: if TRUE, the extracted element may be computed if it appears to be missing from the <code>object</code>. This is notably so for <code>which="RMSEs"</code> or <code>which="par_RMSEs"</code>;  in these cases, the results of the computation are further saved in the original object.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>further arguments passed to or from other methods (currently not used).
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Will depend on <code>which</code>, but aims to retain a convenient format backward-compatible with version 1.4.0.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>logLik</code>.</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  # ##### 0bserved summary statistics 
+  # #  (raw data)
+  #   get_from(slik, "raw_data") 
+  # #  (projected data, with raw ones as attribute, if relevant)
+  #   get_from(slik, which="obs") # or which="stat.obs" or "proj_data"
+  # 
+  # ##### Reference-table information 
+  # #  (raw = unprojected):
+  #   get_from(slik, "reftable_raw")
+  # # : but this is NULL if no projections were performed.
+  #
+  # # Projected:
+  #   get_from(slik, "reftable")
+  # # : including all parameters, latent variables, statistics,
+  # #   'cumul_iter' (the iteration in which each sample was added),
+  # #   and attributes.
+  #
+  # ##### RMSEs
+  # # On any summary-likelihood object 'slik':
+  #   get_from(slik, which="par_RMSEs") # matrix
+  # # despite &lt;object&gt;$par_RMSEs being an environment if 
+  # #  'slik' was created by version &gt; 1.4.0, as then shown by
+  #   get_from(slik, which="par_RMSEs", raw=TRUE)
+  #
+  # # Further, if 
+  #   get_from(slik, which="par_RMSEs")
+  # # returns NULL because the element is absent from the object, 
+  # # then one can force its computation by 
+  #   get_from(slik, which="par_RMSEs", force=TRUE)
+  # # The result are saved in the 'slik' object, so running again 
+  #   get_from(slik, which="par_RMSEs")
+  # # will no longer return NULL.
+  #
+  # ##### Other, less commonly needed elements
+  #   get_from(slik, "Simulate"")
+  #   get_from(slik, "control.Simulate")
+  #   get_from(slik, "env")
+  #   get_from(slik, "packages")
+  # # =&gt; for these elements, the documentation and arguments of refine.default() 
+  # #    provides meaning and context where they may be used.
+  #
+  # Number of elements of the multivariate gaussian mixture model:
+  #   get_from(slik, "nbCluster") 
+</code></pre>
+
+
+</div>

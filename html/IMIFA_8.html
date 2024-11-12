@@ -1,0 +1,151 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>G_moments</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>1st &amp; 2nd Moments of the Pitman-Yor / Dirichlet Processes</h2>
+
+<h3>Description</h3>
+
+<p>Calculate the <em>a priori</em> expected number of clusters (<code>G_expected</code>) or the variance of the number of clusters (<code>G_variance</code>) under a PYP or DP prior for a sample of size <code>N</code> at given values of the concentration parameter <code>alpha</code> and optionally also the Pitman-Yor <code>discount</code> parameter. Useful for soliciting sensible priors (or fixed values) for <code>alpha</code> or <code>discount</code> under the <code>"IMFA"</code> and <code>"IMIFA"</code> methods for <code>mcmc_IMIFA</code>. Additionally, for a given sample size <code>N</code> and given expected number of clusters <code>EG</code>, <code>G_calibrate</code> elicits a value for the concentration parameter <code>alpha</code> <strong>or</strong> the <code>discount</code> parameter.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">G_expected(N,
+           alpha,
+           discount = 0,
+           MPFR = TRUE)
+
+G_variance(N,
+           alpha,
+           discount = 0,
+           MPFR = TRUE)
+
+G_calibrate(N,
+            EG,
+            alpha = NULL,
+            discount = 0,
+            MPFR = TRUE,
+            ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>The sample size.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>The concentration parameter. Must be specified (though not for <code>G_calibrate</code>) and must be strictly greater than <code>-discount</code>. The case <code>alpha=0</code> is accommodated. When <code>discount</code> is negative <code>alpha</code> must be a positive integer multiple of <code>abs(discount)</code>. See <strong>Details</strong> for behaviour for <code>G_calibrate</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>discount</code></td>
+<td>
+<p>The discount parameter for the Pitman-Yor process. Must be less than 1, but typically lies in the interval [0, 1). Defaults to 0 (i.e. the Dirichlet process). When <code>discount</code> is negative <code>alpha</code> must be a positive integer multiple of <code>abs(discount)</code>. See <strong>Details</strong> for behaviour for <code>G_calibrate</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MPFR</code></td>
+<td>
+<p>Logical indicating whether the high-precision libraries <code>Rmpfr</code> and <code>gmp</code> are invoked, at the expense of run-time. Defaults to <code>TRUE</code> and <strong>must</strong> be <code>TRUE</code> for <code>G_expected</code> when <code>alpha=0</code> or <code>G_variance</code> when <code>discount</code> is non-zero. For <code>G_calibrate</code>, it is <em>strongly recommended</em> to use <code>MPFR=TRUE</code> when <code>discount</code> is non-zero and strictly necessary when <code>alpha=0</code> is supplied. See <strong><code>Note</code></strong>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>EG</code></td>
+<td>
+<p>The prior expected number of clusters. Must exceed <code>1</code> and be less than <code>N</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments passed to <code>uniroot</code>, e.g. <code>maxiter</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>All arguments are vectorised. Users can also consult <code>G_priorDensity</code> in order to solicit sensible priors.
+</p>
+<p>For <code>G_calibrate</code>, <strong>only one</strong> of <code>alpha</code> or <code>discount</code> can be supplied, and the function elicits a value for the opposing parameter which achieves the desired expected number of clusters <code>EG</code> for the given sample size <code>N</code>. By default, a value for <code>alpha</code> subject to <code>discount=0</code> (i.e. the Dirichlet process) is elicited. Note that <code>alpha</code> may not be a positive integer multiple of <code>discount</code> as it should be if <code>discount</code> is negative. See <strong>Examples</strong> below.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The expected number of clusters under the specified prior conditions (<code>G_expected</code>), or the variance of the number of clusters (<code>G_variance</code>), or the concentration parameter <code>alpha</code> <strong>or</strong> <code>discount</code> parameter achieving a particular expected number of clusters (<code>G_calibrate</code>).
+</p>
+
+
+<h3>Note</h3>
+
+<p><code>G_variance</code> requires use of the <code>Rmpfr</code> and <code>gmp</code> libraries for non-zero <code>discount</code> values. <code>G_expected</code> requires these libraries only for the <code>alpha=0</code> case. These libraries are <em>strongly recommended</em> (but they are not required) for <code>G_calbirate</code> when <code>discount</code> is non-zero, but they are required when <code>alpha=0</code> is supplied. Despite the high precision arithmetic used, the functions can still be unstable for large <code>N</code> and/or extreme values of <code>alpha</code> and/or <code>discount</code>. See the argument <code>MPFR</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Keefe Murphy - &lt;<a href="mailto:keefe.murphy@mu.ie">keefe.murphy@mu.ie</a>&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>De Blasi, P., Favaro, S., Lijoi, A., Mena, R. H., Prunster, I., and Ruggiero, M. (2015) Are Gibbs-type priors the most natural generalization of the Dirichlet process?, <em>IEEE Transactions on Pattern Analysis and Machine Intelligence</em>, 37(2): 212-229.
+</p>
+<p>Yamato, H. and Shibuya, M. (2000) Moments of some statistics of Pitman sampling formula, <em>Bulletin of Informatics and Cybernetics</em>, 32(1): 1-10.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>G_priorDensity</code>, <code>Rmpfr</code>, <code>uniroot</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Certain examples require the use of the Rmpfr library
+suppressMessages(require("Rmpfr"))
+
+G_expected(N=50, alpha=19.23356, MPFR=FALSE)
+G_variance(N=50, alpha=19.23356, MPFR=FALSE)
+
+G_expected(N=50, alpha=c(19.23356, 12.21619, 1),
+           discount=c(0, 0.25, 0.7300045), MPFR=FALSE)
+G_variance(N=50, alpha=c(19.23356, 12.21619, 1),
+           discount=c(0, 0.25, 0.7300045), MPFR=c(FALSE, TRUE, TRUE))
+
+# Examine the growth rate of the DP
+DP   &lt;- sapply(c(1, 5, 10), function(i) G_expected(1:200, alpha=i, MPFR=FALSE))
+matplot(DP, type="l", xlab="N", ylab="G")
+
+# Examine the growth rate of the PYP
+PY &lt;- sapply(c(0.25, 0.5, 0.75), function(i) G_expected(1:200, alpha=1, discount=i))
+matplot(PY, type="l", xlab="N", ylab="G")
+
+# Other special cases of the PYP are also facilitated
+G_expected(N=50, alpha=c(27.1401, 0), discount=c(-27.1401/100, 0.8054448))
+G_variance(N=50, alpha=c(27.1401, 0), discount=c(-27.1401/100, 0.8054448))
+
+# Elicit values for alpha under a DP prior
+G_calibrate(N=50, EG=25)
+
+# Elicit values for alpha under a PYP prior
+# G_calibrate(N=50, EG=25, discount=c(-27.1401/100, 0.25, 0.7300045))
+# Elicit values for discount under a PYP prior
+# G_calibrate(N=50, EG=25, alpha=c(12.21619, 1, 0), maxiter=2000)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,232 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fit_volume</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit a Univariate State-Space Model on Intraday Trading Volume</h2>
+
+<h3>Description</h3>
+
+<p>The main function for defining and fitting a univaraite state-space model on intraday trading volume. The model is proposed in (Chen et al., 2016) as
+</p>
+<p style="text-align: center;"><code class="reqn">\mathbf{x}_{\tau+1} = \mathbf{A}_{\tau}\mathbf{x}_{\tau} + \mathbf{w}_{\tau},</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">y_{\tau} = \mathbf{C}\mathbf{x}_{\tau} + \phi_{\tau} + v_\tau,</code>
+</p>
+
+<p>where
+</p>
+<ul>
+<li>
+<p><code class="reqn">\mathbf{x}_{\tau} = [\eta_{\tau}, \mu_{\tau}]^\top</code> is the hidden state vector containing the log daily component and the log intraday dynamic component;
+</p>
+</li>
+<li>
+<p><code class="reqn">\mathbf{A}_{\tau} = \left[\begin{array}{cc}a_{\tau}^{\eta}&amp;0\\0&amp;a^{\mu}\end{array} \right]</code>
+is the state transition matrix with <code class="reqn">a_{\tau}^{\eta} = \left\{\begin{array}{cl}a^{\eta} &amp; t = kI, k = 1,2,\dots\\0 &amp; \textrm{otherwise};\end{array}\right.</code>
+</p>
+</li>
+<li>
+<p><code class="reqn">\mathbf{C} = [1, 1]</code> is the observation matrix;
+</p>
+</li>
+<li>
+<p><code class="reqn">\phi_{\tau}</code> is the corresponding element from <code class="reqn">\boldsymbol{\phi} = [\phi_1,\dots, \phi_I]^\top</code>, which is the log seasonal component;
+</p>
+</li>
+<li>
+<p><code class="reqn">\mathbf{w}_{\tau} = [\epsilon_{\tau}^{\eta},\epsilon_{\tau}^{\mu}]^\top \sim \mathcal{N}(\mathbf{0}, \mathbf{Q}_{\tau})</code>
+represents the i.i.d. Gaussian noise in the state transition, with a time-varying covariance matrix
+<code class="reqn">\mathbf{Q}_{\tau} = \left[\begin{array}{cc}(\sigma_{\tau}^{\eta})^2&amp;0\\ 0&amp;(\sigma^{\mu})^2\end{array} \right]</code>
+and <code class="reqn">\sigma_\tau^{\eta} = \left\{\begin{array}{cl} \sigma^{\eta} &amp; t = kI, k = 1,2,\dots\\0 &amp; \textrm{otherwise};\end{array}\right.</code>
+</p>
+</li>
+<li>
+<p><code class="reqn">v_\tau \sim \mathcal{N}(0, r)</code> is the i.i.d. Gaussian noise in the observation;
+</p>
+</li>
+<li>
+<p><code class="reqn">\mathbf{x}_1</code> is the initial state at <code class="reqn">\tau = 1</code>, and it follows <code class="reqn">\mathcal{N}(\mathbf{x}_0, \mathbf{V}_0)</code>.</p>
+</li>
+</ul>
+<p>In the model, <code class="reqn">\boldsymbol{\Theta} = \left\{a^{\eta},a^{\mu},\sigma^{\eta},\sigma^{\mu},r,\boldsymbol{\phi}, \mathbf{x}_0, \mathbf{V}_0\right\}</code>
+are treated as parameters.
+The model is fitted by expectation-maximization (EM) algorithms. The implementation follows (Chen et al., 2016), and the accelerated scheme is provided in (Varadhan and Roland, 2008).
+The algorithm terminates when <code>maxit</code> is reached or the condition <code class="reqn">\|\Delta \boldsymbol{\Theta}_i\| \le \textrm{abstol}</code> is satisfied.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fit_volume(
+  data,
+  fixed_pars = NULL,
+  init_pars = NULL,
+  verbose = 0,
+  control = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>An n_bin * n_day matrix or an <code>xts</code> object storing intraday trading volume.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed_pars</code></td>
+<td>
+<p>A list of parameters' fixed values. The allowed parameters are listed below,
+</p>
+<ul>
+<li>
+<p><code>"a_eta"</code>: <code class="reqn">a^{\eta}</code> of size 1 ;
+</p>
+</li>
+<li>
+<p><code>"a_mu"</code>: <code class="reqn">a^{\mu}</code> of size 1 ;
+</p>
+</li>
+<li>
+<p><code>"var_eta"</code>: <code class="reqn">\sigma^{\eta}</code> of size 1 ;
+</p>
+</li>
+<li>
+<p><code>"var_mu"</code>: <code class="reqn">\sigma^{\mu}</code> of size 1 ;
+</p>
+</li>
+<li>
+<p><code>"r"</code>: <code class="reqn">r</code> of size 1 ;
+</p>
+</li>
+<li>
+<p><code>"phi"</code>: <code class="reqn">\boldsymbol{\phi} = [\phi_1,\dots, \phi_I]^\top</code> of size <code class="reqn">I</code> ;
+</p>
+</li>
+<li>
+<p><code>"x0"</code>: <code class="reqn">\mathbf{x}_0</code> of size 2 ;
+</p>
+</li>
+<li>
+<p><code>"V0"</code>: <code class="reqn">\mathbf{V}_0</code> of size 2 * 2 .</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>init_pars</code></td>
+<td>
+<p>A list of unfitted parameters' initial values. The parameters are the same as <code>fixed_pars</code>.
+If the user does not assign initial values for the unfitted parameters, default ones will be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>An integer specifying the print level of information during the algorithm (default <code>1</code>). Possible numbers:
+</p>
+<ul>
+<li>
+<p><code>"0"</code>: no output;
+</p>
+</li>
+<li>
+<p><code>"1"</code>: show the iteration number and <code class="reqn">\|\Delta \boldsymbol{\Theta}_i\|</code>;
+</p>
+</li>
+<li>
+<p><code>"2"</code>: 1 + show the obtained parameters.</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>A list of control values of EM algorithm:
+</p>
+<ul>
+<li>
+<p><code>acceleration</code>: TRUE/FALSE indicating whether to use the accelerated EM algorithm (default TRUE);
+</p>
+</li>
+<li>
+<p><code>maxit</code>: Maximum number of iterations (default <code>3000</code>);
+</p>
+</li>
+<li>
+<p><code>abstol</code>: Absolute tolerance for parameters' change <code class="reqn">\|\Delta \boldsymbol{\Theta}_i\|</code> as the stopping criteria (default <code>1e-4</code>)
+</p>
+</li>
+<li>
+<p><code>log_switch</code>: TRUE/FALSE indicating whether to record the history of convergence progress (defalut TRUE).</p>
+</li>
+</ul>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list of class "<code>volume_model</code>" with the following elements (if the algorithm converges):
+</p>
+<ul>
+<li>
+<p><code>par</code>: A list of parameters' fitted values.
+</p>
+</li>
+<li>
+<p><code>init</code>: A list of valid initial values from users.
+</p>
+</li>
+<li>
+<p><code>par_log</code>: A list of intermediate parameters' values if <code>log_switch = TRUE</code>.
+</p>
+</li>
+<li>
+<p><code>converged</code>: A list of logical values indicating whether each parameter is fitted.
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Shengjie Xiu, Yifan Yu and Daniel P. Palomar
+</p>
+
+
+<h3>References</h3>
+
+<p>Chen, R., Feng, Y., and Palomar, D. (2016). Forecasting intraday trading volume: A Kalman filter approach. Available at SSRN 3101695.
+</p>
+<p>Varadhan, R., and Roland, C. (2008). Simple and globally convergent methods for accelerating the convergence of any EM algorithm.
+Scandinavian Journal of Statistics, 35(2), 335–353.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(intradayModel)
+data(volume_aapl)
+volume_aapl_training &lt;- volume_aapl[, 1:20]
+
+# fit model with no prior knowledge
+model_fit &lt;- fit_volume(volume_aapl_training)
+
+# fit model with fixed_pars and init_pars
+model_fit &lt;- fit_volume(volume_aapl_training, fixed_pars = list(a_mu = 0.5, var_mu = 0.05),
+                        init_pars = list(a_eta = 0.5))
+
+# fit model with other control options
+model_fit &lt;- fit_volume(volume_aapl_training, verbose = 2, 
+  control = list(acceleration = FALSE, maxit = 1000, abstol = 1e-4, log_switch = FALSE))
+
+
+</code></pre>
+
+
+</div>

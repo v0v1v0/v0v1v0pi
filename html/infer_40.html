@@ -1,0 +1,228 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>visualize</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Visualize statistical inference</h2>
+
+<h3>Description</h3>
+
+<p>Visualize the distribution of the simulation-based inferential statistics or
+the theoretical distribution (or both!).
+</p>
+<p>Learn more in <code>vignette("infer")</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">visualize(data, bins = 15, method = "simulation", dens_color = "black", ...)
+
+visualise(data, bins = 15, method = "simulation", dens_color = "black", ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A distribution. For simulation-based inference, a data frame
+containing a distribution of <code>calculate()</code>d statistics
+or <code>fit()</code>ted coefficient estimates. This object should
+have been passed to <code>generate()</code> before being supplied or
+<code>calculate()</code> to <code>fit()</code>. For theory-based inference,
+the output of <code>assume()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bins</code></td>
+<td>
+<p>The number of bins in the histogram.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>A string giving the method to display. Options are
+<code>"simulation"</code>, <code>"theoretical"</code>, or <code>"both"</code> with <code>"both"</code> corresponding to
+<code>"simulation"</code> and <code>"theoretical"</code>. If <code>data</code> is the output of <code>assume()</code>,
+this argument will be ignored and default to <code>"theoretical"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dens_color</code></td>
+<td>
+<p>A character or hex string specifying the color of the
+theoretical density curve.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments passed along to functions in ggplot2.
+For <code>method = "simulation"</code>, <code>stat_bin()</code>, and for <code>method = "theoretical"</code>,
+<code>geom_path()</code>. Some values may be overwritten by infer internally.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>In order to make the visualization workflow more straightforward
+and explicit, <code>visualize()</code> now only should be used to plot distributions
+of statistics directly. A number of arguments related to shading p-values and
+confidence intervals are now deprecated in <code>visualize()</code> and should
+now be passed to <code>shade_p_value()</code> and <code>shade_confidence_interval()</code>,
+respectively. <code>visualize()</code> will raise a warning if deprecated arguments
+are supplied.
+</p>
+
+
+<h3>Value</h3>
+
+<p>For <code>calculate()</code>-based workflows, a ggplot showing the simulation-based
+distribution as a histogram or bar graph. Can also be used to display
+theoretical distributions.
+</p>
+<p>For <code>assume()</code>-based workflows, a ggplot showing the theoretical distribution.
+</p>
+<p>For <code>fit()</code>-based workflows, a <code>patchwork</code> object
+showing the simulation-based distributions as a histogram or bar graph.
+The interface to adjust plot options and themes is a bit different
+for <code>patchwork</code> plots than ggplot2 plots. The examples highlight the
+biggest differences here, but see <code>patchwork::plot_annotation()</code> and
+patchwork::&amp;.gg for more details.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>shade_p_value()</code>, <code>shade_confidence_interval()</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# generate a null distribution
+null_dist &lt;- gss %&gt;%
+  # we're interested in the number of hours worked per week
+  specify(response = hours) %&gt;%
+  # hypothesizing that the mean is 40
+  hypothesize(null = "point", mu = 40) %&gt;%
+  # generating data points for a null distribution
+  generate(reps = 1000, type = "bootstrap") %&gt;%
+  # calculating a distribution of means
+  calculate(stat = "mean")
+
+# or a bootstrap distribution, omitting the hypothesize() step,
+# for use in confidence intervals
+boot_dist &lt;- gss %&gt;%
+  specify(response = hours) %&gt;%
+  generate(reps = 1000, type = "bootstrap") %&gt;%
+  calculate(stat = "mean")
+
+# we can easily plot the null distribution by piping into visualize
+null_dist %&gt;%
+  visualize()
+
+# we can add layers to the plot as in ggplot, as well...
+# find the point estimate---mean number of hours worked per week
+point_estimate &lt;- gss %&gt;%
+  specify(response = hours) %&gt;%
+  calculate(stat = "mean")
+
+# find a confidence interval around the point estimate
+ci &lt;- boot_dist %&gt;%
+  get_confidence_interval(point_estimate = point_estimate,
+                          # at the 95% confidence level
+                          level = .95,
+                          # using the standard error method
+                          type = "se")
+
+# display a shading of the area beyond the p-value on the plot
+null_dist %&gt;%
+  visualize() +
+  shade_p_value(obs_stat = point_estimate, direction = "two-sided")
+
+# ...or within the bounds of the confidence interval
+null_dist %&gt;%
+  visualize() +
+  shade_confidence_interval(ci)
+
+# plot a theoretical sampling distribution by creating
+# a theory-based distribution with `assume()`
+sampling_dist &lt;- gss %&gt;%
+  specify(response = hours) %&gt;%
+  assume(distribution = "t")
+
+visualize(sampling_dist)
+
+# you can shade confidence intervals on top of
+# theoretical distributions, too---the theoretical
+# distribution will be recentered and rescaled to
+# align with the confidence interval
+visualize(sampling_dist) +
+  shade_confidence_interval(ci)
+
+
+# to plot both a theory-based and simulation-based null distribution,
+# use a theorized statistic (i.e. one of t, z, F, or Chisq)
+# and supply the simulation-based null distribution
+null_dist_t &lt;- gss %&gt;%
+  specify(response = hours) %&gt;%
+  hypothesize(null = "point", mu = 40) %&gt;%
+  generate(reps = 1000, type = "bootstrap") %&gt;%
+  calculate(stat = "t")
+
+obs_stat &lt;- gss %&gt;%
+  specify(response = hours) %&gt;%
+  hypothesize(null = "point", mu = 40) %&gt;%
+  calculate(stat = "t")
+
+visualize(null_dist_t, method = "both")
+
+visualize(null_dist_t, method = "both") +
+  shade_p_value(obs_stat, "both")
+
+
+# to visualize distributions of coefficients for multiple
+# explanatory variables, use a `fit()`-based workflow
+
+# fit 1000 models with the `hours` variable permuted
+null_fits &lt;- gss %&gt;%
+ specify(hours ~ age + college) %&gt;%
+ hypothesize(null = "independence") %&gt;%
+ generate(reps = 1000, type = "permute") %&gt;%
+ fit()
+
+null_fits
+
+# visualize distributions of resulting coefficients
+visualize(null_fits)
+
+# the interface to add themes and other elements to patchwork
+# plots (outputted by `visualize` when the inputted data
+# is from the `fit()` function) is a bit different than adding
+# them to ggplot2 plots.
+library(ggplot2)
+
+# to add a ggplot2 theme to a `calculate()`-based visualization, use `+`
+null_dist %&gt;% visualize() + theme_dark()
+
+# to add a ggplot2 theme to a `fit()`-based visualization, use `&amp;`
+null_fits %&gt;% visualize() &amp; theme_dark()
+
+
+# More in-depth explanation of how to use the infer package
+## Not run: 
+vignette("infer")
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

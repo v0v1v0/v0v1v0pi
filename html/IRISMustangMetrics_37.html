@@ -1,0 +1,193 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>PSDMetric</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Power Spectral Density of a signal</h2>
+
+<h3>Description</h3>
+
+<p>The PSDMetric() function performs spectral analysis on a seismic signal
+and returns 'PSD' metrics with discretized spectral components as well as other
+metrics based on PSDs.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">PSDMetric(st,
+          linLoPeriod=4/(st@traces[[1]]@stats@sampling_rate),
+          linHiPeriod=100,
+          evalresp=NULL,
+          noCorrection=FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>st</code></td>
+<td>
+<p>a <code>Stream</code> object containing a seismic signal</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>linLoPeriod</code></td>
+<td>
+<p>low end of the period band use for calculating the linear dead channel metric</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>linHiPeriod</code></td>
+<td>
+<p>high end of the period band use for calculating the linear dead channel metric</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>evalresp</code></td>
+<td>
+<p>dataframe of freq, amp, phase information matching output of <code>getEvalresp</code>, optional</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>noCorrection</code></td>
+<td>
+<p>boolean (default=FALSE), TRUE=only generate list of PSDs uncorrected for instrument response;
+FALSE=generate list of uncorrected PSDs, list of corrected PSDs, dataframe of PDF values,and PSD-derived metrics</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function calculates average power spectra for a seismic signal as described in the McNamara paper.
+See the <code>McNamaraPSD</code> method of <code>Stream</code> objects in the <span class="pkg">IRISSeismic</span> package for details.
+</p>
+<p>If optional <code>evalresp</code> dataframe is not supplied, the code will call <code>getEvalresp</code> to obtain response
+information from webservices.
+</p>
+<p><em>Uncorrected</em> spectral density values are returned in <code>spectrumMetricList</code> in units of dB.
+</p>
+<p><em>Instrument response corrected</em> spectral density values are returned in <code>correctedPsdDF</code> in units of dB.
+</p>
+<p>Probability Density Function (PDF) histogram values are returned in <code>pdfDF</code>. 
+</p>
+<p>Other metrics calculated from the PSDs are returned in <code>svMetricList</code>.  These metrics are:
+</p>
+
+<dl>
+<dt>
+<b>pct_above_nhnm</b> – "percent above New High Noise Model"</dt>
+<dd>
+<p>Percentage of PSD values that
+are above the New High Noise Model for their frequency. Only frequencies less than the sample_rate/3 are
+considered to avoid instrument response effects as you approach the nyquist frequency. 
+This value is calculated over the entire time period.</p>
+</dd>
+<dt>
+<b>pct_below_nlnm</b> – "percent below New Low Noise Model"</dt>
+<dd>
+<p>Percentage of PSD values that are below the
+New Low Noise Model for their frequency. Only frequencies less than the sample_rate/3 are
+considered to avoid instrument response effects as you approach the nyquist frequency.
+This value is calculated over the entire time period.</p>
+</dd>
+<dt>
+<b>dead_channel_lin</b> – "dead channel metric - linear fit"</dt>
+<dd>
+<p> A "dead channel" metric is calculated from
+the mean of all the PSDs generated. (Typically 47 for a 24 hour period.) Values of the PSD mean line over the band
+(linLoPeriod:linHiPeriod) are fit to a line.  The <code>dead_channel_lin</code> metric is the standard deviation of the
+fit residuals.  Lower numbers indicate a better fit and a higher likelihood that the mean PSD is linear – an
+indication of a "dead channel".</p>
+</dd>
+</dl>
+<p>Note: The dead_channel_exp metric has been removed.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of lists is returned containing:
+</p>
+ 
+<ul>
+<li>
+<p><code>spectrumMetricList</code> = list of <code>SpectrumMetric</code> objects
+</p>
+</li>
+<li>
+<p><code>correctedPsdDF</code> = dataframe of starttime, endtime, frequency (Hz), power (dB) values
+</p>
+</li>
+<li>
+<p><code>pdfDF</code> = dataframe of frequency (Hz), power (dB), hits (count) values
+</p>
+</li>
+<li>
+<p><code>svMetricList</code> = list of <code>SingleValueMetric</code> objects:
+</p>
+
+<ul>
+<li>
+<p><code>pct_above_nhnm</code>
+</p>
+</li>
+<li>
+<p><code>pct_below_nlnm</code>
+</p>
+</li>
+<li>
+<p><code>dead_channel_lin</code>
+</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://pubs.usgs.gov/of/2005/1438/pdf/OFR-1438.pdf">Seismic Noise Analysis System Using Power Spectral Density Probability Density Functions</a> (McNamara and Boaz 2005)
+</p>
+<p><a href="https://pubs.usgs.gov/publication/ofr93322">Observations and Modeling of Seismic Background Noise</a> (Peterson 1993).
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>SpectrumMetric</code>
+<code>SingleValueMetric</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  ## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+# NOTE:  The following trace has 1.728 million points.
+# NOTE:  Downloading and calculating PSD may take a few seconds.
+starttime &lt;- as.POSIXct("2010-02-27",tz="GMT")
+endtime &lt;- as.POSIXct("2010-02-28",tz="GMT")
+  
+# Get the waveform
+st &lt;- getDataselect(iris,"IU","ANMO","00","BHZ",starttime,endtime)
+
+# Calculate the PSD metric and show the SingleValueMetric results
+listOfLists &lt;- PSDMetric(st)
+svMetricList &lt;- listOfLists[['svMetricList']]
+
+dummy &lt;- lapply(svMetricList, show)
+  
+## End(Not run)
+</code></pre>
+
+
+</div>

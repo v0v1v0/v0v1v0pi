@@ -1,0 +1,217 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>simPop</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Simulates a population based on demographic parameters
+</h2>
+
+<h3>Description</h3>
+
+<p>The simulation tracks individual females from birth through a series of adult age classes to death, as well as numbers of female and male offspring. The function allows for 1 or more age classes. Once an animal reaches the oldest age class, age does not increase further until death.
+</p>
+<p>The user specifies the number of females in each age class at the beginning of the simulation, before the first breeding season. Adult females can enter the population as immigrants; the age of immigrants is controlled by <code>ageOfImm</code>.
+</p>
+<p>Fecundity (the total number of offspring per adult female per year) can vary by age class and year in an age x year matrix. The sex ratio determines the proportion of females among the offspring.
+</p>
+<p>In some age classes, not all animals may attempt to breed, and the probability of breeding can be specified.
+</p>
+<p>Probability of survival can also vary by age class and year. The first row of the survival matrix specifies the survival of the animals born in each year and the remaining rows control survival for the respective older age classes.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">simPop(Ni = c(10, 10), phi = c(0.3, 0.55), f = 3.2, nYears = 6, pBreed = 1,
+  sex.ratio = 0.5, Im = 0, ageOfIm = 1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Ni</code></td>
+<td>
+
+<p>vector with number of females of each adult age class in the population prior to breeding in the first year. The length of this vector determines the number of age classes. The first age class refers to the individuals born the previous year.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phi</code></td>
+<td>
+
+<p>survival probabilities for new-borns and each age class for each interval between surveys: a (age classes + 1) x (years - 1) matrix. Input can be abbreviated.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>f</code></td>
+<td>
+
+<p>fecundity rates, the number of offspring (male + female) per female in the population, for each adult age class and each year: an age classes x years matrix. Input can be abbreviated.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nYears</code></td>
+<td>
+
+<p>number of years the population is simulated.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pBreed</code></td>
+<td>
+
+<p>the probability that a female will attempt to breed for each adult age class and each year: an age classes x years matrix. Input can be abbreviated.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sex.ratio</code></td>
+<td>
+
+<p>sex ratio (probability that a new-born is a female) in each year: either scalar or a vector of length <code>nYears</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Im</code></td>
+<td>
+
+<p>number of female immigrants in each year: either scalar or a vector of length <code>nYears</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ageOfIm</code></td>
+<td>
+
+<p>the age class of immigrants in each year: either scalar or a vector of length <code>nYears</code>.
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with the simulation settings and the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>state </code></td>
+<td>
+<p>an individuals x years matrix, with the state of each individual in each year. States are coded: -1 = died, 0 = newborn, 1,2,... = 1-Year, 2-Year,...</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>imYear </code></td>
+<td>
+<p>a vector with the year of immigration for each individual, or NA if not an immigrant.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reprod </code></td>
+<td>
+<p>an individuals x years x 3 array with the number of female and male offspring and the age of the mother for each individual; NAs indicate individuals not alive or alive but not attempting to breeding.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N </code></td>
+<td>
+<p>a matrix with a column for each year and rows for numbers surviving in each age class, total adults, number of females born and total births, number of immigrants. (Immigrants are included in the age classes at the top of the table.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>breeders </code></td>
+<td>
+<p>a matrix with a column for each year and rows for numbers breeding in each age class and total breeders. Note that all animals attempting to breed are classified as breeders, even though no offspring may be produced.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>totAdults </code></td>
+<td>
+<p>a vector with total adults in each year.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>totBreeders </code></td>
+<td>
+<p>a vector with total breeders in each year.</p>
+</td>
+</tr>
+</table>
+<p>The last two are the same as the relevant rows in <code>N</code> and <code>breeders</code>, repeated for ease of extraction with <code>$</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Michael Schaub
+</p>
+
+
+<h3>References</h3>
+
+<p>Schaub, M., Kéry, M. (2022) <em>Integrated Population Models</em>, Academic Press, section 5.5.1.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Simulate a population with the default arguments:
+str(pop &lt;- simPop())
+pop$N
+# Try View, but not available on all platforms
+# View(pop$state)
+pop$phi
+pop$f
+pop$reprod[1:5,,]
+
+# Just one (adult) age group:
+str(pop &lt;- simPop(Ni=20))
+pop$N
+pop$phi
+pop$f
+
+# Using matrices for time-dependent survival, fecundity
+phi &lt;- matrix(c(
+  0.3, 0.5, 0.5, 0.2, 0.2,  # newborns
+  0.5, 0.7, 0.7, 0.4, 0.4), # adults
+  nrow=2, byrow=TRUE)
+f &lt;- matrix(c(3, 4, 5, 2, 2, 3), nrow=1)
+str(pop &lt;- simPop(phi=phi, f=f))
+pop$phi
+pop$f    # Matrices expanded to all adult age classes
+pop$N
+
+# With immigration
+str(pop &lt;- simPop(Im=5))
+pop$N
+# with ageOfIm = 1 (default) immigrants are included in 1-Year figures.
+
+# Not all 1-Years attempt to breed, and fecundity is lower
+str(pop &lt;- simPop(f = c(2, 3.2), pBreed = c(0.7, 1)))
+pop$f
+pop$pBreed
+# Note the difference between numbers of breeders and adults among 1-Years
+pop$breeders
+pop$N
+
+# Extinction
+set.seed(1)
+str(pop &lt;- simPop(f = 0.1, phi = c(0.1, 0.2)))
+pop$N
+
+# Sink population, rescued by immigration
+set.seed(1)
+str(pop &lt;- simPop(f = 0.1, phi = c(0.1, 0.2), Im=5))
+pop$N
+</code></pre>
+
+
+</div>

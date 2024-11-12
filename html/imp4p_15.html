@@ -1,0 +1,116 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>impute.pa</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Imputation of peptides having no value in a biological condition (present in a condition / absent in another).
+</h2>
+
+<h3>Description</h3>
+
+<p>This function imputes missing values by small values.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">impute.pa(tab, conditions, q.min = 0.025, q.norm = 3, eps = 0,
+distribution = "unif", param1 = 3, param2 = 1, R.q.min=1)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>tab</code></td>
+<td>
+<p>A data matrix containing numeric and missing values. Each column of this matrix is assumed to correspond to an experimental sample, and each row to an identified peptide.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conditions</code></td>
+<td>
+<p>A vector of factors indicating the biological condition to which each column (experimental sample) belongs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q.min</code></td>
+<td>
+<p>A quantile value of the observed values allowing defining the maximal value which can be generated. This maximal value is defined by the quantile <code>q.min</code> of the observed values distribution minus <code>eps</code>. Default is 0.025 (the maximal value is the 2.5 percentile of observed values minus <code>eps</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q.norm</code></td>
+<td>
+<p>A quantile value of a normal distribution allowing defining the minimal value which can be generated. Default is 3 (the minimal value is the maximal value minus qn*median(sd(observed values)) where sd is the standard deviation of a row in a condition).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>A value allowing defining the maximal value which can be generated. This maximal value is defined by the quantile <code>q.min</code> of the observed values distribution minus <code>eps</code>. Default is 0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>distribution</code></td>
+<td>
+<p>Distribution used to generated missing values. You have the choice between "unif" for the uniform distribution, "beta" for the Beta distribution or "dirac" for the Dirac distribution. Default is "unif".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>param1</code></td>
+<td>
+<p>Parameter <code>shape1</code> of the Beta distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>param2</code></td>
+<td>
+<p>Parameter <code>shape2</code> of the Beta distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R.q.min</code></td>
+<td>
+<p>Parameter used for the Dirac distribution. In this case, all the missing values are imputed by a single value which is equal to <code>R.q.min*quantile(tab[,j], probs=q.min, na.rm=T)</code>. Default is 1 : the imputed value is the <code>qmin</code> quantile of observed values.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function replaces the missing values in a column by random draws from a specified distribution. The value of <code>eps</code> can be interpreted as a minimal fold-change value above which the present/absent peptides appear.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list composed of :
+</p>
+<p>- <code>tab.imp</code> : the input matrix <code>tab</code> with imputed values instead of missing values.
+</p>
+<p>- <code>para</code> : the parameters of the distribution which has been used to impute.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Quentin Giai Gianetto &lt;quentin2g@yahoo.fr&gt;
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#Simulating data
+res.sim=sim.data(nb.pept=2000,nb.miss=600);
+
+#Imputation of the simulated data set with small values
+data.small.val=impute.pa(res.sim$dat.obs,res.sim$conditions);
+
+</code></pre>
+
+
+</div>

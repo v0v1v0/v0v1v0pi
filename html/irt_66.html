@@ -1,0 +1,150 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>generate_ip</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generate a random <code>Itempool</code> object</h2>
+
+<h3>Description</h3>
+
+<p>Generate a random <code>Itempool</code> object
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">generate_ip(
+  model = "3PL",
+  n = NULL,
+  output = "Itempool",
+  n_categories = 4,
+  se = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>The model of the item pool</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>The number of items in the item pool.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output</code></td>
+<td>
+<p>The type of object returned. The default value is
+<code>"Itempool"</code>.
+</p>
+
+<dl>
+<dt><strong><code>"Itempool"</code></strong></dt>
+<dd>
+<p>Return an
+<code>Itempool-class</code> object.
+</p>
+</dd>
+<dt><strong><code>"Item"</code></strong></dt>
+<dd>
+<p>If <code>n = 1</code> return an
+<code>Item-class</code> object. If <code>n &gt; 1</code>, returns a list of
+<code>Item-class</code> object.
+</p>
+</dd>
+<dt><strong><code>"list"</code></strong></dt>
+<dd>
+<p>Return a list of item
+<code>Item-class</code> objects.
+</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_categories</code></td>
+<td>
+<p>For polytomous items, designate the number of categories
+each item should have. It can be a single integer value larger than 1. In
+this case all of the polytomous items will have this number of categories.
+It can be a vector of length <code>n</code> designating the categories of each
+item. For dichotomous items, the values in <code>n_categories</code> will be
+ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se</code></td>
+<td>
+<p>The values of parameter standard errors for each item,
+i.e. a list
+object with elements named as parameter names (excluding <code>"D"</code>
+parameter).
+</p>
+<p>If the value is <code>TRUE</code>, this function will generate standard error
+values from a uniform distribution between 0.05 and 0.75 for each
+parameter of each item.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional parameters passed to <code>itempool()</code> function.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An <code>Itempool-class</code> object
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Emre Gonulates
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># By default, a '3PL' model item pool generated
+generate_ip()
+# Designate the number of items
+generate_ip(n = 12)
+# Generate item pools for other models
+generate_ip(model = "Rasch")
+generate_ip(model = "1PL")
+generate_ip(model = "2PL")
+generate_ip(model = "4PL")
+generate_ip(model = "GRM") # Graded Response Model
+generate_ip(model = "GPCM") # Generalized Partial Credit Model
+generate_ip(model = "PCM") # Partial Credit Model
+generate_ip(model = "GPCM2") # Reparameterized GPCM
+# Mixture of models
+generate_ip(model = c("4PL", "Rasch"))
+generate_ip(model = sample(c("4PL", "GPCM"), 12, TRUE))
+generate_ip(model = c("2PL", "GRM", "Rasch"), n = 11)
+
+# Generate parameters standard errors for each item
+generate_ip(se_paramters = TRUE)
+
+# Generate an item pool consist of testlets and standalone items
+temp_list &lt;- list(ids = paste0("testlet-", 1:7), n = c(2, 3, 4, 2, 3, 4, 2))
+ip &lt;- itempool(sample(c(
+  generate_ip(n = 10, output = "list"),
+  sapply(1:length(temp_list$ids), function(i)
+    generate_testlet(testlet_id = temp_list$ids[i],
+                     n = temp_list$item_models[i],
+                     item_id_preamble = paste0("t", i, "-"))))))
+</code></pre>
+
+
+</div>

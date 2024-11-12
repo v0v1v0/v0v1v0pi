@@ -1,0 +1,103 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ic_par</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Parametric Regression  Models for Interval Censored Data</h2>
+
+<h3>Description</h3>
+
+<p>Fits a parametric regression model for interval censored data. 
+Can fita proportional hazards, proportional odds or accelerated failure time model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ic_par(formula, data, model = "ph", dist = "weibull", weights = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>Regression formula. Response must be a <code>Surv</code> object of type
+<code>'interval2'</code> or <code>cbind</code>. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Dataset</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>What type of model to fit. Current choices are "<code>ph</code>" (proportional hazards), 
+"<code>po</code>" (proportional odds) or "<code>aft</code>" (accelerated failure time)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist</code></td>
+<td>
+<p>What baseline parametric distribution to use. See details for current choices</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>vector of case weights. Not standardized; see details</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Currently supported distributions choices are "exponential", "weibull", "gamma", 
+"lnorm", "loglogistic" and "generalgamma" (i.e. generalized gamma distribution). 
+</p>
+<p>Response variable should either be of the form <code>cbind(l, u)</code> or <code>Surv(l, u, type = 'interval2')</code>, 
+where <code>l</code> and <code>u</code> are the lower and upper ends of the interval known to contain the event of interest. 
+Uncensored data can be included by setting <code>l == u</code>, right censored data can be included by setting 
+<code>u == Inf</code> or <code>u == NA</code> and left censored data can be included by setting <code>l == 0</code>.
+</p>
+<p>Does not allow uncensored data points at t = 0 (i.e. <code>l == u == 0</code>), as this will 
+lead to a degenerate estimator for most parametric families. Unlike the current implementation 
+of survival's <code>survreg</code>, does allow left side of intervals of positive length to 0 and 
+right side to be <code>Inf</code>. 
+</p>
+<p>In regards to weights, they are not standardized. This means that if weight[i] = 2, 
+this is the equivalent to having two observations with the same values as subject i. 
+</p>
+<p>For numeric stability, if abs(right - left) &lt; 10^-6, observation are considered 
+uncensored rather than interval censored with an extremely small interval.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Clifford Anderson-Bergman
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(miceData)
+
+logist_ph_fit &lt;- ic_par(Surv(l, u, type = 'interval2') ~ grp, 
+                       data = miceData, dist = 'loglogistic')
+
+logist_po_fit &lt;- ic_par(cbind(l, u) ~ grp, 
+                        data = miceData, dist = 'loglogistic',
+                       model = 'po')
+
+summary(logist_ph_fit)
+summary(logist_po_fit)
+</code></pre>
+
+
+</div>

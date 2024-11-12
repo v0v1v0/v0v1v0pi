@@ -1,0 +1,1063 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>create_cat_design</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Computerized Adaptive Test (CAT) Simulation Design</h2>
+
+<h3>Description</h3>
+
+<p><code>create_cat_design</code> is a helper function for
+<code>cat_sim</code> and <code>cat_sim_fast</code> functions. It
+defines the simulation design.
+</p>
+<p>Ideally, there is a design element for each item. So within this design
+(which is a list), there are $k$ design elements for each potentially
+administered item. Each of these sub-design elements are also a list.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">create_cat_design(
+  ip = NULL,
+  title = NULL,
+  true_ip = NULL,
+  first_item_rule = "fixed_theta",
+  first_item_par = list(theta = 0),
+  next_item_rule = "mfi",
+  next_item_par = NULL,
+  ability_est_rule = "eap",
+  ability_est_par = NULL,
+  final_ability_est_rule = NULL,
+  final_ability_est_par = NULL,
+  termination_rule = c("min_item", "min_se", "max_item"),
+  termination_par = list(min_item = 10, min_se = 0.33, max_item = 20),
+  testlet_rules = NULL,
+  exposure_control_rule = NULL,
+  exposure_control_par = NULL,
+  content_bal_rule = NULL,
+  content_bal_par = NULL,
+  ability_type = "theta"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ip</code></td>
+<td>
+<p>An <code>Itempool-class</code> object containing item parameters,
+content information, etc.
+</p>
+<p>If <code>ip = NULL</code> this means this is an infinite item pool,
+where b is on demand, c = 0 and a = 1, D = 1.7.
+</p>
+<p>If <code>true_ip</code> argument is <code>NULL</code>, this item pool will
+be used to generate item responses.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>title</code></td>
+<td>
+<p>A string value representing the title of this CAT design.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>true_ip</code></td>
+<td>
+<p>An <code>Itempool-class</code> object which holds the true
+values of item pool parameters that will be used to generate item
+responses. This is an optional argument. If it is <code>NULL</code>
+and <code>ip</code> is not missing, then, item responses will be
+generated using <code>ip</code>.
+</p>
+<p><strong>Default</strong>: <code>NULL</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>first_item_rule</code></td>
+<td>
+<p>The method how the first item is administered.
+The main effect of this is to select the first item administered
+to an examinee. If, for example, first item is desired to be a
+fixed one or randomly selected from the item pool, then set that
+rule in <code>next_item_rule</code>.
+</p>
+<p><strong>Default</strong>: <code>'fixed_theta'</code>
+</p>
+<p>Possible values and required parameters:
+</p>
+
+<dl>
+<dt><strong>NULL</strong></dt>
+<dd>
+<p>If no separate first item selection rule is
+necessary, the first item will be selected using the
+<code>next_item_rule</code> and it's parameters <code>next_item_par</code>.
+</p>
+</dd>
+<dt><strong>"fixed_theta"</strong></dt>
+<dd>
+<p>Fixed starting value.
+</p>
+<p>Required parameters for <code>first_item_par</code> argument if
+this rule is selected:
+</p>
+
+<dl>
+<dt>theta</dt>
+<dd>
+<p>The value of the initial theta estimate.</p>
+</dd>
+</dl>
+</dd>
+<dt><strong>"theta_range"</strong></dt>
+<dd>
+<p>An initial theta estimate within
+<code>min_theta</code> and <code>max_theta</code> will be randomly selected.
+</p>
+<p>Required parameters for <code>first_item_par</code> argument if
+this rule is selected:
+</p>
+
+<dl>
+<dt>min_theta</dt>
+<dd>
+<p>Minimum theta value of the interval.</p>
+</dd>
+<dt>max_theta</dt>
+<dd>
+<p>Maximum theta value of the interval.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>first_item_par</code></td>
+<td>
+<p>Parameters for the first item rule.
+</p>
+<p><strong>Default</strong>: <code>list(theta = 0)</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>next_item_rule</code></td>
+<td>
+<p>A vector of length one or length maximum test length
+which is designating the next item selection rules.
+</p>
+<p><strong>Default</strong>: <code>'mfi'</code>
+</p>
+<p>Note that, currently, if there are testlets in an item pool and a
+testlet is selected for administration using one of the methods
+below, all items within that testlet will be administered regardless
+of the next item selection rule.
+</p>
+<p>Possible values and required parameters:
+</p>
+
+<dl>
+<dt><strong>random</strong></dt>
+<dd>
+<p>Randomly select items from the item pool.
+Exposure control rules and parameters will be ignored for this
+selection rule.
+</p>
+<p>Required parameters: None.
+</p>
+</dd>
+<dt><strong>mfi</strong></dt>
+<dd>
+<p>Maximum Fisher Information.
+</p>
+<p>Required parameters: None.
+</p>
+</dd>
+<dt><strong>mepv</strong></dt>
+<dd>
+<p>Minimum Expected Posterior Variance.
+</p>
+<p>Required Parameters:
+</p>
+
+<dl>
+<dt>"var_calc_method"</dt>
+<dd>
+<p>Which method to use to calculate the posterior variance.
+See Equation (4) of Choi and Swartz (2009), Comparison of
+CAT Criteria for Polytomous Items.
+</p>
+<p>Available options are:
+</p>
+
+<dl>
+<dt><code>"eap"</code></dt>
+<dd>
+<p>Use the variance from expected a posteriori estimation.
+</p>
+</dd>
+<dt><code>"owen"</code></dt>
+<dd>
+<p>Use the variance from Owen's Bayesian estimation.
+For <code>"Rasch"</code>, <code>"1PL"</code>, <code>"2PL"</code>,
+<code>"3PL"</code> models this is much faster than
+<code>"eap"</code> option above.
+</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt><strong>b_optimal</strong></dt>
+<dd>
+<p>Select item which has item difficulty that is close to the
+current ability estimate.
+</p>
+<p>Required parameters: None.
+</p>
+</dd>
+<dt><strong>fixed</strong></dt>
+<dd>
+<p>Administer a fixed set of items from the item pool. This is
+basically a linear fixed length test where the order of items
+are predefined. Exposure control rules and parameters will be
+ignored for this selection rule.
+</p>
+<p>Required Parameters:
+</p>
+
+<dl>
+<dt>item_id</dt>
+<dd>
+<p>A vector of the item IDs that should be administered.
+</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>next_item_par</code></td>
+<td>
+<p>A list of length one or length maximum test length
+that sets the parameters of next item selection rules. It can also
+be <code>NULL</code>, in which case no parameters necessary for that
+next item selection procedure.
+</p>
+<p><strong>Default</strong>: <code>NULL</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ability_est_rule</code></td>
+<td>
+<p>A vector of length one or length maximum test length
+which is designating the next item selection rules.
+</p>
+<p><strong>Default</strong>: <code>"eap"</code>
+</p>
+<p>Possible values and required parameters:
+</p>
+
+<dl>
+<dt><strong>"eap"</strong></dt>
+<dd>
+<p>Expected-a-posteriori.
+Required parameters:
+</p>
+
+<dl>
+<dt>prior_dist</dt>
+<dd>
+<p>Distribution of the prior distribution.
+Available values:
+</p>
+<p>* <code>norm</code> for normal distribution,
+* <code>unif</code> for uniform distribution.
+</p>
+<p>The default value is <code>norm</code>.
+</p>
+</dd>
+<dt>prior_par</dt>
+<dd>
+<p>A vector of prior parameters.
+</p>
+<p>* For normal distribution <code>c(0, 1)</code>, see <code>?dnorm</code>
+* For uniform distribution <code>c(-3, 3)</code>, see
+<code>?dunif</code>
+</p>
+<p>The default value is <code>c(0, 1)</code>.
+</p>
+</dd>
+<dt>min_theta</dt>
+<dd>
+<p>Minimum possible value of theta. It is a lower bound.
+</p>
+<p>The default value is <code>-4</code>.
+</p>
+</dd>
+<dt>max_theta</dt>
+<dd>
+<p>Maximum possible value of theta. It is an upper bound.
+</p>
+<p>The default value is <code>4</code>.
+</p>
+</dd>
+<dt>no_of_quadrature</dt>
+<dd>
+<p>The number of quadrature, more specifically the number of
+bins the theta range should be divided. The more bins, the
+more precise (and slower) the estimates will be.
+</p>
+<p>The default value is <code>50</code>.
+</p>
+</dd>
+</dl>
+</dd>
+<dt><strong>"map"</strong></dt>
+<dd>
+<p>Maximum-a-posteriori (Bayes Modal).
+Required parameters:
+</p>
+
+<dl>
+<dt>prior_dist</dt>
+<dd>
+<p>Distribution of the prior distribution. Currently only
+available value is:
+</p>
+<p>* <code>norm</code> for normal distribution,
+</p>
+<p>The default value is <code>norm</code>.
+</p>
+</dd>
+<dt>prior_par</dt>
+<dd>
+<p>A vector of prior parameters.
+</p>
+<p>* For normal distribution <code>c(0, 1)</code>, see <code>?dnorm</code>
+* For uniform distribution <code>c(-3, 3)</code>, see
+<code>?dunif</code>
+</p>
+<p>The default value is <code>c(0, 1)</code>.
+</p>
+</dd>
+<dt>min_theta</dt>
+<dd>
+<p>Minimum possible value of theta. It is a lower bound.
+</p>
+<p>The default value is <code>-4</code>.
+</p>
+</dd>
+<dt>max_theta</dt>
+<dd>
+<p>Maximum possible value of theta. It is an upper bound.
+</p>
+<p>The default value is <code>4</code>.
+</p>
+</dd>
+<dt>tol</dt>
+<dd>
+<p>The tolerance (precision) level of the estimate.
+</p>
+<p>The default value is <code>0.00001</code>.
+</p>
+</dd>
+</dl>
+</dd>
+<dt><strong>"owen"</strong></dt>
+<dd>
+<p>Owen's Bayesian Estimation
+Required parameters:
+</p>
+
+<dl>
+<dt>prior_mean</dt>
+<dd>
+<p>Prior mean value. The default value is
+<code>0</code>.</p>
+</dd>
+<dt>prior_var</dt>
+<dd>
+<p>Prior variance value.The default value is
+<code>1</code>.</p>
+</dd>
+</dl>
+</dd>
+<dt><strong>"ml"</strong></dt>
+<dd>
+<p>Maximum likelihood estimation using Newton-Raphson algorithm.
+If this method is used, the standard error of ability estimates
+are calculated using the inverse information value at this
+theta estimate.
+</p>
+<p>Required parameters:
+</p>
+
+<dl>
+<dt>min_theta</dt>
+<dd>
+<p>Minimum possible value of theta. It is a
+lower bound. The default value is -4.
+</p>
+</dd>
+<dt>max_theta</dt>
+<dd>
+<p>Maximum possible value of theta. It is an
+upper bound. The default value is 4.
+</p>
+</dd>
+<dt>criterion</dt>
+<dd>
+<p>This value determines the accuracy of
+estimates. Smaller values lead more accuracy but the
+speed of estimation reduces as the value of <code>criterion</code>
+decreases. The default value is 0.001.
+</p>
+</dd>
+</dl>
+</dd>
+<dt><strong>"eap_ml"</strong></dt>
+<dd>
+<p>Expected-a-posteriori until an imperfect item response string,
+then switch to Maximum Likelihood estimation.
+Required parameters:
+</p>
+
+<dl>
+<dt>prior_dist</dt>
+<dd>
+<p>Distribution of the prior distribution.
+</p>
+<p>Available values:
+</p>
+<p><code>norm</code> for normal distribution,
+</p>
+<p><code>unif</code> for uniform distribution.
+</p>
+</dd>
+<dt>prior_par</dt>
+<dd>
+<p>A vector of prior parameters.
+For normal distribution <code>c(0, 1)</code>, see <code>?dnorm</code>
+For uniform distribution <code>c(-3, 3)</code>, see <code>?dunif</code>
+</p>
+</dd>
+<dt>min_theta</dt>
+<dd>
+<p>Minimum possible value of theta. It is a lower bound.
+</p>
+</dd>
+<dt>max_theta</dt>
+<dd>
+<p>Maximum possible value of theta. It is an upper bound.
+</p>
+</dd>
+<dt>no_of_quadrature</dt>
+<dd>
+<p>The number of quadrature, more specifically the number of
+bins the theta range should be divided. The more bins, the
+more precise (and slower) the estimates will be.
+</p>
+</dd>
+</dl>
+</dd>
+<dt><strong>"map_ml"</strong></dt>
+<dd>
+<p>Maximum-a-posteriori until an imperfect item response string,
+then switch to Maximum Likelihood estimation.
+Required parameters:
+</p>
+
+<dl>
+<dt>prior_dist</dt>
+<dd>
+<p>Distribution of the prior distribution.
+</p>
+<p>Available values:
+</p>
+<p><code>norm</code> for normal distribution,
+</p>
+</dd>
+<dt>prior_par</dt>
+<dd>
+<p>A vector of prior parameters.
+For normal distribution <code>c(0, 1)</code>, see <code>?dnorm</code>
+</p>
+</dd>
+<dt>min_theta</dt>
+<dd>
+<p>Minimum possible value of theta. It is a lower bound.
+</p>
+</dd>
+<dt>max_theta</dt>
+<dd>
+<p>Maximum possible value of theta. It is an upper bound.
+</p>
+</dd>
+<dt>tol</dt>
+<dd>
+<p>The tolerance (precision) level of the estimate.
+</p>
+<p>The default value is <code>0.00001</code>.
+</p>
+</dd>
+</dl>
+</dd>
+<dt><strong>"sum_score"</strong></dt>
+<dd>
+<p>Simple sum score.
+Required parameters: <code>NULL</code>
+</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ability_est_par</code></td>
+<td>
+<p>A list of length one or length maximum test length
+that sets the parameters of ability estimation rules. It can also
+be <code>NULL</code>.
+</p>
+<p>* If <code>ability_est_rule = "eap"</code> then the default is
+<code>list(prior_dist = "norm", prior_par = list(mean = 0, sd = 2),
+                    min_theta = -4, max_theta = 4)</code>
+* If <code>ability_est_rule = "owen"</code> then the default is
+<code>list(prior_mean = 0, prior_var = 1)</code>
+</p>
+<p>If it is <code>NULL</code>, either no parameters necessary for that
+ability estimation rule or the defaults of that ability selection
+rule will be selected.
+</p>
+<p>If it is a list of one, it means that the parameters will be the
+same throughout the test. The names of the list elements will
+represent the parameter types.
+</p>
+<p>A list of lists with length of maximum test length designate
+different parameters for different items in the test progress.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>final_ability_est_rule</code></td>
+<td>
+<p>The ability estimation method that will be
+used to calculate the final ability estimate. The methods and
+the parameters are the same as <code>ability_est_rule</code> and
+<code>ability_est_par</code>. Please see those for details.
+</p>
+<p><strong>Default</strong>: <code>NULL</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>final_ability_est_par</code></td>
+<td>
+<p>A list of parameters that will be used
+for the method designated by the <code>final_ability_est_rule</code>.
+</p>
+<p><strong>Default</strong>: <code>NULL</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>termination_rule</code></td>
+<td>
+<p>This parameter determines how CAT algorithm decides
+terminate the test.
+</p>
+<p>The order of termination rules is important. The algorithm will
+check the rules in that order. If for example
+<code>termination_rule = c('min_se', 'max_item')</code>, first whether
+the SE smaller than a certain value checked and if it is smaller,
+then even the maximum number of items haven't been administered,
+test will terminate.
+</p>
+<p>The <code>"min_item"</code> and <code>"max_item"</code> has a special property
+where, for <code>"min_item"</code>, if the number of items administered
+smaller than <code>min_item</code>, then test will not terminate
+regardless of whether other rules satisfied. Similarly, for
+<code>"max_item"</code>, if the number of items is larger than
+<code>max_item</code>, the test will terminate regardless of whether other
+conditions satisfied or not. If both <code>"min_item"</code> and
+<code>"max_item"</code> are in termination rules, then, test will end when
+both conditions satisfied, i.e. when the number of items
+administered is equal to or larger than <code>max_item</code> value in
+<code>termination_par</code>.
+</p>
+<p>The "test length" refers to "Item" objects, i.e. individual items
+not testlets. For example, if an item pool has 10 testlets each
+having 2 items and 15 standalone items which are not within a
+testlet, then the test length can go up to 35 (2 x 10 + 15).
+</p>
+<p><strong>Default</strong>: <code>c("min_item", "min_se", "max_item")</code>
+</p>
+<p><code>"termination_rule"</code> should be a vector that composed of the
+following termination rules:
+</p>
+
+<dl>
+<dt><code>"min_item"</code></dt>
+<dd>
+<p>The minimum number of items should be
+satisfied. If the number of administered items are equal to
+or larger than this number test ends. </p>
+</dd>
+<dt><code>"max_item"</code></dt>
+<dd>
+<p>The maximum number of items should not be
+exceeded.</p>
+</dd>
+</dl>
+<p>. If this is missing, then the item pool
+size will be set as maximum length.
+</p>
+<dl>
+<dt><code>"min_se"</code></dt>
+<dd>
+<p>If the standard error exceeds <code>min_se</code>
+value, then the test will terminate.</p>
+</dd>
+<dt><code>"sprt"</code></dt>
+<dd>
+<p>Sequential Probability Ratio Test (SPRT).
+SPRT tests two hypotheses:
+</p>
+<p><code class="reqn">H_0</code>: Examinee's ability <code class="reqn">\hat \theta = \theta_0</code>
+</p>
+<p><code class="reqn">H_1</code>: Examinee's ability <code class="reqn">\hat \theta = \theta_1</code>
+</p>
+<p>After the administration of each item, the likelihood (or
+log-likelihood) of the response string is calculated at
+<code class="reqn">\theta_0</code> and <code class="reqn">\theta_1</code>. The ratio of this likelihood is
+then compared to two decision points, <code class="reqn">A</code> and <code class="reqn">B</code>.
+</p>
+<p style="text-align: center;"><code class="reqn">LR = \frac{L(\theta = theta_1)}{\theta = theta_0}</code>
+</p>
+
+<p>In order to calculate the lower (<code class="reqn">A</code>) and upper (<code class="reqn">B</code>)
+decision points, one needs to set <code class="reqn">\alpha</code> and <code class="reqn">\beta</code>.
+<code class="reqn">\alpha</code> represents the rate of false positive classification
+errors <code class="reqn">(0 &lt; \alpha &lt; 1)</code>, i.e. examinees whose true
+classification is fail but passed at the end of test. <code class="reqn">\beta</code>
+is the rate of false negative classification errors <code class="reqn">(0 &lt;
+           \beta &lt; 1)</code>, i.e. examinees whose true classification is pass but
+failed at the end of test. <code class="reqn">A</code> and <code class="reqn">B</code> can be calculated
+as:
+</p>
+<p style="text-align: center;"><code class="reqn">A = \frac{1 - \beta}{\alpha}</code>
+</p>
+
+<p style="text-align: center;"><code class="reqn">B = \frac{\beta}{1 - \alpha}</code>
+</p>
+
+<p>If <code class="reqn">LR &gt; A</code>, examinee passes the test and if <code class="reqn">LR &lt; B</code>
+examinee fails the test. If <code class="reqn">B &lt; LR &lt; A</code>, test continues
+until the maximum number of items reached (or some other test
+termination criteria satisfied.)
+</p>
+<p><code>"sprt"</code> termination rule needs <code>termination_par</code>, where
+the following parameters should be given in a list:
+</p>
+
+<dl>
+<dt><code>"theta_0"</code></dt>
+<dd>
+<p>The highest theta value that the
+test developer is willing to fail an examinee. </p>
+</dd>
+<dt><code>"theta_1"</code></dt>
+<dd>
+<p>The lowest theta value that the
+test developer is willing to pass an examinee.</p>
+</dd>
+<dt><code>"alpha"</code></dt>
+<dd>
+<p>The rate of false positive classification
+errors (0 &lt; <code>alpha</code> &lt; 1), i.e. examinees whose true
+classification is fail but passed at the end of test.</p>
+</dd>
+<dt><code>"beta"</code></dt>
+<dd>
+<p>The rate of false negative classification
+errors (0 &lt; <code>beta</code> &lt; 1), i.e. examinees whose true
+classification is pass but failed at the end of test.</p>
+</dd>
+</dl>
+<p>Example: <code>termination_par = list(sprt = list(theta_0 = -.9,
+                                                             theta_1 = -.1,
+                                                             alpha = 0.05,
+                                                             beta = 0.05))</code>
+</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>termination_par</code></td>
+<td>
+<p>A list of termination rule parameters. This
+is a named list with length equal to the length of
+<code>termination_rule</code> argument. The names of the list elements
+should correspond to the elements of <code>termination_rule</code>
+argument.
+</p>
+<p><strong>Default</strong>: <code>list(min_item = 10, min_se = 0.33,
+                                      max_item = 20)</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>testlet_rules</code></td>
+<td>
+<p>A <code>list</code> containing arguments that specify the
+rules that will be used within a testlet.
+</p>
+<p>The default value is <code>NULL</code> where the following rules will
+be applied if there is a testlet:
+<code>list(next_item_rule = "none", termination_rule = "max_item",
+                    termination_par = list(max_item = 999))</code> where if a
+testlet is selected all items of this testlet is selected (unless
+the a testlet has more than 999 items.). Each item is selected
+with the order it appears in the testlet.
+</p>
+<p>It is assumed that items within testlet are administered together.
+In other words, an item that does not belong to a selected testlet
+cannot be administered between two items that belong to the same
+testlet.
+</p>
+<p>The following list elements are available:
+</p>
+
+<dl>
+<dt><code>next_item_rule</code></dt>
+<dd>
+<p>The way item selection is performed
+within a testlet. Following options are available:
+</p>
+
+<dl>
+<dt><code>"none"</code></dt>
+<dd>
+<p>Items are selected with the order of
+observed in the testlet.</p>
+</dd>
+<dt><code>"mfi"</code></dt>
+<dd>
+<p>Maximum Fisher Information. The most
+informative unadministered item within the testlet at
+the current ability estimate is selected.</p>
+</dd>
+</dl>
+</dd>
+<dt><code>"termination_rule"</code></dt>
+<dd>
+<p>The rule that should be
+satisfied to stop administering items from a testlet. If
+there are more than one rule, the termination rules will
+be applied as the order they appear in the
+<code>termination_rule</code> vector. For example, if
+<code>termination_rule = c("max_item", "min_se")</code>, then if
+<code>max_item</code> criteria is met testlet will be terminated
+without checking for <code>min_se</code> value.
+</p>
+<p>Following options are available:
+</p>
+
+<dl>
+<dt><code>"max_item"</code></dt>
+<dd>
+<p>An integer representing the maximum
+number of items administered for each testlet. The test will
+terminate when maximum number of items is reached or there
+are no items left in the testlet.</p>
+</dd>
+<dt><code>"min_se"</code></dt>
+<dd>
+<p>A numeric value representing the
+standard error of ability estimate value to terminate the
+test. If the standard error exceeds <code>min_se</code>
+value, then the testlet will terminate. This testlet
+termination criteria will only be checked if at least one
+item from the testlet has already been selected.</p>
+</dd>
+</dl>
+</dd>
+<dt><code>"termination_par"</code></dt>
+<dd>
+<p>The test termination parameters.
+See the <code>"termination_par"</code> above in the main function for
+available options.
+</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exposure_control_rule</code></td>
+<td>
+<p>A vector of length one or length maximum test
+length which is designating the next item selection rules. It can
+be <code>NULL</code> in which case there won't be any exposure control.
+</p>
+<p><strong>Default</strong>: <code>NULL</code>, No exposure control will be imposed
+on item selection.
+</p>
+<p>Possible values and required parameters:
+</p>
+
+<dl>
+<dt><code>NULL</code></dt>
+<dd>
+<p>No exposure control.</p>
+</dd>
+<dt>"randomesque"</dt>
+<dd>
+<p>Select one of the most informative <code>num_items</code> items.
+</p>
+
+<dl>
+<dt><code>num_items</code></dt>
+<dd>
+<p>The number of items to select from.</p>
+</dd>
+</dl>
+</dd>
+<dt><code>"sympson-hetter"</code></dt>
+<dd>
+<p>The algorithm of Sympson-Hetter exposure control is explained in
+Sympson and Hetter (1985).
+</p>
+<p>This method does not require any additional
+"exposure_control_par" but each item/testlet should have
+a "misc" slot like the following
+<code>misc = list(sympson_hetter_k = .75)</code>.
+</p>
+<p>When using 'sympson-hetter' exposure control rule, please ensure
+that there are sufficient number of items with
+'sympson_hetter_k' values 1. Otherwise, examinees might not
+get a complete test and an error might be raised by the
+simulation function.
+</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exposure_control_par</code></td>
+<td>
+<p>A list of length one or maximum test length
+designating the exposure control for each item. If there are no
+parameters it will be <code>NULL</code>.
+</p>
+<p><strong>Default</strong>: <code>NULL</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>content_bal_rule</code></td>
+<td>
+<p>Whether a content balancing is imposed on item
+selection. Default value is <code>NULL</code>, where no content balancing
+will be imposed on item selection.
+</p>
+<p><strong>Default</strong>: <code>NULL</code>
+</p>
+<p>Possible values and required parameters:
+</p>
+
+<dl>
+<dt><code>NULL</code></dt>
+<dd>
+<p>No content balancing.</p>
+</dd>
+<dt><strong>max_discrepancy</strong></dt>
+<dd>
+<p>Given a target content
+distribution, the content with maximum discrepancy with target
+discrepancy will be administered.
+</p>
+<p>Required parameters:
+</p>
+
+<dl>
+<dt>target_dist</dt>
+<dd>
+<p>Target content ratios.
+For example, suppose there are three content areas:
+Geometry, Algebra and Arithmetic. If the plan for the test
+is to include 30
+Arithmetic items, then, the <code>target_dist</code> should be:
+c(Geometry = .3, Arithmetic = .2, Algebra = .5). The names
+in the vector should correspond to the names of the content
+areas in the item pool. <code>target_dist</code> should include
+each content area within the item pool for it to work
+properly. If the sum of the <code>target_dist</code> is larger
+than 1, it will be converted to ratios.
+</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>content_bal_par</code></td>
+<td>
+<p>Parameters of <code>content_bal_rule</code>. A list, a
+list of lists or <code>NULL</code>.
+</p>
+<p><strong>Default</strong>: <code>NULL</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ability_type</code></td>
+<td>
+<p>The type of ability the test is measuring. By default
+it is IRT based single 'theta'.
+</p>
+
+<dl>
+<dt><code>"theta"</code></dt>
+<dd>
+<p>Theta for unidimensional IRT models</p>
+</dd>
+<dt><code>"multi_theta"</code></dt>
+<dd>
+<p>Theta vector for multidimensional IRT
+models (Not Implemented Yet).</p>
+</dd>
+<dt><code>"cdm"</code></dt>
+<dd>
+<p>An attribute vector (Not Implemented Yet).</p>
+</dd>
+<dt><code>"raw_score"</code></dt>
+<dd>
+<p>Raw score (i.e. total score) of an
+examinee.</p>
+</dd>
+</dl>
+<p><strong>Default</strong>: <code>"theta"</code></p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A <code>cat_design</code> object that holds the test specifications of a
+CAT.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Emre Gonulates
+</p>
+
+
+<h3>References</h3>
+
+<p>Sympson, J., &amp; Hetter, R. D. (1985). Controlling item-exposure rates in
+computerized adaptive testing. 973–977.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>cat_sim</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">### Example Designs ###
+# Fixed length test IRT test with ability estimation EAP-ML
+n_items &lt;- 30
+ip &lt;- itempool(data.frame(a = runif(n_items, .5, 1.5), b = rnorm(n_items)))
+cd &lt;- create_cat_design(ip = ip, next_item_rule = 'random',
+                        termination_rule = 'min_item',
+                        termination_par = list('min_item' = n_items))
+cd
+create_cat_design(ip = ip, next_item_rule = 'random')
+
+
+n_ip &lt;- 55
+ip &lt;- itempool(data.frame(a = runif(n_ip, .5, 1.5), b = rnorm(n_ip)))
+# Check the default:
+create_cat_design()
+create_cat_design(ip = ip)
+
+### Termination Rule ###
+create_cat_design(
+  termination_rule = c('min_item', 'min_se', 'max_item'),
+  termination_par = list(min_item = 10, min_se = .33, max_item = 20))
+
+cd &lt;- create_cat_design(ip = ip, termination_rule = c('min_item', 'min_se'),
+                        termination_par = list(min_item = 10, min_se = .33))
+
+### Next Item Rule ###
+create_cat_design(ip = ip, next_item_rule = 'random', next_item_par = NULL)
+create_cat_design(
+  ip = ip, termination_rule = c('min_item', 'max_item'),
+  termination_par = list(min_item = 20, max_item = 20),
+  next_item_rule = 'fixed',
+  next_item_par = list(item_id = ip$item_id[1:20]))
+
+# Linear test where all of the items in the item pool administered in the
+# same order as item pool
+ip &lt;- generate_ip(n = 15)
+create_cat_design(
+  ip = ip, termination_rule = c('max_item'),
+  termination_par = list(max_item = 15),
+  next_item_rule = 'fixed')
+
+# Generate an item pool with two testlets and three standalone items and
+# administer first seven items as a linear test.
+ip &lt;- c(generate_testlet(n = 2, testlet_id = "t1"), generate_ip(n = 3),
+        generate_testlet(n = 5, testlet_id = "t2"))
+create_cat_design(
+  ip = ip, termination_rule = c('max_item'),
+  termination_par = list(max_item = 7),
+  next_item_rule = 'fixed')
+
+
+# A linear test where the item order is predefined.
+ip1 &lt;- itempool(data.frame(b = rnorm(5)), item_id = paste0("i",1:5))
+cd &lt;- create_cat_design(
+  ip = ip1,
+  next_item_rule = 'fixed',
+  next_item_par = list(item_id = c("i3", "i2", "i4", "i5", "i1")),
+  ability_est_rule = "eap",
+  termination_rule = 'max_item', termination_par = list(max_item = 5))
+
+### Ability Estimation Rule ###
+create_cat_design(
+  ability_est_rule = 'eap',
+  ability_est_par = list(prior_dist = 'unif',
+                         prior_par = list(min = -2, max = 2),
+                         min_theta = -4, max_theta = 4,
+                         no_of_quadrature = 31))
+create_cat_design(
+  ability_est_rule = 'ml',
+  ability_est_par = list(min_theta = -4, max_theta = 4, criterion = 0.01))
+
+### Exposure Control ###
+create_cat_design(exposure_control_rule = 'randomesque',
+                exposure_control_par = list(num_items = 1))
+
+# 5-4-3-2-1 exposure control
+create_cat_design(
+  exposure_control_rule = 'randomesque',
+  exposure_control_par = lapply(c(5:1, rep(1, 15)),
+                                function(x) list(num_items = x)))
+
+### Content Balancing ###
+create_cat_design(
+  content_bal_rule = 'max_discrepancy',
+  content_bal_par = list(target_dist = c(
+    Geometry = .3, `Rational Numbers` = .2, Algebra = .5)))
+</code></pre>
+
+
+</div>

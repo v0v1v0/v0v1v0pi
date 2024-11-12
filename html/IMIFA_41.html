@@ -1,0 +1,192 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sim_IMIFA</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Simulate Data from a Mixture of Factor Analysers Structure</h2>
+
+<h3>Description</h3>
+
+<p>Functions to simulate data of any size and dimension from a (infinite) mixture of (infinite) factor analysers parameterisation or fitted object.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sim_IMIFA_data(N = 300L,
+               G = 3L,
+               P = 50L,
+               Q = rep(floor(log(P)), G),
+               pis = rep(1/G, G),
+               mu = NULL,
+               psi = NULL,
+               loadings = NULL,
+               scores = NULL,
+               nn = NULL,
+               loc.diff = 2,
+               non.zero = P,
+               forceQg = TRUE,
+               method = c("conditional", "marginal"))
+
+sim_IMIFA_model(res,
+                method = c("conditional", "marginal"))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>N, G, P</code></td>
+<td>
+<p>Desired overall number of observations, number of clusters, and number of variables in the simulated data set. All must be a single integer.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q</code></td>
+<td>
+<p>Desired number of cluster-specific latent factors in the simulated data set. Can be specified either as a single integer if all clusters are to have the same number of factors, or a vector of length <code>G</code>. Defaults to <code>floor(log(P))</code> in each cluster. Should be less than the associated <code>Ledermann</code> bound and the number of observations in the corresponding cluster. The argument <code>forceQg</code> can be used to enforce this upper limit. It is also advisable that <code>Q &lt;= floor((P - 1)/2)</code>, but this restriction is not enforced by <code>forceQg</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pis</code></td>
+<td>
+<p>Mixing proportions of the clusters in the data set if <code>G</code> &gt; 1. Must sum to 1. Defaults to <code>rep(1/G, G)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu</code></td>
+<td>
+<p>True values of the mean parameters, either as a single value, a vector of length <code>G</code>, a vector of length <code>P</code>, or a <code>G * P</code> matrix. If <code>mu</code> is missing, <code>loc.diff</code> is invoked to simulate distinct means for each cluster by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>psi</code></td>
+<td>
+<p>True values of uniqueness parameters, either as a single value, a vector of length <code>G</code>, a vector of length <code>P</code>, or a <code>G * P</code> matrix. As such the user can specify uniquenesses as a diagonal or isotropic matrix, and further constrain uniquenesses across clusters if desired. If <code>psi</code> is missing, uniquenesses are simulated via <code>1/rgamma(P, 2, 1)</code> within each cluster by default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loadings</code></td>
+<td>
+<p>True values of the loadings matrix/matrices. Must be supplied in the form of a list of numeric matrices when <code>G &gt; 1</code>, otherwise a single matrix. Matrices must contain <code>P</code> rows and the number of columns must correspond to the values in <code>Q</code>. If <code>loadings</code> are not supplied, such matrices are populated with standard normal random variates by default (see <code>non.zero</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scores</code></td>
+<td>
+<p>True values of the latent factor scores, as a <code>N * max(Q)</code> numeric matrix. If <code>scores</code> are not supplied, such a matrix is populated with standard normal random variates by default. Only relevant when <code>method="conditional"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nn</code></td>
+<td>
+<p>An alternative way to specify the size of each cluster, by giving the exact number of observations in each cluster explicitly. Must sum to <code>N</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loc.diff</code></td>
+<td>
+<p>A parameter to control the closeness of the clusters in terms of the difference in their location vectors. Only relevant if <code>mu</code> is NOT supplied. Defaults to <code>2</code>.
+</p>
+<p>More specifically, <code>loc.diff</code> (if invoked) is invoked as follows: means are simulated with the vector of cluster-specific hypermeans given by:
+</p>
+<p><code>scale(1:G, center=TRUE, scale=FALSE) * loc.diff</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>non.zero</code></td>
+<td>
+<p>Controls the number of non-zero entries in each loadings column (per cluster) <strong>only</strong> when <code>loadings</code> is not explicitly supplied. Values must be integers in the interval <code>[1,P]</code>. Defaults to <code>P</code>. The positions of the zeros are randomised, and non-zero entries are drawn from a standard normal.
+</p>
+<p>Must be given as a list of length <code>G</code> of vectors of length corresponding to <code>Q</code> when <code>G&gt;1</code>. Can be given either as such a list or simply a vector of length <code>Q</code> when <code>G=1</code>. Alternatively, a single integer can be supplied, common across all loadings columns across all clusters. In any case, <code>non.zero</code> will be affected by <code>forceQg=TRUE</code> by default (see below).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>forceQg</code></td>
+<td>
+<p>A logical indicating whether the upper limit on the number of cluster-specific factors <code>Q</code> is enforced. Defaults to <code>TRUE</code> for <code>sim_IMIFA_data</code>, but is always <code>FALSE</code> for <code>sim_IMIFA_model</code>. Note that when <code>forceQg=TRUE</code> is invoked, <code>non.zero</code> (see above) is also affected. This upper limit is determined by the <code>Ledermann</code> bound and that <code>Q</code> must be less than the number of observations in the given cluster. It is also advisable that <code>Q &lt;= floor((P - 1)/2)</code>, but this restriction is not enforced by <code>forceQg</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>A switch indicating whether the mixture to be simulated from is the conditional distribution of the data given the latent variables (default), or simply the marginal distribution of the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>res</code></td>
+<td>
+<p>An object of class <code>"Results_IMIFA"</code> generated by <code>get_IMIFA_results</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>sim_IMIFA_model</code> is a simple wrapper to <code>sim_IMIFA_data</code> which uses the estimated parameters of a fitted IMIFA related model, as generated by <code>get_IMIFA_results</code>. The necessary parameters must have been originally stored via <code>storeControl</code> in the creation of <code>res</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Invisibly returns a <code>data.frame</code> with <code>N</code> observations (rows) of <code>P</code> variables (columns). The true values of the parameters which generated these data are also stored as attributes.
+</p>
+
+
+<h3>Note</h3>
+
+<p><code>N</code>, <code>G</code>, <code>P</code> &amp; <code>Q</code> will <strong>NOT</strong> be inferred from the supplied parameters <code>pis</code>, <code>mu</code>, <code>psi</code>, <code>loadings</code>, <code>scores</code> &amp; <code>nn</code> - rather, the parameters' length/dimensions must adhere to the supplied values of <code>N</code>, <code>G</code>, <code>P</code> &amp; <code>Q</code>.
+</p>
+<p>Missing values are not allowed in any of <code>pis</code>, <code>mu</code>, <code>psi</code>, <code>loadings</code>, <code>scores</code> &amp; <code>nn</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Keefe Murphy - &lt;<a href="mailto:keefe.murphy@mu.ie">keefe.murphy@mu.ie</a>&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Murphy, K., Viroli, C., and Gormley, I. C. (2020) Infinite mixtures of infinite factor analysers, <em>Bayesian Analysis</em>, 15(3): 937-963. &lt;<a href="https://doi.org/10.1214/19-BA1179">doi:10.1214/19-BA1179</a>&gt;.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>mcmc_IMIFA</code> for fitting an IMIFA related model to the simulated data set.
+</p>
+<p><code>get_IMIFA_results</code> for generating input for <code>sim_IMIFA_model</code>.
+</p>
+<p><code>Ledermann</code> for details on the upper-bound for <code>Q</code>. Note that this function accounts for isotropic uniquenesses, if <code>psi</code> is supplied in that manner, in computing this bound.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Simulate 100 observations from 3 balanced clusters with cluster-specific numbers of latent factors
+# Specify isotropic uniquenesses within each cluster
+# Supply cluster means directly
+sim_data  &lt;- sim_IMIFA_data(N=100, G=3, P=20, Q=c(2, 2, 5), psi=1:3,
+                            mu=matrix(rnorm(60, -2 + 1:3, 1), nrow=20, ncol=3, byrow=TRUE))
+names(attributes(sim_data))
+labels    &lt;- attr(sim_data, "Labels")
+
+# Visualise the data in two-dimensions
+plot(cmdscale(dist(sim_data), k=2), col=labels)
+
+# Examine the overlap with a pairs plot of 5 randomly chosen variables
+pairs(sim_data[,sample(1:20, 5)], col=labels)
+
+# Fit a MIFA model to this data
+# tmp     &lt;- mcmc_IMIFA(sim_data, method="MIFA", range.G=3, n.iters=5000)
+
+# Simulate from this model
+# res     &lt;- get_IMIFA_results(tmp, zlabels=labels)
+# sim_mod &lt;- sim_IMIFA_model(res)
+</code></pre>
+
+
+</div>

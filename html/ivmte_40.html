@@ -1,0 +1,302 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>genmonoboundA</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generating monotonicity and boundedness constraints</h2>
+
+<h3>Description</h3>
+
+<p>This is a wrapper function generating the matrices and vectors
+associated with the monotonicity and boundedness constraints
+declared by the user. Since this function generates all the
+components required for the shape constraints, it is also the
+function that performs the audit. That is, MTR coefficients are
+passed, then this function will verify whether they satisfy the
+shape constraints.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">genmonoboundA(
+  pm0,
+  pm1,
+  support,
+  grid_index,
+  uvec,
+  splinesobj,
+  monov,
+  uname,
+  m0,
+  m1,
+  sset,
+  gstar0,
+  gstar1,
+  m0.lb,
+  m0.ub,
+  m1.lb,
+  m1.ub,
+  mte.lb,
+  mte.ub,
+  m0.dec,
+  m0.inc,
+  m1.dec,
+  m1.inc,
+  mte.dec,
+  mte.inc,
+  solution.m0.min = NULL,
+  solution.m1.min = NULL,
+  solution.m0.max = NULL,
+  solution.m1.max = NULL,
+  audit.tol,
+  direct
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>pm0</code></td>
+<td>
+<p>A list of the monomials in the MTR for d = 0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pm1</code></td>
+<td>
+<p>A list of the monomials in the MTR for d = 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>support</code></td>
+<td>
+<p>a matrix for the support of all variables that enter
+into the MTRs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>grid_index</code></td>
+<td>
+<p>a vector, the row numbers of <code>support</code> used
+to generate the grid preceding the audit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>uvec</code></td>
+<td>
+<p>a vector, the points in the interval [0, 1] that the
+unobservable takes on.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>splinesobj</code></td>
+<td>
+<p>a list of lists. Each of the inner lists contains
+details on the splines declared in the MTRs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>monov</code></td>
+<td>
+<p>name of variable for which the monotonicity conditions
+applies to.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>uname</code></td>
+<td>
+<p>name declared by user to represent the unobservable
+term in the MTRs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m0</code></td>
+<td>
+<p>one-sided formula for marginal treatment response
+function for the control group. The formula may differ from
+what the user originally input in <code>ivmte</code>, as the
+spline components should have been removed. This formula is
+simply a linear combination of all covariates that enter into
+the original <code>m0</code> declared by the user in
+<code>ivmte</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m1</code></td>
+<td>
+<p>one-sided formula for marginal treatment response
+function for the treated group. The formula may differ from
+what the user originally input in <code>ivmte</code>, as the
+spline components should have been removed. This formula is
+simply a linear combination of all covariates that enter into
+the original <code>m1</code> declared by the user in
+<code>ivmte</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sset</code></td>
+<td>
+<p>a list containing the point estimates and gamma
+components associated with each element in the S-set.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gstar0</code></td>
+<td>
+<p>set of expectations for each terms of the MTR for the
+control group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gstar1</code></td>
+<td>
+<p>set of expectations for each terms of the MTR for the
+control group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m0.lb</code></td>
+<td>
+<p>scalar, lower bound on MTR for control group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m0.ub</code></td>
+<td>
+<p>scalar, upper bound on MTR for control group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m1.lb</code></td>
+<td>
+<p>scalar, lower bound on MTR for treated group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m1.ub</code></td>
+<td>
+<p>scalar, upper bound on MTR for treated group.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mte.lb</code></td>
+<td>
+<p>scalar, lower bound on MTE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mte.ub</code></td>
+<td>
+<p>scalar, upper bound on MTE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m0.dec</code></td>
+<td>
+<p>boolean, indicating whether the MTR for the control
+group is monotone decreasing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m0.inc</code></td>
+<td>
+<p>boolean, indicating whether the MTR for the control
+group is monotone increasing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m1.dec</code></td>
+<td>
+<p>boolean, indicating whether the MTR for the treated
+group is monotone decreasing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m1.inc</code></td>
+<td>
+<p>boolean, indicating whether the MTR for the treated
+group is monotone increasing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mte.dec</code></td>
+<td>
+<p>boolean, indicating whether the MTE is monotone
+decreasing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mte.inc</code></td>
+<td>
+<p>boolean, indicating whether the MTE is monotone
+increasing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>solution.m0.min</code></td>
+<td>
+<p>vector, the coefficients for the MTR for
+<code>D = 0</code> corresponding to the lower bound of the target
+parameter. If passed, this will initiate checks of shape
+constraints.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>solution.m1.min</code></td>
+<td>
+<p>vector, the coefficients for the MTR for
+<code>D = 1</code> corresponding to the lower bound of the target
+parameter. If passed, this will initiate checks of shape
+constraints.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>solution.m0.max</code></td>
+<td>
+<p>vector, the coefficients for the MTR for
+<code>D = 0</code> corresponding to the upper bound of the target
+parameter. If passed, this will initiate checks of shape
+constraints.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>solution.m1.max</code></td>
+<td>
+<p>vector, the coefficients for the MTR for
+<code>D = 1</code> corresponding to the upper bound of the target
+parameter. If passed, this will initiate checks of shape
+constraints.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>audit.tol</code></td>
+<td>
+<p>feasibility tolerance when performing the
+audit. By default to set to be equal <code>1e-06</code>. This
+parameter should only be changed if the feasibility tolerance
+of the solver is changed, or if numerical issues result in
+discrepancies between the solver's feasibility check and the
+audit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>direct</code></td>
+<td>
+<p>boolean, set to <code>TRUE</code> if the direct MTR
+regression is used.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a list containing a unified constraint matrix, unified
+vector of inequalities, and unified RHS vector for the
+boundedness and monotonicity constraints of an LP/QCQP problem.
+</p>
+
+
+</div>

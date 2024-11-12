@@ -1,0 +1,115 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get.zeta.ising</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Local posterior probability estimation.</h2>
+
+<h3>Description</h3>
+
+<p>This function estimates the local posterior probability when assuming Ising prior on structured predictors.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get.zeta.ising(SS, beta, alpha, hyperparam, structure, edgeind, j)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>SS</code></td>
+<td>
+<p>a scalar value of sufficient statistic for regression coefficient.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p>a (p*1) matrix of regression coefficients.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>a scalar value of hyperparameter <code>alpha</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hyperparam</code></td>
+<td>
+<p>a two-dimensional vector of hyperparameters <code>a</code> and <code>b</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>structure</code></td>
+<td>
+<p>a data frame stores the information of structure among predictors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>edgeind</code></td>
+<td>
+<p>a vector stores primary keys of <code>structure</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>j</code></td>
+<td>
+<p>an index ranges from 1 to p. This function estimate a local posterior probability of predictor <code>j</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Given all other parameters, this function estimates the local posterior probability or the probability that a regression coefficient is not zero conditional on other par
+ameters. This function is called when assuming Ising prior on structured predictors.</p>
+
+
+<h3>Value</h3>
+
+<p>Return a scalar value of local posterior probability.</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Vitara Pungpapong, Min Zhang, Dabao Zhang</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(simGaussian)
+data(linearrelation)
+Y&lt;-as.matrix(simGaussian[,1])
+X&lt;-as.matrix(simGaussian[,-1])
+n&lt;-dim(X)[1]
+# Obtain initial values from lasso
+data(initbetaGaussian)
+initbeta&lt;-as.matrix(initbetaGaussian)
+# Get final output from ebvs
+output&lt;-icmm(Y, X, b0.start=0, b.start=initbeta, family = "gaussian", 
+        ising.prior = TRUE, structure=linearrelation, estalpha = FALSE, 
+        alpha = 0.5, maxiter = 100)
+b0&lt;-output$coef[1]
+beta&lt;-matrix(output$coef[-1], ncol=1)
+# Get all parameters for function arguments
+w&lt;-get.wprior(beta)
+alpha&lt;-0.5
+sigma&lt;-get.sigma(Y,X,beta,alpha)
+edgeind&lt;-sort(unique(linearrelation[,1]))
+hyperparam&lt;-get.ab(beta, linearrelation, edgeind)
+# Estimate local posterior probability
+j&lt;-1
+Yres&lt;-Y-b0-X%*%beta+X[,j]*beta[j,1]
+sxy&lt;-t(Yres)%*%X[,j]
+ssx&lt;-sum(X[,j]^2)
+SS&lt;-sqrt(n-1)*sxy/(sigma*ssx)
+zeta&lt;-get.zeta.ising(SS=SS, beta=beta, alpha=alpha, hyperparam=hyperparam, 
+      structure=linearrelation, edgeind=edgeind, j=j)
+</code></pre>
+
+
+</div>

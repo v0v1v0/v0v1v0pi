@@ -1,0 +1,127 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>genGamma</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimating expectations of terms in the MTR (gamma objects)</h2>
+
+<h3>Description</h3>
+
+<p>This function generates the gamma objects defined in the paper,
+i.e. each additive term in E[md], where md is a MTR.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">genGamma(
+  monomials,
+  lb,
+  ub,
+  multiplier = 1,
+  subset = NULL,
+  means = TRUE,
+  late.rows = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>monomials</code></td>
+<td>
+<p>[UPDATE DESCRIPTION] object containing list of
+list of monomials. Each element of the outer list represents an
+observation in the data set, each element in the inner list is
+a monomial from the MTR. The variable is the unobservable u,
+and the coefficient is the evaluation of any interactions with
+u.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lb</code></td>
+<td>
+<p>vector of lower bounds for the interval of
+integration. Each element corresponds to an observation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ub</code></td>
+<td>
+<p>vector of upper bounds for the interval of
+integration. Each element corresponds to an observation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>multiplier</code></td>
+<td>
+<p>a vector of the weights that enter into the
+integral. Each element corresponds to an observation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+<p>The row names/numbers of the subset of observations
+to use.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>means</code></td>
+<td>
+<p>logical, if TRUE then function returns the terms of
+E[md]. If FALSE, then function instead returns each term of
+E[md | D, X, Z]. This is useful for testing the code,
+i.e. obtaining population estimates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>late.rows</code></td>
+<td>
+<p>Boolean vector indicating which observations to
+include when conditioning on covariates X.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>If <code>means = TRUE</code>, then the function returns a vector
+of the additive terms in Gamma (i.e. the expectation is over D,
+X, Z, and u). If <code>means = FALSE</code>, then the function
+returns a matrix, where each row corresponds to an observation,
+and each column corresponds to an additive term in E[md | D, X,
+Z] (i.e. only the integral with respect to u is performed).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">dtm &lt;- ivmte:::gendistMosquito()
+
+## Declare MTR formula
+formula0 = ~ 1 + u
+
+## Construct MTR polynomials
+polynomials0 &lt;- polyparse(formula = formula0,
+                data = dtm,
+                uname = u,
+                as.function = FALSE)
+
+## Construct propensity score model
+propensityObj &lt;- propensity(formula = d ~ z,
+                            data = dtm,
+                            link = "linear")
+
+## Generate gamma moments, with S-weight equal to its default value
+## of 1
+genGamma(monomials = polynomials0,
+         lb = 0,
+         ub = propensityObj$phat)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,218 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>intrval</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Relational Operators Comparing Values to Intervals
+</h2>
+
+<h3>Description</h3>
+
+<p>Functions for evaluating if values of vectors are within intervals.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">x %[]% interval
+x %)(% interval
+x %[&lt;]% interval
+x %[&gt;]% interval
+
+x %[)% interval
+x %)[% interval
+x %[&lt;)% interval
+x %[&gt;)% interval
+
+x %(]% interval
+x %](% interval
+x %(&lt;]% interval
+x %(&gt;]% interval
+
+x %()% interval
+x %][% interval
+x %(&lt;)% interval
+x %(&gt;)% interval
+
+intrval_types(type = NULL, plot = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+
+<p>vector or <code>NULL</code>: the values to be compared to interval endpoints.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interval</code></td>
+<td>
+
+<p>vector, 2-column matrix, list, or <code>NULL</code>: the interval end points.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+
+<p>character, type of operator for subsetting the results. The default <code>NULL</code>
+means that all types will be displayed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+
+<p>logical, whether to plot the results, or print a table to the console instead.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Values of <code>x</code> are compared to <code>interval</code> endpoints
+a and b (a &lt;= b).
+Endpoints can be defined as a vector with two values
+(<code>c(a, b)</code>): these values will be compared as a single
+interval with each value in <code>x</code>.
+If endpoints are stored in a matrix-like object or a list,
+comparisons are made element-wise. If lengths do not match,
+shorter objects are recycled.
+These value-to-interval operators work for numeric (integer, real)
+and ordered vectors, and object types which are measured at
+least on ordinal scale (e.g. dates), see Examples.
+Note: interval endpoints are sorted internally thus ensuring the condition
+a &lt;= b is not necessary.
+</p>
+<p>The <code>type</code> argument or the specification of the special function
+determines the open (<code>(</code> and <code>)</code>) or
+closed (<code>[</code> and <code>]</code>) endpoints and relations.
+</p>
+<p>There are four types of intervals (<code>[]</code>, <code>[)</code>, <code>(]</code>, <code>()</code>),
+their negation (<code>)(</code>, <code>)[</code>, <code>](</code>, <code>][</code>, respectively),
+less than (<code>[&lt;]</code>, <code>[&lt;)</code>, <code>(&lt;]</code>, <code>(&lt;)</code>),
+and greater than (<code>[&gt;]</code>, <code>[&gt;)</code>, <code>(&gt;]</code>, <code>(&gt;)</code>) relations.
+</p>
+<p>Note that some operators return identical results but
+are syntactically different:
+<code>%[&lt;]%</code> and <code>%[&lt;)%</code> both evaluate <code>x &lt; a</code>;
+<code>%[&gt;]%</code> and <code>%(&gt;]%</code> both evaluate <code>x &gt; b</code>;
+<code>%(&lt;]%</code> and <code>%(&lt;)%</code> evaluate <code>x &lt;= a</code>;
+<code>%[&gt;)%</code> and <code>%(&gt;)%</code> both evaluate <code>x &gt;= b</code>.
+This is so because we evaluate only one end of the interval
+but still conceptually referring to the relationship
+defined by the right-hand-side <code>interval</code> object
+and given that a &lt;= b.
+This implies 2 conditional logical evaluations
+instead of treating it as a single 3-level ordered factor.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A logical vector, indicating if <code>x</code> is in the specified interval.
+Values are <code>TRUE</code>, <code>FALSE</code>, or <code>NA</code>
+(when any of the 3 values (<code>x</code> or endpoints in <code>interval</code>)
+are <code>NA</code>).
+</p>
+<p>The helper function <code>intrval_types</code>
+can be used to understand and visualize the operators' effects.
+It returns a matrix explaining the properties of the operators.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Peter Solymos &lt;solymos@ualberta.ca&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See help page for relational operators: <code>Comparison</code>.
+</p>
+<p>See <code>%[o]%</code> for relational operators for
+interval-to-interval comparisons.
+</p>
+<p>See <code>factor</code> for the behavior with factor arguments.
+See also <code>%in%</code> for value matching
+and <code>%ni%</code> for negated value matching
+for factors.
+</p>
+<p>See <code>Syntax</code> for operator precedence.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## motivating example from example(lm)
+
+## Annette Dobson (1990) "An Introduction to Generalized Linear Models".
+## Page 9: Plant Weight Data.
+ctl &lt;- c(4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14)
+trt &lt;- c(4.81,4.17,4.41,3.59,5.87,3.83,6.03,4.89,4.32,4.69)
+group &lt;- gl(2, 10, 20, labels = c("Ctl","Trt"))
+weight &lt;- c(ctl, trt)
+lm.D9 &lt;- lm(weight ~ group)
+## compare 95% confidence intervals with 0
+(CI.D9 &lt;- confint(lm.D9))
+0 %[]% CI.D9
+
+## comparing dates
+
+DATE &lt;- as.Date(c("2000-01-01","2000-02-01", "2000-03-31"))
+DATE %[&lt;]% as.Date(c("2000-01-151", "2000-03-15"))
+DATE %[]% as.Date(c("2000-01-151", "2000-03-15"))
+DATE %[&gt;]% as.Date(c("2000-01-151", "2000-03-15"))
+
+## interval formats
+
+x &lt;- rep(4, 5)
+a &lt;- 1:5
+b &lt;- 3:7
+cbind(x=x, a=a, b=b)
+x %[]% cbind(a, b) # matrix
+x %[]% data.frame(a=a, b=b) # data.frame
+x %[]% list(a, b) # list
+
+## helper functions
+
+intrval_types() # print
+intrval_types(plot = TRUE) # plot
+
+## graphical examples
+
+## bounding box
+set.seed(1)
+n &lt;- 10^4
+x &lt;- runif(n, -2, 2)
+y &lt;- runif(n, -2, 2)
+iv1 &lt;- x %[]% c(-1, 1) &amp; y %[]% c(-1, 1)
+plot(x, y, pch = 19, cex = 0.25, col = iv1 + 1, main = "Bounding box")
+
+## time series filtering
+x &lt;- seq(0, 4*24*60*60, 60*60)
+dt &lt;- as.POSIXct(x, origin="2000-01-01 00:00:00")
+f &lt;- as.POSIXlt(dt)$hour %[]% c(0, 11)
+plot(sin(x) ~ dt, type="l", col="grey",
+    main = "Filtering date/time objects")
+points(sin(x) ~ dt, pch = 19, col = f + 1)
+
+## watch precedence
+(2 * 1:5) %[]% (c(2, 3) * 2)
+2 * 1:5 %[]% (c(2, 3) * 2)
+(2 * 1:5) %[]% c(2, 3) * 2
+2 * 1:5 %[]% c(2, 3) * 2
+</code></pre>
+
+
+</div>

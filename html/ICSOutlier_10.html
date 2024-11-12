@@ -1,0 +1,71 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>HTP3</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Production Measurements of High-Tech Parts - Nearly Singular Case</h2>
+
+<h3>Description</h3>
+
+<p>The <code>HTP3</code> data set contains 371 high-tech parts designed for consumer
+products characterized by 33 tests.
+These tests are performed to ensure a high quality of the production.
+All these 371 parts were considered functional and have been sold.
+However the part 32 showed defects in use and was
+returned to the manufacturer by the customer. Therefore this part
+can be considered as outlier.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">data("HTP3")
+</code></pre>
+
+
+<h3>Format</h3>
+
+<p>A data frame with 371 rows and 33 variables V.1 - V.33,
+presenting some approximate collinearity issues which may cause
+some numerical inaccuracies.
+</p>
+
+
+<h3>Source</h3>
+
+<p>Anonymized data from a nondisclosed manufacturer.
+</p>
+
+
+<h3>References</h3>
+
+<p>Archimbaud, A., Drmac, Z., Nordhausen, K., Radojcic, U. and Ruiz-Gazen, A.
+(2023) Numerical Considerations and a New Implementation for Invariant
+Coordinate Selection. <em>SIAM Journal on Mathematics of Data Science</em>,
+<b>5</b>(1), 97–121. <a href="https://doi.org/10.1137/22M1498759">doi:10.1137/22M1498759</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># HTP3 data: the observation 32 is considered as an outlier
+data("HTP3")
+outliers &lt;- c(32)
+boxplot(HTP3)
+
+# Outlier detection using ICS
+library(ICS)
+out &lt;- ICS_outlier(HTP3, ICS_algorithm = "QR",
+                   method = "norm_test",
+                   test = "agostino.test", level_test = 0.05,
+                   level_dist = 0.01, n_dist = 50)
+
+summary(out)
+plot(out)
+text(outliers, out$ics_distances[outliers], outliers, pos = 2, cex = 0.9, col = 2)
+
+</code></pre>
+
+
+</div>

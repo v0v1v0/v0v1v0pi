@@ -1,0 +1,179 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>virtualFISH</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Virtual <em>in situ</em> hybridization.</h2>
+
+<h3>Description</h3>
+
+<p>This function queries a list of DNA sequences with a virtual probe
+(either a sequence or a profile hidden Markov model) and returns only
+the sequences and regions that are of sufficient similarity based on
+log-odds alignment scoring.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">virtualFISH(
+  x,
+  probe,
+  minscore = 100,
+  minamplen = 50,
+  maxamplen = 500,
+  up = NULL,
+  down = NULL,
+  rcdown = TRUE,
+  minfsc = 60,
+  minrsc = 60,
+  maxNs = 0.02,
+  cores = 1,
+  quiet = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a list of DNA sequences in <code>DNAbin</code> format.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probe</code></td>
+<td>
+<p>a DNA sequence ("DNAbin" object) or profile hidden
+Markov model ("PHMM" object) to be used as the virtual hybridization probe.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minscore</code></td>
+<td>
+<p>numeric; the minimum specificity (log-odds score
+for the optimal alignment) between the query sequence and the probe
+for the former to be retained in the output object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minamplen, maxamplen</code></td>
+<td>
+<p>integers giving the minimum and maximum
+acceptable amplicon lengths.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>up, down</code></td>
+<td>
+<p>optional objects of class <code>DNAbin</code>
+giving the forward and reverse primer sequences with which
+to query the sequence list following virtual probe hybridization.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rcdown</code></td>
+<td>
+<p>logical indicating whether the reverse primer should be
+reverse-complemented prior to aligning with the input sequences.
+Should be set to TRUE if <code>down</code>
+is the reverse complement of the target sequence (e.g. the sequence of
+a reverse primer as would be ordered from an oligo supplier).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minfsc</code></td>
+<td>
+<p>numeric, giving the minimum specificity(log-odds score
+for the optimal alignment) between the forward primer and a sequence
+for that sequence to be retained.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minrsc</code></td>
+<td>
+<p>numeric, the minimum specificity (log-odds score for
+the optimal alignment) between the reverse primer (if provided) and
+a sequence for that sequence to be retained.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxNs</code></td>
+<td>
+<p>numeric giving the maximum acceptable proportion
+of the ambiguous residue "N" within the output sequences.
+Defaults to 0.02.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>integer giving the number of processors for multithreading.
+Defaults to 1, and reverts to 1 if <code>x</code> is not a list.
+This argument may alternatively be a 'cluster' object,
+in which case it is the user's responsibility to close the socket
+connection at the conclusion of the operation,
+for example by running <code>parallel::stopCluster(cores)</code>.
+The string 'autodetect' is also accepted, in which case the maximum
+number of cores to use is one less than the total number of cores available.
+Note that in this case there
+may be a tradeoff in terms of speed depending on the number and size
+of sequences to be processed, due to the extra time required to initialize
+the cluster.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quiet</code></td>
+<td>
+<p>logical indicating whether progress should be printed to
+the console.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function is generally used when filtering/trimming a
+local sequence database,
+to mop up any high-scoring sequences with partial/missing primer
+bind sites that were not included in the output of the
+<code>virtualPCR</code>.
+For example, this includes sequences that were generated using the same
+primer set as used in the virtual PCR, and whose primer binding sites
+were trimmed prior to deposition in the sequence database.
+Unlike the virtualPCR function, there is
+no option to retain the primer-bind sites in the returned sequences.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a list of trimmed sequences, returned as an object of class
+<code>DNAbin</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Shaun Wilkinson
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>virtualPCR</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">  ## ensure whale sequences are globally alignable
+  data(whales)
+  model &lt;- aphid::derivePHMM(whales)
+  z &lt;- virtualFISH(whales, probe = model)
+</code></pre>
+
+
+</div>

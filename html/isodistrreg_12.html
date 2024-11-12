@@ -1,0 +1,275 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>idr</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit IDR to training data</h2>
+
+<h3>Description</h3>
+
+<p>Fits isotonic distributional regression (IDR) to a training
+dataset.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">idr(y, X, groups = setNames(rep(1, ncol(X)), colnames(X)), orders =
+  c("comp" = 1), stoch = "sd", pars = osqpSettings(verbose = FALSE, eps_abs =
+  1e-5, eps_rel = 1e-5, max_iter = 10000L), progress = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>numeric vector (the response variable).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>data frame of numeric or ordered factor variables (the regression
+covariates).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groups</code></td>
+<td>
+<p>named vector of length <code>ncol(X)</code> denoting groups of
+variables that are to be ordered with the same order (see 'Details'). Only
+relevant if <code>X</code> contains more than one variable. The same names as in
+<code>X</code> should be used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>orders</code></td>
+<td>
+<p>named vector giving for each group in <code>groups</code> the order
+that will be applied to this group. Only relevant if <code>X</code> contains more
+than one variable. The names of <code>orders</code> give the order, the entries
+give the group labels. Available options: <code>"comp"</code> for componentwise
+order, <code>"sd"</code> for stochastic dominance, <code>"icx"</code> for increasing
+convex order (see 'Details). Default is <code>"comp"</code> for all variables.
+The <code>"sd"</code> and <code>"icx"</code> orders can only be used with numeric
+variables, but not with ordered factors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stoch</code></td>
+<td>
+<p>stochastic order constraint used for estimation. Default is
+<code>"sd"</code> for first order stochastic dominance. Use <code>"hazard"</code> for
+hazard rate order (experimental).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pars</code></td>
+<td>
+<p>parameters for quadratic programming optimization (only relevant
+if <code>X</code> has more than one column), set using
+<code>osqpSettings</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>progress</code></td>
+<td>
+<p>display progressbar (<code>TRUE</code>, <code>FALSE</code> or <code>1</code>,
+<code>0</code>)?</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function computes the isotonic distributional regression (IDR)
+of a response <em>y</em> on on one or more covariates <em>X</em>. IDR estimates
+the cumulative distribution function (CDF) of <em>y</em> conditional on
+<em>X</em> by monotone regression, assuming that <em>y</em> is more likely to
+take higher values, as <em>X</em> increases. Formally, IDR assumes that the
+conditional CDF <code class="reqn">F_{y | X = x}(z)</code> at each fixed threshold <em>z</em>
+decreases, as <em>x</em> increases, or equivalently, that the exceedance
+probabilities for any threshold <code>z</code> <code class="reqn">P(y &gt; z | X = x)</code> increase
+with <em>x</em>.
+</p>
+<p>The conditional CDFs are estimated at each threshold in <code>unique(y)</code>.
+This is the set where the CDFs may have jumps. If <code>X</code> contains more
+than one variable, the CDFs are estimated by calling
+<code>solve_osqp</code> from the package <span class="pkg">osqp</span>
+<code>length(unique(y))</code> times. This might take a while if the training
+dataset is large.
+</p>
+<p>Use the argument <code>groups</code> to group <em>exchangeable</em> covariates.
+Exchangeable covariates are indistinguishable except from the order in
+which they are labelled (e.g. ensemble weather forecasts, repeated
+measurements under the same measurement conditions).
+</p>
+<p>The following orders are available to perform the monotone regression in
+IDR: </p>
+ <ul>
+<li>
+<p> Componentwise order (<code>"comp"</code>): A covariate
+vector <code>x1</code> is greater than <code>x2</code> if <code>x1[i] &gt;= x2[i]</code> holds
+for all components <code>i</code>. This is the <em>standard order used in
+multivariate monotone regression</em> and <em>should not be used for
+exchangeable variables (e.g. perturbed ensemble forecasts)</em>. </p>
+</li>
+<li>
+<p>Stochastic dominance (<code>"sd"</code>): <code>x1</code> is greater than <code>x2</code> in
+the stochastic order, if the (empirical) distribution of the elements of
+<code>x1</code> is greater than the distribution of the elements of <code>x2</code> (in
+first order) stochastic dominance. The <code>"sd"</code> order is invariant under
+permutations of the grouped variables and therefore <em>suitable for
+exchangeable covariables</em>. </p>
+</li>
+<li>
+<p> Increasing convex order (<code>"icx"</code>):
+The <code>"icx"</code> order can be used for groups of exchangeable variables. It
+should be used if the variables have increasing variability, when their
+mean increases (e.g. precipitation forecasts or other variables with
+right-skewed distributions). More precisely, <code>"icx"</code> uses the
+increasing convex stochastic order on the empirical distributions of the
+grouped variables. </p>
+</li>
+</ul>
+<h3>Value</h3>
+
+<p>An object of class <code>"idrfit"</code> containing the following
+components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>data frame of all distinct covariate combinations used for
+the fit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>list of all observed responses in the training data for
+given covariate combinations in <code>X</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cdf</code></td>
+<td>
+<p>matrix containing the estimated CDFs, one CDF per row,
+evaluated at <code>thresholds</code> (see next point). The CDF in the <code>i</code>th
+row corredponds to the estimated conditional distribution of the response
+given the covariates values in <code>X[i,]</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thresholds</code></td>
+<td>
+<p>the thresholds at which the CDFs in <code>cdf</code> are
+evaluated. The entries in <code>cdf[,j]</code> are the conditional CDFs evaluated
+at <code>thresholds[j]</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td>
+<code>groups</code>, <code>orders</code>
+</td>
+<td>
+<p> the groups and orders used for
+estimation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diagnostic</code></td>
+<td>
+<p>list giving a bound on the precision of the CDF
+estimation (the maximal downwards-step in the CDF that has been detected)
+and the fraction of CDF estimations that were stopped at the iteration
+limit <code>max_iter</code>. Decrease the parameters <code>eps_abs</code> and/or
+<code>eps_rel</code> or increase <code>max_iter</code> in <code>pars</code> to improve the
+precision. See <code>osqpSettings</code> for more optimization
+parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indices</code></td>
+<td>
+<p> the row indices of the covariates in <code>X</code> in the
+original training dataset (used for in-sample predictions with
+<code>predict.idrfit</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>constraints</code></td>
+<td>
+<p> (in multivariate IDR, <code>NULL</code> otherwise)
+matrices giving the order constraints for optimization. Used in
+<code>predict.idrfit</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>The function <code>idr</code> is only intended for fitting IDR model for a
+training dataset and storing the results for further processing, but not
+for prediction or evaluation, which is done using the output of
+<code>predict.idrfit</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Code for the Pool-Adjacent Violators Algorithm (PAVA) is adapted from 
+R code by Lutz Duembgen (available on
+<a href="https://www.imsv.unibe.ch/about_us/files/lutz_duembgen/software/index_eng.html">https://www.imsv.unibe.ch/about_us/files/lutz_duembgen/software/index_eng.html</a>).
+</p>
+
+
+<h3>References</h3>
+
+<p>Henzi, A., Moesching, A., &amp; Duembgen, L. (2020). Accelerating the
+pool-adjacent-violators algorithm for isotonic distributional regression.
+arXiv preprint arXiv:2006.05527.
+</p>
+<p>Stellato, B., Banjac, G., Goulart, P., Bemporad, A., &amp; Boyd, S. (2020).
+OSQP: An operator splitting solver for quadratic programs. Mathematical
+Programming Computation, 1-36.
+</p>
+<p>Bartolomeo Stellato, Goran Banjac, Paul Goulart and Stephen Boyd (2019).
+osqp: Quadratic Programming Solver using the 'OSQP' Library. R package
+version 0.6.0.3. https://CRAN.R-project.org/package=osqp
+</p>
+
+
+<h3>See Also</h3>
+
+<p>The S3 method <code>predict.idrfit</code> for predictions based on
+an IDR fit.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("rain")
+
+## Fit IDR to data of 185 days using componentwise order on HRES and CTR and
+## increasing convex order on perturbed ensemble forecasts (P1, P2, ..., P50)
+
+varNames &lt;- c("HRES", "CTR", paste0("P", 1:50))
+X &lt;- rain[1:185, varNames]
+y &lt;- rain[1:185, "obs"]
+
+## HRES and CTR are group '1', with componentwise order "comp", perturbed
+## forecasts P1, ..., P50 are group '2', with "icx" order
+
+groups &lt;- setNames(c(1, 1, rep(2, 50)), varNames)
+orders &lt;- c("comp" = 1, "icx" = 2)
+
+fit &lt;- idr(y = y, X = X, orders = orders, groups = groups)
+fit
+</code></pre>
+
+
+</div>

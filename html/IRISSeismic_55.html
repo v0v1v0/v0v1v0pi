@@ -1,0 +1,184 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getUnavailability</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Retrieve Channel metadata from IRIS DMC</h2>
+
+<h3>Description</h3>
+
+<p>The <code>getUnavailability</code> method obtains metadata for channels that are not available from the IRIS DMC station web service
+and returns it in a dataframe.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getUnavailability(obj, network, station, location, channel,
+                  starttime, endtime, includerestricted,
+                  latitude, longitude, minradius, maxradius)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+ <p><code>IrisClient</code> object </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>network</code></td>
+<td>
+<p> character string with the two letter seismic network code </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>station</code></td>
+<td>
+<p> character string with the station code </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>location</code></td>
+<td>
+<p> character string with the location code </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>channel</code></td>
+<td>
+<p> character string with the three letter channel code </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>starttime</code></td>
+<td>
+<p> POSIXct class specifying the starttime (GMT) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>endtime</code></td>
+<td>
+<p> POSIXct class specifying the endtime (GMT) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>includerestricted</code></td>
+<td>
+<p> optional logical identifying whether to report on restricted data (default=<code>FALSE</code>) </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>latitude</code></td>
+<td>
+<p> optional latitude used when specifying a location and radius </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>longitude</code></td>
+<td>
+<p> optional longitude used when specifying a location and radius </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>minradius</code></td>
+<td>
+<p> optional minimum radius used when specifying a location and radius </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxradius</code></td>
+<td>
+<p> optional maximum radius used when specifying a location and radius </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>getUnavailability</code> method compares the results of the <code>getAvailability</code> and <code>getChannel</code>
+methods and returns those records found only in the output of <code>getChannel</code>.
+</p>
+<p>Each of the arguments <code>network</code>, <code>station</code>, <code>location</code> or <code>channel</code> may contain
+a valid code or a wildcard expression, e.g. "BH?" or "*". Empty strings are converted to "*".
+Otherwise the ascii string that is used for
+these values is simply inserted into the web service request URL.
+</p>
+<p>For more details see the <a href="https://service.iris.edu/fdsnws/station/1/">webservice documentation</a>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A dataframe with the following columns:
+</p>
+
+<pre>
+network, station, location, channel, latitude, longitude, elevation, depth,
+  azimuth, dip, instrument, scale, scalefreq, scaleunits, samplerate, 
+  starttime, endtime
+</pre>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>References</h3>
+
+
+<p>The IRIS DMC station webservice:
+</p>
+<p><a href="https://service.iris.edu/fdsnws/station/1/">https://service.iris.edu/fdsnws/station/1/</a>
+</p>
+<p>This implementation was inspired by the functionality in the obspy get_stations() method.
+</p>
+<p><a href="https://docs.obspy.org/packages/autogen/obspy.clients.fdsn.client.Client.get_stations.html">https://docs.obspy.org/packages/autogen/obspy.clients.fdsn.client.Client.get_stations.html</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>IrisClient-class</code>, <code>getAvailability</code>, <code>getChannel</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+# Date of Nisqually quake
+starttime &lt;- as.POSIXct("2001-02-28",tz="GMT")
+endtime &lt;- starttime + 2*24*3600
+
+# Use the getEvent web service to determine what events happened in this time period
+result &lt;- try(events &lt;- getEvent(iris,starttime,endtime,6.0))
+if (inherits(result,"try-error")) {
+  message(geterrmessage())
+} else {
+  events
+
+# biggest event is Nisqually
+  eIndex &lt;- which(events$magnitude == max(events$magnitude))
+  e &lt;- events[eIndex[1],]
+
+# Find all BHZ channels that were NOT collecting data at the time of the quake 
+# and within 5 degrees of the quake epicenter (or are otherwise unavailable from IRIS).
+  result &lt;- try(channels &lt;- getUnavailability(iris,"*","*","*","BHZ",starttime,endtime,
+                            lat=e$latitude,long=e$longitude,maxradius=5))
+  if (inherits(result,"try-error")) {
+    message(geterrmessage())
+  } else {
+    channels
+  }
+}
+</code></pre>
+
+
+</div>

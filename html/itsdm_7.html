@@ -1,0 +1,243 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>format_observation</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Format the occurrence dataset for usage in <span class="pkg">itsdm</span>
+</h2>
+
+<h3>Description</h3>
+
+<p>The focus of this function is to format the dataset
+but to keep the dataset as original as possible.
+Then the users can modify the data if they want before put it
+into this function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">format_observation(
+  obs_df,
+  eval_df = NULL,
+  split_perc = 0.3,
+  seed = 123,
+  obs_crs = 4326,
+  eval_crs = 4326,
+  x_col = "x",
+  y_col = "y",
+  obs_col = "observation",
+  obs_type = "presence_only"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obs_df</code></td>
+<td>
+<p>(<code>data.frame</code>). The <code>data.frame</code> style table that
+include x and y coordinate and observation of training dataset.
+This parameter is required as it is the training dataset.
+Note: it only takes <code>data.frame</code> to reduce the risk of column name mismatch
+between <code>data.frame</code> and other formats such as <code>tibble</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eval_df</code></td>
+<td>
+<p>(<code>data.frame</code> or <code>NULL</code>) The <code>data.frame</code> style table that
+include x and y coordinate and observation of evaluation dataset.
+Note: it only takes <code>data.frame</code> to reduce the risk of column name mismatch
+between <code>data.frame</code> and other formats such as <code>tibble</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>split_perc</code></td>
+<td>
+<p>(<code>numeric</code>) a <code>numeric</code> between 0 and 1 corresponding to the
+percentage of data used to evaluate the models.
+Only required if <code>eval_df</code> is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>(<code>integer</code>) The seed to split train and evaluation set.
+The default value is <code>123</code>. Only required if <code>eval_df</code> is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>obs_crs</code></td>
+<td>
+<p>(<code>integer</code>, <code>numeric</code>, <code>character</code>, or <code>crs</code>)
+The EPSG code, CRS string, or <code>sf::crs</code> object of the coordinate system of
+the training dataset. It corresponds to <code>x_col</code> and <code>y_col</code> in <code>obs_df</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eval_crs</code></td>
+<td>
+<p>(<code>integer</code>, <code>numeric</code>, <code>character</code>, or <code>crs</code>)
+The EPSG code, CRS string, or <code>sf::crs</code> object of the coordinate system
+of the evaluation dataset. Only required if  <code>eval_df</code> is not <code>NULL</code>.
+It corresponds to <code>x_col</code> and <code>y_col</code> in <code>eval_df</code> if any.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x_col</code></td>
+<td>
+<p>(<code>character</code>) The name of column that is x coordinate
+in <code>obs_df</code> and <code>eval_df</code> if not <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y_col</code></td>
+<td>
+<p>(<code>character</code>) The name of column that is y coordinate
+in <code>obs_df</code> and <code>eval_df</code> if not <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>obs_col</code></td>
+<td>
+<p>(<code>character</code>) The name of column that represents observations
+in <code>obs_df</code> and <code>eval_df</code> if not <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>obs_type</code></td>
+<td>
+<p>(<code>character</code>) The type of observation to be formatted to.
+Only can be one of <code>c("presence_only", "presence_absence")</code>.
+Note that if "presence_only" is set, the absences in <code>obs_df</code> will be deleted.
+This only affect <code>obs_df</code>, <code>eval_df</code> will keep the original type no matter it
+is an independent one or is split from <code>eval_df</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>(<code>FormatOccurrence</code>) A list of
+</p>
+
+<ul>
+<li>
+<p>obs (<code>sf</code>) the formatted pts of observations.
+The column of observation is "observation".
+</p>
+</li>
+<li>
+<p>obs_type (<code>character</code>) the type of the observations,
+presence_only or presence_absence.
+</p>
+</li>
+<li>
+<p>has_eval (<code>logical</code>) whether evaluation dataset is set or generated.
+</p>
+</li>
+<li>
+<p>eval (<code>sf</code>) the formatted pts of observations for evaluation if any.
+The column of observation is "observation".
+</p>
+</li>
+<li>
+<p>eval (<code>eval_type</code>)  the type of the observations for evaluation,
+presence_only or presence_absence.
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p><code>print.FormatOccurrence</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(dplyr)
+library(itsdm)
+data("occ_virtual_species")
+
+# obs + eval, presence-absence
+obs_df &lt;- occ_virtual_species %&gt;% filter(usage == "train")
+eval_df &lt;- occ_virtual_species %&gt;% filter(usage == "eval")
+x_col &lt;- "x"
+y_col &lt;- "y"
+obs_col &lt;- "observation"
+obs_type &lt;- "presence_absence"
+
+obs &lt;- format_observation(
+  obs_df = obs_df, eval_df = eval_df,
+  x_col = x_col, y_col = y_col, obs_col = obs_col,
+  obs_type = obs_type)
+
+# obs + eval, presence-only
+obs_df &lt;- occ_virtual_species %&gt;% filter(usage == "train")
+eval_df &lt;- occ_virtual_species %&gt;% filter(usage == "eval")
+x_col &lt;- "x"
+y_col &lt;- "y"
+obs_col &lt;- "observation"
+obs_type &lt;- "presence_only"
+
+obs &lt;- format_observation(
+  obs_df = obs_df, eval_df = eval_df,
+  x_col = x_col, y_col = y_col, obs_col = obs_col,
+  obs_type = obs_type)
+
+# obs + eval, different crs, presence-only
+obs_df &lt;- occ_virtual_species %&gt;% filter(usage == "train")
+eval_df &lt;- occ_virtual_species %&gt;% filter(usage == "eval")
+obs_crs &lt;- 4326
+# Fake one
+eval_crs &lt;- 20935
+x_col &lt;- "x"
+y_col &lt;- "y"
+obs_col &lt;- "observation"
+obs_type &lt;- "presence_only"
+
+obs &lt;- format_observation(
+  obs_df = obs_df, eval_df = eval_df,
+  obs_crs = obs_crs, eval_crs = eval_crs,
+  x_col = x_col, y_col = y_col, obs_col = obs_col,
+  obs_type = obs_type)
+
+# obs + split, presence-absence
+obs_df &lt;- occ_virtual_species
+split_perc &lt;- 0.5
+seed &lt;- 123
+obs_crs &lt;- 4326
+x_col &lt;- "x"
+y_col &lt;- "y"
+obs_col &lt;- "observation"
+obs_type &lt;- "presence_absence"
+
+obs &lt;- format_observation(
+  obs_df = obs_df, split_perc = split_perc,
+  x_col = x_col, y_col = y_col,
+  obs_col = obs_col, obs_type = obs_type)
+
+# obs, presence-only, no eval
+obs_df &lt;- occ_virtual_species
+eval_df &lt;- NULL
+split_perc &lt;- 0
+seed &lt;- 123
+obs_crs &lt;- 4326
+x_col &lt;- "x"
+y_col &lt;- "y"
+obs_col &lt;- "observation"
+obs_type &lt;- "presence_only"
+
+obs &lt;- format_observation(
+  obs_df = obs_df, eval_df = eval_df,
+  split_perc = split_perc,
+  x_col = x_col, y_col = y_col,
+  obs_col = obs_col, obs_type = obs_type)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,89 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>save_MAFs</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Save or load MAF Python objects
+</h2>
+
+<h3>Description</h3>
+
+<p><span class="pkg">Infusion</span> fit results created using the <span class="pkg">mafR</span> package contain (pointers to) Python objects, which are lost (their pointers being reduced to null pointers) when the fit object is saved on file and reloaded. The functions described here circumvent this issue. 
+</p>
+<p><code>save_MAFs</code> will save the Python objects in distinct files. <code>load_MAFs</code> will load them back into the fit object, <b>not</b> overriding anyone pre-existing into the target fit object. 
+The Python objects are saved under, and read from, files whose names are made of <code>"jointdens"</code>, <code>"pardens"</code>... and the given <code>prefix</code> and <code>ext</code>ension.  
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">save_MAFs(object, ext="_MAF.pkl", prefix="")
+load_MAFs(object, ext="_MAF.pkl", prefix="", set_path_only=FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>An object of class <code>"SLik_j"</code> as produced by the up-to-date <span class="pkg">Infusion</span> workflow.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prefix, ext</code></td>
+<td>
+
+<p>Character: Prefix and extension for the filename of each saved MAF object.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>set_path_only</code></td>
+<td>
+
+<p>Boolean: if TRUE, checks the presence of the saved MAF files, but do not load them, and (re)set the path information in the <code>object</code> (see Details for a programming context of usage).  
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Both functions can write file path information into the input <code>object</code>'s <code>load_MAFs_info</code> element (an environment), where it can be read afterwards. <code>save_MAFs</code> will do so in all cases, and <code>load_MAFs</code> will do so when called with argument <code>set_path_only=TRUE</code>. When a bootstrap is run using parallelisation, the child processes can thus load files using their location information stored in this way. When the files have been moved after the <code>save_MAFs</code> call, their location information must then be updated using <code>load_MAFs(., set_path_onlTRUE)</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Both functions return the updated input <code>object</code>. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>reticulate::py_save_object</code> is used to save the Python objects.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Given object 'slik_j' of class SLik_j
+# save_MAFs(slik_j, prefix = "2024Feb30_")
+## =&gt; '2024Feb30_jointdens_MAF.pkl', etc.
+# save(slik_j, file="slik_j.rda") 
+## =&gt; Objects from Python environments are not saved in the RData file. 
+
+# and later:
+# load(file="slik_j.rda") 
+# slik_j &lt;- load_MAFs(slik_j, prefix = "2024Feb30_")
+## Objects from pkl files are put back at the right place in 'slik_j'. 
+
+</code></pre>
+
+
+</div>

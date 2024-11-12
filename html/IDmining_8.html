@@ -1,0 +1,160 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>MBRM_parallel</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Morisita-Based Filter for Redundancy Minimization (Parallel)</h2>
+
+<h3>Description</h3>
+
+<p>Executes the MBRM algorithm for unsupervised feature selection (CPU parallel computing).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">MBRM_parallel(X, scaleQ, m=2, C=NULL, ID_tot=NULL, ncores=4)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>A <code class="reqn">N \times E</code> <code>matrix</code>, <code>data.frame</code> or <code>data.table</code>
+where <code class="reqn">N</code> is the number of data points and <code class="reqn">E</code> is the number of variables (or features).
+Each variable is rescaled to the <code class="reqn">[0,1]</code> interval by the function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scaleQ</code></td>
+<td>
+<p>A vector containing the values of <code class="reqn">\ell^{-1}</code>
+chosen by the user (see Details).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>The value of the parameter m (by default: <code>m=2</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>C</code></td>
+<td>
+<p>The number of steps of the SFS procedure (by default: <code>C = E</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ID_tot</code></td>
+<td>
+<p>The value of the full data ID if it is known a priori (by default:
+the value of ID_tot is estimated using the Morisita estimator of ID witin
+the function).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncores</code></td>
+<td>
+<p>Number of workers (by default: <code>ncores = 4</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<ol>
+<li> <p><code class="reqn">\ell</code> is the edge length of the grid cells (or quadrats). Since the the variables
+(and consenquently the grid) are rescaled to the <code class="reqn">[0,1]</code> interval, <code class="reqn">\ell</code> is equal
+to <code class="reqn">1</code> for a grid consisting of only one cell.
+</p>
+</li>
+<li> <p><code class="reqn">\ell^{-1}</code> is the number of grid cells (or quadrats) along each axis of the
+Euclidean space in which the data points are embedded.
+</p>
+</li>
+<li> <p><code class="reqn">\ell^{-1}</code> is equal to <code class="reqn">Q^{(1/E)}</code> where <code class="reqn">Q</code> is the number
+of grid cells and <code class="reqn">E</code> is the number of variables (or features).
+</p>
+</li>
+<li> <p><code class="reqn">\ell^{-1}</code> is directly related to <code class="reqn">\delta</code> (see References).
+</p>
+</li>
+<li> <p><code class="reqn">\delta</code> is the diagonal length of the grid cells.
+</p>
+</li>
+<li>
+<p> The values of <code class="reqn">\ell^{-1}</code> in <code>scaleQ</code> must be chosen according to the linear
+part of the <code class="reqn">\log</code>-<code class="reqn">\log</code> plot relating the <code class="reqn">\log</code> values of the
+multipoint Morisita index to the <code class="reqn">\log</code> values of <code class="reqn">\delta</code> (or,
+equivalently, to the <code class="reqn">\log</code> values of <code class="reqn">\ell^{-1}</code>) (see <code>logMINDEX</code>).
+</p>
+</li>
+</ol>
+<h3>Value</h3>
+
+<p>A list of four elements:
+</p>
+
+<ol>
+<li>
+<p> a vector containing the identifier numbers of the original features in
+the order they are selected through the Sequential Forward Selection (SFS)
+search procedure.
+</p>
+</li>
+<li>
+<p> the names of the corresponding features.
+</p>
+</li>
+<li>
+<p> the corresponding ID estimates.
+</p>
+</li>
+<li>
+<p> the ID estimate of the full data set.
+</p>
+</li>
+</ol>
+<h3>Author(s)</h3>
+
+<p>Jean Golay <a href="mailto:jeangolay@gmail.com">jeangolay@gmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>J. Golay and M. Kanevski (2017). Unsupervised feature selection based on the
+Morisita estimator of intrinsic dimension,
+<a href="https://www.sciencedirect.com/science/article/pii/S0950705117303659">Knowledge-Based Systems 135:125-134</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">bf &lt;- Butterfly(10000)
+
+bf_select &lt;- MBRM_parallel(bf[,-9], 5:25, ncores=2)
+var_order &lt;- bf_select[[2]]
+var_perf  &lt;- bf_select[[3]]
+
+## Not run: 
+dev.new(width=5, height=4)
+plot(var_perf,type="b",pch=16,lwd=2,xaxt="n",xlab="", ylab="",
+     col="red",ylim=c(0,max(var_perf)),panel.first={grid(lwd=1.5)})
+axis(1,1:length(var_order),labels=var_order)
+mtext(1,text="Added Features (from left to right)",line=2.5,cex=1)
+mtext(2,text="Estimated ID",line=2.5,cex=1)
+
+bf_large &lt;- Butterfly(10^5)
+system.time(MBRM(bf_large[,-9], 5:25))
+system.time(MBRM_parallel(bf_large[,-9], 5:25))
+
+## End(Not run)
+</code></pre>
+
+
+</div>

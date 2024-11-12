@@ -1,0 +1,120 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>meanFilter</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Make a 2D filter calculations from numeric matrix</h2>
+
+<h3>Description</h3>
+
+<p>This functions take a <code>matrix</code> object, and for each cell
+calculate mean, median or certain quantile around a squared/rectangular
+neighborhood.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">meanFilter(X, radius, times = 1, na_only = FALSE)
+
+quantileFilter(X, radius, probs, times = 1, na_only = FALSE)
+
+medianFilter(X, radius, times = 1, na_only = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>A numeric <code>matrix</code> object used for apply filters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>radius</code></td>
+<td>
+<p>Size of squared or rectangular kernel to apply median. See
+Details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>times</code></td>
+<td>
+<p>How many times do you want to apply the filter?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na_only</code></td>
+<td>
+<p><code>logical</code>, Do you want to apply the filter ONLY in cells
+with NA?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probs</code></td>
+<td>
+<p><code>numeric</code> vector of probabilities with values in [0,1].</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>radius</code> must be defined as a 2-length numeric vector
+specifying the number of rows and columns of the window which will be used to
+make calculations. If the length of radius is 1, the window will be a square.
+</p>
+<p>Functions use C++ algorithms for running some statistical calculations. The
+mean is far obvious, however, there are several ways to perform quantiles.
+<code>quantileFilter</code> function uses
+<a href="https://arma.sourceforge.net/docs.html#quantile">arma::quantile</a>: a
+RcppArmadillo function, which is equivalent to use R quantile
+funtion with <code>type = 5</code>.
+</p>
+<p><code>medianFilter</code> is a wraper of <code>quantileFilter</code>, so the same
+observations are applied to it.
+</p>
+<p><code>na_only</code> performs two actions at once: (1) it applies the filter only in
+the positions where the original value is <code>NA</code> and (2) for the rest of
+the cells, it is replaced with the value of the original matrix.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>matrix</code> object with the same dimensions of <code>X</code>.
+</p>
+<p><code>quantileFilter</code> don't use a kernel but, for each cell, it
+returns the position of quantile 'probs' (value between 0 and 1).
+</p>
+<p><code>medianFilter</code> is a wrapper of <code>quantileFilter</code> with
+<code>probs = 0.5</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Generate example matrix
+nRows &lt;- 50
+nCols &lt;- 100
+
+myMatrix &lt;- matrix(runif(nRows*nCols, 0, 100), nrow = nRows, ncol = nCols)
+radius &lt;- 3
+
+# Make convolution
+myOutput1 &lt;- meanFilter(X = myMatrix, radius = radius)
+myOutput2 &lt;- quantileFilter(X = myMatrix, radius = radius, probs = 0.1)
+myOutput3 &lt;- medianFilter(X = myMatrix, radius = radius)
+
+# Plot results
+par(mfrow = c(2, 2))
+image(myMatrix, zlim = c(0, 100), title = "Original")
+image(myOutput1, zlim = c(0, 100), title = "meanFilter")
+image(myOutput2, zlim = c(0, 100), title = "quantileFilter")
+image(myOutput3, zlim = c(0, 100), title = "medianFilter")
+</code></pre>
+
+
+</div>

@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>read_raw_data</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Read raw data from a variety of common sensors.</h2>
+
+<h3>Description</h3>
+
+<p>Helper function to assist in reading data directly from sensor outputs. Should return a dataframe in correct format
+for use with the rest of the <code>iglu</code> package. Assumes all data will be readable with base R <code>read.csv()</code> function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">read_raw_data(
+  filename,
+  sensor = c("dexcom", "libre", "librepro", "asc", "ipro"),
+  id = "filename",
+  tz = ""
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>filename</code></td>
+<td>
+<p>String matching the name of the data to be read. Assumed to be .csv</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sensor</code></td>
+<td>
+<p><strong>Default: "dexcom".</strong> String naming the type of sensor the data was exported from.
+Must be one of "dexcom", "libre", "librepro", "asc", or "ipro".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>id</code></td>
+<td>
+<p><strong>Default: "filename".</strong> String indicating subject id.
+A value of "read" will cause the program to attempt to read the subject id from the file. A value of "filename" will cause the
+program to use the basename of the filename (i.e. filename without any directory information) with .csv removed, as subject id.
+A value of "default" will cause the program to use whichever of "read" or "filename" that is default for that specific sensor.
+Any other string will be treated as the unique id for the entire file.
+</p>
+<p>Note the asc reader currently does not support id="read"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tz</code></td>
+<td>
+<p>A character string specifying the time zone to be used. System-specific (see <code>as.POSIXct</code>), but " " is the current time zone, and "GMT" is UTC (Universal Time, Coordinated). Invalid values are most commonly treated as UTC, on some platforms with a warning.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A DataFrame object with the columns "id", "time" and "gl" and one row per reading will be returned. For the libre reader,
+if the phrase "mmol/l" is found in the column names, the glucose values will be multiplied by 18.
+</p>
+<p>Assumes .csv format for all data.
+</p>
+<p>Sensor formats change with ongoing development, so these functions may become deprecated.
+If any issues are encountered, contact the package maintainer: this is currently Irina Gaynanova,
+who can be reached at <a href="mailto:irinagn@umich.edu">irinagn@umich.edu</a>.
+</p>
+<p>Note: this function is heavily derived from the readers avaiable in the cgmanalysis package's <code>cleandata</code> function.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A dataframe containing the data read from the named file.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>David Buchanan
+</p>
+
+
+<h3>References</h3>
+
+<p>Vigers et al. (2019) cgmanalysis: An R package for descriptive analysis of continuous glucose monitor data
+<em>PLoS ONE</em> <strong>14(10)</strong>: e0216851,
+<a href="https://doi.org/10.1371/journal.pone.0216851">doi:10.1371/journal.pone.0216851</a>
+</p>
+
+
+</div>

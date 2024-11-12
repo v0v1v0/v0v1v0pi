@@ -1,0 +1,287 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ssvd</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Sparse regularized low-rank matrix approximation.</h2>
+
+<h3>Description</h3>
+
+<p>Estimate an <code class="reqn">{\ell}1</code>-penalized
+singular value or principal components decomposition (SVD or PCA) that introduces sparsity in the
+right singular vectors based on the fast and memory-efficient
+sPCA-rSVD algorithm of Haipeng Shen and Jianhua Huang.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ssvd(x, k = 1, n = 2, maxit = 500, tol = 0.001, center = FALSE,
+  scale. = FALSE, alpha = 0, tsvd = NULL, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A numeric real- or complex-valued matrix or real-valued sparse matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>Matrix rank of the computed decomposition (see the Details section below).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Number of nonzero components in the right singular vectors. If <code>k &gt; 1</code>,
+then a single value of <code>n</code> specifies the number of nonzero components
+in each regularized right singular vector. Or, specify a vector of length
+<code>k</code> indicating the number of desired nonzero components in each
+returned vector. See the examples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxit</code></td>
+<td>
+<p>Maximum number of soft-thresholding iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>Convergence is determined when <code class="reqn">\|U_j - U_{j-1}\|_F &lt; tol</code>, where <code class="reqn">U_j</code> is the matrix of estimated left regularized singular vectors at iteration <code class="reqn">j</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>center</code></td>
+<td>
+<p>a logical value indicating whether the variables should be
+shifted to be zero centered. Alternately, a centering vector of length
+equal the number of columns of <code>x</code> can be supplied. Use <code>center=TRUE</code>
+to perform a regularized sparse PCA.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale.</code></td>
+<td>
+<p>a logical value indicating whether the variables should be
+scaled to have unit variance before the analysis takes place.
+Alternatively, a vector of length equal the number of columns of <code>x</code> can be supplied.
+</p>
+<p>The value of <code>scale</code> determines how column scaling is performed
+(after centering).  If <code>scale</code> is a numeric vector with length
+equal to the number of columns of <code>x</code>, then each column of <code>x</code> is
+divided by the corresponding value from <code>scale</code>.  If <code>scale</code> is
+<code>TRUE</code> then scaling is done by dividing the (centered) columns of
+<code>x</code> by their standard deviations if <code>center=TRUE</code>, and the
+root mean square otherwise.  If <code>scale</code> is <code>FALSE</code>, no scaling is done.
+See <code>scale</code> for more details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>Optional  scalar regularization parameter between zero and one (see Details below).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tsvd</code></td>
+<td>
+<p>Optional initial rank-k truncated SVD or PCA (skips computation if supplied).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Additional arguments passed to <code>irlba</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>ssvd</code> function implements a version of an algorithm by
+Shen and Huang that computes a penalized SVD or PCA that introduces
+sparsity in the right singular vectors by solving a penalized least squares problem.
+The algorithm in the rank 1 case finds vectors <code class="reqn">u, w</code> that minimize
+</p>
+<p style="text-align: center;"><code class="reqn">\|x - u w^T\|_F^2 + \lambda \|w\|_1</code>
+</p>
+
+<p>such that <code class="reqn">\|u\| = 1</code>,
+and then sets <code class="reqn">v = w / \|w\|</code> and
+<code class="reqn">d = u^T x v</code>;
+see the referenced paper for details. The penalty <code class="reqn">\lambda</code> is
+implicitly determined from the specified desired number of nonzero values <code>n</code>.
+Higher rank output is determined similarly
+but using a sequence of <code class="reqn">\lambda</code> values determined to maintain the desired number
+of nonzero elements in each column of <code>v</code> specified by <code>n</code>.
+Unlike standard SVD or PCA, the columns of the returned <code>v</code> when <code>k &gt; 1</code> may not be orthogonal.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list containing the following components:
+</p>
+
+<ul>
+<li>
+<p>u regularized left singular vectors with orthonormal columns
+</p>
+</li>
+<li>
+<p>d regularized upper-triangluar projection matrix so that <code>x %*% v == u %*% d</code>
+</p>
+</li>
+<li>
+<p>v regularized, sparse right singular vectors with columns of unit norm
+</p>
+</li>
+<li>
+<p>center, scale the centering and scaling used, if any
+</p>
+</li>
+<li>
+<p>lambda the per-column regularization parameter found to obtain the desired sparsity
+</p>
+</li>
+<li>
+<p>iter number of soft thresholding iterations
+</p>
+</li>
+<li>
+<p>n value of input parameter <code>n</code>
+</p>
+</li>
+<li>
+<p>alpha value of input parameter <code>alpha</code>
+</p>
+</li>
+</ul>
+<h3>Note</h3>
+
+<p>Our <code>ssvd</code> implementation of the Shen-Huang method makes the following choices:
+</p>
+
+<ol>
+<li>
+<p>The l1 penalty is the only available penalty function. Other penalties may appear in the future.
+</p>
+</li>
+<li>
+<p>Given a desired number of nonzero elements in <code>v</code>, value(s) for the <code class="reqn">\lambda</code>
+penalty are determined to achieve the sparsity goal subject to the parameter <code>alpha</code>.
+</p>
+</li>
+<li>
+<p>An experimental block implementation is used for results with rank greater than 1 (when <code>k &gt; 1</code>)
+instead of the deflation method described in the reference.
+</p>
+</li>
+<li>
+<p>The choice of a penalty lambda associated with a given number of desired nonzero
+components is not unique. The <code>alpha</code> parameter, a scalar between zero and one,
+selects any possible value of lambda that produces the desired number of
+nonzero entries. The default <code>alpha = 0</code> selects a penalized solution with
+largest corresponding value of <code>d</code> in the 1-d case. Think of <code>alpha</code> as
+fine-tuning of the penalty.
+</p>
+</li>
+<li>
+<p>Our method returns an upper-triangular matrix <code>d</code> when <code>k &gt; 1</code> so
+that <code>x %*% v == u %*% d</code>. Non-zero
+elements above the diagonal result from non-orthogonality of the <code>v</code> matrix,
+providing a simple interpretation of cumulative information, or explained variance
+in the PCA case, via the singular value decomposition of <code>d %*% t(v)</code>.
+</p>
+</li>
+</ol>
+<p>What if you have no idea for values of the argument <code>n</code> (the desired sparsity)?
+The reference describes a cross-validation and an ad-hoc approach; neither of which are
+in the package yet. Both are prohibitively computationally expensive for matrices with a huge
+number of columns. A future version of this package will include a revised approach to
+automatically selecting a reasonable sparsity constraint.
+</p>
+<p>Compare with the similar but more general functions <code>SPC</code> and <code>PMD</code> in the <code>PMA</code> package
+by Daniela M. Witten, Robert Tibshirani, Sam Gross, and Balasubramanian Narasimhan.
+The <code>PMD</code> function can compute low-rank regularized matrix decompositions with sparsity penalties
+on both the <code>u</code> and <code>v</code> vectors. The <code>ssvd</code> function is
+similar to the PMD(*, L1) method invocation of <code>PMD</code> or alternatively the <code>SPC</code> function.
+Although less general than <code>PMD</code>(*),
+the <code>ssvd</code> function can be faster and more memory efficient for the
+basic sparse PCA problem.
+See <a href="https://bwlewis.github.io/irlba/ssvd.html">https://bwlewis.github.io/irlba/ssvd.html</a> for more information.
+</p>
+<p>(* Note that the s4vd package by Martin Sill and Sebastian Kaiser, <a href="https://cran.r-project.org/package=s4vd">https://cran.r-project.org/package=s4vd</a>,
+includes a fast optimized version of a closely related algorithm by Shen, Huang, and Marron, that penalizes
+both <code>u</code> and <code>v</code>.)
+</p>
+
+
+<h3>References</h3>
+
+
+<ul>
+<li>
+<p>Shen, Haipeng, and Jianhua Z. Huang. "Sparse principal component analysis via regularized low rank matrix approximation." Journal of multivariate analysis 99.6 (2008): 1015-1034.
+</p>
+</li>
+<li>
+<p>Witten, Tibshirani and Hastie (2009) A penalized matrix decomposition, with applications to sparse principal components and canonical correlation analysis. _Biostatistics_ 10(3): 515-534.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+set.seed(1)
+u &lt;- matrix(rnorm(200), ncol=1)
+v &lt;- matrix(c(runif(50, min=0.1), rep(0,250)), ncol=1)
+u &lt;- u / drop(sqrt(crossprod(u)))
+v &lt;- v / drop(sqrt(crossprod(v)))
+x &lt;- u %*% t(v) + 0.001 * matrix(rnorm(200*300), ncol=300)
+s &lt;- ssvd(x, n=50)
+table(actual=v[, 1] != 0, estimated=s$v[, 1] != 0)
+oldpar &lt;- par(mfrow=c(2, 1))
+plot(u, cex=2, main="u (black circles), Estimated u (blue discs)")
+points(s$u, pch=19, col=4)
+plot(v, cex=2, main="v (black circles), Estimated v (blue discs)")
+points(s$v, pch=19, col=4)
+
+# Let's consider a trivial rank-2 example (k=2) with noise. Like the
+# last example, we know the exact number of nonzero elements in each
+# solution vector of the noise-free matrix. Note the application of
+# different sparsity constraints on each column of the estimated v.
+# Also, the decomposition is unique only up to sign, which we adjust
+# for below.
+set.seed(1)
+u &lt;- qr.Q(qr(matrix(rnorm(400), ncol=2)))
+v &lt;- matrix(0, ncol=2, nrow=300)
+v[sample(300, 15), 1] &lt;- runif(15, min=0.1)
+v[sample(300, 50), 2] &lt;- runif(50, min=0.1)
+v &lt;- qr.Q(qr(v))
+x &lt;- u %*% (c(2, 1) * t(v)) + .001 * matrix(rnorm(200 * 300), 200)
+s &lt;- ssvd(x, k=2, n=colSums(v != 0))
+
+# Compare actual and estimated vectors (adjusting for sign):
+s$u &lt;- sign(u) * abs(s$u)
+s$v &lt;- sign(v) * abs(s$v)
+table(actual=v[, 1] != 0, estimated=s$v[, 1] != 0)
+table(actual=v[, 2] != 0, estimated=s$v[, 2] != 0)
+plot(v[, 1], cex=2, main="True v1 (black circles), Estimated v1 (blue discs)")
+points(s$v[, 1], pch=19, col=4)
+plot(v[, 2], cex=2, main="True v2 (black circles), Estimated v2 (blue discs)")
+points(s$v[, 2], pch=19, col=4)
+par(oldpar)
+
+</code></pre>
+
+
+</div>

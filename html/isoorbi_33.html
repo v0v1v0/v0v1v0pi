@@ -1,0 +1,117 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>orbi_summarize_results</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Generate the results table</h2>
+
+<h3>Description</h3>
+
+<p>Contains the logic to generate the results table. It passes the  <code>ratio_method</code> parameter to the <code>orbi_calculate_summarized_ratio()</code> function for ratio calculations.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">orbi_summarize_results(
+  dataset,
+  ratio_method = c("mean", "sum", "median", "geometric_mean", "slope", "weighted_sum"),
+  .by = c("block", "sample_name", "segment", "data_group", "data_type", "injection"),
+  include_flagged_data = FALSE,
+  include_unused_data = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dataset</code></td>
+<td>
+<p>A tibble from <code>IsoX</code> output (<code>orbi_read_isox()</code>) and with a basepeak already defined (using <code>orbi_define_basepeak()</code>). Optionally, with block definitions (<code>orbi_define_blocks_for_dual_inlet()</code>) or even additional block segments (<code>orbi_segment_blocks()</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ratio_method</code></td>
+<td>
+<p>Method for computing the ratio. <strong>Please note well</strong>: the formula used to calculate ion ratios matters! Do not simply use arithmetic mean. The best option may depend on the type of data you are processing (e.g., MS1 versus M+1 fragmentation). <code>ratio_method</code> can be one of the following:
+</p>
+
+<ul>
+<li> <p><code>mean</code>: arithmetic mean of ratios from individual scans.
+</p>
+</li>
+<li> <p><code>sum</code>: sum of all ions of the numerator across all scans divided by the sum of all ions observed for the denominator across all scans.
+</p>
+</li>
+<li> <p><code>geometric_mean</code>: geometric mean of ratios from individual scans.
+</p>
+</li>
+<li> <p><code>slope</code>: The ratio is calculated using the slope obtained from a linear regression model that is weighted by the <code style="white-space: pre;">⁠numerator x⁠</code>, using <code>stats::lm(x ~ y + 0, weights = x)</code>.
+</p>
+</li>
+<li> <p><code>weighted_sum</code>: A derivative of the <code>sum</code> option. The weighing function ensures that each scan contributes equal weight to the ratio calculation,
+i.e. scans with more ions in the Orbitrap do not contribute disproportionately to the total <code>sum</code> of <code>x</code> and <code>y</code> that is used to calculate <code>x/y</code>.
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.by</code></td>
+<td>
+<p>additional grouping columns for the results summary (akin to dplyr's <code>.by</code> parameter e.g. in <code>dplyr::summarize()</code>). If not set by the user, all columns in the parameter's default values are used, if present in the dataset. Note that the order of these is also used to arrange the summary.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include_flagged_data</code></td>
+<td>
+<p>whether to include flagged data in the calculations (FALSE by default)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>include_unused_data</code></td>
+<td>
+<p>whether to include unused data in the calculations (FALSE by default), in addition to peaks actually flagged as setting("data_type_data")</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Returns a results summary table retaining the columns <code>filename</code>, <code>compound</code>, <code>isotopocule</code> and <code>basepeak</code> as well as the grouping columns from the <code>.by</code> parameter that are part of the input <code>dataset</code>. Additionally this function adds the following results columns: <code>start_scan.no</code>, <code>end_scan.no</code>, <code>start_time.min</code>, <code>mean_time.min</code>, <code>end_time.min</code>, <code>ratio</code>, <code>ratio_sem</code>, <code>ratio_relative_sem_permil</code>, <code>shot_noise_permil</code>, <code>No.of.Scans</code>, <code>minutes_to_1e6_ions</code>
+</p>
+
+<ul>
+<li> <p><code>ratio</code>: The isotope ratio between the <code>isotopocule</code> and the <code>basepeak</code>, calculated using the <code>ratio_method</code>
+</p>
+</li>
+<li> <p><code>ratio_sem</code>: Standard error of the mean for the ratio
+</p>
+</li>
+<li> <p><code>number_of_scans</code>: Number of scans used for the final ratio calculation
+</p>
+</li>
+<li> <p><code>minutes_to_1e6_ions</code>: Time in minutes it would take to observe 1 million ions of the <code>isotopocule</code> used as numerator of the ratio calculation.
+</p>
+</li>
+<li> <p><code>shot_noise_permil</code>: Estimate of the shot noise (more correctly thermal noise) of the reported ratio in permil.
+</p>
+</li>
+<li> <p><code>ratio_relative_sem_permil</code>: Relative standard error of the reported ratio in permil
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">fpath &lt;- system.file("extdata", "testfile_flow.isox", package = "isoorbi")
+df &lt;- orbi_read_isox(file = fpath) |&gt;
+      orbi_simplify_isox() |&gt;
+      orbi_define_basepeak("M0")  |&gt;
+      orbi_summarize_results(ratio_method = "sum")
+
+</code></pre>
+
+
+</div>

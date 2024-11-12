@@ -1,0 +1,337 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sensbayes</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Verifying Optimality of Bayesian D-optimal Designs</h2>
+
+<h3>Description</h3>
+
+<p>Plots the sensitivity (derivative) function  and calculates the efficiency lower bound (ELB) for a  given  Bayesian design.
+Let <code class="reqn">\boldsymbol{x}</code> belongs to <code class="reqn">\chi</code> that denotes the design space.
+Based on the general equivalence theorem,  a design <code class="reqn">\xi^*</code> is optimal if and only if the value of the sensitivity (derivative) function
+is non-positive for all <code class="reqn">\boldsymbol{x}</code> in <code class="reqn">\chi</code> and zero when
+<code class="reqn">\boldsymbol{x}</code> belongs to the support of <code class="reqn">\xi^*</code> (be equal to the one of the design points).
+</p>
+<p>For an approximate (continuous) design, when the design space is one or two-dimensional, the user can visually verify the optimality of the design by observing the
+sensitivity plot. Furthermore, the proximity of the design to the optimal design
+can be measured by the  ELB without knowing the latter.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sensbayes(
+  formula,
+  predvars,
+  parvars,
+  family = gaussian(),
+  x,
+  w,
+  lx,
+  ux,
+  fimfunc = NULL,
+  prior = list(),
+  sens.control = list(),
+  sens.bayes.control = list(),
+  crt.bayes.control = list(),
+  plot_3d = c("lattice", "rgl"),
+  plot_sens = TRUE,
+  npar = NULL,
+  calculate_criterion = TRUE,
+  silent = FALSE,
+  crtfunc = NULL,
+  sensfunc = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>A linear or nonlinear model <code>formula</code>.
+A symbolic description of the model consists of predictors and the unknown model parameters.
+Will be coerced to a <code>formula</code> if necessary.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predvars</code></td>
+<td>
+<p>A vector of characters. Denotes the predictors in the <code>formula</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parvars</code></td>
+<td>
+<p>A vector of characters. Denotes the unknown parameters in the <code>formula</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>A description of the response distribution and the link function to be used in the model.
+This can be a family function, a call to a family function or a character string naming the family.
+Every family function has a link argument allowing to specify the link function to be applied on the response variable.
+If not specified, default links are used. For details see <code>family</code>.
+By default, a linear gaussian model <code>gaussian()</code> is applied.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A vector of candidate design (support) points.
+When is not set to <code>NULL</code> (default),
+the algorithm only finds the optimal weights for the candidate points in  <code>x</code>.
+Should be set when the user has a finite number of candidate design points  and the purpose
+is to find the optimal weight for each of them (when zero, they will be excluded from the design).
+For design points with more than one dimension, see 'Details' of <code>sensminimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>Vector of the corresponding design weights for <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lx</code></td>
+<td>
+<p>Vector of lower bounds for the predictors. Should be in the same order as <code>predvars</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ux</code></td>
+<td>
+<p>Vector of upper bounds for the predictors. Should be in the same order as <code>predvars</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fimfunc</code></td>
+<td>
+<p>A function. Returns the FIM as a <code>matrix</code>. Required when <code>formula</code> is missing. See 'Details' of <code>minimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior</code></td>
+<td>
+<p>An object of class <code>cprior</code>. User can also use one of the functions
+<code>uniform</code>, <code>normal</code>,
+<code>skewnormal</code> or <code>student</code>  to create the  prior. See 'Details' of <code>bayes</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sens.control</code></td>
+<td>
+<p>Control Parameters for Calculating the ELB. For details, see <code>sens.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sens.bayes.control</code></td>
+<td>
+<p>A list. Control parameters to verify the general equivalence theorem. For details, see <code>sens.bayes.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>crt.bayes.control</code></td>
+<td>
+<p>A list. Control parameters to approximate the integral in  the Bayesian criterion at a given design over the parameter space.
+For details, see <code>crt.bayes.control</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_3d</code></td>
+<td>
+<p>Which package should be used to plot the sensitivity (derivative) function for two-dimensional design space. Defaults to <code>"lattice"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_sens</code></td>
+<td>
+<p>Plot the sensitivity (derivative) function? Defaults to <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>npar</code></td>
+<td>
+<p>Number of model parameters.  Used when <code>fimfunc</code> is given instead of <code>formula</code> to specify the number of model parameters.
+If not specified correctly, the sensitivity (derivative) plot may be shifted below the y-axis.
+When <code>NULL</code> (default), it will be set to <code>length(parvars)</code> or
+<code>prior$npar</code> when <code>missing(formula)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>calculate_criterion</code></td>
+<td>
+<p>Calculate the optimality criterion? See 'Details' of <code>sensminimax</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>silent</code></td>
+<td>
+<p>Do not print anything? Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>crtfunc</code></td>
+<td>
+<p>(Optional) a function that specifies an arbitrary criterion. It must have especial arguments and output. See 'Details' of <code>bayes</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sensfunc</code></td>
+<td>
+<p>(Optional) a function that specifies the sensitivity function for <code>crtfunc</code>. See 'Details' of <code>bayes</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Let <code class="reqn">\Xi</code> be the space of all  approximate designs with
+<code class="reqn">k</code> design points (support points) at <code class="reqn">x_1, x_2, ...,  x_k</code> from  design space <code class="reqn">\chi</code> with
+corresponding weights  <code class="reqn">w_1, . . . ,w_k</code>.
+Let <code class="reqn">M(\xi, \theta)</code> be the Fisher information
+matrix (FIM) of a <code class="reqn">k-</code>point design <code class="reqn">\xi</code>
+and  <code class="reqn">\pi(\theta)</code> is a user-given  prior distribution for the vector of unknown parameters <code class="reqn">\theta</code>.
+A design <code class="reqn">\xi^*</code> is Bayesian D-optimal among all designs on <code class="reqn">\chi</code> if and only if  the following inequality holds for all <code class="reqn">\boldsymbol{x} \in \chi</code>
+</p>
+<p style="text-align: center;"><code class="reqn">c(\boldsymbol{x}, \xi^*) =  \int_{\theta \in Theta}tr M^{-1}(\xi^*, \theta)I(\boldsymbol{x}, \theta)-p \pi(\theta) d\theta\leq 0,</code>
+</p>
+
+<p>with equality at all support points of <code class="reqn">\xi^*</code>.
+Here, <code class="reqn">p</code> is the number of model parameters.
+<code class="reqn">c(\boldsymbol{x},\xi^*)</code> is
+called <strong>sensitivity</strong> or <strong>derivative</strong> function.
+</p>
+<p>Depending on the complexity of the problem at hand, sometimes, the CPU time can be considerably reduced
+by choosing a set of  less conservative values for the tuning parameters <code>tol</code> and <code>maxEval</code> in
+the function <code>sens.bayes.control</code> when <code>sens.bayes.control$method = "cubature"</code>.
+Similarly, this applies  when <code>sens.bayes.control$method = "quadrature"</code>.
+In general, if the CPU time matters, the user should find an appropriate speed-accuracy trade-off  for her/his own problem.
+See 'Examples' for more details.
+</p>
+
+
+<h3>Note</h3>
+
+<p>The default values of the tuning parameters in <code>sens.bayes.control</code> are set in a way that
+having accurate plots for the sensitivity (derivative) function
+and calculating the ELB to a high precision  to be the primary goals,
+although the process may take too long. The user should choose a set of less conservative values
+via the argument <code>sens.bayes.control</code> when the CPU-time is too long or matters.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##################################################################
+# Checking the Bayesian D-optimality of a design for the 2Pl model
+##################################################################
+skew2 &lt;- skewnormal(xi = c(0, 1), Omega = matrix(c(1, -0.17, -0.17, .5), nrow = 2),
+                    alpha = c(-1, 0), lower =  c(-3, .1), upper = c(3, 2))
+## Not run: 
+  sensbayes(formula = ~1/(1 + exp(-b *(x - a))),
+            predvars = "x", parvars = c("a", "b"),
+            family = binomial(),
+            x= c(-2.50914, -1.16780, -0.36904, 1.29227),
+            w =c(0.35767, 0.11032, 0.15621, 0.37580),
+            lx = -3, ux = 3,
+            prior = skew2)
+  # took 29 seconds on my system!
+
+## End(Not run)
+
+# It took very long.
+# We re-adjust the tuning parameters in sens.bayes.control to be faster
+# See how we drastically reduce the maxEval and increase the tolerance
+## Not run: 
+  sensbayes(formula = ~1/(1 + exp(-b *(x - a))),
+            predvars = "x", parvars = c("a", "b"),
+            family = binomial(),
+            x= c(-2.50914, -1.16780, -0.36904, 1.29227),
+            w =c(0.35767, 0.11032, 0.15621, 0.37580),
+            lx = -3, ux = 3,prior = skew2,
+            sens.bayes.control = list(cubature = list(tol = 1e-4, maxEval = 300)))
+  # took 5 Seconds on my system!
+
+## End(Not run)
+
+
+
+# Compare it with the following:
+sensbayes(formula = ~1/(1 + exp(-b *(x - a))),
+          predvars = "x", parvars = c("a", "b"),
+          family = binomial(),
+          x= c(-2.50914, -1.16780, -0.36904, 1.29227),
+          w =c(0.35767, 0.11032, 0.15621, 0.37580),
+          lx = -3, ux = 3,prior = skew2,
+          sens.bayes.control = list(cubature = list(tol = 1e-4, maxEval = 200)))
+# Look at the plot!
+# took 3 seconds on my system
+
+
+########################################################################################
+# Checking the Bayesian D-optimality of a design for the 4-parameter sigmoid emax model
+########################################################################################
+lb &lt;- c(4, 11, 100, 5)
+ub &lt;- c(9, 17, 140, 10)
+## Not run: 
+  sensbayes(formula = ~ theta1 + (theta2 - theta1)*(x^theta4)/(x^theta4 + theta3^theta4),
+            predvars = c("x"), parvars = c("theta1", "theta2", "theta3", "theta4"),
+            x = c(0.78990, 95.66297, 118.42964,147.55809, 500),
+            w = c(0.23426, 0.17071, 0.17684, 0.1827, 0.23549),
+            lx = .001, ux = 500,  prior = uniform(lb, ub))
+  # took 200 seconds on my system
+
+## End(Not run)
+
+# Re-adjust the tuning parameters to have it faster
+## Not run: 
+  sensbayes(formula = ~ theta1 + (theta2 - theta1)*(x^theta4)/(x^theta4 + theta3^theta4),
+            predvars = c("x"), parvars = c("theta1", "theta2", "theta3", "theta4"),
+            x = c(0.78990, 95.66297, 118.42964,147.55809, 500),
+            w = c(0.23426, 0.17071, 0.17684, 0.1827, 0.23549),
+            lx = .001, ux = 500,  prior = uniform(lb, ub),
+            sens.bayes.control = list(cubature = list(tol = 1e-3, maxEval = 300)))
+  # took 4 seconds on my system. See how much it makes difference
+
+## End(Not run)
+
+## Not run: 
+  # Now we try it with quadrature. Default is 6 nodes
+  sensbayes(formula = ~ theta1 + (theta2 - theta1)*(x^theta4)/(x^theta4 + theta3^theta4),
+            predvars = c("x"), parvars = c("theta1", "theta2", "theta3", "theta4"),
+            x = c(0.78990, 95.66297, 118.42964,147.55809, 500),
+            w = c(0.23426, 0.17071, 0.17684, 0.1827, 0.23549),
+            sens.bayes.control = list(method = "quadrature"),
+            lx = .001, ux = 500,  prior = uniform(lb, ub))
+  # 166.519 s
+
+  # use less number of nodes  to see if we can reduce the CPU time
+  sensbayes(formula = ~ theta1 + (theta2 - theta1)*(x^theta4)/(x^theta4 + theta3^theta4),
+            predvars = c("x"), parvars = c("theta1", "theta2", "theta3", "theta4"),
+            x = c(0.78990, 95.66297, 118.42964,147.55809, 500),
+            w = c(0.23426, 0.17071, 0.17684, 0.1827, 0.23549),
+            sens.bayes.control = list(method = "quadrature",
+                                      quadrature = list(level = 3)),
+            lx = .001, ux = 500,  prior = uniform(lb, ub))
+  # we don't have an accurate plot
+
+  # use less number of levels: use 4 nodes
+  sensbayes(formula = ~ theta1 + (theta2 - theta1)*(x^theta4)/(x^theta4 + theta3^theta4),
+            predvars = c("x"), parvars = c("theta1", "theta2", "theta3", "theta4"),
+            x = c(0.78990, 95.66297, 118.42964,147.55809, 500),
+            w = c(0.23426, 0.17071, 0.17684, 0.1827, 0.23549),
+            sens.bayes.control = list(method = "quadrature",
+                                      quadrature = list(level = 4)),
+            lx = .001, ux = 500,  prior = uniform(lb, ub))
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

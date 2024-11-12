@@ -1,0 +1,172 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>aggregate_data</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Aggregate data by categorical variables</h2>
+
+<h3>Description</h3>
+
+<p>Summarizes non-categorical variables in a dataframe by grouping them
+based on specified categorical variables and returns the aggregated result
+along with the tidyverse code used to generate it.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">aggregate_data(
+  data,
+  group_vars,
+  summaries,
+  vars = NULL,
+  names = NULL,
+  quantiles = c(0.25, 0.75)
+)
+
+aggregate_dt(
+  data,
+  dt,
+  dt_comp,
+  group_vars = NULL,
+  summaries,
+  vars = NULL,
+  names = NULL,
+  quantiles = c(0.25, 0.75)
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A dataframe or survey design object to be aggregated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group_vars</code></td>
+<td>
+<p>A character vector specifying the variables in <code>data</code> to '
+be used as grouping factors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>summaries</code></td>
+<td>
+<p>An unnamed character vector or named list of summary
+functions to calculate for each group.
+If unnamed, the vector elements should be names of variables in the
+dataset for which summary statistics need to be calculated.
+If named, the names should correspond to the summary functions
+(e.g., "mean", "sd", "iqr") to be applied to each variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vars</code></td>
+<td>
+<p>(Optional) A character vector specifying the names of variables
+in the dataset for which summary statistics need to be calculated.
+This argument is ignored if <code>summaries</code> is a named list.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>names</code></td>
+<td>
+<p>(Optional) A character vector or named list providing name
+templates for the newly created variables. See details for more
+information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quantiles</code></td>
+<td>
+<p>(Optional) A numeric vector specifying the desired
+quantiles (e.g., c(0.25, 0.5, 0.75)).
+See details for more information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dt</code></td>
+<td>
+<p>A character string representing the name of the date-time variable
+in the dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dt_comp</code></td>
+<td>
+<p>A character string specifying the component of the date-time
+to use for grouping.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>aggregate_data()</code> function accepts any R function that returns a
+single-value summary (e.g., <code>mean</code>, <code>var</code>, <code>sd</code>, <code>sum</code>, <code>IQR</code>). By default,
+new variables are named <code style="white-space: pre;">⁠{var}_{fun}⁠</code>, where <code>{var}</code> is the variable name
+and <code>{fun}</code> is the summary function used. The user can provide custom names
+using the <code>names</code> argument, either as a vector of the same length as <code>vars</code>,
+or as a named list where the names correspond to summary functions (e.g.,
+"mean" or "sd").
+</p>
+<p>The special summary "missing" can be included, which counts the number of
+missing values in the variable. The default name for this summary is
+<code style="white-space: pre;">⁠{var}_missing⁠</code>.
+</p>
+<p>If <code>quantiles</code> are requested, the function calculates the specified
+quantiles (e.g., 25th, 50th, 75th percentiles), creating new variables for
+each quantile. To customize the names of these variables, use <code>{p}</code> as a
+placeholder in the <code>names</code> argument, where <code>{p}</code> represents the quantile
+value. For example, using <code>names = "Q{p}_{var}"</code> will create variables like
+"Q0.25_Sepal.Length" for the 25th percentile.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An aggregated dataframe containing the summary statistics for each
+group, along with the tidyverse code used for the aggregation.
+</p>
+
+
+<h3>Functions</h3>
+
+
+<ul><li> <p><code>aggregate_dt()</code>: Aggregate data by dates and times
+</p>
+</li></ul>
+<h3>Author(s)</h3>
+
+<p>Tom Elliott, Owen Jin, Zhaoming Su
+</p>
+<p>Zhaoming Su
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>code</code>
+</p>
+<p><code>aggregate_data</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">aggregated &lt;-
+    aggregate_data(iris,
+        group_vars = c("Species"),
+        summaries = c("mean", "sd", "iqr")
+    )
+code(aggregated)
+head(aggregated)
+
+</code></pre>
+
+
+</div>

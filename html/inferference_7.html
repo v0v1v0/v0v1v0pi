@@ -1,0 +1,224 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>interference</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimate Causal Effects in presence of interference</h2>
+
+<h3>Description</h3>
+
+<p>Estimate Causal Effects in presence of interference
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">interference(
+  formula,
+  propensity_integrand = "logit_integrand",
+  loglihood_integrand = propensity_integrand,
+  allocations,
+  data,
+  model_method = "glmer",
+  model_options = list(family = stats::binomial(link = "logit")),
+  causal_estimation_method = "ipw",
+  causal_estimation_options = list(variance_estimation = "robust"),
+  conf.level = 0.95,
+  rescale.factor = 1,
+  integrate_allocation = TRUE,
+  runSilent = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>The formula used to define the causal model.  Has a minimum 
+of 4 parts, separated by <code>|</code> and <code>~</code> in a specific structure: 
+<code>outcome | exposure ~ propensity covariates | group</code>. The order matters, 
+and the pipes split the data frame into corresponding pieces. The part 
+separated by <code>~</code> is passed to the chosen <code>model_method</code> used to 
+estimate or fix propensity parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>propensity_integrand</code></td>
+<td>
+<p>A function, which may be created by the user, 
+used to compute the IP weights. This defaults to <code>logit_integrand</code>, 
+which calculates the product of inverse logits for individuals in a group: 
+<code class="reqn">\prod_{j = 1}^{n_i} \{r \times h_{ij}(b_i)^{A_{ij}}\}\{1 - r \times 
+h_{ij}(b_i)\}^{1 - A_{ij}} f_b(b_i; \theta_s)</code> where </p>
+<p style="text-align: center;"><code class="reqn">h_{ij}(b_i) = logit^{-1}
+(\mathbf{X}_{ij}\theta_a + b_i)</code>
+</p>
+<p> and <code class="reqn">b_i</code> is a group-level random effect, 
+<code class="reqn">f_b</code> is a <code class="reqn">N(0, \theta_s)</code> density, and <code class="reqn">r</code> is a known 
+randomization probability which may be useful if a participation vector is 
+included in the <code>formula</code>. If no random effect was included in the 
+<code>formula</code>, <code>logit_integrand</code> essentially ignores the random effect 
+and <code class="reqn">f_b(b_i, \theta_s)</code> integrates to 1. See details for arguments that 
+can be passed to <code>logit_integrand</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loglihood_integrand</code></td>
+<td>
+<p>A function, which may be created by the user, that
+defines the log likelihood of the logit model used for <code>robust</code> variance
+estimation. Generally, this will be the same function as 
+<code>propensity_integrand</code>. Indeed, this is the default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>allocations</code></td>
+<td>
+<p>a vector of values in (0, 1). Increasing the number of 
+elements of the allocation vector greatly increases computation time; however, 
+a larger number of allocations will make plots look nicer. A minimum of two 
+allocations is required.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>the analysis data frame. This must include all the variables 
+defined in the <code>formula</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model_method</code></td>
+<td>
+<p>the method used to estimate or set the propensity model 
+parameters. Must be one of <code>'glm'</code>, <code>'glmer'</code>, or <code>'oracle'</code>. 
+Defaults to <code>'glmer'</code>. For a fixed effects only model use <code>'glm'</code>, 
+and to include random effects use<code>'glmer'</code>. <code>logit_integrand</code> 
+only supports a single random effect for the grouping variable, so if more 
+random effects are included in the model, different <code>propensity_integrand</code>
+and <code>loglihood_integrand</code> functions should be defined. When the propensity 
+parameters are known (as in simulations) or if estimating parameters by 
+other methods, use the <code>'oracle'</code> option. See <code>model_options</code> for
+details on how to pass the oracle parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model_options</code></td>
+<td>
+<p>a list of options passed to the function in 
+<code>model_method</code>. Defaults to <code>list(family = binomial(link = 'logit'))</code>. 
+When <code>model_method = 'oracle'</code>, the list must have two elements (1)
+<code>fixed_effects</code> and (2) <code>random_effects</code>. If the model did not include 
+random effects, set <code>random.effects = NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>causal_estimation_method</code></td>
+<td>
+<p>currently only supports <code>'ipw'</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>causal_estimation_options</code></td>
+<td>
+<p>A list. Current options are: (1) <code>variance_estimation</code> is 
+either <code>'naive'</code> or <code>'robust'</code>. See details. Defaults to <code>'robust'</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conf.level</code></td>
+<td>
+<p>level for confidence intervals. Defaults to <code>0.95</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rescale.factor</code></td>
+<td>
+<p>a scalar multiplication factor by which to rescale outcomes
+and effects. Defaults to <code>1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>integrate_allocation</code></td>
+<td>
+<p>Indicator of whether the integrand function uses 
+the allocation parameter. Defaults to TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>runSilent</code></td>
+<td>
+<p>if FALSE, status of computations are printed to console. Defaults to TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Used to pass additional arguments to internal functions such as 
+<code>numDeriv::grad()</code> or <code>integrate()</code>. Additionally, arguments can be 
+passed to the <code>propensity_integrand</code> and <code>loglihood_integrand</code> functions.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The following formula includes a random effect for the group: <code>outcome | 
+exposure ~ propensity covariates + (1|group) | group</code>. In this instance, the 
+group variable appears twice. If the study design includes a "participation" 
+variable, this is easily added to the formula: <code>outcome | exposure | 
+participation ~ propensity covariates | group</code>. 
+</p>
+<p><code>logit_integrand</code> has two options that can be passed via the <code>...</code> 
+argument: 
+</p>
+
+<ul>
+<li> <p><code>randomization</code>: a scalar. This is the <code class="reqn">r</code> in the formula just 
+above. It defaults to 1 in the case that a <code>participation</code> vector is not 
+included. The vaccine study example demonstrates use of this argument.
+</p>
+</li>
+<li> <p><code>integrate_allocation</code>: <code>TRUE/FALSE</code>. When group sizes grow 
+large (over 1000), the product term of <code>logit_integrand</code> tends quickly to 0. 
+When set to <code>TRUE</code>, the IP weights tend less quickly to 0. 
+Defaults to <code>FALSE</code>.
+</p>
+</li>
+</ul>
+<p>If the true propensity model is known (e.g. in simulations) use 
+<code>variance_estimatation = 'naive'</code>; otherwise, use the default 
+<code>variance_estimatation = 'robust'</code>. Refer to the web appendix of
+Heydrich-Perez et al. (2014) (doi: <a href="https://doi.org/10.1111/biom.12184">10.1111/biom.12184</a>)
+for complete details.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a list of overall and group-level IPW point estimates, overall 
+and group-level IPW point estimates (using the weight derivatives), derivatives
+of the loglihood, the computed weight matrix, the computed 
+weight derivative array, and a summary.
+</p>
+
+
+<h3>References</h3>
+
+<p>Saul, B. and Hugdens, M. G. (2017). 
+A Recipe for inferference: Start with Causal Inference. Add Interference. Mix Well with R. 
+Journal of Statistical Software, 82(2), 1-21. doi: <a href="https://doi.org/10.18637/jss.v082.i02">10.18637/jss.v082.i02</a>
+</p>
+<p>Perez-Heydrich, C., Hudgens, M. G., Halloran, M. E., Clemens, J. D., Ali, M., &amp; Emch, M. E. (2014). 
+Assessing effects of cholera vaccination in the presence of interference. Biometrics, 70(3), 731-741.
+</p>
+<p>Tchetgen Tchetgen, E. J., &amp; VanderWeele, T. J. (2012). On causal inference in the presence of interference. 
+Statistical Methods in Medical Research, 21(1), 55-75.
+</p>
+
+
+</div>

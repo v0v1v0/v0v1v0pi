@@ -1,0 +1,142 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Procrustes</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Procrustes Transformation</h2>
+
+<h3>Description</h3>
+
+<p>This function performs a Procrustes transformation on a matrix <code>X</code> to minimize the squared distance between <code>X</code> and another comparable matrix <code>Xstar</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Procrustes(X,
+           Xstar,
+           translate = FALSE,
+           dilate = FALSE,
+           sumsq = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>The matrix to be transformed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Xstar</code></td>
+<td>
+<p>The target matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>translate</code></td>
+<td>
+<p>Logical value indicating whether <code>X</code> should be translated (defaults to <code>FALSE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dilate</code></td>
+<td>
+<p>Logical value indicating whether <code>X</code> should be dilated (defaults to <code>FALSE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sumsq</code></td>
+<td>
+<p>Logical value indicating whether the sum of squared differences between <code>X</code> and <code>Xstar</code> should be calculated and returned.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+
+<p><code>R</code>, <code>tt</code>, and <code>d</code> are chosen so that:
+</p>
+<p style="text-align: center;"><code class="reqn">d \times \mathbf{X} \mathbf{R} + 1\hspace*{-3.5pt}1 \underline{t}^\top \approx X^\star</code>
+</p>
+
+<p><code>X.new</code> is given by:
+</p>
+<p style="text-align: center;"><code class="reqn">X_{\textrm{new}} = d \times \mathbf{X} \mathbf{R} + 1\hspace*{-3.5pt}1 \underline{t}^\top</code>
+</p>
+
+
+
+
+<h3>Value</h3>
+
+<p>A list containing:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>X.new</code></td>
+<td>
+<p>The matrix that is the Procrustes transformed version of <code>X</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+<p>The rotation matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t</code></td>
+<td>
+<p>The translation vector (if <code>isTRUE(translate)</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p>The scaling factor (is <code>isTRUE(dilate)</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ss</code></td>
+<td>
+<p>The sum of squared differences (if <code>isTRUE(sumsq)</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p><code>X</code> is padded out with columns containing <code>0</code> if it has fewer columns than <code>Xstar</code>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Borg, I. and Groenen, P. J. F. (1997) <em>Modern Multidimensional Scaling: Theory and Applications</em>. Springer Series in Statistics. New York, NY, USA: Springer-Verlag, pp. 340-342.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Match two matrices, allowing translation and dilation
+mat1     &lt;- diag(rnorm(10))
+mat2     &lt;- 0.05 * matrix(rnorm(100), 10, 10) + mat1
+proc     &lt;- Procrustes(X=mat1, Xstar=mat2, translate=TRUE, dilate=TRUE, sumsq=TRUE)
+
+# Extract the transformed matrix, rotation matrix, translation vector and scaling factor
+mat_new  &lt;- proc$X.new
+mat_rot  &lt;- proc$R
+mat_t    &lt;- proc$t
+mat_d    &lt;- proc$d
+
+# Compare the sum of squared differences to a Procrustean transformation with rotation only
+mat_ss   &lt;- proc$ss
+mat_ss2  &lt;- Procrustes(X=mat1, Xstar=mat2, sumsq=TRUE)$ss
+</code></pre>
+
+
+</div>

@@ -1,0 +1,176 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Pb0corr</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Common Pb correction</h2>
+
+<h3>Description</h3>
+
+<p>Applies a common-Pb correction to a U-Pb dataset using either the
+Stacey-Kramers mantle evolution model, isochron regression, or any
+nominal initial Pb isotope composition.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Pb0corr(x, option = 3, omit4c = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an object of class <code>UPb</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>option</code></td>
+<td>
+<p>one of either
+</p>
+<p><code>1</code>: nominal common Pb isotope composition
+</p>
+<p><code>2</code>: isochron regression
+</p>
+<p><code>3</code>: Stacey-Kramers correction</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>omit4c</code></td>
+<td>
+<p>vector with indices of aliquots that should be
+omitted from the isochron regression (only used if
+<code>option=2</code>)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>IsoplotR</code> implements nine different methods to correct for
+the presence of non-radiogenic (‘common’) lead. This includes three
+strategies tailored to datasets that include <code class="reqn">^{204}</code>Pb
+measurements, three strategies tailored to datasets that include
+<code class="reqn">^{208}</code>Pb measurements, and a further three strategies for
+datasets that only include <code class="reqn">^{206}</code>Pb and
+<code class="reqn">^{207}</code>Pb.
+</p>
+<p><code class="reqn">^{204}</code>Pb is the only one of lead's four stable isotopes that
+does not have a naturally occurring radioactive parent. This makes
+it very useful for common-Pb correction:
+</p>
+<p><code class="reqn">\left[\frac{{}^{206|7}Pb}{{}^{204}Pb}\right]_r =
+\left[\frac{{}^{206|7}Pb}{{}^{204}Pb}\right]_m -
+\left[\frac{{}^{206|7}Pb}{{}^{204}Pb}\right]_\circ</code>
+</p>
+<p>where <code class="reqn">[{}^{206|7}Pb/^{204}Pb]_r</code> marks the radiogenic
+<code class="reqn">{}^{206}</code>Pb or <code class="reqn">{}^{207}</code>Pb component;
+<code class="reqn">[{}^{206|7}Pb/^{204}Pb]_m</code> is the measured ratio; and
+<code class="reqn">[{}^{206|7}Pb/^{204}Pb]_\circ</code> is the non-radiogenic component.
+</p>
+<p><code>IsoplotR</code> offers three different ways to determine
+<code class="reqn">[{}^{206|7}Pb/^{204}Pb]_\circ</code>. The first and easiest option
+is to simply use a nominal value such as the
+<code class="reqn">{}^{206|7}</code>Pb/<code class="reqn">^{204}</code>Pb-ratio of a cogenetic feldspar,
+assuming that this is representative for the common-Pb composition
+of the entire sample. A second method is to determine the
+non-radiogenic isotope composition by fitting an isochron line
+through multiple aliquots of the same sample, using the
+3-dimensional regression algorithm of Ludwig (1998).
+</p>
+<p>Unfortunately, neither of these two methods is applicable to
+detrital samples, which generally lack identifiable cogenetic
+minerals and aliquots. For such samples, <code>IsoplotR</code> infers the
+common-Pb composition from the two-stage crustal evolution model of
+Stacey and Kramers (1975). The second stage of this model is
+described by:
+</p>
+<p><code class="reqn">\left[\frac{{}^{206}Pb}{{}^{204}Pb}\right]_\circ =
+\left[\frac{{}^{206}Pb}{{}^{204}Pb}\right]_{3.7Ga} +
+\left[\frac{{}^{238}U}{{}^{204}Pb}\right]_{sk}
+\left(e^{\lambda_{238}3.7Ga}-e^{\lambda_{238}t}\right)</code>
+</p>
+<p>where <code class="reqn">\left[{}^{206}Pb/{}^{204}Pb\right]_{3.7Ga} = 11.152</code> and
+<code class="reqn">\left[{}^{238}U/{}^{204}Pb\right]_{sk} = 9.74</code>. These
+Equations can be solved for <code class="reqn">t</code> and
+<code class="reqn">\left[{}^{206}Pb/{}^{204}Pb\right]_\circ</code> using the method of
+maximum likelihood. The <code class="reqn">{}^{207}</code>Pb/<code class="reqn">{}^{204}</code>Pb-ratio is
+corrected in exactly the same way, using
+<code class="reqn">\left[{}^{207}Pb/{}^{204}Pb\right]_{3.7Ga} = 12.998</code>.
+</p>
+<p>In the absence of <code class="reqn">^{204}</code>Pb measurements, a <code class="reqn">^{208}</code>Pb-based
+common lead correction can be used:
+</p>
+<p><code class="reqn">\frac{{}^{206|7}Pb_r}{{}^{208}Pb_\circ} =
+\frac{{}^{206|7}Pb_m}{{}^{208}Pb_\circ} -
+\left[\frac{{}^{206|7}Pb}{{}^{208}Pb}\right]_\circ</code>
+</p>
+<p>where <code class="reqn">{}^{208}Pb_\circ</code> marks the non-radiogenic
+<code class="reqn">{}^{208}Pb</code>-component, which is obtained by removing the
+radiogenic component for any given age.
+</p>
+<p>If neither <code class="reqn">{}^{204}</code>Pb nor <code class="reqn">{}^{208}</code>Pb were measured,
+then a <code class="reqn">^{207}</code> Pb-based common lead correction can be used:
+</p>
+<p><code class="reqn"> \left[\frac{{}^{207}Pb}{{}^{206}Pb}\right]_m = f
+\left[\frac{{}^{207}Pb}{{}^{206}Pb}\right]_\circ + (1-f)
+\left[\frac{{}^{207}Pb}{{}^{204}Pb}\right]_r</code>
+</p>
+<p>where <code class="reqn">f</code> is the fraction of common lead, and
+<code class="reqn">[{}^{207}Pb/{}^{206}Pb]_r</code> is obtained by projecting the U-Pb
+measurements on the concordia line in Tera-Wasserburg space.  Like
+before, the initial lead composition
+<code class="reqn">[{}^{207}Pb/{}^{206}Pb]_\circ</code> can be obtained in three
+possible ways: by analysing a cogenetic mineral, by isochron
+regression through multiple aliquots, or from the Stacey and
+Kramers (1975) model.
+</p>
+<p>Besides the common-Pb problem, a second reason for U-Pb discordance
+is radiogenic Pb-loss during igneous and metamorphic activity.
+This moves the data away from the concordia line along a linear
+array, forming an isochron or ‘discordia’ line.  <code>IsoplotR</code>
+fits this line using the Ludwig (1998) algorithm. If the data are
+plotted on a Wetherill concordia diagram, the program will not only
+report the usual lower intercept with the concordia line, but the
+upper intercept as well. Both values are geologically meaningful as
+they constrain both the initial igneous age as well as the timing
+of the partial resetting event.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a list in which <code>x.raw</code> contains the original data and
+<code>x</code> the common Pb-corrected compositions. All other items in
+the list are inherited from the input data.
+</p>
+
+
+<h3>References</h3>
+
+<p>Ludwig, K.R., 1998. On the treatment of concordant uranium-lead
+ages. Geochimica et Cosmochimica Acta, 62(4), pp.665-676.
+</p>
+<p>Stacey, J.T. and Kramers, 1., 1975. Approximation of terrestrial
+lead isotope evolution by a two-stage model. Earth and Planetary
+Science Letters, 26(2), pp.207-221.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">attach(examples)
+corrected &lt;- Pb0corr(UPb,option=2)
+concordia(corrected)
+# produces identical results as:
+dev.new()
+concordia(UPb,common.Pb=2)
+</code></pre>
+
+
+</div>

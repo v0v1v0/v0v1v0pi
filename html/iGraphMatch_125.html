@@ -1,0 +1,152 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sample_correlated_ieg_pair</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Sample graphs from edge probability matrix and correlation matrix</h2>
+
+<h3>Description</h3>
+
+<p>Sample a pair of graphs with specified edge probability and
+correlation between each pair of vertices.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sample_correlated_ieg_pair(
+  n,
+  p_mat,
+  c_mat,
+  ncore = n,
+  directed = FALSE,
+  loops = FALSE,
+  permutation = 1:n
+)
+
+sample_correlated_rdpg_pair(X, corr, ncore = nrow(X), ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>An integer. Number of total vertices for the sampled graphs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p_mat</code></td>
+<td>
+<p>An <code>n-by-n</code> matrix. Edge probability matrix, each entry
+should be in the open (0,1) interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c_mat</code></td>
+<td>
+<p>An <code>n-by-n</code> matrix. The target Pearson correlation matrix,
+each entry should be in the open (0,1) interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ncore</code></td>
+<td>
+<p>An integer. Number of core vertices.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>directed</code></td>
+<td>
+<p>Logical scalar, whether to generate directed graphs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loops</code></td>
+<td>
+<p>Logical scalar, whether self-loops are allowed in the graph.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>permutation</code></td>
+<td>
+<p>A numeric vector,permute second graph.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>A matrix. Dot products matrix, each entry must be in open (0,1)
+interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>corr</code></td>
+<td>
+<p>A number. The target Pearson correlation between the adjacency
+matrices of the generated graphs. It must be in open (0,1) interval.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Passed to <code>sample_correlated_ieg_pair</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>sample_correlated_ieg_pair</code> returns two igraph objects named
+<code>graph1</code> and <code>graph2</code>. If sample two graphs with junk vertices,
+the first <code>ncore</code> vertices are core vertices and the rest are junk
+vertices.
+</p>
+<p><code>sample_correlated_rdpg_pair</code> returns two igraph objects named
+<code>graph1</code> and <code>graph2</code> that are sampled from random dot product
+graphs model. If sample two graphs with junk vertices, the first
+<code>ncore</code> vertices are core vertices and the rest are junk vertices.
+</p>
+
+
+<h3>References</h3>
+
+<p>S. Young and E. Scheinerman (2007), <em>Random Dot Product
+Graph Models for Social Networks</em>. Proceedings of the 5th International
+Conference on Algorithms and Models for the Web-graph, pages 138-149.
+</p>
+<p>F. Fang and D. Sussman and V. Lyzinski (2018), <em>Tractable
+Graph Matching via Soft Seeding</em>. <a href="https://arxiv.org/abs/1807.09299">https://arxiv.org/abs/1807.09299</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>sample_correlated_gnp_pair</code>,
+<code>sample_correlated_sbm_pair</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">n &lt;- 50
+p_mat &lt;- matrix(runif(n^2),n)
+c_mat &lt;- matrix(runif(n^2),n)
+sample_correlated_ieg_pair(n,p_mat,c_mat,ncore=40)
+
+## sample a pair of igraph objects from random dot
+## product graphs model with dimension 3 and scale 8
+n &lt;- 50
+xdim &lt;- 3
+scale &lt;- 8
+X &lt;- matrix(rgamma(n*(xdim+1),scale,1),n,xdim+1)
+X &lt;- X/rowSums(X)
+X &lt;- X[,1:xdim]
+sample_correlated_rdpg_pair(X,corr=0.5,ncore=40)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,451 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>bootIPEC</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Bootstrap Function for Nonlinear Regression</h2>
+
+<h3>Description</h3>
+
+<p>Generates the density distributions, standard errors, confidence intervals, 
+covariance matrices and correlation matrices of parameters 
+based on bootstrap replications.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">bootIPEC( expr, x, y, ini.val, weights = NULL, control = list(), 
+          nboot = 200, CI = 0.95, fig.opt = TRUE, fold = 3.5, 
+          unique.num = 2, prog.opt = TRUE )
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>expr</code></td>
+<td>
+<p>A given parametric model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A vector or matrix of observations of independent variable(s)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>A vector of observations of response variable</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ini.val</code></td>
+<td>
+<p>A vector or list of initial values of model parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>An optional vector of weights to be used in the fitting process. 
+<code>weights</code> should be NULL or a numeric vector. If non-NULL, weighted least squares is used with weights <code>weights</code>; 
+otherwise ordinary least squares is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>A list of control parameters for using the <code>optim</code> 
+function in package <span class="pkg">stats</span></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nboot</code></td>
+<td>
+<p>The number of bootstrap replications</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CI</code></td>
+<td>
+<p>The confidence level(s) of the required interval(s)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fig.opt</code></td>
+<td>
+<p>An option of drawing figures of the distributions of bootstrap values of 
+parameters and figures of pairwise comparisons of bootstrap values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fold</code></td>
+<td>
+<p>A parameter removing the extreme bootstrap values of parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unique.num</code></td>
+<td>
+<p>The least number of sampled non-overlapping data points 
+for carrying out a bootstrap nonlinear regression</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prog.opt</code></td>
+<td>
+<p>An option of showing the running progress of bootstrap</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>ini.val</code> can be a vector or a list that has saved initial values for model parameters, 
+</p>
+<p>e.g. <code>y = beta0 + beta1 * x + beta2 * x^2</code>, 
+</p>
+<p><code>ini.val = list(beta0=seq(5, 15, len=2), beta1=seq(0.1, 1, len=9), 
+beta2=seq(0.01, 0.05, len=5))</code>, which is similar to the usage of the 
+input argument of <code>start</code> of <code>nls</code> in package <span class="pkg">stats</span>. 
+</p>
+<p>In the <code>weights</code> argument option, the default is <code>weights = NULL</code>. 
+In that case, ordinary least squares is used. 
+The residual sum of squares (RSS) between the observed and predicted <code class="reqn">y</code> values 
+is minimized to estimate a model's parameters, i.e., 
+</p>
+<p style="text-align: center;"><code class="reqn">\mbox{RSS} = \sum_{i=1}^{n}\left(y_i-\hat{y}_i\right)^{2}</code>
+</p>
+
+<p>where <code class="reqn">y_i</code> and <code class="reqn">\hat{y}_i</code> represent the observed and predicted <code class="reqn">y</code> values, respectively; 
+and <code class="reqn">n</code> represents the sample size. If <code>weights</code> is a numeric vector, 
+the weighted residual sum of squares is minimized, i.e.,   
+</p>
+<p style="text-align: center;"><code class="reqn">\mbox{RSS} = \sum_{i=1}^{n}w_i\left(y_i-\hat{y}_i\right)^{2}</code>
+</p>
+ 
+<p>where <code class="reqn">w_i</code> is the <code class="reqn">i</code> elements of <code>weights</code>.
+</p>
+<p><code>CI</code> determines the width of confidence intervals. 
+</p>
+<p><code>fold</code> is used to delete the data whose differences from the median exceed 
+a certain <code>fold</code> of the difference between 3/4 and 1/4 quantiles of the 
+bootstrap values of a model parameter. 
+</p>
+<p>The default of <code>unique.num</code> is 2. That is, at least two non-overlapping data 
+points randomly sampled from <code class="reqn">\left(x, y\right)</code> are needed for carrying out 
+a bootstrap nonlinear regression.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>M</code></td>
+<td>
+<p>The matrix saving the fitted results of all <code>nboot</code> bootstrap 
+values of model parameters and goodness of fit</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>perc.ci.mat</code></td>
+<td>
+<p>The matrix saving the estimate, standard error, median, mean, 
+and the calculated lower and upper limits of confidence interval based on 
+the bootstrap percentile method</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bca.ci.mat</code></td>
+<td>
+<p>The matrix saving the estimate, standard error, median, mean, 
+and the calculated lower and upper limits of confidence interval based on 
+the bootstrap <code class="reqn">BC_a</code> method</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>covar.mat</code></td>
+<td>
+<p>The covariance matrix of parameters based on the bootstrap 
+values when <code>nboot &gt; 1</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cor.mat</code></td>
+<td>
+<p>The correlation matrix of parameters based on the bootstrap 
+values when <code>nboot &gt; 1</code></p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>To obtain reliable confidence intervals of model parameters, more than <strong>2000</strong> 
+bootstrap replications are recommended; whereas to obtain a reliable standard error of the estimate 
+of a parameter, more than <strong>30</strong> bootstrap replications are sufficient (Efron and Tibshirani 1993). 
+<code>bca.ci.mat</code> is recommended to show better confidence intervals of parameters than 
+those in <code>perc.ci.mat</code>. 
+</p>
+<p>The outputs of model parameters will all be represented by <code class="reqn">\theta_i</code>, <code class="reqn">i</code> from 1 
+to <code class="reqn">p</code>, where <code class="reqn">p</code> represents the number of model parameters. The letters of model 
+parameters defined by users such as <code class="reqn">\beta_i</code> will be automatically replaced by <code class="reqn">\theta_i</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Peijian Shi <a href="mailto:pjshi@njfu.edu.cn">pjshi@njfu.edu.cn</a>, Peter M. Ridland <a href="mailto:p.ridland@unimelb.edu.au">p.ridland@unimelb.edu.au</a>, 
+David A. Ratkowsky <a href="mailto:d.ratkowsky@utas.edu.au">d.ratkowsky@utas.edu.au</a>, Yang Li <a href="mailto:yangli@fau.edu">yangli@fau.edu</a>.
+</p>
+
+
+<h3>References</h3>
+
+<p>Efron, B. and Tibshirani, R.J. (1993) <em>An Introduction to the Bootstrap</em>. 
+Chapman and Hall (CRC), New York. <a href="https://doi.org/10.2307/2532810">doi:10.2307/2532810</a>
+</p>
+<p>Sandhu, H.S., Shi, P., Kuang, X., Xue, F. and Ge, F. (2011) Applications of the bootstrap to 
+insect physiology. <em>Fla. Entomol.</em> 94, 1036<code class="reqn">-</code>1041. <a href="https://doi.org/10.1653/024.094.0442">doi:10.1653/024.094.0442</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>fitIPEC</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#### Example 1 #################################################################################
+graphics.off()
+# The velocity of the reaction (counts/min^2) under different substrate concentrations 
+#   in parts per million (ppm) (Page 269 of Bates and Watts 1988)
+
+x1 &lt;- c(0.02, 0.02, 0.06, 0.06, 0.11, 0.11, 0.22, 0.22, 0.56, 0.56, 1.10, 1.10)
+y1 &lt;- c(76, 47, 97, 107, 123, 139, 159, 152, 191, 201, 207, 200)
+
+# Define the Michaelis-Menten (MM) model
+MM &lt;- function(theta, x){
+    theta[1]*x / ( theta[2] + x )    
+}
+
+
+  set.seed(123)
+  res4 &lt;- bootIPEC( MM, x=x1, y=y1, ini.val=c(200, 0.05), 
+                    control=list(reltol=1e-20, maxit=40000), nboot=2000, CI=0.95, 
+                    fig.opt=TRUE )
+  res4
+  set.seed(NULL)
+
+#################################################################################################
+
+
+#### Example 2 ##################################################################################
+graphics.off()
+# Development data of female pupae of cotton bollworm (Wu et al. 2009)
+# References:
+#   Ratkowsky, D.A. and Reddy, G.V.P. (2017) Empirical model with excellent statistical 
+#       properties for describing temperature-dependent developmental rates of insects  
+#       and mites. Ann. Entomol. Soc. Am. 110, 302-309.
+#   Wu, K., Gong, P. and Ruan, Y. (2009) Estimating developmental rates of 
+#       Helicoverpa armigera (Lepidoptera: Noctuidae) pupae at constant and
+#       alternating temperature by nonlinear models. Acta Entomol. Sin. 52, 640-650.
+
+# 'x2' is the vector of temperature (in degrees Celsius)
+# 'D2' is the vector of developmental duration (in d)
+# 'y2' is the vector of the square root of developmental rate (in 1/d)
+
+x2 &lt;- seq(15, 37, by=1)
+D2 &lt;- c(41.24,37.16,32.47,26.22,22.71,19.01,16.79,15.63,14.27,12.48,
+       11.3,10.56,9.69,9.14,8.24,8.02,7.43,7.27,7.35,7.49,7.63,7.9,10.03)
+y2 &lt;- 1/D2
+y2 &lt;- sqrt( y2 )
+ini.val1 &lt;- c(0.14, 30, 10, 40)
+
+# Define the square root function of the Lobry-Rosso-Flandrois (LRF) model
+sqrt.LRF &lt;- function(P, x){
+  ropt &lt;- P[1]
+  Topt &lt;- P[2]
+  Tmin &lt;- P[3]
+  Tmax &lt;- P[4]
+  fun0 &lt;- function(z){
+    z[z &lt; Tmin] &lt;- Tmin
+    z[z &gt; Tmax] &lt;- Tmax
+    return(z)
+  }
+  x &lt;- fun0(x)
+  if (Tmin &gt;= Tmax | ropt &lt;= 0 | Topt &lt;= Tmin | Topt &gt;= Tmax) 
+    temp &lt;- Inf
+  if (Tmax &gt; Tmin &amp; ropt &gt; 0 &amp; Topt &gt; Tmin &amp; Topt &lt; Tmax){
+    temp &lt;- sqrt( ropt*(x-Tmax)*(x-Tmin)^2/((Topt-Tmin)*((Topt-Tmin
+      )*(x-Topt)-(Topt-Tmax)*(Topt+Tmin-2*x))) )  
+  }
+  return( temp )
+}
+
+myfun &lt;- sqrt.LRF
+
+  set.seed(123)
+  resu4 &lt;- bootIPEC( myfun, x=x2, y=y2, ini.val=ini.val1, 
+                     nboot=2000, CI=0.95, fig.opt=TRUE )
+  resu4
+  set.seed(NULL)
+
+#################################################################################################
+
+
+#### Example 3 ##################################################################################
+graphics.off()
+# Height growth data of four species of bamboo (Gramineae: Bambusoideae)
+# Reference(s):
+# Shi, P., Fan, M., Ratkowsky, D.A., Huang, J., Wu, H., Chen, L., Fang, S. and  
+#     Zhang, C. (2017) Comparison of two ontogenetic growth equations for animals and plants. 
+#     Ecol. Model. 349, 1-10.
+
+data(shoots)
+# Choose a species
+# 1: Phyllostachys iridescens; 2: Phyllostachys mannii; 
+# 3: Pleioblastus maculatus; 4: Sinobambusa tootsik.
+# 'x3' is the vector of the observation times from a specific starting time of growth
+# 'y3' is the vector of the aboveground height values of bamboo shoots at 'x3' 
+
+ind &lt;- 4
+x3  &lt;- shoots$x[shoots$Code == ind]
+y3  &lt;- shoots$y[shoots$Code == ind] 
+
+# Define the beta sigmoid model (bsm)
+bsm &lt;- function(P, x){
+  P  &lt;- cbind(P)
+  if(length(P) !=4 ) {stop(" The number of parameters should be 4!")}
+  ropt &lt;- P[1]
+  topt &lt;- P[2]
+  tmin &lt;- P[3]
+  tmax &lt;- P[4]
+  tailor.fun &lt;- function(x){
+    x[x &lt; tmin] &lt;- tmin
+    x[x &gt; tmax] &lt;- tmax
+    return(x)
+  }
+  x &lt;- tailor.fun(x)   
+  return(ropt*(x-tmin)*(x-2*tmax+topt)/(topt+tmin-
+         2*tmax)*( (x-tmin)/(topt-tmin) )^((topt-tmin)/(tmax-topt)))   
+}
+
+# Define the simplified beta sigmoid model (simp.bsm)
+simp.bsm &lt;- function(P, x, tmin=0){
+  P  &lt;- cbind(P)  
+  ropt  &lt;- P[1]
+  topt  &lt;- P[2]
+  tmax  &lt;- P[3]
+  tailor.fun &lt;- function(x){
+    x[x &lt; tmin] &lt;- tmin
+    x[x &gt; tmax] &lt;- tmax
+    return(x)
+  }
+  x &lt;- tailor.fun(x)   
+  return(ropt*(x-tmin)*(x-2*tmax+topt)/(topt+tmin-
+         2*tmax)*((x-tmin)/(topt-tmin) )^((topt-tmin)/(tmax-topt)))   
+}
+
+# For the original beta sigmoid model
+ini.val2 &lt;- c(40, 30, 5, 50)
+xlab2    &lt;- "Time (d)"
+ylab2    &lt;- "Height (cm)"
+
+
+  set.seed(123)
+  re4 &lt;- bootIPEC( bsm, x=x3, y=y3, ini.val=ini.val2,    
+                   control=list(trace=FALSE, reltol=1e-20, maxit=50000),
+                   nboot=2000, CI=0.95, fig.opt=TRUE, fold=10 )
+  re4
+  set.seed(NULL)
+
+
+# For the simplified beta sigmoid model (in comparison with the original beta sigmoid model)
+ini.val7 &lt;- c(40, 30, 50)
+
+
+  set.seed(123)
+  RESU4 &lt;- bootIPEC( simp.bsm, x=x3, y=y3, ini.val=ini.val7,   
+                     control=list(trace=FALSE, reltol=1e-20, maxit=50000),
+                     nboot=2000, CI=0.95, fig.opt=TRUE, fold=10 )
+  RESU4
+  set.seed(NULL)
+
+#################################################################################################
+
+
+#### Example 4 ##################################################################################
+graphics.off()
+# Weight of cut grass data (Pattinson 1981)
+# References:
+#   Clarke, G.P.Y. (1987) Approximate confidence limits for a parameter function in nonlinear 
+#       regression. J. Am. Stat. Assoc. 82, 221-230.
+#   Gebremariam, B. (2014) Is nonlinear regression throwing you a curve? 
+#       New diagnostic and inference tools in the NLIN Procedure. Paper SAS384-2014. 
+#       http://support.sas.com/resources/papers/proceedings14/SAS384-2014.pdf
+#   Pattinson, N.B. (1981) Dry Matter Intake: An Estimate of the Animal
+#       Response to Herbage on Offer. unpublished M.Sc. thesis, University
+#       of Natal, Pietermaritzburg, South Africa, Department of Grassland Science.
+
+# 'x4' is the vector of weeks after commencement of grazing in a pasture
+# 'y4' is the vector of weight of cut grass from 10 randomly sited quadrants
+
+x4 &lt;- 1:13
+y4 &lt;- c( 3.183, 3.059, 2.871, 2.622, 2.541, 2.184, 
+         2.110, 2.075, 2.018, 1.903, 1.770, 1.762, 1.550 )
+
+# Define the first case of Mitscherlich equation
+MitA &lt;- function(P1, x){
+    P1[3] + P1[2]*exp(P1[1]*x)
+}
+
+# Define the second case of Mitscherlich equation
+MitB &lt;- function(P2, x){
+    log( P2[3] ) + exp(P2[2] + P2[1]*x)
+}
+
+# Define the third case of Mitscherlich equation
+MitC &lt;- function(P3, x, x1=1, x2=13){
+    theta1 &lt;- P3[1]
+    beta2  &lt;- P3[2]
+    beta3  &lt;- P3[3]
+    theta2 &lt;- (beta3 - beta2)/(exp(theta1*x2)-exp(theta1*x1))
+    theta3 &lt;- beta2/(1-exp(theta1*(x1-x2))) - beta3/(exp(theta1*(x2-x1))-1)
+    theta3 + theta2*exp(theta1*x)
+}
+
+
+  set.seed(123)
+  ini.val3 &lt;- c(-0.1, 2.5, 1.0)
+  r4       &lt;- bootIPEC( MitA, x=x4, y=y4, ini.val=ini.val3,    
+                        nboot=2000, CI=0.95, fig.opt=TRUE )
+  r4
+
+  ini.val4 &lt;- c(exp(-0.1), log(2.5), 1)
+  R4       &lt;- bootIPEC( MitB, x=x4, y=y4, ini.val=ini.val4, 
+                        nboot=2000, CI=0.95, fig.opt=TRUE )
+  R4
+
+  # ini.val6 &lt;- c(-0.15, 2.52, 1.09)
+  iv.list2 &lt;- list(seq(-2, -0.05, len=5), seq(1, 4, len=8), seq(0.05, 3, by=0.5))
+  RES0 &lt;- fitIPEC( MitC, x=x4, y=y4, ini.val=iv.list2,    
+                   control=list(trace=FALSE, reltol=1e-10, maxit=5000) )
+  RES0$par
+  RES4 &lt;- bootIPEC( MitC, x=x4, y=y4, ini.val=iv.list2, 
+                    control=list(trace=FALSE, reltol=1e-10, maxit=5000), 
+                    nboot=5000, CI=0.95, fig.opt=TRUE, fold=3.5, unique.num=2 )
+  RES4
+  set.seed(NULL)
+
+#################################################################################################
+</code></pre>
+
+
+</div>

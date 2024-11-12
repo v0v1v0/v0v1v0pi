@@ -1,0 +1,155 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>check_resid</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Inspect residuals of regression models.</h2>
+
+<h3>Description</h3>
+
+<p>Inspect residuals of regression models.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">check_resid(
+  model,
+  AR_start = NULL,
+  split_pred = NULL,
+  ask = TRUE,
+  select = 1:4
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A regression model, resulting from the functions
+<code>gam</code> or <code>bam</code>, or <code>lm</code>,
+<code>glm</code>, <code>lmer</code>, or <code>glmer</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>AR_start</code></td>
+<td>
+<p>Defaults to NULL. 
+Only use this when the model was run in an old versions of package 
+<code>mgcv</code> and the function cannot retrieve the used AR.start values from 
+the <code>model</code>. When an error is shown with newer versions of 
+<code>mgcv</code>, please check the column provided as values of AR.start.
+when using old versions of package <code>mgcv</code>.
+Function will give error when it cannot find AR.start.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>split_pred</code></td>
+<td>
+<p>A names list indicating time series in the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ask</code></td>
+<td>
+<p>Logical: whether or not to show the plots one by one. 
+Defaults to TRUE. When set to FALSE, make sure to have specified 
+sufficient rows and columns to show the X plots. Alternatively, 
+use <code>select</code> to plot only specific plots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>select</code></td>
+<td>
+<p>Vector or numeric value indicating which plots to return 
+(see Notes). Defaults to 1:4 (all).</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+
+<ul>
+<li>
+<p> Plot 1: distribution of residuals with QQ norm plot.
+</p>
+</li>
+<li>
+<p> Plot 2: distribution of residuals with density plot.
+</p>
+</li>
+<li>
+<p> Plot 3: ACF plot of residuals. In case an AR1 model is included, 
+the gray lines indicate standard residuals, and the thick black lines 
+indicate AR1 corrected residuals. 
+</p>
+</li>
+<li>
+<p> Plot 4 (optional): In case the <code>split_pred</code> predictors are 
+specified an ACF plot averaged over the time series is produced. dashed 
+lines indicate the maximum and minimum time series (w.r.t. lag 2), the 
+solid lines the 25
+mean of all time series.
+</p>
+</li>
+</ul>
+<p>See the examples on how to specify a selection of these plots.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jacolien van Rij
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other Model evaluation: 
+<code>diagnostics()</code>,
+<code>plot_modelfit()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(simdat)
+
+## Not run: 
+# Add start event column:
+simdat &lt;- start_event(simdat, event=c('Subject', 'Trial'))
+head(simdat)
+
+# bam model with AR1 model (toy example, not serious model):
+m1 &lt;- bam(Y ~ Group + te(Time, Trial, by=Group), 
+   data=simdat, rho=.5, AR.start=simdat$start.event)
+
+# Warning, no time series specified:
+check_resid(m1)
+
+# Time series specified, results in a 'standard' ACF plot, 
+# treating all residuals as single time seriesand,
+# and an ACF plot with the average ACF over time series:
+check_resid(m1, split_pred=list(Subject=simdat$Subject, Trial=simdat$Trial))
+# Note: residuals do not look very good.
+# Alternative (results in the same, see help(acf_resid) ):
+check_resid(m1, split_pred='AR.start')
+
+# Define larger plot window (choose which line you need):
+dev.new(width=8, height=8) # on windows or mac
+quartz(,8,8)               # on mac
+x11(width=8, height=8)     # on linux or mac
+
+par(mfrow=c(2,2), cex=1.1)
+check_resid(m1, split_pred='AR.start', ask=FALSE)
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

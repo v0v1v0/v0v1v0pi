@@ -1,0 +1,153 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>idstrsplit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Create an iterator for splitting binary or character input into a dataframe
+</h2>
+
+<h3>Description</h3>
+
+<p><code>idstrsplit</code> takes a binary connection or character vector (which is 
+interpreted as a file name) and splits it into a series of dataframes 
+according to the separator.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">idstrsplit(x, col_types, sep="|", nsep=NA, strict=TRUE, 
+           max.line = 65536L, max.size = 33554432L)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>character vector (each element is treated as a row) or a
+raw vector (newlines separate rows)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col_types</code></td>
+<td>
+<p>required character vector or a list. A vector of
+classes to be assumed for the output dataframe. If it is a list,
+<code>class(x)[1]</code> will be used to determine the class of the
+contained element. It will not be recycled, and must
+be at least as long as the longest row if <code>strict</code> is <code>TRUE</code>.
+</p>
+<p>Possible values are <code>"NULL"</code> (when the column is skipped) one of
+the six atomic vector types (<code>'character'</code>, <code>'numeric'</code>,
+<code>'logical'</code>, <code>'integer'</code>,  <code>'complex'</code>, <code>'raw'</code>)
+or <code>POSIXct</code>.
+'POSIXct' will parse date format in the form "YYYY-MM-DD hh:mm:ss.sss"
+assuming GMT time zone. The separators between digits can be any
+non-digit characters and only the date part is mandatory. See also
+<code>fasttime::asPOSIXct</code> for details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep</code></td>
+<td>
+<p>single character: field (column) separator. Set to <code>NA</code>
+for no seperator; in other words, a single column.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nsep</code></td>
+<td>
+<p>index name separator (single character) or <code>NA</code> if no
+index names are included</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>strict</code></td>
+<td>
+<p>logical, if <code>FALSE</code> then <code>dstrsplit</code> will not
+fail on parsing errors, otherwise input not matching the format
+(e.g. more columns than expected) will cause an error.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.line</code></td>
+<td>
+<p>maximum length of one line (in byets) - determines the
+size of the read buffer, default is 64kb</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max.size</code></td>
+<td>
+<p>maximum size of the chunk (in bytes), default is 32Mb</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If <code>nsep</code> is specified then all characters up to (but excluding)
+the occurrence of <code>nsep</code> are treated as the index name. The
+remaining characters are split using the <code>sep</code> character into
+fields (columns). <code>dstrsplit</code> will fail with an error if any
+line contains more columns then expected unless <code>strict</code> is
+<code>FALSE</code>. Excessive columns are ignored in that case. Lines may
+contain fewer columns in which case they are set to <code>NA</code>.
+</p>
+<p>Note that it is legal to use the same separator for <code>sep</code> and
+<code>nsep</code> in which case the first field is treated as a row name and
+subsequent fields as data columns.
+</p>
+<p>If <code>nsep</code> is specified, the output of <code>dstrsplit</code> contains
+an extra column called 'rowindex' containing the row index. This is
+used instead of the rownames to allow for duplicated indicies (which
+are checked for and not allowed in a dataframe, unlike the case with
+a matrix).
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>idstrsplit</code> returns an iterator (closure). When <code>nextElem</code> is
+called on the iterator a data.frame is returned with as many rows as
+they are lines in the input and as many columns as there are
+non-NULL values in <code>col_types</code>, plus an additional column if
+<code>nsep</code> is specified. The colnames (other than the row index)
+are set to 'V' concatenated with the column number unless
+<code>col_types</code> is a named vector in which case the names are
+inherited.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Michael Kane
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">col_names &lt;- names(iris)
+write.csv(iris, file="iris.csv", row.names=FALSE)
+it &lt;- idstrsplit("iris.csv", col_types=c(rep("numeric", 4), "character"), 
+                 sep=",")
+# Get the elements
+iris_read &lt;- it$nextElem()[-1,]
+# or with the iterators package
+# nextElem(it)
+names(iris_read) &lt;- col_names
+print(head(iris_read))
+
+## remove iterator, connections and files
+rm("it")
+gc(FALSE)
+unlink("iris.csv")
+</code></pre>
+
+
+</div>

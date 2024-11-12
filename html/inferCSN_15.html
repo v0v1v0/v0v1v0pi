@@ -1,0 +1,271 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>inferCSN</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+<strong>infer</strong>ring <strong>C</strong>ell-<strong>S</strong>pecific gene regulatory <strong>N</strong>etwork</h2>
+
+<h3>Description</h3>
+
+<p><strong>infer</strong>ring <strong>C</strong>ell-<strong>S</strong>pecific gene regulatory <strong>N</strong>etwork
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">inferCSN(
+  object,
+  penalty = "L0",
+  algorithm = "CD",
+  cross_validation = FALSE,
+  seed = 1,
+  n_folds = 10,
+  percent_samples = 1,
+  r_threshold = 0,
+  regulators = NULL,
+  targets = NULL,
+  regulators_num = NULL,
+  cores = 1,
+  verbose = TRUE,
+  ...
+)
+
+## S4 method for signature 'matrix'
+inferCSN(
+  object,
+  penalty = "L0",
+  algorithm = "CD",
+  cross_validation = FALSE,
+  seed = 1,
+  n_folds = 10,
+  percent_samples = 1,
+  r_threshold = 0,
+  regulators = NULL,
+  targets = NULL,
+  regulators_num = NULL,
+  cores = 1,
+  verbose = TRUE,
+  ...
+)
+
+## S4 method for signature 'sparseMatrix'
+inferCSN(
+  object,
+  penalty = "L0",
+  algorithm = "CD",
+  cross_validation = FALSE,
+  seed = 1,
+  n_folds = 10,
+  percent_samples = 1,
+  r_threshold = 0,
+  regulators = NULL,
+  targets = NULL,
+  regulators_num = NULL,
+  cores = 1,
+  verbose = TRUE,
+  ...
+)
+
+## S4 method for signature 'data.frame'
+inferCSN(
+  object,
+  penalty = "L0",
+  algorithm = "CD",
+  cross_validation = FALSE,
+  seed = 1,
+  n_folds = 10,
+  percent_samples = 1,
+  r_threshold = 0,
+  regulators = NULL,
+  targets = NULL,
+  regulators_num = NULL,
+  cores = 1,
+  verbose = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>The input data for <em><code>inferCSN</code></em>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>penalty</code></td>
+<td>
+<p>The type of regularization, default is <em><code>L0</code></em>.
+This can take either one of the following choices: <em><code>L0</code></em>, <em><code>L0L1</code></em>, and <em><code>L0L2</code></em>.
+For high-dimensional and sparse data, <em><code>L0L2</code></em> is more effective.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algorithm</code></td>
+<td>
+<p>The type of algorithm used to minimize the objective function, default is <em><code>CD</code></em>.
+Currently <em><code>CD</code></em> and <em><code>CDPSI</code></em> are supported.
+The <em><code>CDPSI</code></em> algorithm may yield better results, but it also increases running time.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cross_validation</code></td>
+<td>
+<p>Logical value, default is <em><code>FALSE</code></em>, whether to use cross-validation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>The random seed for cross-validation, default is <em><code>1</code></em>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_folds</code></td>
+<td>
+<p>The number of folds for cross-validation, default is <em><code>10</code></em>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>percent_samples</code></td>
+<td>
+<p>The percent of all samples used for <code>sparse_regression</code>, default is <em><code>1</code></em>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r_threshold</code></td>
+<td>
+<p>Threshold of <code class="reqn">R^2</code> or correlation coefficient, default is <em><code>0</code></em>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>regulators</code></td>
+<td>
+<p>The regulator genes for which to infer the regulatory network.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>targets</code></td>
+<td>
+<p>The target genes for which to infer the regulatory network.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>regulators_num</code></td>
+<td>
+<p>The number of non-zore coefficients, this value will affect the final performance.
+The maximum support size at which to terminate the regularization path.
+Recommend setting this to a small fraction of min(n,p) (e.g. 0.05 * min(n,p)) as L0 regularization typically selects a small portion of non-zeros.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>The number of cores to use for parallelization with <code>foreach</code>, default is <em><code>1</code></em>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>Logical value, default is <em><code>TRUE</code></em>, whether to print progress messages.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Parameters for other methods.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A data table of regulator-target regulatory relationships
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data("example_matrix")
+network_table_1 &lt;- inferCSN(
+  example_matrix
+)
+head(network_table_1)
+
+network_table_2 &lt;- inferCSN(
+  example_matrix,
+  cores = 2
+)
+
+identical(
+  network_table_1,
+  network_table_2
+)
+
+inferCSN(
+  example_matrix,
+  regulators = c("g1", "g2"),
+  targets = c("g3", "g4")
+)
+inferCSN(
+  example_matrix,
+  regulators = c("g1", "g2"),
+  targets = c("g3", "g0")
+)
+inferCSN(
+  example_matrix,
+  regulators = c("g1", "g0"),
+  targets = c("g2", "g3")
+)
+inferCSN(
+  example_matrix,
+  regulators = c("g1"),
+  targets = c("g2")
+)
+## Not run: 
+data("example_matrix")
+network_table &lt;- inferCSN(example_matrix)
+head(network_table)
+
+network_table_sparse_1 &lt;- inferCSN(
+  as(example_matrix, "sparseMatrix")
+)
+head(network_table_sparse_1)
+
+network_table_sparse_2 &lt;- inferCSN(
+  as(example_matrix, "sparseMatrix"),
+  cores = 2
+)
+identical(
+  network_table,
+  network_table_sparse_1
+)
+
+identical(
+  network_table_sparse_1,
+  network_table_sparse_2
+)
+
+plot_scatter(
+  data.frame(
+    network_table$weight,
+    network_table_sparse_1$weight
+  ),
+  legend_position = "none"
+)
+
+plot_weight_distribution(
+  network_table
+) + plot_weight_distribution(
+  network_table_sparse_1
+)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

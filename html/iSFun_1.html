@@ -1,0 +1,209 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iscca</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Integrative sparse canonical correlation analysis</h2>
+
+<h3>Description</h3>
+
+<p>This function provides a penalty-based integrative sparse canonical correlation analysis method to handle the multiple datasets with high dimensions generated under similar protocols, which consists of two built-in penalty items for selecting the important variables for users to choose, and two contrasted penalty functions for eliminating the diffierence (magnitude or sign) between estimators within each group.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iscca(x, y, L, mu1, mu2, mu3, mu4, eps = 1e-04, pen1 = "homogeneity",
+  pen2 = "magnitude", scale.x = TRUE, scale.y = TRUE, maxstep = 50,
+  submaxstep = 10, trace = FALSE, draw = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>list of data matrices, L datasets of explanatory variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>list of data matrices, L datasets of dependent variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L</code></td>
+<td>
+<p>numeric, number of datasets.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu1</code></td>
+<td>
+<p>numeric, sparsity penalty parameter for vector u.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu2</code></td>
+<td>
+<p>numeric, contrasted penalty parameter for vector u.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu3</code></td>
+<td>
+<p>numeric, sparsity penalty parameter for vector v.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu4</code></td>
+<td>
+<p>numeric, contrasted penalty parameter for vector v.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>numeric, the threshold at which the algorithm terminates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pen1</code></td>
+<td>
+<p>character, "homogeneity" or "heterogeneity" type of the sparsity structure. If not specified, the default is homogeneity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pen2</code></td>
+<td>
+<p>character, "magnitude" or "sign" based contrasted penalty. If not specified, the default is magnitude.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale.x</code></td>
+<td>
+<p>character, "TRUE" or "FALSE", whether or not to scale the variables x. The default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale.y</code></td>
+<td>
+<p>character, "TRUE" or "FALSE", whether or not to scale the variables y. The default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxstep</code></td>
+<td>
+<p>numeric, maximum iteration steps. The default value is 50.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>submaxstep</code></td>
+<td>
+<p>numeric, maximum iteration steps in the sub-iterations. The default value is 10.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trace</code></td>
+<td>
+<p>character, "TRUE" or "FALSE". If TRUE, prints out its screening results of variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>draw</code></td>
+<td>
+<p>character, "TRUE" or "FALSE". If TRUE, plot the convergence path of loadings and the heatmap of coefficient beta.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An 'iscca' object that contains the list of the following items.
+</p>
+
+<ul>
+<li>
+<p>x: list of data matrices, L datasets of explanatory variables with centered columns. If scale.x is TRUE, the columns of L datasets are standardized to have mean 0 and standard deviation 1.
+</p>
+</li>
+<li>
+<p>y: list of data matrices, L datasets of dependent variables with centered columns. If scale.y is TRUE, the columns of L datasets are standardized to have mean 0 and standard deviation 1.
+</p>
+</li>
+<li>
+<p>loading.x: the estimated canonical vector of variables x.
+</p>
+</li>
+<li>
+<p>loading.y: the estimated canonical vector of variables y.
+</p>
+</li>
+<li>
+<p>variable.x: the screening results of variables x. 
+</p>
+</li>
+<li>
+<p>variable.y: the screening results of variables y.
+</p>
+</li>
+<li>
+<p>meanx: list of numeric vectors, column mean of the original datasets x.
+</p>
+</li>
+<li>
+<p>normx: list of numeric vectors, column standard deviation of the original datasets x.
+</p>
+</li>
+<li>
+<p>meany: list of numeric vectors, column mean of the original datasets y.
+</p>
+</li>
+<li>
+<p>normy: list of numeric vectors, column standard deviation of the original datasets y.
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p>See Also as <code>preview.cca</code>, <code>iscca.cv</code>, <code>meta.scca</code>, <code>scca</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Load a list with 3 data sets
+library(iSFun)
+data("simData.cca")
+x &lt;- simData.cca$x
+y &lt;- simData.cca$y
+L &lt;- length(x)
+mu1 &lt;- mu3 &lt;- 0.4
+mu2 &lt;- mu4 &lt;- 2.5
+
+prev_cca &lt;- preview.cca(x = x, y = y, L = L, scale.x = TRUE, scale.y = TRUE)
+res_homo_m &lt;- iscca(x = x, y = y, L = L, mu1 = mu1, mu2 = mu2, mu3 = mu3, mu4 = mu4,
+                    eps = 5e-2, maxstep = 50, submaxstep = 10, trace = TRUE, draw = TRUE)
+
+
+res_homo_s &lt;- iscca(x = x, y = y, L = L, mu1 = mu1, mu2 = mu2, mu3 = mu3, mu4 = mu4,
+                    eps = 5e-2, pen1 = "homogeneity", pen2 = "sign", scale.x = TRUE,
+                    scale.y = TRUE, maxstep = 50, submaxstep = 10, trace = FALSE, draw = FALSE)
+
+mu1 &lt;- mu3 &lt;- 0.3
+mu2 &lt;- mu4 &lt;- 2
+res_hete_m &lt;- iscca(x = x, y = y, L = L, mu1 = mu1, mu2 = mu2, mu3 = mu3, mu4 = mu4,
+                    eps = 5e-2, pen1 = "heterogeneity", pen2 = "magnitude", scale.x = TRUE,
+                    scale.y = TRUE, maxstep = 50, submaxstep = 10, trace = FALSE, draw = FALSE)
+
+res_hete_s &lt;- iscca(x = x, y = y, L = L, mu1 = mu1, mu2 = mu2, mu3 = mu3, mu4 = mu4,
+                    eps = 5e-2, pen1 = "heterogeneity", pen2 = "sign", scale.x = TRUE,
+                    scale.y = TRUE, maxstep = 50, submaxstep = 10, trace = FALSE, draw = FALSE)
+
+</code></pre>
+
+
+</div>

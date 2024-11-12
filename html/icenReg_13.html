@@ -1,0 +1,84 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ir_clustBoot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Updates the covariance using cluster bootstrap</h2>
+
+<h3>Description</h3>
+
+<p>Adjusts error estimates for repeated measures data by use of the cluster bootstrap.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ir_clustBoot(fit, ID, bs_samples = 1000)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fit</code></td>
+<td>
+<p>Either an ic_par or ic_sp model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ID</code></td>
+<td>
+<p>Subject identifier</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bs_samples</code></td>
+<td>
+<p>Number of bootstrap samples</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Standard models in icenReg assume independence between each observation. 
+This assumption is broken if we can have multiple observations from a single subject, 
+which can lead to an underestimation of the standard errors. <code>ir_clustBoot</code>
+addresses this by using a cluster bootstrap to fix up the standard errors. 
+</p>
+<p>Note that this requires refitting the model <code>bs_samples</code>, which means this can be 
+fairly time consuming.
+</p>
+
+
+<h3>References</h3>
+
+<p>Sherman, Michael, and Saskia le Cessie. 
+"A comparison between bootstrap methods and 
+generalized estimating equations for correlated 
+outcomes in generalized linear models." 
+Communications in Statistics-Simulation and Computation 26.3 (1997): 901-925.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Simulating repeated measures data 
+simdata = simIC_cluster(nIDs = 10, nPerID = 4)
+
+# Fitting with basic model
+fit = ic_par(cbind(l,u) ~ x1 + x2, data = simdata)
+fit
+
+# Updating covariance
+ir_clustBoot(fit, ID = simdata$ID, bs_samples = 10)
+# (Low number of bootstrap samples used for quick testing by CRAN, 
+# never use this few!!)
+
+# Note that the SE's have changed from above
+fit
+</code></pre>
+
+
+</div>

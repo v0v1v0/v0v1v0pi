@@ -1,0 +1,111 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>coef.iva</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Coefficient of the Object of Class iva
+</h2>
+
+<h3>Description</h3>
+
+<p><code>coef</code> method for class <code>"iva"</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'iva'
+coef(object, which.dataset = NA, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>an object of class <code>"iva"</code>, usually the result of a call to <code>NewtonIVA</code> or <code>fastIVA</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>which.dataset</code></td>
+<td>
+
+<p>positive integer. Provides the index in case the unmixing matrix only for a specific data set is desired. Default is to return all unmixing matrices.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>further arguments are not used.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Returns the unmixing matrices for all datasets or only for the requested dataset.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Unmixing matrix or all unmixing matrices of the object of class <code>"iva"</code>. If a single unmixing matrix is requested, it is an array with dimension <code>[P, P]</code> and if all unmixing matrices are requested, it is an array with dimension <code>[P, P, D]</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Mika Sipilä
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>NewtonIVA</code>, <code>fastIVA</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">if (require("LaplacesDemon")) {
+  # Generate sources from multivariate Laplace distribution
+  P &lt;- 4; N &lt;- 1000; D &lt;- 4;
+  S &lt;- array(NA, c(P, N, D))
+
+  for (i in 1:P) {
+    U &lt;- array(rnorm(D * D), c(D, D))
+    Sigma &lt;- crossprod(U)
+    S[i, , ] &lt;- rmvl(N, rep(0, D), Sigma)
+  }
+
+  # Generate mixing matrices from standard normal distribution
+  A &lt;- array(rnorm(P * P * D), c(P, P, D))
+
+  # Generate mixtures
+  X &lt;- array(NaN, c(P, N, D))
+  for (d in 1:D) {
+    X[, , d] &lt;- A[, , d] %*% S[, , d]
+  }
+
+  # Estimate sources and unmixing matrices
+  res_G &lt;- NewtonIVA(X, source_density = "gaussian")
+
+
+  # All D unmixing matrices
+  coef(res_G)
+
+  # The unmixing matrix for the second dataset
+  coef(res_G, 2)
+}
+</code></pre>
+
+
+</div>

@@ -1,0 +1,121 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>image_contour_detector</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Unsupervised Smooth Contour Lines Detection in an image</h2>
+
+<h3>Description</h3>
+
+<p>Unsupervised Smooth Contour Detection.<br></p>
+<p>Following the a contrario approach, the starting point is defining the conditions where contours should not be detected: 
+soft gradient regions contaminated by noise. To achieve this, low frequencies are removed from the input image. 
+Then, contours are validated as the frontiers separating two adjacent regions, one with significantly larger values 
+than the other. Significance is evaluated using the Mann-Whitney U test to determine whether the samples were drawn 
+from the same distribution or not. This test makes no assumption on the distributions. 
+The resulting algorithm is similar to the classic Marr-Hildreth edge detector, 
+with the addition of the statistical validation step. Combined with heuristics based on the Canny and Devernay methods, 
+an efficient algorithm is derived producing sub-pixel contours.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">image_contour_detector(x, Q = 2, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a matrix of image pixel values in the 0-255 range.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Q</code></td>
+<td>
+<p>numeric value with the pixel quantization step</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments, not used yet</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>an object of class cld which is a list with the following elements
+</p>
+
+<ul>
+<li>
+<p>curves: The number of contour lines found
+</p>
+</li>
+<li>
+<p>contourpoints: The number of points defining the contour lines found
+</p>
+</li>
+<li>
+<p>data: A data.frame with columns 'x', 'y' and 'curve' giving the x/y locations for each contour curve
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+<p>Rafael Grompone von Gioi, and Gregory Randall, Unsupervised Smooth Contour Detection, 
+Image Processing On Line, 6 (2016), pp. 233-267. doi: <a href="https://doi.org/10.5201/ipol.2016.175">10.5201/ipol.2016.175</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(pixmap)
+imagelocation &lt;- system.file("extdata", "image.pgm", package="image.ContourDetector")
+image         &lt;- read.pnm(file = imagelocation, cellres = 1)
+
+x             &lt;- image@grey * 255
+contourlines  &lt;- image_contour_detector(x, Q = 2)
+contourlines
+plot(image)
+plot(contourlines, add = TRUE, col = "red")
+
+
+##
+## line_segment_detector expects a matrix as input
+##  if you have a jpg/png/... convert it to pgm first or take the r/g/b channel
+
+library(magick)
+x   &lt;- image_read(system.file("extdata", "atomium.jpg", package="image.ContourDetector"))
+x
+mat &lt;- image_data(x, channels = "gray")
+mat &lt;- as.integer(mat, transpose = TRUE)
+mat &lt;- drop(mat)
+contourlines &lt;- image_contour_detector(mat)
+plot(contourlines)
+
+
+##
+##  working with a RasterLayer
+##
+
+
+library(raster)
+x   &lt;- raster(system.file("extdata", "landscape.tif", package="image.ContourDetector"))
+
+contourlines &lt;- image_contour_detector(x)
+image(x)
+plot(contourlines, add = TRUE, col = "blue", lwd = 10)
+
+
+</code></pre>
+
+
+</div>

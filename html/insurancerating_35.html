@@ -1,0 +1,131 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>rows_per_date</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Find active rows per date</h2>
+
+<h3>Description</h3>
+
+<p>Fast overlap joins. Usually, <code>df</code> is a very large data.table
+(e.g. insurance portfolio) with small interval ranges, and <code>dates</code> is much
+smaller with (e.g.) claim dates.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">rows_per_date(
+  df,
+  dates,
+  df_begin,
+  df_end,
+  dates_date,
+  ...,
+  nomatch = NULL,
+  mult = "all"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df</code></td>
+<td>
+<p>data.frame with portfolio (df should include time period)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dates</code></td>
+<td>
+<p>data.frame with dates to join</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df_begin</code></td>
+<td>
+<p>column name with begin dates of time period in <code>df</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df_end</code></td>
+<td>
+<p>column name with end dates of time period in <code>df</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dates_date</code></td>
+<td>
+<p>column name with dates in <code>dates</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional column names in <code>dates</code> to join by</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nomatch</code></td>
+<td>
+<p>When a row (with interval say, <code style="white-space: pre;">⁠[a,b]⁠</code>) in x has no match in
+y, nomatch=NA means NA is returned for y's non-by.y columns for that row of
+x. nomatch=NULL (default) means no rows will be returned for that row of x.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mult</code></td>
+<td>
+<p>When multiple rows in y match to the row in x, <code>mult</code> controls
+which values are returned - "all" (default), "first" or "last".</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>returned class is equal to class of <code>df</code>
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Martin Haringa
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(lubridate)
+portfolio &lt;- data.frame(
+begin1 = ymd(c("2014-01-01", "2014-01-01")),
+end = ymd(c("2014-03-14", "2014-05-10")),
+termination = ymd(c("2014-03-14", "2014-05-10")),
+exposure = c(0.2025, 0.3583),
+premium =  c(125, 150),
+car_type = c("BMW", "TESLA"))
+
+## Find active rows on different dates
+dates0 &lt;- data.frame(active_date = seq(ymd("2014-01-01"), ymd("2014-05-01"),
+by = "months"))
+rows_per_date(portfolio, dates0, df_begin = begin1, df_end = end,
+dates_date = active_date)
+
+## With extra identifiers (merge claim date with time interval in portfolio)
+claim_dates &lt;- data.frame(claim_date = ymd("2014-01-01"),
+car_type = c("BMW", "VOLVO"))
+
+### Only rows are returned that can be matched
+rows_per_date(portfolio, claim_dates, df_begin = begin1,
+   df_end = end, dates_date = claim_date, car_type)
+
+### When row cannot be matched, NA is returned for that row
+rows_per_date(portfolio, claim_dates, df_begin = begin1,
+   df_end = end, dates_date = claim_date, car_type, nomatch = NA)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,439 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ivreg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Instrumental-Variable Regression by 2SLS, 2SM, or 2SMM Estimation</h2>
+
+<h3>Description</h3>
+
+<p>Fit instrumental-variable regression by two-stage least squares (2SLS). This is
+equivalent to direct instrumental-variables estimation when the number of
+instruments is equal to the number of regressors. Alternative robust-regression
+estimators are also provided, based on M-estimation (2SM) and MM-estimation
+(2SMM).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ivreg(
+  formula,
+  instruments,
+  data,
+  subset,
+  na.action,
+  weights,
+  offset,
+  contrasts = NULL,
+  model = TRUE,
+  y = TRUE,
+  x = FALSE,
+  method = c("OLS", "M", "MM"),
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula, instruments</code></td>
+<td>
+<p>formula specification(s) of the regression
+relationship and the instruments. Either <code>instruments</code> is missing and
+<code>formula</code> has three parts as in <code>y ~ x1 + x2 | z1 + z2 + z3</code>
+(recommended) or <code>formula</code> is <code>y ~ x1 + x2</code> and <code>instruments</code>
+is a one-sided formula <code>~ z1 + z2 + z3</code> (only for backward
+compatibility).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>an optional data frame containing the variables in the model.
+By default the variables are taken from the environment of the
+<code>formula</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+<p>an optional vector specifying a subset of observations to be
+used in fitting the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+<p>a function that indicates what should happen when the data
+contain <code>NA</code>s. The default is set by the <code>na.action</code> option.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>an optional vector of weights to be used in the fitting
+process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+<p>an optional offset that can be used to specify an a priori
+known component to be included during fitting.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>contrasts</code></td>
+<td>
+<p>an optional list. See the <code>contrasts.arg</code> of
+<code>model.matrix.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model, x, y</code></td>
+<td>
+<p>logicals.  If <code>TRUE</code> the corresponding components of
+the fit (the model frame, the model matrices, the response) are returned. These
+components are necessary for computing regression diagnostics.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>the method used to fit the stage 1 and 2 regression: 
+<code>"OLS"</code> for traditional 2SLS regression (the default), 
+<code>"M"</code> for M-estimation, or <code>"MM"</code> for MM-estimation, with the
+latter two robust-regression methods implemented via the <code>rlm</code> 
+function in the <span class="pkg">MASS</span> package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments passed to <code>ivreg.fit</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>ivreg</code> is the high-level interface to the work-horse function
+<code>ivreg.fit</code>. A set of standard methods (including <code>print</code>,
+<code>summary</code>, <code>vcov</code>, <code>anova</code>, <code>predict</code>, <code>residuals</code>,
+<code>terms</code>, <code>model.matrix</code>, <code>bread</code>, <code>estfun</code>) is available
+and described in <code>ivregMethods</code>. For methods related to regression
+diagnostics, see <code>ivregDiagnostics</code>.
+</p>
+<p>Regressors and instruments for <code>ivreg</code> are most easily specified in a
+formula with two parts on the right-hand side, e.g., <code>y ~ x1 + x2 | z1
++ z2 + z3</code>, where <code>x1</code> and <code>x2</code> are the explanatory variables and <code>z1</code>,
+<code>z2</code>, and <code>z3</code> are the instrumental variables. Note that exogenous regressors
+have to be included as instruments for themselves. 
+</p>
+<p>For example, if there is
+one exogenous regressor <code>ex</code> and one endogenous regressor <code>en</code>
+with instrument <code>in</code>, the appropriate formula would be <code>y ~ en +
+ex | in + ex</code>. Alternatively, a formula with three parts on the right-hand
+side can also be used: <code>y ~ ex | en | in</code>. The latter is typically more convenient, if
+there is a large number of exogenous regressors.
+</p>
+<p>Moreover, two further equivalent specification strategies are possible that are
+typically less convenient compared to the strategies above. One option is to use
+an update formula with a <code>.</code> in the second part of the formula is used:
+<code>y ~ en + ex | . - en + in</code>. Another option is to use a separate formula
+for the instruments (only for backward compatibility with earlier versions):
+<code>formula = y ~ en + ex, instruments = ~ in + ex</code>.
+</p>
+<p>Internally, all specifications are converted to the version with two parts
+on the right-hand side.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>ivreg</code> returns an object of class <code>"ivreg"</code> that inherits from
+class <code>"lm"</code>, with the following components:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>coefficients</code></td>
+<td>
+<p>parameter estimates, from the stage-2 regression.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>residuals</code></td>
+<td>
+<p>vector of model residuals.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>residuals1</code></td>
+<td>
+<p>matrix of residuals from the stage-1 regression.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>residuals2</code></td>
+<td>
+<p>vector of residuals from the stage-2 regression.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitted.values</code></td>
+<td>
+<p>vector of predicted means for the response.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>either the vector of weights used (if any) or <code>NULL</code> (if none).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+<p>either the offset used (if any) or <code>NULL</code> (if none).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>estfun</code></td>
+<td>
+<p>a matrix containing the empirical estimating functions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>number of observations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nobs</code></td>
+<td>
+<p>number of observations with non-zero weights.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p</code></td>
+<td>
+<p>number of columns in the model matrix x of regressors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>q</code></td>
+<td>
+<p>number of columns in the instrumental variables model matrix z</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rank</code></td>
+<td>
+<p>numeric rank of the model matrix for the stage-2 regression.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.residual</code></td>
+<td>
+<p>residual degrees of freedom for fitted model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cov.unscaled</code></td>
+<td>
+<p>unscaled covariance matrix for the coefficients.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma</code></td>
+<td>
+<p>residual standard deviation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qr</code></td>
+<td>
+<p>QR decomposition for the stage-2 regression.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>qr1</code></td>
+<td>
+<p>QR decomposition for the stage-1 regression.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rank1</code></td>
+<td>
+<p>numeric rank of the model matrix for the stage-1 regression.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coefficients1</code></td>
+<td>
+<p>matrix of coefficients from the stage-1 regression.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.residual1</code></td>
+<td>
+<p>residual degrees of freedom for the stage-1 regression.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exogenous</code></td>
+<td>
+<p>columns of the <code>"regressors"</code> matrix that are exogenous.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>endogenous</code></td>
+<td>
+<p>columns of the <code>"regressors"</code> matrix that are endogenous.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>instruments</code></td>
+<td>
+<p>columns of the <code>"instruments"</code> matrix that are
+instruments for the endogenous variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>the method used for the stage 1 and 2 regressions, one of <code>"OLS"</code>,
+<code>"M"</code>, or <code>"MM"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rweights</code></td>
+<td>
+<p>a matrix of robustness weights with columns for each of the stage-1
+regressions and for the stage-2 regression (in the last column) if the fitting method is 
+<code>"M"</code> or <code>"MM"</code>, <code>NULL</code> if the fitting method is <code>"OLS"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hatvalues</code></td>
+<td>
+<p>a matrix of hatvalues. For <code>method = "OLS"</code>, the matrix consists of two
+columns, for each of the stage-1 and stage-2 regression; for <code>method = "M"</code> or <code>"MM"</code>,
+there is one column for <em>each</em> stage=1 regression and for the stage-2 regression. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.residual</code></td>
+<td>
+<p>residual degrees of freedom for fitted model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>the original function call.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>the model formula.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+<p>function applied to missing values in the model fit.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>terms</code></td>
+<td>
+<p>a list with elements <code>"regressors"</code> and <code>"instruments"</code> 
+containing the terms objects for the respective components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>levels</code></td>
+<td>
+<p>levels of the categorical regressors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>contrasts</code></td>
+<td>
+<p>the contrasts used for categorical regressors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>the full model frame (if <code>model = TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>the response vector (if <code>y = TRUE</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a list with elements <code>"regressors"</code>, <code>"instruments"</code>, <code>"projected"</code>,
+containing the model matrices from the respective components (if <code>x = TRUE</code>). 
+<code>"projected"</code> is the matrix of regressors projected on the image of the instruments.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Greene, W.H. (2003) <em>Econometric Analysis</em>, 5th ed., Upper Saddle River: Prentice Hall.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ivreg.fit</code>, <code>ivregDiagnostics</code>, <code>ivregMethods</code>,
+<code>lm</code>, <code>lm.fit</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## data
+data("CigaretteDemand", package = "ivreg")
+
+## model 
+m &lt;- ivreg(log(packs) ~ log(rprice) + log(rincome) | salestax + log(rincome),
+  data = CigaretteDemand)
+summary(m)
+summary(m, vcov = sandwich::sandwich, df = Inf)
+
+## ANOVA
+m2 &lt;- update(m, . ~ . - log(rincome) | . - log(rincome))
+anova(m, m2)
+car::Anova(m)
+
+## same model specified by formula with three-part right-hand side
+ivreg(log(packs) ~ log(rincome) | log(rprice) | salestax, data = CigaretteDemand)
+
+# Robust 2SLS regression
+data("Kmenta", package = "ivreg")
+Kmenta1 &lt;- Kmenta
+Kmenta1[20, "Q"] &lt;- 95 # corrupted data
+deq &lt;- ivreg(Q ~ P + D | D + F + A, data=Kmenta) # demand equation, uncorrupted data
+deq1 &lt;- ivreg(Q ~ P + D | D + F + A, data=Kmenta1) # standard 2SLS, corrupted data
+deq2 &lt;- ivreg(Q ~ P + D | D + F + A, data=Kmenta1, subset=-20) # standard 2SLS, removing bad case
+deq3 &lt;- ivreg(Q ~ P + D | D + F + A, data=Kmenta1, method="MM") # 2SLS MM estimation
+car::compareCoefs(deq, deq1, deq2, deq3)
+round(deq3$rweights, 2) # robustness weights
+
+</code></pre>
+
+
+</div>

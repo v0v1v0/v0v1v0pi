@@ -1,0 +1,85 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>akima</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Waveform Distortion Data for Bivariate Interpolation
+</h2>
+
+<h3>Description</h3>
+
+<p><code>akima</code> is a list with components <code>x</code>, <code>y</code> and <code>z</code> which
+represents a smooth surface of <code>z</code> values at selected points
+irregularly distributed in the <code>x-y</code> plane.
+</p>
+<p>The data was taken from a study of waveform distortion in
+electronic circuits, described in:
+Hiroshi Akima, "A Method of Bivariate Interpolation and
+Smooth Surface Fitting Based on Local Procedures", 
+CACM,
+Vol. 17, No. 1, January 1974, pp. 18-20.
+</p>
+
+
+<h3>References</h3>
+
+<p>Hiroshi Akima, "A Method of Bivariate Interpolation and
+Smooth Surface Fitting for Irregularly Distributed Data
+Points", 
+ACM Transactions on Mathematical Software,
+Vol. 4, No. 2, June 1978, pp. 148-159.
+Copyright 1978, Association for Computing Machinery, Inc.,
+reprinted by permission.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+library(rgl)
+data(akima)
+# data
+rgl.spheres(akima$x,akima$z , akima$y,0.5,color="red")
+rgl.bbox()
+# bivariate linear interpolation
+# interp:
+akima.li &lt;- interp(akima$x, akima$y, akima$z, 
+                   xo=seq(min(akima$x), max(akima$x), length = 100),
+                   yo=seq(min(akima$y), max(akima$y), length = 100))
+# interp surface:
+rgl.surface(akima.li$x,akima.li$y,akima.li$z,color="green",alpha=c(0.5))
+# interpp:
+akima.p &lt;- interpp(akima$x, akima$y, akima$z,
+                    runif(200,min(akima$x),max(akima$x)),
+                    runif(200,min(akima$y),max(akima$y)))
+# interpp points:
+rgl.points(akima.p$x,akima.p$z , akima.p$y,size=4,color="yellow")
+
+# bivariate spline interpolation
+# data
+rgl.spheres(akima$x,akima$z , akima$y,0.5,color="red")
+rgl.bbox()
+# bivariate cubic spline interpolation
+# interp:
+akima.si &lt;- interp(akima$x, akima$y, akima$z, 
+                   xo=seq(min(akima$x), max(akima$x), length = 100),
+                   yo=seq(min(akima$y), max(akima$y), length = 100),
+                   linear = FALSE, extrap = TRUE)
+# interp surface:
+rgl.surface(akima.si$x,akima.si$y,akima.si$z,color="green",alpha=c(0.5))
+# interpp:
+akima.sp &lt;- interpp(akima$x, akima$y, akima$z,
+                    runif(200,min(akima$x),max(akima$x)),
+                    runif(200,min(akima$y),max(akima$y)),
+                   linear = FALSE, extrap = TRUE)
+# interpp points:
+rgl.points(akima.sp$x,akima.sp$z , akima.sp$y,size=4,color="yellow")
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

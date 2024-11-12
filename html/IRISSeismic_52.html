@@ -1,0 +1,154 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getTraveltime</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Retrieve seismic traveltime information from IRIS DMC</h2>
+
+<h3>Description</h3>
+
+<p>The <code>getTraveltime</code> method obtains seismic traveltime data from
+the IRIS DMC <code>traveltime</code> web service and returns it in a dataframe.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getTraveltime(obj, latitude, longitude, depth, staLatitude, staLongitude)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+<p> an <code>IrisClient</code> object </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>latitude</code></td>
+<td>
+<p> latitude of seismic event </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>longitude</code></td>
+<td>
+<p> longitude of seismic event </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>depth</code></td>
+<td>
+<p> depth of seismic event </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>staLatitude</code></td>
+<td>
+<p> latitude of seismic station </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>staLongitude</code></td>
+<td>
+<p> longitude of seismic station </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>traveltime</code> web service calculates travel-times for seismic phases using a 1-D spherical earth model.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A dataframe with the following columns:
+</p>
+
+<pre>
+distance, depth, phaseName, travelTime, rayParam, takeoff, incident
+  puristDistance, puristName
+</pre>
+<p>Rows are ordered by <code>travelTime</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>The IRIS DMC traveltime web service:
+</p>
+<p><a href="https://service.iris.edu/irisws/traveltime/1/">https://service.iris.edu/irisws/traveltime/1/</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>IrisClient-class</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+# Two days around the "Nisqually Quake"
+starttime &lt;- as.POSIXct("2001-02-27", tz="GMT")
+endtime &lt;- starttime + 3600 * 24 * 2
+
+# Find biggest seismic event over these two days -- it's the "Nisqually"
+events &lt;- getEvent(iris, starttime, endtime, minmag=5.0)
+bigOneIndex &lt;- which(events$magnitude == max(events$magnitude))
+bigOne &lt;- events[bigOneIndex[1],]
+
+# Find US stations that are available within an hour of the event
+start &lt;- bigOne$time
+end &lt;- start + 3600
+availability &lt;- getAvailability(iris, "US", "", "", "BHZ",
+                                starttime=start, endtime=end,
+                                latitude=bigOne$latitude, longitude=bigOne$longitude,
+                                minradius=0, maxradius=10)
+    
+# Get the station the furthest East
+minLonIndex &lt;- which(availability$longitude == max(availability$longitude))
+snclE &lt;- availability[minLonIndex,]
+
+# Plot the BHZ signal from this station
+st &lt;- getDataselect(iris,snclE$network,snclE$station,snclE$location,snclE$channel,
+                    start,end)
+
+# Check that there is only a single trace and then plot it
+length(st@traces)
+tr &lt;- st@traces[[1]]
+plot(tr, subsampling=1) # need subsmpling=1 to add vertical lines with abline()
+
+# Find travel times to this station
+traveltimes &lt;- getTraveltime(iris, bigOne$latitude, bigOne$longitude, bigOne$depth,
+                             snclE$latitude, snclE$longitude)
+
+# Look at the list                             
+traveltimes
+
+# mark the P and S arrival times
+pArrival &lt;- start + traveltimes$travelTime[traveltimes$phaseName=="P"]
+sArrival &lt;- start + traveltimes$travelTime[traveltimes$phaseName=="S"] 
+abline(v=pArrival, col='red')
+abline(v=sArrival, col='blue')
+
+## End(Not run)
+</code></pre>
+
+
+</div>

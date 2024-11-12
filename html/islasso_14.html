@@ -1,0 +1,402 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>islasso</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+The Induced Smoothed lasso
+</h2>
+
+<h3>Description</h3>
+
+<p><code>islasso</code> is used to fit lasso regression models wherein the nonsmooth <code class="reqn">L_1</code> norm penalty is replaced by a smooth approximation justified under the induced smoothing paradigm. Simple lasso-type or elastic-net penalties are permitted and Linear, Logistic, Poisson and Gamma responses are allowed.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">islasso(formula, family = gaussian, lambda, alpha = 1, data, weights, subset,
+        offset, unpenalized, contrasts = NULL, control = is.control())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+
+<p>an object of class “formula” (or one that can be coerced to that class): the ‘usual’  symbolic description of the model to be fitted.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+
+<p>the assumed response distribution. Gaussian, (quasi) Binomial, (quasi) Poisson, and Gamma are allowed. <code>family=gaussian</code> is implemented with <code>identity</code> link, <code>family=binomial</code> is implemented with <code>logit</code> or <code>probit</code> links, <code>family=poisson</code> is implemented with <code>log</code> link, and <code>family=Gamma</code> is implemented with <code>inverse</code>, <code>log</code> and <code>identity</code> links.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+
+<p>Value of the tuning parameter in the objective. If missing, the optimal lambda is computed using <code>cv.glmnet</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+
+<p>The elastic-net mixing parameter, with <code class="reqn">0\le\alpha\le 1</code>. The penalty is defined
+as </p>
+<p style="text-align: center;"><code class="reqn">(1-\alpha)/2||\beta||_2^2+\alpha||\beta||_1.</code>
+</p>
+ <p><code>alpha=1</code>
+is the lasso penalty, and <code>alpha=0</code> the ridge penalty.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>an optional data frame, list or environment (or object coercible by as.data.frame to a data frame) containing the variables in the model. If not found in data, the variables are taken from environment(formula), typically the environment from which <code>islasso</code> is called.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+
+<p>observation weights. Default is 1 for each observation.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subset</code></td>
+<td>
+
+<p>an optional vector specifying a subset of observations to be used in the fitting process.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+
+<p>this can be used to specify an a priori known component to be included in the linear predictor during fitting. This should be NULL or a numeric vector of length equal to the number of cases.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unpenalized</code></td>
+<td>
+
+<p>optional. A vector of integers or characters indicating any covariate (in the formula) with coefficients not to be penalized. The intercept, if included in the model, is <em>always</em> unpenalized.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>contrasts</code></td>
+<td>
+<p>an optional list. See the contrasts.arg of <code>model.matrix.default</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+
+<p>a list of parameters for controlling the fitting process (see <code>islasso.control</code> for more details).
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><code>islasso</code> estimates regression models by imposing a lasso-type penalty on some or all regression coefficients. However the nonsmooth <code class="reqn">L_1</code> norm penalty is replaced by a smooth approximation justified under the induced smoothing paradigm. The advantage is that reliable standard errors are returned as model output and hypothesis testing on linear combinantions of the regression parameters can be carried out straightforwardly via the Wald statistic. Simulation studies provide evidence that the proposed approach   controls type-I errors and exhibits good power in different scenarios.</p>
+
+
+<h3>Value</h3>
+
+
+<p>A list of
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>coefficients</code></td>
+<td>
+<p>a named vector of coefficients</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se</code></td>
+<td>
+<p>a named vector of standard errors</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>residuals</code></td>
+<td>
+<p>the working residuals</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fitted.values</code></td>
+<td>
+<p>the fitted values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rank</code></td>
+<td>
+<p>the estimated degrees of freedom</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>family</code></td>
+<td>
+<p>the family object used</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>linear.predictors</code></td>
+<td>
+<p>the linear predictors</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>deviance</code></td>
+<td>
+<p>the family deviance</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>aic</code></td>
+<td>
+<p>the Akaike Information Criterion</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>null.deviance</code></td>
+<td>
+<p>the family null deviance</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter</code></td>
+<td>
+<p>the number of iterations of IWLS used</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>the working weights, that is the weights in the final iteration of the IWLS fit</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.residual</code></td>
+<td>
+<p>the residual degrees of freedom</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df.null</code></td>
+<td>
+<p>the degrees of freedom of a null model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>converged</code></td>
+<td>
+<p>logical. Was the IWLS algorithm judged to have converged?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>if requested (the default), the model frame used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>call</code></td>
+<td>
+<p>the matched call</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>the formula supplied</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>terms</code></td>
+<td>
+<p>the terms object used</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>he data argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>offset</code></td>
+<td>
+<p>the offset vector used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>the value of the control argument used</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlevels</code></td>
+<td>
+<p>(where relevant) a record of the levels of the factors used in fitting.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>the lambda value used in the islasso algorithm</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>the elasticnet mixing parameter</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dispersion</code></td>
+<td>
+<p>the estimated dispersion parameter</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>internal</code></td>
+<td>
+<p>internal elements</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>contrasts</code></td>
+<td>
+<p>(only where relevant) the contrasts used.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>The main function of the same name was inspired by the R function previously implemented by Vito MR Muggeo.
+</p>
+<p>Maintainer: Gianluca Sottile &lt;gianluca.sottile@unipa.it&gt;
+</p>
+
+
+<h3>References</h3>
+
+<p>Cilluffo, G, Sottile, G, S, La Grutta, S and Muggeo, VMR (2019). <em>The Induced Smoothed lasso: A practical framework for hypothesis testing in high dimensional regression</em>.
+Statistical Methods in Medical Research, DOI: 10.1177/0962280219842890.
+</p>
+<p>Sottile, G, Cilluffo, G, Muggeo, VMR (2019). <em>The R package islasso: estimation and
+hypothesis testing in lasso regression</em>. Technical Report on ResearchGate.
+doi:10.13140/RG.2.2.16360.11521.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>islasso.fit</code>, <code>summary.islasso</code>, <code>residuals.islasso</code>, <code>logLik.islasso</code>, <code>predict.islasso</code> and <code>deviance.islasso</code> methods.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+set.seed(1)
+n &lt;- 100
+p &lt;- 100
+p1 &lt;- 10  #number of nonzero coefficients
+coef.veri &lt;- sort(round(c(seq(.5, 3, l=p1/2), seq(-1, -2, l=p1/2)), 2))
+sigma &lt;- 1
+
+coef &lt;- c(coef.veri, rep(0, p-p1))
+
+X &lt;- matrix(rnorm(n*p), n, p)
+eta &lt;- drop(X%*%coef)
+
+##### gaussian ######
+mu &lt;- eta
+y &lt;- mu + rnorm(n, 0, sigma)
+
+o &lt;- islasso(y ~ ., data = data.frame(y = y, X), 
+             family = gaussian())
+o
+summary(o)
+coef(o)
+fitted(o)
+predict(o, type="response")
+plot(o)
+residuals(o)
+deviance(o)
+AIC(o)
+logLik(o)
+
+## Not run: 
+# for the interaction
+o &lt;- islasso(y ~ X1 * X2, data = data.frame(y = y, X), 
+             family = gaussian())
+
+##### binomial ######
+coef &lt;- c(c(1,1,1), rep(0, p-3))
+X &lt;- matrix(rnorm(n*p), n, p)
+eta &lt;- drop(cbind(1, X)%*%c(-1, coef))
+mu &lt;- binomial()$linkinv(eta)
+y &lt;- rbinom(n, 100, mu)
+y &lt;- cbind(y, 100-y)
+
+o &lt;- islasso(cbind(y1, y2) ~ ., 
+             data = data.frame(y1 = y[,1], y2 = y[,2], X), 
+             family = binomial())
+summary(o, pval = .05)
+
+##### poisson ######
+coef &lt;- c(c(1,1,1), rep(0, p-3))
+X &lt;- matrix(rnorm(n*p), n, p)
+eta &lt;- drop(cbind(1, X)%*%c(1, coef))
+mu &lt;- poisson()$linkinv(eta)
+y &lt;- rpois(n, mu)
+
+o &lt;- islasso(y ~ ., data = data.frame(y = y, X), 
+             family = poisson())
+summary(o, pval = .05)
+
+##### Gamma ######
+coef &lt;- c(c(1,1,1), rep(0, p-3))
+X &lt;- matrix(rnorm(n*p), n, p)
+eta &lt;- drop(cbind(1, X)%*%c(-1, coef))
+mu &lt;- Gamma(link="log")$linkinv(eta)
+shape &lt;- 10
+phi &lt;- 1 / shape
+y &lt;- rgamma(n, scale = mu / shape, shape = shape)
+
+o &lt;- islasso(y ~ ., data = data.frame(y = y, X), 
+             family = Gamma(link = "log"))
+summary(o, pval = .05)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

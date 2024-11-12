@@ -1,0 +1,104 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_p_infection_year</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate the probability imprinting occurs n years after birth</h2>
+
+<h3>Description</h3>
+
+<p>Given an individual's birth year, the year of observation, and pre-calculated influenza circulation intensities, calculate the probability that the first influenza infection occurs exactly 0, 1, 2, ... 12 years after birth.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_p_infection_year(
+  birth_year,
+  observation_year,
+  intensity_df,
+  max_year,
+  baseline_annual_p_infection = 0.28
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>birth_year</code></td>
+<td>
+<p>year of birth (numeric). Must be between 1918 and the current calendar year.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>observation_year</code></td>
+<td>
+<p>year of observation, which affects the birth cohort's age.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intensity_df</code></td>
+<td>
+<p>data frame of annual intensities, output by <code>get_country_intensity_data()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_year</code></td>
+<td>
+<p>maximum year for which to output probabilities. Must be greater than or equal to observation_year. (If in doubt, set equal to observation year.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>baseline_annual_p_infection</code></td>
+<td>
+<p>average annual probability of primary infection. The default, 0.28, was estimated using age-seroprevalence data in <a href="https://doi.org/10.1126/science.aag1322">doi:10.1126/science.aag1322</a>Gostic et al. Science, (2016).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The probability of primary influenza infection n years after birth is calculated based on a modified <a href="https://en.wikipedia.org/wiki/Geometric_distribution">geometric distribution</a>: let p be the average annual probability of a primary influenza infection. Then the probability that primary infection occurs n=0,1,2,... years after birth is <code class="reqn">p*(1-p)^{n}</code>.
+</p>
+<p>This function modifies the geometric model above to account for changes in annual circulation intensity, so that annual probabilities of primary infection <code class="reqn">p_i</code> are scaled by the intensity in calendar year i. Details are given in <a href="https://doi.org/10.1126/science.aag1322">doi:10.1126/science.aag1322</a>Gostic et al. Science, (2016).
+</p>
+
+
+<h3>Value</h3>
+
+<p>a vector whose entries show the probability that a person born
+in year 0 was first infected by influenza in year 0, 1, 2, 3, ...12
+We only consider the first 13 probabilities (i.e. we assume everyone
+imprints before age 13. These outputs are not normalized, so the
+vector sum asymptotically approaches one, but is not exactly equal
+to one. For cohorts born &lt;13 years prior to the year of observation,
+the output vector will have less than 13 entries.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># For a cohort under 12 years old and born in 2000, return the
+# probabilities of primary infection in 2000, 2001, ... 2012:
+get_p_infection_year(
+  birth_year = 2000,
+  observation_year = 2022,
+  intensity_df = get_country_intensity_data("Canada", 2022),
+  max_year = 2022
+)
+
+# If the cohort is still under age 12 at the time of observation, return
+# a truncated vector of probabilities:
+get_p_infection_year(
+  birth_year = 2020,
+  observation_year = 2022,
+  intensity_df = get_country_intensity_data("Mexico", 2022),
+  max_year = 2022
+)
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,80 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>repSomaticHypermutation</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculates number of mutations against the germline for each clonotype</h2>
+
+<h3>Description</h3>
+
+<p>This function aligns V and J genes from the germline in each cluster
+with corresponding genes in each clonotype, saves the alignments for purpose of visualization,
+and calculates number of mutations for each clonotype.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">repSomaticHypermutation(.data, .threads, .nofail)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>.data</code></td>
+<td>
+<p>The data to be processed: an output of repClonalFamily();
+variants with one sample and list of samples are both supported.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.threads</code></td>
+<td>
+<p>Number of threads to use.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.nofail</code></td>
+<td>
+<p>Will return NA instead of stopping if Clustal W is not installed.
+Used to avoid raising errors in examples on computers where Clustal W is not installed.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Dataframe or list of dataframes (if input is a list with multiple samples).
+The dataframe has all the columns from repClonalFamily() output dataframe, with Sequence
+column unnested: the resulting dataframe has one line per clonotype. Clone.ID column
+contains original IDs for clonotypes, and can be used as dataframe key.
+New columns are added:
+* Germline.Alignment.V: contains V gene alignment of current clonotype with the germline
+* Germline.Alignment.J: contains J gene alignment of current clonotype with the germline
+* Substitutions: contains number of substitutions in the alignment (summary for V and J)
+* Insertions: contains number of insertions in the clonotype relative to germline
+(summary for V and J)
+* Deletions: contains number of deletions in the clonotype relative to germline
+(summary for V and J)
+* Mutations: contains total number of mutations in the alignment (summary for V and J)
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(bcrdata)
+bcr_data &lt;- bcrdata$data
+
+bcr_data %&gt;%
+  seqCluster(seqDist(bcr_data), .fixed_threshold = 3) %&gt;%
+  repGermline(.threads = 1) %&gt;%
+  repAlignLineage(.min_lineage_sequences = 2, .align_threads = 2, .nofail = TRUE) %&gt;%
+  repClonalFamily(.threads = 1, .nofail = TRUE) %&gt;%
+  repSomaticHypermutation(.threads = 1, .nofail = TRUE)
+</code></pre>
+
+
+</div>

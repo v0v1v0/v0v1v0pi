@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>submit_extract</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Submit an extract request via the IPUMS API</h2>
+
+<h3>Description</h3>
+
+<p>Submit an extract request via the IPUMS API and return an
+<code>ipums_extract</code> object containing the extract
+definition with a newly-assigned extract request number.
+</p>
+<p>Learn more about the IPUMS API in <code>vignette("ipums-api")</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">submit_extract(extract, api_key = Sys.getenv("IPUMS_API_KEY"))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>extract</code></td>
+<td>
+<p>An <code>ipums_extract</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>api_key</code></td>
+<td>
+<p>API key associated with your user account. Defaults to the
+value of the <code>IPUMS_API_KEY</code> environment variable. See
+<code>set_ipums_api_key()</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An <code>ipums_extract</code> object containing the
+extract definition and newly-assigned extract number of the submitted
+extract.
+</p>
+<p>Note that some unspecified extract fields may be populated with default
+values and therefore change slightly upon submission.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>wait_for_extract()</code> to wait for an extract to finish processing.
+</p>
+<p><code>get_extract_info()</code> and <code>is_extract_ready()</code> to check the status of an
+extract request.
+</p>
+<p><code>download_extract()</code> to download an extract's data files.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">my_extract &lt;- define_extract_micro(
+  collection = "cps",
+  description = "2018-2019 CPS Data",
+  samples = c("cps2018_05s", "cps2019_05s"),
+  variables = c("SEX", "AGE", "YEAR")
+)
+
+## Not run: 
+# Store your submitted extract request to obtain the extract number
+submitted_extract &lt;- submit_extract(my_extract)
+
+submitted_extract$number
+
+# This is useful for checking the extract request status
+get_extract_info(submitted_extract)
+
+# You can always get the latest status, even if you forget to store the
+# submitted extract request object
+submitted_extract &lt;- get_last_extract_info("cps")
+
+# You can also check if submitted extract is ready
+is_extract_ready(submitted_extract)
+
+# Or have R check periodically and download when ready
+downloadable_extract &lt;- wait_for_extract(submitted_extract)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

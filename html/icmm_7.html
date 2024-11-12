@@ -1,0 +1,113 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get.pseudodata.cox</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Obtain pseudodata based on the Cox's regression model.</h2>
+
+<h3>Description</h3>
+
+<p>For Cox's regression model, given the current estimates of regression coefficients, working responses and their corresponding weights are obtained.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get.pseudodata.cox(Y, X, event, beta, time, ntime, sumevent)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>Y</code></td>
+<td>
+<p>an (n*1) numeric matrix of time response.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>an (n*p) numeric design matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>event</code></td>
+<td>
+<p>an (n*1) numeric matrix of status: of status indicator: <code>0</code>=right censored, <code>1</code>=event at time.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p>a (p*1) matrix of regression coefficients.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time</code></td>
+<td>
+<p>a vector or sorted value of <code>Y</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ntime</code></td>
+<td>
+<p>length of the vector <code>time</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sumevent</code></td>
+<td>
+<p>a vector of size <code>ntime</code> where each element is the sum of event where <code>Y</code> is equal to each value in <code>time</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Return a list including elements
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>z</code></td>
+<td>
+<p>an (n*1) matrix of working responses</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma2</code></td>
+<td>
+<p>an (n*1) matrix of inverse of weights.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Vitara Pungpapong, Min Zhang, Dabao Zhang</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(simCox)
+Y&lt;-as.matrix(simCox[,1])
+event&lt;-as.matrix(simCox[,2])
+X&lt;-as.matrix(simCox[,-(1:2)])
+time&lt;-sort(unique(Y))
+ntime&lt;-length(time)
+# sum of event_i where y_i =time_k
+sumevent&lt;-rep(0, ntime)
+for(j in 1:ntime)
+{
+  sumevent[j]&lt;-sum(event[Y[,1]==time[j]])
+}
+# Obtain initial values from lasso
+data(initbetaCox)
+initbeta&lt;-as.matrix(initbetaCox)
+# Get Pseudodata
+pseudodata&lt;-get.pseudodata.cox(Y, X, event, initbeta, time, ntime, sumevent)
+z&lt;-pseudodata$z
+sigma&lt;-sqrt(pseudodata$sigma2)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,98 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>if_case</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Pipe-friendly vectorized if</h2>
+
+<h3>Description</h3>
+
+<p>Compared to <code>dplyr::if_else()</code>, this function is easier to use with a pipe.
+A vector piped into this function will be quietly ignored.
+This allows magrittr dots to be used in arguments without requiring
+workarounds like wrapping the function in braces.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">if_case(condition, true, false, missing = NA, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>condition</code></td>
+<td>
+<p>Logical vector</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>true, false, missing</code></td>
+<td>
+<p>Values to use for <code>TRUE</code>, <code>FALSE</code>, and <code>NA</code> values
+of <code>condition</code>.
+They must be either the same length as <code>condition</code>, or length 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Values passed to <code>...</code> produce an error.
+This facilitates the quiet ignoring of a piped vector.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function is also less strict than <code>dplyr::if_else()</code>.
+If <code>true</code>, <code>false</code>, and <code>missing</code> are different types, they are silently
+coerced to a common type.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Where <code>condition</code> is <code>TRUE</code>, the matching value from <code>true</code>;
+where it's <code>FALSE</code>, the matching value from <code>false</code>;
+and where it's <code>NA</code>, the matching value from <code>missing</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>in_case()</code>, a pipeable alternative to <code>dplyr::case_when()</code>
+</p>
+<p><code>switch_case()</code>, a reimplementation of <code>switch()</code>
+</p>
+<p><code>dplyr::if_else()</code>, from which this function is derived
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x &lt;- c(1, 2, 5, NA)
+
+# if_case() produces the same output as dplyr::if_else()
+if_case(x &gt; 3, "high", "low", "missing")
+dplyr::if_else(x &gt; 3, "high", "low", "missing")
+
+# if_case() does not throw an error if arguments are not of the same type
+if_case(x &gt; 3, "high", "low", NA)
+try(dplyr::if_else(x &gt; 3, "high", "low", NA))
+
+# if_case() can accept a piped input without an error or requiring braces
+x %&gt;% if_case(. &gt; 3, "high", "low", "missing")
+try(x %&gt;% dplyr::if_else(. &gt; 3, "high", "low", "missing"))
+x %&gt;% {dplyr::if_else(. &gt; 3, "high", "low", "missing")}
+
+# You can also pipe a conditional test like dplyr::if_else()
+{x &gt; 3} %&gt;% if_case("high", "low", "missing")
+{x &gt; 3} %&gt;% dplyr::if_else("high", "low", "missing")
+</code></pre>
+
+
+</div>

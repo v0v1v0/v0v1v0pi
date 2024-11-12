@@ -1,0 +1,115 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dec_dm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Decrement the Warping Path
+</h2>
+
+<h3>Description</h3>
+
+<p>Update the warping path to omit observations of the alignment of two time series.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dec_dm(dm, Ndec, diffM = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dm</code></td>
+<td>
+<p>direction matrix, output from dtw(Q=Q, C=C, ws=ws)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Ndec</code></td>
+<td>
+<p>integer, number of observations (columns) to be reduced</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diffM</code></td>
+<td>
+<p>matrix of differences</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>wp</code></td>
+<td>
+<p>warping path</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ii</code></td>
+<td>
+<p>indices of Q of the optimal path</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>jj</code></td>
+<td>
+<p>indices of C of the optimal path</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>diffp</code></td>
+<td>
+<p>path of differences (only returned if diffM is not NULL)</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+
+<ul>
+<li>
+<p> Leodolter, M.; Pland, C.; Brändle, N; <em>IncDTW: An R Package for Incremental Calculation of Dynamic Time Warping</em>. Journal of Statistical Software, 99(9), 1-23. doi: <a href="https://doi.org/10.18637/jss.v099.i09">10.18637/jss.v099.i09</a>
+</p>
+</li>
+<li>
+<p> Sakoe, H.; Chiba, S., <em>Dynamic programming algorithm optimization for spoken word recognition, Acoustics, Speech, and Signal Processing</em> [see also IEEE Transactions on Signal Processing], IEEE Transactions on , vol.26, no.1, pp. 43-49, Feb 1978. http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1163055
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">Q &lt;- cos(1:100)
+C &lt;- cumsum(rnorm(80))
+# the ordinary calculation
+result_base &lt;- dtw(Q=Q, C=C, return_wp = TRUE) 
+
+# the ordinary calculation without the last 4 observations
+result_decr &lt;- dtw(Q=Q, C=C[1:(length(C) - 4)], return_wp = TRUE) 
+# the decremental step: reduce C for 4 observation
+result_decr2 &lt;- dec_dm(result_base$dm, Ndec = 4) 
+
+# compare ii, jj and wp of result_decr and those of 
+result_decr$ii
+result_decr2$ii
+identical(result_decr$ii, result_decr2$ii)
+
+result_decr$jj
+result_decr2$jj
+identical(result_decr$jj, result_decr2$jj)
+
+result_decr$wp
+result_decr2$wp
+identical(result_decr$wp, result_decr2$wp)
+
+
+</code></pre>
+
+
+</div>

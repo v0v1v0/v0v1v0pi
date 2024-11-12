@@ -1,0 +1,98 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>each_edge</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Rewires the endpoints of the edges of a graph to a random vertex</h2>
+
+<h3>Description</h3>
+
+<p>This function can be used together with <code>rewire()</code>.
+This method rewires the endpoints of the edges with a constant probability
+uniformly randomly to a new vertex in a graph.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">each_edge(
+  prob,
+  loops = FALSE,
+  multiple = FALSE,
+  mode = c("all", "out", "in", "total")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>prob</code></td>
+<td>
+<p>The rewiring probability, a real number between zero and one.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loops</code></td>
+<td>
+<p>Logical scalar, whether loop edges are allowed in the rewired
+graph.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>multiple</code></td>
+<td>
+<p>Logical scalar, whether multiple edges are allowed in the
+generated graph.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mode</code></td>
+<td>
+<p>Character string, specifies which endpoint of the edges to rewire
+in directed graphs. ‘all’ rewires both endpoints, ‘in’ rewires
+the start (tail) of each directed edge, ‘out’ rewires the end (head)
+of each directed edge. Ignored for undirected graphs.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Note that this method might create graphs with multiple and/or loop edges.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Gabor Csardi <a href="mailto:csardi.gabor@gmail.com">csardi.gabor@gmail.com</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other rewiring functions: 
+<code>keeping_degseq()</code>,
+<code>rewire()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Some random shortcuts shorten the distances on a lattice
+g &lt;- make_lattice(length = 100, dim = 1, nei = 5)
+mean_distance(g)
+g &lt;- rewire(g, each_edge(prob = 0.05))
+mean_distance(g)
+
+# Rewiring the start of each directed edge preserves the in-degree distribution
+# but not the out-degree distribution
+g &lt;- sample_pa(1000)
+g2 &lt;- g %&gt;% rewire(each_edge(mode = "in", multiple = TRUE, prob = 0.2))
+degree(g, mode = "in") == degree(g2, mode = "in")
+</code></pre>
+
+
+</div>

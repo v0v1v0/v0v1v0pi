@@ -1,0 +1,132 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>cond.test</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Conditional Test for Contrasting Circular Order</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates the p-value corresponding to the conditional test where the hypotheses are whether the data follow a fixed circular order or not.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">cond.test(data, groups=NULL, kappa=NULL, biasCorrect=TRUE)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>vector or matrix with the data. See details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>groups</code></td>
+<td>
+<p>a numeric vector with the circular order to be contrasted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kappa</code></td>
+<td>
+<p>numeric and positive, if NULL, it will be estimated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>biasCorrect</code></td>
+<td>
+<p>logical, if <code>TRUE</code>, the correction of the bias is done in the estimation of kappa.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function performs the conditional test to constrast the hypotheses:
+</p>
+<p><code class="reqn">\hspace{1.7cm}H_{0}:</code> The circular parameters follow a fixed circular order.
+</p>
+<p><code class="reqn">\hspace{1.7cm}H_{1}:\hspace{0.1cm}H_{0}</code> is not true.
+</p>
+<p>This conditional test is a modification of the likelihood ratio test.  See Fern?ndez et al. (2011) for full details about the conditional test.  For a whole explanation of the use of this function, see the vignette of this package where some examples are shown.
+</p>
+<p>The circular order to be tested is defined in the argument <code>groups</code> by a numeric vector with the positions in the order of each element. 
+The result of <code>cond.test</code> is the p-value of this test.  There are two cases depending on whether <code class="reqn">\kappa</code> is known or not.  
+</p>
+<p>If <code class="reqn">\kappa</code> is known, <code>data</code> is usually a vector with the unrestricted circular means. In this case the value of <code class="reqn">\kappa</code> has to be introduced in the argument <code>kappa</code>.  <code>data</code> could also be a matrix with replications and the user knows the value of <code class="reqn">\kappa</code>, then if it is introduced in the argument <code>kappa</code> it will be used by the function to perform the contrast instead of using the estimation.
+</p>
+<p>When <code class="reqn">\kappa</code> is unknown, replications are needed in order to calculate the estimation. Then, <code>data</code> must be a matrix where each column is a replication while each row is a population.  <code class="reqn">\kappa</code> is estimated internally using the function <code>mle.vonmises</code> developed in the package <b>circular</b>.  By default, the correction of the bias is done, if the user prefers not correcting the bias, just set the argument <code>biasCorrect=FALSE</code>.
+</p>
+<p>For both cases (<code class="reqn">\kappa</code> known or unknown), the order to be contrasted is introduced in <code>groups</code> in the form of a numeric vector with length equal to the number of populations. Each value of the argument establishes the level of the order the corresponding population is assigned to.  The default value is the sequence corresponding to the simple order (1, 2, ..., q).  Notice that no particular order is assumed among the populations belonging to the same level set. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>The output is an S3 object of class <code>isocir</code>, similar to the result in the function <code>CIRE</code> but adding the following values:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>pvalue</code></td>
+<td>
+<p>numeric, it is the p-value what results of the conditional test.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kappa</code></td>
+<td>
+<p>numeric, it is the value of kappa.</p>
+</td>
+</tr>
+</table>
+<p>The attribute <code>estkappa</code> shows if kappa is estimated or known.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Author(s): Sandra Barragán based on the SAS code written by Miguel A. Fernández.
+Maintainer:&lt;sandra.barragan@gmail.com&gt;</p>
+
+
+<h3>References</h3>
+
+<p>Mardia, K. and Jupp, P. (2000).
+<em>Directional Statistics</em>, Chichester: Wiley.
+</p>
+<p>Rueda, C., Fernandez, M. A. and Peddada, S. D. (2009).
+Estimation of parameters subject to order restrictions on a circle with application to estimation of phase angles of cell-cycle genes.
+<em>Journal of the American Statistical Association</em>, <b>104</b>, n485; pp 338–347. <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2742472/">https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2742472/</a>
+</p>
+<p>Fernandez, M. A., Rueda, C. and Peddada, S. D. (2012).
+Identification of a core set of signature cell cycle genes whose relative order of time to peak expression is conserved across
+species, <em>Nucl. Acids Res.</em> <b>40</b>, n7: pp 2823–2832. doi:10.1093/nar/gkr1077.
+<a href="https://academic.oup.com/nar/article/40/7/2823/1183140">https://academic.oup.com/nar/article/40/7/2823/1183140</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>CIRE</code>,<code>sce</code>, <code>mrl</code>, <code>isocir</code>, <code>plot.isocir</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(cirdata)
+# Example without replications and a partial circular order:
+orderGroups &lt;- c(1,1,1,2,2,3,4,4)
+cond.test(cirdata, groups = orderGroups, kappa = 0.2)
+# Example with replications and the next circular order:
+orderGroups2 &lt;- c(1:8)
+data(datareplic)
+cond.test(data = datareplic, groups = orderGroups2)
+</code></pre>
+
+
+</div>

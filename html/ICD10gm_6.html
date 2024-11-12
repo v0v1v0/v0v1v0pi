@@ -1,0 +1,99 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>icd_expand</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Expand list of ICD codes to include all possible subcodes</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>icd_expand</code> takes a data.frame containing ICD codes
+and optional metadata as input. It returns a data.frame containing
+all ICD codes at or below the specified level of the hierarchy
+(e.g. the specification "E11" is expanded to include all three,
+four and five-digit codes beginning with E11).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">icd_expand(
+  icd_in,
+  year,
+  col_icd = "ICD",
+  col_meta = NULL,
+  type = "strict",
+  ignore_icd_errors = FALSE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>icd_in</code></td>
+<td>
+<p>Data frame defining ICD codes of interest</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>year</code></td>
+<td>
+<p>ICD 10 version</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col_icd</code></td>
+<td>
+<p>Column of icd_in containing ICD codes (Default: ICD)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col_meta</code></td>
+<td>
+<p>(Optional) Columns containing meta information to retain (e.g. Grouper, age or other criteria for later use). If left NULL, only col_icd is retained.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>A character string determining how strictly matching should be performed, passed to <code>icd_parse</code>. This must be one of "strict" (<code>str</code> contains a ICD code with no extraneous characters), <code>bounded</code> (<code>str</code> contains an ICD code with a word boundary on both sides) or <code>weak</code> (ICD codes are extracted even if they are contained within a word, e.g. "E10Diabetes" would return "E10"). Default: <code>strict</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ignore_icd_errors</code></td>
+<td>
+<p>logical. Whether to ignore incorrectly specified input (potentially leading to incomplete output) or stop if any ICD specification does not correspond to a valid ICD code. Default: <code>FALSE</code>, stop on error.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>data.frame with columns YEAR, ICD_CODE, ICD_COMPRESSED, ICD_LABEL and, if specified, columns specified by col_meta
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>icd_history()</code> to historize the output
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Incomplete or non-terminal codes expand to the right.
+# This is useful to specified code blocks in a compact manner
+icd_meta &lt;- data.frame(ICD = "R1")
+icd_expand(icd_meta, year = 2019)
+
+# Optional metadata columns can be carried
+# through with the specification
+icd_meta &lt;- data.frame(ICD = "M54", icd_label = "Back pain")
+icd_expand(icd_meta, year = 2019, col_meta = "icd_label")
+
+</code></pre>
+
+
+</div>

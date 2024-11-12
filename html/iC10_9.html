@@ -1,0 +1,180 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>matchFeatures</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Matching features from the classifier to the test data.
+</h2>
+
+<h3>Description</h3>
+
+<p>This function matches available copy number and/or expression data features to the training signatures;
+using either genomic position or HUGO gene name for copy number features and either Illumina
+probe names or HUGO gene name for expression features.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">matchFeatures(CN = NULL, Exp = NULL,
+CN.by.feat = c("gene", "probe"),
+Exp.by.feat = c("gene", "probe"),
+ref="hg19")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>CN</code></td>
+<td>
+
+<p>Data must be log2 copy number ratios. Two formats are allowed:
+- a matrix where each row represents a gene and each column a sample.
+In this case <code>CN.by.feat</code> must be "gene" and the rownames must be the hgnc gene names.
+- a data.frame with segmented data. The following columns must exist: 'ID' for the sample name,
+'chromosome_name' for the chromosome (must be numeric), 'loc.start' for the start position of the region,
+'loc.end' for the end position of the region, 'seg.mean' for the log2ratio of the segment.
+If NULL, copy number is not used in the classifier.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Exp</code></td>
+<td>
+
+<p>Matrix with the expression data to classify. Each row must be a gene or an Illumina probe, and each
+column must correspond to a sample.
+Rownames must be either Illumina probes, in which case <code>Exp.by.feat</code> must be "probe";  or hgnc gene names,
+in which case <code>Exp.by.feat</code> must be "gene".
+If NULL, expression is not used in the classifier.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CN.by.feat</code></td>
+<td>
+
+<p>Either "probe" or "gene", Default is "probe".
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Exp.by.feat</code></td>
+<td>
+
+<p>Either "probe" or "gene", Default is "gene".
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ref</code></td>
+<td>
+
+<p>Either "hg18", "hg19" or "hg38". It is used to match the copy number probes if <code>CN.by.feat</code> is "probe"
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>One of <code>CN</code> or <code>Exp</code> must be not NULL.
+If matching is done by gene, hgnc gene name is used to match the rownames of the features. A list of
+synonym gene names is used (see <code>Map.All</code>).
+For copy number features matched by probe, the maximum log ratio in absolute value inside the limits
+of the feature is used. If there is no copy number in that region, the value of the probe before it is used.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with the following elements is returned:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>CN</code></td>
+<td>
+<p>copy number data to classify</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>train.CN</code></td>
+<td>
+<p>copy number training data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Exp</code></td>
+<td>
+<p>expression data to classify</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>train.Exp</code></td>
+<td>
+<p>expression training data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>train.iC10</code></td>
+<td>
+<p>iC10 assignments for the training data</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>map.cn</code></td>
+<td>
+<p>annotation data for the copy number features</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>map.exp</code></td>
+<td>
+<p>annotation data for the expression features</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Note that the training set will be different, depending on the features
+matched.
+Genomic annotation for the training dataset has been obtained from Mark
+Dunning's lluminaHumanv3.db package.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Oscar M Rueda
+</p>
+
+
+<h3>References</h3>
+
+<p>Ali HR et al. Genome-driven integrated classification of breast cancer
+validated in over 7,500 samples. Genome Biology 2014; 15:431.
+Curtis et al. The genomic and transcriptomic architecture of 2,000
+breast tumours reveals novel subgroups. Nature 2012; 486:346-352.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>normalizeFeatures</code>, <code>iC10</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">require(iC10TrainingData)
+data(train.CN)
+data(train.Exp)
+features &lt;- matchFeatures(Exp=train.Exp,Exp.by.feat="probe", ref="hg18")
+str(features)
+</code></pre>
+
+
+</div>

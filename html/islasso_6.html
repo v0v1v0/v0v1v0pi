@@ -1,0 +1,116 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>anova.islasso</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>General Linear Combination method for <code>islasso</code> objects</h2>
+
+<h3>Description</h3>
+
+<p>General linear hypotheses and confidence intervals estimation for linear combinantions of the regression coefficients in  <code>islasso</code> fits
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'islasso'
+anova(object, A, b = NULL, ci, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>a fitted model object of class "islasso".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>matrix (or vector) giving linear combinations of coefficients by rows, or a character vector giving the hypothesis in symbolic form (see Details). </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b</code></td>
+<td>
+<p>right-hand-side vector for hypothesis, with as many entries as rows in the hypothesis matrix A; can be omitted, in which case it defaults to a vector of zeroes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ci</code></td>
+<td>
+<p>optionally, a two columns matrix of estimated confidence intervals for the estimated coefficients.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>not used.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>For the islasso regression model with coefficients <code class="reqn">\beta</code>, the null hypothesis is </p>
+<p style="text-align: center;"><code class="reqn">H_0:A\beta=b</code>
+</p>
+<p> where A and b are known matrix and vector. 
+</p>
+<p>The hypothesis matrix A can be supplied as a numeric matrix (or vector), the rows of which specify linear combinations of the model coefficients, which are tested equal to the corresponding entries in the right-hand-side vector b, which defaults to a vector of zeroes.
+</p>
+<p>Alternatively, the hypothesis can be specified symbolically as a character vector with one or more elements, each of which gives either a linear combination of coefficients, or a linear equation in the coefficients (i.e., with both a left and right side separated by an equals sign). Components of a linear expression or linear equation can consist of numeric constants, or numeric constants multiplying coefficient names (in which case the number precedes the coefficient, and may be separated from it by spaces or an asterisk); constants of 1 or -1 may be omitted. Spaces are always optional. Components are separated by plus or minus signs. Newlines or tabs in hypotheses will be treated as spaces. See the examples below.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class "anova.islasso" which contains the estimates, the standard errors, the Wald statistics and corresponding p value of each linear combination and of the restriced model.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>The main function of the same name was inspired by the R function previously implemented by Vito MR Muggeo.
+</p>
+<p>Maintainer: Gianluca Sottile &lt;gianluca.sottile@unipa.it&gt;
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">set.seed(1)
+n &lt;- 100
+p &lt;- 100
+p1 &lt;- 10  #number of nonzero coefficients
+coef.true &lt;- sort(round(c(seq(.5, 3, l=p1/2), seq(-1, -2, l=p1/2)), 2))
+sigma &lt;- 1
+
+coef &lt;- c(coef.true, rep(0, p-p1))
+
+X &lt;- matrix(rnorm(n*p), n, p)
+eta &lt;- drop(X %*% coef)
+mu &lt;- eta
+y &lt;- mu + rnorm(n, 0, sigma)
+
+o &lt;- islasso(y ~ . - 1, data = data.frame(y = y, X), 
+             family = gaussian())
+anova(o, A = diag(p), b = coef)
+anova(o, A = c("X1 + X2 + X3 + X4 + X5 = -7.5"))
+anova(o, A = c("X1 + X2 + X3 + X4 + X5 = 0"))
+anova(o, A = c("X6 + X7 + X8 + X9 + X10"), b = 8.75)
+anova(o, A = c("X6 + X7 + X8 + X9 + X10"), b = 0)
+anova(o, A = c("X1 + X2 + X3 + X4 + X5 = -7.5",
+               "X6 + X7 + X8 + X9 + X10 = 8.75"))
+anova(o, A = c("X1 + X2 + X3 + X4 + X5",
+               "X6 + X7 + X8 + X9 + X10"), b = c(-7.5, 8.75))
+anova(o, A = c("X1 + X2 + X3 + X4 + X5",
+               "X6 + X7 + X8 + X9 + X10"))
+
+</code></pre>
+
+
+</div>

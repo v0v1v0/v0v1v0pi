@@ -1,0 +1,101 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>contentmask</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Content masking</h2>
+
+<h3>Description</h3>
+
+<p>This function offers three algorithms for topic/content masking. In order to run the masking algorithms, a <code>spacy</code> tokenizer or POS-tagger has to be run first (via <code>spacyr</code>). For more information about the masking algorithms see Details below.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">contentmask(
+  corpus,
+  model = "en_core_web_sm",
+  algorithm = "POSnoise",
+  fw_list = "eng_halvani",
+  replace_non_ascii = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>corpus</code></td>
+<td>
+<p>A <code>quanteda</code> corpus object, typically the output of the <code>create_corpus()</code> function.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>The spacy model to use. The default is "en_core_web_sm".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>algorithm</code></td>
+<td>
+<p>A string, either "POSnoise" (default), "frames", or "textdistortion".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fw_list</code></td>
+<td>
+<p>The list of function words to use for the <code>textdistortion</code> algorithm. This is either the default ("eng_halvani") for the same list of function words used for <code>POSnoise</code> or it can be a vector of strings where each string is a function word to keep.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>replace_non_ascii</code></td>
+<td>
+<p>A logical value indicating whether to remove non-ASCII characters (including emojis). This is the default.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The default algorithm for content masking that this function applies is <code>POSnoise</code> (Halvani and Graner 2021). This algorithm only works for English and it transforms a text by masking tokens using their POS tag if these tokens are: nouns, verbs, adjectives, adverbs, digits, and symbols while leaving all the rest unchanged. <code>POSnoise</code> uses a list of function words for English that also includes frequent words belonging to the masked Part of Speech tags that tend to be mostly functional (e.g. make, recently, well).
+</p>
+<p>Another algorithm implemented is Nini's (2023) <code>frames</code> or <code style="white-space: pre;">⁠frame n-grams⁠</code>. This algorithm does not involve a special list of tokens and therefore can potentially work for any language provided that the correct <code>spacy</code> model is loaded. This algorithm consists in masking all tokens using their POS tag only when these are nouns, verbs, or personal pronouns.
+</p>
+<p>Finally, the last algorithm implemented is a version of <code>textdistortion</code>, as originally proposed by Stamatatos (2017). This version of the algorithm is essentially <code>POSnoise</code> but without POS tag information. The default implementation uses the same list of function words that are used for <code>POSnoise</code>. In addition to the function words provided, the function treats all punctuation marks and new line breaks as function words to keep. The basic tokenization is done using <code>spacyr</code> so the right model for the language being analysed should be selected.
+</p>
+<p>If you have never used <code>spacyr</code> before then please follow the instructions to set it up and install a model before using this function.
+</p>
+<p>The removal of non-ASCII characters is done using the <code>textclean</code> package.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>quanteda</code> corpus object only containing functional tokens, depending on the algorithm chosen. The corpus contains the same docvars as the input. Email addresses or URLs are treated like nouns.
+</p>
+
+
+<h3>References</h3>
+
+<p>Halvani, Oren &amp; Lukas Graner. 2021. POSNoise: An Effective Countermeasure Against Topic Biases in Authorship Analysis. In Proceedings of the 16th International Conference on Availability, Reliability and Security, 1–12. Vienna, Austria: Association for Computing Machinery. https://doi.org/10.1145/3465481.3470050.
+Nini, Andrea. 2023. A Theory of Linguistic Individuality for Authorship Analysis (Elements in Forensic Linguistics). Cambridge, UK: Cambridge University Press.
+Stamatatos, Efstathios. 2017. Masking topic-related information to enhance authorship attribution. Journal of the Association for Information Science and Technology. https://doi.org/10.1002/asi.23968.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+text &lt;- "The cat was on the chair. He didn't move\ncat@pets.com;\nhttp://quanteda.io/. i.e. a test "
+toy.corpus &lt;- quanteda::corpus(text)
+contentmask(toy.corpus, algorithm = "POSnoise")
+contentmask(toy.corpus, algorithm = "textdistortion")
+
+## End(Not run)
+</code></pre>
+
+
+</div>

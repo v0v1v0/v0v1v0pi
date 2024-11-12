@@ -1,0 +1,152 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>pcaLocalDimEst</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Local Dimension Estimation with PCA </h2>
+
+<h3>Description</h3>
+
+<p>Estimates local manifold dimension using the largest singular values of the covariance matrix.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">pcaLocalDimEst(data, ver, alphaFO = .05, alphaFan = 10, betaFan = .8, PFan = .95,
+     ngap = 5, maxdim = min(dim(data)), verbose = TRUE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p> a local data set for which dimension should be estimated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ver</code></td>
+<td>
+<p> possible values: <code>'FO'</code>, <code>'fan'</code>, <code>'maxgap'</code>, <code>'cal'</code>. <code>'cal'</code> is often very slow. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alphaFO</code></td>
+<td>
+<p> only for <code>ver = 'FO'</code>. An eigenvalue is considered significant if it is larger than alpha times the largest eigenvalue. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alphaFan</code></td>
+<td>
+<p> only for <code>ver = 'Fan'</code>. The alpha parameter (large gap threshold).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>betaFan</code></td>
+<td>
+<p> only for <code>ver = 'Fan'</code>. The beta parameter (total covariance threshold).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>PFan</code></td>
+<td>
+<p> only for <code>ver = 'Fan'</code>. Total covariance in non-noise.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ngap</code></td>
+<td>
+<p> only for <code>ver = 'cal'</code>. How many of the largest gaps that should be considered. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxdim</code></td>
+<td>
+<p> only for <code>ver = 'cal'</code>. The maximal manifold dimension of the data. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p> should information about the process be printed out? </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Version <code>'FO'</code> is the method by Fukunaga-Olsen, version <code>'fan'</code> is the method by Fan et al..
+</p>
+<p>Version <code>'maxgap'</code> returns the position of the largest relative gap in the sequence of singular values.
+</p>
+<p>Version <code>'cal'</code> considers the positions of the <code>ngap</code> largest relative gaps in the
+sequence of singular values and generates calibration data to determine which one of them is most likely.
+</p>
+<p>All versions assume that the data is local, i.e. that it is a neighborhood taken from a larger data set,
+such that the curvature and the noise within the neighborhood is relatively small. In the ideal case
+(no noise, no curvature) this is equivalent to the data being uniformly distributed over a hyper ball.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A <code>DimEst</code> object with slots:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>dim.est</code></td>
+<td>
+<p>the dimension estimate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gap.size</code></td>
+<td>
+<p>if <code>ver</code> is not <code>'cal'</code>, the size of the gap in singular values corresponding to the estimated dimension</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>likelihood</code></td>
+<td>
+<p>if <code>ver</code> is <code>cal</code>, the likelihood of the estimated dimension.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Kerstin Johnsson, Lund University
+</p>
+
+
+<h3>References</h3>
+
+
+<p>Fukunaga, K. and Olsen, D. R. (1971). An algorithm for finding intrinsic dimensionality
+of data. <em>IEEE Trans. Comput.</em>, <b>c-20</b>(2):176-183.
+</p>
+<p>Fan, M. et al. (2010). Intrinsic dimension estimation of data by principal component 
+analysis. <em>arXiv preprint</em> 1002.2050.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>pcaOtpmPointwiseDimEst</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data &lt;- cutHyperPlane(100, 4, 10, .05)
+pcaLocalDimEst(data, 'fan')
+pcaLocalDimEst(data, 'FO')
+pcaLocalDimEst(data, 'maxgap')
+
+</code></pre>
+
+
+</div>

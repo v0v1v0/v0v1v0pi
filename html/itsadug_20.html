@@ -1,0 +1,187 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_modelterm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get estimated for selected model terms.</h2>
+
+<h3>Description</h3>
+
+<p>Get estimated for selected model terms.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_modelterm(
+  model,
+  select,
+  cond = NULL,
+  n.grid = 30,
+  se = TRUE,
+  f = 1.96,
+  as.data.frame = TRUE,
+  print.summary = getOption("itsadug_print")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A gam object, produced by <code>gam</code> or 
+<code>bam</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>select</code></td>
+<td>
+<p>A number, indicating the model term to be selected.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cond</code></td>
+<td>
+<p>A named list of the values to restrict the estimates for the 
+predictor terms. When NULL (default) values are automatically selected.
+Only relevant for complex interactions, which involve more than two 
+dimensions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.grid</code></td>
+<td>
+<p>Number of data points estimated for each random smooth.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se</code></td>
+<td>
+<p>Logical: whether or not to return the confidence interval or 
+standard error around the estimates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>f</code></td>
+<td>
+<p>A number to scale the standard error. Defaults to 1.96, resulting 
+in 95% confidence intervals. For 99% confidence intervals use a value of 
+2.58.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>as.data.frame</code></td>
+<td>
+<p>Logical: whether or not to return a data.frame. 
+Default is TRUE, and a list will be returned.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print.summary</code></td>
+<td>
+<p>Logical: whether or not to print a summary of the 
+values selected for each predictor. 
+Default set to the print info messages option 
+(see <code>infoMessages</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A data frame with estimates for the selected smooth term.
+Or a list with two or more elements:
+</p>
+
+<ul>
+<li> <p><code>fit</code>: Numeric vector with the fitted values;
+</p>
+</li>
+<li> <p><code>se.fit</code>: Optionally, only with <code>se=TRUE</code>.
+Numeric vector with the error or confidence interval values (f*SE);
+</p>
+</li>
+<li> <p><code>f</code>: The multiplication factor for generating 
+the confidence interval values;
+</p>
+</li>
+<li> <p><code>terms</code>: Numeric vector (for 1-dimensional smooth) 
+or data frame (more 2- or more dimensional surfaces) 
+with values of the modelterms.
+</p>
+</li>
+<li> <p><code>title</code>: String with name of the model term.
+</p>
+</li>
+<li> <p><code>xlab</code>, <code>ylab</code>, or <code>labels</code>:
+Labels for x-axis and optionally y-axis. Precise structure depends 
+on type of smooth term: for 1-dimensional smooth only x-label is provided, 
+for 2-dimensional smooths x-label and y-label are provided, 
+for more complex smooths a vector of of labels is provided.
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Jacolien van Rij
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other Model predictions: 
+<code>get_coefs()</code>,
+<code>get_difference()</code>,
+<code>get_fitted()</code>,
+<code>get_predictions()</code>,
+<code>get_random()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(simdat)
+
+## Not run:  
+# Model with random effect and interactions:
+m1 &lt;- bam(Y ~ s(Time) + s(Trial) 
++ti(Time, Trial)
++s(Time, Subject, bs='fs', m=1),
+data=simdat)
+
+# Get data frame with predictions:
+p &lt;- get_modelterm(m1, select=1)
+emptyPlot(range(p$terms), range(p$fit), h=0)
+plot_error(p$terms, p$fit, p$se.fit, shade=TRUE, xpd=TRUE)
+
+# Plot random effects in separate panels:
+pp &lt;- get_modelterm(m1, select=4, as.data.frame=TRUE)
+require(lattice)
+lattice::xyplot(fit~Time|Subject, 
+    data=pp, type='l',
+    xlab='Time', ylab='Partial effect')
+
+# Plot selection of subjects:
+pp &lt;- get_modelterm(m1, select=4, 
+    cond=list(Subject=c('a01', 'a03', 'c16')),
+    as.data.frame=TRUE)
+lattice::xyplot(fit~Time|Subject, 
+    data=pp, type='l',
+    xlab='Time', ylab='Partial effect')
+
+# Or using the package ggplot2:
+require(ggplot2)
+pp &lt;- get_modelterm(m1, select=4, as.data.frame=TRUE)
+pg &lt;- ggplot2::qplot(Time, fit, data = pp, 
+    geom = c('point', 'line'), colour = Subject)
+pg + ggplot2::guides(col = guide_legend(nrow = 18))
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

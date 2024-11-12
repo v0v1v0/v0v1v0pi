@@ -1,0 +1,208 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>estim.mix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Estimation of a mixture model of MCAR and MNAR values in each column of a data matrix.
+</h2>
+
+<h3>Description</h3>
+
+<p>This function allows estimating a mixture model of MCAR and MNAR values in each column of data sets similar to the ones which can be studied in MS-based quantitative proteomics. Such data matrices contain intensity values of identified peptides.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">estim.mix(tab, tab.imp, conditions, x.step.mod=150, x.step.pi=150,
+nb.rei=200)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>tab</code></td>
+<td>
+<p>A data matrix containing numeric and missing values. Each column of this matrix is assumed to correspond to an experimental sample, and each row to an identified peptide.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tab.imp</code></td>
+<td>
+<p>A matrix where the missing values of <code>tab</code> have been imputed under the assumption that they are all MCAR. For instance, such a matrix can be obtained by using the function <code>impute.slsa</code> of this package.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conditions</code></td>
+<td>
+<p>A vector of factors indicating the biological condition to which each column (experimental sample) belongs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x.step.mod</code></td>
+<td>
+<p>The number of points in the intervals used for estimating the cumulative distribution functions of the mixing model in each column.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x.step.pi</code></td>
+<td>
+<p>The number of points in the intervals used for estimating the proportion of MCAR values in each column.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nb.rei</code></td>
+<td>
+<p>The number of initializations of the minimization algorithm used to estimate the proportion of MCAR values (see Details).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function aims to estimate the following mixture model in each column:
+</p>
+<p><code class="reqn">F_{tot}(x)=\pi_{na}\times F_{na}(x)+(1-\pi_{na})\times F_{obs}(x)</code>
+</p>
+<p><code class="reqn">F_{na}(x)=\pi_{mcar}\times F_{tot}(x)+(1-\pi_{mcar})\times F_{mnar}(x)</code>
+</p>
+<p>where <code class="reqn">\pi_{na}</code> is the proportion of missing values, <code class="reqn">\pi_{mcar}</code> is the proportion of MCAR values, <code class="reqn">F_{tot}</code> is the cumulative distribution function (cdf) of the complete values, <code class="reqn">F_{na}</code> is the cdf of the missing values, <code class="reqn">F_{obs}</code> is the cdf of the observed values, and <code class="reqn">F_{mnar}</code> is the cdf of the MNAR values.
+</p>
+<p>To estimate this model, a first step consists to compute a rough estimate of <code class="reqn">F_{na}</code>  by assuming that all missing values are MCAR (thanks to the argument <code>tab.imp</code>). This rough estimate is noted <code class="reqn">\hat{F}_{na}</code>.
+</p>
+<p>In a second step, the proportion of MCAR values is estimated. To do so, the ratio
+</p>
+<p><code class="reqn">\hat{\pi}(x)=(1-\hat{F}_{na}(x))/(1-\hat{F}_{tot}(x))</code>
+</p>
+<p>is computed for different <code class="reqn">x</code>, where
+</p>
+<p><code class="reqn">\hat{F}_{tot}(x)=\pi_{na}\times \hat{F}_{na}(x)+(1-\pi_{na})\times \hat{F}_{obs}(x)</code>
+</p>
+<p>with <code class="reqn">\hat{F}_{obs}</code> the empirical cdf of the observed values.
+</p>
+<p>Next, the following minimization is performed:
+</p>
+<p><code class="reqn">\min_{1&gt;k&gt;0,a&gt;0,d&gt;0}f(k,a,d)</code>
+</p>
+<p>where
+</p>
+<p><code class="reqn">f(k,a,d)=\sum_x \frac{1}{s(x)^2}\times [\hat{\pi}(x)-k-(1-k)\frac{\exp(-a\times [x-lower_x]^d)}{1-\hat{F}_{tot}(x)}]^2</code>
+</p>
+<p>where <code class="reqn">s(x)^2</code> is an estimate of the asymptotic variance of <code class="reqn">\hat{\pi}(x)</code>, <code class="reqn">lower_x</code> is an estimate of the minimum of the complete values. To perform this minimization, the function <code>optim</code> with the method "L-BFGS-B" is used. Because it is function of its initialization, it is possible to reinitialize a number of times the minimisation algorithm with the argument <code>nb.rei</code>: the parameters leading to the lowest minimum are next kept.
+</p>
+<p>Once <code>k</code>, <code>a</code> and <code>d</code> are estimated, one can use several methods to estimate <code class="reqn">\pi_{mcar}</code>: it is estimated
+by <code class="reqn">k</code>;
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list composed of:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>abs.pi</code></td>
+<td>
+<p>A numeric matrix containing the intervals used for estimating the ratio
+</p>
+<p><code>(1-F_na(x))/(1-F_tot(x))</code>
+</p>
+<p>in each column.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pi.init</code></td>
+<td>
+<p>A numeric matrix containing the estimated ratios
+</p>
+<p><code>(1-F_na(x))/(1-F_tot(x))</code>
+</p>
+<p>where <code>x</code> belongs to <code>abs.pi[,j]</code> for each sample <code>j</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>var.pi.init</code></td>
+<td>
+<p>A numeric matrix containing the estimated asymptotic variances of <code>pi.init</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trend.pi.init</code></td>
+<td>
+<p>A numeric matrix containing the estimated trend of the model used in the minimization algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>abs.mod</code></td>
+<td>
+<p>A numeric vector containing the interval used for estimating the mixture models in each column.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pi.na</code></td>
+<td>
+<p>A numeric vector containing the proportions of missing values in each column.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>F.na</code></td>
+<td>
+<p>A numeric matrix containing the estimated cumulative distribution functions of missing values in each column on the interval <code>abs.mod</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>F.tot</code></td>
+<td>
+<p>A numeric matrix containing the estimated cumulative distribution functions of complete values in each column on the interval <code>abs.mod</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>F.obs</code></td>
+<td>
+<p>A numeric matrix containing the estimated cumulative distribution functions of observed values in each column on the interval <code>abs.mod</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pi.mcar</code></td>
+<td>
+<p>A numeric vector containing the estimations of the proportion of MCAR values in each column.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MinRes</code></td>
+<td>
+<p>A numeric matrix containing the three parameters of the model used in the minimization algorithm (three first rows), and the value of minimized function.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Quentin Giai Gianetto &lt;quentin2g@yahoo.fr&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>impute.slsa</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#Simulating data
+res.sim=sim.data(nb.pept=2000,nb.miss=600);
+
+#Imputation of missing values with a MCAR-devoted algorithm: here the slsa algorithm
+dat.slsa=impute.slsa(tab=res.sim$dat.obs,conditions=res.sim$condition,repbio=res.sim$repbio);
+
+#Estimation of the mixture model
+res=estim.mix(tab=res.sim$dat.obs, tab.imp=dat.slsa, conditions=res.sim$condition);
+
+</code></pre>
+
+
+</div>

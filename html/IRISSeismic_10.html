@@ -1,0 +1,223 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>crossSpectrum</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Cross-Spectral Analysis</h2>
+
+<h3>Description</h3>
+
+<p>The crossSpectrum() function is based on <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span>'s spec.pgram() function and attempts to provide
+complete results of cross-spectral FFT analysis in a programmer-friendly fashion.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">crossSpectrum(x, spans = NULL, kernel = NULL, taper = 0.1,
+                           pad = 0, fast = TRUE,
+                           demean = FALSE, detrend = TRUE,
+                           na.action = stats::na.fail)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>multivariate time series</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spans</code></td>
+<td>
+<p>vector of odd integers giving the widths of modified Daniell smoothers to be used to smooth the periodogram</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kernel</code></td>
+<td>
+<p>alternatively, a kernel smoother of class "tskernel"</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>taper</code></td>
+<td>
+<p>specifies the proportion of data to taper. A split cosine bell taper is applied to this proportion of the data at the beginning and end of the series</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pad</code></td>
+<td>
+<p>proportion of data to pad. Zeros are added to the end of the series to increase its length by the proportion pad</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fast</code></td>
+<td>
+<p>logical. if TRUE, pad the series to a highly composite length</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>demean</code></td>
+<td>
+<p>logical. If TRUE, subtract the mean of the series</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>detrend</code></td>
+<td>
+<p>logical. If TRUE, remove a linear trend from the series. This will also remove the mean</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+<p>NA action function</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The multivariate timeseries passed in as the first argument should be a union of two separate timeseries with the same sampling rate created in the following manner:
+</p>
+<pre>
+  ts1 &lt;- ts(data1,frequency=sampling_rate)
+  ts2 &lt;- ts(data2,frequency=sampling_rate)
+  x &lt;- ts.union(ts1,ts2)
+</pre>
+<p>The crossSpectrum() function borrows most of its code from <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span>'s spec.pgram() function. It omits any plotting
+functionality and returns a programmer-friendly dataframe of all cross-spectral components generated during
+Fourier analysis for use in calculating transfer functions.
+</p>
+<p>The naming of cross-spectral components is borrowed from the Octave version of MATLAB's pwelch() function.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A dataframe with the following columns:
+</p>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>freq</code></td>
+<td>
+<p>spectral frequencies</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spec1</code></td>
+<td>
+<p>'two-sided' spectral amplitudes for ts1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>spec2</code></td>
+<td>
+<p>'two-sided' spectral amplitudes for ts2</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coh</code></td>
+<td>
+<p>magnitude squared coherence between ts1 and ts2</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>phase</code></td>
+<td>
+<p>cross-spectral phase between ts1 and ts2</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Pxx</code></td>
+<td>
+<p>periodogram for ts1</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Pyy</code></td>
+<td>
+<p>periodogram for ts2</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Pxy</code></td>
+<td>
+<p>cross-periodogram for ts1 and ts2</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://sourceforge.net/p/octave/signal/ci/default/tree/inst/pwelch.m">Octave pwelch() source code</a>
+</p>
+<p><a href="https://CRAN.R-project.org/package=psd/vignettes/normalization.pdf">Normalization of Power Spectral Density estimates</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>McNamaraPSD</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Create a new IrisClient
+iris &lt;- new("IrisClient")
+
+# Get seismic data
+starttime &lt;- as.POSIXct("2011-05-01", tz="GMT")
+endtime &lt;- starttime + 3600
+
+st1 &lt;- getDataselect(iris,"CI","PASC","00","BHZ",starttime,endtime)
+st2 &lt;- getDataselect(iris,"CI","PASC","10","BHZ",starttime,endtime)
+tr1 &lt;- st1@traces[[1]]
+tr2 &lt;- st2@traces[[1]]
+
+# Both traces have a sampling rate of 40 Hz
+sampling_rate &lt;- tr1@stats@sampling_rate
+
+ts1 &lt;- ts(tr1@data,frequency=sampling_rate)
+ts2 &lt;- ts(tr2@data,frequency=sampling_rate)
+
+# Calculate the cross spectrum
+DF &lt;- crossSpectrum(ts.union(ts1,ts2),spans=c(3,5,7,9))
+
+# Calculate the transfer function
+transferFunction &lt;- DF$Pxy / DF$Pxx
+transferAmp &lt;- Mod(transferFunction)
+transferPhase &lt;- pracma::mod(Arg(transferFunction) * 180/pi,360)
+
+# 2 rows
+layout(matrix(seq(2)))
+
+# Plot
+plot(1/DF$freq,transferAmp,type='l',log='x',
+     xlab="Period (sec)",
+     main="Transfer Function Amplitude")
+
+plot(1/DF$freq,transferPhase,type='l',log='x',
+     xlab="Period (sec)", ylab="degrees",
+     main="Transfer Function Phase")
+
+# Restore default layout
+layout(1)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

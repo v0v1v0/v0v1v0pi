@@ -1,0 +1,118 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>write</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Write sequences to text in FASTA or FASTQ format.</h2>
+
+<h3>Description</h3>
+
+<p>These functions take a list of DNA or amino acid sequences in
+<code>DNAbin</code> or <code>AAbin</code> format
+and outputs a text file to a specified directory.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">writeFASTQ(x, file = "", compress = FALSE, append = FALSE)
+
+writeFASTA(x, file = "", compress = FALSE, append = FALSE, wrap = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a list of sequences in <code>DNAbin</code> or <code>AAbin</code> format, or a
+vector of sequences as concatenated upper-case character strings.
+For writeFASTQ, only DNAbin objects are accepted, and each element should have
+a vector of quality scores of equal length attributed to the sequence.
+These vectors are comprised of raw bytes ranging from 00 to 5d
+(0 to 93 when converted to integers).
+See <code>readFASTQ</code> for more details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>character string giving a valid file path to output the text to.
+If file = "" (default setting) the text file is written to the
+console.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>compress</code></td>
+<td>
+<p>logical indicating whether the output file should be gzipped.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>append</code></td>
+<td>
+<p>logical indicating whether the output should be appended to the file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>wrap</code></td>
+<td>
+<p>integer giving the maximum number of characters on each sequence line.
+Defaults to NULL (no wrapping).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>NULL (invisibly).
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Shaun Wilkinson
+</p>
+
+
+<h3>References</h3>
+
+<p>Illumina help page:
+<a href="https://help.basespace.illumina.com/articles/descriptive/fastq-files/">https://help.basespace.illumina.com/articles/descriptive/fastq-files/</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>readFASTQ</code> for reading FASTQ files into R,
+and <code>write.dna</code> in the ape package
+for writing DNA to text in FASTA and other formats.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+  ## download and extract example FASTQ file to temporary directory
+  td &lt;- tempdir()
+  URL &lt;- "https://www.dropbox.com/s/71ixehy8e51etdd/insect_tutorial1_files.zip?dl=1"
+  dest &lt;- paste0(td, "/insect_tutorial1_files.zip")
+  download.file(URL, destfile = dest, mode = "wb")
+  unzip(dest, exdir = td)
+  x &lt;- readFASTQ(paste0(td, "/COI_sample2.fastq"))
+  ## trim primers from sequences
+  mlCOIintF &lt;- "GGWACWGGWTGAACWGTWTAYCCYCC"
+  jgHCO2198 &lt;- "TAIACYTCIGGRTGICCRAARAAYCA"
+  x &lt;- trim(x, up = mlCOIintF, down = jgHCO2198)
+  ## quality filter with size selection and singleton removal
+  x &lt;- qfilter(x, minlength = 250, maxlength = 350)
+  ## output filtered FASTQ file
+  writeFASTQ(x, file = paste0(td, "/COI_sample2_filtered.fastq"))
+  writeFASTA(x, file = paste0(td, "/COI_sample2_filtered.fasta"))
+ 
+</code></pre>
+
+
+</div>

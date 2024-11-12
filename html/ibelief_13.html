@@ -1,0 +1,110 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>DST</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Combination rules</h2>
+
+<h3>Description</h3>
+
+<p>Different rules to combine masses
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">DST(MassIn, criterion, TypeSSF = 0)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>MassIn</code></td>
+<td>
+<p>The matrix containing the masses. Each column represents a
+piece of mass.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>criterion</code></td>
+<td>
+<p>The combination criterion:
+</p>
+<p>criterion=1 Smets criterion (conjunctive combination rule)
+</p>
+<p>criterion=2 Dempster-Shafer criterion (normalized)
+</p>
+<p>criterion=3 Yager criterion
+</p>
+<p>criterion=4 Disjunctive combination criterion
+</p>
+<p>criterion=5 Dubois criterion (normalized and disjunctive combination)
+</p>
+<p>criterion=6 Dubois and Prade criterion (mixt combination), only for Bayesian masses whose focal elements are singletons
+</p>
+<p>criterion=7 Florea criterion
+</p>
+<p>criterion=8 PCR6
+</p>
+<p>criterion=9 Cautious Denoeux Min for functions non-dogmatics
+</p>
+<p>criterion=10 Cautious Denoeux Max for separable masses
+</p>
+<p>criterion=11 Hard Denoeux for functions sub-normal
+</p>
+<p>criterion=12 Mean of the bbas
+</p>
+<p>criterion=13 LNS rule, for separable masses
+</p>
+<p>criterion=131 LNSa rule, for separable masses</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>TypeSSF</code></td>
+<td>
+<p>The parameter of LNS rule (criterion = 13) and LNSa rule (criterion = 131). If TypeSSF = 0, it is not a SSF, the general case. If TypeSSF = 1, a SSF with a singleton as a focal element. If TypeSSF = 2, a SSF with any subset of <code class="reqn">\Theta</code> as a focal element.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The combined mass vector. One column.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+m1=c(0,0.4, 0.1, 0.2, 0.2, 0, 0, 0.1);
+m2=c(0,0.2, 0.3, 0.1, 0.1, 0, 0.2, 0.1);
+m3=c(0.1,0.2, 0, 0.1, 0.1, 0.1, 0, 0.3);
+
+m3d=discounting(m3,0.95);
+
+M_comb_Smets=DST(cbind(m1,m2,m3d),1);
+M_comb_Smets
+M_comb_PCR6=DST(cbind(m1,m2),8);
+M_comb_PCR6
+M_comb_LNS = DST(cbind(m1,m2),13);
+M_comb_LNS 
+M_comb_LNSa = DST(cbind(m1,m2),131);
+M_comb_LNSa 
+
+n1 = 5
+ThetaSize = 3
+mass_mat = matrix(0, 2^ThetaSize, n1 + 1);
+mass_mat[2, 1 : n1] = c(0.12, 0.16, 0.15, 0.11, 0.14) 
+mass_mat[3, n1 + 1] = 0.95;
+mass_mat[8, ] = 1 - colSums(mass_mat)
+mass_ssf_mat = mass_mat[c(2^(1:ThetaSize-1)+1, 8), ]
+# the following three functions could produce the same results
+DST(mass_mat, 13)
+DST(mass_mat, 13, TypeSSF = 2)
+DST(mass_ssf_mat, 13, TypeSSF = 1)
+</code></pre>
+
+
+</div>

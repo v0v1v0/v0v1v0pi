@@ -1,0 +1,228 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot.break_down</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot Generic for Break Down Objects</h2>
+
+<h3>Description</h3>
+
+<p>Displays a waterfall break down plot for objects of <code>break_down</code> class.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'break_down'
+plot(
+  x,
+  ...,
+  baseline = NA,
+  max_features = 10,
+  min_max = NA,
+  vcolors = DALEX::colors_breakdown_drwhy(),
+  digits = 3,
+  rounding_function = round,
+  add_contributions = TRUE,
+  shift_contributions = 0.05,
+  plot_distributions = FALSE,
+  vnames = NULL,
+  title = "Break Down profile",
+  subtitle = "",
+  max_vars = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an explanation created with <code>break_down</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>baseline</code></td>
+<td>
+<p>if numeric then veritical line starts in <code>baseline</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_features</code></td>
+<td>
+<p>maximal number of features to be included in the plot. default value is <code>10</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min_max</code></td>
+<td>
+<p>a range of OX axis. By default <code>NA</code>, therefore it will be extracted from the contributions of <code>x</code>. But it can be set to some constants, useful if these plots are to be used for comparisons.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vcolors</code></td>
+<td>
+<p>If <code>NA</code> (default), DrWhy colors are used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>number of decimal places (<code>round</code>) or significant digits (<code>signif</code>) to be used.
+See the <code>rounding_function</code> argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rounding_function</code></td>
+<td>
+<p>a function to be used for rounding numbers.
+This should be <code>signif</code> which keeps a specified number of significant digits or <code>round</code> (which is default) to have the same precision for all components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add_contributions</code></td>
+<td>
+<p>if <code>TRUE</code>, variable contributions will be added to the plot</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shift_contributions</code></td>
+<td>
+<p>number describing how much labels should be shifted to the right, as a fraction of range. By default equal to <code>0.05</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_distributions</code></td>
+<td>
+<p>if <code>TRUE</code> then distributions of conditional propotions will be plotted. This requires <code>keep_distributions=TRUE</code> in the
+<code>break_down</code>, <code>local_attributions</code>, or <code>local_interactions</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vnames</code></td>
+<td>
+<p>a character vector, if specified then will be used as labels on OY axis. By default NULL</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>title</code></td>
+<td>
+<p>a character. Plot title. By default <code>"Break Down profile"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>subtitle</code></td>
+<td>
+<p>a character. Plot subtitle. By default <code>""</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_vars</code></td>
+<td>
+<p>alias for the <code>max_features</code> parameter.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a <code>ggplot2</code> object.
+</p>
+
+
+<h3>References</h3>
+
+<p>Explanatory Model Analysis. Explore, Explain and Examine Predictive Models. <a href="https://ema.drwhy.ai">https://ema.drwhy.ai</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library("DALEX")
+library("iBreakDown")
+set.seed(1313)
+model_titanic_glm &lt;- glm(survived ~ gender + age + fare,
+                       data = titanic_imputed, family = "binomial")
+explain_titanic_glm &lt;- explain(model_titanic_glm,
+                           data = titanic_imputed,
+                           y = titanic_imputed$survived,
+                           label = "glm")
+
+bd_glm &lt;- break_down(explain_titanic_glm, titanic_imputed[1, ])
+bd_glm
+plot(bd_glm, max_features = 3)
+plot(bd_glm, max_features = 3,
+     vnames = c("average","+ male","+ young","+ cheap ticket", "+ other factors", "final"))
+
+## Not run: 
+## Not run:
+library("randomForest")
+set.seed(1313)
+# example with interaction
+# classification for HR data
+model &lt;- randomForest(status ~ . , data = HR)
+new_observation &lt;- HR_test[1,]
+
+explainer_rf &lt;- explain(model,
+                        data = HR[1:1000,1:5])
+
+bd_rf &lt;- local_attributions(explainer_rf,
+                           new_observation)
+bd_rf
+plot(bd_rf)
+plot(bd_rf, baseline = 0)
+plot(bd_rf, min_max = c(0,1))
+
+bd_rf &lt;- local_attributions(explainer_rf,
+                           new_observation,
+                           keep_distributions = TRUE)
+bd_rf
+plot(bd_rf, plot_distributions = TRUE)
+
+bd_rf &lt;- local_interactions(explainer_rf,
+                 new_observation,
+                 keep_distributions = TRUE)
+
+bd_rf
+plot(bd_rf)
+plot(bd_rf, plot_distributions = TRUE)
+
+# example for regression - apartment prices
+# here we do not have intreactions
+model &lt;- randomForest(m2.price ~ . , data = apartments)
+explainer_rf &lt;- explain(model,
+                        data = apartments_test[1:1000,2:6],
+                        y = apartments_test$m2.price[1:1000])
+
+bd_rf &lt;- local_attributions(explainer_rf,
+                           apartments_test[1,])
+bd_rf
+plot(bd_rf, digits = 1)
+plot(bd_rf, digits = 1, baseline = 0)
+
+bd_rf &lt;- local_attributions(explainer_rf,
+                           apartments_test[1,],
+                           keep_distributions = TRUE)
+plot(bd_rf, plot_distributions = TRUE)
+
+bd_rf &lt;- local_interactions(explainer_rf,
+                 new_observation = apartments_test[1,],
+                 keep_distributions = TRUE)
+
+bd_rf
+plot(bd_rf)
+plot(bd_rf, plot_distributions = TRUE)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

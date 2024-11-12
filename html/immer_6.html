@@ -1,0 +1,213 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>immer_ccml</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Composite Conditional Maximum Likelihood Estimation for the Partial Credit Model
+with a Design Matrix for Item Parameters
+</h2>
+
+<h3>Description</h3>
+
+<p>Estimates the partial credit model with a design matrix for item
+parameters with composite conditional maximum likelihood estimation.
+The estimation uses pairs of items <code class="reqn">X_i</code> and <code class="reqn">X_j</code> and considers conditional
+likelihoods <code class="reqn">P(X_i=k, X_j=h | \theta) / P( X_i + X_j=k+h| \theta )</code>. By using
+this strategy, the trait <code class="reqn">\theta</code> cancels out (like in conditional maximum
+likelihood estimation). The proposed strategy is a generalization of the Zwinderman (1995)
+composite conditional maximum likelihood approach of the Rasch model to the
+partial credit model. See Varin, Reid and Firth (2011) for a general introduction to
+composite conditional maximum likelihood estimation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">immer_ccml( dat, weights=NULL, irtmodel="PCM", A=NULL, b_fixed=NULL, control=NULL )
+
+## S3 method for class 'immer_ccml'
+summary(object, digits=3, file=NULL, ...)
+
+## S3 method for class 'immer_ccml'
+coef(object, ...)
+
+## S3 method for class 'immer_ccml'
+vcov(object, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>dat</code></td>
+<td>
+
+<p>Data frame with polytomous item responses <code class="reqn">0,1,\ldots, K</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+
+<p>Optional vector of sampling weights
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>irtmodel</code></td>
+<td>
+<p>Model string for specifying the item response model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+
+<p>Design matrix (items <code class="reqn">\times</code> categories <code class="reqn">\times</code> basis parameters).
+Entries for categories are for <code class="reqn">1,\ldots,K</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>b_fixed</code></td>
+<td>
+
+<p>Matrix with fixed <code class="reqn">b</code> parameters
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>Control arguments for optimization function
+<code>stats::nlminb</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>Object of class <code>immer_ccml</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>Number of digits after decimal to print</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>file</code></td>
+<td>
+<p>Name of a file in which the output should be sunk</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments to be passed.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function estimates the partial credit model as
+<code class="reqn">P(X_i=h | \theta ) \propto \exp( h \theta - b_{ih} )</code> with
+<code class="reqn">b_{ih}=\sum_l a_{ihl} \xi_l</code> where the values <code class="reqn">a_{ihl}</code>
+are included in the design matrix <code>A</code> and <code class="reqn">\xi_l</code> denotes
+basis item parameters.
+</p>
+
+
+<h3>Value</h3>
+
+<p>List with following entries (selection)
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>coef</code></td>
+<td>
+<p>Item parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vcov</code></td>
+<td>
+<p>Covariance matrix for item parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se</code></td>
+<td>
+<p>Standard errors for item parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nlminb_result</code></td>
+<td>
+<p>Output from optimization with
+<code>stats::nlminb</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>suff_stat</code></td>
+<td>
+<p>Used sufficient statistics</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ic</code></td>
+<td>
+<p>Information criteria</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Varin, C., Reid, N., &amp; Firth, D. (2011). An overview of composite likelihood methods.
+<em>Statistica Sinica, 21</em>, 5-42.
+</p>
+<p>Zwinderman, A. H. (1995). Pairwise parameter estimation in Rasch models.
+<em>Applied Psychological Measurement, 19</em>(4), 369-375.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>See <code>sirt::rasch.pairwise.itemcluster</code>
+of an implementation of the composite conditional maximum likelihood approach for the
+Rasch model.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#############################################################################
+# EXAMPLE 1: Partial credit model with CCML estimation
+#############################################################################
+
+library(TAM)
+
+data(data.gpcm, package="TAM")
+dat &lt;- data.gpcm
+
+#-- initial MML estimation in TAM to create a design matrix
+mod1a &lt;- TAM::tam.mml(dat, irtmodel="PCM2")
+summary(mod1a)
+
+#* define design matrix
+A &lt;- - mod1a$A[,-1,-1]
+A &lt;- A[,,-1]
+str(A)
+
+#-- estimate model
+mod1b &lt;- immer::immer_ccml( dat, A=A)
+summary(mod1b)
+</code></pre>
+
+
+</div>

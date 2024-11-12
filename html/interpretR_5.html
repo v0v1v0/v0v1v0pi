@@ -1,0 +1,108 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>variableImportance</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Permutation- based Variable Importance Measures</h2>
+
+<h3>Description</h3>
+
+<p><code>variableImportance</code> produces permutation- based variable importance measures (currently only for binary classification models from the package <code>randomForest</code> and only for the performance measure AUROC)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">variableImportance(
+  object = NULL,
+  xdata = NULL,
+  ydata = NULL,
+  CV = 3,
+  measure = "AUROC",
+  sort = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>A model. Currently only binary classification models from the package <code>randomForest</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xdata</code></td>
+<td>
+<p>A data frame containing the predictors for the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ydata</code></td>
+<td>
+<p>A factor containing the response variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CV</code></td>
+<td>
+<p>Cross-validation. How many times should the data be permuted and the decrease in performance be calculated? Afterwards the mean is taken. CV should be higher for very small samples to ensure stability.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>measure</code></td>
+<td>
+<p>Currently only Area Under the Receiver Operating Characteristic Curve (AUROC) is supported.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sort</code></td>
+<td>
+<p>Logical. Should the results be sorted from high to low?</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Currently only binary classification models from <code>randomForest</code> are supported. Also, currently only AUROC is supported. Definition of MeanDecreaseAUROC: for the entire ensemble the AUROC is recorded on the provided xdata. The same is subsequently done after permuting each variable (iteratively, for each variable separately). Then the latter is subtracted from the former. This is called the Decrease in AUROC. If we do this for multiple CV, it becomes the Mean Decrease in AUROC.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame containing the variable names and the mean decrease in AUROC
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Authors: Michel Ballings, and Dirk Van den Poel, Maintainer: <a href="mailto:Michel.Ballings@GMail.com">Michel.Ballings@GMail.com</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>parDepPlot</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#Prepare data
+data(iris)
+iris &lt;- iris[1:100,]
+iris$Species &lt;- as.factor(ifelse(factor(iris$Species)=="setosa",0,1))
+#Estimate model
+library(randomForest)
+ind &lt;- sample(nrow(iris),50)
+rf &lt;- randomForest(Species~., iris[ind,])
+#Obtain variable importances
+variableImportance(object=rf, xdata=iris[-ind,names(iris) != "Species"],
+ydata=iris[-ind,]$Species) 
+</code></pre>
+
+
+</div>

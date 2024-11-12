@@ -1,0 +1,81 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>RooksGradient</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate Gradient Statistics in the Rook's Neighbourhood</h2>
+
+<h3>Description</h3>
+
+<p>The movement of populations into adjacent cells may sometimes be influenced
+by the gradient of some predictive variable. This function enables the
+calculation of a simple gradient statistic in the rook's neighbourhood of
+each cell in a dataset. The statistic must first be computed for each grid
+cell using <code>SubgridStats</code>. Then for each grid, the RooksGradient
+function computes the arithmetic average of the difference between the
+statistic at the focal grid cell and the statistic in the four (or fewer)
+adjacent neighbours in its Rook's neibourhood. This arithmetically averaged
+difference is then returned under the column header of 'Gradient'. A negative
+gradient estimate indicates that the statistic in the central cell is higher
+than that in neighbouring cells whereas a positive gradient estimate
+indicates the opposite.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">RooksGradient(vfdf, statistic = "mean")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>vfdf</code></td>
+<td>
+<p>A data frame as returned by <code>SubgridStats</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>statistic</code></td>
+<td>
+<p>desired output statistic: It should be one of "mean", "var",
+or "sum". Default setting is mean.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A data frame similar to vfdf except that it includes an additional
+column called Gradient as described above.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># creating pattern patterns
+Mat1 &lt;- matrix(rep(0,9*9), nrow = 9)
+Mat1[c(4:6), c(4:6)] &lt;- 2
+Mat1[c(4:6), c(1:3)] &lt;- 1
+Mat1[c(1:3), c(4:6)] &lt;- 1
+Mat1[c(7:9), c(4:6)] &lt;- 1
+Mat1[c(4:6), c(7:9)] &lt;- 1
+Mat1
+
+Rast1 &lt;- terra::rast(Mat1)
+terra::plot(Rast1)
+
+# calculating the mean in 9 subgrids
+(statsdf1 &lt;- SubgridStats(Rast1, factv1 = 3, facth1 = 3, statistic = "mean"))
+
+# computing the gradient statistic on the mean
+(graddf1 &lt;- RooksGradient(statsdf1, statistic = "mean"))
+# the Gradient statistic in the central grid in row 5 should
+# be equal to negative one
+
+</code></pre>
+
+
+</div>

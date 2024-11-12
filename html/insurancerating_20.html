@@ -1,0 +1,135 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>fit_truncated_dist</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit a distribution to truncated severity (loss) data</h2>
+
+<h3>Description</h3>
+
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental"><img src="../help/figures/lifecycle-experimental.svg" alt="[Experimental]"></a> Estimate the original
+distribution from truncated data. Truncated data arise frequently in
+insurance studies. It is common that only claims above a certain threshold
+are known.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">fit_truncated_dist(
+  y,
+  dist = c("gamma", "lognormal"),
+  left = NULL,
+  right = NULL,
+  start = NULL,
+  print_initial = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>vector with observations of losses</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist</code></td>
+<td>
+<p>distribution for severity ("gamma" or "lognormal"). Defaults to
+"gamma".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>left</code></td>
+<td>
+<p>numeric. Observations below this threshold are not present in the
+sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>right</code></td>
+<td>
+<p>numeric. Observations above this threshold are not present in
+the sample. Defaults to Inf.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>start</code></td>
+<td>
+<p>list of starting parameters for the algorithm.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print_initial</code></td>
+<td>
+<p>print attempts for initial parameters.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>fitdist returns an object of class "fitdist"
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Martin Haringa
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Original observations for severity
+set.seed(1)
+e &lt;- rgamma(1000, scale = 148099.5, shape = 0.4887023)
+
+# Truncated data (only claims above 30.000 euros)
+threshold &lt;- 30000
+f &lt;- e[e &gt; threshold]
+
+library(dplyr)
+library(ggplot2)
+data.frame(value = c(e, f),
+variable = rep(c("Original data", "Only claims above 30.000 euros"),
+               c(length(e), length(f)))) %&gt;%
+               filter(value &lt; 5e5) %&gt;%
+               mutate(value = value / 1000) %&gt;%
+               ggplot(aes(x = value)) +
+               geom_histogram(colour = "white") +
+               facet_wrap(~variable, ncol = 1) +
+               labs(y = "Number of observations",
+                    x = "Severity (x 1000 EUR)")
+
+# scale = 156259.7 and shape = 0.4588. Close to parameters of original
+# distribution!
+x &lt;- fit_truncated_dist(f, left = threshold, dist = "gamma")
+
+# Print cdf
+autoplot(x)
+
+# CDF with modifications
+autoplot(x, print_dig = 5, xlab = "loss", ylab = "cdf", ylim = c(.9, 1))
+
+est_scale &lt;- x$estimate[1]
+est_shape &lt;- x$estimate[2]
+
+# Generate data from truncated distribution (between 30k en 20 mln)
+rg &lt;- rgammat(10, scale = est_scale, shape = est_shape, lower = 3e4,
+ upper = 20e6)
+
+# Calculate quantiles
+quantile(rg, probs = c(.5, .9, .99, .995))
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

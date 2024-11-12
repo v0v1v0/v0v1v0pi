@@ -1,0 +1,208 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>prepare_data</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Prepare data in a standardized format</h2>
+
+<h3>Description</h3>
+
+<p>These are the data preprocessing functions provided by the <code>injurytools</code>
+package, which involve:
+</p>
+
+<ol>
+<li>
+<p> setting <strong>exposure</strong> and <strong>injury data</strong> in a standardized
+format and
+</p>
+</li>
+<li>
+<p> integrating both sources of data into an adequate data structure.
+</p>
+</li>
+</ol>
+<p><code>prepare_inj()</code> and <code>prepare_exp()</code> set standardized names and
+proper classes to the (key) columns in injury and exposure data,
+respectively. <code>prepare_all()</code> integrates both, standardized injury and
+exposure data sets, and convert them into an <code>injd</code> <strong>S3</strong> object
+that has an adequate structure for further statistical analyses.
+See the <a href="https://lzumeta.github.io/injurytools/articles/prepare-injury-data.html">Prepare Sports Injury Data</a>
+vignette for details.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">prepare_inj(
+  df_injuries0,
+  player = "player",
+  date_injured = "date_injured",
+  date_recovered = "date_recovered"
+)
+
+prepare_exp(
+  df_exposures0,
+  player = "player",
+  date = "date",
+  time_expo = "time_expo"
+)
+
+prepare_all(
+  data_exposures,
+  data_injuries,
+  exp_unit = c("minutes", "hours", "days", "matches_num", "matches_minutes",
+    "activity_days", "seasons")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>df_injuries0</code></td>
+<td>
+<p>A data frame containing injury information, with columns
+referring to the player name/id, date of injury and date of recovery (as
+minimal data).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>player</code></td>
+<td>
+<p>Character referring to the column name where player information
+is stored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>date_injured</code></td>
+<td>
+<p>Character referring to the column name where the
+information about the date of injury is stored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>date_recovered</code></td>
+<td>
+<p>Character referring to the column name where the
+information about the date of recovery is stored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>df_exposures0</code></td>
+<td>
+<p>A data frame containing exposure information, with
+columns referring to the player name/id, date of exposure and the total
+time of exposure of the corresponding data entry (as minimal data).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>date</code></td>
+<td>
+<p>Character referring to the column name where the exposure date
+information is stored. Besides, the column must be of class
+Date or
+integer/numeric. If it is
+<code>integer</code>/<code>numeric</code>, it should refer to the year in which the
+season started (e.g. <code>date</code> = 2015 to refer to the 2015/2016 season).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time_expo</code></td>
+<td>
+<p>Character referring to the column name where the information
+about the time of exposure in that corresponding date is stored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_exposures</code></td>
+<td>
+<p>Exposure data frame with standardized column names, in
+the same fashion that <code>prepare_exp()</code> returns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data_injuries</code></td>
+<td>
+<p>Injury data frame with standardized column names, in the
+same fashion that <code>prepare_inj()</code> returns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exp_unit</code></td>
+<td>
+<p>Character defining the unit of exposure time ("minutes" the
+default).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p><code>prepare_inj()</code> returns a data frame in which the <strong>key
+columns</strong> in injury data are standardized and have a proper format.
+</p>
+<p><code>prepare_exp()</code> returns a data frame in which the <strong>key
+columns</strong> in exposure data are standardized and have a proper format.
+</p>
+<p><code>prepare_all()</code> returns the <code>injd</code> <strong>S3</strong> object that
+contains all the necessary information and a proper data structure to
+perform further statistical analyses (e.g. calculate injury summary
+statistics, visualize injury data).
+</p>
+
+<ul>
+<li>
+<p> If <code>exp_unit</code> is "minutes" (the default), the columns
+<code>tstart_min</code> and <code>tstop_min</code> are created which specify the time
+to event (injury) values, the starting and stopping time of the interval,
+respectively. That is the training time in minutes, that the player has
+been at risk, until an injury (or censorship) has occurred. For other
+choices, <code>tstart_x</code> and <code>tstop_x</code> are also created according to
+the <code>exp_unit</code> indicated (<code>x</code>, one of: <code>min</code>, <code>h</code>,
+<code>match</code>, <code>minPlay</code>, <code>d</code>, <code>acd</code> or <code>s</code>). These
+columns will be useful for survival analysis routines. See Note section.
+</p>
+</li>
+<li>
+<p> It also creates <code>days_lost</code> column based on the difference between
+<code>date_recovered</code> and <code>date_injured</code> in days. And if it does exist (in
+the raw data) it overrides.
+</p>
+</li>
+</ul>
+<h3>Note</h3>
+
+<p>Depending on the unit of exposure, <code>tstart_x</code> and <code>tstop_x</code>
+columns might have same values (e.g. if <code>exp_unit</code> = "matches_num" and the
+player has not played any match between the corresponding period of time).
+Please be aware of this before performing any survival analysis related
+task.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">df_injuries &lt;- prepare_inj(df_injuries0   = raw_df_injuries,
+                           player         = "player_name",
+                           date_injured   = "from",
+                           date_recovered = "until")
+
+df_exposures &lt;- prepare_exp(df_exposures0 = raw_df_exposures,
+                            player        = "player_name",
+                            date          = "year",
+                            time_expo     = "minutes_played")
+
+
+injd &lt;- prepare_all(data_exposures = df_exposures,
+                    data_injuries  = df_injuries,
+                    exp_unit = "matches_minutes")
+head(injd)
+class(injd)
+str(injd, 1)
+
+</code></pre>
+
+
+</div>

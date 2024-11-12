@@ -1,0 +1,170 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>construct_tariff_classes</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Construct insurance tariff classes</h2>
+
+<h3>Description</h3>
+
+<p>Constructs insurance tariff classes to <code>fitgam</code> objects
+produced by <code>fit_gam</code>. The goal is to bin the continuous risk factors
+such that categorical risk factors result which capture the effect of the
+covariate on the response in an accurate way, while being easy to use in a
+generalized linear model (GLM).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">construct_tariff_classes(
+  object,
+  alpha = 0,
+  niterations = 10000,
+  ntrees = 200,
+  seed = 1
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>fitgam object produced by <code>fit_gam</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>complexity parameter. The complexity parameter (alpha) is used
+to control the number of tariff classes. Higher values for <code>alpha</code>
+render less tariff classes. (<code>alpha</code> = 0 is default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>niterations</code></td>
+<td>
+<p>in case the run does not converge, it terminates after a
+specified number of iterations defined by niterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ntrees</code></td>
+<td>
+<p>the number of trees in the population.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>an numeric seed to initialize the random number generator (for
+reproducibility).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Evolutionary trees are used as a technique to bin the <code>fitgam</code>
+object produced by <code>fit_gam</code> into risk homogeneous categories.
+This method is based on the work by Henckaerts et al. (2018). See Grubinger
+et al. (2014) for more details on the various parameters that
+control aspects of the evtree fit.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of class <code>constructtariffclasses</code> with components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>prediction</code></td>
+<td>
+<p>data frame with predicted values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>name of continuous risk factor for which tariff classes are
+constructed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>either 'frequency', 'severity' or 'burning'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>data frame with predicted values and observed values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>x_obs</code></td>
+<td>
+<p>observations for continuous risk factor</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>splits</code></td>
+<td>
+<p>vector with boundaries of the constructed tariff classes</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tariff_classes</code></td>
+<td>
+<p>values in vector <code>x</code> coded according to which
+constructed tariff class they fall</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Martin Haringa
+</p>
+
+
+<h3>References</h3>
+
+<p>Antonio, K. and Valdez, E. A. (2012). Statistical concepts of a
+priori and a posteriori risk classification in insurance. Advances in
+Statistical Analysis, 96(2):187–224. doi:10.1007/s10182-011-0152-7.
+</p>
+<p>Grubinger, T., Zeileis, A., and Pfeiffer, K.-P. (2014). evtree:
+Evolutionary learning of globally optimal classification and regression trees
+in R. Journal of Statistical Software, 61(1):1–29. doi:10.18637/jss.v061.i01.
+</p>
+<p>Henckaerts, R., Antonio, K., Clijsters, M. and Verbelen, R.
+(2018). A data driven binning strategy for the construction of insurance
+tariff classes. Scandinavian Actuarial Journal, 2018:8, 681-705.
+doi:10.1080/03461238.2018.1429300.
+</p>
+<p>Wood, S.N. (2011). Fast stable restricted maximum likelihood and
+marginal likelihood estimation of semiparametric
+generalized linear models. Journal of the Royal Statistical Society (B)
+73(1):3-36. doi:10.1111/j.1467-9868.2010.00749.x.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+library(dplyr)
+fit_gam(MTPL, nclaims = nclaims,
+x = age_policyholder, exposure = exposure) |&gt;
+   construct_tariff_classes()
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

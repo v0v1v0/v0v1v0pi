@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>create.autoencoder.irf.matrix</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create matrix of independent reduced features</h2>
+
+<h3>Description</h3>
+
+<p>Create matrix of independent reduced features using autoencoders</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">create.autoencoder.irf.matrix(data.types, data.matrices,
+autoencoders, filter.to.common.patients = FALSE,
+patients.to.return = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data.types</code></td>
+<td>
+<p>vector, where each element is a data type ID matching the names in data.matrices and dist.metrics</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.matrices</code></td>
+<td>
+<p>list, where each element is a matrix with features as rows and patients as columns</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>autoencoders</code></td>
+<td>
+<p>list, where each element is an autoencoder corresponding to each data type. Can be either an keras autoencoder object or the file where the autoencoder was saved.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filter.to.common.patients</code></td>
+<td>
+<p>logical, where TRUE indicates to filter out patients that don't have all data types.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>patients.to.return</code></td>
+<td>
+<p>vector of patients to return correlations for. If NULL all patients/columns will be used.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>matrix where rows are patients and columns are pairs of data types</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Natalie Fox</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+
+# Load three data types and create an autoencder for each
+example.molecular.data.dir &lt;- paste0(path.package('iSubGen'),'/exdata/');
+molecular.data &lt;- list();
+ae.result &lt;- list();
+for(i in c('cna','snv','methy')) {
+  molecular.data[[i]] &lt;- load.molecular.aberration.data(
+    paste0(example.molecular.data.dir,i,'_profiles.txt'),
+    patients = c(paste0('EP00',1:9), paste0('EP0',10:30))
+    );
+  ae.result[[i]] &lt;- create.autoencoder(
+    data.type = i,
+    data.matrix = molecular.data[[i]],
+    encoder.layers.node.nums = c(10,2)
+    )$autoencoder;
+  }
+
+# Create a matrix of the bottleneck layers 
+irf.matrix &lt;- create.autoencoder.irf.matrix(
+  data.types = names(molecular.data),
+  data.matrices = molecular.data,
+  autoencoders = ae.result
+  );
+
+## End(Not run)
+</code></pre>
+
+
+</div>

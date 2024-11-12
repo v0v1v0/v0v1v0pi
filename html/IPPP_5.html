@@ -1,0 +1,117 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>IPPPcondrandnum</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Generate Events Relative to a Known Event of an Inhomogeneous Poisson Point Process
+</h2>
+
+<h3>Description</h3>
+
+<p>Given knowledge of the location of one event from an inhomogeneous Poisson point process (IPPP), this function determines random numbers corresponding to the location of the n-th event above/below the known event.
+</p>
+<p>The IPPP is described by a rate function r.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">IPPPcondrandnum(pointlocation, xrate, yrate, no = 1, nthpoint = 1, mode = "forward")</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>pointlocation</code></td>
+<td>
+<p>Location of the known event</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xrate</code></td>
+<td>
+<p>Vector of (strictly increasing) real numbers</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>yrate</code></td>
+<td>
+<p>Vector of strictly positive real numbers of the same length as
+xrate. The vectors xrate and yrate form the rate function r in the sense
+that r=approxfun(xrate,yrate)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>no</code></td>
+<td>
+<p>OPTIONAL, default is 1. The number of random events to generate</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nthpoint</code></td>
+<td>
+<p>OPTIONAL, default is 1. Setting this to a value i will simulate the location of the ith event above/below the event at the position pointlocation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mode</code></td>
+<td>
+<p>OPTIONAL, default is "forward". Determines whether the pdf for points above(right) the known event is determined (mode="forward""), or whether the pdf for points below(left) the known event is determined (mode="backward"")</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The value of rate function r below min(xrate) is set to r(min(xrate)), and for values above max(xrate) it is set to r(max(xrate)). Both r(min(xrate)) and r(max(xrate)) need to be strictly positive for the results to be correct.</p>
+
+
+<h3>Value</h3>
+
+<p>Vector of length no, containing the locations of the simulated events.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Niklas Hohmann</p>
+
+
+<h3>References</h3>
+
+<p>Hohmann, Niklas. "Conditional Densities and Simulations of Inhomogeneous Poisson Point Processes: The R package "IPPP"" arXiv 2019. &lt;arXiv:1901.10754&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>vignette("IPPP")</code> for an overview of the features of the IPPP package and some background.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#define rate function
+xrate=seq(0,2*pi,length.out=1000)
+yrate=sin(xrate)+1.01
+plot(xrate,yrate,type="l",main="Rate Function")
+#define known event:
+pointlocation=3
+lines(c(3,3),c(0,3),lwd=3)
+#values where the density is calulated:
+x=xrate
+#simulate the next point above the known event:
+p1=IPPPcondrandnum(pointlocation, xrate,yrate)
+points(p1,0.5,pch=1,cex=2)
+#simulate 10 times the next event below the known location:
+p2=IPPPcondrandnum(pointlocation, xrate,yrate,no=10,mode="backward")
+points(p2,rep(1,length(p2)),cex=2,pch=2)
+#simulate the second point above the known event:
+p3=IPPPcondrandnum(pointlocation, xrate,yrate,no=1,nthpoint=2)
+points(p3,1.5,cex=2,pch=3) #might be out of the plot
+</code></pre>
+
+
+</div>

@@ -1,0 +1,269 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sample_chung_lu</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Random graph with given expected degrees</h2>
+
+<h3>Description</h3>
+
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental"><img src="../help/figures/lifecycle-experimental.svg" alt="[Experimental]"></a>
+</p>
+<p>The Chung-Lu model is useful for generating random graphs with fixed expected
+degrees. This function implements both the original model of Chung and Lu, as
+well as some additional variants with useful properties.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sample_chung_lu(
+  out.weights,
+  in.weights = NULL,
+  ...,
+  loops = TRUE,
+  variant = c("original", "maxent", "nr")
+)
+
+chung_lu(
+  out.weights,
+  in.weights = NULL,
+  ...,
+  loops = TRUE,
+  variant = c("original", "maxent", "nr")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>out.weights</code></td>
+<td>
+<p>A vector of non-negative vertex weights (or out-weights).
+In sparse graphs, these will be approximately equal to the expected
+(out-)degrees.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>in.weights</code></td>
+<td>
+<p>A vector of non-negative in-weights, approximately equal to
+the expected in-degrees in sparse graphs. May be set to <code>NULL</code>, in
+which case undirected graphs are generated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>These dots are for future extensions and must be empty.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loops</code></td>
+<td>
+<p>Logical, whether to allow the creation of self-loops. Since
+vertex pairs are connected independently, setting this to <code>FALSE</code> is
+equivalent to simply discarding self-loops from an existing loopy Chung-Lu
+graph.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>variant</code></td>
+<td>
+<p>The model variant to sample from, with different definitions
+of the connection probability between vertices <code class="reqn">i</code> and <code class="reqn">j</code>. Given
+<code class="reqn">q_{ij} = \frac{w_i w_j}{S}</code>, the following
+formulations are available:
+</p>
+
+<dl>
+<dt>“original”</dt>
+<dd>
+<p>the original Chung-Lu model, <code class="reqn">p_{ij} = \min(q_{ij}, 1)</code>.</p>
+</dd>
+<dt>“maxent”</dt>
+<dd>
+<p>maximum entropy model with fixed expected degrees,
+<code class="reqn">p_{ij} = \frac{q_{ij}}{1 + q_{ij}}</code>.</p>
+</dd>
+<dt>“nr”</dt>
+<dd>
+<p>Norros and Reittu's model, <code class="reqn">p_{ij} = 1 - \exp(-q_{ij})</code>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>In the original Chung-Lu model, each pair of vertices <code class="reqn">i</code> and <code class="reqn">j</code> is
+connected with independent probability
+</p>
+<p style="text-align: center;"><code class="reqn">p_{ij} = \frac{w_i w_j}{S},</code>
+</p>
+
+<p>where <code class="reqn">w_i</code> is a weight associated with vertex <code class="reqn">i</code> and
+</p>
+<p style="text-align: center;"><code class="reqn">S = \sum_k w_k</code>
+</p>
+
+<p>is the sum of weights. In the directed variant, vertices have both
+out-weights, <code class="reqn">w^\text{out}</code>, and in-weights,
+<code class="reqn">w^\text{in}</code>, with equal sums,
+</p>
+<p style="text-align: center;"><code class="reqn">S = \sum_k w^\text{out}_k = \sum_k w^\text{in}_k.</code>
+</p>
+
+<p>The connection probability between <code class="reqn">i</code> and <code class="reqn">j</code> is
+</p>
+<p style="text-align: center;"><code class="reqn">p_{ij} = \frac{w^\text{out}_i w^\text{in}_j.}{S}</code>
+</p>
+
+<p>This model is commonly used to create random graphs with a fixed
+<em>expected</em> degree sequence. The expected degree of vertex <code class="reqn">i</code> is
+approximately equal to the weight <code class="reqn">w_i</code>. Specifically, if the graph is
+directed and self-loops are allowed, then the expected out- and in-degrees
+are precisely <code class="reqn">w^\text{out}</code> and <code class="reqn">w^\text{in}</code>. If
+self-loops are disallowed, then the expected out- and in-degrees are
+<code class="reqn">\frac{w^\text{out} (S - w^\text{in})}{S}</code>
+and
+<code class="reqn">\frac{w^\text{in} (S - w^\text{out})}{S}</code>,
+respectively. If the graph is undirected, then the expected degrees with and
+without self-loops are
+<code class="reqn">\frac{w (S + w)}{S}</code>
+and
+<code class="reqn">\frac{w (S - w)}{S}</code>,
+respectively.
+</p>
+<p>A limitation of the original Chung-Lu model is that when some of the weights
+are large, the formula for <code class="reqn">p_{ij}</code> yields values larger than 1.
+Chung
+and Lu's original paper excludes the use of such weights. When
+<code class="reqn">p_{ij} &gt; 1</code>, this function simply issues a warning and creates
+a connection between <code class="reqn">i</code> and <code class="reqn">j</code>. However, in this case the expected
+degrees will no longer relate to the weights in the manner stated above. Thus,
+the original Chung-Lu model cannot produce certain (large) expected degrees.
+</p>
+<p>To overcome this limitation, this function implements additional variants of
+the model, with modified expressions for the connection probability
+<code class="reqn">p_{ij}</code> between vertices <code class="reqn">i</code> and <code class="reqn">j</code>. Let
+<code class="reqn">q_{ij} = \frac{w_i w_j}{S}</code>, or
+<code class="reqn">q_{ij} = \frac{w^\text{out}_i w^\text{in}_j}{S}</code>
+in the directed case. All model variants become equivalent in the limit of sparse
+graphs where <code class="reqn">q_{ij}</code> approaches zero. In the original Chung-Lu model,
+selectable by setting <code>variant</code> to “original”, <code class="reqn">p_{ij} =
+\min(q_{ij}, 1)</code>. The “maxent” variant,
+sometimes referred to as the generalized random graph, uses <code class="reqn">p_{ij} =
+\frac{q_{ij}}{1 + q_{ij}}</code>, and is equivalent to a
+maximum entropy model (i.e., exponential random graph model) with a
+constraint on expected degrees;
+see Park and Newman (2004), Section B, setting <code class="reqn">\exp(-\Theta_{ij}) =
+\frac{w_i w_j}{S}</code>. This model is also discussed
+by Britton, Deijfen, and Martin-Löf (2006). By virtue of being a
+degree-constrained maximum entropy model, it generates graphs with the same
+degree sequence with the same probability. A third variant can be requested
+with “nr”, and uses <code class="reqn">p_{ij} = 1 - \exp(-q_{ij})</code>. This is the underlying simple graph of a multigraph model
+introduced by Norros and Reittu (2006). For a discussion of these three model
+variants, see Section 16.4 of Bollobás, Janson, Riordan (2007), as well as
+Van Der Hofstad (2013).
+</p>
+
+
+<h3>Value</h3>
+
+<p>An igraph graph.
+</p>
+
+
+<h3>Related documentation in the C library</h3>
+
+<p><a href="https://igraph.org/c/html/latest/igraph-Generators.html#igraph_chung_lu_game"><code>igraph_chung_lu_game()</code></a>.</p>
+
+
+<h3>References</h3>
+
+<p>Chung, F., and Lu, L. (2002). Connected components in a random
+graph with given degree sequences. Annals of Combinatorics, 6, 125-145.
+<a href="https://doi.org/10.1007/PL00012580">doi:10.1007/PL00012580</a>
+</p>
+<p>Miller, J. C., and Hagberg, A. (2011). Efficient Generation of Networks
+with Given Expected Degrees. <a href="https://doi.org/10.1007/978-3-642-21286-4_10">doi:10.1007/978-3-642-21286-4_10</a>
+</p>
+<p>Park, J., and Newman, M. E. J. (2004). Statistical mechanics of networks.
+Physical Review E, 70, 066117. <a href="https://doi.org/10.1103/PhysRevE.70.066117">doi:10.1103/PhysRevE.70.066117</a>
+</p>
+<p>Britton, T., Deijfen, M., and Martin-Löf, A. (2006). Generating Simple
+Random Graphs with Prescribed Degree Distribution. Journal of Statistical
+Physics, 124, 1377-1397. <a href="https://doi.org/10.1007/s10955-006-9168-x">doi:10.1007/s10955-006-9168-x</a>
+</p>
+<p>Norros, I., and Reittu, H. (2006). On a conditionally Poissonian graph
+process. Advances in Applied Probability, 38, 59-75.
+<a href="https://doi.org/10.1239/aap/1143936140">doi:10.1239/aap/1143936140</a>
+</p>
+<p>Bollobás, B., Janson, S., and Riordan, O. (2007). The phase transition in
+inhomogeneous random graphs. Random Structures &amp; Algorithms, 31, 3-122.
+<a href="https://doi.org/10.1002/rsa.20168">doi:10.1002/rsa.20168</a>
+</p>
+<p>Van Der Hofstad, R. (2013). Critical behavior in inhomogeneous random
+graphs. Random Structures &amp; Algorithms, 42, 480-508.
+<a href="https://doi.org/10.1002/rsa.20450">doi:10.1002/rsa.20450</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>sample_fitness()</code> implements a similar model with a sharp
+constraint on the number of edges. <code>sample_degseq()</code> samples random graphs
+with sharply specified degrees. <code>sample_gnp()</code> creates random graphs with a
+fixed connection probability <code class="reqn">p</code> between all vertex pairs.
+</p>
+<p>Random graph models (games)
+<code>erdos.renyi.game()</code>,
+<code>sample_()</code>,
+<code>sample_bipartite()</code>,
+<code>sample_correlated_gnp()</code>,
+<code>sample_correlated_gnp_pair()</code>,
+<code>sample_degseq()</code>,
+<code>sample_dot_product()</code>,
+<code>sample_fitness()</code>,
+<code>sample_fitness_pl()</code>,
+<code>sample_forestfire()</code>,
+<code>sample_gnm()</code>,
+<code>sample_gnp()</code>,
+<code>sample_grg()</code>,
+<code>sample_growing()</code>,
+<code>sample_hierarchical_sbm()</code>,
+<code>sample_islands()</code>,
+<code>sample_k_regular()</code>,
+<code>sample_last_cit()</code>,
+<code>sample_pa()</code>,
+<code>sample_pa_age()</code>,
+<code>sample_pref()</code>,
+<code>sample_sbm()</code>,
+<code>sample_smallworld()</code>,
+<code>sample_traits_callaway()</code>,
+<code>sample_tree()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+g &lt;- sample_chung_lu(c(3, 3, 2, 2, 2, 1, 1))
+
+rowMeans(replicate(
+  100,
+  degree(sample_chung_lu(c(1, 3, 2, 1), c(2, 1, 2, 2)), mode = "out")
+))
+
+rowMeans(replicate(
+  100,
+  degree(sample_chung_lu(c(1, 3, 2, 1), c(2, 1, 2, 2), variant = "maxent"), mode='out')
+))
+</code></pre>
+
+
+</div>

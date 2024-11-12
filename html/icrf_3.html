@@ -1,0 +1,500 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>icrf</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Interval Censored Recursive Forests (ICRF)</h2>
+
+<h3>Description</h3>
+
+<p><code>icrf</code> implements the ICRF algorithm to estimate the
+conditional survival probability for interval censored survival data.
+(It can also be used for right-censored survival data and current status data.)
+<code>icrf</code> recursively builds random forests using the extremely randomized
+trees (ERT) algorithm and uses kernel smoothing in the time domain.
+This <code>icrf</code> package is built based on the <code>randomForest</code> package
+by Andy Liaw and Matthew Wiener. (Quoted statements are from
+<code>randomForest</code> by Liaw and Wiener unless otherwise mentioned.)
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">icrf(x, ...)
+
+## Default S3 method:
+icrf(
+  x,
+  L,
+  R,
+  tau = max(R[is.finite(R)]) * 1.5,
+  bandwidth = NULL,
+  quasihonesty = TRUE,
+  initialSmoothing = TRUE,
+  timeSmooth = NULL,
+  xtest = NULL,
+  ytest = NULL,
+  nfold = 5L,
+  ntree = 500L,
+  mtry = ceiling(sqrt(p)),
+  split.rule = c("Wilcoxon", "logrank", "PetoWilcoxon", "PetoLogrank", "GWRS", "GLR",
+    "SWRS", "SLR"),
+  ERT = FALSE,
+  uniformERT = ERT,
+  returnBest = sampsize &lt; n,
+  imse.monitor = 1,
+  replace = !ERT,
+  sampsize = ifelse(ERT, 0.95, 0.632) * n,
+  nodesize = 6L,
+  maxnodes = NULL,
+  importance = FALSE,
+  nPerm = 1,
+  proximity,
+  oob.prox = ifelse(sampsize == n &amp; !replace, FALSE, proximity),
+  do.trace = FALSE,
+  keep.forest = is.null(xtest),
+  keep.inbag = FALSE,
+  ...
+)
+
+## S3 method for class 'formula'
+icrf(
+  formula,
+  data = NULL,
+  data.type = c("interval", "right", "currentstatus"),
+  interval.label = c("L", "R"),
+  right.label = c("T", "status"),
+  currentstatus.label = c("monitor", "status"),
+  ...,
+  na.action = na.fail,
+  epsilon = NULL
+)
+
+## S3 method for class 'icrf'
+print(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>a data frame or a matrix of predictors. <code>x</code> is not needed when <code>formula</code> is specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>optional arguments to be passed to icrf.default.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L, R</code></td>
+<td>
+<p>the left and right end point of the interval. <code>R</code> should be greater
+than or equal to <code>L</code>. In case of equality, a small number <code>epsilon</code> (the smaller of
+minimum nonzero interval length and 1e-10) is added.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau</code></td>
+<td>
+<p>the study end time. ([0, <code>tau</code>] is the window for the analysis.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bandwidth</code></td>
+<td>
+<p>a positive number. The bandwidth of the kernel smoothing. For faster computing,
+set <code>bandwidth = 0</code> for no smoothing.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quasihonesty</code></td>
+<td>
+<p>if <code>TRUE</code>, the terminal node prediction is given by the NPMLE of the
+interval data. If <code>FALSE</code>, the terminal node prediction is given by the average of the
+conditional probabilities (exploitative).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>initialSmoothing</code></td>
+<td>
+<p>if <code>TRUE</code>, the initial survival curve used for
+interval-conditional survival probability estimate is smoothed using the Gaussian kernel.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>timeSmooth</code></td>
+<td>
+<p>a numeric vector of time points at which the smoothed
+survival curves are estimated. It should be in an increasing order.
+If <code>null</code>, a set of distinct interval end points is used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xtest</code></td>
+<td>
+<p>a dataset or matrix of predictors for the test dataset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ytest</code></td>
+<td>
+<p>a true survival curve for the test set in a form of the dataframe or matrix.
+The number of rows is the same as <code>xtest</code> and each column corresponds to the
+time points of <code>timeSmooth</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nfold</code></td>
+<td>
+<p>Number of forests to iterate. In practice, numbers between 5 and 10 is reasonable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ntree</code></td>
+<td>
+<p>Number of trees to build within each forest. 'This should not be set to too small a number, to ensure that every input
+row gets predicted at least a few times.'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mtry</code></td>
+<td>
+<p>Number of candidate predictors tried at each split.
+The default value is sqrt(p) where p is number of variables in <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>split.rule</code></td>
+<td>
+<p>Splitting rules. See details. The default is
+<code>"Wilcoxon", or equivalently "GWRS"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ERT</code></td>
+<td>
+<p>If <code>ERT=TRUE</code> ERT algorithm applies. If <code>FALSE</code>,
+a comprehensive greedy algorithm (Breiman's random forest algorithm) applies.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>uniformERT</code></td>
+<td>
+<p>Only relevant when <code>ERT=TRUE</code>. If <code>uniformERT=TRUE</code>,
+random candidate cutpoints are selected using uniform distribution. If
+<code>FALSE</code>, random candidate cutpoints are chosen among the midpoints of two
+neighboring predictor values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>returnBest</code></td>
+<td>
+<p>If <code>returnBest=TRUE</code>, the survival curve estimate at the
+best iteration is returned. If <code>FALSE</code>, the estimate at the last iteration
+is returned. The best iteration is determined by the type of IMSE measures specified
+in <code>imse.monitor</code>. By default, <code>returnBest=TRUE</code> when the out-of-bag
+sample is available (sampsize &lt; n).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>imse.monitor</code></td>
+<td>
+<p>Which type of IMSE is used to monitor which fold is the best?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>replace</code></td>
+<td>
+<p>Whether the cases are sampled with or without replacement?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sampsize</code></td>
+<td>
+<p>Size of random sampling.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nodesize</code></td>
+<td>
+<p>Each terminal node cannot be smaller than this value. 'Setting this number
+larger causes smaller trees to be grown (and thus take less time).'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxnodes</code></td>
+<td>
+<p>Up to how many terminal nodes can a tree have?
+'If not given, trees are grown to the maximum possible
+(subject to limits by nodesize). If set larger than maximum possible,
+a warning is issued.'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>importance</code></td>
+<td>
+<p>If <code>TRUE</code>, variable importance measure will be computed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nPerm</code></td>
+<td>
+<p>How many permutations (of OOB data) to do for variable importance assessment?
+'Number larger than 1 gives slightly more
+stable estimate, but not very effective. Currently only implemented for regression.'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>proximity</code></td>
+<td>
+<p>If <code>TRUE</code>, proximity measure among the cases is calculated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>oob.prox</code></td>
+<td>
+<p>If <code>TRUE</code>, proximity is calculated only on "out-of-bag" data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>do.trace</code></td>
+<td>
+<p>If <code>TRUE</code>, intermediate outputs are printed during the tree building
+procedure. 'If set to some integer, then running output is printed for every do.trace trees.'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep.forest</code></td>
+<td>
+<p>'If set to FALSE, the forest will not be retained in the output
+object. If xtest is given, defaults to FALSE.'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep.inbag</code></td>
+<td>
+<p>'Should an n by ntree matrix be returned that keeps track of
+which samples are "in-bag" in which trees (but not how many times, if sampling
+with replacement)'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula, data.type, interval.label, right.label, currentstatus.label</code></td>
+<td>
+<p>a formula object, with the
+response in a Surv 'interval2' or <code>cbind</code>.
+Alternatively, the survival outcome may be omitted in the formula and the labels relevent
+to the survival outcome can be entered in either <code>interval.label</code>, <code>right.label</code>,
+or <code>currentstatus.label</code> with the <code>data.type</code> being specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>a data frame that includes the intervals and the predictor values.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.action</code></td>
+<td>
+<p>'a function to specify the action to be taken if NAs are
+found. (NOTE: If given, this argument must be named.)'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>epsilon</code></td>
+<td>
+<p>A small positive value needed to discriminate the left and right
+interval end points for the uncensored data.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Four <code>split.rule</code> options are available: <code>Wilcoxon</code>, <code>logrank</code>,
+<code>PetoWilcoxon</code>, <code>PetoLogrank</code>. The aliases are
+<code>GWRS</code>, <code>GLR</code>, <code>SWRS</code>, and <code>SLR</code>, respectively.
+The first two are generalized
+Wilcoxon-rank-sum test and generalized log-rank test proposed in Cho et al (2020+),
+and the latter two are score-based Wilcoxon-rank-sum test and score-based
+log-rank test proposed by Peto and Peto (1972) "Asymptotically efficient
+rank invariant test procedures."
+</p>
+
+
+<h3>Value</h3>
+
+<p>An <code>icrf</code> class object which contains the following components in a list:
+</p>
+
+<p>An <code>icrf</code> class object which contains the following components in a list:
+</p>
+<ul>
+<li>
+<p>callthe original call to <code>icrf</code>
+</p>
+</li>
+<li>
+<p>methodThe input values of <code>split.rule</code>, <code>ERT</code>,
+</p>
+<p>quasihonest, <code>bandwith</code>, and the subsample ratio
+(= <code>sampsize</code> / <code>n</code>)
+</p>
+</li>
+<li>
+<p>predictedthe estimated survival curves of the training set using
+out-of-bag samples.
+</p>
+</li>
+<li>
+<p>predictedNOthe estimated survival curves of the training set using
+non-out-of-bag samples.
+</p>
+</li>
+<li>
+<p>predictedNO.Smthe smoothed survival curves of the training set using
+non-out-of-bag samples.
+</p>
+</li>
+<li>
+<p>time.pointstime points at which the survival curves are estimated.
+</p>
+</li>
+<li>
+<p>time.points.smoothtime points at which the smoothed survival curves
+are estimated.
+</p>
+</li>
+<li>
+<p>imse.oobIntegrated mean squared error (IMSE) measured based on the
+out-of-bag samples
+</p>
+</li>
+<li>
+<p>imse.NOIntegrated mean squared error (IMSE) measured based on the
+non-out-of-bag samples
+</p>
+</li>
+<li>
+<p>oob.timesnumber of times for which each case was 'out-of-bag'
+</p>
+</li>
+<li>
+<p>importancean array of three matrices where each matrix has
+<code>nfold</code> columns and <code>p</code> (number of predictors) rows.
+The importance is measured based on increase in IMSE types 1 and 2,
+respectively, and the node impurity.
+</p>
+</li>
+<li>
+<p>importanceSD'The "standard errors" of the permutation-based
+importance measure.' A <code>p</code> by <code>nfold</code> by 2
+array corresponding to the first two matrices of the importance array.
+</p>
+</li>
+<li>
+<p>nfoldnumber of forests iterated over.
+</p>
+</li>
+<li>
+<p>ntreenumber of trees built.
+</p>
+</li>
+<li>
+<p>mtrynumber of candidate predictors tried at each node.
+</p>
+</li>
+<li>
+<p>forest'a list that contains the entire forest;' <code>NULL</code> 'if
+<code>keep.forest=FALSE</code>.'
+</p>
+</li>
+<li>
+<p>intervals<code>n</code> by 2 matrix of the intervals.
+</p>
+</li>
+<li>
+<p>proximityif <code>proximity=TRUE</code> if <code>proximity=TRUE</code> when
+<code>icrf</code> is called, a matrix of proximity measures among
+the input (based on the frequency that pairs of data points are in
+the same terminal nodes).
+</p>
+<p>inbagif <code>keep.inbag=TRUE</code> provides a matrix of in-bag indicators
+for the last forest iteration.
+</p>
+<p>runtimestart and end times and the elapsed time.
+</p>
+<p>testif test set is given (through the <code>xtest</code> or additionally
+<code>ytest</code> arguments), this component is a list which contains the
+corresponding <code>predicted</code> and  error measures (IMSE's).
+If <code>proximity=TRUE</code>, there is also a component, <code>proximity</code>,
+which contains the proximity among the test set as well as proximity
+between test and training data.
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Hunyong Cho, Nicholas P. Jewell, and Michael R. Kosorok.
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://arxiv.org/abs/1912.09983">Cho H., Jewell N. J., and Kosorok M. R. (2020+). "Interval censored
+recursive forests"</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>predict.icrf</code>, <code>plot.icrf</code>, <code>survplot</code>, <code>importance.icrf</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># rats data example.
+# The type of this dataset is current status data.
+# Note that this is a toy example. Use a larger ntree and nfold in practice.
+data(rat2)
+
+
+ set.seed(2)
+# 1. formula (currentstatus)
+rats.icrf &lt;-
+  icrf(~ dose.lvl + weight + male + cage.no, data = rat2,
+       data.type = "currentstatus", currentstatus.label = c("survtime", "tumor"),
+       returnBest = TRUE, ntree=10, nfold=3)
+
+# 2. formula containing the interval
+# Alternatively, create the interval endpoints and use the Surv object.
+L = ifelse(rat2$tumor, 0, rat2$survtime)
+R = ifelse(rat2$tumor, rat2$survtime, Inf)
+library(survival) # for Surv function
+icrf(Surv(L, R, type = "interval2") ~ dose.lvl + weight + male + cage.no, data = rat2,
+     ntree=10, nfold=3)
+
+# Or, 3. formula (interval)
+rat2b &lt;- cbind(rat2, L = L, R = R)
+set.seed(1)
+icrf( ~ dose.lvl + weight + male + cage.no, data = rat2b,
+     data.type = "interval", interval.label = c("L", "R"),
+     ntree=10, nfold=3)
+
+# 4. default method
+set.seed(1)
+icrf(rat2[, c("dose.lvl", "weight", "male", "cage.no")], L = L, R = R,
+     ntree=10, nfold=3)
+ 
+
+</code></pre>
+
+
+</div>

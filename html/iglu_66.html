@@ -1,0 +1,142 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sd_measures</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate SD subtypes</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>sd_measures</code> produces SD subtype values in a tibble object
+with a row for each subject and columns corresponding to id followed by
+each SD subtype.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sd_measures(data,dt0 = NULL, inter_gap = 45, tz = "")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>DataFrame object with column names "id", "time", and "gl".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dt0</code></td>
+<td>
+<p>The time frequency for interpolation in minutes, the default will match the CGM meter's frequency (e.g. 5 min for Dexcom).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inter_gap</code></td>
+<td>
+<p>The maximum allowable gap (in minutes) for interpolation. The values will not be interpolated between the glucose measurements that are more than inter_gap minutes apart. The default value is 45 min.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tz</code></td>
+<td>
+<p>A character string specifying the time zone to be used. System-specific (see <code>as.POSIXct</code>), but " " is the current time zone, and "GMT" is UTC (Universal Time, Coordinated). Invalid values are most commonly treated as UTC, on some platforms with a warning.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A tibble object with 1 row for each subject, a column for subject id and
+a column for each SD subtype values is returned.
+</p>
+<p>Missing values will be linearly interpolated when close enough to non-missing values.
+</p>
+
+<ol>
+<li>
+<p> SDw - vertical within days:
+</p>
+<p>Calculated by first taking the standard deviation of each day's glucose measurements,
+then taking the mean of all the standard deviations. That is, for d
+days we compute <code class="reqn">SD_1 ... SD_d</code> daily standard deviations and calculate
+<code class="reqn">1/d * \sum [(SD_i)]</code>
+</p>
+</li>
+<li>
+<p> SDhhmm - between time points:
+</p>
+<p>Also known as SDhh:mm. Calculated by taking the mean glucose values at each time point in the grid across days,
+and taking the standard deviation of those mans. That is, for t time points
+we compute <code class="reqn">X_t</code> means for each time point and then compute <code class="reqn">SD([X_1, X_2, ... X_t])</code>.
+</p>
+</li>
+<li>
+<p> SDwsh - within series:
+</p>
+<p>Also known as SDws h. Calculated by taking the hour-long intervals starting at every point in the interpolated
+grid, computing the standard deviation of the points in each hour-long interval, and then
+finding the mean of those standard deviations. That is, for n time points compute
+<code class="reqn">SD_1 ... SD_n</code>, where <code class="reqn">SD_i</code> is the standard deviation of the glucose values <code class="reqn">[X_i, X_{i+1}, ... X_{i+k}]</code>
+corresponding to hour-long window starting at observation <code class="reqn">X_i</code>, the number of observations in the window k depends on CGM meter frequency. Then, take
+<code class="reqn">1/n * \sum [(SD_i)]</code>.
+</p>
+</li>
+<li>
+<p> SDdm - horizontal sd:
+</p>
+<p>Calculated by taking the daily mean glucose values, and then taking the standard deviation
+of those daily means. That is, for d days we take <code class="reqn">X_1 ... X_d</code> daily means, and then compute
+<code class="reqn">SD([X_1, X_2, ... X_d])</code>.
+</p>
+</li>
+<li>
+<p> SDb -  between days, within timepoints:
+</p>
+<p>Calculated by taking the standard deviation of the glucose values across days for each time point,
+and then taking the mean of those standard deviations.
+That is, for t time points take <code class="reqn">SD_1 ... SD_t</code> standard deviations, and then compute
+<code class="reqn">1/t * \sum[(SD_i)]</code>
+</p>
+</li>
+<li>
+<p> SDbdm - between days, within timepoints, corrected for changes in daily means:
+</p>
+<p>Also known as SDb // dm. Calculated by subtracting the daily mean from each glucose value, then taking the standard deviation
+of the corrected glucose values across days for each time point, and then taking the mean of those
+standard deviations.
+That is, for t time points take <code class="reqn">SD_1 ... SD_t</code> standard deviations, and then compute
+<code class="reqn">1/t * \sum[(SD_i)]</code>. where <code class="reqn">SD_i</code> is the standard deviation of d daily values at the
+1st time point, where each value is the dth measurement for the ith time point subtracted by
+the mean of all glucose values for day d.
+</p>
+</li>
+</ol>
+<h3>Value</h3>
+
+<p>A tibble object with a column for id and a column for each of the six SD subtypes.
+</p>
+
+
+<h3>References</h3>
+
+<p>Rodbard (2009) New and Improved Methods to Characterize Glycemic Variability
+Using Continuous Glucose Monitoring
+<em>Diabetes Technology and Therapeutics</em> <strong>11</strong> .551-565,
+<a href="https://doi.org/10.1089/dia.2009.0015">doi:10.1089/dia.2009.0015</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(example_data_1_subject)
+sd_measures(example_data_1_subject)
+
+</code></pre>
+
+
+</div>

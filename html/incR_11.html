@@ -1,0 +1,159 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>incRt</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculation of temperature average and variance for customised
+time windows</h2>
+
+<h3>Description</h3>
+
+<p>Calculation of temperature average and variation between two customised
+time periods per day. Time windows can be defined by the user using the <code>limits</code> argument,
+defined by bird activity time (using the <code>activity.times</code> parameter) or set according to
+twilight times if coordinates are provided (<code>coor</code>).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">incRt(
+  data,
+  temp.name,
+  limits = NULL,
+  coor = NULL,
+  activity.times = FALSE,
+  civil.twilight = FALSE,
+  time.zone = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>data frame containing a time-series vector of 1's and 0's (incubation scores), 
+where "1"
+means "incubating individual inside nest" and "0" means "incubating individual 
+outside the nests". This vector, 
+under the name of <code>incR_score</code>, is provided by <code>incRscan</code> in the 
+first object of the returned list. A column named "date" is needed to refer to daily
+calculations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>temp.name</code></td>
+<td>
+<p>(character object) name of the column containing temperature data 
+in data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>limits</code></td>
+<td>
+<p>vector of length 2 giving the time limits for calculations. For example,
+'c(6,20)' would calculate temperature averages and variances for two time periods, from 6 to 20
+and from 20 to 6 of the next day. 'civil.twilight' and 'activity.times' must be
+FALSE to allow the use of 'limits'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coor</code></td>
+<td>
+<p>coordinates for the location where temperature was recorded,
+formatted as decimal degrees N/S, decimal degrees E/W.
+When 'civil.twilight' is TRUE, 'coor' allows the user to define sunrise and sunset times
+based on the <code>getSunlightTimes</code> function (in <code>suncalc</code> package).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>activity.times</code></td>
+<td>
+<p>TRUE or FALSE. Set as TRUE when time periods for calculation
+are defined by <code>incRact</code>. Data must contain a column named 
+'incR_score' for the use of <code>incRact</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>civil.twilight</code></td>
+<td>
+<p>TRUE or FALSE. Set as TRUE when time periods for calculation
+are to be defined by civil twilight times - calculated using <code>getSunlightTimes</code>. 
+If 'civil.twilight = TRUE', 'coor' and 'time.zone' need to be specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>time.zone</code></td>
+<td>
+<p>time zone for <code>getSunlightTimes</code> dawn and dusk calculations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>use parameters in <code>incRact</code> if <em>activity.times</em> = TRUE.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a data frame containing temperature means and variance for the defined time 
+window.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Pablo Capilla-Lasheras
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>incRprep</code> <code>incRscan</code> <code>incRact</code>
+<code>getSunlightTimes</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># loading example data
+data(incR_procdata)
+
+# calculation based on chosen times from 6am to 7pm and 7pm to 6am
+incRt (data=incR_procdata, 
+        temp.name="temperature",
+        limits=c(6,19), 
+        coor=NULL, 
+        civil.twilight=FALSE, 
+        activity.times=FALSE,
+        time.zone=NULL)
+        
+# calculation based on activity times
+incRt (data=incR_procdata, 
+        temp.name="temperature", 
+        limits=NULL, 
+        coor=NULL, 
+        civil.twilight=FALSE, 
+        activity.times=TRUE,
+        time.zone=NULL,
+        time_column="time",             # extra argument needed for incRact
+        vector.incubation="incR_score") # extra argument needed for incRact
+        
+# calculation based on civil twilight
+incRt (data=incR_procdata, 
+        temp.name="temperature",
+        limits=NULL, 
+        coor=c(42,0.89), 
+        civil.twilight=TRUE, 
+        activity.times=FALSE,
+        time.zone="GMT")
+</code></pre>
+
+
+</div>

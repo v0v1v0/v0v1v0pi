@@ -1,0 +1,84 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>lambdaG</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Apply the LambdaG algorithm</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates the likelihood ratio of grammar models, or <code class="reqn">\lambda_G</code>, as in Nini et al. (under review). In order to run the analysis as in this paper, all data must be preprocessed using <code>contentmask()</code> with the "algorithm" parameter set to "POSnoise".
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">lambdaG(q.data, k.data, ref.data, N = 10, r = 30, cores = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>q.data</code></td>
+<td>
+<p>The questioned or disputed data as a <code>quanteda</code> tokens object with the tokens being sentences (e.g. the output of <code>tokenize_sents()</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k.data</code></td>
+<td>
+<p>The known or undisputed data as a <code>quanteda</code> tokens object with the tokens being sentences (e.g. the output of <code>tokenize_sents()</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ref.data</code></td>
+<td>
+<p>The reference dataset as a <code>quanteda</code> tokens object with the tokens being sentences (e.g. the output of <code>tokenize_sents()</code>). This can be the same object as <code>k.data</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N</code></td>
+<td>
+<p>The order of the model. Default is 10.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>r</code></td>
+<td>
+<p>The number of iterations. Default is 30.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cores</code></td>
+<td>
+<p>The number of cores to use for parallel processing (the default is one).</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>The function will test all possible combinations of Q texts and candidate authors and return a
+data frame containing <code class="reqn">\lambda_G</code>, an uncalibrated log-likelihood ratio (base 10). <code class="reqn">\lambda_G</code> can then be calibrated into a likelihood ratio that expresses the strength of the evidence using <code>calibrate_LLR()</code>. The data frame contains a column called "target" with a logical value which is TRUE if the author of the Q text is the candidate and FALSE otherwise.
+</p>
+
+
+<h3>References</h3>
+
+<p>Nini, A., Halvani, O., Graner, L., Gherardi, V., Ishihara, S. Authorship Verification based on the Likelihood Ratio of Grammar Models. https://arxiv.org/abs/2403.08462v1
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">q.data &lt;- enron.sample[1] |&gt; quanteda::tokens("sentence")
+k.data &lt;- enron.sample[2:10] |&gt; quanteda::tokens("sentence")
+ref.data &lt;- enron.sample[11:ndoc(enron.sample)] |&gt; quanteda::tokens("sentence")
+lambdaG(q.data, k.data, ref.data)
+
+</code></pre>
+
+
+</div>

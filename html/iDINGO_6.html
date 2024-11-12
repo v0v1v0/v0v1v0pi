@@ -1,0 +1,137 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Greg.em</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fitting precision regression models
+</h2>
+
+<h3>Description</h3>
+
+<p>This function fits the covariance regression model by Hoff and Niu (2012) using EM algorithm with the restriction of diagonal matrix for the noise variance
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Greg.em(formula, data = NULL, R = 1, tol = 1e-10, itmax = 1000, verbose = F)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+
+<p>an object of class "formula" used in model.frame function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+
+<p>a data frame used in model.frame function
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>R</code></td>
+<td>
+
+<p>rank of the model 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+
+<p>a stopping criterion
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>itmax</code></td>
+<td>
+
+<p>maximum number of iteration
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>If true, estimation results for each iteration are printed
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>MLE of the baseline covariance matrix</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+<p>MLE of the regression coefficients</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Min Jin Ha &lt;mjha@mdanderson.org&gt;</p>
+
+
+<h3>References</h3>
+
+<p>Hoff, P. D. and Niu, X. (2012) A covariance regression model. Statistica Sinica, 22, 729-753.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">library(glasso)
+data(gbm)
+x = gbm[,1]
+Y = as.matrix(gbm[,-1])
+p = ncol(Y)
+# Estimating inverse covariance matrix using GLasso #
+S = cov(Y)
+w.upper = which(upper.tri(S))
+
+rhoarray = exp(seq(log(0.001),log(1),length=100))
+BIC = rep(0,length(rhoarray))
+for (rh in 1:length(rhoarray)) {
+    fit.gl1 = glasso(S,rho=rhoarray[rh])
+    BIC[rh] = extendedBIC(gamma=0,omegahat=fit.gl1$wi,S=S,n=nrow(Y))
+}
+rho = rhoarray[which.min(BIC)]
+fit.gl2 = glasso(S,rho=rho)
+Omega = fit.gl2$wi
+
+# Fitting (Covariance Regression on transformed data)
+diag.Omega = diag(Omega)
+P = -Omega/diag.Omega
+diag(P) = 0
+
+tY = Y 
+mdat = apply(tY,2,mean)
+sdat = apply(tY,2,sd)
+std.tY = t((t(tY) - mdat)/sdat)
+smat = diag(sdat)
+
+## rank 1 covariance regression
+fit.g = Greg.em(std.tY~x,R=1) 
+</code></pre>
+
+
+</div>

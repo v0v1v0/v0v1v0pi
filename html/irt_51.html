@@ -1,0 +1,281 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>classification_indices</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Calculate classification accuracy and consistency</h2>
+
+<h3>Description</h3>
+
+<p>Calculate classification accuracy and consistency
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">classification_indices(
+  method = "recursive",
+  ip = NULL,
+  theta = NULL,
+  theta_cs = NULL,
+  raw_cs = NULL,
+  resp = NULL,
+  se = NULL,
+  perf_categories = NULL,
+  n_theta = 100,
+  theta_lower_bound = -6,
+  theta_upper_bound = 6,
+  cat_labels = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>The method of classification accuracy and consistency
+calculation method. Following methods are available:
+</p>
+
+<dl>
+<dt><code>'rudner'</code></dt>
+<dd>
+<p>Rudner (2000, 2005) based classification accuracy and consistency
+indices.
+</p>
+<p>Following values should be provided for this method:
+<code>theta, se, theta_cs</code>.
+Following values can optionally be provided for this method:
+<code>perf_categories, cat_labels</code>.
+</p>
+</dd>
+<dt><code>'guo'</code></dt>
+<dd>
+<p>Guo (2006) based classification accuracy and
+consistency indices.
+</p>
+<p>Note that calculation times can be long for this method. The value of
+<code>n_theta</code> can be decreased to speed up the function but this
+will reduce the accuracy of the index.
+</p>
+<p>Following values should be provided for this method:
+<code>ip, resp, theta_cs</code> and either one of <code>theta</code> or
+<code>perf_categories</code>.
+Following values can optionally be provided for this method:
+<code>n_theta, theta_lower_bound, theta_upper_bound, cat_labels</code>.
+</p>
+</dd>
+<dt><code>'recursive'</code></dt>
+<dd>
+<p>Lee (2010) based classification
+accuracy and consistency indices.
+</p>
+<p>Following values should be provided for this method:
+<code>ip, theta</code> and either one of these <code>theta_cs, raw_cs</code>.
+Following values can optionally be provided for this method:
+<code>perf_categories, cat_labels</code>.
+</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ip</code></td>
+<td>
+<p>An <code>Itempool-class</code> object. Item pool parameters can be
+composed of any combination of unidimensional dichotomous or polytomous
+items. Required for <code>"guo"</code> and <code>"recursive"</code> methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta</code></td>
+<td>
+<p>A numeric vector representing the abilities of examinees.
+Required for <code>'rudner'</code> and <code>'recursive'</code> method. For
+<code>"guo"</code> method, this vector will be used to get performance category
+of each examinee if <code>perf_categories</code> is <code>NULL</code>. The default
+value is <code>NULL</code>. For <code>method = "guo"</code> either <code>theta</code> or
+<code>perf_categories</code> should be provided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta_cs</code></td>
+<td>
+<p>A sorted (ascending order) numeric vector representing the
+theta scale cut scores. Do not include <code>-Inf</code> or <code>Inf</code>. Required
+for <code>'rudner'</code> and <code>'guo'</code> method; required for 'recursive' if
+<code>raw_cs</code> is not provided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>raw_cs</code></td>
+<td>
+<p>A sorted (ascending order) numeric vector of summed-score cut
+score values. Do not include 0 or the maximum possible score of the test in
+this vector. Required for 'recursive' method if 'theta_cs' is not provided.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>resp</code></td>
+<td>
+<p>A <code>Response_set-class</code>, a <code>matrix</code> or a
+<code>data.frame</code> object that holds responses. If <code>matrix</code> or a
+<code>data.frame</code> provided, they will be converted to a
+<code>Response_set-class</code>. Required for <code>'guo'</code> method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se</code></td>
+<td>
+<p>A numeric vector representing the standard errors of ability
+estimates. Required for <code>'rudner'</code> method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>perf_categories</code></td>
+<td>
+<p>An integer  vector representing the performance
+categories of examinees. The number 1 should represent the lowest category.
+For example if there are three cut scores the valid values can only be: 0,
+1, 2 and 3. This  vector will be used <code>theta</code> is <code>NULL</code>. The
+default value is <code>NULL</code>. Either <code>theta</code> or <code>perf_categories</code>
+should be provided. Can optional be provided for all methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n_theta</code></td>
+<td>
+<p>An integer representing the number of equally spaced theta
+points between cut scores. The default value is 100. Use larger values to
+increase accuracy but larger numbers will also slow the speed of
+calculation. Can optionally be provided for the <code>'guo'</code> method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta_lower_bound</code></td>
+<td>
+<p>A number representing the lower bound for cut
+scores. The default value is -6. Can optionally be provided for the
+<code>'guo'</code> method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>theta_upper_bound</code></td>
+<td>
+<p>A number representing the upper bound for cut
+scores. The default value is 6. Can optionally be provided for the
+<code>'guo'</code> method.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cat_labels</code></td>
+<td>
+<p>A string vector representing the labels of the categories.
+The length of the vector should be one more than the length of the cut
+scores. The default value is <code>NULL</code> where the categories will be
+labeled as 1, 2, ..., (number of cut scores plus one). For example, if
+there are three cut scores category labels can be:
+<code>c("Unsatisfactory", "Basic", "Mastery", "Advanced")</code>. Can optional be
+provided for all methods.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list of following elements:
+</p>
+
+<dl>
+<dt><code>category_prob</code></dt>
+<dd>
+<p>A numeric vector representing the
+performance category classification probabilities of each examinee.</p>
+</dd>
+<dt><code>ca</code></dt>
+<dd>
+<p>Marginal (overall) classification accuracy index</p>
+</dd>
+<dt><code>cc</code></dt>
+<dd>
+<p>Marginal (overall) classification consistency index</p>
+</dd>
+<dt><code>ind_cs_ca</code></dt>
+<dd>
+<p>Individual cut score classification accuracy
+indices. This value will only be calculated when there are more than
+one cut score.</p>
+</dd>
+<dt><code>ind_cs_ca</code></dt>
+<dd>
+<p>Individual cut score classification consistency
+indices. This value will only be calculated when there are more than
+one cut score.</p>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p>Emre Gonulates
+</p>
+
+
+<h3>References</h3>
+
+<p>Guo, F. (2006). Expected classification accuracy using the latent
+distribution. Practical Assessment, Research, and Evaluation, 11(1), 6.
+</p>
+<p>Lee, W. C. (2010). Classification consistency and accuracy for complex
+assessments using item response theory. Journal of Educational Measurement,
+47(1), 1-17.
+</p>
+<p>Rudner, L. M. (2000). Computing the expected proportions of misclassified
+examinees. Practical Assessment, Research, and Evaluation, 7(1), 14.
+</p>
+<p>Rudner, L. M. (2005). Expected classification accuracy. Practical Assessment,
+Research, and Evaluation, 10(1), 13.
+</p>
+<p>Wyse, A. E., &amp; Hao, S. (2012). An evaluation of item response theory
+classification accuracy and consistency indices. Applied Psychological
+Measurement, 36(7), 602-624.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+ip &lt;- generate_ip(model = sample(c("GPCM", "2PL"), 20, TRUE))
+n_examinee &lt;- 100
+
+true_theta &lt;- rnorm(n_examinee)
+resp_set &lt;- generate_resp_set(ip = ip, theta = true_theta, prop_missing = .2)
+theta_est &lt;- est_ability(resp = resp_set, ip = ip, method = "eap")
+se &lt;- theta_est$se
+theta_est &lt;- theta_est$est
+raw_score &lt;- est_ability(resp = resp_set, method = "sum_score")$est
+
+# Cut score
+theta_cs &lt;- c(-1, 0, 1.5)
+raw_cs &lt;- round(rsss(ip = ip, scale_score = theta_cs))
+
+# Rudner (2000, 2005) based indices:
+classification_indices(method = "rudner", theta = theta_est, se = se,
+                       theta_cs = theta_cs)
+
+# Guo (2006) based indices:
+classification_indices(method = "guo", ip = ip, resp = resp_set,
+                       theta = theta_est, theta_cs = theta_cs)
+
+# Recursive method based indices:
+classification_indices(method = "recursive", ip = ip, theta = theta_est,
+                       theta_cs = theta_cs)
+# Use raw score cut scores with recursive method
+classification_indices(method = "recursive", ip = ip, theta = theta_est,
+                       raw_cs = raw_cs)
+
+</code></pre>
+
+
+</div>

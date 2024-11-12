@@ -1,0 +1,192 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>linearDL</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Sample Bayesian linear infinite factor models with the Dirichlet-Laplace prior
+</h2>
+
+<h3>Description</h3>
+
+<p>Perform Bayesian factor analysis by sampling the posterior distribution of parameters in a factor model with the Dirichlet-Laplace shrinkage prior of Bhattacharya et al.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">linearDL(X, nrun, burn, thin = 1, prop = 1, 
+epsilon = 1e-3, k = NULL,
+output = c("covMean", "covSamples", "factSamples",
+"sigSamples"), verbose = TRUE, dump = FALSE,
+filename = "samps.Rds", buffer = 10000,
+augment = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>Data matrix (n x p)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nrun</code></td>
+<td>
+<p>number of iterations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>burn</code></td>
+<td>
+<p>burn-in period</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thin</code></td>
+<td>
+<p>thinning interval</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prop</code></td>
+<td>
+<p>proportion of elements in each column less than epsilon in magnitude cutoff</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>epsilon</code></td>
+<td>
+<p>tolerance</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>Number of factors</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>output</code></td>
+<td>
+<p>output type, a vector including some of: c("covMean", "covSamples", "factSamples", "sigSamples")</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>logical. Show progress bar?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dump</code></td>
+<td>
+<p>logical. Save output object during sampling?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>filename</code></td>
+<td>
+<p>if dump, filename for output</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>buffer</code></td>
+<td>
+<p>if dump, frequency of saving</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>augment</code></td>
+<td>
+<p>additional sampling steps as an expression</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>some of:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>covMean</code></td>
+<td>
+<p>X covariance posterior mean</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>omegaSamps</code></td>
+<td>
+<p>X covariance posterior samples</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambdaSamps</code></td>
+<td>
+<p>Posterior factor loadings samples (rotationally ambiguous)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>etaSamps</code></td>
+<td>
+<p>Posterior factor samples (rotationally ambiguous)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigmaSamps</code></td>
+<td>
+<p>Posterior marginal variance samples (see notation in Bhattacharya and Dunson (2011))</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>numFacts</code></td>
+<td>
+<p>Number of factors for each iteration</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Evan Poworoznek
+</p>
+
+
+<h3>References</h3>
+
+<p>Bhattacharya, Anirban, et al. "Dirichlet-Laplace priors for optimal shrinkage." Journal of the American Statistical Association 110.512 (2015): 1479-1490.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>linearDL</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">k0 = 5
+p = 20
+n = 50
+
+lambda = matrix(rnorm(p*k0, 0, 0.01), ncol = k0)
+lambda[sample.int(p, 40, replace = TRUE) +
+         p*(sample.int(k0, 40, replace = TRUE)-1)] = rnorm(40, 0, 1)
+lambda[1:7, 1] = rnorm(7, 2, 0.5)
+lambda[8:14, 2] = rnorm(7, -2, 0.5)
+lambda[15:20, 3] = rnorm(6, 2, 0.5)
+lambda[,4] = rnorm(p, 0, 0.5)
+lambda[,5] = rnorm(p, 0, 0.5)
+plotmat(varimax(lambda)[[1]])
+
+X = matrix(rnorm(n*k0),n,k0)%*%t(lambda) + matrix(rnorm(n*p), n, p)
+
+out = linearMGSP(X = X, nrun = 1000, burn = 500)
+</code></pre>
+
+
+</div>

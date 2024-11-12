@@ -1,0 +1,179 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>vis_hist</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Visualisation of distributions using histograms</h2>
+
+<h3>Description</h3>
+
+<p>Visualisation of distributions using ggplot2-based histograms.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">vis_hist(
+  .data,
+  .by = NA,
+  .meta = NA,
+  .title = "Gene usage",
+  .ncol = NA,
+  .points = TRUE,
+  .test = TRUE,
+  .coord.flip = FALSE,
+  .grid = FALSE,
+  .labs = c("Gene", NA),
+  .melt = TRUE,
+  .legend = NA,
+  .add.layer = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>.data</code></td>
+<td>
+<p>Input matrix or data frame.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.by</code></td>
+<td>
+<p>Pass NA if you want to plot samples without grouping.
+</p>
+<p>You can pass a character vector with one or several column names from ".meta"
+to group your data before plotting. In this case you should provide ".meta".
+</p>
+<p>You can pass a character vector that exactly matches the number of samples in
+your data, each value should correspond to a sample's property. It will be used
+to group data based on the values provided. Note that in this case you should
+pass NA to ".meta".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.meta</code></td>
+<td>
+<p>A metadata object. An R dataframe with sample names and their properties,
+such as age, serostatus or hla.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.title</code></td>
+<td>
+<p>The text for the title of the plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.ncol</code></td>
+<td>
+<p>A number of columns to display. Provide NA (by default) if you want the function
+to automatically detect the optimal number of columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.points</code></td>
+<td>
+<p>A logical value defining whether points will be visualised or not.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.test</code></td>
+<td>
+<p>A logical vector whether statistical tests should be applied. See "Details" for more information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.coord.flip</code></td>
+<td>
+<p>If TRUE then swap x- and y-axes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.grid</code></td>
+<td>
+<p>If TRUE then plot separate visualisations for each sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.labs</code></td>
+<td>
+<p>A character vector of length two with names for x-axis and y-axis, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.melt</code></td>
+<td>
+<p>If TRUE then apply melt to the ".data" before plotting.
+In this case ".data" is supposed to be a data frame with the first character column reserved
+for names of genes and other numeric columns reserved to counts or frequencies of genes.
+Each numeric column should be associated with a specific repertoire sample.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.legend</code></td>
+<td>
+<p>If TRUE then plots the legend. If FALSE removes the legend from the plot.
+If NA automatically detects the best way to display legend.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.add.layer</code></td>
+<td>
+<p>Addditional ggplot2 layers, that added to each plot in the output plot or grid of plots.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Is not used here.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If data is grouped, then statistical tests for comparing means of groups will be performed, unless <code>.test = FALSE</code> is supplied.
+In case there are only two groups, the Wilcoxon rank sum test (https://en.wikipedia.org/wiki/Wilcoxon_signed-rank_test) is performed
+(R function <code>wilcox.test</code> with an argument <code>exact = FALSE</code>) for testing if there is a difference in mean rank values between two groups.
+In case there more than two groups, the Kruskal-Wallis test (https://en.wikipedia.org/wiki/Kruskal
+A significant Kruskal-Wallis test indicates that at least one sample stochastically dominates one other sample.
+Adjusted for multiple comparisons P-values are plotted on the top of groups.
+P-value adjusting is done using the Holm method (https://en.wikipedia.org/wiki/Holm
+You can execute the command <code>?p.adjust</code> in the R console to see more.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A ggplot2 object.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>vis.immunr_gene_usage, geneUsage
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(immdata)
+imm_gu &lt;- geneUsage(immdata$data[[1]])
+vis(imm_gu,
+  .plot = "hist", .add.layer =
+    theme(axis.text.x = element_text(angle = 75, vjust = 1))
+)
+imm_gu &lt;- geneUsage(immdata$data[1:4])
+vis(imm_gu,
+  .plot = "hist", .grid = TRUE, .add.layer =
+    theme(axis.text.x = element_text(angle = 75, vjust = 1))
+)
+</code></pre>
+
+
+</div>

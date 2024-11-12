@@ -1,0 +1,272 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>PCAboot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Bootstrap-Based Testing for Subsphericity 
+</h2>
+
+<h3>Description</h3>
+
+<p>The function tests, assuming an elliptical model, that the last <code>p-k</code> eigenvalues of
+a scatter matrix are equal and the <code>k</code> interesting components are those with a larger variance. 
+To obtain p-values two different bootstrapping strategies are available and the user can provide the scatter matrix to be used
+as a function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">PCAboot(X, k, n.boot = 200, s.boot = "B1", S = MeanCov, Sargs = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>a numeric data matrix with p&gt;1 columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>the number of eigenvalues larger than the equal ones. Can be between 0 and p-2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.boot</code></td>
+<td>
+<p>number of bootstrapping samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s.boot</code></td>
+<td>
+<p>bootstrapping strategy to be used. Possible values are <code>"B1"</code>, <code>"B2"</code>. See details for further information.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>S</code></td>
+<td>
+<p>A function which returns a list that has as its first element a location vector and as the second element the scatter matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Sargs</code></td>
+<td>
+<p>list of further arguments passed on to the function specified in <code>S</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Here the function <code>S</code> needs to return a list where the first argument is a location vector and the second one a scatter matrix.
+</p>
+<p>The location is used to center the data and the scatter matrix is used to perform PCA.
+</p>
+<p>Consider X as the centered data and denote by W the transformation matrix to the principal components. The corresponding eigenvalues
+from PCA are <code class="reqn">d_1,...,d_p</code>. Under the null, <code class="reqn">d_k &gt; d_{k+1} = ... = d_{p}</code>.
+Denote further by <code class="reqn">\bar{d}</code> the mean of the last <code>p-k</code> eigenvalues and by <code class="reqn">D^* = diag(d_1,...,d_k,\bar{d},...,\bar{d})</code> a <code class="reqn">p \times p</code> diagonal matrix. Assume that <code class="reqn">S</code> is the matrix with principal components which can be decomposed into <code class="reqn">S_1</code> and <code class="reqn">S_2</code> where 
+<code class="reqn">S_1</code> contains the k interesting principal components and <code class="reqn">S_2</code> the last <code class="reqn">p-k</code> principal components.
+</p>
+<p>For a sample of size <code class="reqn">n</code>, the test statistic used for the boostrapping tests is
+</p>
+<p style="text-align: center;"><code class="reqn">T = n / (\bar{d}^2) \sum_{k+1}^p (d_i - \bar{d})^2.</code>
+</p>
+ 
+<p>The function offers then two boostrapping strategies:
+</p>
+
+<ol>
+<li> <p><code>s.boot="B1"</code>: 
+The first strategy has the following steps:
+</p>
+
+<ol>
+<li>
+<p> Take a bootstrap sample <code class="reqn">S^*</code> of size <code class="reqn">n</code> from <code class="reqn">S</code> and decompose it into <code class="reqn">S_1^*</code> and <code class="reqn">S_2^*</code>.
+</p>
+</li>
+<li>
+<p> Every observation in <code class="reqn">S_2^*</code> is transformed with a different random orthogonal matrix.
+</p>
+</li>
+<li>
+<p> Recombine <code class="reqn">S^*=(S_1^*, S_2^*)</code> and create <code class="reqn">X^*= S^* W</code>.
+</p>
+</li>
+<li>
+<p> Compute the test statistic based on <code class="reqn">X^*</code>. 
+</p>
+</li>
+<li>
+<p> Repeat the previous steps <code>n.boot</code> times.
+</p>
+</li>
+</ol>
+</li>
+<li> <p><code>s.boot="B2"</code>: 
+The second strategy has the following steps:
+</p>
+
+<ol>
+<li>
+<p> Scale each principal component using the matrix <code class="reqn">D</code>, i.e. <code class="reqn">Z = S D</code>. 
+</p>
+</li>
+<li>
+<p> Take a bootstrap sample <code class="reqn">Z^*</code> of size <code class="reqn">n</code> from <code class="reqn">Z</code>.
+</p>
+</li>
+<li>
+<p> Every observation in <code class="reqn">Z^*</code> is transformed with a different random orthogonal matrix.
+</p>
+</li>
+<li>
+<p> Recreate <code class="reqn">X^*= Z^* {D^*}^{-1} W</code>.
+</p>
+</li>
+<li>
+<p> Compute the test statistic based on <code class="reqn">X^*</code>. 
+</p>
+</li>
+<li>
+<p> Repeat the previous steps <code>n.boot</code> times.
+</p>
+</li>
+</ol>
+<p>To create the random orthogonal matrices the function <code>rorth</code> is used.
+</p>
+</li>
+</ol>
+<h3>Value</h3>
+
+<p>A list of class ictest inheriting from class htest containing:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>statistic</code></td>
+<td>
+<p>the value of the test statistic.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.value </code></td>
+<td>
+<p>the p-value of the test.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parameter </code></td>
+<td>
+<p>the degrees of freedom of the test.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>character string which test was performed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.name</code></td>
+<td>
+<p>character string giving the name of the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative</code></td>
+<td>
+<p>character string specifying the alternative hypothesis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>the number or larger eigenvalues used in the testing problem.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>W</code></td>
+<td>
+<p>the transformation matrix to the principal components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>S</code></td>
+<td>
+<p>data matrix with the centered principal components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>the underlying eigenvalues.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MU</code></td>
+<td>
+<p>the location of the data which was substracted before calculating the principal components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>SCATTER</code></td>
+<td>
+<p>The computed scatter matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scatter</code></td>
+<td>
+<p>character string denoting which scatter function was used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s.boot</code></td>
+<td>
+<p>character string denoting which bootstrapping test version was used.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Klaus Nordhausen
+</p>
+
+
+<h3>References</h3>
+
+<p><cite>Nordhausen, K., Oja, H. and Tyler, D.E. (2022), Asymptotic and Bootstrap Tests for Subspace Dimension, Journal of Multivariate Analysis, 188, 104830. &lt;doi:10.1016/j.jmva.2021.104830&gt;.</cite>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>cov</code>, <code>MeanCov</code>, <code>PCAasymp</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">n &lt;- 200
+X &lt;- cbind(rnorm(n, sd = 2), rnorm(n, sd = 1.5), rnorm(n), rnorm(n), rnorm(n))
+
+# for demonstration purpose the n.boot is chosen small, should be larger in real applications
+
+TestCov &lt;- PCAboot(X, k = 2, n.boot=30)
+TestCov
+
+
+TestTM &lt;- PCAboot(X, k = 1, n.boot=30, s.boot = "B2", S = "tM", Sargs = list(df=2))
+TestTM
+
+</code></pre>
+
+
+</div>

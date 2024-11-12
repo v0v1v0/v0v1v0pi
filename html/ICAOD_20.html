@@ -1,0 +1,184 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ICA.control</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Returns ICA Control Optimization Parameters</h2>
+
+<h3>Description</h3>
+
+<p>The function <code>ICA.control</code> returns a list of ICA control parameters.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ICA.control(
+  ncount = 40,
+  nimp = ncount/10,
+  assim_coeff = 4,
+  revol_rate = 0.3,
+  damp = 0.99,
+  uniting_threshold = 0.02,
+  equal_weight = FALSE,
+  sym = FALSE,
+  sym_point = NULL,
+  stop_rule = c("maxiter", "equivalence"),
+  stoptol = 0.99,
+  checkfreq = 0,
+  plot_cost = TRUE,
+  plot_sens = TRUE,
+  plot_3d = c("lattice", "rgl"),
+  trace = TRUE,
+  rseed = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>ncount</code></td>
+<td>
+<p>Number of countries. Defaults to <code>40</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nimp</code></td>
+<td>
+<p>Number of imperialists. Defaults to 10 percent of <code>ncount</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>assim_coeff</code></td>
+<td>
+<p>Assimilation coefficient. Defaults to <code>4</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>revol_rate</code></td>
+<td>
+<p>Revolution rate. Defaults to <code>0.3</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>damp</code></td>
+<td>
+<p>Damp ratio for revolution rate.  <code>revol_rate</code> is decreased in every iteration by a factor of <code>damp</code> (<code>revol_rate * damp</code>). Defaults to <code>0.99</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>uniting_threshold</code></td>
+<td>
+<p>If the distance between two imperialists is less than the product of the uniting threshold by the largest distance in the search space, ICA unites the empires. Defaults to <code>0.02</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>equal_weight</code></td>
+<td>
+<p>Should the weights of design points assumed to be equal? Defaults to <code>FALSE</code>. If <code>TRUE</code>, it reduces the dimension of the search space and produces a design that gives equal weight to all of its support points.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sym</code></td>
+<td>
+<p>Should the design points be symmetric around <code>sym_point</code>? Defaults to <code>FALSE</code>. When <code>TRUE</code>, <code>sym_point</code> must be given.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sym_point</code></td>
+<td>
+<p>If <code>sym = TRUE</code>, the design points will be symmetric around <code>sym_point</code>. See 'Details'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stop_rule</code></td>
+<td>
+<p>Either  <code>'maxiter'</code> or <code>'equivalence'</code>.
+Denotes the type of stopping rule.  See 'Details'. Defaults to <code>'maxiter'</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>stoptol</code></td>
+<td>
+<p>If <code>stop_rule = 'equivalence'</code>, algorithm stops when  ELB is larger than  <code>stoptol</code>. Defaults to <code>0.99</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>checkfreq</code></td>
+<td>
+<p>The algorithm verifies the  general equivalence theorem in
+every <code>checkfreq</code> iterations.
+When <code>checkfreq = 0</code>, no verification will be done. When <code>checkfreq = Inf</code>, only the output design will be verified.
+Defaults to <code>0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_cost</code></td>
+<td>
+<p>Plot the iterations (evolution) of algorithm? Defaults to <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_sens</code></td>
+<td>
+<p>Plot the sensitivity (derivative) function at every <code>checkfreq</code>. Defaults to <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot_3d</code></td>
+<td>
+<p>Character. Which package should be used to plot the sensitivity plot for models with two explanatory variables?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>trace</code></td>
+<td>
+<p>Print the information in every iteration? Defaults to <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rseed</code></td>
+<td>
+<p>Random seed. Defaults to <code>NULL</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If <code>stop_rule = 'maxiter'</code>, the algorithm iterates until maximum number of iterations.<br>
+If <code>stope_rule = 'equivalence'</code>, the algorithm stops when either ELB  is greater than <code>stoptol</code> or it reaches <code>maxiter</code>.
+In this case, you must specify the check frequency by <code>checkfreq</code>.
+Note that checking equivalence theorem is a very time consuming process,
+especially for Bayesian and minimax design problems.
+We advise using this option only for locally, multiple objective and robust optimal designs.
+</p>
+<p>What to follows shows  how <code>sym_point</code> and <code>sym</code> may be useful? <br>
+Assume the 2PL model of the form <code class="reqn"> P(Y=1) = \frac{1}{1+exp(-b(x - a))}</code> and
+let the parameters <code class="reqn">a</code> and <code class="reqn">b</code>
+belong to
+<code class="reqn">[a_L, a_U]</code> and <code class="reqn">[b_L, b_U]</code>, respectively.
+It can be shown that the optimal design for this model
+is symmetric around <code class="reqn">a_M = \frac{a_L + a_U}{2}</code>.
+For this model, to find accurate symmetric designs, one can set <code>sym = TRUE</code> and
+provide the value of the <code class="reqn">a_M</code> via <code>sym_point</code>.
+In this case, the output design will be symmetric around the point <code>sym_point</code>.
+The length of  <code>sym_point</code> must be equal to the number of model predictors, here, is equal to <code>1</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of ICA control parameters.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">ICA.control(ncount = 100)
+</code></pre>
+
+
+</div>

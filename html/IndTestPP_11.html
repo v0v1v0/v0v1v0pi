@@ -1,0 +1,296 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>CPSPPOTevents</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Identifying the  occurrence points  of the indicator processes in  the CPSP from a POT approach</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates the  occurrence times and other characteristics (length, maximum and mean intensity) of the  extreme events
+of the three indicator processes of a bivariate Common Poisson Shock Process (CPSP) obtained from a 
+Peak Over Threshold (POT) approach.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">CPSPPOTevents(N1,N2,thres1,thres2, date=NULL, dplot=T, pmfrow=c(2,1), 
+	axispoints=NULL,...)</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>N1</code></td>
+<td>
+<p>Numeric vector. Series <code class="reqn">(x_i)</code> whose threshold exceedances define the first CPSP marginal process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N2</code></td>
+<td>
+<p>Numeric vector. Series <code class="reqn">(y_i)</code> whose threshold exceedances define the second CPSP marginal process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thres1</code></td>
+<td>
+<p>Numeric value. Threshold  used to define the extreme events in <code class="reqn">(x_i)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thres2</code></td>
+<td>
+<p>Numeric value. Threshold used to define the extreme events  in <code class="reqn">(y_i)</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>date</code></td>
+<td>
+<p>Optional. A vector or matrix indicating the date of each observation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dplot</code></td>
+<td>
+<p>Optional. A logical flag. If it is TRUE,  the  marginal and indicator processes  are plotted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pmfrow</code></td>
+<td>
+<p>Optional.  A vector of  the form (nr, nc) to be supplied as value of the argument <code>mfrow</code> in  <code>par</code>. </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>axispoints</code></td>
+<td>
+<p>Optional. Numeric vector with the  points in the time index where axis ticks and labels (from the first column in <code>date</code>)
+have to be drawn.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments to  be passed to  the function <code>plot</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A CPSP <code class="reqn">N</code> can be  decomposed into three independent indicator processes: <code class="reqn">N_{(1)}</code>, <code class="reqn">N_{(2)}</code>  
+and <code class="reqn">N_{(12)}</code>,  the processes of the points  occurring
+only in the first  marginal process, only in the second and  in both of them (simultaneous points).
+In the CPSP resulting from applying a POT approach, the events in  <code class="reqn">N_{(1)}</code>
+are  a run of consecutive observations where <code class="reqn">x_i</code> exceeds its  extreme threshold but <code class="reqn">y_i</code> does not exceed 
+its extreme threshold. An extreme event  in  <code class="reqn">N_{(2)}</code> is defined analogously. A simultaneous  event,  or event 
+in  <code class="reqn">N_{(12)}</code>, is a run where both series  exceed  their thresholds. 
+</p>
+<p>For the events  defined in each indicator process, three magnitudes (length, maximum intensity and mean intensity) 
+are calculated together with the   initial point and the point of maximum excess of each event. In  
+<code class="reqn">N_{(12)}</code>, the maximum and the  mean intensity  in  both  series <code class="reqn">(x_i)</code> and
+<code class="reqn">(y_i)</code> are  calculated. 
+</p>
+<p>The occurrence point of each event is  the time  in the run where the maximum   of the sum of the excesses of   
+<code class="reqn">(x_i)</code> and <code class="reqn">(y_i)</code> over their threholds   occurs;  if an observation does not exceed  
+its corresponding threshold,  that  excess is 0. According to this definition, the occurrence point in 
+<code class="reqn">N_{(1)}</code> is the point  with maximum intensity in <code class="reqn">(x_i)</code> within  the run. 
+</p>
+<p>The vectors <code>inddat1</code>, <code>inddat2</code> and <code>inddat12</code>, elements of the output list,
+mark the observations  that should be used in the estimation of each indicator  process.  The 
+observations in an extreme event which are not the occurrence point are marked with 0
+and treated as non observed in the estimation process.  The rest are marked with 1  and 
+must be included in the likelihood function. See  function <code>fitPP.fun</code> in package NHPoisson
+for more details on the use of these indexes in the estiamtion of a point process.
+</p>
+<p>The  points in the  marginal  <code class="reqn">N_{1}</code>, <code class="reqn">N_{2}</code>  and indicator  
+<code class="reqn">N_{(1)}</code>, <code class="reqn">N_{(2)}</code>  and <code class="reqn">N_{(12)}</code>  processes can be optionally plotted. 
+If  <code>date</code> is NULL, default axis are used. Otherwise, the values in <code>axispoints</code> are used 
+as the  points in the time index where axis ticks and labels, from  the first column in <code>date</code>,  
+have to be drawn.  If  <code>axispoints</code> is NULL, a default grid of points  is built  using  the 
+function <code>marca</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list with components
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>Im1</code></td>
+<td>
+<p>Vector of  mean excesses (over the threshold) of the extreme events in <code class="reqn">N_{(1)}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Ix1</code></td>
+<td>
+<p>Vector of  maximum excesses (over the threshold) of the extreme events in <code class="reqn">N_{(1)}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L1</code></td>
+<td>
+<p>Vector of  lengths of the extreme events in <code class="reqn">N_{(1)}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Px1</code></td>
+<td>
+<p>Vector of  points of  maximum excess of the extreme events in <code class="reqn">N_{(1)}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Pi1</code></td>
+<td>
+<p>Vector of  initial points of the extreme events in <code class="reqn">N_{(1)}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inddat1 </code></td>
+<td>
+<p>Index  of the observations to be used in the estimation process  of <code class="reqn">N_{(1)}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Im2</code></td>
+<td>
+<p>Vector of  mean excesses (over the threshold) of the extreme events in <code class="reqn">N_{(2)}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>IxY</code></td>
+<td>
+<p>Vector of maximum excesses (over the threshold) of the extreme events in <code class="reqn">N_{(2)}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L2</code></td>
+<td>
+<p>Vector of  lengths of the extreme events in <code class="reqn">N_{(2)}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Px2</code></td>
+<td>
+<p>Vector of  points of  maximum excess of the extreme events in <code class="reqn">N_{(2)}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Pi2</code></td>
+<td>
+<p>Vector of   initial points of the extreme events in <code class="reqn">N_{(2)}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inddat2 </code></td>
+<td>
+<p>Index of the observations to be used in the estimation process  of  
+<code class="reqn">N_{(2)}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Im121</code></td>
+<td>
+<p>Vector of  mean excesses of the series <code class="reqn">(x_i)</code> in <code class="reqn">N_{(12)}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Ix121</code></td>
+<td>
+<p>Vector of  maximum excesses  the series <code class="reqn">(x_i)</code> in <code class="reqn">N_{(12)}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Im122</code></td>
+<td>
+<p>Vector of  mean excesses of the series <code class="reqn">(y_i)</code> in <code class="reqn">N_{(12)}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Ix122</code></td>
+<td>
+<p>Vector of  maximum excesses  the series <code class="reqn">(y_i)</code> in <code class="reqn">N_{(12)}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L12</code></td>
+<td>
+<p>Vector of lengths of the extreme events in <code class="reqn">N_{(12)}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Px12</code></td>
+<td>
+<p>Vector of points of  maximum excess of the extreme events in <code class="reqn">N_{(12)}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Pi12</code></td>
+<td>
+<p>Vector of  initial points of the extreme events in <code class="reqn">N_{(12)}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>inddat12</code></td>
+<td>
+<p>Index of the observations to be used in the estimation process  of <code class="reqn">N_{(12)}</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N1</code></td>
+<td>
+<p>Input argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>N2</code></td>
+<td>
+<p>Input argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thres1</code></td>
+<td>
+<p>Input argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>thres1</code></td>
+<td>
+<p>Input argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>date</code></td>
+<td>
+<p>Input argument.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Abaurrea, J. Asin, J. and Cebrian, A.C. (2015). A Bootstrap Test of Independence Between Three Temporal Nonhomogeneous Poisson Processes 
+and its Application to Heat Wave Modeling. <em>Environmental and Ecological Statistics</em>, 22(1), 127-144.
+</p>
+
+
+<h3>See Also</h3>
+
+ <p><code>CPSPpoints</code>, <code>PlotMCPSP</code>, <code>PlotICPSP</code> </p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(TxBHZ)
+dateT&lt;-cbind(TxBHZ$year,TxBHZ$month,TxBHZ$day)  #year, month and day of the month
+marca&lt;- c(1:length(TxBHZ$TxH))[c(1,diff(dateT[,1]))==1]  # points at  first day  of the year
+BivEv&lt;-CPSPPOTevents(N1=TxBHZ$TxH,N2=TxBHZ$TxZ,thres1=378,thres2=364, date=dateT, 
+       axispoints=marca)
+</code></pre>
+
+
+</div>

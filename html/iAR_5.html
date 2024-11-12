@@ -1,0 +1,132 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>BIARkalman</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Maximum Likelihood Estimation of the BIAR Model via Kalman Recursions</h2>
+
+<h3>Description</h3>
+
+<p>Maximum Likelihood Estimation of the BIAR model parameters phiR and phiI. The estimation procedure uses the Kalman Filter to find the maximum of the likelihood.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">BIARkalman(
+  y1,
+  y2,
+  t,
+  delta1 = 0,
+  delta2 = 0,
+  zero.mean = "TRUE",
+  niter = 10,
+  seed = 1234
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y1</code></td>
+<td>
+<p>Array with the observations of the first time series of the BIAR process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y2</code></td>
+<td>
+<p>Array with the observations of the second time series of the BIAR process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t</code></td>
+<td>
+<p>Array with the irregular observational times.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta1</code></td>
+<td>
+<p>Array with the measurements error standard deviations of the first time series of the BIAR process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>delta2</code></td>
+<td>
+<p>Array with the measurements error standard deviations of the second time series of the BIAR process.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zero.mean</code></td>
+<td>
+<p>logical; if true, the array y has zero mean; if false, y has a mean different from zero.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>niter</code></td>
+<td>
+<p>Number of iterations in which the function nlminb will be repeated.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>a single value, interpreted as the seed of the random process.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list with the following components:
+</p>
+
+<ul>
+<li>
+<p>phiR MLE of the autocorrelation coefficient of BIAR model (phiR).
+</p>
+</li>
+<li>
+<p>phiI MLE of the cross-correlation coefficient of the BIAR model (phiI).
+</p>
+</li>
+<li>
+<p>ll Value of the negative log likelihood evaluated in phiR and phiI.
+</p>
+</li>
+</ul>
+<h3>References</h3>
+
+<p>Elorrieta F, Eyheramendy S, Palma W, Ojeda C (2021).
+“A novel bivariate autoregressive model for predicting and forecasting irregularly observed time series.”
+<em>Monthly Notices of the Royal Astronomical Society</em>, <b>505</b>(1), 1105–1116.
+ISSN 0035-8711, doi: <a href="https://doi.org/10.1093/mnras/stab1216">10.1093/mnras/stab1216</a>, <a href="https://academic.oup.com/mnras/article-pdf/505/1/1105/38391762/stab1216.pdf">https://academic.oup.com/mnras/article-pdf/505/1/1105/38391762/stab1216.pdf</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>gentime</code>, <code>BIARsample</code>, <code>BIARphikalman</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+n=80
+set.seed(6714)
+st&lt;-gentime(n)
+x=BIARsample(n=n,phiR=0.9,phiI=0,st=st,rho=0)
+y=x$y
+y1=y/apply(y,1,sd)
+biar=BIARkalman(y1=y1[1,],y2=y1[2,],t=st,delta1 = rep(0,length(y[1,])),
+delta2=rep(0,length(y[1,])))
+biar
+
+</code></pre>
+
+
+</div>

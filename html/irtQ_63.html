@@ -1,0 +1,282 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>sx2_fit</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>S-X2 fit statistic</h2>
+
+<h3>Description</h3>
+
+<p>This function computes <code class="reqn">S-X^{2}</code> (Orlando &amp; Thissen, 2000, 2003) item fit statistic.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">sx2_fit(x, ...)
+
+## Default S3 method:
+sx2_fit(
+  x,
+  data,
+  D = 1,
+  alpha = 0.05,
+  min.collapse = 1,
+  norm.prior = c(0, 1),
+  nquad = 30,
+  weights,
+  pcm.loc = NULL,
+  ...
+)
+
+## S3 method for class 'est_item'
+sx2_fit(
+  x,
+  alpha = 0.05,
+  min.collapse = 1,
+  norm.prior = c(0, 1),
+  nquad = 30,
+  weights,
+  pcm.loc = NULL,
+  ...
+)
+
+## S3 method for class 'est_irt'
+sx2_fit(
+  x,
+  alpha = 0.05,
+  min.collapse = 1,
+  norm.prior = c(0, 1),
+  nquad = 30,
+  weights,
+  pcm.loc = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A data frame containing the item metadata (e.g., item parameters, number of categories, models ...), an object
+of class <code>est_item</code> obtained from the function <code>est_item</code>, or an object of class <code>est_irt</code>
+obtained from the function <code>est_irt</code>. See <code>irtfit</code>, <code>info</code>, or <code>simdat</code>
+for more details about the item metadata. The data frame of item metadata can be easily obtained using the function <code>shape_df</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments passed to or from other methods.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>A matrix containing examinees' response data for the items in the argument <code>x</code>. A row and column indicate
+the examinees and items, respectively.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>A scaling factor in IRT models to make the logistic function as close as possible to the normal ogive function (if set to 1.7).
+Default is 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alpha</code></td>
+<td>
+<p>A numeric value to specify significance <code class="reqn">\alpha</code>-level of the hypothesis test for <code class="reqn">S-X^{2}</code> fit statistic. Default is .05.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.collapse</code></td>
+<td>
+<p>An integer value to indicate the minimum frequency of cells to be collapsed. Default is 1. See below for details.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>norm.prior</code></td>
+<td>
+<p>A numeric vector of two components specifying a mean and standard deviation of the normal prior distribution.
+These two parameters are used to obtain the gaussian quadrature points and the corresponding weights from the normal distribution. Default is
+c(0,1).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nquad</code></td>
+<td>
+<p>An integer value specifying the number of gaussian quadrature points from the normal prior distribution. Default is 30.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>A two-column matrix or data frame containing the quadrature points (in the first column) and the corresponding weights
+(in the second column) of the latent variable prior distribution. The weights and quadrature points can be easily obtained
+using the function <code>gen.weight</code>. If missing, default values are used (see the arguments of <code>norm.prior</code> and <code>nquad</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pcm.loc</code></td>
+<td>
+<p>A vector of integer values indicating the locations of partial credit model (PCM) items whose slope parameters are fixed
+to certain values. Default is NULL.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Often, very small expected frequencies in the contingency tables used to compute <code class="reqn">\chi^{2}</code> fit statistics could
+compromise the accuracy of the <code class="reqn">\chi^{2}</code> approximation for their distribution (Orlando &amp; Thissen, 2000).
+To avoid this problem, Orlando and Thissen (2000) used an algorithm of collapsing adjacent test score groups to maintain
+a minimum expected category frequency of 1. However, if Orlando and Thissen's cell collapsing approach is applied to polytomous data,
+too much information would be lost (Kang &amp; Chen, 2008). Thus, Kang and Chen (2008) collapsed adjacent cells of item score categories
+for a specific score group to ensure a minimum expected category frequency of 1. The same collapsing strategies were applied
+in the function <code>sx2_fit</code>. If a minimum expected category frequency needs to be set to different number, you can specify
+the minimum value in the argument <code>min.collapse</code>.
+</p>
+<p>Note that if "DRM" is specified for an item in the item metadata set, the item is considered as "3PLM" to compute degree of freedom of
+the <code class="reqn">S-X^{2}</code> fit statistic.
+</p>
+<p>Also, any missing responses in <code>data</code> are replaced with incorrect responses (i.e., 0s).
+</p>
+
+
+<h3>Value</h3>
+
+<p>This function returns a list. Within a list, several internal objects are contained such as:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>fit_stat</code></td>
+<td>
+<p>A data frame containing the results of <code class="reqn">S-X^{2}</code> fit statistics for all items.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>item_df</code></td>
+<td>
+<p>The item metadata specified in the argument <code>x</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exp_freq</code></td>
+<td>
+<p>A list containing the collapsed expected frequency tables for all items.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>obs_freq</code></td>
+<td>
+<p>A list containing the collapsed observed frequency tables for all items.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exp_prob</code></td>
+<td>
+<p>A list containing the collapsed expected probability tables for all items.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>obs_prop</code></td>
+<td>
+<p>A list containing the collapsed observed proportion tables for all items.</p>
+</td>
+</tr>
+</table>
+<h3>Methods (by class)</h3>
+
+
+<ul>
+<li> <p><code>sx2_fit(default)</code>: Default method to compute <code class="reqn">S-X^{2}</code> fit statistics for a data frame <code>x</code> containing the item metadata.
+</p>
+</li>
+<li> <p><code>sx2_fit(est_item)</code>: An object created by the function <code>est_item</code>.
+</p>
+</li>
+<li> <p><code>sx2_fit(est_irt)</code>: An object created by the function <code>est_irt</code>.
+</p>
+</li>
+</ul>
+<h3>Author(s)</h3>
+
+<p>Hwanggyu Lim <a href="mailto:hglim83@gmail.com">hglim83@gmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Kang, T., &amp; Chen, T. T. (2008). Performance of the generalized S-X2 item fit index for polytomous IRT models.
+<em>Journal of Educational Measurement, 45</em>(4), 391-406.
+</p>
+<p>Orlando, M., &amp; Thissen, D. (2000). Likelihood-based item-fit indices for dichotomous item response theory models.
+<em>Applied Psychological Measurement, 24</em>(1), 50-64.
+</p>
+<p>Orlando, M., &amp; Thissen, D. (2003). Further investigation of the performance of S-X2: An item fit index for use with
+dichotomous item response theory models. <em>Applied Psychological Measurement, 27</em>(4), 289-298.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>irtfit</code>, <code>info</code>, <code>simdat</code>, <code>shape_df</code>, <code>est_item</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## example 1: all five polytomous IRT models are GRM
+## import the "-prm.txt" output file from flexMIRT
+flex_sam &lt;- system.file("extdata", "flexmirt_sample-prm.txt", package = "irtQ")
+
+# select the item metadata
+x &lt;- bring.flexmirt(file = flex_sam, "par")$Group1$full_df
+
+# generate examinees' abilities from N(0, 1)
+set.seed(23)
+score &lt;- rnorm(500, mean = 0, sd = 1)
+
+# simulate the response data
+data &lt;- simdat(x = x, theta = score, D = 1)
+
+
+# compute fit statistics
+fit1 &lt;- sx2_fit(x = x, data = data, nquad = 30)
+
+# fit statistics
+fit1$fit_stat
+
+
+## example 2: first 39th and 40th items follows GRM and 53rd, 54th, and 55th items
+##            follow PCM (thus, the slope parameters are fixed to 1)
+# replace the model names with GPCM and
+# assign 1 to the slope parameters for the 53rd, 54th, and 55th items
+x[53:55, 3] &lt;- "GPCM"
+x[53:55, 4] &lt;- 1
+
+# generate examinees' abilities from N(0, 1)
+set.seed(25)
+score &lt;- rnorm(1000, mean = 0, sd = 1)
+
+# simulate the response data
+data &lt;- simdat(x = x, theta = score, D = 1)
+
+
+# compute fit statistics
+fit2 &lt;- sx2_fit(x = x, data = data, nquad = 30, pcm.loc = 53:55)
+
+# fit statistics
+fit2$fit_stat
+
+
+</code></pre>
+
+
+</div>

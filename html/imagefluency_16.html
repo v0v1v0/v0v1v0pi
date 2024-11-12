@@ -1,0 +1,133 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>img_symmetry</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Image symmetry</h2>
+
+<h3>Description</h3>
+
+<p><code>img_symmetry</code> returns the vertical and horizontal mirror symmetry of an
+image. Higher values indicate higher image symmetry.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">img_symmetry(img, vertical = TRUE, horizontal = TRUE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>img</code></td>
+<td>
+<p>An image in form of a matrix or array of numeric values. Use e.g.
+<code>img_read()</code> to read an image file into <code>R</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vertical</code></td>
+<td>
+<p>logical. Should the vertical symmetry be computed? (default:
+TRUE)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>horizontal</code></td>
+<td>
+<p>logical. Should the horizontal symmetry be computed?
+(default: TRUE)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further options: <code>shift_range</code> to shift the mirror axis,
+<code>per_channel</code> to switch between a maximal per channel vs. per image
+symmetry (see details).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function returns the vertical and horizontal mirror symmetry of
+an image <code>img</code>. Symmetry values can range between 0 (not symmetrical)
+and 1 (fully symmetrical). If <code>vertical</code> or <code>horizontal</code> is set
+to <code>FALSE</code> then vertical or horizontal symmetry is not computed,
+respectively.
+</p>
+<p>As the perceptual mirror axis is not necessarily exactly in the middle of a
+picture, the function estimates in a first step several symmetry values
+with different positions for the mirror axis. To this end, the mirror axis
+is automatically shifted up to 5% (default) of the image width to the left
+and to the right (in the case of vertical symmetry; analogously for
+horizontal symmetry). In the second step, the overall symmetry score is
+computed as the maximum of the symmetry scores given the different mirror
+axes. See Mayer &amp; Landwehr (2018) for details.
+</p>
+<p>Advanced users can change the shift range with the optional parameter
+<code>shift_range</code>, which takes a numeric decimal as input. The default
+<code>shift_range = 0.05</code> (i.e., 5%).
+</p>
+<p>For color images, the default is that first a maximal symmetry score (as
+explained above) is obtained per color channel (parameter <code>per_channel
+  = TRUE</code>). Subsequently, a weighted average between each color channel's
+maximal score is computed as the image's overall symmetry. Advanced users
+can reverse this order by setting <code>per_channel = FALSE</code>. This results
+in first computing the weighted averages for each position of the mirror
+axis separately, and afterwards finding the maximal overall symmetry score.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a named vector of numeric values (vertical and horizontal symmetry)
+</p>
+
+
+<h3>References</h3>
+
+<p>Mayer, S. &amp; Landwehr, J, R. (2018). Quantifying Visual Aesthetics
+Based on Processing Fluency Theory: Four Algorithmic Measures for
+Antecedents of Aesthetic Preferences. <em>Psychology of Aesthetics,
+Creativity, and the Arts</em>, <em>12</em>(4), 399–431.
+doi: <a href="https://doi.org/10.1037/aca0000187">10.1037/aca0000187</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>img_read</code>, <code>img_complexity</code>,
+<code>img_contrast</code>, <code>img_self_similarity</code>
+<code>img_simplicity</code>, <code>img_typicality</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example image with high vertical symmetry: rails
+rails &lt;- img_read(system.file("example_images", "rails.jpg", package = "imagefluency"))
+#
+# display image
+grid::grid.raster(rails)
+#
+# get symmetry
+img_symmetry(rails)
+
+# Example image with low vertical symmetry: bridge
+bridge &lt;- img_read(system.file("example_images", "bridge.jpg", package = "imagefluency"))
+#
+# display image
+grid::grid.raster(bridge)
+#
+# get symmetry
+img_symmetry(bridge)
+
+</code></pre>
+
+
+</div>

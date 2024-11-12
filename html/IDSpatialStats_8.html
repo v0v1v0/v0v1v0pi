@@ -1,0 +1,131 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>est.transdist.theta.weights</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Estimate transmission distance theta values by replication</h2>
+
+<h3>Description</h3>
+
+<p>This function estimates the weight of each theta value by performing a user defined number of replications with the <code>get.transdist.theta</code> function. The weights
+of each theta are calculated as the number of simulations in which a case at time <code>t1</code> and <code>t2</code> are separated by theta transmission events.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">est.transdist.theta.weights(case.times, gen.t.mean, t.density, t1, n.rep = 100)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>case.times</code></td>
+<td>
+<p>a vector giving the occurrence time for each case</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gen.t.mean</code></td>
+<td>
+<p>the mean generation time of the infecting pathogen</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t.density</code></td>
+<td>
+<p>a vector giving the generation time density of the infecting pathogen</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>t1</code></td>
+<td>
+<p>time step to begin simulation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.rep</code></td>
+<td>
+<p>number of replications in the simulation (default = 100)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a three-dimensional array containing the mean normalized theta weights estimated across all replications
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>John Giles, Justin Lessler, and Henrik Salje
+</p>
+
+
+<h3>References</h3>
+
+<p>Salje H, Cummings DAT and Lessler J (2016). “Estimating infectious disease transmission distances using the overall distribution of cases.” Epidemics, 17, pp. 10–18. ISSN 1755-4365, doi: <a href="https://www.sciencedirect.com/science/article/pii/S1755436516300317">10.1016/j.epidem.2016.10.001</a>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other transdist: 
+<code>est.transdist()</code>,
+<code>est.transdist.bootstrap.ci()</code>,
+<code>est.transdist.temporal()</code>,
+<code>est.transdist.temporal.bootstrap.ci()</code>,
+<code>get.transdist.theta()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+
+set.seed(1)
+
+gen.t.mean &lt;- 7
+gen.t.sd &lt;- 2
+t1 &lt;- 0
+
+# Normally distributed transmission kernel with mean and standard deviation = 100
+dist.func &lt;- alist(n=1, a=1/100, rexp(n, a)) 
+
+# Simulate epidemic
+a &lt;- sim.epidemic(R=5,
+                  gen.t.mean=gen.t.mean,
+                  gen.t.sd=gen.t.sd,
+                  min.cases=5,
+                  tot.generations=3,
+                  trans.kern.func=dist.func)
+
+# Get case times
+a &lt;- a[order(a[,3]),]
+case.times &lt;- round(a[,3])
+unique.times &lt;- unique(case.times)
+ntimes &lt;- length(unique.times)
+
+
+# Generation time distribution
+max.t &lt;- round(max(unique.times) - t1) - 1
+n.step &lt;- round(max.t/gen.t.mean)
+gen &lt;- rep(0, max.t*2)
+for (i in 1:n.step){gen &lt;- gen + dnorm(1:(max.t*2), gen.t.mean*i, gen.t.sd*i)}
+gen[1] &lt;- 0 # No instantaneous infections
+t.density &lt;- gen/sum(gen)
+
+# Estimation of theta weights matrix
+b &lt;- est.transdist.theta.weights(case.times=case.times,
+                                 n.rep=3, 
+                                 gen.t.mean=gen.t.mean, 
+                                 t1=t1, 
+                                 t.density=t.density)
+
+</code></pre>
+
+
+</div>

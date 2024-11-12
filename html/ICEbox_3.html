@@ -1,0 +1,318 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ice</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Creates an object of class <code>ice</code>.
+</h2>
+
+<h3>Description</h3>
+
+<p>Creates an <code>ice</code> object with individual conditional expectation curves
+for the passed model object, <code>X</code> matrix, predictor, and response.  See
+Goldstein et al (2013) for further details.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ice(object, X, y, predictor, predictfcn, verbose = TRUE, frac_to_build = 1, 
+             indices_to_build = NULL, num_grid_pts, logodds = FALSE, probit = FALSE, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+
+<p>The fitted model to estimate ICE curves for.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+
+<p>The design matrix we wish to estimate ICE curves for. Rows are observations, columns are
+predictors.  Typically this is taken to be <code>object</code>'s training data, but this is not
+strictly necessary.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+
+<p>Optional vector of the response values <code>object</code> was trained on.  It is used
+to compute y-axis ranges that are useful for plotting.  If not passed, the range
+of predicted values is used and a warning is printed.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predictor</code></td>
+<td>
+
+<p>The column number or variable name in <code>X</code> of the predictor of interest, 
+(<code class="reqn">x_S = X[, j]</code>).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predictfcn</code></td>
+<td>
+
+<p>Optional function that accepts two arguments, <code>object</code> and <code>newdata</code>, and
+returns an <code>N</code> vector of <code>object</code>'s predicted response for data <code>newdata</code>. 
+If this argument is not passed, the procedure attempts to find a generic <code>predict</code> 
+function corresponding to <code>class(object)</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+
+<p>If <code>TRUE</code>, prints messages about the procedure's progress.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>frac_to_build</code></td>
+<td>
+
+<p>Number between 0 and 1, with 1 as default.  For large <code>X</code> matrices or fitted models
+that are slow to make predictions, specifying <code>frac_to_build</code> less than 1 will choose
+a subset of the observations to build curves for. The subset is chosen such that the remaining
+observations' values of <code>predictor</code> are evenly spaced throughout the quantiles of the
+full <code>X[,predictor]</code> vector.  
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indices_to_build</code></td>
+<td>
+
+<p>Vector of indices, <code class="reqn">\subset \{1, \ldots, nrow(X)\}</code> specifying which observations to build ICE curves for. As this is an alternative to setting <code>frac_to_build</code>, both 
+cannot be specified.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num_grid_pts</code></td>
+<td>
+
+<p>Optional number of values in the range of <code>predictor</code> at which to estimate each curve. 
+If missing, the curves are estimated at each unique value of <code>predictor</code> 
+in the <code>X</code> observations we estimate ICE curves for.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>logodds</code></td>
+<td>
+
+<p>If <code>TRUE</code>, for classification creates PDPs by plotting the centered log-odds implied by the fitted 
+probabilities. We assume that the generic or passed predict function 
+returns probabilities, and so the flag tells us to transform these to centered logits after 
+the predictions are generated. Note: <code>probit</code> cannot be <code>TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>probit</code></td>
+<td>
+
+<p>If <code>TRUE</code>, for classification creates PDPs by plotting the probit implied by the fitted 
+probabilities. We assume that the generic or passed predict function 
+returns probabilities, and so the flag tells us to transform these to probits after 
+the predictions are generated. Note: <code>logodds</code> cannot be <code>TRUE</code>.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Other arguments to be passed to <code>object</code>'s generic predict function.  
+</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list of class <code>ice</code> with the following elements.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>gridpts</code></td>
+<td>
+<p>Sorted values of <code>predictor</code> at which each curve is estimated. Duplicates
+are removed – by definition, elements of <code>gridpts</code> are unique.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ice_curves</code></td>
+<td>
+<p>Matrix of dimension <code>nrow(X)</code> by <code>length(gridpts)</code>.
+Each row corresponds to an observation's ICE curve, estimated at the values of <code>predictor</code> in 
+<code>gridpts</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xj</code></td>
+<td>
+<p>The actual values of <code>predictor</code> observed in the data in the order
+of <code>Xice</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>actual_predictions</code></td>
+<td>
+<p>Vector of length <code>nrow(X)</code> containing the model's 
+predictions at the actual value of the predictors in the order of <code>Xice</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>String with the predictor name corresponding to <code>predictor</code>. If <code>predictor</code>
+is a column number, <code>xlab</code> is set to <code>colnames(X)[, predictor]</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nominal_axis</code></td>
+<td>
+<p>If <code>TRUE</code>, <code>length(gridpts)</code> is 5 or fewer; otherwise <code>FALSE</code>.
+When <code>TRUE</code> the <code>plot</code> function treats the x-axis as if x is nominal.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>range_y</code></td>
+<td>
+<p>If <code>y</code> was passed, the range of the response.  Otherwise it defaults to be <br><code>max(ice_curves)</code> - <code>min(ice_curves)</code> and a message is printed to the console.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sd_y</code></td>
+<td>
+<p>If <code>y</code> was passed, the standard deviation of the response.  Otherwise it is defaults to
+<code>sd(actual_predictions)</code> and a message is printed to the console.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Xice</code></td>
+<td>
+<p>A matrix containing the subset of <code>X</code> for which ICE curves are estimated. 
+Observations are ordered to be increasing in <code>predictor</code>.  This ordering is the same one 
+as in <code>ice_curves</code>, <code>xj</code> and <code>actual_predictions</code>, meaning for all these objects
+the <code>i</code>-th element refers to the same observation in <code>X</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pdp</code></td>
+<td>
+<p>A vector of size <code>length(gridpts)</code> which is a numerical approximation to the partial 
+dependence function (PDP) corresponding to the estimated ICE curves. See Goldstein et al (2013) for a discussion
+of how the PDP is a form of post-processing. See Friedman (2001) for a description of PDPs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predictor</code></td>
+<td>
+<p>Same as the argument, see argument description.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>logodds</code></td>
+<td>
+<p>Same as the argument, see argument description.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indices_to_build</code></td>
+<td>
+<p>Same as the argument, see argument description.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>frac_to_build</code></td>
+<td>
+<p>Same as the argument, see argument description.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>predictfcn</code></td>
+<td>
+<p>Same as the argument, see argument description.</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Jerome Friedman. Greedy Function Approximation: A Gradient Boosting Machine. The Annals of Statistics,
+29(5): 1189-1232, 2001.
+</p>
+<p>Goldstein, A., Kapelner, A., Bleich, J., and Pitkin, E., Peeking
+Inside the Black Box: Visualizing Statistical Learning With Plots of
+Individual Conditional Expectation. (2014) Journal of Computational
+and Graphical Statistics, in press
+</p>
+
+
+<h3>See Also</h3>
+
+<p>plot.ice, print.ice, summary.ice
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+require(ICEbox)
+require(randomForest)
+require(MASS) #has Boston Housing data, Pima
+
+########  regression example
+data(Boston) #Boston Housing data
+X = Boston
+y = X$medv
+X$medv = NULL
+
+## build a RF:
+bhd_rf_mod = randomForest(X, y)
+
+## Create an 'ice' object for the predictor "age":
+bhd.ice = ice(object = bhd_rf_mod, X = X, y = y, predictor = "age", frac_to_build = .1) 
+
+#### classification example
+data(Pima.te)  #Pima Indians diabetes classification
+y = Pima.te$type
+X = Pima.te
+X$type = NULL
+
+## build a RF:
+pima_rf_mod = randomForest(x = X, y = y)
+
+## Create an 'ice' object for the predictor "skin":
+# For classification we plot the centered log-odds. If we pass a predict
+# function that returns fitted probabilities, setting logodds = TRUE instructs
+# the function to set each ice curve to the centered log-odds of the fitted 
+# probability.
+pima.ice = ice(object = pima_rf_mod, X = X, predictor = "skin", logodds = TRUE,
+                    predictfcn = function(object, newdata){ 
+                         predict(object, newdata, type = "prob")[, 2]
+                    }
+              )
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

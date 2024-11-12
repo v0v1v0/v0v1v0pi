@@ -1,0 +1,135 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Iscores</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Iscores: compute the imputation KL-based scoring rules</h2>
+
+<h3>Description</h3>
+
+<p>Iscores: compute the imputation KL-based scoring rules
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">Iscores(
+  imputations,
+  methods,
+  X.NA,
+  m = length(imputations[[1]]),
+  num.proj = 100,
+  num.trees.per.proj = 5,
+  min.node.size = 10,
+  n.cores = 1,
+  projection.function = NULL,
+  rescale = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>imputations</code></td>
+<td>
+<p>a list of list of imputations matrices containing no missing values of the same size as X.NA</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>methods</code></td>
+<td>
+<p>a vector of characters indicating which methods are considered for imputations. It should have the same length as the list imputations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>X.NA</code></td>
+<td>
+<p>a matrix containing missing values, the data to impute.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>m</code></td>
+<td>
+<p>the number of multiple imputation to consider, defaulting to the number of provided multiple imputations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.proj</code></td>
+<td>
+<p>an integer specifying the number of projections to consider for the score.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>num.trees.per.proj</code></td>
+<td>
+<p>an integer, the number of trees per projection.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>min.node.size</code></td>
+<td>
+<p>the minimum number of nodes in a tree.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.cores</code></td>
+<td>
+<p>an integer, the number of cores to use.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>projection.function</code></td>
+<td>
+<p>a function providing the user-specific projections.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rescale, </code></td>
+<td>
+<p>a boolean, TRUE if the scores should be rescaled such that the max score is 0.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a vector made of the scores for each imputation method.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">n &lt;- 100
+X &lt;- cbind(rnorm(n),rnorm(n))
+X.NA &lt;- X
+X.NA[,1] &lt;- ifelse(stats::runif(n)&lt;=0.2, NA, X[,1])
+
+imputations &lt;- list()
+
+imputations[[1]] &lt;- lapply(1:5, function(i) {
+ X.loc &lt;- X.NA
+ X.loc[is.na(X.NA[,1]),1] &lt;- mean(X.NA[,1],na.rm=TRUE)
+ return(X.loc)
+})
+
+imputations[[2]] &lt;- lapply(1:5, function(i) {
+ X.loc &lt;- X.NA
+ X.loc[is.na(X.NA[,1]),1] &lt;- sample(X.NA[!is.na(X.NA[,1]),1],
+ size = sum(is.na(X.NA[,1])), replace = TRUE)
+ return(X.loc)
+})
+
+methods &lt;- c("mean","sample")
+
+Iscores(imputations,
+methods,
+X.NA,
+num.proj=5
+)
+
+</code></pre>
+
+
+</div>

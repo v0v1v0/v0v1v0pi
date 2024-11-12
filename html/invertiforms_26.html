@@ -1,0 +1,149 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>RegularizedLaplacian</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Construct and use the Regularized Laplacian</h2>
+
+<h3>Description</h3>
+
+<p>Construct and use the Regularized Laplacian
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">RegularizedLaplacian(A, tau_row = NULL, tau_col = NULL)
+
+## S4 method for signature 'RegularizedLaplacian,Matrix'
+transform(iform, A)
+
+## S4 method for signature 'RegularizedLaplacian,matrix'
+transform(iform, A)
+
+## S4 method for signature 'RegularizedLaplacian,sparseLRMatrix'
+transform(iform, A)
+
+## S4 method for signature 'RegularizedLaplacian,Matrix'
+inverse_transform(iform, A)
+
+## S4 method for signature 'RegularizedLaplacian,matrix'
+inverse_transform(iform, A)
+
+## S4 method for signature 'RegularizedLaplacian,vsp_fa'
+inverse_transform(iform, A)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>A</code></td>
+<td>
+<p>A matrix to transform.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau_row</code></td>
+<td>
+<p>Additive regularizer for row sums of <code>abs(A)</code>. Typically
+this corresponds to inflating the (absolute) out-degree of each node
+by <code>tau_row</code>. Defaults to <code>NULL</code>, in which case we set <code>tau_row</code> to
+the mean (absolute) row sum of <code>A</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tau_col</code></td>
+<td>
+<p>Additive regularizer for column sums of <code>abs(A)</code>. Typically
+this corresponds to inflating the (absolute) in-degree of each node
+by <code>tau_col</code>. Defaults to <code>NULL</code>, in which case we set <code>tau_col</code> to
+the mean (absolute) column sum of <code>A</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iform</code></td>
+<td>
+<p>An Invertiform object describing the transformation.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>We define the <em>regularized Laplacian</em> <code class="reqn">L^\tau(A)</code> of an
+<code class="reqn">n \times n</code> graph adjacency matrix <code class="reqn">A</code> as
+</p>
+<p style="text-align: center;"><code class="reqn">
+  L^\tau(A)_{ij} = \frac{A_{ij}}{\sqrt{d^{out}_i + \tau_{row}}
+  \sqrt{d^{in}_j + \tau_{col}}}
+</code>
+</p>
+
+<p>where
+</p>
+<p style="text-align: center;"><code class="reqn">
+  d^{out}_i = \sum_{j=1}^n \| A_{ij} \|
+</code>
+</p>
+
+<p>and
+</p>
+<p style="text-align: center;"><code class="reqn">
+  d^{in}_j = \sum_{i=1}^n \| A_{ij} \|.
+</code>
+</p>
+
+<p>When <code class="reqn">A_{ij}</code> denotes the present of an edge <em>from</em> node <code class="reqn">i</code>
+<em>to</em> node <code class="reqn">j</code>, which is fairly standard notation,
+<code class="reqn">d^{out}_i</code> denotes the (absolute) out-degree of node
+<code class="reqn">i</code> and <code class="reqn">d^{in}_j</code> denotes the (absolute) in-degree
+of node <code class="reqn">j</code>. Then <code class="reqn">\tau_{row}</code> is an additive
+out-degree regularizer and <code class="reqn">\tau_{col}</code> is an
+additive in-degree regularizer.
+</p>
+<p>Note that this documentation renders more clearly at
+<a href="https://rohelab.github.io/invertiforms/">https://rohelab.github.io/invertiforms/</a>.
+</p>
+
+
+<h3>Value</h3>
+
+
+<ul>
+<li> <p><code>RegularizedLaplacian()</code> creates a RegularizedLaplacian object.
+</p>
+</li>
+<li> <p><code>transform()</code> returns the transformed matrix,
+typically as a Matrix.
+</p>
+</li>
+<li> <p><code>inverse_transform()</code> returns the inverse transformed matrix,
+typically as a Matrix.
+</p>
+</li>
+</ul>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(igraph)
+library(igraphdata)
+
+data("karate", package = "igraphdata")
+
+A &lt;- get.adjacency(karate)
+
+iform &lt;- RegularizedLaplacian(A)
+
+L &lt;- transform(iform, A)
+L
+
+A_recovered &lt;- inverse_transform(iform, L)
+
+all.equal(A, A_recovered)
+
+</code></pre>
+
+
+</div>

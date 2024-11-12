@@ -1,0 +1,244 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>FOBIasymp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Testing for the Number of Gaussian Components in NGCA or ICA Using FOBI 
+</h2>
+
+<h3>Description</h3>
+
+<p>In non-gaussian component analysis (NGCA) and independent components analysis (ICA) gaussian components are considered as uninteresting.
+The function tests, based on FOBI, if there are <code>p-k</code> gaussian components where <code>p</code> is the dimension of the data.
+The function offers three different test versions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">FOBIasymp(X, k, type = "S3", model = "NGCA", method = "satterthwaite")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>numeric data matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>the number of non-gaussian components under the null.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>which of the three tests to perform. Options are <code>"S1"</code>, <code>"S2"</code> and <code>"S3"</code>. For the differences see the details section.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>What is the underlying assumption of the non-gaussian parts. Options are general <code>"NGCA"</code> model and <code>"ICA"</code> model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>if <code>type = "S1"</code> the teststatistic has as limiting distribution a weighted sum of chisquare distributions. To compute the p-value then the 
+function used is <code>pchisqsum</code>. The <code>method</code> argument specifies which method  <code>pchisqsum</code> uses for the computation.
+Options are <code>"satterthwaite"</code>, <code>"integration"</code> and  <code>"saddlepoint"</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function jointly diagonalizes the regular covariance and the matrix of fourth moments. Note however that in this case the matrix of fourth moments
+is not made consistent under the normal model by dividing it by <code class="reqn">p+2</code>, as for example done by the function <code>cov4</code> where <code class="reqn">p</code> denotes the dimension
+of the data. Therefore 
+the eigenvalues of this generalized eigenvector-eigenvalue problem which correspond to normally distributed components should be <code>p+2</code>.
+</p>
+<p>Given eigenvalues <code class="reqn">d_1,...,d_p</code> the function thus orders the components in decending order according to the values of <code class="reqn">(d_i-(p+2))^2</code>.
+</p>
+<p>Under the null it is then assumed that the first <code>k</code> interesting components are mutually independent and non-normal and the last <code>p-k</code> are gaussian.
+</p>
+<p>Three possible tests are then available to test this null hypothesis for a sample of size n:
+</p>
+
+<ol>
+<li> <p><code>type="S1"</code>: The test statistic T is the variance of the last p-k eigenvalues around p+2:
+</p>
+<p style="text-align: center;"><code class="reqn">T = n \sum_{i=k+1}^p (d_i-(p+2))^2</code>
+</p>
+
+<p>the limiting distribution of which under the null is the sum of two weighted chisquare distributions with weights: 
+</p>
+<p><code class="reqn">w_1 = 2 \sigma_1 / (p-k)</code> and <code class="reqn">w_2 = 2 \sigma_1 / (p-k)  +  \sigma_2</code>.
+</p>
+<p>and degrees of freedom:
+</p>
+<p><code class="reqn">df_1 = (p-k-1)(p-k+2)/2</code> and <code class="reqn">df_2 = 1</code>.
+</p>
+</li>
+<li> <p><code>type="S2"</code>: Another possible version for the test statistic is a scaled sum of the variance of the eigenvalues around the mean plus the variance around
+the expected value under normality (p+2). Denote <code class="reqn">VAR_{dpk}</code> as the variance of the last p-k eigenvalues  and  <code class="reqn">VAR2_{dpk}</code> as the variance of these eigenvalues around <code class="reqn">p+2</code>.
+Then the test statistic is:
+</p>
+<p style="text-align: center;"><code class="reqn">T = (n (p-k) VAR_{dpk}) / (2 \sigma_1) + (n VAR2_{dpk}) / (2 \sigma_1 / (p-k) + \sigma_2)</code>
+</p>
+
+<p>This test statistic has a limiting chisquare distribution with <code class="reqn">(p-k-1)(p-q+2)/2 + 1</code> degrees of freedom.
+</p>
+</li>
+<li> <p><code>type="S3"</code>: The third possible test statistic just checks the equality of the last p-k eigenvalues using only the first part of the test statistic of <code>type="S2"</code>.
+The test statistic is then:
+</p>
+<p style="text-align: center;"><code class="reqn">T = (n (p-k) VAR_{dpk}) / (2 \sigma_1)</code>
+</p>
+
+<p>and has a limiting chisquare distribution with <code class="reqn">(p-k-1)(p-q+2)/2</code> degrees of freedom.
+</p>
+</li>
+</ol>
+<p>The constants <code class="reqn">\sigma_1</code> and <code class="reqn">\sigma_2</code> depend on the underlying model assumptions as specified in argument <code>model</code> and are estimated from the data.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of class ictest inheriting from class htest containing:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>statistic</code></td>
+<td>
+<p>the value of the test statistic.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.value </code></td>
+<td>
+<p>the p-value of the test.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parameter </code></td>
+<td>
+<p>the degrees of freedom of the test or the degrees of freedoms and the corresponding weights of the test in case the test
+has as its limiting distribution a weighted sum of chisquare distributions.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>character string denoting which test was performed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.name</code></td>
+<td>
+<p>character string giving the name of the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative</code></td>
+<td>
+<p>character string specifying the alternative hypothesis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>the number or non-gaussian components used in the testing problem.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>W</code></td>
+<td>
+<p>the transformation matrix to the independent components. Also known as unmixing matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>S</code></td>
+<td>
+<p>data matrix with the centered independent components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>the underlying FOBI eigenvalues.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MU</code></td>
+<td>
+<p>the location of the data which was substracted before calculating the independent components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma1</code></td>
+<td>
+<p>the asymptotic constant sigma1 needed for the asymptotic test(s).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sigma2</code></td>
+<td>
+<p>the asymptotic constant sigma2 needed for the asymptotic test(s).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>the value of <code>type</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>the value of <code>model</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Klaus Nordhausen
+</p>
+
+
+<h3>References</h3>
+
+<p><cite>Nordhausen, K., Oja, H. and Tyler, D.E. (2022), Asymptotic and Bootstrap Tests for Subspace Dimension, Journal of Multivariate Analysis, 188, 104830. &lt;doi:10.1016/j.jmva.2021.104830&gt;.</cite>
+</p>
+<p><cite>Nordhausen, K., Oja, H., Tyler, D.E. and Virta, J. (2017), Asymptotic and Bootstrap Tests for the Dimension of the Non-Gaussian Subspace, Signal Processing Letters, 24, 887–891. &lt;doi:10.1109/LSP.2017.2696880 &gt;.</cite>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>FOBI</code>,  <code>FOBIboot</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">n &lt;- 1500
+S &lt;- cbind(runif(n), rchisq(n, 2), rexp(n), rnorm(n), rnorm(n), rnorm(n))
+A &lt;- matrix(rnorm(36), ncol = 6)
+X &lt;- S %*% t(A)
+
+FOBIasymp(X, k = 2)
+FOBIasymp(X, k = 3, type = "S1")
+FOBIasymp(X, k = 0, type = "S2", model = "ICA")
+</code></pre>
+
+
+</div>

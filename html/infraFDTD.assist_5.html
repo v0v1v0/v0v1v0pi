@@ -1,0 +1,202 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>PrepFiles</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Generate Input Files for infraFDTD
+</h2>
+
+<h3>Description</h3>
+
+<p>infraFDTD requires text files defining the topography, atmospheric
+sound speed structure, atmospheric density structure, and station
+locations. PrepFiles generates these files from variables in R.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">PrepFiles(X, sta, dh, fn_topo, fn_c, fn_rho, fn_sta, c = 335, rho = 1.2,
+xlim = range(X$x), ylim = range(X$y), c_function = NA, rho_function =
+NA, z_extent = NaN)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+
+<p>DEM. Must include elements x (vector), y (vector), z (matrix: nrow =
+length(x), ncol = length(y))
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sta</code></td>
+<td>
+
+<p>Station info. Must include elements x, y (vectors in meters, in
+same coordinate system as X). Station names are optionally stored in
+element sta. z is optional and should only be included if you want 
+microphones in the air. If z is missing, all stations are located on
+surface. Otherwise, NaN elevations are located on the surface, and
+non-NaN elevations are preserved. 
+
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dh</code></td>
+<td>
+
+<p>Grid Spacing (m).
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fn_topo</code></td>
+<td>
+
+<p>Output file name for DEM.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fn_c</code></td>
+<td>
+
+<p>Output file name for sound speed. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fn_rho</code></td>
+<td>
+
+<p>Output file name for density.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fn_sta</code></td>
+<td>
+
+<p>Output file name for stations.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c</code></td>
+<td>
+
+<p>Sound speed (m/s). If a scalar, sound speed is homogeneous in the
+model. If a vector with length equal to the number of vertical nodes
+in the model, sound speed varies vertically according to the vector
+(this is inconvenient; it's normally better to use c_function for a
+variable atmosphere). This input is ignored if c_function is provided.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho</code></td>
+<td>
+
+<p>Density (kg/m^3). If a scalar, density is homogeneous in the
+model. If a vector with length equal to the number of vertical nodes
+in the model, density varies vertically according to the vector
+(this is inconvenient; it's normally better to use rho_function for a
+variable atmosphere). This input is ignored if rho_function is provided.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlim</code></td>
+<td>
+
+<p>X limits of output DEM–must be contained within the boundaries of DEM.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylim</code></td>
+<td>
+
+<p>Y limits of output DEM–must be contained within the boundaries of DEM.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c_function</code></td>
+<td>
+
+<p>Function giving sound speed as a function of height. Consider using
+approxfun() to generate this from an atmospheric profile.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rho_function</code></td>
+<td>
+
+<p>Function giving density as a function of height. Consider using
+approxfun() to generate this from an atmospheric profile.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>z_extent</code></td>
+<td>
+
+<p>Vertical thickness of model (m); must be greater than total relief in model.
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function does not generate a param.h file; however, it does print
+values that can be copied to param.h by the user.
+</p>
+<p>Consider using package rNOMADS to find the atmospheric profile.
+</p>
+
+
+<h3>Value</h3>
+
+<p>None; print and file output only.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jake Anderson
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## generate the DEM
+data(volcano) # Maunga Whau (NZ) from built-in package "datasets"
+DEM = list(x = 10 * 1:87, y = 10 * 1:61, z = volcano)
+
+## choose the station locations
+sta = list(x = c(100, 500), y = c(100, 500))
+
+## show the topo map with stations
+image(DEM, col = terrain.colors(20))
+contour(DEM, add = TRUE)
+points(sta, pch = 25, bg = 1)
+
+## make the input files for infraFDTD, using the default homogeneous
+## sound speed and density
+PrepFiles(X = DEM, sta = sta, dh = 10, fn_topo = 'topo.txt', fn_c =
+'c.txt', fn_rho = 'rho.txt', fn_sta = 'sta.txt')
+</code></pre>
+
+
+</div>

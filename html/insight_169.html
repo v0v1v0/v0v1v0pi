@@ -1,0 +1,59 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_random</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Get the data from random effects</h2>
+
+<h3>Description</h3>
+
+<p>Returns the data from all random effects terms.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_random(x)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A fitted mixed model.</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p>The data from all random effects terms, as data frame. Or <code>NULL</code>
+if model has no random effects.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(sleepstudy)
+# prepare some data...
+sleepstudy$mygrp &lt;- sample(1:5, size = 180, replace = TRUE)
+sleepstudy$mysubgrp &lt;- NA
+for (i in 1:5) {
+  filter_group &lt;- sleepstudy$mygrp == i
+  sleepstudy$mysubgrp[filter_group] &lt;-
+    sample(1:30, size = sum(filter_group), replace = TRUE)
+}
+
+m &lt;- lmer(
+  Reaction ~ Days + (1 | mygrp / mysubgrp) + (1 | Subject),
+  data = sleepstudy
+)
+
+head(get_random(m))
+
+</code></pre>
+
+
+</div>

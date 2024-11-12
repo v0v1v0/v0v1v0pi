@@ -1,0 +1,160 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>dindexm</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Distributional index model (DIM)</h2>
+
+<h3>Description</h3>
+
+<p>Fits distributional index model with user-specified index
+function to training dataset. See the examples at the bottom to learn
+how to specify a distributional single index model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">dindexm(
+  formula,
+  indexfit,
+  data,
+  response,
+  pars = osqpSettings(verbose = FALSE, eps_abs = 1e-05, eps_rel = 1e-05, max_iter =
+    10000L),
+  progress = TRUE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>object of class <code>formula</code> that describes the index 
+model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>indexfit</code></td>
+<td>
+<p>function that fits the index model to training data. Should
+accept arguments <code>formula</code> and <code>data</code> and admit a <code>predict</code>
+method. Further arguments in <code>...</code> are passed to indexfit.
+See examples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p><code>data.frame</code> containing the covariates of the index model
+and the response variable.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>response</code></td>
+<td>
+<p>name of the response variable in <code>data</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pars</code></td>
+<td>
+<p>parameters for quadratic programming optimization (only relevant
+for multivariate index functions), set using
+<code>osqpSettings</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>progress</code></td>
+<td>
+<p>display progressbar for fitting idr?</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>further arguments passed to <code>indexfit</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This function fits a distributional index model (DIM) to training data. The
+DIM assumes that the response is more likely to attain higher values when the
+values of the index function increases. The index function can be
+estimated by parametric methods like <code>lm</code> or 
+<code>glm</code> or also nonparametrically.
+</p>
+<p>The formal mathematical assumption of the DIM is that the conditional CDFs
+<code class="reqn">F_{y | g(X) = g(x)}(z)</code> at each fixed threshold <em>z</em> decreases, as
+<em>g(x)</em> increases. Here <code>y</code> denotes the response, <code>x</code>, <code>X</code>
+are the covariates in <code>data</code> and <code>g</code> is the index function
+estimated by <code>indexfit</code>.
+</p>
+<p>Estimation is performed in two steps: <code>indexfit</code> is applied to 
+<code>data</code> to estimate the function <code>g</code>. With this estimate,
+<code>idr</code> is applied with the pseudo-covariates <code>g(x)</code> and
+response <code>y</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Object of class <code>dindexm</code>: A list containing the index model (first
+component) and the IDR fit on the pseudo-data with the index as covariate
+(second component).
+</p>
+
+
+<h3>References</h3>
+
+<p>Henzi, A., Kleger, G. R., &amp; Ziegel, J. F. (2020). Distributional (Single)
+Index Models. arXiv preprint arXiv:2006.09219.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>idr</code> for more information on IDR,
+<code>predict.dindexfit</code> for (out-of-sample) predictions based on a
+model with with <code>dindexm</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">n &lt;- 1000
+X &lt;- data.frame(x1 = rnorm(n), x2 = rnorm(n), x3 = rnorm(n))
+y &lt;- rnorm(n, 1 - X[, 1] + X[, 2]^2 / 3 - (1 - X[, 3]) * (1 + X[, 3]) / 2)
+data &lt;- cbind(y = y, as.data.frame(X))
+
+## data for out-of-sample prediction
+newX &lt;- data.frame(x1 = rnorm(10), x2 = rnorm(10), x3 = rnorm(10))
+
+## linear regression model for index
+model &lt;- dindexm(
+  formula = y ~ poly(x1, degree = 2) + poly(x2, degree = 2) + 
+    poly(x3, degree = 2),
+  indexfit = lm,
+  response = "y",
+  data = data
+)
+pred &lt;- predict(model, data = newX)
+
+## plot
+plot(pred, 1, main = "LM based DIM")
+grd &lt;- pred[[1]]$points
+trueCdf &lt;- pnorm(
+  grd,
+  1 - newX[1, 1] + newX[1, 2]^2 / 3 - (1 - newX[1, 3]) * (1 + newX[1, 3]) / 2
+)
+points(grd, trueCdf, type = "l", col = 2)
+</code></pre>
+
+
+</div>

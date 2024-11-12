@@ -1,0 +1,157 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>disoph</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Fit Double Isotonic Proportional Hazards Model</h2>
+
+<h3>Description</h3>
+
+<p>Nonparametric estimation of monotone baseline hazard and monotone covariate effect functions in the proportional hazards model.</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">  disoph(formula, bshape, data, maxiter, eps)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>formula object: response ~ iso(<code class="reqn">z</code>,shape="increasing")+<code class="reqn">x_1+x_2+...+x_p</code>. The response must be right-censored survival outcome using the Surv function in the survival package. The iso function attributes the covariate <code class="reqn">z</code>' name, shape and anchor point.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>bshape</code></td>
+<td>
+<p>direnction of the baseline hazard function (<code class="reqn">bshape</code>="increasing" or "decreasing").</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>data.frame includes variables named in the formula argument.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxiter</code></td>
+<td>
+<p>maximum number of iteration (default is <code class="reqn">10^4</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>stopping convergence criteria (default is <code class="reqn">10^-3</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The disoph function computes (<code class="reqn">\lambda0, \psi, \beta</code>) in the isotonic proportional hazards model, defined as
+</p>
+<p style="text-align: center;"><code class="reqn">\lambda(t|z,x)=\lambda0(t)exp(\psi(z)+\beta_1x_1+\beta_2x_2+...+\beta_px_p),</code>
+</p>
+
+<p>based on the full likelihood, where <code class="reqn">\lambda0</code> is a monotone increasing (or decreasing) baseline hazard function, <code class="reqn">\psi</code> is a monotone increasing (or decreasing) covariate effect function, <code class="reqn">z</code> is a univariate variable, (<code class="reqn">x_1,x_2,...,x_p</code>) is a set of covariates, and <code class="reqn">\beta=(\beta_1,\beta_2,...,\beta_p</code>) is a set of corresponding regression parameters. It allows to estimate <code class="reqn">(\lambda0, \beta)</code> only if iso(<code class="reqn">z</code>,shape="increasing") is removed in the formula object. Likewise, It allows to estimate <code class="reqn">(\lambda0, \psi)</code> only if <code class="reqn">x</code> is removed in the formula object. Using the nonparametric maximum likelihood approaches, estimated <code class="reqn">\lambda0</code> and <code class="reqn">\psi</code> are right continuous increasing (or left continuos decreasing) step functions. Compared to the standard partial likelihood approach, the full likelihood approach in the disoph function additionally use shape-information on <code class="reqn">\lambda0</code>, resulting in more efficient estimators especially for a finate sampe size.
+</p>
+<p>For the anchor constraint, one point has to be fixed with <code class="reqn">\psi(K)=0</code> to solve the identifiability problem, e.g. <code class="reqn">\lambda0(t)exp(\psi(z))=(\lambda0(t)exp(-c))(exp(\psi(z)+c))</code> for any constant <code class="reqn">c</code>. <code class="reqn">K</code> is called an anchor point. By default, we set <code class="reqn">K</code> as a median of values of <code class="reqn">z</code>'s. The choice of anchor points are not important because, for example, different anchor points results in the same hazard ratios.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A list of class fisoph:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>iso.bh</code></td>
+<td>
+<p>data.frame with <code class="reqn">t</code> and estimated <code class="reqn">\lambda0</code>(t).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iso.cov</code></td>
+<td>
+<p>data.frame with <code class="reqn">z</code> and estimated <code class="reqn">\psi</code>(z).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>beta</code></td>
+<td>
+<p>estimated <code class="reqn">\beta_1,\beta_2,...,\beta_p</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>conv</code></td>
+<td>
+<p>algorithm convergence status.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>iter</code></td>
+<td>
+<p>total number of iterations.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>Zk</code></td>
+<td>
+<p>anchor satisfying estimated <code class="reqn">\psi(Zk)</code>=0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shape.bh</code></td>
+<td>
+<p>order restriction on <code class="reqn">\lambda0</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>shape.cov</code></td>
+<td>
+<p>order restriction on <code class="reqn">\psi</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Yunro Chung [auth, cre]</p>
+
+
+<h3>References</h3>
+
+<p>Yunro Chung, Double Isotonic Proportional Hazards Models with Applications to Dose-Finding Studies. In preparation.</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#test1
+test1=data.frame(
+  time=  c(2, 5, 1, 7, 9, 5, 3, 6, 8, 9, 7, 4, 5, 2, 8),
+  status=c(0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1),
+  z=     c(2, 1, 1, 3, 5, 6, 7, 9, 3, 0, 2, 7, 3, 9, 4)
+)
+disoph.fit1=disoph(Surv(time, status)~iso(z,shape="inc"),bshape="inc",data=test1)
+print(disoph.fit1)
+plot(disoph.fit1)
+
+#test2
+test2=data.frame(
+  time=  c(2, 5, 1, 7, 9, 5, 3, 6, 8, 9, 7, 4, 5, 2, 8),
+  status=c(0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1),
+  z=     c(2, 1, 1, 3, 5, 6, 7, 9, 3, 0, 2, 7, 3, 9, 4),
+  trt=   c(1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+  x=     c(1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6)
+)
+disoph.fit2=disoph(Surv(time, status)~iso(z,shape="inc")+trt+x,bshape="inc",data=test2)
+print(disoph.fit2)
+plot(disoph.fit2)
+</code></pre>
+
+
+</div>

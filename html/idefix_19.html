@@ -1,0 +1,390 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>SurveyApp</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Shiny application to generate a discrete choice survey.</h2>
+
+<h3>Description</h3>
+
+<p>This function starts a shiny application which puts choice sets on screen and
+saves the responses. The complete choice design can be provided in advance, or
+can be generated sequentially adaptively, or can be a combination of both.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">SurveyApp(
+  des = NULL,
+  n.total,
+  alts,
+  atts,
+  lvl.names,
+  coding,
+  alt.cte = NULL,
+  no.choice = NULL,
+  buttons.text,
+  intro.text,
+  end.text,
+  data.dir = NULL,
+  c.lvls = NULL,
+  prior.mean = NULL,
+  prior.covar = NULL,
+  cand.set = NULL,
+  n.draws = NULL,
+  lower = NULL,
+  upper = NULL,
+  parallel = TRUE,
+  reduce = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>des</code></td>
+<td>
+<p>A numeric matrix which represents the design matrix. Each row is a
+profile.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.total</code></td>
+<td>
+<p>A numeric value indicating the total number of choice sets.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alts</code></td>
+<td>
+<p>A character vector containing the names of the alternatives.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>atts</code></td>
+<td>
+<p>A character vector containing the names of the attributes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lvl.names</code></td>
+<td>
+<p>A list containing character vectors with the values of each
+level of each attribute.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>coding</code></td>
+<td>
+<p>A character vector denoting the type of coding used for each
+attribute. See also <code>Profiles</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alt.cte</code></td>
+<td>
+<p>A binary vector indicating for each alternative if an
+alternative specific constant is present. The default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>no.choice</code></td>
+<td>
+<p>An integer indicating which alternative should be a no choice
+alternative. The default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>buttons.text</code></td>
+<td>
+<p>A string containing the text presented together with the
+option buttons.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>intro.text</code></td>
+<td>
+<p>A string containing the text presented before the choice
+survey.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>end.text</code></td>
+<td>
+<p>A string containing the text presented after the choice
+survey.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.dir</code></td>
+<td>
+<p>A character string with the directory denoting where the data
+needs to be written. The default is NULL</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>c.lvls</code></td>
+<td>
+<p>A list containing numeric vectors with the attribute levels for
+each continuous attribute. The default is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior.mean</code></td>
+<td>
+<p>Numeric vector indicating the mean of the multivariate
+normal distribution (prior).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior.covar</code></td>
+<td>
+<p>Covariance matrix of the prior distribution.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cand.set</code></td>
+<td>
+<p>A numeric matrix in which each row is a possible profile. The
+<code>Profiles</code> function can be used to generate this matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.draws</code></td>
+<td>
+<p>Numeric value indicating the number of draws.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lower</code></td>
+<td>
+<p>Numeric vector of lower truncation points, the default
+is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>upper</code></td>
+<td>
+<p>Numeric vector of upper truncation points, the default
+is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parallel</code></td>
+<td>
+<p>Logical value indicating whether computations should be done
+over multiple cores. The default is <code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>reduce</code></td>
+<td>
+<p>Logical value indicating whether the candidate set should be
+reduced or not.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>A pregenerated design can be specified in <code>des</code>. This should be a matrix
+in which each row is a profile. This can be generated with <code>Modfed</code>
+or  <code>CEA</code>, but it is not necessary.
+</p>
+<p>If <code>n.total</code> = <code>nrow(des)</code> / <code>length(alts)</code>, the specified
+design will be put on screen, one set after the other, and the responses will
+be saved. If <code>n.total</code> &gt; (<code>nrow(des)</code> / <code>length(alts)</code>), first
+the specified design will be shown and afterwards the remaining sets will be
+generated adaptively. If <code>des</code> = <code>NULL</code>, <code>n.total</code> sets will be
+generated adaptively. See <code>SeqMOD</code> for more information on adaptive
+choice sets.
+</p>
+<p>Whenever adaptive sets will be generated, <code>prior.mean</code>,
+<code>prior.covar</code>, <code>cand.set</code> and <code>n.draws</code>, should be specified.
+These arguments are necessary for the underlying importance sampling algorithm
+to update the prior preference distribution. <code>lower</code> and <code>upper</code> can
+be used to specify lower and upper truncation points. See
+<code>ImpsampMNL</code> for more details.
+</p>
+<p>The names specified in <code>alts</code> will be used to label the choice
+alternatives. The names specified in <code>atts</code> will be used to name the
+attributes in the choice sets. The values of <code>lvl.names</code> will be used to
+create the values in the choice sets. See <code>Decode</code> for more
+details.
+</p>
+<p>The text specified in <code>buttons.text</code> will be displayed above the buttons
+to indicate the preferred choice (for example: "indicate your preferred
+choice"). The text specified in <code>intro.text</code> will be displayed before the
+choice sets. This will generally be a description of the survey and some
+instructions. The text specified in <code>end.text</code> will be displayed after
+the survey. This will generally be a thanking note and some further
+instructions.
+</p>
+<p>A no choice alternative is coded as an alternative with 1 alternative specific
+constant and zero's for all other attribute levels. If a no choice alternative
+is present in <code>des</code>, or is desired when generating adaptive choice sets,
+<code>no.choice</code> should be specified. This should be done with an integer,
+indicating which alternative is the no choice option. This alternative will
+not be presented on screen, but the option to select "no choice" will be. The
+<code>alt.cte</code> argument should be specified accordingly, namely with a
+<code>1</code> on the location of the <code>no.choice</code> option. See examples for
+illustration.
+</p>
+<p>When <code>parallel</code> is <code>TRUE</code>, <code>detectCores</code> will
+be used to decide upon the number of available cores. That number minus 1
+cores will be used to search for the optimal adaptive choice set. For small problems
+(6 parameters), <code>parallel = TRUE</code> can be slower. For larger problems the
+computation time will decrease significantly.
+</p>
+<p>When <code>reduce = TRUE</code>, the set of all potential choice sets will be
+reduced to choice sets that have a unique information matrix. If no
+alternative specific constants are used, <code>reduce</code> should always be
+<code>TRUE</code>. When alternative specific constants are used <code>reduce</code> can be
+<code>TRUE</code> so that the algorithm will be faster, but the combinations of
+constants and profiles will not be evaluated exhaustively.
+</p>
+
+
+<h3>Value</h3>
+
+<p>After completing the survey, two text files can be found in
+<code>data.dir</code>. The file with "num" in the filename is a matrix with the
+numeric choice data. The coded design matrix ("par"), presented during the
+survey, together with the observed responses ("resp") can be found here.
+Rownames indicate the setnumbers. The file with "char" in the filename is a
+matrix with character choice data. The labeled design matrix ("par"),
+presented during the survey, together with the observed responses ("resp")
+can be found here. See <code>LoadData</code> to load the data.
+</p>
+
+
+<h3>References</h3>
+
+<p>Yu J, Goos P, Vandebroek M (2011).
+“Individually adapted sequential Bayesian conjoint-choice designs in the presence of consumer heterogeneity.”
+<a href="https://www.sciencedirect.com/science/article/pii/S0167811611000668">https://www.sciencedirect.com/science/article/pii/S0167811611000668</a>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+#### Present choice design without adaptive sets (n.total = sets in des)
+# example design 
+data("example_design") # pregenerated design
+xdes &lt;- example_design
+### settings of the design 
+code &lt;- c("D", "D", "D")
+n.sets &lt;- 8
+# settings of the survey
+alternatives &lt;- c("Alternative A", "Alternative B")
+attributes &lt;- c("Price", "Time", "Comfort")
+labels &lt;- vector(mode="list", length(attributes))
+labels[[1]] &lt;- c("$10", "$5", "$1")
+labels[[2]] &lt;- c("20 min", "12 min", "3 min")
+labels[[3]] &lt;- c("bad", "average", "good")
+i.text &lt;- "Welcome, here are some instructions ... good luck!"
+b.text &lt;- "Please choose the alternative you prefer"
+e.text &lt;- "Thanks for taking the survey"
+dataDir &lt;- getwd()
+# Display the survey 
+SurveyApp (des = xdes, n.total = n.sets, alts = alternatives, 
+          atts = attributes, lvl.names = labels, coding = code, 
+          buttons.text = b.text, intro.text = i.text, end.text = e.text)
+
+#### Present choice design with partly adaptive sets (n.total &gt; sets in des)
+# example design 
+data("example_design") # pregenerated design
+xdes &lt;- example_design
+### settings of the design 
+code &lt;- c("D", "D", "D")
+n.sets &lt;- 12
+# settings of the survey
+alternatives &lt;- c("Alternative A", "Alternative B")
+attributes &lt;- c("Price", "Time", "Comfort")
+labels &lt;- vector(mode="list", length(attributes))
+labels[[1]] &lt;- c("$10", "$5", "$1")
+labels[[2]] &lt;- c("20 min", "12 min", "3 min")
+labels[[3]] &lt;- c("bad", "average", "good")
+i.text &lt;- "Welcome, here are some instructions ... good luck!"
+b.text &lt;- "Please choose the alternative you prefer"
+e.text &lt;- "Thanks for taking the survey"
+# setting for adaptive sets 
+levels &lt;- c(3, 3, 3)
+cand &lt;- Profiles(lvls = levels, coding = code)
+p.mean &lt;- c(0.3, 0.7, 0.3, 0.7, 0.3, 0.7)
+p.var &lt;- diag(length(p.mean))
+dataDir &lt;- getwd()
+# Display the survey 
+SurveyApp(des = xdes, n.total = n.sets, alts = alternatives, 
+          atts = attributes, lvl.names = labels, coding = code, 
+          buttons.text = b.text, intro.text = i.text, end.text = e.text, 
+          prior.mean = p.mean, prior.covar = p.var, cand.set = cand, 
+          n.draws = 50)
+          
+#### Choice design with only adaptive sets (des=NULL)
+# setting for adaptive sets 
+levels &lt;- c(3, 3, 3)
+p.mean &lt;- c(0.3, 0.7, 0.3, 0.7, 0.3, 0.7)
+low = c(-Inf, -Inf, -Inf, 0, 0, -Inf)
+up = rep(Inf, length(p.mean))
+p.var &lt;- diag(length(p.mean)) 
+code &lt;- c("D", "D", "D")
+cand &lt;- Profiles(lvls = levels, coding = code)
+n.sets &lt;- 12
+# settings of the survey
+alternatives &lt;- c("Alternative A", "Alternative B")
+attributes &lt;- c("Price", "Time", "Comfort")
+labels &lt;- vector(mode="list", length(attributes))
+labels[[1]] &lt;- c("$10", "$5", "$1")
+labels[[2]] &lt;- c("20 min", "12 min", "3 min")
+labels[[3]] &lt;- c("bad", "average", "good")
+i.text &lt;- "Welcome, here are some instructions ... good luck!"
+b.text &lt;- "Please choose the alternative you prefer"
+e.text &lt;- "Thanks for taking the survey"
+dataDir &lt;- getwd()
+# Display the survey 
+SurveyApp(des = NULL, n.total = n.sets, alts = alternatives,
+          atts = attributes, lvl.names = labels, coding = code, 
+          buttons.text = b.text, intro.text = i.text, end.text = e.text, 
+          prior.mean = p.mean, prior.covar = p.var, cand.set = cand, 
+          lower = low, upper = up, n.draws = 50)
+# If CEA algorithm is desired, cand.set argument is not needed
+SurveyApp(des = NULL, n.total = n.sets, alts = alternatives,
+         atts = attributes, lvl.names = labels, coding = code, 
+         buttons.text = b.text, intro.text = i.text, end.text = e.text, 
+         prior.mean = p.mean, prior.covar = p.var, 
+         lower = low, upper = up, n.draws = 50)
+         
+#### Present choice design with a no choice alternative.
+# example design 
+data("nochoice_design") # pregenerated design
+xdes &lt;- nochoice_design
+### settings of the design 
+code &lt;- c("D", "D", "D")
+n.sets &lt;- 8
+# settings of the survey
+alternatives &lt;- c("Alternative A", "Alternative B", "None")
+attributes &lt;- c("Price", "Time", "Comfort")
+labels &lt;- vector(mode = "list", length(attributes))
+labels[[1]] &lt;- c("$10", "$5", "$1")
+labels[[2]] &lt;- c("20 min", "12 min", "3 min")
+labels[[3]] &lt;- c("bad", "average", "good")
+i.text &lt;- "Welcome, here are some instructions ... good luck!"
+b.text &lt;- "Please choose the alternative you prefer"
+e.text &lt;- "Thanks for taking the survey"
+
+# Display the survey 
+SurveyApp(des = xdes, n.total = n.sets, alts = alternatives, 
+          atts = attributes, lvl.names = labels, coding = code, 
+          buttons.text = b.text, intro.text = i.text, end.text = e.text,
+          no.choice = 3, alt.cte = c(0, 0, 1))
+
+## End(Not run)
+</code></pre>
+
+
+</div>

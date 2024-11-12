@@ -1,0 +1,224 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iscca.cv</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Cross-validation for iscca</h2>
+
+<h3>Description</h3>
+
+<p>Performs K-fold cross validation for the integrative sparse canonical correlation analysis over a grid of values for the regularization parameter mu1, mu2, mu3 and mu4.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iscca.cv(x, y, L, K = 5, mu1, mu2, mu3, mu4, eps = 1e-04,
+  pen1 = "homogeneity", pen2 = "magnitude", scale.x = TRUE,
+  scale.y = TRUE, maxstep = 50, submaxstep = 10)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>list of data matrices, L datasets of explanatory variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>list of data matrices, L datasets of dependent variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L</code></td>
+<td>
+<p>numeric, number of datasets.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>K</code></td>
+<td>
+<p>numeric, number of cross-validation folds. Default is 5.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu1</code></td>
+<td>
+<p>numeric, the feasible set of sparsity penalty parameter for vector u.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu2</code></td>
+<td>
+<p>numeric, the feasible set of contrasted penalty parameter for vector u.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu3</code></td>
+<td>
+<p>numeric, the feasible set of sparsity penalty parameter for vector v.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mu4</code></td>
+<td>
+<p>numeric, the feasible set of contrasted penalty parameter for vector v.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eps</code></td>
+<td>
+<p>numeric, the threshold at which the algorithm terminates.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pen1</code></td>
+<td>
+<p>character, "homogeneity" or "heterogeneity" type of the sparsity structure. If not specified, the default is homogeneity.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pen2</code></td>
+<td>
+<p>character, "magnitude" or "sign" based contrasted penalty. If not specified, the default is magnitude.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale.x</code></td>
+<td>
+<p>character, "TRUE" or "FALSE", whether or not to scale the variables x. The default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scale.y</code></td>
+<td>
+<p>character, "TRUE" or "FALSE", whether or not to scale the variables y. The default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>maxstep</code></td>
+<td>
+<p>numeric, maximum iteration steps. The default value is 50.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>submaxstep</code></td>
+<td>
+<p>numeric, maximum iteration steps in the sub-iterations. The default value is 10.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An 'iscca.cv' object that contains the list of the following items.
+</p>
+
+<ul>
+<li>
+<p>x: list of data matrices, L datasets of explanatory variables with centered columns. If scale.x is TRUE, the columns of L datasets are standardized to have mean 0 and standard deviation 1.
+</p>
+</li>
+<li>
+<p>y: list of data matrices, L datasets of dependent variables with centered columns. If scale.y is TRUE, the columns of L datasets are standardized to have mean 0 and standard deviation 1.
+</p>
+</li>
+<li>
+<p>mu1: the sparsity penalty parameter selected from the feasible set of parameter mu1 provided by users.
+</p>
+</li>
+<li>
+<p>mu2: the contrasted penalty parameter selected from the feasible set of parameter mu2 provided by users.
+</p>
+</li>
+<li>
+<p>mu3: the sparsity penalty parameter selected from the feasible set of parameter mu3 provided by users.
+</p>
+</li>
+<li>
+<p>mu4: the contrasted penalty parameter selected from the feasible set of parameter mu4 provided by users.
+</p>
+</li>
+<li>
+<p>fold: The fold assignments for cross-validation for each observation.
+</p>
+</li>
+<li>
+<p>loading.x: the estimated canonical vector of variables x with selected tuning parameters.
+</p>
+</li>
+<li>
+<p>loading.y: the estimated canonical vector of variables y with selected tuning parameters.
+</p>
+</li>
+<li>
+<p>variable.x: the screening results of variables x.
+</p>
+</li>
+<li>
+<p>variable.y: the screening results of variables y.
+</p>
+</li>
+<li>
+<p>meanx: list of numeric vectors, column mean of the original datasets x.
+</p>
+</li>
+<li>
+<p>normx: list of numeric vectors, column standard deviation of the original datasets x.
+</p>
+</li>
+<li>
+<p>meany: list of numeric vectors, column mean of the original datasets y.
+</p>
+</li>
+<li>
+<p>normy: list of numeric vectors, column standard deviation of the original datasets y.
+</p>
+</li>
+</ul>
+<h3>See Also</h3>
+
+<p>See Also as <code>iscca</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Load a list with 3 data sets
+library(iSFun)
+data("simData.cca")
+x &lt;- simData.cca$x
+y &lt;- simData.cca$y
+L &lt;- length(x)
+mu1 &lt;- c(0.2, 0.4)
+mu3 &lt;- 0.4
+mu2 &lt;- mu4 &lt;- 2.5
+
+res_homo_m &lt;- iscca.cv(x = x, y = y, L = L, K = 5, mu1 = mu1, mu2 = mu2, mu3 = mu3,
+                       mu4 = mu4, eps = 1e-2, pen1 = "homogeneity", pen2 = "magnitude",
+                       scale.x = TRUE, scale.y = TRUE, maxstep = 50, submaxstep = 10)
+
+res_homo_s &lt;- iscca.cv(x = x, y = y, L = L, K = 5, mu1 = mu1, mu2 = mu2, mu3 = mu3,
+                       mu4 = mu4, eps = 1e-2, pen1 = "homogeneity", pen2 = "sign",
+                       scale.x = TRUE, scale.y = TRUE, maxstep = 50, submaxstep = 10)
+
+mu1 &lt;- mu3 &lt;- c(0.1, 0.3)
+mu2 &lt;- mu4 &lt;- 2
+res_hete_m &lt;- iscca.cv(x = x, y = y, L = L, K = 5, mu1 = mu1, mu2 = mu2, mu3 = mu3,
+                       mu4 = mu4, eps = 1e-2, pen1 = "heterogeneity", pen2 = "magnitude",
+                       scale.x = TRUE, scale.y = TRUE, maxstep = 50, submaxstep = 10)
+
+res_hete_s &lt;- iscca.cv(x = x, y = y, L = L, K = 5, mu1 = mu1, mu2 = mu2, mu3 = mu3,
+                       mu4 = mu4, eps = 1e-2, pen1 = "heterogeneity", pen2 = "sign",
+                       scale.x = TRUE, scale.y = TRUE, maxstep = 50, submaxstep = 10)
+
+</code></pre>
+
+
+</div>

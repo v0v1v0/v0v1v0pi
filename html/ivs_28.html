@@ -1,0 +1,97 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iv_diff</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Diff a vector to create an interval vector</h2>
+
+<h3>Description</h3>
+
+<p><code>iv_diff()</code> is a convenient way to generate an iv from a preexisting vector,
+as long as that vector is in strictly increasing order. It returns an iv
+that is 1 element shorter than <code>x</code> (unless <code>x</code> is already empty).
+</p>
+<p>It is particularly useful for creating an iv column from an existing column
+inside of <code>dplyr::mutate()</code>, but requires you to explicitly handle padding
+in that case, see the examples.
+</p>
+<p>Missing values are allowed, and will be propagated to each side of the
+resulting interval after applying the diff.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">iv_diff(x)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p><code style="white-space: pre;">⁠[vector]⁠</code>
+</p>
+<p>A vector in strictly increasing order.</p>
+</td>
+</tr></table>
+<h3>Details</h3>
+
+<p><code>iv_diff()</code> is inspired by <code>diff()</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An iv using <code>x</code> as the inner type, with size equal to
+<code>max(0L, vec_size(x) - 1L)</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">x &lt;- as.Date("2019-01-01") + c(0, 5, 7, 10, 19)
+x
+
+# Notice how the boundaries don't overlap, because the closing `)` aligns
+# with an opening `[`.
+iv_diff(x)
+
+# Like `iv()`, missing values propagate to both boundaries of the interval.
+# Before missing value propagation was applied, it looked like this:
+# [1, NA), [NA, 2), [2, 3)
+x &lt;- c(1, NA, 2, 3)
+iv_diff(x)
+
+# Values in `x` must be in strictly increasing order to generate a valid
+# interval vector
+x &lt;- c(1, 0, 2, 2)
+try(iv_diff(x))
+
+x &lt;- c(1, NA, 0)
+try(iv_diff(x))
+
+# ---------------------------------------------------------------------------
+# Use with `mutate()`
+
+library(dplyr)
+
+# `iv_diff()` is useful for converting a pre-existing column into an interval
+# vector, but you'll need to apply padding to ensure that the size of the
+# diff-ed result is the same as the number of rows in your data frame. There
+# are two main ways to pad, which are explored below.
+df &lt;- tibble(x = c(1, 3, 6))
+
+# Pad with a known lower/upper bound
+df %&gt;% mutate(iv = iv_diff(c(0, x)))
+df %&gt;% mutate(iv = iv_diff(c(x, Inf)))
+
+# Pad with a missing value, which results in a fully missing interval
+df %&gt;% mutate(iv = iv_diff(c(NA, x)))
+df %&gt;% mutate(iv = iv_diff(c(x, NA)))
+</code></pre>
+
+
+</div>

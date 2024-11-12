@@ -1,0 +1,351 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>iprior_cv</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Perform a cross-validation experiment with the iprior function</h2>
+
+<h3>Description</h3>
+
+<p>A convenience function to perform a k-fold cross-validation experiment and
+obtain mean squared error of prediction. Most of the arguments are similar to
+<code>iprior()</code> and <code>kernL()</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## Default S3 method:
+iprior_cv(
+  y,
+  ...,
+  folds = 2,
+  par.cv = TRUE,
+  kernel = "linear",
+  method = "direct",
+  control = list(),
+  interactions = NULL,
+  est.lambda = TRUE,
+  est.hurst = FALSE,
+  est.lengthscale = FALSE,
+  est.offset = FALSE,
+  est.psi = TRUE,
+  fixed.hyp = NULL,
+  lambda = 1,
+  psi = 1,
+  nystrom = FALSE,
+  nys.seed = NULL
+)
+
+## S3 method for class 'formula'
+iprior_cv(
+  formula,
+  data,
+  folds = 2,
+  one.lam = FALSE,
+  par.cv = TRUE,
+  kernel = "linear",
+  method = "direct",
+  control = list(),
+  est.lambda = TRUE,
+  est.hurst = FALSE,
+  est.lengthscale = FALSE,
+  est.offset = FALSE,
+  est.psi = TRUE,
+  fixed.hyp = NULL,
+  lambda = 1,
+  psi = 1,
+  nystrom = FALSE,
+  nys.seed = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Vector of response variables</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Only used when fitting using non-formula, enter the variables
+(vectors or matrices) separated by commas.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>folds</code></td>
+<td>
+<p>The number of cross-validation folds. Set equal to sample size
+or <code>Inf</code> to perform leave-one-out cross-validation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>par.cv</code></td>
+<td>
+<p>Logical. Multithreading to fit the models? Defaults to
+<code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>kernel</code></td>
+<td>
+<p>Character vector indicating the type of kernel for the
+variables. Available choices are: </p>
+ <ul>
+<li>
+<p><code>"linear"</code> -
+(default) for the linear kernel </p>
+</li>
+<li>
+<p><code>"canonical"</code> - alternative
+name for <code>"linear"</code> </p>
+</li>
+<li>
+<p><code>"fbm"</code>, <code>"fbm,0.5"</code> - for the
+fBm kernel with Hurst coefficient 0.5 (default) </p>
+</li>
+<li>
+<p><code>"se"</code>,
+<code>"se,1"</code> - for the SE kernel with lengthscale 1 (default)
+</p>
+</li>
+<li>
+<p><code>"poly"</code>, <code>"poly2"</code>, <code>"poly2,0"</code> - for the polynomial
+kernel of degree 2 with offset 0 (default) </p>
+</li>
+<li>
+<p><code>"pearson" - for the
+Pearson kernel</code></p>
+</li>
+</ul>
+<p> The <code>kernel</code> argument can also be a vector of length
+equal to the number of variables, therefore it is possible to specify
+different kernels for each variables. Note that factor type variables are
+assigned the Pearson kernel by default, and that non-factor types can be
+forced to use the Pearson kernel (not recommended).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>The estimation method. One of: </p>
+ <ul>
+<li>
+<p><code>"direct"</code>
+- for the direct minimisation of the marginal deviance using
+<code>optim()</code>'s L-BFGS method </p>
+</li>
+<li>
+<p><code>"em"</code> - for the EM algorithm
+</p>
+</li>
+<li>
+<p><code>"mixed"</code> - combination of the direct and EM methods
+</p>
+</li>
+<li>
+<p><code>"fixed"</code> - for just obtaining the posterior regression function
+with fixed hyperparameters (default method when setting <code>fixed.hyp =
+TRUE</code>) </p>
+</li>
+<li>
+<p><code>"canonical"</code> - an efficient estimation method which
+takes advantage of the structure of the linear kernel </p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>control</code></td>
+<td>
+<p>(Optional) A list of control options for the estimation
+procedure: </p>
+ <dl>
+<dt><code>maxit</code></dt>
+<dd>
+<p>The maximum number of iterations
+for the quasi-Newton optimisation or the EM algorithm. Defaults to
+<code>100</code>.</p>
+</dd> <dt><code>em.maxit</code></dt>
+<dd>
+<p>For <code>method = "mixed"</code>, the number
+of EM steps before switching to direct optimisation. Defaults to <code>5</code>.</p>
+</dd>
+<dt><code>stop.crit</code></dt>
+<dd>
+<p>The stopping criterion for the EM and L-BFGS
+algorithm, which is the difference in successive log-likelihood values.
+Defaults to <code>1e-8</code>.</p>
+</dd> <dt><code>theta0</code></dt>
+<dd>
+<p>The initial values for the
+hyperparameters. Defaults to random starting values.</p>
+</dd>
+<dt><code>report</code></dt>
+<dd>
+<p>The interval of reporting for the <code>optim()</code>
+function.</p>
+</dd> <dt><code>restarts</code></dt>
+<dd>
+<p>The number of random restarts to perform.
+Defaults to <code>0</code>. It's also possible to set it to <code>TRUE</code>, in which
+case the number of random restarts is set to the total number of available
+cores.</p>
+</dd> <dt><code>no.cores</code></dt>
+<dd>
+<p>The number of cores in which to do random
+restarts. Defaults to the total number of available cores.</p>
+</dd>
+<dt><code>omega</code></dt>
+<dd>
+<p>The overrelaxation parameter for the EM algorithm - a
+value between 0 and 1.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>interactions</code></td>
+<td>
+<p>Character vector to specify the interaction terms. When
+using formulas, this is specified automatically, so is not required. Syntax
+is <code>"a:b"</code> to indicate variable <code>a</code> interacts with variable
+<code>b</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>est.lambda</code></td>
+<td>
+<p>Logical. Estimate the scale parameters? Defaults to
+<code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>est.hurst</code></td>
+<td>
+<p>Logical. Estimate the Hurst coefficients for fBm kernels?
+Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>est.lengthscale</code></td>
+<td>
+<p>Logical. Estimate the lengthscales for SE kernels?
+Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>est.offset</code></td>
+<td>
+<p>Logical. Estimate the offsets for polynomial kernels?
+Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>est.psi</code></td>
+<td>
+<p>Logical. Estimate the error precision? Defaults to
+<code>TRUE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fixed.hyp</code></td>
+<td>
+<p>Logical. If <code>TRUE</code>, then no hyperparameters are
+estimated, i.e. all of the above <code>est.x</code> are set to <code>FALSE</code>, and
+vice versa. If <code>NULL</code> (default) then all of the <code>est.x</code> defaults
+are respected.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda</code></td>
+<td>
+<p>Initial/Default scale parameters. Relevant especially if
+<code>est.lambda = FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>psi</code></td>
+<td>
+<p>Initial/Default value for error precision. Relevant especially if
+<code>est.psi = FALSE</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nystrom</code></td>
+<td>
+<p>Either logical or an integer indicating the number of Nystrom
+samples to take. Defaults to <code>FALSE</code>. If <code>TRUE</code>, then
+approximately 10% of the sample size is used for the Nystrom
+approximation.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nys.seed</code></td>
+<td>
+<p>The random seed for the Nystrom sampling. Defaults to
+<code>NULL</code>, which means the random seed is not fixed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>formula</code></td>
+<td>
+<p>The formula to fit when using formula interface.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data</code></td>
+<td>
+<p>Data frame containing variables when using formula interface.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>one.lam</code></td>
+<td>
+<p>Logical. When using formula input, this is a convenient way of
+letting the function know to treat all variables as a single variable (i.e.
+shared scale parameter). Defaults to <code>FALSE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Uses a multicore loop to fit the folds by default, set <code>par.cv = FALSE</code>
+to not use multithreading.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An <code>iprior_xv</code> object containing a data frame of the
+cross-validated values such as the log-likelihood, training MSE and test
+MSE.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+
+# 5-fold CV experiment
+(mod.cv &lt;- iprior_cv(y ~ X, gen_smooth(100), kernel = "se", folds = 5))
+
+# LOOCV experiment
+(mod.cv &lt;- iprior_cv(y ~ X, gen_smooth(100), kernel = "se", folds = Inf))
+
+# Can also get root MSE
+print(mod.cv, "RMSE")
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

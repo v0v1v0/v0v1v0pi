@@ -1,0 +1,86 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ISRaD.extra.geospatial</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>ISRaD.extra.geospatial</h2>
+
+<h3>Description</h3>
+
+<p>Extracts data from a user-supplied raster file and adds data as a new variable at the profile level
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ISRaD.extra.geospatial(
+  database,
+  geodata_directory,
+  CRS = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>database</code></td>
+<td>
+<p>ISRaD dataset object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>geodata_directory</code></td>
+<td>
+<p>Directory where geospatial data are found</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>CRS</code></td>
+<td>
+<p>Coordinate reference system used for geospatial datasets</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>Generic function that uses geographic coordinates of profiles to extract data from one or more raster files.
+Raster data will be added as new variables at the profile level.<br><br>
+The new variable name will be a concatenation of "pro_", and the file name (excluding the file extension).
+The ISRaD file name convention for geospatial files uses a 6 component string, separated by "_". Missing components can be replaced with "x" ("x"s will be dropped before creating variable names). The 6 components are as follows:<br><br>
+1) Short description of the data type, e.g. "bd" for bulk density<br>
+2) Top layer depth or exact depth (numeric, cm)<br>
+3) Bottom layer depth (numeric, cm)<br>
+4) Year of data observation (numeric)<br>
+5) Data units (e.g. mmyr for mean annual precipitation)<br>
+6) Any relevant notes<br><br>
+Coordinate reference system can be specified with the "CRS" argument; default is WGS84. Note that all files in geodata_directory must use the same CRS.<br><br></p>
+
+
+<h3>Value</h3>
+
+<p>Updated ISRaD_extra object with new columns at the profile level
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Load example dataset Gaudinski_2001
+database &lt;- ISRaD::Gaudinski_2001
+# Fill profile coordinates
+database &lt;- ISRaD.extra.fill_coords(database)
+# Run function
+# Note that geospatial data in pkg is only for the Gaudinski_2001 dataset
+# Users may supply their own geospatial data as long as it can be read by the raster package
+database.x &lt;- ISRaD.extra.geospatial(database,
+  geodata_directory = system.file("extdata", "geodata_directory", package = "ISRaD")
+)
+
+
+</code></pre>
+
+
+</div>

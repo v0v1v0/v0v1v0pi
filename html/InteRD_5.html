@@ -1,0 +1,102 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>InteRD2</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>The InteRD2 estimate</h2>
+
+<h3>Description</h3>
+
+<p>This function provides a robust deconvolution framework to integrate information from scRNA-seq references,
+marker genes, and prior biological knowledge.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">InteRD2(bulk.data,list_marker,cell_type_unique,comb_sampled,ave_est,ave_sd,
+lambda_option,tol=0.0005)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>bulk.data</code></td>
+<td>
+<p>The 'ExpressionSet' object for a target bulk data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>list_marker</code></td>
+<td>
+<p>A list of pre-specified marker genes corresponding to each cell type.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cell_type_unique</code></td>
+<td>
+<p>A list of cell types. It should match the order in list.marker.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comb_sampled</code></td>
+<td>
+<p>A pre-specified cell type proportions for the target bulk data, which could be obtained from reference-based deconvolution approach.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ave_est</code></td>
+<td>
+<p>A pre-specified population-level cell type proportions, which could be obtained from single-cell RNA-seq and external expression data from different studies, species, or data types</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ave_sd</code></td>
+<td>
+<p>A pre-specified standard deviation for cell-type proportion estimation. The default is 1 for each cell type.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>lambda_option</code></td>
+<td>
+<p>A sequence of values for the tuning parameter.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>tol</code></td>
+<td>
+<p>A tolerance value for convergence. The default is 0.0005.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list containing estimated cell type proportions corresponding to each tuning value, named 'est'; and a sequence of goodness-of-fit values corresponding to each tuning value, named 'metrics'. The smaller the better.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##read data
+library(InteRD)
+readRDSFromWeb&lt;-function(ref) {readRDS(gzcon(url(ref)))}
+urlremote&lt;-"https://github.com/chencxxy28/Data/raw/main/data_InteRD/"
+pseudo.seger&lt;-readRDSFromWeb(paste0(urlremote,"pseudo.seger.rds"))
+InteRD1&lt;-readRDSFromWeb(paste0(urlremote,"InteRD1.rds"))
+ave_est&lt;-readRDSFromWeb(paste0(urlremote,"ave_est.rds"))
+ave_sd&lt;-readRDSFromWeb(paste0(urlremote,"ave_sd.rds"))
+list_marker&lt;-readRDSFromWeb(paste0(urlremote,"list_markerbaron20.rds"))
+lambda_option&lt;-0
+cell_type_unique&lt;-c("alpha","beta","delta","gamma")
+lambda_option&lt;-10e+05
+InteRD2.output&lt;-InteRD2(bulk.data=pseudo.seger,list_marker,cell_type_unique,
+comb_sampled=InteRD1,ave_est,ave_sd,lambda_option=lambda_option,tol=0.01)
+InteRD2&lt;-InteRD.predict.prop(InteRD.output=InteRD2.output)
+
+</code></pre>
+
+
+</div>

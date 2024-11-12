@@ -1,0 +1,169 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot.ShapDependence</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Show variable dependence plots and variable interaction plots
+obtained from Shapley values.</h2>
+
+<h3>Description</h3>
+
+<p>Plot Shapley value-based variable dependence curves using
+ggplot2 by optionally selecting target variable(s). It also can plot the
+interaction between a related variable to the selected variable(s).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'ShapDependence'
+plot(
+  x,
+  target_var = NA,
+  related_var = NA,
+  sample_prop = 0.3,
+  sample_bin = 100,
+  smooth_line = TRUE,
+  seed = 123,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>(<code>ShapDependence</code>) The variable dependence object to plot.
+It could be the return of function <code>shap_dependence</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target_var</code></td>
+<td>
+<p>(<code>vector</code> of <code>character</code>) The target variable to plot. It could be
+<code>NA</code>. If it is <code>NA</code>, all variables will be plotted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>related_var</code></td>
+<td>
+<p>(<code>character</code>) The dependent variable to plot together with
+target variables. It could be <code>NA</code>. If it is <code>NA</code>, no related variable will be
+plotted.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sample_prop</code></td>
+<td>
+<p>(<code>numeric</code>) The proportion of points to sample for plotting.
+It will be ignored if the number of points is less than 1000.
+The default is <code>0.3</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sample_bin</code></td>
+<td>
+<p>(<code>integer</code>) The number of bins to use for stratified sampling.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>smooth_line</code></td>
+<td>
+<p>(<code>logical</code>) Whether to fit the smooth line or not.
+It will be ignored if the number of points is less than 1000.
+The default is 100.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>seed</code></td>
+<td>
+<p>(<code>integer</code>) The seed for sampling.
+It will be ignored if the number of points is less than 1000.
+The default is 123.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Other arguments passed on to <code>geom_smooth</code>. Mainly
+<code>method</code> and <code>formula</code> to fit the smooth line. Note that the same arguments
+will be used for all target variables. User could set variable one by one to
+set the arguments separately.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>If the number of samples is more than 1000, a stratified sampling is used to
+thin the sample pool, and then plot its subset. The user could set a proportion
+to sample and a number of bins for stratified sampling.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>ggplot2</code> figure of dependent curves
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>shap_dependence</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# Using a pseudo presence-only occurrence dataset of
+# virtual species provided in this package
+library(dplyr)
+library(sf)
+library(stars)
+library(itsdm)
+
+# Prepare data
+data("occ_virtual_species")
+obs_df &lt;- occ_virtual_species %&gt;% filter(usage == "train")
+eval_df &lt;- occ_virtual_species %&gt;% filter(usage == "eval")
+x_col &lt;- "x"
+y_col &lt;- "y"
+obs_col &lt;- "observation"
+
+# Format the observations
+obs_train_eval &lt;- format_observation(
+  obs_df = obs_df, eval_df = eval_df,
+  x_col = x_col, y_col = y_col, obs_col = obs_col,
+  obs_type = "presence_only")
+
+env_vars &lt;- system.file(
+  'extdata/bioclim_tanzania_10min.tif',
+  package = 'itsdm') %&gt;% read_stars() %&gt;%
+  slice('band', c(1, 5, 12, 16))
+
+# With imperfect_presence mode,
+mod &lt;- isotree_po(
+  obs_mode = "imperfect_presence",
+  obs = obs_train_eval$obs,
+  obs_ind_eval = obs_train_eval$eval,
+  variables = env_vars, ntrees = 20,
+  sample_size = 0.8, ndim = 2L,
+  seed = 123L, response = FALSE,
+  spatial_response = FALSE,
+  check_variable = FALSE)
+
+var_dependence &lt;- shap_dependence(
+  model = mod$model,
+  var_occ = mod$vars_train,
+  variables = mod$variables)
+plot(var_dependence, target_var = 'bio1', related_var = 'bio12')
+
+
+</code></pre>
+
+
+</div>

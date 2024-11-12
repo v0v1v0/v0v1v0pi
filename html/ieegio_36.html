@@ -1,0 +1,214 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot.ieegio_volume</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot '3D' volume in anatomical slices</h2>
+
+<h3>Description</h3>
+
+<p>Plot '3D' volume in anatomical slices
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'ieegio_volume'
+plot(
+  x,
+  position = c(0, 0, 0),
+  center_position = FALSE,
+  which = c("coronal", "axial", "sagittal"),
+  slice_index = 1L,
+  transform = "vox2ras",
+  zoom = 1,
+  pixel_width = max(zoom/2, 1),
+  crosshair_gap = 4,
+  crosshair_lty = 2,
+  col = c("black", "white"),
+  crosshair_col = "#00FF00A0",
+  continuous = TRUE,
+  vlim = NULL,
+  add = FALSE,
+  main = "",
+  axes = FALSE,
+  background = col[[1]],
+  foreground = col[[length(col)]],
+  ...,
+  .xdata = x$data
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p><code>'ieegio_volume'</code> object; see <code>read_volume</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>position</code></td>
+<td>
+<p>cross-hair focused position</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>center_position</code></td>
+<td>
+<p>whether to center canvas at <code>position</code>,
+default is <code>FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>which</code></td>
+<td>
+<p>which slice to plot; choices are <code>"coronal"</code>,
+<code>"axial"</code>, and <code>"sagittal"</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>slice_index</code></td>
+<td>
+<p>length of 1: if <code>x</code> has fourth dimension
+(e.g. 'fMRI'), then which slice index to draw</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>transform</code></td>
+<td>
+<p>which transform to apply, can be a 4-by-4 matrix,
+an integer or name indicating the matrix in <code>x$transforms</code>; this needs
+to be the transform matrix from voxel index to 'RAS'
+(right-anterior-superior coordinate system), often called <code>'xform'</code>,
+<code>'sform'</code>, <code>'qform'</code> in 'NIfTI' terms, or <code>'Norig'</code> in
+'FreeSurfer'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>zoom</code></td>
+<td>
+<p>zoom-in level</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pixel_width</code></td>
+<td>
+<p>pixel size, ranging from <code>0.05</code> to <code>50</code>;
+default is the half of <code>zoom</code> or <code>1</code>, whichever is greater;
+the unit of <code>pixel_width</code> divided by <code>zoom</code> is milliliter</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>crosshair_gap</code></td>
+<td>
+<p>the cross-hair gap in milliliter</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>crosshair_lty</code></td>
+<td>
+<p>the cross-hair line type</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p>color palette for continuous <code>x</code> values</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>crosshair_col</code></td>
+<td>
+<p>the cross-hair color; set to <code>NA</code> to hide</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>continuous</code></td>
+<td>
+<p>reserved</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>vlim</code></td>
+<td>
+<p>the range limit of the data; default is computed from range of
+<code>x$data</code>; data values exceeding the range will be trimmed</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add</code></td>
+<td>
+<p>whether to add the plot to existing underlay;
+default is <code>FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main, ...</code></td>
+<td>
+<p>passed to <code>image</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>axes</code></td>
+<td>
+<p>whether to draw axes; default is <code>FALSE</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>background, foreground</code></td>
+<td>
+<p>background and foreground colors; default is
+the first and last elements of <code>col</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>.xdata</code></td>
+<td>
+<p>default is <code>x$data</code>, used to speed up the calculation
+when multiple different angles are to be plotted</p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+library(ieegio)
+
+nifti_file &lt;- "brain.demosubject.nii.gz"
+
+# Use `ieegio_sample_data(nifti_file)`
+#   to download sample data
+
+
+if( ieegio_sample_data(nifti_file, test = TRUE) ) {
+
+# ---- NIfTI examples ---------------------------------------------
+
+file &lt;- ieegio_sample_data(nifti_file)
+
+# basic read
+vol &lt;- read_volume(file)
+
+par(mfrow = c(1, 3), mar = c(0, 0, 3.1, 0))
+
+ras_position &lt;- c(-50, -10, 15)
+
+ras_str &lt;- paste(sprintf("%.0f", ras_position), collapse = ",")
+
+for(which in c("coronal", "axial", "sagittal")) {
+  plot(x = vol, position = ras_position, crosshair_gap = 10,
+       crosshair_lty = 2, zoom = 3, which = which,
+       main = sprintf("%s T1RAS=[%s]", which, ras_str))
+}
+
+
+}
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,172 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>item</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Create an <code>Item</code> object</h2>
+
+<h3>Description</h3>
+
+<p>This function is used for creating <code>Item-class</code>
+objects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">item(
+  ...,
+  model = NULL,
+  item_id = NULL,
+  parameters = NULL,
+  se = NULL,
+  content = NULL,
+  misc = NULL
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>The item parameter arguments.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>The model that item <code>parameters</code> represents. Currently
+model can be:
+1PL, 2PL, 3PL, 4PL, M1PL, M2PL and M3PL, GRM, PCM or GPCM.
+Ideally, a model should be specified for the construction of an
+<code>Item-class</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>item_id</code></td>
+<td>
+<p>Item ID. Default value is <code>NULL</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parameters</code></td>
+<td>
+<p>A list containing numeric vectors that represent item
+parameters. Depending on the model these can change.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se</code></td>
+<td>
+<p>A list object containing standard error of item parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>content</code></td>
+<td>
+<p>Content information for item.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>misc</code></td>
+<td>
+<p>This slot is a list where one can put any information about
+the item. For example, one can enter the ID's of the enemies of the current
+item as <code>misc = list(enemies = c("i1", i2))</code>. Or, one can enter
+Sympson-Hetter exposure control parameter K:
+<code>misc = list(sympson_hetter_k = .75)</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>An <code>Item-class</code> class object.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Emre Gonulates
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Create 2PL item:
+item(a = 1.2, b = -0.94)
+item(a = 1.2, b = -0.94, model = "2PL")
+# Specify scaling constant D:
+item(a = 1.2, b = -0.94, D = 1.7)
+
+# Add additional item specifications:
+# Add item_id
+item(a = 1.2, b = -0.94, item_id = "My-Item-1")
+# Add content
+item(a = 1.2, b = -0.94, item_id = "My-Item-1", content = "Geometry")
+# Add additional parameter
+item(a = 1.2, b = -0.94, misc = list(sympson_hetter_k = 1))
+# Add any argument to 'misc' field
+i1 &lt;- item(a = 1.2, b = -0.94, item_id = "item1", content = "Earth Science",
+           misc = list(key = "C", operational = TRUE, type = "MC",
+                       enemies = c("i2", "i3")))
+# Access fields
+i1$misc
+i1$misc$key
+i1$misc$operational
+i1$misc$enemies
+i1$a
+i1$b
+i1$D
+i1$parameters
+i1$item_id
+i1$content
+
+
+# Rasch Model
+item(b = 1.2)
+item(b = 1.2, model = "Rasch")
+
+# 1PL model:
+item(b = 1.2, model = "1PL")
+item(b = 1.2, D = 1)
+
+# 3PL model:
+item(a = 0.92, b = 2.7, c = 0.17)
+item(a = 0.92, b = 2.7, c = 0.17, model = "3PL")
+item(a = 0.92, b = 2.7, c = 0.17, D = 1.7, model = "3PL")
+
+# 4PL model:
+item(a = 0.92, b = 2.7, c = 0.17, d = 0.98)
+item(a = 0.92, b = 2.7, c = 0.17, d = 0.98, model = "4PL")
+item(a = 0.92, b = 2.7, c = 0.17, d = 0.92, D = 1.7, model = "4PL")
+item(parameters = list(a = 0.92, b = 2.7, c = 0.17, d = 0.92, D = 1.7),
+     model = "4PL")
+
+# Create a GRM model
+item(a = 1.9, b = c(-1, 0.82, 1.5), model = "GRM")
+item(parameters = list(a = 1.9, b = c(-1, 2), D = 1), model = "GRM")
+
+# Create a GPCM model
+item(a = 1.9, b = c(-1.6, -0.09, 1.25), model = "GPCM")
+item(parameters = list(a = 1.9, b = c(-1, 2), D = 1), model = "GPCM")
+
+# Create a GPCM2 model (Reparameterized GPCM model)
+item(a = 1.9, b = 0.65, d = c(-1.6, -0.09, 1.25), model = "GPCM2")
+item(parameters = list(a = 1.9, b = 0.65, d = c(-1.6, -0.09, 1.25), D = 1.7),
+     model = "GPCM2")
+
+# Create a PCM model
+item(b = c(-0.7, 0.72, 1.9), model = "PCM")
+item(parameters = list(b = c(-1, 2)), model = "PCM")
+
+# Add additional arguments to items
+i1 &lt;- item(a = 1.2, b = 2)
+i1 &lt;- item(i1, item_id = "new_item_id", content = "Algebra")
+</code></pre>
+
+
+</div>

@@ -1,0 +1,110 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>rms</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Root Mean Square and RMS Variance</h2>
+
+<h3>Description</h3>
+
+<p>The <code>rms</code> and <code>rmsVariance</code> methods of <code>Trace</code> and <code>Stream</code> objects compute the 
+Root Mean Square (RMS) amplitude or RMS variance of the associated data in each object.
+RMS variance removes the DC level from the seismic signal so that the zero line
+is consistent.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">rms(x, na.rm)
+parallelRms(x, na.rm)
+rmsVariance(x, na.rm)
+parallelRmsVariance(x, na.rm)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p> a <code>Trace</code> or <code>Stream</code> object </p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>na.rm</code></td>
+<td>
+<p> a logical specifying whether missing values should be removed </p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p><b>Trace method</b>
+</p>
+<p>The RMS amplitude of a single <code>Trace</code> is calculated as:
+</p>
+<p style="text-align: center;"><code class="reqn">rms(x) = \sqrt{ \frac{\sum_1^n{(x_i)^2}}{n} } </code>
+</p>
+
+<p>The RMS variance of a single <code>Trace</code> is calculated as:
+</p>
+<p style="text-align: center;"><code class="reqn">rmsVariance(x) = \sqrt{ \frac{\sum_1^n{(x_i - \bar{x})^2}}{n} } </code>
+</p>
+
+<p>where <code class="reqn">x</code> is the vector of data values and <code class="reqn">n</code> is the length of that vector.
+</p>
+<p><b>Stream methods</b>
+</p>
+<p>For <code>Stream</code> objects, data from all <code>Trace</code>s in the stream
+are first extracted and concatenated into a single numeric vector after which the
+algorithm is applied.
+</p>
+<p>The <code>parallel~</code> version of this method is only available on <code>Stream</code> objects
+and returns a vector of values, one for each <code>Trace</code>.
+</p>
+<p>By default, the <code>Stream</code> versions of these methods use <code>na.rm=FALSE</code> as there
+should be no missing datapoints in each <code>Trace</code>. The <code>Trace</code> methods default to 
+<code>na.rm=TRUE</code> to accommodate merged traces where gaps between traces have been
+filled with <code>NA</code>s.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A single numeric value is returned or <code>NA</code> if the trace has no data.
+</p>
+<p>A numeric vector is returned for <code>parallelRmsVariance</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jonathan Callahan <a href="mailto:jonathan@mazamascience.com">jonathan@mazamascience.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+
+# Open a connection to IRIS DMC webservices
+iris &lt;- new("IrisClient")
+
+starttime &lt;- as.POSIXct("2012-01-24", tz="GMT")
+endtime &lt;- as.POSIXct("2012-01-25", tz="GMT")
+
+# Get the waveform
+st &lt;- getDataselect(iris,"AK","PIN","","BHZ",starttime,endtime)
+
+# Get the first trace and generate some statistics
+tr &lt;- st@traces[[1]]
+rmsVariance(tr)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

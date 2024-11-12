@@ -1,0 +1,148 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>simPois</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Simulate a Poisson process
+</h2>
+
+<h3>Description</h3>
+
+<p>Simulate an (inhomogeneous) Poisson process with a given intensity/rate 
+function over the interval <code class="reqn">[0,T]</code>
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">simPois(int=NULL,cens=1,int.M=optimize(int,c(0,cens),maximum=TRUE)$obj*1.1,
+        B=max(as.integer(sqrt(int.M * cens)),10), exp.int=FALSE,par=c(1,2))
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>int</code></td>
+<td>
+
+<p>A (vectorized) positive function. The intensity/rate function.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cens</code></td>
+<td>
+
+<p>A positive scalar. The censoring time, or time of termination of
+observations, <code class="reqn">T</code>. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>int.M</code></td>
+<td>
+
+<p>A positive scalar. Maximum value of the intensity function over <code class="reqn">[0,T]</code>,
+or a larger value. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>B</code></td>
+<td>
+
+<p>An integer. The block size to be used in generating exponential
+random variables in blocks. 
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>exp.int</code></td>
+<td>
+
+<p>Logical. Set to TRUE, if the intensity function is exponential,
+i.e. a*exp(-b*x). If set to TRUE, the parameters a and b should also
+be supplied via the argument par.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>par</code></td>
+<td>
+
+<p>A numerical vector of two elements, giving the parameters a and b of
+the exponential intensity function. The values are not ignored if
+exp.int is set to FALSE. 
+</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function works by first generating a Poisson process with constant
+rate <code>int.M</code> oever <code class="reqn">[0,T]</code>, and then thinning the process
+with retention probability function
+</p>
+<p style="text-align: center;"><code class="reqn">p(x)=\code{int}(x)/\code{int.M}</code>
+</p>
+<p>. 
+</p>
+<p>When generating the homoneous Poisson process, it first generates
+about <code class="reqn">\Lambda+1.96*\sqrt{\Lambda}</code> exponential variables, then,
+if the exponential variables are not enough (their sum has not reached
+the censoring time <code class="reqn">T</code> yet), generates exponential variables in
+blocks of size <code>B</code> until the total of all the generated
+exponentials exceeds <code class="reqn">T</code>. Then <code>cumsum</code>s of the exponentials
+that are smaller than or equal to <code class="reqn">T</code> are retained as the event
+times of the homogeneous Poisson process. This method apparantly does
+not produce tied event times. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>A numerical vector giving the event/jump times of the Poisson process
+in <code class="reqn">[0,T]</code>, in ascending order. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Feng Chen &lt;feng.chen@unsw.edu.au&gt;
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>simPois0</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">##---- Should be DIRECTLY executable !! ----
+##-- ==&gt;  Define data, use random,
+##--	or do  help(data=index)  for the standard data sets.
+
+## The function is currently defined as
+function (int, cens = 1, int.M = optimize(int, c(0, cens), maximum = TRUE)$obj * 
+    1.1, B = max(as.integer(sqrt(int.M * cens)), 10)) 
+{
+    tms &lt;- rexp(as.integer(int.M * cens + 2 * sqrt(int.M * cens)), 
+        rate = int.M)
+    while (sum(tms) &lt; cens) tms &lt;- c(tms, rexp(B, rate = int.M))
+    cumtms &lt;- cumsum(tms)
+    tms &lt;- cumtms[cumtms &lt;= cens]
+    N &lt;- length(tms)
+    if (N == 0) 
+        return(numeric(0))
+    tms[as.logical(mapply(rbinom, n = 1, size = 1, prob = int(tms)/int.M))]
+  }
+</code></pre>
+
+
+</div>

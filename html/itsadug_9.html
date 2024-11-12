@@ -1,0 +1,161 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>diagnostics</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Visualization of the model fit for time series data.</h2>
+
+<h3>Description</h3>
+
+<p>Diagnostic plots for evaluating the model fit.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">diagnostics(
+  model,
+  plot = "all",
+  ask = TRUE,
+  print.summary = getOption("itsadug_print")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A lm or gam object, produced by <code>gam</code> or 
+<code>bam</code>, <code>lm</code>, <code>glm</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>A text string or numeric vector indicating which diagnostic 
+plots to show. Default is 'all'. See Section 'Details' for the different 
+options.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ask</code></td>
+<td>
+<p>Logical: whether the user is prompted before starting a new 
+page of output. Defaults to TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print.summary</code></td>
+<td>
+<p>Logical: whether or not to print summary.
+Default set to the print info messages option 
+(see <code>infoMessages</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>When <code>plot='all'</code>, the following plots are generated:
+</p>
+
+<ol>
+<li>
+<p> Residuals by fitted values. Used for inspection of general trends 
+in the residuals.
+</p>
+</li>
+<li>
+<p> Residuals ordered by predictor. Useful for checking how the trends 
+of individual predictors are captured by the model.
+</p>
+</li>
+<li>
+<p> Distribution of residuals. QQ plot that compares the distribution 
+of the residuals with the normal distribution. 
+</p>
+</li>
+<li>
+<p> ACF of residuals. Inspection of autocorrelation in the residuals. 
+See also <code>acf_resid</code>.
+</p>
+</li>
+<li>
+<p> Trends in the random smooths. Be careful with the interpretation of 
+the 'fixed' effects and interactions when the random smooths show trends. 
+See examples below.
+</p>
+</li>
+<li>
+<p> Printing distributions of numeric predictors.
+</p>
+</li>
+</ol>
+<h3>Author(s)</h3>
+
+<p>Jacolien van Rij
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other Model evaluation: 
+<code>check_resid()</code>,
+<code>plot_modelfit()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+data(simdat)
+## Not run: 
+# no random smooths:
+m1 &lt;- bam(Y ~ Group + s(Time, by=Group) + s(Trial) + s(Subject, bs='re'), data=simdat)
+diagnostics(m1)
+
+# only plot residuals by predictor:
+diagnostics(m1, plot=2)
+
+# without prompts:
+par(mfrow=c(2,2))
+diagnostics(m1, plot=1:4, ask=FALSE)
+
+# only plot random smooths:
+diagnostics(m1, plot=5)
+# Note: the plot does not change,
+# because there are no random smooths to plot.
+
+# with random smooths
+m2 &lt;- bam(Y ~ Group + s(Time, by=Group) + s(Time, Subject, bs='fs', m=1), data=simdat)  
+diagnostics(m2)  
+
+## INSPECTION OF RANDOM SMOOTHS 
+## ----------------------------
+
+# In this underspecified model (too much smoothing for the interaction)
+# part of the effect of Time is captured by the random smooths:
+m3 &lt;- bam(Y ~ te(Time, Trial, k=c(3,3)) + s(Time, Subject, bs='fs', m=1), data=simdat) 
+
+# The plot shows a clear trend in the average of the random smooths, 
+# and the amplitude of the mean (!) curve is almost as large as the 
+# amplitude of the 'fixed' effect of Time:
+diagnostics(m3, plot=5, ask=FALSE)
+
+# Compare with the following models:
+m4 &lt;- bam(Y ~ te(Time, Trial, k=c(10,5)) + s(Time, Subject, bs='fs', m=1), data=simdat) 
+diagnostics(m4, plot=5, ask=FALSE)
+
+m5 &lt;- bam(Y ~ s(Time) + s(Trial) + ti(Time, Trial) 
+    + s(Time, Subject, bs='fs', m=1), data=simdat) 
+diagnostics(m5, plot=5, ask=FALSE)
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

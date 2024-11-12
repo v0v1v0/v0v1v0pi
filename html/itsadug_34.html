@@ -1,0 +1,280 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot_diff</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot difference curve based on model predictions.</h2>
+
+<h3>Description</h3>
+
+<p>Plot difference curve based on model predictions.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">plot_diff(
+  model,
+  view,
+  comp,
+  cond = NULL,
+  se = 1.96,
+  sim.ci = FALSE,
+  n.grid = 100,
+  add = FALSE,
+  rm.ranef = TRUE,
+  mark.diff = TRUE,
+  col.diff = "red",
+  col = "black",
+  eegAxis = FALSE,
+  transform.view = NULL,
+  print.summary = getOption("itsadug_print"),
+  plot = TRUE,
+  main = NULL,
+  ylab = NULL,
+  xlab = NULL,
+  xlim = NULL,
+  ylim = NULL,
+  hide.label = FALSE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A GAMM model, resulting from the functions
+<code>gam</code> or <code>bam</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>view</code></td>
+<td>
+<p>Name of continuous predictor that should be plotted on the x-
+axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>comp</code></td>
+<td>
+<p>Named list with the grouping predictor (categorical variable)
+and the 2 levels to calculate the difference for.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cond</code></td>
+<td>
+<p>A named list of the values to use for the predictor terms. 
+Variables omitted from this list will have the closest observed value to 
+the median for continuous variables, or the reference level for factors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se</code></td>
+<td>
+<p>If less than or equal to zero then only the predicted smooth is 
+plotted, but if greater than zero, then the predicted values plus 
+confidence intervals are plotted. 
+The value of <code>se</code> will be multiplied with 
+the standard error (i.e., 1.96 results in 95%CI and 2.58). 
+Default is set to 1.96 (95%CI).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sim.ci</code></td>
+<td>
+<p>Logical: Using simultaneous confidence intervals or not 
+(default set to FALSE). The implementation of simultaneous CIs follows 
+Gavin Simpson's blog of December 15, 2016: 
+<a href="https://fromthebottomoftheheap.net/2016/12/15/simultaneous-interval-revisited/">https://fromthebottomoftheheap.net/2016/12/15/simultaneous-interval-revisited/</a>. 
+This interval is calculated from simulations based. 
+Please specify a seed (e.g., <code>set.seed(123)</code>) for reproducable results. 
+Note: in contrast with Gavin Simpson's code, here the Bayesian posterior 
+covariance matrix of the parameters is uncertainty corrected 
+(<code>unconditional=TRUE</code>) to reflect the uncertainty on the estimation of 
+smoothness parameters.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.grid</code></td>
+<td>
+<p>Number of data points sampled as predictions. Defaults to 100.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>add</code></td>
+<td>
+<p>Logical: whether or not to add the line to an existing plot. 
+Default is FALSE.
+When no plot window is available and <code>add=TRUE</code>, 
+the function will generate an error.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rm.ranef</code></td>
+<td>
+<p>Logical: whether or not to remove random effects. 
+Default is TRUE. Alternatively a string (or vector of strings) with the 
+name of the random effect(s) to remove.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>mark.diff</code></td>
+<td>
+<p>Logical: whether or not marking where the difference 
+is significantly different from 0.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col.diff</code></td>
+<td>
+<p>Color to mark differences (red by default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>col</code></td>
+<td>
+<p>Line color. Shading color is derived from line color.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>eegAxis</code></td>
+<td>
+<p>Logical: whether or not to reverse the y-axis, plotting 
+negative values upwards. Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>transform.view</code></td>
+<td>
+<p>Function for transforming 
+the values on the x-axis. Defaults to NULL (no transformation). 
+(See <code>plot_smooth</code> for more info.)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print.summary</code></td>
+<td>
+<p>Logical: whether or not to print the summary. 
+Default set to the print info messages option 
+(see <code>infoMessages</code>).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot</code></td>
+<td>
+<p>Logical: whether or not to plot the difference. If FALSE, then 
+the output is returned as a list, with the estimated difference 
+(<code>est</code>) and the standard error over the estimate (<code>se.est</code>) and 
+the x-values (<code>x</code>). Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>main</code></td>
+<td>
+<p>Text string, alternative title for plot.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylab</code></td>
+<td>
+<p>Text string, alternative label for y-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlab</code></td>
+<td>
+<p>Text string, alternative label for x-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlim</code></td>
+<td>
+<p>Range of x-axis. If not specified, the function automatically 
+generates an appropriate x-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylim</code></td>
+<td>
+<p>Range of y-axis. If not specified, the function automatically 
+generates an appropriate y-axis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>hide.label</code></td>
+<td>
+<p>Logical: whether or not to hide the label 
+(i.e., 'difference'). Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Optional arguments for <code>emptyPlot</code>, 
+or <code>plot_error</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>If the result is not being plotted, a list is 
+returned with the estimated difference (<code>est</code>) and the standard error 
+over the estimate (<code>se</code>) and the x-values (<code>x</code>) is returned.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Martijn Wieling, Jacolien van Rij
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other Testing for significance: 
+<code>compareML()</code>,
+<code>plot_diff2()</code>,
+<code>report_stats()</code>,
+<code>wald_gam()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(simdat)
+## Not run: 
+m1 &lt;- bam(Y ~ Group + te(Time, Trial, by=Group)
+    + s(Time, Subject, bs='fs', m=1),
+    data=simdat, discrete=TRUE)
+plot_diff(m1, view='Time', comp=list(Group=c('Children', 'Adults')))
+# in this model, excluding random effects does not change the difference:
+plot_diff(m1, view='Time', comp=list(Group=c('Children', 'Adults')), 
+    rm.ranef=TRUE)
+# simultaneous CI:
+plot_diff(m1, view='Time', comp=list(Group=c('Children', 'Adults')), 
+    rm.ranef=TRUE, sim.ci=TRUE)
+# Reversed y-axis (for EEG data) and no shading:
+plot_diff(m1, view='Time', comp=list(Group=c('Children', 'Adults')), 
+    eegAxis=TRUE, shade=FALSE)
+plot_diff(m1, view='Time', comp=list(Group=c('Children', 'Adults')),
+density=15, angle=90, ci.lwd=3)
+# Retrieving plot values...
+out &lt;- plot_diff(m1, view='Time', comp=list(Group=c('Children', 'Adults')), 
+   plot=FALSE)
+#... which might be used for indicating differences:
+x &lt;- find_difference(out$est, out$se, f=1.96, xVals=out$xVals)
+# add lines:
+arrows(x0=x$start, x1=x$end, y0=0, y1=0,code=3, length=.1, col='red')
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

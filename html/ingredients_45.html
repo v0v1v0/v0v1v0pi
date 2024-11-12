@@ -1,0 +1,80 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>print.aggregated_profiles_explainer</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Prints Aggregated Profiles</h2>
+
+<h3>Description</h3>
+
+<p>Prints Aggregated Profiles
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'aggregated_profiles_explainer'
+print(x, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>an individual variable profile explainer produced with the <code>aggregate_profiles()</code> function</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments that will be passed to <code>head()</code></p>
+</td>
+</tr>
+</table>
+<h3>Examples</h3>
+
+<pre><code class="language-R">library("DALEX")
+library("ingredients")
+
+model_titanic_glm &lt;- glm(survived ~ gender + age + fare,
+                         data = titanic_imputed, family = "binomial")
+
+explain_titanic_glm &lt;- explain(model_titanic_glm,
+                               data = titanic_imputed[,-8],
+                               y = titanic_imputed[,8])
+
+selected_passangers &lt;- select_sample(titanic_imputed, n = 100)
+cp_rf &lt;- ceteris_paribus(explain_titanic_glm, selected_passangers)
+
+head(cp_rf)
+
+pdp_rf &lt;- aggregate_profiles(cp_rf, variables = "age")
+head(pdp_rf)
+
+
+library("ranger")
+
+model_titanic_rf &lt;- ranger(survived ~.,  data = titanic_imputed,
+                           probability = TRUE)
+
+explain_titanic_rf &lt;- explain(model_titanic_rf,
+                              data = titanic_imputed[,-8],
+                              y = titanic_imputed[,8],
+                              label = "ranger forest",
+                              verbose = FALSE)
+
+cp_rf &lt;- ceteris_paribus(explain_titanic_rf, selected_passangers)
+cp_rf
+
+pdp_rf &lt;- aggregate_profiles(cp_rf, variables = "age")
+head(pdp_rf)
+
+
+</code></pre>
+
+
+</div>

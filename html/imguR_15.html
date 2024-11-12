@@ -1,0 +1,76 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>Authentication</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Imgur API Authentication</h2>
+
+<h3>Description</h3>
+
+<p>Description of Imgur API authentication options</p>
+
+
+<h3>Details</h3>
+
+<p>All calls to the Imgur.com API must be authenticated. imguR provides two authentication methods: anonymous API key authentication (the default) and OAuth2.0 authentication.
+</p>
+<p>By default, all calls are made anonymously. Most operations can be performed in this way. The package provides an API key for performing operations in this way. This default key can be overridden by passing <code>key</code> argument through any function. This may be useful if you intend to make a large number of anonymous requests using your own registered application.
+</p>
+<p>Alternatively, calls can be made with a user-specific OAuth2.0 token. This token is generated using <code>imgur_login</code> in an interactive session. The token allows calls to be made to a specific Imgur.com user account, which eases making subsequent changes to uploaded images (e.g., updating their metadata, adding images to an album, or deleting images). The token can then be passed using the <code>token</code> argument to any function.
+</p>
+<p>Note: if both <code>key</code> and <code>token</code> arguments are supplied to a function, the <code>token</code> argument always takes precedence.</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://api.imgur.com/oauth2">https://api.imgur.com/oauth2</a></p>
+
+
+<h3>See Also</h3>
+
+<p><code>imgur_login</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# OAuth2.0-authenticated use
+
+# interactive OAuth login
+tkn &lt;- imgur_login()
+
+# upload a simple graph
+i &lt;- imgur(token = tkn)
+hist(rnorm(100))
+u &lt;- imgur_off(i)
+
+# pass the `imgur_image` object to `update_image`:
+update_image(u, title = 'My graph', description = 'A simple graph', token = tkn)
+
+# or, pass just the image id:
+update_image(u$id, title = 'My graph', description = 'A simple graph', token = tkn)
+
+# periodically refresh token
+tkn$refresh()
+
+## End(Not run)
+
+## Not run: 
+# anonymous use
+
+# upload a simple graph
+i &lt;- imgur()
+hist(rnorm(100))
+u &lt;- imgur_off(i)
+
+# pass just the image deletehash:
+update_image(u$deletehash, title = 'My graph', description = 'A simple graph')
+
+## End(Not run)
+
+</code></pre>
+
+
+</div>

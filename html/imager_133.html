@@ -1,0 +1,91 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>imchange</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Modify parts of an image</h2>
+
+<h3>Description</h3>
+
+<p>A shortcut for modifying parts of an image, using imeval syntax. See doc for imeval first. As part of a pipe, avoids the creating of intermediate variables.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">imchange(obj, where, fo, env = parent.frame())
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>obj</code></td>
+<td>
+<p>an image or imlist</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>where</code></td>
+<td>
+<p>where to modify. a pixset, or a formula (in imeval syntax) that evaluates to a pixset.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>fo</code></td>
+<td>
+<p>a formula (in imeval syntax) used to modify the image part</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>env</code></td>
+<td>
+<p>evulation environment (see imeval)</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a modified image
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Simon Barthelme
+</p>
+
+
+<h3>See Also</h3>
+
+<p>imeval
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+#Set border to 0:
+imchange(boats,px.borders(boats,10),~ 0) %&gt;% plot
+#Eq. to
+im &lt;- boats
+im[px.borders(im,10)] &lt;- 0
+#Using formula syntax
+imchange(boats,~ px.borders(.,10),~ 0)
+#Replace with grayscale ramp
+imchange(boats,~ px.borders(.,10),~ xs) %&gt;% plot
+#Kill red channel in image
+imchange(boats,~ c==1,~ 0) %&gt;% plot
+#Shit hue by an amount depending on eccentricity
+load.example("parrots") %&gt;%
+  RGBtoHSL %&gt;%
+  imchange(~ c==1,~ .+80*exp(-(rho/550)^2) ) %&gt;%
+  HSLtoRGB %&gt;%
+  plot
+
+</code></pre>
+
+
+</div>

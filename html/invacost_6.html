@@ -1,0 +1,151 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>plot.invacost.costmodel</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Plot model predictions of cost trends over time</h2>
+
+<h3>Description</h3>
+
+<p>This function provides different plotting methods for the estimated annual
+cost of invasive species based on the temporal trend of costs.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">## S3 method for class 'invacost.costmodel'
+plot(
+  x,
+  plot.breaks = 10^(-15:15),
+  plot.type = "facets",
+  models = c("ols.linear", "ols.quadratic", "robust.linear", "robust.quadratic", "gam",
+    "mars", "quantile"),
+  evaluation.metric = FALSE,
+  graphical.parameters = NULL,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>The output object from <code>modelCosts</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.breaks</code></td>
+<td>
+<p>a vector of numeric values indicating the plot breaks 
+for the Y axis (cost values)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>plot.type</code></td>
+<td>
+<p><code>"single"</code> or <code>"facets"</code>. Defines the type of plot
+you want to make: a single facet with all models (<code>"single"</code>), or a 
+facet per category of model (<code>"facets"</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>models</code></td>
+<td>
+<p>the models the user would like to appear in the plots. Can be
+any subset of the models included in 'modelCosts'. Default is all models.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>evaluation.metric</code></td>
+<td>
+<p><code>TRUE</code> or <code>FALSE</code>. If <code>TRUE</code>, the
+Root Mean Square Error evaluation metric will be displayed on bottom right of
+the graph (except for quantile regressions, for which it not relevant). The
+displayed RMSE is the one based on calibration data only (see the slot
+<code>RMSE</code> in your <code>modelCosts</code> object)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>graphical.parameters</code></td>
+<td>
+<p>set this to <code>"manual"</code> if you want to 
+customise <code>ggplot2</code> parameters. 
+By default, the following layers are configured: <code>ylab</code>, <code>xlab</code>, 
+<code>scale_x_continuous</code>,
+<code>theme_bw</code> and, if <code>cost.transf = "log10"</code>, <code>scale_y_log10</code> and 
+<code>annotation_logticks</code>. If you specify <code>grahical.parameters = "manual"</code>,
+all defaults will be ignored.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>additional arguments, none implemented for now</p>
+</td>
+</tr>
+</table>
+<h3>Note</h3>
+
+<p>Error bands represent 95
+regression, GAM and quantile regression. We cannot construct confidence 
+intervals around the mean for MARS techniques. However, we can estimate
+prediction intervals by fitting a variance model to MARS residuals. Hence,
+the error bands for MARS model represent 95
+by fitting a linear model to the residuals of the MARS model. To learn more
+about this, see <code>varmod</code>
+</p>
+<p>If the legend appears empty (no colours) on your computer screen, try to
+zoom in the plot, or to write to a file. There is a rare bug where under
+certain conditions you cannot see the colours in the legend, because of their
+transparency; zooming in or writing to a file are the best workarounds.
+</p>
+
+
+<h3>References</h3>
+
+<p><a href="https://github.com/Farewe/invacost">https://github.com/Farewe/invacost</a>
+</p>
+<p>Leroy Boris, Kramer Andrew M, Vaissière Anne-Charlotte, Kourantidou Melina,
+Courchamp Franck &amp; Diagne Christophe (2022). Analysing economic costs 
+of invasive alien species with the invacost R package. Methods in Ecology
+and Evolution. <a href="https://doi.org/10.1111/2041-210X.13929">doi:10.1111/2041-210X.13929</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(invacost)
+
+### Cleaning steps
+# Eliminating data with no information on starting and ending years
+invacost &lt;- invacost[-which(is.na(invacost$Probable_starting_year_adjusted)), ]
+invacost &lt;- invacost[-which(is.na(invacost$Probable_ending_year_adjusted)), ]
+# Keeping only observed and reliable costs
+invacost &lt;- invacost[invacost$Implementation == "Observed", ]
+invacost &lt;- invacost[which(invacost$Method_reliability == "High"), ]
+# Eliminating data with no usable cost value
+invacost &lt;- invacost[-which(is.na(invacost$Cost_estimate_per_year_2017_USD_exchange_rate)), ]
+
+### Expansion
+
+db.over.time &lt;- expandYearlyCosts(invacost,
+                                  startcolumn = "Probable_starting_year_adjusted",
+                                  endcolumn = "Probable_ending_year_adjusted")
+
+### Analysis
+res &lt;- modelCosts(db.over.time,
+                  minimum.year = 1970,
+                  maximum.year = 2020)
+
+### Visualisation
+plot(res)
+plot(res, plot.type = "single")
+</code></pre>
+
+
+</div>

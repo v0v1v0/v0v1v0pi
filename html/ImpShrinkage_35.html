@@ -1,0 +1,146 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>resReg</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>The restricted estimator</h2>
+
+<h3>Description</h3>
+
+<p>This function calculates the restricted estimator using
+</p>
+<p style="text-align: center;"><code class="reqn">\hat{\beta}^{R} = \hat{\beta}^{U} - (X^{\top}X)^{-1}H^{\top}
+(H(X^{\top}X)^{-1}H^{\top})^{-1}(H\hat{\beta}^{U}-h)</code>
+</p>
+
+<p>where
+</p>
+
+<ul>
+<li> <p><code class="reqn">\hat{\beta}^{U}</code> is the unrestricted estimator; See <code>unrReg</code>.
+</p>
+</li>
+<li> <p><code class="reqn">H\beta = h</code> represents a subspace of the parameter space induced
+by the non-sample information. Here, <code class="reqn">H</code> is a known <code class="reqn">q \times p</code>
+matrix, and <code class="reqn">h</code> is a known <code class="reqn">q</code>-vector.
+</p>
+</li>
+</ul>
+<h3>Usage</h3>
+
+<pre><code class="language-R">resReg(X, y, H, h)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>Matrix with input observations, of dimension <code>n</code> x <code>p</code>;
+each row is an observation vector.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Vector with response observations of size <code>n</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>H</code></td>
+<td>
+<p>A given <code>q</code> x <code>p</code> matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>h</code></td>
+<td>
+<p>A given <code>q</code> x <code>1</code> vector.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>#' The corresponding estimator of <code class="reqn">\sigma^2</code> is
+</p>
+<p style="text-align: center;"><code class="reqn">s^2 = \frac{1}{n-p}(y-X\hat{\beta}^{R})^{\top}(y - X\hat{\beta}^{R}).</code>
+</p>
+
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>restricted</code> is a list containing at least the following components:
+</p>
+
+<dl>
+<dt><code>coef</code></dt>
+<dd>
+<p>A named vector of coefficients.</p>
+</dd>
+<dt><code>residuals</code></dt>
+<dd>
+<p>The residuals, that is, the response values minus fitted values.</p>
+</dd>
+<dt><code>s2</code></dt>
+<dd>
+<p>The estimated variance.</p>
+</dd>
+<dt><code>fitted.values</code></dt>
+<dd>
+<p>The fitted values.</p>
+</dd>
+</dl>
+<h3>References</h3>
+
+<p>Saleh, A. K. Md. Ehsanes. (2006). <em>Theory of Preliminary Test and
+Stein‐Type Estimation With Applications</em>, Wiley.
+</p>
+<p>Kaciranlar, S., Akdeniz, S. S. F., Styan, G. P. &amp; Werner, H. J. (1999). A new biased
+estimators in linear regression and detailed
+analysis of the widely-analysed dataset on
+portland cement. <em>Sankhya, Series B</em>, 61(3), 443-459.
+</p>
+<p>Kibria, B. M. Golam (2005). Applications of Some Improved Estimators in Linear Regression,
+<em>Journal of Modern Applied Statistical Methods</em>, 5(2), 367- 380.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">n_obs &lt;- 100
+p_vars &lt;- 5
+beta &lt;- c(2, 1, 3, 0, 5)
+simulated_data &lt;- simdata(n = n_obs, p = p_vars, beta)
+X &lt;- simulated_data$X
+y &lt;- simulated_data$y
+p &lt;- ncol(X)
+# H beta = h
+H &lt;- matrix(c(1, 1, -1, 0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 1, 0), nrow = 3, ncol = p, byrow = TRUE)
+h &lt;- rep(0, nrow(H))
+resReg(X, y, H, h)
+
+# H beta != h
+H &lt;- matrix(c(1, 1, -1, 0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 1, 0), nrow = 3, ncol = p, byrow = TRUE)
+h &lt;- rep(1, nrow(H))
+resReg(X, y, H, h)
+
+
+data(cement)
+X &lt;- as.matrix(cbind(1, cement[, 1:4]))
+y &lt;- cement$y
+# Based on Kaciranlar et al. (1999)
+H &lt;- matrix(c(0, 1, -1, 1, 0), nrow = 1, ncol = 5, byrow = TRUE)
+h &lt;- rep(0, nrow(H))
+resReg(X, y, H, h)
+# Based on Kibria (2005)
+H &lt;- matrix(c(0, 1, -1, 1, 0, 0, 0, 1, -1, -1, 0, 1, -1, 0, -1), nrow = 3, ncol = 5, byrow = TRUE)
+h &lt;- rep(0, nrow(H))
+resReg(X, y, H, h)
+</code></pre>
+
+
+</div>

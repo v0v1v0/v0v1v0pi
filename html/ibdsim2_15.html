@@ -1,0 +1,185 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>haploDraw</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Draw haplotypes onto a pedigree plot</h2>
+
+<h3>Description</h3>
+
+<p>Visualise the IBD pattern of a single chromosome, by drawing haplotypes onto
+the pedigree.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">haploDraw(
+  x,
+  ibd,
+  chrom = NULL,
+  ids = NULL,
+  unit = "mb",
+  L = NULL,
+  pos = 1,
+  cols = NULL,
+  height = 4,
+  width = 0.75,
+  sep = 0.75,
+  dist = 1,
+  keep.par = FALSE,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A <code>ped</code> object.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ibd</code></td>
+<td>
+<p>A <code>genomeSim</code> object, typically made by <code>ibdsim()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>chrom</code></td>
+<td>
+<p>A chromosome number, needed if <code>ibd</code> contains data from multiple
+chromosomes.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ids</code></td>
+<td>
+<p>A vector indicating for which pedigree members haplotypes should
+be drawn. If NULL (default), all individuals in <code>ibd</code> are included.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>unit</code></td>
+<td>
+<p>Either "mb" (default) or "cm".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>L</code></td>
+<td>
+<p>A positive number: the chromosome length. By default derived from
+<code>ibd</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pos</code></td>
+<td>
+<p>A vector recycled to <code>pedsize(x)</code>, indicating where haplotypes
+should be drawn relative to the pedigree symbols: 0 = no haplotypes; 1 =
+below; 2 = left; 3 = above; 4 = right. By default, all are placed below.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cols</code></td>
+<td>
+<p>A colour vector corresponding to the alleles in <code>ibd</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>height</code></td>
+<td>
+<p>The height of the haplotype rectangles in units of the pedigree
+symbol height. Default: 4.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>width</code></td>
+<td>
+<p>The width of the haplotype rectangles in units of the pedigree
+symbol width. Default: 0.75.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sep</code></td>
+<td>
+<p>The separation between haplotypes within a pair, measured in
+pedigree symbol widths.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>dist</code></td>
+<td>
+<p>The distance between pedigree symbols and the closest haplotype,
+measured in pedigree symbol widths.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>keep.par</code></td>
+<td>
+<p>A logical, by default FALSE; passed on to <code>plot.ped()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>Further arguments passed on to <code>plot.ped()</code>, e.g. <code>margins</code> and
+<code>cex</code>. See <code>?plotmethods</code> for a complete list.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>None.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+###############################
+# Example 1: A family quartet #
+###############################
+
+x = nuclearPed(2)
+map = uniformMap(M = 1)
+s = ibdsim(x, map = map, seed = 4276)
+
+haploDraw(x, s)
+
+# Custom colours and placements
+haploDraw(x, s, cols = c(3,7,2,4), pos = c(2,4,2,4))
+
+# Standard plot options apply
+haploDraw(x, s, margins = 3, cex = 1.5, title = "Full sibs")
+ 
+
+###########################
+# Example 2: Autozygosity #
+###########################
+
+x = halfCousinPed(0, child = TRUE)
+map = uniformMap(M = 1)
+s = ibdsim(x, map = map, skipRecomb = c(1,3), seed = 2)
+
+# Only include relevant individuals (skip 1 and 3)
+haploDraw(x, s, ids = c(2,4,5,6), pos = c(1,2,4,4))
+
+###############################
+# Example 3: X-chromosomal sims
+###############################
+
+x = nuclearPed(2, sex = 2:1)
+s = ibdsim(x, N = 1, map = uniformMap(M = 1, chrom = "X"), seed = 123)
+
+haploDraw(x, s)
+
+
+</code></pre>
+
+
+</div>

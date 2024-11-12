@@ -1,0 +1,67 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>IPA_workflow</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+IPA Workflow
+</h2>
+
+<h3>Description</h3>
+
+<p>This function executes the IPA workflow in order.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">IPA_workflow(spreadsheet)
+IPA_Workflow(spreadsheet)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table><tr style="vertical-align: top;">
+<td><code>spreadsheet</code></td>
+<td>
+
+<p>IPA spreadsheet
+</p>
+</td>
+</tr></table>
+<h3>Value</h3>
+
+<p>This function organizes the IPA file processing for a better performance using the template spreadsheet.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+s_path &lt;- system.file("extdata", package = "IDSL.IPA")
+SSh1 &lt;- paste0(s_path,"/IPA_parameters.xlsx")
+## To see the results, use a known folder instead of the `tempdir()` command
+temp_wd &lt;- tempdir()
+temp_wd_zip &lt;- paste0(temp_wd, "/idsl_ipa_test_files.zip")
+spreadsheet &lt;- readxl::read_xlsx(SSh1)
+PARAM = cbind(spreadsheet[, 2], spreadsheet[, 4])
+tryCatch({download.file(paste0("https://github.com/idslme/IDSL.IPA/blob/main/",
+                               "IPA_educational_files/idsl_ipa_test_files.zip?raw=true"),
+                        destfile = temp_wd_zip)
+  unzip(temp_wd_zip, exdir = temp_wd)
+  pass_download &lt;- TRUE},
+  error = function(e) {pass_download &lt;- FALSE},
+  warning = function(w) {pass_download &lt;- FALSE})
+if (pass_download) {
+  PARAM[7, 2] &lt;- temp_wd
+  PARAM[44, 2] &lt;- s_path
+  PARAM[10, 2] &lt;- temp_wd
+  IPA_workflow(PARAM)
+}
+
+</code></pre>
+
+
+</div>

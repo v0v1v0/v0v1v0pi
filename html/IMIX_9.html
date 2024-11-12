@@ -1,0 +1,96 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>model_selection</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Model Selection</h2>
+
+<h3>Description</h3>
+
+<p>Model selection for sub-model outputs in IMIX, this step is to calculate the AIC or BIC values for one model
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">model_selection(
+  loglik,
+  n,
+  g = 4,
+  d = 2,
+  modelname = c("IMIX_ind", "IMIX_ind_unrestrict", "IMIX_cor_twostep", "IMIX_cor",
+    "IMIX_cor_restrict")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>loglik</code></td>
+<td>
+<p>Full log likelihood, result output from IMIX or a sub model in IMIX: 'Full MaxLogLik final'</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n</code></td>
+<td>
+<p>Total number of genes</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>g</code></td>
+<td>
+<p>Number of components</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>d</code></td>
+<td>
+<p>Number of data types</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>modelname</code></td>
+<td>
+<p>The model name, default is IMIX_ind</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>AIC/BIC values of the target model
+</p>
+
+
+<h3>References</h3>
+
+<p>Ziqiao Wang and Peng Wei. 2020. “IMIX: a multivariate mixture model approach to association analysis through multi-omics data integration.” Bioinformatics. &lt;doi:10.1093/bioinformatics/btaa1001&gt;.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+# First load the data
+data("data_p")
+
+# Specify the initial values
+mu_input &lt;- c(0,3,0,3)
+sigma_input &lt;- rep(1,4)
+p_input &lt;- rep(0.5,4)
+
+# Fit the IMIX model
+test1 &lt;- IMIX(data_input = data_p,data_type = "p",mu_ini = mu_input,sigma_ini = sigma_input,
+p_ini = p_input,alpha = 0.1,model_selection_method = "AIC")
+
+# Calculate the AIC and BIC values for IMIX_ind with two data types and four components
+model_selection(test1$IMIX_ind$`Full MaxLogLik final`,
+n=dim(test1$IMIX_ind$`posterior prob`)[1],g=4,d=2, "IMIX_ind")
+
+</code></pre>
+
+
+</div>

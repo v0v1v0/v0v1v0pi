@@ -1,0 +1,88 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>transferFunctionSpectra</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>function to retrieve response values to use for input to the IRISMustangMetrics::transferFunctionMetric</h2>
+
+<h3>Description</h3>
+
+<p>The <code>transferFunctionSpectra</code> function returns a frequency-amplitude-phase response from the service.iris.edu/iris/ws/evalresp web service for a seismic <code>Stream</code> object
+using sampling_rate to determine frequency limits. The IRISMustangMetrics::transferFunctionMetric expects this output as evalresp input.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">transferFunctionSpectra(st,sampling_rate)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>st</code></td>
+<td>
+<p>a <code>Stream</code> object</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>sampling_rate</code></td>
+<td>
+<p>sample rate</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The <code>transferFunctionSpectra</code> /determines the minfreq, maxfreq, and nfreq for input to the 
+<code>getEvalresp</code> function based on input sample rate. Other getEvalresp inputs are units='def' (default)
+and output='fap' (frequency-amplitude-phase).  
+</p>
+<p><code>transferFunctionSpectra</code> will always call <code>getEvalresp</code> using the service.iris.edu/irisws/evalresp 
+web service. The IRISMustangMetrics::transferFunctionMetric expects this output as evalresp input.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Output is a dataframe with columns named:
+</p>
+<pre>freq, amp, phase</pre>
+
+
+<h3>Author(s)</h3>
+
+<p>Mary Templeton <a href="mailto:met@iris.washington.edu">met@iris.washington.edu</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>getEvalresp</code>,
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+# Create a new IrisClient
+iris &lt;- new("IrisClient", debug=TRUE)
+
+# Get seismic data
+starttime &lt;- as.POSIXct("2011-05-05", tz="GMT") 
+endtime &lt;- starttime + 1*24*3600
+st &lt;- getDataselect(iris,"IU","GRFO","--","BHE",starttime,endtime)
+sampling_rate &lt;- 20
+
+# Generate power spectral density for each hour long segment
+evalresp  &lt;- transferFunctionSpectra(st,sampling_rate)
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

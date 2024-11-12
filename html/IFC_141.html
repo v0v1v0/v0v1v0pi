@@ -1,0 +1,138 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>getInfo</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>IFC File Information Extraction</h2>
+
+<h3>Description</h3>
+
+<p>Retrieves rich information from RIF, CIF and DAF files.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">getInfo(
+  fileName,
+  from = c("acquisition", "analysis")[2],
+  verbose = FALSE,
+  verbosity = 1,
+  warn = TRUE,
+  force_default = TRUE,
+  cifdir = dirname(fileName),
+  ntry = +Inf,
+  ...
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>fileName</code></td>
+<td>
+<p>path to file..</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>from</code></td>
+<td>
+<p>whether to extract information from 'acquisition' or 'analysis'. Default is 'analysis'.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>whether to display information (use for debugging purpose). Default is FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbosity</code></td>
+<td>
+<p>quantity of information print to console when verbose is TRUE; 1: normal, 2: rich. Default is 1.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>warn</code></td>
+<td>
+<p>whether to send warning message when trying to read 'analysis' information from a 'rif' file. Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>force_default</code></td>
+<td>
+<p>when display information can't be retrieved whether to use default values. Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cifdir</code></td>
+<td>
+<p>the path of the directory to initially look to cif file. Default is dirname(fileName). Only apply when 'fileName' is a .daf file.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ntry</code></td>
+<td>
+<p>number of times <code>getInfo</code> will be allowed to find corresponding cif file. Default is +Inf. Only apply when 'fileName' is a .daf file.
+If cif can't be found, but 'ntry' is reached, then an error will be thrown.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p>other arguments to be passed.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>a list of information (open .daf file in an text editor for more details) about input fileName of class 'IFC_info' and 'acquistion' or 'analysis', whose members are:<br>
+-objcount, number of object in file,<br>
+-date, date of file creation,<br>
+-instrument, instrument identification,<br>
+-sw_raw, version of software for raw data,<br>
+-sw_processed, version of software for processed data,<br>
+-channelwidth, default channel width in pixel,<br>
+-in_use, channels used,<br>
+-brightfield, whether brightfield is applied on channels and its intensity,<br>
+-illumination, laser illumination parameters,<br>
+-collectionmode, the collection mode,<br>
+-magnification, magnification used,<br>
+-coremode, the core mode,<br>
+-evmode, the high gain mode,<br>
+-CrossTalkMatrix. compensation matrix applied,<br>
+-ChannelPresets, channel preset,<br>
+-ImageDisplaySettings, image display settings,<br>
+-Images, information about colors, range and channels,<br>
+-masks, masks defined,<br>
+-ViewingModes, modes of visualization,<br>
+-checksum, checksum computed,<br>
+-Merged_rif, character vector of path of files used to create rif, if input file was a merged,<br>
+-Merged_cif, character vector of path of files used to create cif, if input file was a merged,<br>
+-XIF_test, integer defining XIF type,<br>
+-checksum, integer corresponding to file checksum,<br>
+-fileName, path of fileName input,<br>
+-fileName_image, path of fileName_image.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">if(requireNamespace("IFCdata", quietly = TRUE)) {
+  ## use a daf file
+  file_daf &lt;- system.file("extdata", "example.daf", package = "IFCdata")
+  info &lt;- getInfo(fileName = file_daf, from = "analysis")
+  ## show some information
+  print(info$Images)
+} else {
+  message(sprintf('Please run `install.packages("IFCdata", repos = "%s", type = "source")` %s',
+                  'https://gitdemont.github.io/IFCdata/',
+                  'to install extra files required to run this example.'))
+}
+</code></pre>
+
+
+</div>

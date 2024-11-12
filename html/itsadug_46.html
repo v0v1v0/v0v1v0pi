@@ -1,0 +1,151 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>resid_gam</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Extract model residuals and remove the autocorrelation accounted for.</h2>
+
+<h3>Description</h3>
+
+<p>Extract model residuals and remove the autocorrelation accounted for.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">resid_gam(model, AR_start = NULL, incl_na = FALSE, return_all = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>A GAMM model build with <code>gam</code> or 
+<code>bam</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>AR_start</code></td>
+<td>
+<p>Optional: vector with logicals, indicating the start of 
+events. 
+Default is NULL, because generally the function can retrieve all necessary 
+information from the model.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>incl_na</code></td>
+<td>
+<p>Whether or not to include missing values (NA)when returning 
+the residuals. Defaults to FALSE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>return_all</code></td>
+<td>
+<p>Default is FALSE. Returns a list with normal residuals, 
+corrected residuals, and the value of rho.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>Corrected residuals.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Jacolien van Rij
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>resid</code>, <code>missing_est</code>
+</p>
+<p>Other functions for model criticism: 
+<code>acf_n_plots()</code>,
+<code>acf_plot()</code>,
+<code>acf_resid()</code>,
+<code>derive_timeseries()</code>,
+<code>start_event()</code>,
+<code>start_value_rho()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(simdat)
+
+## Not run: 
+# Add start event column:
+simdat &lt;- start_event(simdat, event=c('Subject', 'Trial'))
+head(simdat)
+# bam model with AR1 model (toy example, not serious model):
+m1 &lt;- bam(Y ~ Group + te(Time, Trial, by=Group), 
+   data=simdat, rho=.5, AR.start=simdat$start.event)
+# Standard residuals:
+res1 &lt;- resid(m1)
+# Corrected residuals:
+res2 &lt;- resid_gam(m1)
+
+# Result in different ACF's:
+par(mfrow=c(1,2))
+acf(res1)
+acf(res2)
+
+# Without AR.start included in the model:
+m2 &lt;- bam(Y ~ Group + te(Time, Trial, by=Group), 
+   data=simdat)
+acf(resid_gam(m2), plot=F)
+# Same as resid(m2)!
+acf(resid(m2), plot=F)
+
+### MISSING VALUES ###
+# Note that corrected residuals cannot be calculated for the last 
+# point of each time series. These missing values are by default
+# excluded.
+
+# Therefore, this will result in an error...
+simdat$res &lt;- resid_gam(m1)
+# ... and this will give an error too:
+simdat$res &lt;- NA
+simdat[!is.na(simdat$Y),] &lt;- resid_gam(m1)
+# ... but this works:
+simdat$res &lt;- resid_gam(m1, incl_na=TRUE)
+
+# The parameter incl_na will NOT add missing values
+# for missing values in the *data*. 
+# Example:
+simdat[sample(nrow(simdat), 15),]$Y &lt;- NA
+# Without AR.start included in the model:
+m2 &lt;- bam(Y ~ Group + te(Time, Trial, by=Group), 
+   data=simdat)
+# This works:
+acf(resid_gam(m2))
+# ...but this results in error, although no AR1 model specified:
+simdat$res &lt;- resid_gam(m2)
+# ... for this type of missing data, this does not solve the problem:
+simdat$res &lt;- resid_gam(m2, incl_na=TRUE)
+# instead try this:
+simdat$res &lt;- NA
+simdat[-missing_est(m2),]$res &lt;- resid_gam(m2)
+
+# With AR.start included in the model:
+m1 &lt;- bam(Y ~ Group + te(Time, Trial, by=Group), 
+   data=simdat, rho=.5, AR.start=simdat$start.event)
+# This works (incl_na=TRUE):
+simdat$res &lt;- NA
+simdat[-missing_est(m2),]$res &lt;- resid_gam(m2, incl_na=TRUE)
+
+
+## End(Not run)
+</code></pre>
+
+
+</div>

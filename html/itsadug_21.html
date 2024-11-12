@@ -1,0 +1,200 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>get_pca_predictions</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Return PCA predictions.</h2>
+
+<h3>Description</h3>
+
+<p>Produces perspective or contour plot views of gam model 
+predictions of the additive effects interactions.
+The code is based on the script for <code>vis.gam</code>, 
+but allows to cancel random effects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">get_pca_predictions(
+  x,
+  pca.term = NULL,
+  weights = NULL,
+  view = NULL,
+  cond = list(),
+  select = NULL,
+  n.grid = 30,
+  se = 1.96,
+  xlim = NULL,
+  ylim = NULL,
+  partial = TRUE,
+  rm.ranef = NULL,
+  as.data.frame = TRUE,
+  print.summary = getOption("itsadug_print")
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A gam object, produced by <code>gam</code> or 
+<code>bam</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>pca.term</code></td>
+<td>
+<p>Text string, name of model predictor that represents a 
+principle component.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>weights</code></td>
+<td>
+<p>Named list with the predictors that are combined in the PC 
+and their weights. See examples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>view</code></td>
+<td>
+<p>A two-value vector containing the names of the two terms to 
+plot. The two terms should be part of the PC. Note that 
+variables coerced to factors in the model formula won't work as view 
+variables.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>cond</code></td>
+<td>
+<p>A named list of the values to use for the other predictor 
+terms (not in view). Used for choosing between smooths that share the 
+same view predictors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>select</code></td>
+<td>
+<p>A number, selecting a single model term for printing. e.g. 
+if you want the plot for the second smooth term set select=2.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.grid</code></td>
+<td>
+<p>The number of grid nodes in each direction used for 
+calculating the plotted surface.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>se</code></td>
+<td>
+<p>If less than or equal to zero then only the predicted surface 
+is plotted, but if greater than zero, then 3 surfaces are plotted, one at 
+the predicted values minus se standard errors, one at the predicted 
+values and one at the predicted values plus se standard errors.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>xlim</code></td>
+<td>
+<p>A two item array giving the lower and upper limits for the x-
+axis scale. NULL to choose automatically.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ylim</code></td>
+<td>
+<p>A two item array giving the lower and upper limits for the y-
+axis scale. NULL to choose automatically.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>partial</code></td>
+<td>
+<p>Logical value: whether or not to plot the partial effect 
+(TRUE) or the summed effect (FALSE, default).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rm.ranef</code></td>
+<td>
+<p>Logical: whether or not to remove random effects. 
+Default is TRUE.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>as.data.frame</code></td>
+<td>
+<p>Logical: whether the output is returned as data 
+frame (TRUE, default) or as list (FALSE).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>print.summary</code></td>
+<td>
+<p>Logical: whether or not to print a summary.
+Default set to the print info messages option 
+(see <code>infoMessages</code>).</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Jacolien van Rij
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>plot_pca_surface</code>, <code>prcomp</code>
+</p>
+<p>Other Functions for PCA interpretation: 
+<code>plot_pca_surface()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">data(simdat)
+# add hypothetical correlated term:
+simdat$predictor &lt;-  (simdat$Trial+10)^.75 + rnorm(nrow(simdat))
+# principal components analysis:
+pca &lt;- prcomp(simdat[, c('Trial', 'predictor')])
+# only first PC term contributes:
+summary(pca)
+# get rotation (weights of predictors in PC):
+pcar &lt;- pca$rotation
+# add PC1 to data:
+simdat$PC1 &lt;- pca$x[,1]
+
+## Not run: 
+# model:
+m1 &lt;- bam(Y ~ Group + te(Time, PC1, by=Group) 
+    + s(Time, Subject, bs='fs', m=1, k=5), data=simdat)
+# inspect surface:
+fvisgam(m1, view=c('Time', 'PC1'), cond=list(Group='Children'),
+    rm.ranef=TRUE)
+# how does Trial contribute?
+p &lt;- get_pca_predictions(m1, pca.term='PC1', weights=pcar[,'PC1'], 
+    view=c('Time', 'Trial'), cond=list(Group='Children'),
+    rm.ranef=TRUE, partial=FALSE)
+# Note that the range of Trial is estimated based on the values of PC1.
+# A better solution is to specify the range:
+p &lt;- get_pca_predictions(m1, pca.term='PC1', weights=pcar[,'PC1'], 
+    view=list(Time=range(simdat$Time), Trial=range(simdat$Trial)), 
+    cond=list(Group='Children'),rm.ranef=TRUE, partial=FALSE)
+# plotting of the surface:
+plot_pca_surface(m1, pca.term='PC1', weights=pcar[,'PC1'], 
+    view=c('Time', 'Trial'), cond=list(Group='Children'),rm.ranef=TRUE)
+
+## End(Not run)
+</code></pre>
+
+
+</div>

@@ -1,0 +1,234 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>prepraster</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Prepare the structural raster</h2>
+
+<h3>Description</h3>
+
+<p>This function prepares the structural raster for the follow-up analyses. The
+size and extent of the structural raster defines the resolution at which the
+isoscapes and the assignments are defined.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">prepraster(
+  raster,
+  isofit = NULL,
+  margin_pct = 5,
+  aggregation_factor = 0L,
+  aggregation_fn = mean,
+  manual_crop = NULL,
+  values_to_zero = c(-Inf, 0),
+  verbose = interactive()
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>raster</code></td>
+<td>
+<p>The structural raster (<em>SpatRaster</em>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>isofit</code></td>
+<td>
+<p>The fitted isoscape model returned by the function <code>isofit</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>margin_pct</code></td>
+<td>
+<p>The percentage representing by how much the area should
+extend outside the area used for cropping (default = 5, corresponding to
+5%). Set to 0 if you want exact cropping.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>aggregation_factor</code></td>
+<td>
+<p>The number of neighbouring cells (<em>integer</em>) to
+merge during aggregation</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>aggregation_fn</code></td>
+<td>
+<p>The <em>function</em> used to aggregate cells</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>manual_crop</code></td>
+<td>
+<p>A vector of four coordinates (<em>numeric</em>) for manual
+cropping, e.g. the spatial extent</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>values_to_zero</code></td>
+<td>
+<p>A <em>numeric vector</em> of length two specifying the range
+of values for the structural raster that must be turned into 0. Default is
+<code>c(-Inf, 0)</code> which for an elevation raster brings all seas to an elevation
+of zero. For using IsoriX for marine organisms, you should use <code>c(0, Inf)</code>
+instead.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>verbose</code></td>
+<td>
+<p>A <em>logical</em> indicating whether information about the progress
+of the procedure should be displayed or not while the function is running.
+By default verbose is <code>TRUE</code> if users use an interactive R session, and
+<code>FALSE</code> otherwise.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>This functions allows the user to crop a raster according to either the
+extent of the isoscape or manually. If a fitted isoscape object is provided
+(see <code>isofit</code>), the function extracts the observed locations of isotopic
+sources from the model object and crops the structural raster accordingly.
+Alternatively, <code>manual_crop</code> allows you to crop the structural raster to a
+desired extent. If no model and no coordinates for manual cropping are
+provided, no crop will be performed. Importantly, cropping is recommended as
+it prevents extrapolations outside the latitude/longitude range of the source
+data. Predicting outside the range of the source data may lead to highly
+unreliable predictions.
+</p>
+<p>Aggregation changes the spatial resolution of the raster, making computation
+faster and using less memory (this can affect the assignment; see note
+below). An aggregation factor of zero (or one) keeps the resolution constant
+(default).
+</p>
+<p>This function relies on calls to the functions <code>terra::aggregate</code> and
+<code>terra::crop</code> from the package <span class="pkg">terra</span>. It thus share the limitations
+of these functions. In particular, <code>terra::crop</code> expects extents with
+increasing longitudes and latitudes. We have tried to partially relax this
+constrains for longitude and you can use the argument <code>manual_crop</code> to
+provide longitudes in decreasing order, which is useful to centre a isoscape
+around the pacific for instance. But this fix does not solve all the
+limitations as plotting polygons or points on top of that remains problematic
+(see example bellow). We will work on this on the future but we have other
+priorities for now (let us know if you really need this feature).
+</p>
+
+
+<h3>Value</h3>
+
+<p>The prepared structural raster of class <em>SpatRaster</em>
+</p>
+
+
+<h3>Note</h3>
+
+<p>Aggregating the raster may lead to different results for the
+assignment, because the values of raster cells changes depending on the
+aggregation function (see example below), which in turn affects model
+predictions.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ElevRasterDE</code> for information on elevation rasters, which can be
+used as structural rasters.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">
+## The examples below will only be run if sufficient time is allowed
+## You can change that by typing e.g. options_IsoriX(example_maxtime = XX)
+## if you want to allow for examples taking up to ca. XX seconds to run
+## (so don't write XX but put a number instead!)
+
+if (getOption_IsoriX("example_maxtime") &gt; 30) {
+  ## We fit the models for Germany
+  GNIPDataDEagg &lt;- prepsources(data = GNIPDataDE)
+
+  GermanFit &lt;- isofit(
+    data = GNIPDataDEagg,
+    mean_model_fix = list(elev = TRUE, lat_abs = TRUE)
+  )
+
+  ### Let's explore the difference between aggregation schemes
+
+  ## We aggregate and crop using different settings
+  ElevationRaster1 &lt;- prepraster(
+    raster = ElevRasterDE,
+    isofit = GermanFit,
+    margin_pct = 0,
+    aggregation_factor = 0
+  )
+
+  ElevationRaster2 &lt;- prepraster(
+    raster = ElevRasterDE,
+    isofit = GermanFit,
+    margin_pct = 5,
+    aggregation_factor = 5
+  )
+
+  ElevationRaster3 &lt;- prepraster(
+    raster = ElevRasterDE,
+    isofit = GermanFit,
+    margin_pct = 10,
+    aggregation_factor = 5, aggregation_fn = max
+  )
+
+  ## We plot the outcome of the 3 different aggregation schemes using terra
+
+  oripar &lt;- par(mfrow = c(1, 3)) ## display 3 plots side-by-side
+
+  plot(ElevationRaster1, main = "Original small raster")
+  polys(CountryBorders)
+  polys(OceanMask, col = "blue")
+
+  plot(ElevationRaster2, main = "Small raster aggregated (by mean)")
+  polys(CountryBorders)
+  polys(OceanMask, col = "blue")
+
+  plot(ElevationRaster3, main = "Small raster aggregated (by max)")
+  polys(CountryBorders)
+  polys(OceanMask, col = "blue")
+
+  par(oripar) ## restore graphical settings
+}
+
+## The examples below will only be run if sufficient time is allowed
+## You can change that by typing e.g. options_IsoriX(example_maxtime = XX)
+## if you want to allow for examples taking up to ca. XX seconds to run
+## (so don't write XX but put a number instead!)
+
+if (getOption_IsoriX("example_maxtime") &gt; 10) {
+  ### Let's create a raster centered around the pacific
+
+  ## We first create an empty raster
+  EmptyRaster &lt;- rast(matrix(0, ncol = 360, nrow = 180))
+  ext(EmptyRaster) &lt;- c(-180, 180, -90, 90)
+  crs(EmptyRaster) &lt;- "+proj=longlat +datum=WGS84"
+
+  ## We crop it around the pacific
+  PacificA &lt;- prepraster(EmptyRaster, manual_crop = c(110, -70, -90, 90))
+  ext(PacificA) # note that the extent has changed!
+
+  ## We plot (note the use of the function shift()!)
+  plot(PacificA, col = "blue", legend = FALSE)
+  polys(CountryBorders, col = "black")
+  polys(shift(CountryBorders, dx = 360), col = "black")
+}
+
+</code></pre>
+
+
+</div>

@@ -1,0 +1,153 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>img_self_similarity</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Image self-similarity</h2>
+
+<h3>Description</h3>
+
+<p><code>img_self_similarity</code> returns the self-similarity of an image (i.e., the
+degree to which the log-log power spectrum of the image falls with a slope of
+-2). Higher values indicate higher image self-similarity.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">img_self_similarity(img, full = FALSE, logplot = FALSE, raw = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>img</code></td>
+<td>
+<p>An image in form of a matrix or array of numeric values,
+preferably by square size. If the input is not square, bilinear resizing to
+a square size is performed using the
+<code>OpenImageR</code> package. Use e.g.
+<code>img_read()</code> to read an image file into <code>R</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>full</code></td>
+<td>
+<p>logical. Should the full frequency range be used for
+interpolation? (default: <code>FALSE</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>logplot</code></td>
+<td>
+<p>logical. Should the log-log power spectrum of the image be
+plotted? (default: <code>FALSE</code>)</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>raw</code></td>
+<td>
+<p>logical. Should the raw value of the regression slope be returned?
+(default: <code>FALSE</code>)</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function takes a (square) array or matrix of numeric or integer
+values representing an image as input and returns the self-similarity of
+the image. Self-similarity is computed via the slope of the log-log power
+spectrum using OLS. A slope near <code>-2</code> indicates fractal-like
+properties (see Redies et al., 2007; Simoncelli &amp; Olshausen, 2001). Thus,
+value for self-similarity that is return by the function calculated as
+<code>self-similarity = abs(slope + 2) * (-1)</code>. That is, the measure
+reaches its maximum value of 0 for a slope of -2, and any deviation from -2
+results in negative values that are more negative the higher the deviation
+from -2. For color images, the weighted average between each color channel's
+values is computed (cf. Mayer &amp; Landwehr 2018).
+</p>
+<p>Per default, only the frequency range betwen 10 and 256 cycles per image is
+used for interpolation. Computation for the full range can be set via the
+parameter <code>full = TRUE</code>.
+</p>
+<p>If <code>logplot</code> is set to <code>TRUE</code> then a log-log plot of the power
+spectrum is additionally shown. If the package <code>ggplot2</code> is installed
+the plot includes the slope of the OLS regression. Note that this option is
+currently implemented for grayscale images.
+</p>
+<p>It is possible to get the raw regression slope (instead of the transformed
+value which indicates self-similarity) by using the option <code>raw =
+  TRUE</code>.
+</p>
+<p>For color images, the weighed average between each color channel's values
+is computed.
+</p>
+
+
+<h3>Value</h3>
+
+<p>a numeric value (self-similarity)
+</p>
+
+
+<h3>Note</h3>
+
+<p>The function inspired by Matlab's sfPlot (by Diederick C. Niehorster).
+</p>
+
+
+<h3>References</h3>
+
+<p>Mayer, S. &amp; Landwehr, J, R. (2018). Quantifying Visual Aesthetics
+Based on Processing Fluency Theory: Four Algorithmic Measures for
+Antecedents of Aesthetic Preferences. <em>Psychology of Aesthetics,
+Creativity, and the Arts</em>, <em>12</em>(4), 399–431.
+doi: <a href="https://doi.org/10.1037/aca0000187">10.1037/aca0000187</a>
+</p>
+<p>Redies, C., Hasenstein, J., &amp; Denzler, J. (2007). Fractal-like
+image statistics in visual art: Similarity to natural scenes. <em>Spatial
+Vision</em>, <em>21</em>, 137–148.
+doi: <a href="https://doi.org/10.1163/156856807782753921">10.1163/156856807782753921</a>
+</p>
+<p>Simoncelli, E. P., &amp; Olshausen, B. A. (2001). Natural image
+statistics and neural representation. <em>Annual Review of Neuroscience</em>,
+<em>24</em>, 1193–1216.
+doi: <a href="https://doi.org/10.1146/annurev.neuro.24.1.1193">10.1146/annurev.neuro.24.1.1193</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>img_read</code>, <code>img_contrast</code>,
+<code>img_complexity</code>, <code>img_simplicity</code>,
+<code>img_symmetry</code>, <code>img_typicality</code>,
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># Example image with high self-similarity: romanesco
+romanesco &lt;- img_read(system.file("example_images", "romanesco.jpg", package = "imagefluency"))
+#
+# display image
+grid::grid.raster(romanesco)
+#
+# get self-similarity
+img_self_similarity(romanesco)
+
+# Example image with low self-similarity: office
+office &lt;- img_read(system.file("example_images", "office.jpg", package = "imagefluency"))
+#
+# display image
+grid::grid.raster(office)
+#
+# get self-similarity
+img_self_similarity(office)
+
+</code></pre>
+
+
+</div>

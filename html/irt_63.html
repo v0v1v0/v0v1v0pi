@@ -1,0 +1,521 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>est_flexmirt</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>Unidimensional Item Calibration via flexMIRT</h2>
+
+<h3>Description</h3>
+
+<p><code>est_flexmirt</code> runs flexMIRT in batch mode. This function
+requires flexMIRT program already installed on the Windows machine.
+Visit &lt;https://vpgcentral.com/software/flexmirt/&gt; for more details
+about the software. Even though flexMIRT can run various models, only a
+selected set of unidimensional models can be fitted using
+<code>est_flexmirt</code> function.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">est_flexmirt(
+  x = NULL,
+  model = NULL,
+  target_dir = getwd(),
+  analysis_name = "flexMIRT_calibration",
+  item_ids = NULL,
+  D = 1,
+  max_em_cycles = c(500, 100),
+  quadrature = c(49, 6),
+  em_tol = c(1e-04, 1e-09),
+  prior = NULL,
+  gof = "Basic",
+  examinee_id_var = NULL,
+  group_var = NULL,
+  scoring_method = NULL,
+  additional_options = NULL,
+  additional_constraints = NULL,
+  flexmirt_exe = NULL,
+  overwrite = FALSE,
+  show_output_on_console = TRUE
+)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>x</code></td>
+<td>
+<p>A matrix/data.frame/Response_set object including examinee
+item responses. In it's bare form, it can be a matrix of item responses,
+where ideally the column names are the item IDs and row names are the
+examinee IDs (though neither are necessary).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>model</code></td>
+<td>
+<p>The psychometric model(s) of items. The user can provide an
+input in the following three ways: (a) A vector of length one which
+represents the model of each item. (b) A vector which has the same length
+as the number of items that will be calibrated that specifies the model
+of each item. (c) <code>NULL</code>, the default value, where the program will
+check the number of categories of each item. Items with two or fewer
+categories will be calibrated using <code>"3PL"</code> (three-parameter logistic
+IRT model), items with more than two categories will be calibrated using
+<code>"GRM"</code> (Graded Response Model).
+</p>
+
+<dl>
+<dt><code>"1PL"</code></dt>
+<dd>
+<p>One-parameter logistic model.</p>
+</dd>
+<dt><code>"2PL"</code></dt>
+<dd>
+<p>Two-parameter logistic model.</p>
+</dd>
+<dt><code>"3PL"</code></dt>
+<dd>
+<p>Three-parameter logistic model.</p>
+</dd>
+<dt><code>"GRM"</code></dt>
+<dd>
+<p>Graded Response Model</p>
+</dd>
+<dt><code>"GPCM"</code></dt>
+<dd>
+<p>Generalized Partial Credit Model</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>target_dir</code></td>
+<td>
+<p>The directory/folder where the flexMIRT syntax data
+files and output will be saved. The default value is the current working
+directory, i.e. <code>get_wd()</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>analysis_name</code></td>
+<td>
+<p>This will be the file names of the data, flexMIRT
+syntax file and output files. The default value is
+<code>"flexMIRT_calibration"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>item_ids</code></td>
+<td>
+<p>A vector of column names or numbers of the <code>x</code> that
+represents the responses. The default value is <code>NULL</code> where all of
+the columns in the data are assumed to be a response matrix (unless
+specified by <code>group_var</code> or <code>examinee_id_var</code> arguments).</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>Scaling constant. Default value is 1. If it is not equal to 1,
+a new line added to constraints to multiply the slope parameter with the
+D value specified.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>max_em_cycles</code></td>
+<td>
+<p>A numeric vector of length two specifying the maximum
+number of iterations allowed in E- and M-steps. The default value is
+<code>c(500, 100)</code> where there will be maximum 500 iterations allowed in
+E-steps and 100 iterations M-steps,</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>quadrature</code></td>
+<td>
+<p>A numeric vector of length two specifying the number of
+quadrature points and the maximum theta value. The default value is
+<code>c(49, 6)</code> where there will be 49 rectangular quadrature points over
+-6 and +6,</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>em_tol</code></td>
+<td>
+<p>A numeric vector of length two specifying the convergence
+criteria for E- and M-steps. The default value is <code>c(1e-4, 1e-9)</code>
+where convergence criteria for E-steps is 0.0001 and the convergence
+criteria for M-step is 1e-9.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>prior</code></td>
+<td>
+<p>A data frame that specifies the priors for the estimated item
+parameters. There are two possible options.
+</p>
+<p>Option 1: The same priors will be imposed on all items. The data.frame
+should have four columns:
+</p>
+
+<dl>
+<dt><code>"par"</code></dt>
+<dd>
+<p>The parameter on which prior will be imposed. It
+can take the following values: <code>"intercept"</code> for location
+parameters (usually for item difficulty parameters, <code>"slope"</code> for
+item discrimination parameters, <code>"guessing"</code> for lower asymptote
+parameter of 3PL.</p>
+</dd>
+<dt><code>"dist"</code></dt>
+<dd>
+<p>The distribution of the prior. It can take the
+following values: <code>"normal"</code> for normal distribution,
+<code>"lognormal"</code> for log-normal distribution, and <code>"beta"</code> for
+Beta distribution.</p>
+</dd>
+<dt><code>"v1"</code></dt>
+<dd>
+<p>A number for the first parameter of the selected
+distribution. For normal and log-normal distributions this is the mean
+of the distribution. For Beta distribution, this is the alpha-1 value.
+So, if the a Beta distribution with alpha = 10 desired, the value of
+'v1' should be 11.</p>
+</dd>
+<dt><code>"v2"</code></dt>
+<dd>
+<p>A number for the second parameter of the selected
+distribution. For normal and log-normal distributions this is the
+standard deviation of the distribution. For Beta distribution, this is
+the beta-1 value. So, if the a Beta distribution with beta = 3 desired,
+the value of 'v2' should be 4.</p>
+</dd>
+</dl>
+<p>Here is an example:
+<code>prior &lt;- data.frame(par = c("intercept", "slope", "guessing"),
+                            dist = c("normal", "lognormal", "beta"),
+                            v1 = c(0, 0, 1),
+                            v2 = c(1, 0.5, 3))</code>
+</p>
+<p>Option 2: Different priors will be assigned to individual items.
+The data.frame should have five columns. In addition to four columns
+described above, a column specifying item's ID should be added.
+The column name should be <code>"item_id"</code> and it's values should
+correspond to the item ID's specified in the response data.
+</p>
+<p>Here is an example:
+<code>prior &lt;- data.frame(
+    item_id = c("Item_1", "Item_1", "Item_3", "Item_3", "Item_10"),
+    par = c("intercept", "slope", "intercept", "slope", "slope"),
+    dist = c("normal", "lognormal", "normal", "lognormal", "lognormal"),
+    v1 = c(0, 0, 0, 0, 0),
+    v2 = c(1, 0.5, 2, 0.6, 0.7))</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>gof</code></td>
+<td>
+<p>A string specifying the extent of Goodness-of-fit indices that
+will be calculated and reported. The available options are
+<code>"Basic"</code> (the default value), <code>"Extended"</code> and
+<code>"Complete"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>examinee_id_var</code></td>
+<td>
+<p>If examinee IDs are saved in one of the columns of
+argument <code>x</code>, this will be the name of that column. The default value
+is <code>NULL</code>. When the value is <code>NULL</code>, the program will check the
+row names of the data.frame or matrix. If the row names are not
+<code>NULL</code>, the program will use these values as examinee IDs.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>group_var</code></td>
+<td>
+<p>The column name or number that contains group membership
+information if multi-group calibration is desired. Ideally, it grouping
+variable is represented by single digit integers. If other type of data
+provided, an integer value will automatically assigned to the variables.
+The default value is <code>NULL</code>, where no multi-group analysis will be
+performed.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>scoring_method</code></td>
+<td>
+<p>A string value representing the method of scoring. The
+currently available options are: "EAP" and "MAP".</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>additional_options</code></td>
+<td>
+<p>A vector of strings that will be added to the
+syntax. For example, when <code>scoring_method = "ML"</code>, the minimum and
+maximum values of theta estimates needs to be specified:
+<code>c("MinMLscore = -5;", "MaxMLscore = 5;")</code>. Or, when estimating "3PL"
+parameters <code>"NormalMetric3PL = Yes;"</code> can be added to get a normal
+metric scale. See flexMIRT manual for other options.
+The default value is <code>NULL</code>, where no  additional options will be
+added to the syntax.
+Note that following additional options will be added by other arguments
+of this function, so you don't need to add them in this argument
+separately:
+<code>"Quadrature =", "MaxE =", "MaxM =", "Etol =", "Mtol =", "Score ="</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>additional_constraints</code></td>
+<td>
+<p>The The default value is <code>NULL</code>, where no
+additional constraints will be added to the syntax except the constraints
+that will be added for models such as <code>"Rasch"</code> or <code>"1PL"</code>.
+</p>
+<p>Examples of additional constraints can be:
+</p>
+
+<ul>
+<li>
+<p> Guessing parameter. For example, if the items are multiple choice
+and there are four possible choices, the prior distribution of the
+pseudo-guessing parameter can be set to Beta(1, 3), where parameters
+alpha = 2 (2 - 1 = 1) and beta = 4 (4-1 = 3). This will
+correspond to prior sample size of 4 and prior mode of
+(1 / (3+1) = 0.25). You can add the following line to the
+<code>additional_constraints</code> (see Example 2 below.):
+</p>
+<p><code>Prior (Item_1-Item_35), Guessing : Beta(1.0,3.0);</code>
+</p>
+<p>The distribution can be different, for example, for Normal distribution
+provide mean and standard deviation, for Log-normal distribution
+provide mean and standard deviation in logarithmic scale.
+</p>
+<p>For example, in the code below, a normal prior with mean -1.09 and
+standard deviation 0.5 is imposed on the <em>logit</em> of the guessing
+parameters:
+<code>Prior (Item_1-Item_35), Guessing : Normal(-1.09,0.5);</code>
+</p>
+</li>
+<li>
+<p> Slope parameters. The following argument will set
+the item slopes for Item_1 to Item_10 equal:
+<code>Fix (Item_1-Item_10), Slope;</code>
+</p>
+<p>Similarly a log-normal prior can be imposed on slope parameters:
+<code>Prior (Item_1-Item_35), Slope : logNormal(1, 1.6487);</code>
+</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>flexmirt_exe</code></td>
+<td>
+<p>This is the executable file to run flexMIRT syntax. On
+most Windows computers this is the path where <code>"WinFlexMIRT.exe"</code> can
+be found. For example:
+<code>"C:\Program Files\flexMIRT3.5.2\WinFlexMIRT.exe"</code>. By default the
+value is <code>NULL</code>, the function will search the relevant locations for
+<code>"WinFlexMIRT.exe"</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>overwrite</code></td>
+<td>
+<p>If TRUE and there is already a BILOG-MG data file in the
+target path with the same name, the file will be overwritten.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>show_output_on_console</code></td>
+<td>
+<p>logical (not NA), indicates whether to capture
+the output of the command and show it on the R console. The default value
+is <code>TRUE</code>.</p>
+</td>
+</tr>
+</table>
+<h3>Value</h3>
+
+<p>A list containing the calibration results
+</p>
+
+<dl>
+<dt>"ip"</dt>
+<dd>
+<p>An <code>Itempool-class</code> object holding the item
+parameters. Please check whether model converged (using
+<code>...$converged</code>) before interpreting/using <code>ip</code>.</p>
+</dd>
+<dt>"score"</dt>
+<dd>
+<p>A data frame object that holds examinee IDs, ability
+estimates and standard error of ability estimates.</p>
+</dd>
+<dt>"syntax"</dt>
+<dd>
+<p>The syntax file.</p>
+</dd>
+<dt>"converged"</dt>
+<dd>
+<p>A logical value indicating whether a model has been
+converged or not. This value is <code>TRUE</code> only when both
+<code>converged_first_order</code> and <code>converged_second_order</code> are
+<code>TRUE</code>.</p>
+</dd>
+<dt>"converged_first_order"</dt>
+<dd>
+<p>A logical value indicating whether
+first-order test indicates convergence. </p>
+</dd>
+<dt>"converged_second_order"</dt>
+<dd>
+<p>A logical value indicating whether
+second-order test indicates convergence.</p>
+</dd>
+<dt>"convergence_details"</dt>
+<dd>
+<p>A more detailed information about
+convergence. This element has two values, "First-order test" and
+"Second-order test". Use this information to further judge the
+convergence. From flexMIRT user manual (p.11): "the reported
+first-order test examines if the gradient has vanished sufficiently for
+the solution to be a stationary point. The second-order test tests if
+the information matrix is positive definite, a prerequisite for the
+solution to be a possible maximum. For the second-order test, reporting
+that the solution is a possible maximum simply means that the program
+reached a statistically desirable solution. The other possible message
+that may be printed for the outcome of the second-order test is
+“Solution is not a maximum; caution is advised.” If a warning message
+is received for either the first- or second-order test, all parameter
+estimates should be taken a provisional and should not be used as final
+estimates, for future scoring, etc. but, rather, should be used to
+diagnose possible issues with the model/items."
+</p>
+</dd>
+<dt>"gof"</dt>
+<dd>
+<p>The goodness-of-fit statistics.</p>
+</dd>
+<dt>"input"</dt>
+<dd>
+<p>A list object that stores the arguments that are passed
+to the function.</p>
+</dd>
+</dl>
+<h3>Author(s)</h3>
+
+<p>Emre Gonulates
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run: 
+
+#############################################
+############## Example 1 - 2PL ##############
+#############################################
+# IRT Two-parameter Logistic Model Calibration
+
+# Create responses to be used in flexMIRT estimation
+true_theta &lt;- rnorm(1000)
+true_ip &lt;- generate_ip(n = 30, model = "2PL")
+resp &lt;- sim_resp(true_ip, true_theta)
+# The following line will run flexMIRT, estimate 2PL model and put the
+# analysis results in the target directory:
+fm_calib &lt;- est_flexmirt(x = resp, model = "2PL",
+                         target_dir = "C:/Temp/Analysis", overwrite = TRUE)
+# Check whether the calibration converged
+fm_calib$converged
+fm_calib$convergence_details
+
+# Get the estimated item pool
+fm_calib$ip
+
+# See the BILOG-MG syntax
+cat(fm_calib$syntax, sep = "\n")
+
+# Get goodness-of-fit statistics and marginal reliability:
+fm_calib$gof
+
+# Get estimated scores
+head(fm_calib$score)
+
+# Compare true and estimated abilities
+plot(true_theta, fm_calib$score$theta, xlab = "True Theta",
+     ylab = "Estimated theta")
+abline(a = 0, b = 1, col = "red", lty = 2)
+
+# Compare true item parameters
+plot(true_ip$a, fm_calib$ip$a, xlab = "True 'a'", ylab = "Estimated 'a'")
+abline(a = 0, b = 1, col = "red", lty = 2)
+
+plot(true_ip$b, fm_calib$ip$b, xlab = "True 'b'", ylab = "Estimated 'b'")
+abline(a = 0, b = 1, col = "red", lty = 2)
+
+mean(fm_calib$score$theta)
+
+#############################################
+############## Example 2 - 3PL ##############
+#############################################
+# IRT Three-parameter Logistic Model Calibration with D = 1.7
+
+# Create responses to be used in flexMIRT estimation
+true_theta &lt;- rnorm(5000)
+true_ip &lt;- generate_ip(n = 35, model = "3PL", D = 1)
+resp &lt;- sim_resp(true_ip, true_theta)
+
+# The following line will run 3PL calibration via flexMIRT:
+fm_calib &lt;- est_flexmirt(
+  x = resp,
+  model = "3PL",
+  max_em_cycles = c(1000, 200),
+  prior = data.frame(par = c("intercept", "slope", "guessing"),
+                     dist = c("normal", "lognormal", "beta"),
+                     v1 = c(0, 0, 1),
+                     v2 = c(1, 0.5, 3)),
+  target_dir = "C:/Temp/Analysis",
+  overwrite = TRUE)
+
+# Check whether the calibration converged
+fm_calib$converged
+
+fm_calib$convergence_details
+
+# Get the estimated item pool
+fm_calib$ip
+
+# Get goodness-of-fit statistics and marginal reliability:
+fm_calib$gof
+
+# Get estimated scores
+head(fm_calib$score)
+
+# Compare true and estimated abilities
+plot(true_theta, fm_calib$score$theta, xlab = "True Theta",
+     ylab = "Estimated theta")
+abline(a = 0, b = 1, col = "red", lty = 2)
+
+# Compare true item parameters
+plot(true_ip$a, fm_calib$ip$a, xlab = "True 'a'", ylab = "Estimated 'a'")
+abline(a = 0, b = 1, col = "red", lty = 2)
+
+plot(true_ip$b, fm_calib$ip$b, xlab = "True 'b'", ylab = "Estimated 'b'")
+abline(a = 0, b = 1, col = "red", lty = 2)
+
+mean(fm_calib$score$theta)
+
+
+## End(Not run) # end dontrun
+</code></pre>
+
+
+</div>

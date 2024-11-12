@@ -1,0 +1,162 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>blockPredict</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2> Spatial block prediction</h2>
+
+<h3>Description</h3>
+
+<p><code>blockPredict</code> is a generic method for prediction of 
+spatially aggregated variables within the <code>intamap-package</code> package.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R"> blockPredict(object, ...) </code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p> a list object of the type described in <code>intamap-package</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+<p> other arguments that will be passed to the requested interpolation method. 
+See the individual interpolation methods for more information. The following arguments 
+from <code>object</code> can be overrun through <code>...</code>:
+</p>
+
+<dl>
+<dt><code>block</code></dt>
+<dd>
+<p>Block size; a vector with 1, 2 or 3 values containing the size
+of a rectangular in x-, y- and z-dimension respectively
+(0 if not set), or a data frame with 1, 2 or 3 columns,
+containing the points that discretize the block in the
+x-, y- and z-dimension to define irregular blocks relative to
+(0,0) or (0,0,0) - see also the details section of <code>predict.gstat</code>.
+By default, predictions or simulations refer to the support of the data values. </p>
+</dd>
+<dt><code>cellsize</code></dt>
+<dd>
+<p>size of cells for discretization of blocks for numerical simulation</p>
+</dd>
+</dl>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The function <code>blockPredict</code> is a wrapper around the <code>spatialPredict.block</code> function 
+within the <code>intamap-package</code> package, to simplify the calls for block predictions. 
+</p>
+<p>Block predictions are spatial predictions assumed to be valid for a certain area. 
+The blocks can either be given by passing <code>SpatialPolygons</code> as the 
+predicitonLocations or by passing the block-argument through the parameters of the 
+object or through the <code>...</code>-argument.
+</p>
+<p>There are esentially two ways to solve the problems of block predictions.
+</p>
+
+<dl>
+<dt>analytical</dt>
+<dd>
+<p>block predictions can be found directly by block kriging</p>
+</dd>
+<dt>numerical</dt>
+<dd>
+<p>block predictions can be found through numerical simulations
+over a set of points within the block, the requested output is found by 
+averaging over these simulations </p>
+</dd>
+</dl>
+<p>The analytical solutions are used when applicable. This is typically for 
+ordinary kriging based methods and prediction types that can be
+found by linear aggregation (e.g. block mean). 
+</p>
+<p>If the prediction type necessitates simulations, this is done by subsampling
+the blocks. This can either be done block-wise, with a certain number of points
+within each block, with a certain cellsize, or with a certain number of points
+</p>
+<p><code>automap</code> Uses function <code>autoKrige</code> in the 
+<code>automap</code> package.
+If <code>object</code> already includes a variogram model, 
+<code>krige</code> in the <code>gstat</code>-package will be called directly.
+</p>
+
+
+<h3>Value</h3>
+
+ 
+<p>a list object similar to <code>object</code>, but extended with predictions at
+a the set of locations defined <code>object</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p> Jon Olav Skoien</p>
+
+
+<h3>References</h3>
+
+ 
+<p>Pebesma, E., Cornford, D., Dubois, G., Heuvelink, G.B.M., Hristopulos, D., Pilz, J., Stohlker, U., Morin, G., Skoien, J.O. INTAMAP: The design and implementation f an interoperable automated interpolation Web Service. Computers and Geosciences 37 (3), 2011. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>gstat</code>,<code>autoKrige</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R"># This example skips some steps that might be necessary for more complicated
+# tasks, such as estimateParameters and pre- and postProcessing of the data
+data(meuse)
+coordinates(meuse) = ~x+y
+meuse$value = log(meuse$zinc)
+data(meuse.grid)
+gridded(meuse.grid) = ~x+y
+proj4string(meuse) = CRS("+init=epsg:28992")
+proj4string(meuse.grid) = CRS("+init=epsg:28992")
+
+# set up intamap object:
+obj = createIntamapObject(
+	observations = meuse,
+	predictionLocations = meuse.grid[sample(1:length(meuse.grid),10),],
+	targetCRS = "+init=epsg:3035",
+	class = "automap"
+)
+
+# do interpolation step:
+obj = conformProjections(obj)
+obj = estimateParameters(obj) 
+obj = blockPredict(obj,block=c(100,100))  # blockPredict
+
+
+# intamap object for which simulation is needed:
+meuse$value = meuse$zinc
+obj = createIntamapObject(
+	observations = meuse,
+	predictionLocations = meuse.grid[sample(1:length(meuse.grid),5),],
+	params = list(ngrid = 16),
+  class = "transGaussian"  # trans-Gaussian kriging method
+)
+obj = estimateParameters(obj, lambda = 0)  # lambda is optional, lambda = 0 gives lognormal kriging
+obj = blockPredict(obj,block=c(100,100))  # blockPredict
+</code></pre>
+
+
+</div>

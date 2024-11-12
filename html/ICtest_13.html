@@ -1,0 +1,278 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>ICSboot</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+Boostrap-based Testing for the Number of Gaussian Components in NGCA Using Two Scatter Matrices
+</h2>
+
+<h3>Description</h3>
+
+<p>In independent components analysis (ICA) gaussian components are considered as uninteresting.
+The function uses boostrappping tests, based on ICS using any combination of two scatter matrices, to decide if there are <code>p-k</code> gaussian components where <code>p</code> is the dimension of the data.
+The function offers two different boostrapping strategies.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">ICSboot(X, k, S1=cov, S2=cov4, S1args=NULL, S2args=NULL, n.boot = 200, s.boot = "B1")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>X</code></td>
+<td>
+<p>a numeric data matrix with p&gt;1 columns.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>the number of non-gaussian components under the null.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>S1</code></td>
+<td>
+<p>name of the first scatter matrix function. Can only return a matrix. Default is <code>cov</code></p>
+</td>
+</tr>
+</table>
+<p>.
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>S2</code></td>
+<td>
+<p>name of the second scatter matrix function. Can only return a matrix. Default is <code>cov4</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>S1args</code></td>
+<td>
+<p>list with optional additional arguments for <code>S1</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>S2args</code></td>
+<td>
+<p>list with optional additional arguments for <code>S2</code>.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>n.boot</code></td>
+<td>
+<p>number of bootstrapping samples.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s.boot</code></td>
+<td>
+<p>bootstrapping strategy to be used. Possible values are <code>"B1"</code>, <code>"B2"</code>. See details for further information.</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>While in <code>FOBIasymp</code> and <code>FOBIboot</code> the two scatters used are always <code>cov</code> and  <code>cov4</code> this function can be used with any two scatter functions. In that case however the value of the Gaussian eigenvalues are in general not known and depend on the scatter functions used. Therefore the test uses as test statistic the <code>k</code> successive eigenvalues with the smallest variance. Which means the default here might differ from <code>FOBIasymp</code> and <code>FOBIboot</code>.
+</p>
+<p>Given eigenvalues <code class="reqn">d_1,...,d_p</code> the function thus orders the components in descending order according to the "variance" criterion .
+</p>
+<p>Under the null it is then assumed that the first <code>k</code> interesting components are mutually independent and non-normal and the last <code>p-k</code> components are gaussian.
+</p>
+<p>Let <code class="reqn">d_1,...,d_p</code> be the ordered eigenvalues, <code class="reqn">W</code> the correspondingly ordered unmixing matrix, <code class="reqn">s_i = W (x_i-MU)</code> the corresponding
+source vectors which give the source matrix <code class="reqn">S</code> which can be decomposed into <code class="reqn">S_1</code> and <code class="reqn">S_2</code> where <code class="reqn">S_1</code> is the matrix with the <code class="reqn">k</code> non-gaussian components
+and <code class="reqn">S_2</code> the matrix with the gaussian components (under the null).
+</p>
+<p>Two possible bootstrap tests are provided for testing that the last <code>p-k</code> components are gaussian and independent from the first k components:
+</p>
+
+<ol>
+<li> <p><code>s.boot="B1"</code>: 
+The first strategy has the followong steps:
+</p>
+
+<ol>
+<li>
+<p> Take a bootstrap sample <code class="reqn">S_1^*</code> of size <code class="reqn">n</code> from <code class="reqn">S_1</code>.
+</p>
+</li>
+<li>
+<p> Take a bootstrap sample <code class="reqn">S_2^*</code> consisting of a matrix with gaussian random variables having <code class="reqn">cov(S_2)</code>.
+</p>
+</li>
+<li>
+<p> Combine <code class="reqn">S^*=(S_1^*, S_2^*)</code> and create <code class="reqn">X^*= S^* W</code>.
+</p>
+</li>
+<li>
+<p> Compute the test statistic based on <code class="reqn">X^*</code>. 
+</p>
+</li>
+<li>
+<p> Repeat the previous steps <code>n.boot</code> times.
+</p>
+</li>
+</ol>
+<p>Note that in this bootstrapping test the assumption of ”independent components” is not used, it is only used that the last <code class="reqn">p-k</code> components are gaussian and independent from the first <code class="reqn">k</code> components. Therefore this strategy can be applied in an independent component analysis (ICA) framework
+and in a non-gaussian components analysis (NGCA) framework.
+</p>
+</li>
+<li> <p><code>s.boot="B2"</code>: 
+The second strategy has the following steps:
+</p>
+
+<ol>
+<li>
+<p> Take a bootstrap sample <code class="reqn">S_1^*</code> of size <code class="reqn">n</code> from <code class="reqn">S_1</code> where the subsampling is done separately for each independent component.
+</p>
+</li>
+<li>
+<p> Take a bootstrap sample <code class="reqn">S_2^*</code>  consisting of a matrix with gaussian random variables having <code class="reqn">cov(S_2)</code>
+</p>
+</li>
+<li>
+<p> Combine <code class="reqn">S^*=(S_1^*, S_2^*)</code> and create <code class="reqn">X^*= S^* W</code>.
+</p>
+</li>
+<li>
+<p> Compute the test statistic based on <code class="reqn">X^*</code>. 
+</p>
+</li>
+<li>
+<p> Repeat the previous steps <code>n.boot</code> times.
+</p>
+</li>
+</ol>
+<p>This bootstrapping strategy assumes a full ICA model and cannot be used in an NGCA framework. Note that when the goal is to recover the non-gaussian independent components both scatters used must have the independence property.
+</p>
+</li>
+</ol>
+<h3>Value</h3>
+
+<p>A list of class ictest inheriting from class htest containing:
+</p>
+<table>
+<tr style="vertical-align: top;">
+<td><code>statistic</code></td>
+<td>
+<p>the value of the test statistic.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>p.value </code></td>
+<td>
+<p>the p-value of the test.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parameter </code></td>
+<td>
+<p>the number of boostrapping samples used to obtain the p-value.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+<p>character string which test was performed and which scatters were used.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>data.name</code></td>
+<td>
+<p>character string giving the name of the data.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>alternative</code></td>
+<td>
+<p>character string specifying the alternative hypothesis.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>k</code></td>
+<td>
+<p>the number or non-gaussian components used in the testing problem.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>W</code></td>
+<td>
+<p>the transformation matrix to the independent components. Also known as unmixing matrix.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>S</code></td>
+<td>
+<p>data matrix with the centered independent components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>D</code></td>
+<td>
+<p>the underlying eigenvalues.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>MU</code></td>
+<td>
+<p>the location of the data which was substracted before calculating the independent components.</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>s.boot</code></td>
+<td>
+<p>character string which boostrapping strategy was used.</p>
+</td>
+</tr>
+</table>
+<h3>Author(s)</h3>
+
+<p>Klaus Nordhausen
+</p>
+
+
+<h3>References</h3>
+
+<p><cite>Nordhausen, K., Oja, H. and Tyler, D.E. (2022), Asymptotic and Bootstrap Tests for Subspace Dimension, Journal of Multivariate Analysis, 188, 104830. &lt;doi:10.1016/j.jmva.2021.104830&gt;.</cite>
+</p>
+<p><cite>Nordhausen, K., Oja, H., Tyler, D.E. and Virta, J. (2017), Asymptotic and Bootstrap Tests for the Dimension of the Non-Gaussian Subspace, Signal Processing Letters, 24, 887–891. &lt;doi:10.1109/LSP.2017.2696880&gt;.</cite>
+</p>
+<p><cite>Radojicic, U. and Nordhausen, K. (2020),  Non-Gaussian Component Analysis: Testing the Dimension of the Signal Subspace. In Maciak, M., Pestas, M. and Schindler, M. (editors) "Analytical Methods in Statistics. AMISTAT 2019", 101–123, Springer, Cham. &lt;doi:10.1007/978-3-030-48814-7_6&gt;.</cite>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>ics</code>, <code>FOBIboot</code>,  <code>FOBIasymp</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">n &lt;- 750
+S &lt;- cbind(runif(n), rchisq(n, 2), rexp(n), rnorm(n), rnorm(n), rnorm(n))
+A &lt;- matrix(rnorm(36), ncol = 6)
+X &lt;- S %*% t(A)
+
+# n.boot is small for demonstration purpose, should be larger
+ICSboot(X, k=1, n.boot=20)
+
+if(require("ICSNP")){
+
+myTyl &lt;- function(X,...) HR.Mest(X,...)$scatter
+myT &lt;- function(X,...) tM(X,...)$V
+
+# n.boot is small for demonstration purpose, should be larger
+ICSboot(X, k=3, S1=myT, S2=myTyl, s.boot = "B2", n.boot=20)
+}
+</code></pre>
+
+
+</div>

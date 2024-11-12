@@ -1,0 +1,263 @@
+<div class="container">
+
+<table style="width: 100%;"><tr>
+<td>lc2_agreement</td>
+<td style="text-align: right;">R Documentation</td>
+</tr></table>
+<h2>
+A Latent Class Model for Agreement of Two Raters
+</h2>
+
+<h3>Description</h3>
+
+<p>Estimates a latent class model for agreement of two raters
+(Schuster &amp; Smith, 2006). See Details for the description of
+the model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">lc2_agreement(y, w=rep(1, nrow(y)), type="homo", method="BFGS", ...)
+
+## S3 method for class 'lc2_agreement'
+summary(object, digits=3,...)
+
+## S3 method for class 'lc2_agreement'
+logLik(object, ...)
+
+## S3 method for class 'lc2_agreement'
+anova(object, ...)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+
+<p>A data frame containing the values of two raters in columns
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+
+<p>Optional vector of weights
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+
+<p>Type of model specification. Can be <code>"unif"</code>, <code>"equal"</code>,
+<code>"homo"</code> or <code>"hete"</code>. See Details.
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>method</code></td>
+<td>
+
+<p>Optimization method used in <code>stats::optim</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>...</code></td>
+<td>
+
+<p>Further arguments passed to <code>stats::optim</code>
+</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>object</code></td>
+<td>
+<p>Object of class <code>l2_agreement</code></p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>digits</code></td>
+<td>
+<p>Number of digits for rounding</p>
+</td>
+</tr>
+</table>
+<h3>Details</h3>
+
+<p>The latent class model for two raters decomposes a portion of ratings
+which conform to true agreement and another portion of ratings which
+conform to a random rating of a category. Let <code class="reqn">X_r</code> denote the rating of
+rater <code class="reqn">r</code>, then for <code class="reqn"> i \neq j</code>, it is assumed that
+</p>
+<p style="text-align: center;"><code class="reqn">P(X_1=i, X_2=j)=\phi_{1i}  \phi_{2j} ( 1 - \gamma )</code>
+</p>
+
+<p>For <code class="reqn">i=j</code> it is assumed that
+</p>
+<p style="text-align: center;"><code class="reqn">P(X_1=i, X_2=i)=\tau_i \gamma + \phi_{1i} \phi_{2i} ( 1 - \gamma )</code>
+</p>
+
+<p>where <code class="reqn">\gamma</code> denotes the proportion of true ratings.
+</p>
+<p>All <code class="reqn">\tau_i</code> and <code class="reqn">\phi_{ri}</code> parameters are estimated
+using <code>type="hete"</code>. If the <code class="reqn">\phi</code> parameters are assumed
+as invariant across the two raters (i.e. <code class="reqn">\phi_{1i}=\phi_{2i}=\phi_{i}</code>),
+then <code>type="homo"</code> must be specified. The constraint <code class="reqn">\tau_i=\phi_i</code>
+is imposed by <code>type="equal"</code>. All <code class="reqn">\phi_i</code> parameters
+are set equal to each other using <code>type="unif"</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<table>
+<tr style="vertical-align: top;">
+<td><code>model_output</code></td>
+<td>
+<p>Output of the fitted model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>saturated_output</code></td>
+<td>
+<p>Output of the saturated model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>LRT_output</code></td>
+<td>
+<p>Output of the likelihood ratio test of model fit</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>partable</code></td>
+<td>
+<p>Parameter table</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>parmsummary</code></td>
+<td>
+<p>Parameter summary</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>agree_true</code></td>
+<td>
+<p>True agreement index shich is the <code class="reqn">\gamma</code> parameter</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>agree_chance</code></td>
+<td>
+<p>Agreement by chance</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>rel_agree</code></td>
+<td>
+<p>Conditional reliability of agreement</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>optim_output</code></td>
+<td>
+<p>Output of <code>optim</code> from the fitted model</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>nobs</code></td>
+<td>
+<p>Number of observations</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>type</code></td>
+<td>
+<p>Model type</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>ic</code></td>
+<td>
+<p>Information criteria</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>loglike</code></td>
+<td>
+<p>Log-likelihood</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>npars</code></td>
+<td>
+<p>Number of parameters</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>y</code></td>
+<td>
+<p>Used dataset</p>
+</td>
+</tr>
+<tr style="vertical-align: top;">
+<td><code>w</code></td>
+<td>
+<p>Used weights</p>
+</td>
+</tr>
+</table>
+<h3>References</h3>
+
+<p>Schuster, C., &amp; Smith, D. A. (2006). Estimating with a latent
+class model the reliability of nominal judgments upon which
+two raters agree. <em>Educational and Psychological Measurement, 66</em>(5), 739-747.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">#############################################################################
+# EXAMPLE 1: Dataset in Schuster and Smith (2006)
+#############################################################################
+
+data(data.immer08)
+dat &lt;- data.immer08
+
+# select ratings and frequency weights
+y &lt;- dat[,1:2]
+w &lt;- dat[,3]
+
+#*** Model 1: Uniform distribution phi parameters
+mod1 &lt;- immer::lc2_agreement( y=y, w=w, type="unif")
+summary(mod1)
+
+#*** Model 2: Equal phi and tau parameters
+mod2 &lt;- immer::lc2_agreement( y=y, w=w, type="equal")
+summary(mod2)
+
+## Not run: 
+#*** Model 3: Homogeneous rater model
+mod3 &lt;- immer::lc2_agreement( y=y, w=w, type="homo")
+summary(mod3)
+
+#*** Model 4: Heterogeneous rater model
+mod4 &lt;- immer::lc2_agreement( y=y, w=w, type="hete")
+summary(mod4)
+
+#--- some model comparisons
+anova(mod3,mod4)
+IRT.compareModels(mod1,mod2,mod3,mod4)
+
+## End(Not run)
+</code></pre>
+
+
+</div>
